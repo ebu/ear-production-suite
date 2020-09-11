@@ -1,0 +1,15 @@
+install_manifest.txt
+/build*
+/doxy_docs
+/src/reaper_adm/old
+/install*
+*.aps
+*.orig
+*.user
+*.reapeaks
+.idea
+compile_commands.json
+newmods.bat
+*-old.wav
+*.DS_Store
+.DS_Store

@@ -1,0 +1,20 @@
+digraph {
+	node [fillcolor="#cccccc" fontname=Hack shape=record style=filled]
+	APR_1001 [label="{APR_1001|audioProgrammeName=\"Test Programme: JPI\"\l}" fillcolor="#f69c6e"]
+	APR_1001 -> ACO_1001
+	ACO_1001 [label="{ACO_1001|audioContentName=\"Test Content: JPI\"\l}" fillcolor="#9fd178"]
+	ACO_1001 -> AO_1001
+	AO_1001 [label="{AO_1001|audioObjectName=\"Test: JPI\"\laudioComplementaryObjectIDRef=\"None\"\l}" fillcolor="#4dafdc"]
+	AO_1001 -> AP_00031001
+	AO_1001 -> ATU_00000001
+	ATU_00000001 [label="{ATU_00000001|trackIndex=\"1\"\lsampleRate=\"None\"\lbitDepth=\"None\"\l}" fillcolor="#cccccc"]
+	ATU_00000001 -> AP_00031001
+	ATU_00000001 -> AT_00031001_01
+	AP_00031001 [label="{AP_00031001|audioPackFormatName=\"Test: JPI\"\l}" fillcolor="#f2736d"]
+	AP_00031001 -> AC_00031001
+	AS_00031001 [label="{AS_00031001|audioStreamFormatName=\"Test: JPI\"\l}" fillcolor="#688db2"]
+	AS_00031001 -> AC_00031001
+	AT_00031001_01 [label="{AT_00031001_01|audioTrackFormatName=\"Test: JPI\"\l}" fillcolor="#bd91e0"]
+	AT_00031001_01 -> AS_00031001
+	AC_00031001 [label="{AC_00031001|audioChannelFormatName=\"Test: JPI\"\l}" fillcolor="#fef7b5"]
+}

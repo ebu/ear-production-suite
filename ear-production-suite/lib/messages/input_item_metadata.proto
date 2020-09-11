@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "type_metadata.proto";
+
+message InputItemMetadata {
+  optional string connection_id = 1 [default = "00000000-0000-0000-0000-000000000000"];
+  optional int32 routing = 2 [default = -1];
+  optional string name = 3 [default = "no name"];
+   // ARGB color encoded as 32-bit int
+  // (((alpha << 24) | (red << 16) | (green << // 8) | blue))
+  optional uint32 colour = 4 [default = 0];
+  optional uint32 continuity_counter = 5 [default = 0];
+  optional bool changed = 6 [default = true];
+  oneof metadata {
+    DirectSpeakersTypeMetadata ds_metadata = 7;
+    MatrixTypeMetadata mtx_metadata = 8;
+    ObjectsTypeMetadata obj_metadata = 9;
+    HoaTypeMetadata hoa_metadata = 10;
+    BinauralTypeMetadata bin_metadata = 11;
+  }
+}

@@ -1,0 +1,15 @@
+
+if(NOT TARGET Reaper_adm::libreaper_adm)
+include(CMakeFindDependencyMacro)
+  #find public dependencies here
+
+  if(REAPER_ADM_USE_STATIC OR (@BUILD_INTERFACE@ AND (NOT @BUILD_SHARED_LIBS@)))
+   # find private dependencies here
+
+   # import static targets
+     include(${CMAKE_CURRENT_LIST_DIR}/reaper_adm_static.cmake)
+  else()
+   # import shared targets
+     include(${CMAKE_CURRENT_LIST_DIR}/reaper_adm.cmake)
+  endif()
+endif()

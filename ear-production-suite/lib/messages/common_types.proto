@@ -1,0 +1,53 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+enum CmdStatus {
+  STATUS_CMD_OK = 0;
+  ERROR_INVALID_CMD = 1;
+  ERROR_TYPE = 2;
+  ERROR_PROTOCOL_MISMATCH = 3;
+  ERROR_OTHER = 4;
+}
+
+enum PluginType {
+  INPUT_PLUGIN = 0;
+  SCENE_PLUGIN = 1;
+  MONITORING_PLUGIN = 2;
+}
+
+enum AdmType {
+  ADM_NOTYPE = 0;
+  ADM_DIRECTSPEAKERS = 1;
+  ADM_MATRIX = 2;
+  ADM_OBJECT = 3;
+  ADM_HOA = 4;
+  ADM_BINAURAL = 5;
+}
+
+enum ContentKind {
+  UNKNOWN = -1;
+  NON_DIALOGUE = 0;
+  NON_DIALOGUE_UNDEFINED = 1;
+  NON_DIALOGUE_MUSIC = 2;
+  NON_DIALOGUE_EFFECT = 3;
+  DIALOGUE = 4;
+  DIALOGUE_UNDEFINED = 5;
+  DIALOGUE_STORYLINE = 6;
+  DIALOGUE_VOICEOVER = 7;
+  DIALOGUE_SPOKEN_SUBTITLE = 8;
+  DIALOGUE_AUDIO_DESCRIPTION = 9;
+  DIALOGUE_COMMENTARY = 10;
+  DIALOGUE_EMERGENCY = 11;
+  MIXED = 12;
+  MIXED_UNDEFINED = 13;
+  MIXED_COMPLETE_MAIN = 14;
+  MIXED_MIXED = 15;
+  MIXED_HEARING_IMPAIRED = 16;
+}
+
+message PolarPosition {
+  optional double azimuth = 1 [default = 0.0];
+  optional double elevation = 2 [default = 0.0];
+  optional double distance = 3 [default = 1.0];
+}

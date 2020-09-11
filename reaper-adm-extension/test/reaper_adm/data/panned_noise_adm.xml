@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ebuCoreMain xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="urn:ebu:metadata-schema:ebuCore" xml:lang="en">
+  <coreMetadata>
+    <title typeLabel="FileTitle">
+      <dc:title xml:lang="en">Panning noise ADM Test File</dc:title>
+    </title>
+    <creator>
+      <organisationDetails>
+        <organisationName>BBC</organisationName>
+      </organisationDetails>
+    </creator>
+    <description typeLabel="Description" typeLink="http://www.ebu.ch/metadata/cs/ebu_DescriptionTypeCodeCS.xml#1">
+      <dc:description>
+This ADM test file contains 1 track with has an object moving from front centre in an anti-clockwise horizontal circle around the origin in 15 degree steps. The object is a burst of noise.
+    </dc:description>
+    </description>
+    <date>
+      <created startDate="2017-06-02"/>
+    </date>
+    <format>
+      <audioFormatExtended>
+        <audioProgramme audioProgrammeID="APR_1001" audioProgrammeName="PanningNoise">
+          <audioContentIDRef>ACO_1001</audioContentIDRef>
+        </audioProgramme>
+        <audioContent audioContentID="ACO_1001" audioContentName="PanningNoise">
+          <audioObjectIDRef>AO_1001</audioObjectIDRef>
+        </audioContent>
+        <audioObject audioObjectID="AO_1001" audioObjectName="Noise">
+          <audioPackFormatIDRef>AP_00031001</audioPackFormatIDRef>
+          <audioTrackUIDRef>ATU_00000001</audioTrackUIDRef>
+        </audioObject>
+        <audioPackFormat audioPackFormatID="AP_00031001" audioPackFormatName="Noise" typeLabel="0003" typeDefinition="Objects">
+          <audioChannelFormatIDRef>AC_00031001</audioChannelFormatIDRef>
+        </audioPackFormat>
+        <audioChannelFormat audioChannelFormatID="AC_00031001" audioChannelFormatName="Noise" typeLabel="0003" typeDefinition="Objects">
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000001" duration="00:00:00.50000">
+            <position coordinate="azimuth">0.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000002" rtime="00:00:00.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">15.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000003" rtime="00:00:01.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">30.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000004" rtime="00:00:01.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">45.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000005" rtime="00:00:02.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">60.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000006" rtime="00:00:02.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">75.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000007" rtime="00:00:03.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">90.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000008" rtime="00:00:03.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">105.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000009" rtime="00:00:04.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">120.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000a" rtime="00:00:04.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">135.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000b" rtime="00:00:05.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">150.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000c" rtime="00:00:05.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">165.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000d" rtime="00:00:06.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">180.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000e" rtime="00:00:06.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-165.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_0000000f" rtime="00:00:07.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-150.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000010" rtime="00:00:07.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-135.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000011" rtime="00:00:08.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-120.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000012" rtime="00:00:08.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-105.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000013" rtime="00:00:09.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-90.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000014" rtime="00:00:09.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-75.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000015" rtime="00:00:10.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-60.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000016" rtime="00:00:10.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-45.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000017" rtime="00:00:11.00000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-30.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+          <audioBlockFormat audioBlockFormatID="AB_00031001_00000018" rtime="00:00:11.50000" duration="00:00:00.50000">
+            <position coordinate="azimuth">-15.00</position>
+            <position coordinate="elevation">0.00</position>
+            <position coordinate="distance">1.00</position>
+            <jumpPosition>1</jumpPosition>
+          </audioBlockFormat>
+        </audioChannelFormat>
+        <audioStreamFormat audioStreamFormatID="AS_00031001" audioStreamFormatName="PCM_Noise" formatLabel="0001" formatDefinition="PCM">
+          <audioChannelFormatIDRef>AC_00031001</audioChannelFormatIDRef>
+          <audioTrackFormatIDRef>AT_00031001_01</audioTrackFormatIDRef>
+        </audioStreamFormat>
+        <audioTrackFormat audioTrackFormatID="AT_00031001_01" audioTrackFormatName="PCM_Noise" formatLabel="0001" formatDefinition="PCM">
+          <audioStreamFormatIDRef>AS_00031001</audioStreamFormatIDRef>
+        </audioTrackFormat>
+        <audioTrackUID bitDepth="24" sampleRate=" 48000" UID="ATU_00000001"/>
+      </audioFormatExtended>
+    </format>
+  </coreMetadata>
+</ebuCoreMain>
+  

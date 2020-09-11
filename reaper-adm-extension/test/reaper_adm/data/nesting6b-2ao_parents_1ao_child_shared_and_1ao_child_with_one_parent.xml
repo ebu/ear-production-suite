@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ebuCoreMain xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="urn:ebu:metadata-schema:ebuCore_2014" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schema="EBU_CORE_20140201.xsd" xml:lang="en">
+	<coreMetadata>
+		<format>
+			<audioFormatExtended>
+				<audioProgramme audioProgrammeID="APR_1001" audioProgrammeName="audProg">
+					<audioContentIDRef>ACO_1001</audioContentIDRef>
+				</audioProgramme>
+				<audioContent audioContentID="ACO_1001" audioContentName="audCont">
+					<audioObjectIDRef>AO_1001</audioObjectIDRef>
+					<audioObjectIDRef>AO_1002</audioObjectIDRef>
+				</audioContent>
+
+				<audioObject audioObjectID="AO_1001" audioObjectName="Parent AO 1">
+					<audioObjectIDRef>AO_1003</audioObjectIDRef>
+				</audioObject>
+                <audioObject audioObjectID="AO_1002" audioObjectName="Parent AO 2">
+					<audioObjectIDRef>AO_1003</audioObjectIDRef>
+					<audioObjectIDRef>AO_1004</audioObjectIDRef>
+				</audioObject>
+                <audioObject audioObjectID="AO_1003" audioObjectName="Shared Child AO">
+					<audioPackFormatIDRef>AP_00031001</audioPackFormatIDRef>
+					<audioTrackUIDRef>ATU_00000001</audioTrackUIDRef>
+				</audioObject>
+                <audioObject audioObjectID="AO_1004" audioObjectName="Child of AO 2">
+					<audioPackFormatIDRef>AP_00031002</audioPackFormatIDRef>
+					<audioTrackUIDRef>ATU_00000002</audioTrackUIDRef>
+				</audioObject>
+
+				<audioPackFormat audioPackFormatID="AP_00031001" audioPackFormatName="PF (Shared Child)" typeLabel="0003" typeDefinition="Objects">
+					<audioChannelFormatIDRef>AC_00031001</audioChannelFormatIDRef>
+				</audioPackFormat>
+                <audioPackFormat audioPackFormatID="AP_00031002" audioPackFormatName="PF (Child of AO 2)" typeLabel="0003" typeDefinition="Objects">
+					<audioChannelFormatIDRef>AC_00031002</audioChannelFormatIDRef>
+				</audioPackFormat>
+
+				<audioChannelFormat audioChannelFormatID="AC_00031001" audioChannelFormatName="CF (Shared Child)" typeLabel="0003" typeDefinition="Objects">
+                    <audioBlockFormat audioBlockFormatID="AB_00031001_00000001">
+						<position coordinate="azimuth">90.000000</position>
+						<position coordinate="elevation">0.000000</position>
+					</audioBlockFormat>
+                </audioChannelFormat>
+                <audioChannelFormat audioChannelFormatID="AC_00031002" audioChannelFormatName="CF (Child of AO 2)" typeLabel="0003" typeDefinition="Objects">
+                    <audioBlockFormat audioBlockFormatID="AB_00031002_00000001">
+						<position coordinate="azimuth">-90.000000</position>
+						<position coordinate="elevation">0.000000</position>
+					</audioBlockFormat>
+                </audioChannelFormat>
+
+				<audioStreamFormat audioStreamFormatID="AS_00031001" audioStreamFormatName="SF (Shared Child)" formatLabel="0001" formatDefinition="PCM">
+					<audioChannelFormatIDRef>AC_00031001</audioChannelFormatIDRef>
+				</audioStreamFormat>
+				<audioTrackFormat audioTrackFormatID="AT_00031001_01" audioTrackFormatName="TF (Shared Child)" formatLabel="0001" formatDefinition="PCM">
+					<audioStreamFormatIDRef>AS_00031001</audioStreamFormatIDRef>
+				</audioTrackFormat>
+				<audioTrackUID UID="ATU_00000001">
+					<audioTrackFormatIDRef>AT_00031001_01</audioTrackFormatIDRef>
+					<audioPackFormatIDRef>AP_00031001</audioPackFormatIDRef>
+				</audioTrackUID>
+
+                <audioStreamFormat audioStreamFormatID="AS_00031002" audioStreamFormatName="SF (Child of AO 2)" formatLabel="0001" formatDefinition="PCM">
+					<audioChannelFormatIDRef>AC_00031002</audioChannelFormatIDRef>
+				</audioStreamFormat>
+				<audioTrackFormat audioTrackFormatID="AT_00031002_01" audioTrackFormatName="TF (Child of AO 2)" formatLabel="0001" formatDefinition="PCM">
+					<audioStreamFormatIDRef>AS_00031002</audioStreamFormatIDRef>
+				</audioTrackFormat>
+				<audioTrackUID UID="ATU_00000002">
+					<audioTrackFormatIDRef>AT_00031002_01</audioTrackFormatIDRef>
+					<audioPackFormatIDRef>AP_00031002</audioPackFormatIDRef>
+				</audioTrackUID>
+
+			</audioFormatExtended>
+		</format>
+	</coreMetadata>
+</ebuCoreMain>

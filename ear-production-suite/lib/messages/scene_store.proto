@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "monitoring_item_metadata.proto";
+
+message SceneStore {
+  repeated MonitoringItemMetadata items = 1;
+}

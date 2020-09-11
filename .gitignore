@@ -1,0 +1,12 @@
+build*/
+*.swp
+.DS_Store
+.vscode
+docs/.build
+docs/venv
+/.vs
+/CMakeSettings.json
+/CMakeSettings.json_
+.ccls-cache
+.idea
+3rdparty

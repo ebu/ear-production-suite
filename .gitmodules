@@ -1,0 +1,27 @@
+[submodule "submodules/libadm"]
+	path = submodules/libadm
+	url = https://github.com/rsjtaylor/libadm.git
+[submodule "submodules/libbw64"]
+	path = submodules/libbw64
+	url = https://github.com/ebu/libbw64.git
+[submodule "submodules/libear"]
+	path = submodules/libear
+	url = https://github.com/rsjtaylor/libear.git
+[submodule "submodules/googletest"]
+	path = submodules/googletest
+	url = https://github.com/google/googletest.git
+[submodule "submodules/WDL"]
+	path = submodules/WDL
+	url = https://github.com/justinfrankel/WDL.git
+[submodule "submodules/VST3"]
+	path = submodules/VST3
+	url = https://github.com/steinbergmedia/vst3sdk
+[submodule "submodules/JUCE"]
+	path = submodules/JUCE
+	url = https://github.com/WeAreROLI/JUCE.git
+[submodule "submodules/readerwriterqueue"]
+	path = submodules/readerwriterqueue
+	url = https://github.com/cameron314/readerwriterqueue
+[submodule "submodules/vcpkg"]
+	path = submodules/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

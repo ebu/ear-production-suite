@@ -1,0 +1,106 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "common_types.proto";
+import "common_commands.proto";
+
+message CmdConnectionReq {
+  extend ear.plugin.proto.CmdRequest {
+    optional CmdConnectionReq cmdConnectionReq = 20;
+  }
+  required string connection_id = 1;
+  required PluginType plugin_type = 2;
+  optional int32 protocol_version = 3 [default = 0];
+}
+
+message CmdConnectionResp {
+  extend ear.plugin.proto.CmdResponse {
+    optional CmdConnectionResp cmdConnectionResp = 21;
+  }
+  required string connection_id = 1;
+}
+
+message DetailObject {
+  optional int32 id = 1;
+}
+
+message DetailDirectSpeakers {
+  optional int32 id = 1;
+}
+
+message DetailHOA {
+  optional int32 id = 1;
+}
+
+message DetailMatrix {
+  optional int32 id = 1;
+}
+
+message CmdConnectionDetailsReq {
+  extend ear.plugin.proto.CmdRequest {
+    optional CmdConnectionDetailsReq cmdConnectionDetailsReq = 22;
+  }
+  required string connection_id = 1;
+  required AdmType item_type = 2;
+  oneof detail {
+    DetailObject details_object = 4;
+    DetailDirectSpeakers details_direct_speakers = 5;
+    DetailHOA details_hoa = 6;
+    DetailMatrix details_matrix = 7;
+  }
+}
+
+message CmdConnectionDetailsResp {
+  extend ear.plugin.proto.CmdResponse {
+    optional CmdConnectionDetailsResp cmdConnectionDetailsResp = 23;
+  }
+  required string connection_id = 1;
+  required string metadata_endpoint = 2;
+}
+
+message CmdMonitoringConnectionDetailsReq {
+  extend ear.plugin.proto.CmdRequest {
+    optional CmdMonitoringConnectionDetailsReq cmdMonitoringConnectionDetailsReq =
+        28;
+  }
+  required string connection_id = 1;
+}
+
+message CmdMonitoringConnectionDetailsResp {
+  extend ear.plugin.proto.CmdResponse {
+    optional CmdMonitoringConnectionDetailsResp cmdMonitoringConnectionDetailsResp =
+        29;
+  }
+  required string connection_id = 1;
+  required string metadata_endpoint = 2;
+}
+
+message CmdAliveReq {
+  extend ear.plugin.proto.CmdRequest {
+    optional CmdAliveReq cmdAliveReq = 24;
+  }
+  required string connection_id = 1;
+}
+
+message CmdAliveResp {
+  extend ear.plugin.proto.CmdResponse {
+    optional CmdAliveResp cmdAliveResp = 25;
+  }
+  required string connection_id = 1;
+}
+
+message CmdCloseConnectionReq {
+  extend ear.plugin.proto.CmdRequest {
+    optional CmdCloseConnectionReq cmdCloseConnectionReq = 26;
+  }
+  required string connection_id = 1;
+}
+
+message CmdCloseConnectionResp {
+  extend ear.plugin.proto.CmdResponse {
+    optional CmdCloseConnectionResp cmdCloseConnectionResp = 27;
+  }
+  required string connection_id = 1;
+}
+

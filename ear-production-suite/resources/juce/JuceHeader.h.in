@@ -1,0 +1,74 @@
+/*
+
+    IMPORTANT! This file is auto-generated each time you save your
+    project - if you alter its contents, your changes may be overwritten!
+
+    This is the header file that your files should include in order to get all the
+    JUCE library headers. You should avoid including the JUCE headers directly in
+    your own source files, because that wouldn't pick up the correct configuration
+    options for your app.
+
+*/
+
+#pragma once
+
+#ifdef __clang__
+  #define EAR_DIAGNOSTIC_PUSH _Pragma("clang diagnostic push")
+  #define EAR_IGNORE_DEPRECATED _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+  #define EAR_DIAGNOSTIC_POP _Pragma("clang diagnostic pop")
+// feel free to add more
+#elif defined __GNUC__
+  #define EAR_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic push")
+  #define EAR_IGNORE_DEPRECATED _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+  #define EAR_DIAGNOSTIC_POP _Pragma("GCC diagnostic pop")
+#elif defined _MSC_VER
+  #define EAR_DIAGNOSTIC_PUSH __pragma(warning( push ))
+  #define EAR_IGNORE_DEPRECATED
+  #define EAR_DIAGNOSTIC_POP __pragma(warning( pop ))
+#else
+  #define EAR_DIAGNOSTIC_PUSH
+  #define EAR_IGNORE_DEPRECATED
+  #define EAR_DIAGNOSTIC_POP
+#endif
+
+
+#include "AppConfig.h"
+
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_devices/juce_audio_devices.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_utils/juce_audio_utils.h>
+#include <juce_core/juce_core.h>
+#include <juce_cryptography/juce_cryptography.h>
+#include <juce_data_structures/juce_data_structures.h>
+#include <juce_dsp/juce_dsp.h>
+#include <juce_events/juce_events.h>
+#include <juce_graphics/juce_graphics.h>
+
+EAR_DIAGNOSTIC_PUSH
+EAR_IGNORE_DEPRECATED
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_opengl/juce_opengl.h>
+EAR_DIAGNOSTIC_POP
+
+#include <juce_video/juce_video.h>
+
+
+#if ! DONT_SET_USING_JUCE_NAMESPACE
+ // If your code uses a lot of JUCE classes, then this will obviously save you
+ // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE.
+ using namespace juce;
+#endif
+
+#if ! JUCE_DONT_DECLARE_PROJECTINFO
+namespace ProjectInfo
+{
+    const char* const  projectName    = "@PLUGIN_DISPLAY_NAME@";
+    const char* const  companyName    = "Ear";
+    const char* const  versionString  = "@PROJECT_VERSION@";
+    const int          versionNumber  = 0x@PROJECT_VERSION_MAJOR@@PROJECT_VERSION_MINOR@@PROJECT_VERSION_PATCH@;
+}
+#endif

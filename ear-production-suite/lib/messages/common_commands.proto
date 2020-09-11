@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "common_types.proto";
+
+message CmdRequest {
+  extensions 10 to max;
+}
+
+message CmdResponse {
+  optional CmdStatus status = 1;
+  optional string error_description = 2;
+
+  extensions 10 to max;
+}

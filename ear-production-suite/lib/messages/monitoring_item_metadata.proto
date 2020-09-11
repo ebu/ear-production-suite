@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "type_metadata.proto";
+
+message MonitoringItemMetadata {
+  optional string connection_id = 1 [default = "00000000-0000-0000-0000-000000000000"];
+  optional int32 routing = 2 [default = -1];
+  optional bool changed = 3 [default = true];
+  oneof metadata {
+    DirectSpeakersTypeMetadata ds_metadata = 4;
+    MatrixTypeMetadata mtx_metadata = 5;
+    ObjectsTypeMetadata obj_metadata = 6;
+    HoaTypeMetadata hoa_metadata = 7;
+    BinauralTypeMetadata bin_metadata = 8;
+  }
+}

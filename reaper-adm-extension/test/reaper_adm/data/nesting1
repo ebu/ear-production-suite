@@ -1,0 +1,32 @@
+digraph {
+	node [fillcolor="#cccccc" fontname=Hack shape=record style=filled]
+	APR_1001 [label="{APR_1001|audioProgrammeName=\"audProg\"\l}" fillcolor="#f69c6e"]
+	APR_1001 -> ACO_1001
+	ACO_1001 [label="{ACO_1001|audioContentName=\"audCont\"\l}" fillcolor="#9fd178"]
+	ACO_1001 -> AO_1001
+	AO_1001 [label="{AO_1001|audioObjectName=\"audObj\"\laudioComplementaryObjectIDRef=\"None\"\l}" fillcolor="#4dafdc"]
+	AO_1001 -> AP_00031001
+	AO_1001 -> ATU_00000001
+	AO_1001 -> ATU_00000002
+	ATU_00000001 [label="{ATU_00000001|trackIndex=\"1\"\lsampleRate=\"None\"\lbitDepth=\"None\"\l}" fillcolor="#cccccc"]
+	ATU_00000001 -> AT_00031001_01
+	ATU_00000001 -> AP_00031001
+	ATU_00000002 [label="{ATU_00000002|trackIndex=\"2\"\lsampleRate=\"None\"\lbitDepth=\"None\"\l}" fillcolor="#cccccc"]
+	ATU_00000002 -> AT_00031002_01
+	ATU_00000002 -> AP_00031002
+	AP_00031001 [label="{AP_00031001|audioPackFormatName=\"Parent PF\"\l}" fillcolor="#f2736d"]
+	AP_00031001 -> AP_00031002
+	AP_00031001 -> AC_00031001
+	AP_00031002 [label="{AP_00031002|audioPackFormatName=\"Child PF\"\l}" fillcolor="#f2736d"]
+	AP_00031002 -> AC_00031002
+	AS_00031001 [label="{AS_00031001|audioStreamFormatName=\"1st SF\"\l}" fillcolor="#688db2"]
+	AS_00031001 -> AC_00031001
+	AS_00031002 [label="{AS_00031002|audioStreamFormatName=\"2nd SF\"\l}" fillcolor="#688db2"]
+	AS_00031002 -> AC_00031002
+	AT_00031001_01 [label="{AT_00031001_01|audioTrackFormatName=\"1st TF\"\l}" fillcolor="#bd91e0"]
+	AT_00031001_01 -> AS_00031001
+	AT_00031002_01 [label="{AT_00031002_01|audioTrackFormatName=\"2nd TF\"\l}" fillcolor="#bd91e0"]
+	AT_00031002_01 -> AS_00031002
+	AC_00031001 [label="{AC_00031001|audioChannelFormatName=\"1st CF (parent pack)\"\l}" fillcolor="#fef7b5"]
+	AC_00031002 [label="{AC_00031002|audioChannelFormatName=\"2nd CF (child pack)\"\l}" fillcolor="#fef7b5"]
+}

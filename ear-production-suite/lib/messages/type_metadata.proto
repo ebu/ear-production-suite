@@ -1,0 +1,54 @@
+syntax = "proto2";
+
+package ear.plugin.proto;
+
+import "common_types.proto";
+
+// XXX: the numbers directly correspond to the indicies in the speaker layout  combobox
+enum SpeakerLayout {
+  ITU_BS_2051_UNKNOWN = -1;
+  ITU_BS_2051_0_1_0 = 0;
+  ITU_BS_2051_0_2_0 = 1;
+  ITU_BS_2051_0_5_0 = 2;
+  ITU_BS_2051_2_5_0 = 3;
+  ITU_BS_2051_4_5_0 = 4;
+  ITU_BS_2051_4_5_1 = 5;
+  ITU_BS_2051_3_7_0 = 6;
+  ITU_BS_2051_4_9_0 = 7;
+  ITU_BS_2051_9_10_3 = 8;
+  ITU_BS_2051_0_7_0 = 9;
+  ITU_BS_2051_4_7_0 = 10;
+  ITU_BS_2094_2_7_0_AP_00010016 = 11;
+  ITU_BS_755_0_3_0 = 12;
+  ITU_BS_2051_0_5_0_NO_LFE = 13;
+}
+
+message Speaker {
+  optional int32 id = 1 [default = 0];
+  repeated string labels = 2;
+  optional PolarPosition position = 3;
+  optional bool is_lfe = 4 [default = false];
+  optional float gain = 5 [default = 1.0];
+}
+
+message DirectSpeakersTypeMetadata {
+  optional SpeakerLayout layout = 1 [default = ITU_BS_2051_UNKNOWN];
+  repeated Speaker speakers = 2;
+}
+
+message MatrixTypeMetadata {}
+
+message ObjectsTypeMetadata {
+  optional double gain = 1 [default = 1.0];
+  optional PolarPosition position = 2;
+  optional double width = 3 [default = 0.0];
+  optional double height = 4 [default = 0.0];
+  optional double depth = 5 [default = 0.0];
+  optional double diffuse = 6 [default = 0.0];
+  optional double factor = 7 [default = 0.0];
+  optional double range = 8 [default = 0.0];
+}
+
+message HoaTypeMetadata {}
+
+message BinauralTypeMetadata {}
