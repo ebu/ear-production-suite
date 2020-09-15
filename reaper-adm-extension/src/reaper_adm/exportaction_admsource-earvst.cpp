@@ -366,7 +366,11 @@ std::vector<std::shared_ptr<PluginInstance>> EarVstExportSources::getEarInputPlu
             if(EarInputVst::isInputPlugin(api, trk, vstPos)) {
                 auto pluginInst = std::make_shared<EarInputVst>(trk, vstPos, api);
                 auto pluginTrackMapping = pluginInst->getTrackMapping();
-                if(pluginTrackMapping == trackMapping) {
+                auto pluginWidth = pluginInst->getWidth();
+                auto pluginStartCh = pluginTrackMapping;
+                auto pluginEndCh = pluginTrackMapping + pluginWidth - 1;
+
+                if(trackMapping >= pluginStartCh && trackMapping <= pluginEndCh) {
                     insts.push_back(std::make_shared<PluginInstance>(trk, vstPos, api));
                 }
             }
@@ -479,18 +483,30 @@ bool EarInputVst::vstPosIsObjectVst(ReaperAPI const& api, MediaTrack *trk, int v
     return (strcmp(name, getObjectVstCompName()) == 0);
 }
 
-bool EarInputVst::isInputPlugin(char * vstName)
+bool EarInputVst::isObjectPlugin(std::string vstNameStr)
 {
-    auto vstNameStr = std::string(vstName);
     // Name only
     if(vstNameStr == objectVstName) return true;
+    // Comparison name (includes VST3: and ends with company name and channel count)
+    getObjectVstCompName(); // need to ensure generated
+    if (strncmp (vstNameStr.c_str(), getObjectVstCompName(), objectVstCompNameLen) == 0) return true;
+    return false;
+}
+
+bool EarInputVst::isDirectSpeakersPlugin(std::string vstNameStr)
+{
+    // Name only
     if(vstNameStr == directSpeakersVstName) return true;
     // Comparison name (includes VST3: and ends with company name and channel count)
     getDirectSpeakersVstCompName(); // need to ensure generated
-    if (strncmp (vstName, getDirectSpeakersVstCompName(), directSpeakersVstCompNameLen) == 0) return true;
-    getObjectVstCompName(); // need to ensure generated
-    if (strncmp (vstName, getObjectVstCompName(), objectVstCompNameLen) == 0) return true;
+    if (strncmp (vstNameStr.c_str(), getDirectSpeakersVstCompName(), directSpeakersVstCompNameLen) == 0) return true;
     return false;
+}
+
+bool EarInputVst::isInputPlugin(char * vstName)
+{
+    auto vstNameStr = std::string(vstName);
+    return isObjectPlugin(vstNameStr) || isDirectSpeakersPlugin(vstNameStr);
 }
 
 bool EarInputVst::isInputPlugin(ReaperAPI const& api, MediaTrack *trk, int vstPos) {
@@ -529,6 +545,20 @@ int EarInputVst::getTrackMapping()
     auto optVal = getParameterWithConvertToInt(*paramTrackMapping);
     assert(optVal.has_value());
     return *optVal;
+}
+
+int EarInputVst::getWidth()
+{
+    if(isObjectPlugin(name)) return 1;
+    if(!isDirectSpeakersPlugin(name)) return 0;
+
+    assert(paramSpeakerLayout);
+    auto speakerLayout = getParameterWithConvertToInt(*paramSpeakerLayout);
+    assert(speakerLayout.has_value());
+
+    int trackWidth = speakerLayout.has_value()? EARPluginSuite::countChannelsInSpeakerLayout(*speakerLayout) : 0;
+
+    return trackWidth;
 }
 
 // EarSceneMasterVst

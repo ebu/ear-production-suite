@@ -37,6 +37,9 @@ namespace admplug {
         static const char* DIRECTSPEAKERS_METADATA_PLUGIN_NAME;
         static const char* SCENEMASTER_PLUGIN_NAME;
         static const char* RENDERER_PLUGIN_NAME;
+
+        static int countChannelsInSpeakerLayout(int slIndex);
+
     private:
         std::vector<std::unique_ptr<PluginParameter>> const & automatedObjectPluginParameters();
         std::vector<std::unique_ptr<TrackParameter>> const & trackParameters();

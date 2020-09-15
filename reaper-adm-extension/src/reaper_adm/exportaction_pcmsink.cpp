@@ -68,7 +68,7 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     // Check other errors (warnings/infos are fine... we can continue with those)
     auto errors = admExportHandler->generateExportErrorStrings();
     if(errors.size() > 0) {
-        auto op = std::string("Can not render to the following issues:\r\n");
+        auto op = std::string("Can not render due to the following issues:\r\n");
         for(auto& error : errors) {
             op.append("\r\n");
             op.append(error);

@@ -135,14 +135,6 @@ namespace {
         return pfData->relatedChannelFormats.size();
     }
 
-    int countChannelsInSpeakerLayout(int slIndex) {
-        auto pfId = getPackFormatIdFromSpeakerLayoutIndex(slIndex);
-        if(pfId.has_value()) {
-            return countChannelsInPackFormat(*pfId);
-        }
-        return 0;
-    }
-
     std::vector<int> determineUsedObjectTrackMappingValues(PluginInstance& plugin) {
         auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
         auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
@@ -163,7 +155,7 @@ namespace {
         auto speakerLayoutParam = createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::SPEAKER_LAYOUT), { SPEAKER_LAYOUT_MIN, SPEAKER_LAYOUT_MAX });
         auto speakerLayout = plugin.getParameterWithConvertToInt(*(speakerLayoutParam.get()));
         assert(speakerLayout.has_value());
-        int trackWidth = speakerLayout.has_value()? countChannelsInSpeakerLayout(*speakerLayout) : 0;
+        int trackWidth = speakerLayout.has_value()? EARPluginSuite::countChannelsInSpeakerLayout(*speakerLayout) : 0;
         if(trackWidth <= 0) trackWidth = 1; // Track mapping is single channel by default.
 
         if(trackMapping.has_value() && *trackMapping >= 0) {
@@ -398,6 +390,15 @@ bool EARPluginSuite::pluginSuiteUsable(const ReaperAPI &api)
 bool admplug::EARPluginSuite::representAdmStructureWithGroups(ReaperAPI const & api)
 {
     return false; // Scene master does this!
+}
+
+int admplug::EARPluginSuite::countChannelsInSpeakerLayout(int slIndex)
+{
+    auto pfId = getPackFormatIdFromSpeakerLayoutIndex(slIndex);
+    if(pfId.has_value()) {
+        return countChannelsInPackFormat(*pfId);
+    }
+    return 0;
 }
 
 std::vector<std::unique_ptr<PluginParameter>> const& EARPluginSuite::automatedObjectPluginParameters()

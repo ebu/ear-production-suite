@@ -60,7 +60,7 @@ public:
     ~EarInputVst() {};
 
     int getTrackMapping();
-    // TODO: Probably gonna need a "getWidth" (or similar) method too at some point
+    int getWidth();
 
     // Statics
 
@@ -78,11 +78,15 @@ public:
     static std::vector<int> trackObjectVstIndexes(ReaperAPI const& api, MediaTrack *trk);
     static bool vstPosIsObjectVst(ReaperAPI const& api, MediaTrack *trk, int vstPos);
 
+    static bool isObjectPlugin(std::string vstNameStr);
+    static bool isDirectSpeakersPlugin(std::string vstNameStr);
     static bool isInputPlugin(char* vstName);
     static bool isInputPlugin(ReaperAPI const& api, MediaTrack *trk, int vstPos);
 
 private:
+    // TODO: Fix hard-coded values - pull from plugin suite
     std::unique_ptr<PluginParameter> paramTrackMapping{ createPluginParameter(0, { -1.0, 63.0 }) };
+    std::unique_ptr<PluginParameter> paramSpeakerLayout{ createPluginParameter(1, { -1.0, 13.0 }) };
 
     // Statics
 
