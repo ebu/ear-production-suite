@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+
+.c-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 2.5rem;
+  padding-right: 0px;
+  width: 100%;
+  background: $t-theme;
+  z-index: 10;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(to bottom, rgba(#000, .25), rgba(#000, 0));
+  }
+
+  &.is-fixed {
+    position: fixed;
+    will-change: transform;
+  }
+}
+
+.c-navigation__item {
+  position: relative;
+  display: inline-block;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+  @include ff--mono(500);
+  @include fs--meta;
+  color: $c__white;
+  text-transform: uppercase;
+
+  &:not(:last-of-type) {
+    margin-right: 2.5rem;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: transparent;
+    transition: background ease-in-out 0.2s;
+  }
+
+  &:hover:after,
+  &.is-active:after {
+    background: $c__white;
+  }
+}
+
+.c-navigation__item_logo {
+  position: relative;
+  display: inline-block;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 1rem;
+
+  &:not(:last-of-type) {
+    margin-right: 2.5rem;
+  }
+
+  img {
+    vertical-align: middle;
+
+    @media screen and (min-width: 601px) {
+      height: 6rem;
+    }
+    @media screen and (max-width: 601px) {
+      height: 4rem;
+    }
+  }
+
+}

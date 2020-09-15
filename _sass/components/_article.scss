@@ -1,0 +1,35 @@
+/* ==========================================================================
+   Article
+   ========================================================================== */
+
+.c-article {
+
+}
+
+.c-article__main {
+  max-width: 96rem;  // 960px
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: 12.5rem;
+  @include fs--body;
+
+  > * {
+    margin-bottom: 1.8rem;
+    color: rgba($c__black, .7);
+  }
+
+  a:not(.c-btn) {
+    text-decoration: underline;
+  }
+
+  blockquote {
+    margin-left: -2.5rem;
+    width: calc(100% + 5rem);
+    padding: 2.5rem;
+    background: $c__light-grey;
+  }
+
+  ul, ol {
+    margin-left: 40px;
+  }
+}

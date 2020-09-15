@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+// Base button
+.c-btn {
+  padding: 1.5rem 2rem;
+  @include fs--meta;
+  text-decoration: none;
+  background: $c__dark-blue;
+  border-radius: 10px;
+  border-style: none;
+  color: $c__white;
+  font-weight: bold;
+}
+
+.c-btn > a {
+  color: $c__white;
+}
+
+.c-btn:hover {
+  background: $c__dark-blue-hover;
+  cursor: pointer;
+}
+
+// Button groups
+.c-btn-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+summary {
+  padding: 1rem;
+  padding-left: 2rem;
+  background-color: $c__dark-background-lighter;
+  list-style: none; /* Triangle not shown */
+}
+
+/* Style für Webkit-Browser */
+summary::-webkit-details-marker {
+  display: none; /* Triangle not shown */
+}
+summary::before {
+  padding-right: 1rem;
+  content: '\25B8'; /* Instead of Triangle closed */
+  color: $c__dark-background-collapsible;
+  display: inline-block;
+  width: 14px;
+}
+details[open] summary::before {
+  padding-right: 1rem;
+  content: '\25BE'; /* Instead of Triangle open */
+}
+
+summary:hover {
+  background: $c__dark-background-lighter-hover;
+  cursor: pointer;
+}
+
+details {
+  margin-top: 1rem;
+  border: 1px solid $c__dark-background-lighter;
+}
+
+details > ol {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+details > ol > li {
+  padding-top: 0.5rem;
+}
+
+*:focus {
+    outline: none;
+}
