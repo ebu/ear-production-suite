@@ -3,8 +3,28 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    env:
+      CCACHE_COMPRESS: 'true'
+      CCACHE_COMPRESSLEVEL: '6'
+      CCACHE_MAXSIZE: '500M'
+      CCACHE_WIN_VERSION: 3.7.7
+    strategy:
+      matrix:
+        config:
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest
+          }         
+        #- {
+        #    name: "Ubuntu 20.04 GCC",
+        #    os: ubuntu-20.04
+        #  }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest
+          }
     steps:
       # checkout to workspace
       - uses: actions/checkout@v2
@@ -15,6 +35,7 @@ jobs:
 
       # Restore from cache the previously built ports. If "cache miss", then provision vcpkg, install desired ports, finally cache everything for the next run.
       - name: Restore from cache and run vcpkg
+        if: matrix.config.os == 'windows-latest'
         uses: lukka/run-vcpkg@v4
         env: 
           vcpkgResponseFile: '${{github.workspace}}/response_file.txt'
@@ -26,12 +47,76 @@ jobs:
           # Since the cache must be invalidated when content of the response file changes, let's
           # compute its hash and append this to the computed cache's key.
           appendedCacheKey: ${{ hashFiles(env.vcpkgResponseFile) }}
+      
+      - name: 'Install ubuntu dependencies'
+        if: matrix.config.os == 'ubuntu-20.04'
+        run: sudo apt-get update && sudo apt-get install ccache libboost-dev libboost-filesystem-dev libboost-math-dev libboost-mpi-dev protobuf-compiler libprotobuf-dev libnng-dev libspdlog-dev libyaml-cpp-dev libasound2-dev 
+      
+      - name: 'Install macos dependencies'
+        if: matrix.config.os == 'macos-latest'
+        run: brew install boost protobuf nng spdlog yaml-cpp ccache
+      
+      - name: 'Set cmake flags'
+        id: cmake_flags
+        run: echo "::set-output name=cmake_flags::-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+      
+      - name: 'Install ccache'
+        if: matrix.config.os == 'windows-latest'
+        shell: cmake -P {0}
+        run: |
+          set(ccache_url "https://github.com/cristianadam/ccache/releases/download/v$ENV{CCACHE_WIN_VERSION}/Windows.tar.xz")
+          file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
+        working-directory: ${{ runner.workspace }}
+      
+      - name: 'Add ccache to path'
+        run: echo "::add-path::${{ runner.workspace }}"
+        
+      - name: 'Set ccache config'
+        run: |
+          echo "::set-env name=CCACHE_BASEDIR::${{ github.workspace }}"
+          echo "::set-env name=CCACHE_DIR::${{ runner.workspace }}/.ccache"
+          
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        shell: cmake -P {0}
+        run: |
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          message("::set-output name=timestamp::${current_date}")
+
+      - name: ccache cache files
+        uses: actions/cache@v1.1.0
+        with:
+          path: ${{ runner.workspace }}/.ccache
+          key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+              ${{ matrix.config.name }}-ccache-
+              
+      - name: 'zero ccache stats'
+        run: ccache -z
+        
+      - name: 'print ccache config'
+        run: ccache -p
 
       - name: 'Build with CMake and Ninja'
+        env:
+          CCACHE_BASEDIR: '${{ github.workspace }}'
+          CCACHE_DIR: '${{ runner.workspace }}/.ccache'
+          CCACHE_COMPRESS: 'true'
+          CCACHE_COMPRESSLEVEL: '6'
+          CCACHE_MAXSIZE: '500M'
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          useVcpkgToolchainFile: true
+          useVcpkgToolchainFile: ${{ matrix.config.os == 'windows-latest' }}
           buildDirectory: '${{ runner.workspace }}/b/ninja'
-          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=Release -GNinja'
+          cmakeAppendedArgs: '${{ steps.cmake_flags.outputs.cmake_flags }} -DCMAKE_BUILD_TYPE=Release -GNinja'
+ 
+      - name: 'print ccache stats'
+        run: ccache -s
+ 
+      - name: 'Run tests'
+        run: ctest . --output-on-failure
+        working-directory: '${{ runner.workspace }}/b/ninja'
+             
