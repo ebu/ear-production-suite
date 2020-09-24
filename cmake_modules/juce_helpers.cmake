@@ -42,7 +42,7 @@ set_source_files_properties( ${_SUPPORT_PATH}/PkgInfo
 endfunction()
 
 function(install_juce_vst3_plugin PLUGIN_NAME)
-install(TARGETS ${PLUGIN_NAME}_VST3 DESTINATION "VST3")
+install(TARGETS ${PLUGIN_NAME}_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3")
 endfunction()
 
 function (_generate_juce_module_stub MODULE_FILENAME DEST_PATH OUTVAR)

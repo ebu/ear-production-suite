@@ -19,7 +19,7 @@ function(add_monitoring_plugin SPEAKER_LAYOUT SPEAKER_LAYOUT_NAME)
     SPEAKER_LAYOUT_NAME="${SPEAKER_LAYOUT_NAME}"
     )
   target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base)
-  install(TARGETS ear_monitoring_${SPEAKER_LAYOUT}_VST3 DESTINATION "ear-production-suite")
+  install(TARGETS ear_monitoring_${SPEAKER_LAYOUT}_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endfunction()
 
 add_monitoring_plugin("0+2+0" "2.0")
