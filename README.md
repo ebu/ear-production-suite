@@ -1,3 +1,5 @@
+![Build](https://github.com/ebu/ear-production-suite/workflows/Build/badge.svg)
+
 # EAR production suite
 
 
