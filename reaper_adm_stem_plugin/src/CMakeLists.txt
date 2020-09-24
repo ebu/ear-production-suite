@@ -34,18 +34,18 @@ target_include_directories(adm_export_source_VST3
 	$<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-
-
-
 target_compile_definitions(adm_export_source_VST3
     PUBLIC JUCE_DISABLE_ASSERTIONS)
 
-set(macos_install_dir "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
-set(win_install_dir "$ENV{programfiles}/Common Files/VST3")
-set(linux_install_dir "share/REAPER/UserPlugins") # TODO - don't know the correct location
-
 install(TARGETS
     adm_export_source_VST3
-     DESTINATION
-        $<$<PLATFORM_ID:Windows>:${win_install_dir}>$<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>
+    COMPONENT
+      Plugins
+    DESTINATION
+      ${EPS_PLUGIN_INSTALL_PREFIX}VST3
     )
+
+include(DeployVST3)
+
+set(DEP_SEARCH_PATHS "${PROJECT_BINARY_DIR}/lib" "${PROJECT_BINARY_DIR}/VST3" "${PROJECT_BINARY_DIR}/lib/*" "${PROJECT_BINARY_DIR}/VST3/*")
+install_all_vst3_dependencies("${EPS_PLUGIN_INSTALL_PREFIX}VST3" "${DEP_SEARCH_PATHS}")

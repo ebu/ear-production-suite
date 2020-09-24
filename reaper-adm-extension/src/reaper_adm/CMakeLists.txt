@@ -77,12 +77,8 @@ target_link_libraries(reaper_adm
       reaper_adm_dependencies
       )
 
-set(macos_install_dir "UserPlugins")
-set(win_install_dir "Plugins")
-if(EXISTS "C:/Program Files/REAPER (x64)/reaper.exe")
-	# Not running as CI job - install to REAPER Plugins dir
-   set(win_install_dir "C:/Program Files/REAPER (x64)/Plugins")
-endif()
+set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}Plugins")
+set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(linux_install_dir "share/REAPER/UserPlugins")
 
 install(TARGETS
@@ -93,4 +89,4 @@ install(TARGETS
         $<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>
     )
 
-install(DIRECTORY ADMPresets DESTINATION $<$<PLATFORM_ID:Windows>:${win_install_dir}>$<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>)
+install(DIRECTORY ADMPresets COMPONENT Extension DESTINATION $<$<PLATFORM_ID:Windows>:${win_install_dir}>$<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>)

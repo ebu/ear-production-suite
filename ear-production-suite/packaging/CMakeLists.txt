@@ -1,9 +1,7 @@
-include(DeployVST3.cmake)
+include(DeployVST3)
 
 set(DEP_SEARCH_PATHS "${PROJECT_BINARY_DIR}/lib" "${PROJECT_BINARY_DIR}/VST3" "${PROJECT_BINARY_DIR}/lib/*" "${PROJECT_BINARY_DIR}/VST3/*")
-install_all_vst3_dependencies("ear-production-suite" "${DEP_SEARCH_PATHS}")
-
-
+install_all_vst3_dependencies("${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite" "${DEP_SEARCH_PATHS}")
 
 if(APPLE)
   set(CPACK_GENERATOR "DragNDrop")
