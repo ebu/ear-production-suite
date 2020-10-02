@@ -16,6 +16,3 @@ boost-range
 boost-smart-ptr
 boost-uuid
 boost-variant
---triplet
-x64-windows-static
-
