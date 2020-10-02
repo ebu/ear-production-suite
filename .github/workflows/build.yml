@@ -13,18 +13,30 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest MSVC",
+          - name: "Windows Latest MSVC"
             os: windows-latest
-          }         
-        #- {
-        #    name: "Ubuntu 20.04 GCC",
-        #    os: ubuntu-20.04
-        #  }
-        - {
-            name: "macOS Latest Clang",
+            package: true
+            vcpkg_toolchain: x64-windows-static
+            cmake_config: >-
+              -DEPS_BUILD_PACKAGE=ON
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -DCMAKE_BUILD_TYPE=Release
+              -GNinja        
+          #- {
+          #    name: "Ubuntu 20.04 GCC",
+          #    os: ubuntu-20.04
+          #  }
+          - name: "macOS Latest Clang"
             os: macos-latest
-          }
+            package: true
+            vcpkg_toolchain: x64-osx
+            cmake_config: >-
+              -DEPS_BUILD_PACKAGE=ON
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -DCMAKE_BUILD_TYPE=Release
+              -GNinja
     steps:
       # checkout to workspace
       - uses: actions/checkout@v2
@@ -35,13 +47,12 @@ jobs:
 
       # Restore from cache the previously built ports. If "cache miss", then provision vcpkg, install desired ports, finally cache everything for the next run.
       - name: Restore from cache and run vcpkg
-        if: matrix.config.os == 'windows-latest'
         uses: lukka/run-vcpkg@v4
         env: 
           vcpkgResponseFile: '${{github.workspace}}/response_file.txt'
         with:
           # Response file stored in source control, it provides the list of ports and triplet(s).
-          vcpkgArguments: '@${{ env.vcpkgResponseFile }}'
+          vcpkgArguments: '@${{ env.vcpkgResponseFile }} --triplet ${{ matrix.config.vcpkg_toolchain }}'
           # Location of the vcpkg as submodule of the repository.
           vcpkgDirectory: '${{ github.workspace }}/submodules/vcpkg'
           # Since the cache must be invalidated when content of the response file changes, let's
@@ -52,15 +63,7 @@ jobs:
         if: matrix.config.os == 'ubuntu-20.04'
         run: sudo apt-get update && sudo apt-get install ccache libboost-dev libboost-filesystem-dev libboost-math-dev libboost-mpi-dev protobuf-compiler libprotobuf-dev libnng-dev libspdlog-dev libyaml-cpp-dev libasound2-dev 
       
-      - name: 'Install macos dependencies'
-        if: matrix.config.os == 'macos-latest'
-        run: brew install boost protobuf nng spdlog yaml-cpp ccache
-      
-      - name: 'Set cmake flags'
-        id: cmake_flags
-        run: echo "::set-output name=cmake_flags::-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
-      
-      - name: 'Install ccache'
+      - name: 'Install ccache on windows'
         if: matrix.config.os == 'windows-latest'
         shell: cmake -P {0}
         run: |
@@ -68,6 +71,10 @@ jobs:
           file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
         working-directory: ${{ runner.workspace }}
+      
+      - name: 'Install ccache on macos'
+        if: matrix.config.os == 'macos-latest'
+        run: brew install ccache
       
       - name: 'Add ccache to path'
         run: echo "::add-path::${{ runner.workspace }}"
@@ -98,6 +105,20 @@ jobs:
       - name: 'print ccache config'
         run: ccache -p
 
+      - name: 'Set install prefix'
+        id: cmake_install_prefix
+        env:
+          RUNNER_WORKSPACE: ${{ runner.workspace }}
+        shell: cmake -P {0}
+        run: |
+          string(SUBSTRING $ENV{GITHUB_SHA} 0 8 SHORT_SHA)
+          string(REPLACE " " "_" NAME_NO_SPACES "${{ matrix.config.name }}")
+          file(TO_CMAKE_PATH "$ENV{RUNNER_WORKSPACE}" RUNNER_WORKSPACE)
+          set(INSTALL_DIR "${NAME_NO_SPACES}_${SHORT_SHA}")
+          file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
+          message("::set-output name=install_prefix::${PREFIX}")
+          message("::set-output name=install_dir::${INSTALL_DIR}")
+
       - name: 'Build with CMake and Ninja'
         env:
           CCACHE_BASEDIR: '${{ github.workspace }}'
@@ -109,14 +130,27 @@ jobs:
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          useVcpkgToolchainFile: ${{ matrix.config.os == 'windows-latest' }}
+          useVcpkgToolchainFile: ${{ matrix.config.os != 'ubuntu*' }}
           buildDirectory: '${{ runner.workspace }}/b/ninja'
-          cmakeAppendedArgs: '${{ steps.cmake_flags.outputs.cmake_flags }} -DCMAKE_BUILD_TYPE=Release -GNinja'
- 
+          cmakeAppendedArgs: '-DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" ${{ matrix.config.cmake_config }}'
+
       - name: 'print ccache stats'
         run: ccache -s
- 
+
       - name: 'Run tests'
         run: ctest . --output-on-failure
         working-directory: '${{ runner.workspace }}/b/ninja'
-             
+
+      - name: 'Install to output dir'
+        if: ${{ matrix.config.package }}
+        run: |
+          cmake -E make_directory ${{ steps.cmake_install_prefix.outputs.install_prefix }} && cmake --install .
+        working-directory: '${{ runner.workspace }}/b/ninja'
+
+      - name: 'upload output dir as build artifact'
+        if: ${{ matrix.config.package }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
+          path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
+
