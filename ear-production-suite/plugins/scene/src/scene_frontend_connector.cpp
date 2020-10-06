@@ -670,6 +670,7 @@ void JuceSceneFrontendConnector::tabMoved(EarTabbedComponent*, int oldIndex,
                                           int newIndex) {
   moveProgramme(oldIndex, newIndex);
   moveProgrammeView(oldIndex, newIndex);
+  selectProgramme(newIndex);
 }
 
 void JuceSceneFrontendConnector::removeTabClicked(
