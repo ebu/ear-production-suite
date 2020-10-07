@@ -19,10 +19,12 @@ set(SOURCES_SCENE_MASTER
 )
 
 add_juce_vst3_plugin(scene
-  SOURCES ${SOURCES_SCENE_MASTER} 
+  SOURCES ${SOURCES_SCENE_MASTER}
+  CODE_SUFFIX "FF"  
   DISPLAY_NAME "EAR Scene"
   DESCRIPTION "The scene plugin"
   OUTPUT_NAME "EAR Scene")
+  
 target_link_libraries(scene_VST3 PRIVATE ear-plugin-base)
 install(TARGETS scene_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 

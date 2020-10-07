@@ -2,11 +2,15 @@ set(_JUCE_SUPPORT_RESOURCES ${PROJECT_SOURCE_DIR}/resources)
 
 function(add_juce_vst3_plugin PLUGIN_NAME)
   set(options)
-  set(oneValueArgs DESCRIPTION DISPLAY_NAME OUTPUT_NAME)
+  set(oneValueArgs DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_SUFFIX)
   set(multiValueArgs SOURCES)
   cmake_parse_arguments(PLUGIN "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
 
+  if(NOT PLUGIN_CODE_SUFFIX)
+    set(PLUGIN_CODE_SUFFIX "00")
+  endif()
+  
   if(NOT PLUGIN_DISPLAY_NAME)
     set(PLUGIN_DISPLAY_NAME "${PLUGIN_NAME}")
   endif()
