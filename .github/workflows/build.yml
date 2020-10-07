@@ -10,6 +10,7 @@ jobs:
       CCACHE_COMPRESSLEVEL: '6'
       CCACHE_MAXSIZE: '500M'
       CCACHE_WIN_VERSION: 3.7.7
+      MACOSX_DEPLOYMENT_TARGET: 10.12
     strategy:
       matrix:
         config:
@@ -36,6 +37,7 @@ jobs:
               -DCMAKE_C_COMPILER_LAUNCHER=ccache
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
               -DCMAKE_BUILD_TYPE=Release
+              -DCMAKE_OSX_DEPLOYMENT_TARGET="10.12"
               -GNinja
     steps:
       # checkout to workspace
