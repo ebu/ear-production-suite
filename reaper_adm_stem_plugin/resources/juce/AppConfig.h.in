@@ -390,7 +390,7 @@
 #define JucePlugin_VSTCategory kPlugSurroundFx
 #endif
 #ifndef JucePlugin_Vst3Category
-#define JucePlugin_Vst3Category "Spatial|Surround"
+#define JucePlugin_Vst3Category "Fx|Spatial"
 #endif
 #ifndef JucePlugin_AUMainType
 #define JucePlugin_AUMainType 'aufx'
