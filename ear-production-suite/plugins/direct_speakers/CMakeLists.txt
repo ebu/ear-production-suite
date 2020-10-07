@@ -10,9 +10,13 @@ set(SOURCES_DIRECT_SPEAKERS_INPUT
     src/direct_speakers_plugin_processor.cpp
 )
 
-add_juce_vst3_plugin(direct_speakers SOURCES ${SOURCES_DIRECT_SPEAKERS_INPUT} 
-                                     DISPLAY_NAME "EAR DirectSpeakers" 
-                                     DESCRIPTION "The metadata input plugin for channel-based audio"
-                                     OUTPUT_NAME "EAR DirectSpeakers")
+# Input plugin code suffixes to start from 10
+add_juce_vst3_plugin(direct_speakers
+  SOURCES ${SOURCES_DIRECT_SPEAKERS_INPUT}
+  CODE_SUFFIX "10"
+  DISPLAY_NAME "EAR DirectSpeakers" 
+  DESCRIPTION "The metadata input plugin for channel-based audio"
+  OUTPUT_NAME "EAR DirectSpeakers")
+  
 target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base)
 install(TARGETS direct_speakers_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

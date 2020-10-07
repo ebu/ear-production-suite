@@ -11,11 +11,14 @@ set(SOURCES_OBJECT_INPUT
     src/object_plugin_processor.cpp
 )
 
+# Input plugin code suffixes to start from 10
 add_juce_vst3_plugin(object
   SOURCES ${SOURCES_OBJECT_INPUT}
+  CODE_SUFFIX "11"
   DISPLAY_NAME "EAR Object"
   DESCRIPTION "The metadata input plugin for objects"
   OUTPUT_NAME "EAR Object")
+  
 target_include_directories(object_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(object_VST3 PRIVATE ear-plugin-base)
 install(TARGETS object_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

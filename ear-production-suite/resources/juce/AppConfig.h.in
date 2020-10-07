@@ -357,7 +357,7 @@
 #define JucePlugin_ManufacturerCode 0x45425520  // 'EBU '
 #endif
 #ifndef JucePlugin_PluginCode
-#define JucePlugin_PluginCode 0x45505320  // 'EPS '
+#define JucePlugin_PluginCode 0x455053@PLUGIN_CODE_SUFFIX@  // 'EPS*'
 #endif
 #ifndef JucePlugin_IsSynth
 #define JucePlugin_IsSynth 0
