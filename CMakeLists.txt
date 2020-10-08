@@ -16,8 +16,8 @@ add_subdirectory(submodules)
 add_subdirectory(ear-production-suite)
 add_subdirectory(reaper-adm-extension)
 add_subdirectory(reaper_adm_stem_plugin)
+add_subdirectory(tools)
 
 if(EPS_BUILD_PACKAGE)
     add_subdirectory(packaging)
 endif()
-

@@ -1,4 +1,4 @@
-# EAR Production Suite (Beta release)
+# EAR Production Suite (Beta 0.7.0 release)
 
 The latest builds are available under [Releases](https://github.com/ebu/ear-production-suite/releases).
 Please download the files from there. The EAR Production Suite (EPS) download bundle comprises of multiple components:
@@ -8,6 +8,13 @@ Please download the files from there. The EAR Production Suite (EPS) download bu
 - ADM Export Source VST® Plugin
 - REAPER session template
 
+## Release notes
+### 0.7.0
+* To fix a problem using the plugins with some hosts, the ID for all plugins has changed. This will break any projects that use the 0.6.0 plugins. See tools/upgrade_project to upgrade existing REAPER projects. 
+* Fixed a bug where a moved programme tab would not receive newly added items
+* Releases of the macOS plugins are now built with a target version of 10.12 (tested on 10.14+)
+### 0.6.0
+* Initial release
 
 ## Installation
 
@@ -23,7 +30,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
     - macOS: ~/Library/Application Support/REAPER/UserPlugins 
 5. Restart REAPER
 6. You should see a new menu option **File -> Create Project from ADM file** now.
-If you don't see this option and you are using Windows, it might be neccesary to download and install the [Visual C++ 2015 redistributable](https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads) ("vc_redist.x64.exe") from Microsoft.
+If you don't see this option and you are using Windows, it might be necessary to download and install the [Visual C++ 2015 redistributable](https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads) ("vc_redist.x64.exe") from Microsoft.
 
 On macOS Catalina or above you may experience plugin load errors due to the new Gatekeeper feature.
 You can disable Gatekeeper globally as per [this site](https://cronotek.net/blog/how-to-disable-gatekeeper-on-macos-mojave-and-catalina)
