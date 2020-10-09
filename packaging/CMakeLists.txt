@@ -3,6 +3,10 @@ install(FILES
         README.md
         DESTINATION
         .)
+install(TARGETS
+        project_upgrade
+        DESTINATION
+        tools)
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_NAME "EAR Production Suite")
 set(CPACK_PACKAGE_VERSION "${CMAKE_PROJECT_VERSION}")
