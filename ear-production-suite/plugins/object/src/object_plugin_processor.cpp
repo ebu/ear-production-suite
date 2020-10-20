@@ -158,7 +158,8 @@ void ObjectsAudioProcessor::setStateInformation(const void* data,
       *azimuth_ = xmlState->getDoubleAttribute("azimuth", 0.0);
       *elevation_ = xmlState->getDoubleAttribute("elevation", 0.0);
       *distance_ = xmlState->getDoubleAttribute("distance", 1.0);
-      *linkSize_ = xmlState->getBoolAttribute("linkSize", true);
+      *linkSize_ = xmlState->getBoolAttribute("link_size", true);
+      *size_ = xmlState->getDoubleAttribute("size", 0.0);
       *width_ = xmlState->getDoubleAttribute("width", 0.0);
       *height_ = xmlState->getDoubleAttribute("height", 0.0);
       *depth_ = xmlState->getDoubleAttribute("depth", 0.0);
