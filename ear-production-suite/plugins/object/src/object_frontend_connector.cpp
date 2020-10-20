@@ -575,6 +575,8 @@ void ObjectsJuceFrontendConnector::sliderValueChanged(Slider* slider) {
     *(p_->getWidth()) = slider->getValue();
   } else if (!heightSlider_.expired() && slider == heightSlider_.lock().get()) {
     *(p_->getHeight()) = slider->getValue();
+  } else if (!depthSlider_.expired() && slider == depthSlider_.lock().get()) {
+    *(p_->getDepth()) = slider->getValue();
   } else if (!diffuseSlider_.expired() &&
              slider == diffuseSlider_.lock().get()) {
     *(p_->getDiffuse()) = slider->getValue();
