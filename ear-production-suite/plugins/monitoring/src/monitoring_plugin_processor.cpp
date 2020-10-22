@@ -33,9 +33,7 @@ EarMonitoringAudioProcessor::_getBusProperties() {
   channels_ = layout.channelNames().size();
   auto ret = BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true);
-  for (const std::string& name : layout.channelNames()) {
-    ret = ret.withOutput(name, AudioChannelSet::mono(), true);
-  }
+  ret = ret.withOutput("Output", AudioChannelSet::discreteChannels(layout.channels().size()), true);
   return ret;
 }
 
