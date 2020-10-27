@@ -21,7 +21,8 @@ class ElementOverview : public Component, private Timer {
       : rotateLeftButton_(std::make_unique<EarButton>()),
         rotateRightButton_(std::make_unique<EarButton>()),
         currentViewingAngle_(180.f),
-        endViewingAngle_(180.f) {
+        endViewingAngle_(180.f),
+        dirty_(true) {
     rotateLeftButton_->setOffStateIcon(std::unique_ptr<Drawable>(
         Drawable::createFromImageData(binary_data::previous_icon_svg,
                                       binary_data::previous_icon_svgSize)));
@@ -64,6 +65,7 @@ class ElementOverview : public Component, private Timer {
   }
 
   void paint(Graphics& g) override {
+    std::unique_lock<std::mutex> lock(dirtyMutex_);
     {  // draw background
       g.drawImageAt(cachedBackground_, 0, 0);
     }
@@ -121,6 +123,7 @@ class ElementOverview : public Component, private Timer {
       g.drawText(labels.at((startIndex + 3) % 4), leftLabelArea,
                  Justification::right);
     }
+    dirty_ = false;
   }
 
   void drawSphereInRect(Graphics& g, Rectangle<float> rect, float linewidth) {
@@ -159,9 +162,15 @@ class ElementOverview : public Component, private Timer {
   }
 
   void setProgramme(proto::Programme programme, ItemStore itemStore) {
-    programme_ = programme;
-    itemStore_ = itemStore;
-    repaint();
+    std::unique_lock<std::mutex> lock(dirtyMutex_, std::defer_lock);
+    if (lock.try_lock()) {
+      if (dirty_ == false) {
+        programme_ = programme;
+        itemStore_ = itemStore;
+        repaint();
+        dirty_ = true;
+      }
+    }
   }
 
   void rotate(float angle) {
@@ -179,8 +188,14 @@ class ElementOverview : public Component, private Timer {
   }
 
   void timerCallback() override {
-    updateViewingAngle();
-    repaint();
+    std::unique_lock<std::mutex> lock(dirtyMutex_, std::defer_lock);
+    if (lock.try_lock()) {
+      if (dirty_ == false) {
+        updateViewingAngle();
+        repaint();
+        dirty_ = true;
+      }
+    }
   }
 
   void updateViewingAngle() {
@@ -286,6 +301,9 @@ class ElementOverview : public Component, private Timer {
   float startViewingAngle_;
   float endViewingAngle_;
   float currentViewingAngle_;
+
+  std::mutex dirtyMutex_;
+  bool dirty_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElementOverview)
 };
