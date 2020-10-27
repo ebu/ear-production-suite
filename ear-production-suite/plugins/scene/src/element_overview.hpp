@@ -309,11 +309,11 @@ class ElementOverview : public Component, private Timer {
     overviewUpdate_ = !overviewUpdate_;
 
     if (overviewUpdate_ == false) {
-      rotateLeftButton_->onClick = nullptr;
-      rotateRightButton_->onClick = nullptr;
+      rotateLeftButton_->setEnabled(false);
+      rotateRightButton_->setEnabled(false);
     } else {
-      rotateLeftButton_->onClick = [this]() { this->rotate(90.f); };
-      rotateRightButton_->onClick = [this]() { this->rotate(-90.f); };
+      rotateLeftButton_->setEnabled(true);
+      rotateRightButton_->setEnabled(true);
     }
   }
 
