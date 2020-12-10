@@ -1,6 +1,6 @@
 ![Build](https://github.com/ebu/ear-production-suite/workflows/Build/badge.svg)
 
-# EAR production suite
+# EAR Production Suite
 
 
 ## Introduction
@@ -27,6 +27,13 @@ You can open the folder from within REAPER via
 ```
 [Options] -> [Show REAPER resource path in explorer/finder...]
 ```
+
+### REAPER Language Packs
+
+Please note that the EAR Production Suite (specifically the `reaper_adm` extension) is currently incompatible with REAPER Language Packs. 
+Attempting to use the extension with a REAPER installation which has a Language Pack installed may cause REAPER to fail to load.
+
+This will be addressed in a future version.
 
 ### OS X Gatekeeper
 On macOS Catalina or above you may experience plugin load errors due to the new Gatekeeper feature.
