@@ -21,4 +21,4 @@ add_juce_vst3_plugin(object
   
 target_include_directories(object_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(object_VST3 PRIVATE ear-plugin-base)
-install(TARGETS object_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install_juce_vst3_plugin(object "${EAR_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
