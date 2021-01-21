@@ -38,6 +38,9 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
     XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES"
     MACOSX_BUNDLE_INFO_PLIST "${_SUPPORT_PATH}/Info.plist"
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/VST3"
+    COMPILE_PDB_NAME "${PLUGIN_OUTPUT_NAME}"
+    COMPILE_PDB_OUTPUT_DIR "${PROJECT_BINARY_DIR}/VST3"
+
   )
 set_source_files_properties( ${_SUPPORT_PATH}/PkgInfo
  PROPERTIES
@@ -45,8 +48,12 @@ set_source_files_properties( ${_SUPPORT_PATH}/PkgInfo
 
 endfunction()
 
-function(install_juce_vst3_plugin PLUGIN_NAME)
-install(TARGETS ${PLUGIN_NAME}_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3")
+function(install_juce_vst3_plugin PLUGIN_NAME DESTINATION)
+install(TARGETS ${PLUGIN_NAME}_VST3 COMPONENT Plugins DESTINATION "${DESTINATION}")
+if(WIN32)
+    install(FILES $<TARGET_PDB_FILE:${PLUGIN_NAME}_VST3>
+            DESTINATION "${DESTINATION}" OPTIONAL)
+endif()
 endfunction()
 
 function (_generate_juce_module_stub MODULE_FILENAME DEST_PATH OUTVAR)
