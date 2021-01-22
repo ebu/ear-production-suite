@@ -24,10 +24,16 @@ jobs:
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
               -DCMAKE_BUILD_TYPE=Release
               -GNinja        
-          #- {
-          #    name: "Ubuntu 20.04 GCC",
-          #    os: ubuntu-20.04
-          #  }
+          - name: "Windows Latest MSVC RelWithDebInfo" 
+            os: windows-latest
+            package: true
+            vcpkg_toolchain: x64-windows-static 
+            cmake_config: >-
+              -DEPS_BUILD_PACKAGE=ON
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo
+              -GNinja
           - name: "macOS Latest Clang"
             os: macos-latest
             package: true
