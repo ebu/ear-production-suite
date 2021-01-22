@@ -7,7 +7,7 @@ subtitle: A collection of production tools for Audio Definition Model (ADM) comp
 <div markdown="1" class="text_section">
 The EAR Production Suite (EPS) is a set of VST® plugins for digital audio workstations (DAWs) that enable sound engineers to produce immersive and personalizable content using the [Audio Definition Model](https://www.itu.int/rec/R-REC-BS.2076) (ADM) format and to monitor it for any [ITU-R BS.2051](https://www.itu.int/rec/R-REC-BS.2051/en) loudspeaker configuration using the [ITU ADM Renderer](https://www.itu.int/rec/R-REC-BS.2127/en). ADM is the only format available for codec-agnostic [Next Generation Audio](https://tech.ebu.ch/nga) (NGA) productions. Moreover, the EAR Production Suite enables professionals to import and export ADM files, compliant to the [EBU ADM Production profile](https://tech.ebu.ch/docs/tech/tech3392.pdf). The VST® plugins are currently optimized for the Reaper DAW, which features an extension interface that is used to import and export ADM files within a BW64 container. The EAR Production Suite was designed to demonstrate the intended use of the ADM in audio production workflows, so that the standards can be adopted in other professional tools in a consistent manner.
 
-The EAR Production Suite is a joint [open-source development](https://github.com/ebu/ear-production-suite) of [BBC R&D](https://bbc.co.uk/rd) and [IRT](https://www.irt.de/en/home)
+The EAR Production Suite is a joint [open-source development](https://github.com/ebu/ear-production-suite) of [BBC R&D](https://bbc.co.uk/rd) and [IRT](https://www.irt.de/en/home).
 </div>
 
 <div class="features">
@@ -102,6 +102,17 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
     <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-macOS.v0.6.0.zip"><button class="c-btn">Download macOS</button></a>
     <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-Windows.v0.6.0.zip"><button class="c-btn">Download Windows</button></a>
   </div>
+</div>
+
+<div markdown="1" class="text_section">
+## Frequently Asked Questions (FAQ)
+  <details>
+    <summary>Will my exported ADM BW64 files work with other tools, such as the Dolby Atmos Production Suite?</summary>
+      <div class="text_section">
+        <p>No, currently the files are not compatible with the Dolby Atmos Production Suite.</p>
+        <p>The cause of this problem is in the different ADM profiles that are used by each set of tools. The EAR Production Suite uses the <a href="https://tech.ebu.ch/docs/tech/tech3392.pdf">EBU ADM Production profile</a>, whereas the Dolby Atmos tools use <a href="https://developer.dolby.com/technology/dolby-atmos/adm-atmos-profile/">Dolby’s ADM profile specification</a>. The EAR Production Suite provides a conversion from the Dolby profile on import, however it only exports to the EBU Production profile and the Dolby tools do not accept this as input. We hope to provide support for ADM profile conversion in future and are keen to work with the industry to ensure proper interoperability.</p>
+      </div>
+  </details>
 </div>
 
 <div markdown="1" class="text_section">
