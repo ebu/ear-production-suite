@@ -466,21 +466,23 @@ std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> Cumula
     std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>> blocks;
 
     auto times = getSortedPointTimes();
-    double lastEndTime = 0.0;
+    auto lastEndTime = toNs(0.0);
 
     auto audioObjectDuration = regionEnd - regionStart;
 
     for(auto timeIt = times.begin(); timeIt != times.end(); timeIt++) {
 
+        const auto timeNs = toNs(*timeIt);
+        
         // Use front or back of parameter values vectors
         bool processBack = (*timeIt == 0.0); // For starting block, no point doing front and back - front would be ineffective.
 
         while(true) {
 
             std::shared_ptr<adm::AudioBlockFormatObjects> block;
-
-            auto rtime = toNs(lastEndTime) - regionStart;
-            auto duration = toNs(*timeIt - lastEndTime);
+   
+            auto rtime = lastEndTime - regionStart;
+            auto duration = timeNs - lastEndTime;
             auto endTime = rtime + duration;
 
             if(rtime < audioObjectDuration && endTime >= std::chrono::nanoseconds::zero()) {
@@ -551,7 +553,7 @@ std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> Cumula
                 blocks.push_back(block);
             }
 
-            lastEndTime = *timeIt;
+            lastEndTime = timeNs;
 
             // If we have already created an additional point or we don't need to create an additional point anyway, quit.
             if(processBack || !multipleValuesForSingleParameterAtTime(*timeIt)) break;
