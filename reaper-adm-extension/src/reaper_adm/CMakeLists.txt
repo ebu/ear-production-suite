@@ -10,6 +10,7 @@ file(GLOB_RECURSE h_files *.h)
 file(GLOB_RECURSE rc_files *.rc)
 file(GLOB_RECURSE rc_mac_files *.rc_mac_*)
 
+
 add_library(reaper_adm_object OBJECT "")
 target_sources(reaper_adm_object
     PRIVATE
@@ -76,6 +77,17 @@ target_link_libraries(reaper_adm
     PRIVATE
       reaper_adm_dependencies
       )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+add_custom_command(
+    TARGET reaper_adm 
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory        
+        ${CMAKE_CURRENT_BINARY_DIR}/ear-production-combined.build
+        ${CMAKE_CURRENT_BINARY_DIR}/reaper_adm.build
+)
+endif()
+
 
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}Plugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
