@@ -194,7 +194,6 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 auto param = pluginSuite->getParameterFor(admParameter);
                 auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
                 
-                //DEBUG IAL
                 if (getEnvelopeBypassed(env, api)) { 
                     // We have an envelope, but it is bypassed
                     auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
@@ -204,7 +203,6 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                     }
                 }
                 else if(param && env) {
-                //DEBUG IAL
                     // We have an envelope for this ADM parameter
                     auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
                     for(auto &newError : newErrors) {
