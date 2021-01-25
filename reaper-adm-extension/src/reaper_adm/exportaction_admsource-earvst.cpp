@@ -193,8 +193,18 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 auto admParameter = (AdmParameter)admParameterIndex;
                 auto param = pluginSuite->getParameterFor(admParameter);
                 auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
-
-                if(param && env) {
+                
+                //DEBUG IAL
+                if (getEnvelopeBypassed(env, api)) { 
+                    // We have an envelope, but it is bypassed
+                    auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
+                    auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
+                    for (auto& newError : newErrors) {
+                        warningStrings.push_back(newError.what());
+                    }
+                }
+                else if(param && env) {
+                //DEBUG IAL
                     // We have an envelope for this ADM parameter
                     auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
                     for(auto &newError : newErrors) {
@@ -355,6 +365,30 @@ std::optional<double> EarVstExportSources::getValueFor(std::shared_ptr<admplug::
 
     return std::optional<double>();
 }
+
+//TODO IAL
+bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api)
+{
+    bool envBypassed = false;
+    char chunk[1024]; // A new envelope should only be about 100 bytes
+    bool getRes = api.GetEnvelopeStateChunk(env, chunk, 1024, false);
+    if (getRes)
+    {
+        std::istringstream chunkSs(chunk);
+        std::string line;
+        while (std::getline(chunkSs, line))
+        {
+            auto activePos = line.rfind("ACT ", 0);
+            if (activePos != std::string::npos)
+            {
+                auto active = static_cast<int>(line[activePos + 4]) - 48;
+                envBypassed = !active;
+            }
+        }
+    }
+    return envBypassed;
+}
+//TODO IAL
 
 std::vector<std::shared_ptr<PluginInstance>> EarVstExportSources::getEarInputPluginsWithTrackMapping(int trackMapping, ReaperAPI const& api)
 {

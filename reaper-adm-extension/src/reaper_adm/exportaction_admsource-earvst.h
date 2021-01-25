@@ -210,5 +210,7 @@ private:
     std::vector<std::shared_ptr<PluginInstance>> getEarInputPluginsWithTrackMapping(int trackMapping, ReaperAPI const& api);
     TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, AdmParameter admParameter, ReaperAPI const & api);
     std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, AdmParameter admParameter, ReaperAPI const & api);
-
+    //TODO IAL
+    bool getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api);
+    //TODO IAL
 };
