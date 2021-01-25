@@ -10,3 +10,4 @@ docs/venv
 .ccls-cache
 .idea
 3rdparty
+._*
