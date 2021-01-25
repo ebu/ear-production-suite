@@ -109,8 +109,9 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
   <details>
     <summary>Will my exported ADM BW64 files work with other tools, such as the Dolby Atmos Production Suite?</summary>
       <div class="text_section">
-        <p>No, currently the files are not compatible with the Dolby Atmos Production Suite.</p>
-        <p>The cause of this problem is in the different ADM profiles that are used by each set of tools. The EAR Production Suite uses the <a href="https://tech.ebu.ch/docs/tech/tech3392.pdf">EBU ADM Production profile</a>, whereas the Dolby Atmos tools use <a href="https://developer.dolby.com/technology/dolby-atmos/adm-atmos-profile/">Dolby’s ADM profile specification</a>. The EAR Production Suite provides a conversion from the Dolby profile on import, however it only exports to the EBU Production profile and the Dolby tools do not accept this as input. We hope to provide support for ADM profile conversion in future and are keen to work with the industry to ensure proper interoperability.</p>
+        <p>Currently the files are not compatible with the Dolby Atmos Production Suite.</p>
+        <p>The cause of this problem is that each set of tools currently uses a different ADM profile. The EAR Production Suite uses the <a href="https://tech.ebu.ch/docs/tech/tech3392.pdf">EBU ADM Production profile</a>, whereas the Dolby Atmos tools use <a href="https://developer.dolby.com/technology/dolby-atmos/adm-atmos-profile/">Dolby’s ADM profile specification</a>. The EAR Production Suite provides a conversion from the Dolby profile on import, however it only exports to the EBU Production profile and the Dolby tools do not accept this as input. We hope to provide support for ADM profile conversion in future.</p>
+        <p>More generally, ADM support has been implemented by different manufacturers and there are currently some interoperability issues. The EBU ADM Production profile is not yet widely supported, but we are working with the industry to ensure proper interoperability, using common profiles at the various stages from production through to emission.</p>
       </div>
   </details>
 </div>
