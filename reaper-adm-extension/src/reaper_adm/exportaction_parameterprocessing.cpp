@@ -550,6 +550,11 @@ std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> Cumula
                 block->set((adm::Rtime)rtime);
                 block->set((adm::Duration)duration);
 
+                // Use JumpPosition for second block if multiple points at same position
+                if (multipleValuesForSingleParameterAtTime(*timeIt) && processBack) {
+                    block->set(adm::JumpPosition((adm::JumpPositionFlag)true));
+                }
+
                 blocks.push_back(block);
             }
 
