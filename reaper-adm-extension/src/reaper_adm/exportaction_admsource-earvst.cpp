@@ -364,29 +364,25 @@ std::optional<double> EarVstExportSources::getValueFor(std::shared_ptr<admplug::
     return std::optional<double>();
 }
 
-//TODO IAL
 bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api)
 {
     bool envBypassed = false;
     char chunk[1024]; // A new envelope should only be about 100 bytes
     bool getRes = api.GetEnvelopeStateChunk(env, chunk, 1024, false);
-    if (getRes)
-    {
+    if (getRes) {
         std::istringstream chunkSs(chunk);
         std::string line;
-        while (std::getline(chunkSs, line))
-        {
+        while (std::getline(chunkSs, line)) {
             auto activePos = line.rfind("ACT ", 0);
-            if (activePos != std::string::npos)
-            {
+            if (activePos != std::string::npos) {
                 auto active = static_cast<int>(line[activePos + 4]) - 48;
                 envBypassed = !active;
+                break;
             }
         }
     }
     return envBypassed;
 }
-//TODO IAL
 
 std::vector<std::shared_ptr<PluginInstance>> EarVstExportSources::getEarInputPluginsWithTrackMapping(int trackMapping, ReaperAPI const& api)
 {
