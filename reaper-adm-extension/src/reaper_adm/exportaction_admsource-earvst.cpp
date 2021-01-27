@@ -375,7 +375,7 @@ bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI cons
         while (std::getline(chunkSs, line)) {
             auto activePos = line.rfind("ACT ", 0);
             if (activePos != std::string::npos) {
-                auto active = static_cast<int>(line[activePos + 4]) - 48;
+                auto active = static_cast<int>(line.at(activePos + 4)) - 48;
                 envBypassed = !active;
                 break;
             }
