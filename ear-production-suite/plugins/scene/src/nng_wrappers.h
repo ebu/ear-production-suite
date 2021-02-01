@@ -327,7 +327,7 @@ class CommandReceiver : public SocketBaseForListeners, public CommandCommon {
 
       case RECV:
         resAioRes = nng_aio_result(aio);
-        if (resAioRes == NNG_ECANCELED) break;
+        if (resAioRes == NNG_ECANCELED || resAioRes == NNG_ECLOSED) break;
         assert(resAioRes == 0);
 
         nngMsg = nng_aio_get_msg(aio);
