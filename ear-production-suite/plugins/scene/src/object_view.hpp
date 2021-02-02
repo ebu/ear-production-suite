@@ -124,8 +124,6 @@ class ObjectView : public ElementView,
     positionInteractionSettings_->distanceMinSlider->addListener(this);
     positionInteractionSettings_->distanceMaxSlider->addListener(this);
     addAndMakeVisible(positionInteractionPanel_.get());
-            
-    settingsButtonBackgroundColour = settingsButton_->findColour(EarButton::backgroundColourId);
 
     updateDesiredHeight();
   }
@@ -339,7 +337,9 @@ class ObjectView : public ElementView,
   }
 
   void notifyDataChange() {
-    const Colour col = (data_.object.mutable_interactive_gain()->enabled() || data_.object.mutable_interactive_on_off()->enabled() || data_.object.mutable_interactive_position()->enabled()) ? Colours::orange : settingsButtonBackgroundColour;
+    const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
+                        data_.object.mutable_interactive_on_off()->enabled() ||
+                        data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteractivity : EarColours::Area01dp;
                                            
     settingsButton_->setColour(EarButton::backgroundColourId, col);
     
@@ -399,8 +399,6 @@ class ObjectView : public ElementView,
   ObjectType objectType_;
 
   ListenerList<Listener> listeners_;
-                       
-  Colour settingsButtonBackgroundColour{Colours::black};
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObjectView)
 };
