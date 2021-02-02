@@ -47,6 +47,7 @@ static const Colour HeaderText = Colour(0, 0, 0).withAlpha(0.87f);
 static const Colour ComboBoxPopupBackground = Colour(49, 49, 49);
 static const Colour ObjectItemBackground = Colour(30, 30, 30);
 static const Colour Sphere = Colour(90, 90, 90);
+static const Colour SettingsButtonInteractivity = Colours::orange.withMultipliedBrightness(0.6f);
 
 static const Colour Item01 = Colour(255, 131, 111);
 static const Colour Item02 = Colour(255, 255, 128);
