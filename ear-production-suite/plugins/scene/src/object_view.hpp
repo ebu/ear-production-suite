@@ -90,6 +90,7 @@ class ObjectView : public ElementView,
       data_.object.mutable_interactive_on_off()->set_enabled(
           this->onOffInteractionPanel_->isExpanded());
       this->notifyDataChange();
+      updateSettingsButtonColour();
     };
     addAndMakeVisible(onOffInteractionPanel_.get());
 
@@ -100,6 +101,7 @@ class ObjectView : public ElementView,
       data_.object.mutable_interactive_gain()->set_enabled(
           this->gainInteractionPanel_->isExpanded());
       this->notifyDataChange();
+      updateSettingsButtonColour();
     };
     gainInteractionSettings_->gainSliderRange->addListener(this);
     gainInteractionSettings_->gainMinSlider->addListener(this);
@@ -113,6 +115,7 @@ class ObjectView : public ElementView,
       data_.object.mutable_interactive_position()->set_enabled(
           this->positionInteractionPanel_->isExpanded());
       this->notifyDataChange();
+      updateSettingsButtonColour();
     };
     positionInteractionSettings_->azimuthSliderRange->addListener(this);
     positionInteractionSettings_->azimuthMinSlider->addListener(this);
@@ -145,6 +148,8 @@ class ObjectView : public ElementView,
 
     settingsButton_->setToggleState(data_.object.show_settings(),
                                     dontSendNotification);
+    updateSettingsButtonColour();
+    
     onOffInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
     gainInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
     positionInteractionPanel_->setVisible(
@@ -337,18 +342,20 @@ class ObjectView : public ElementView,
   }
 
   void notifyDataChange() {
-    const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
-                        data_.object.mutable_interactive_on_off()->enabled() ||
-                        data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteractivity : EarColours::Area01dp;
-                                           
-    settingsButton_->setColour(EarButton::backgroundColourId, col);
-    
     Component::BailOutChecker checker(this);
     listeners_.callChecked(
         checker, [&](Listener& l) { l.objectDataChanged(this->data_); });
     if (checker.shouldBailOut()) {
       return;
     }
+  }
+  
+  void updateSettingsButtonColour() {
+    const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
+                        data_.object.mutable_interactive_on_off()->enabled() ||
+                        data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteraction : EarColours::Area01dp;
+                                           
+    settingsButton_->setColour(EarButton::backgroundColourId, col);
   }
 
   void updateDesiredHeight() {
