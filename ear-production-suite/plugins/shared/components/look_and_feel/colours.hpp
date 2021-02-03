@@ -65,7 +65,7 @@ static const std::vector<Colour> Items{Item01, Item02, Item03, Item04,
                                        Item05, Item06, Item07, Item08,
                                        Item09, Item10, Item11, Item12};
 
-static const Colour SettingsButtonInteractivity = Item07.withMultipliedBrightness(0.75f);
+static const Colour SettingsButtonInteraction = Item07.withMultipliedBrightness(0.75f);
 
 }  // namespace EarColours
 
