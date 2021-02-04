@@ -466,71 +466,73 @@ void ObjectsJuceFrontendConnector::setRange(float range) {
 
 void ObjectsJuceFrontendConnector::parameterValueChanged(int parameterIndex,
                                                          float newValue) {
-  using ParameterId = ui::ObjectsFrontendBackendConnector::ParameterId;
-  switch (parameterIndex) {
-    case 0:
-      notifyParameterChanged(ParameterId::ROUTING, p_->getRouting()->get());
-      setRouting(p_->getRouting()->get());
-      break;
-    case 1:
-      notifyParameterChanged(ParameterId::GAIN,
-                             Decibels::decibelsToGain(p_->getGain()->get()));
-      setGain(p_->getGain()->get());
-      break;
-    case 2:
-      notifyParameterChanged(ParameterId::AZIMUTH, p_->getAzimuth()->get());
-      setAzimuth(p_->getAzimuth()->get());
-      break;
-    case 3:
-      notifyParameterChanged(ParameterId::ELEVATION, p_->getElevation()->get());
-      setElevation(p_->getElevation()->get());
-      break;
-    case 4:
-      notifyParameterChanged(ParameterId::DISTANCE, p_->getDistance()->get());
-      setDistance(p_->getDistance()->get());
-      break;
-    case 5:
-      setLinkSize(p_->getLinkSize()->get());
-      break;
-    case 6:
-      setSize(p_->getSize()->get());
-      break;
-    case 7:
-      notifyParameterChanged(ParameterId::WIDTH, p_->getWidth()->get() * 360.f);
-      setWidth(p_->getWidth()->get());
-      break;
-    case 8:
-      notifyParameterChanged(ParameterId::HEIGHT,
-                             p_->getHeight()->get() * 360.f);
-      setHeight(p_->getHeight()->get());
-      break;
-    case 9:
-      notifyParameterChanged(ParameterId::DEPTH, p_->getDepth()->get());
-      setDepth(p_->getDepth()->get());
-      break;
-    case 10:
-      notifyParameterChanged(ParameterId::DIFFUSE, p_->getDiffuse()->get());
-      setDiffuse(p_->getDiffuse()->get());
-      break;
-    case 11:
-      setDivergence(p_->getDivergence()->get());
-      if (p_->getDivergence()->get()) {
+  updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+    using ParameterId = ui::ObjectsFrontendBackendConnector::ParameterId;
+    switch (parameterIndex) {
+      case 0:
+        notifyParameterChanged(ParameterId::ROUTING, p_->getRouting()->get());
+        setRouting(p_->getRouting()->get());
+        break;
+      case 1:
+        notifyParameterChanged(ParameterId::GAIN,
+                               Decibels::decibelsToGain(p_->getGain()->get()));
+        setGain(p_->getGain()->get());
+        break;
+      case 2:
+        notifyParameterChanged(ParameterId::AZIMUTH, p_->getAzimuth()->get());
+        setAzimuth(p_->getAzimuth()->get());
+        break;
+      case 3:
+        notifyParameterChanged(ParameterId::ELEVATION, p_->getElevation()->get());
+        setElevation(p_->getElevation()->get());
+        break;
+      case 4:
+        notifyParameterChanged(ParameterId::DISTANCE, p_->getDistance()->get());
+        setDistance(p_->getDistance()->get());
+        break;
+      case 5:
+        setLinkSize(p_->getLinkSize()->get());
+        break;
+      case 6:
+        setSize(p_->getSize()->get());
+        break;
+      case 7:
+        notifyParameterChanged(ParameterId::WIDTH, p_->getWidth()->get() * 360.f);
+        setWidth(p_->getWidth()->get());
+        break;
+      case 8:
+        notifyParameterChanged(ParameterId::HEIGHT,
+                               p_->getHeight()->get() * 360.f);
+        setHeight(p_->getHeight()->get());
+        break;
+      case 9:
+        notifyParameterChanged(ParameterId::DEPTH, p_->getDepth()->get());
+        setDepth(p_->getDepth()->get());
+        break;
+      case 10:
+        notifyParameterChanged(ParameterId::DIFFUSE, p_->getDiffuse()->get());
+        setDiffuse(p_->getDiffuse()->get());
+        break;
+      case 11:
+        setDivergence(p_->getDivergence()->get());
+        if (p_->getDivergence()->get()) {
+          notifyParameterChanged(ParameterId::FACTOR, p_->getFactor()->get());
+          notifyParameterChanged(ParameterId::RANGE, p_->getRange()->get());
+        } else {
+          notifyParameterChanged(ParameterId::FACTOR, 0.f);
+          notifyParameterChanged(ParameterId::RANGE, 0.f);
+        }
+        break;
+      case 12:
         notifyParameterChanged(ParameterId::FACTOR, p_->getFactor()->get());
+        setFactor(p_->getFactor()->get());
+        break;
+      case 13:
         notifyParameterChanged(ParameterId::RANGE, p_->getRange()->get());
-      } else {
-        notifyParameterChanged(ParameterId::FACTOR, 0.f);
-        notifyParameterChanged(ParameterId::RANGE, 0.f);
-      }
-      break;
-    case 12:
-      notifyParameterChanged(ParameterId::FACTOR, p_->getFactor()->get());
-      setFactor(p_->getFactor()->get());
-      break;
-    case 13:
-      notifyParameterChanged(ParameterId::RANGE, p_->getRange()->get());
-      setRange(p_->getRange()->get());
-      break;
-  }
+        setRange(p_->getRange()->get());
+        break;
+    }
+  });
 }
 
 void ObjectsJuceFrontendConnector::trackPropertiesChanged(
