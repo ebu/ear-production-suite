@@ -182,9 +182,15 @@ extern "C" {
         admFileMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
+    auto reaperFileMenu = reaperMainMenu->getMenuByText("File");
+    if (reaperFileMenu) {
+        reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
+    }
+    else {
+        reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
+        reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
+    }
     assert(reaperFileMenu);
-    reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
     reaperFileMenu->init();
 
     // Insert menu
@@ -225,9 +231,15 @@ extern "C" {
         admInsertMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
+    auto reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");
+    if (reaperInsertMenu) {
+        reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
+    }
+    else {
+        reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
+        reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item")));
+    }
     assert(reaperInsertMenu);
-    reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item")));
     reaperInsertMenu->init();
 
     return 1;
