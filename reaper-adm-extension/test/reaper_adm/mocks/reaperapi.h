@@ -185,6 +185,7 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD2(GetTrackMediaItem, MediaItem*(MediaTrack* tr, int itemidx));
   MOCK_CONST_METHOD4(GetSetProjectInfo, double(ReaProject* project, const char* desc, double value, bool is_set));
   MOCK_CONST_METHOD0(GetAppVersion, const char*());
+  MOCK_CONST_METHOD3(LocalizeString, const char*(const char* src_string, const char* section, int flagsOptional));
 
   // Custom funcs
   MOCK_CONST_METHOD0(UpdateArrangeForAutomation,
