@@ -367,16 +367,15 @@ std::optional<double> EarVstExportSources::getValueFor(std::shared_ptr<admplug::
 bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api)
 {
     bool envBypassed = false;
-    char chunk[1024]; // A new envelope should only be about 100 bytes
+    char chunk[1024]; // For a plugin parameter (PARMENV) the ACT flag should always be within the first couple bytes of the state chunk
     bool getRes = api.GetEnvelopeStateChunk(env, chunk, 1024, false);
     if (getRes) {
         std::istringstream chunkSs(chunk);
         std::string line;
         while (std::getline(chunkSs, line)) {
             auto activePos = line.rfind("ACT ", 0);
-            if (activePos != std::string::npos) {
-                auto active = static_cast<int>(line.at(activePos + 4)) - 48;
-                envBypassed = !active;
+            if ((activePos != std::string::npos) && (line.size() > (activePos + 4))) {
+                envBypassed = line.at(activePos + 4) == '0';
                 break;
             }
         }
