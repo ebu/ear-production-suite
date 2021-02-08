@@ -23,16 +23,45 @@ namespace {
         return info;
     }
 
+#ifdef WIN32
+    std::string ConvertWideToUtf8(const std::wstring& wstr)
+    {
+        int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
+        std::string str(count, 0);
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
+        return str;
+    }
+
+    MENUITEMINFOW getStringMenuInfoStruct(wchar_t* text, std::size_t size = 0) {
+        MENUITEMINFOW info{};
+        info.cbSize = sizeof(MENUITEMINFOW);
+        info.fType = MFT_STRING;
+        info.fMask = MIIM_TYPE | MIIM_SUBMENU;
+        info.dwTypeData = text;
+        info.cch = static_cast<int>(size);
+        return info;
+    }
+#endif
+
     int findPositionOfItemWithText(HMENU menu, std::string textOrig) {
         std::string text(textOrig);
         boost::erase_all(text, "&");
+#ifdef WIN32
+        std::vector<wchar_t> buffer(256, '\0');
+#else
         std::vector<char> buffer(256, '\0');
+#endif
         auto itemCount = GetMenuItemCount(menu);
         for (int itemPosition = 0; itemPosition != itemCount; ++itemPosition) {
             buffer[0] = '\0';
             auto info = getStringMenuInfoStruct(&buffer[0], buffer.size());
+#ifdef WIN32
+            if (GetMenuItemInfoW(menu, itemPosition, true, &info)) {
+                std::string menuText = ConvertWideToUtf8(buffer.data());
+#else
             if (GetMenuItemInfo(menu, itemPosition, true, &info)) {
                 std::string menuText = buffer.data();
+#endif
                 boost::erase_all(menuText, "&"); // Win returns amp preceding kbd shortcut char - strip it for comparison
                 if (menuText == text) {
                     return itemPosition;
@@ -45,13 +74,22 @@ namespace {
     HMENU findHmenuOfItemWithText(HMENU menu, std::string textOrig) {
         std::string text(textOrig);
         boost::erase_all(text, "&");
+#ifdef WIN32
+        std::vector<wchar_t> buffer(256, '\0');
+#else
         std::vector<char> buffer(256, '\0');
+#endif
         auto itemCount = GetMenuItemCount(menu);
         for (int itemPosition = 0; itemPosition != itemCount; ++itemPosition) {
             buffer[0] = '\0';
             auto info = getStringMenuInfoStruct(&buffer[0], buffer.size());
+#ifdef WIN32
+            if (GetMenuItemInfoW(menu, itemPosition, true, &info)) {
+                std::string menuText = ConvertWideToUtf8(buffer.data());
+#else
             if (GetMenuItemInfo(menu, itemPosition, true, &info)) {
                 std::string menuText = buffer.data();
+#endif
                 boost::erase_all(menuText, "&"); // Win returns amp preceding kbd shortcut char - strip it for comparison
                 if (menuText == text) {
                     return info.hSubMenu;
@@ -61,6 +99,13 @@ namespace {
         return nullptr;
     }
 
+    HMENU findHmenuOfItemWithPosition(HMENU menu, int itemPosition) {
+        auto itemCount = GetMenuItemCount(menu);
+        if (itemPosition < (itemCount - 1)) {
+            return GetSubMenu(menu, itemPosition);
+        }
+        return nullptr;
+    }
 }
 
 Insertable::Insertable(std::shared_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) :
@@ -192,6 +237,13 @@ std::shared_ptr<RawMenu> RawMenu::getMenuByText(std::string menuText)
     return std::make_shared<RawMenu>(hmenu);
 }
 
+std::shared_ptr<RawMenu> RawMenu::getMenuByPosition(int menuPosition)
+{
+    auto hmenu = findHmenuOfItemWithPosition(hMenu, menuPosition);
+    if (hmenu == nullptr) return nullptr;
+    return std::make_shared<RawMenu>(hmenu);
+}
+
 void RawMenu::update(std::string, HMENU)
 {
     for(auto& item : items) {
@@ -204,6 +256,10 @@ void RawMenu::insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserte
     items.emplace_back(std::move(item), inserter);
 }
 
+bool RawMenu::checkHardcodedPosition(std::string itemText)
+{
+    return findPositionOfItemWithText(hMenu, itemText) == MenuTextToPostion.at(itemText);
+}
 
 SubMenu::SubMenu(std::string menuText) :
     text{menuText.begin(), menuText.end()},
@@ -364,3 +420,5 @@ int BeforeNamedItem::getIndex(HMENU menu) const
     index = std::max<int>(0, index);
     return index;
 }
+
+
