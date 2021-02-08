@@ -50,6 +50,14 @@ struct CrtBreakAllocSetter {
 CrtBreakAllocSetter g_crtBreakAllocSetter;
 */
 
+static const std::map<const std::string, const int> MenuTextToPostion = {
+    {"File", 0},
+    {"Insert", 3},
+    {"Project templates", 8},
+    {"Empty item", 3}
+};
+
+
 extern "C" {
   int REAPER_PLUGIN_DLL_EXPORT REAPER_PLUGIN_ENTRYPOINT(REAPER_PLUGIN_HINSTANCE hInstance, reaper_plugin_info_t *rec)
   {
@@ -174,9 +182,9 @@ extern "C" {
         admFileMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperFileMenu = reaperMainMenu->getMenuByText("File");
+    auto reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
     assert(reaperFileMenu);
-    reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
+    reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
     reaperFileMenu->init();
 
     // Insert menu
@@ -217,9 +225,9 @@ extern "C" {
         admInsertMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");
+    auto reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
     assert(reaperInsertMenu);
-    reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
+    reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item")));
     reaperInsertMenu->init();
 
     return 1;

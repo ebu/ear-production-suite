@@ -61,6 +61,13 @@ namespace {
         return nullptr;
     }
 
+    HMENU findHmenuOfItemWithPosition(HMENU menu, int itemPosition) {
+        auto itemCount = GetMenuItemCount(menu);
+        if (itemPosition < (itemCount - 1)) {
+            return GetSubMenu(menu, itemPosition);
+        }
+        return nullptr;
+    }
 }
 
 Insertable::Insertable(std::shared_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) :
@@ -189,6 +196,13 @@ std::shared_ptr<RawMenu> RawMenu::getMenuByText(std::string menuText)
 {
     auto hmenu = findHmenuOfItemWithText(hMenu, menuText);
     if(hmenu == nullptr) return nullptr;
+    return std::make_shared<RawMenu>(hmenu);
+}
+
+std::shared_ptr<RawMenu> RawMenu::getMenuByPosition(int menuPosition)
+{
+    auto hmenu = findHmenuOfItemWithPosition(hMenu, menuPosition);
+    if (hmenu == nullptr) return nullptr;
     return std::make_shared<RawMenu>(hmenu);
 }
 

@@ -96,6 +96,7 @@ public:
     void update(std::string menuId, HMENU menu) override;
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
     std::shared_ptr<admplug::RawMenu> getMenuByText(std::string menuText);
+    std::shared_ptr<admplug::RawMenu> getMenuByPosition(int menuPosition);
     void init();
 private:
     HMENU hMenu;
