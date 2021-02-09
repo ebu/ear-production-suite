@@ -439,6 +439,16 @@ void JuceSceneFrontendConnector::removeFromProgrammes(
       }
     }
   }
+  else {
+    auto* prog = p_->getProgrammeStore()->mutable_programme(p_->getProgrammeStore()->selected_programme_index());
+    for(int elementPos = 0; elementPos < prog->element().size(); ++elementPos) {
+        if(communication::ConnectionId(prog->element(elementPos).object().connection_id()) == id) {
+            prog->mutable_element()->erase(prog->mutable_element()->begin() + elementPos);
+            break;
+        }
+    }
+    notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
+  }
 }
 
 void JuceSceneFrontendConnector::removeFromObjectViews(
