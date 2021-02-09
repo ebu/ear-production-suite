@@ -30,6 +30,7 @@ SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
 communication::MessageBuffer SceneBackend::getMessage() {
   std::lock_guard<std::mutex> lock(storeMutex_);
   if (rebuildSceneStore_) {
+    rebuildSceneStore_ = false;
     updateSceneStore();
   }
   communication::MessageBuffer buffer =
