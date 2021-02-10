@@ -97,6 +97,7 @@ public:
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
     std::shared_ptr<admplug::RawMenu> getMenuByText(std::string menuText);
     std::shared_ptr<admplug::RawMenu> getMenuByPosition(int menuPosition);
+    bool checkHardcodedPosition(std::string menuText);
     void init();
 private:
     HMENU hMenu;
@@ -165,5 +166,11 @@ private:
     HMENU mainMenu;
 };
 
+static const std::map<const std::string, const int> MenuTextToPostion = {
+    {"File", 0},
+    {"Insert", 3},
+    {"Project templates", 8},
+    {"Empty item", 2}
+};
 
 }

@@ -218,6 +218,10 @@ void RawMenu::insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserte
     items.emplace_back(std::move(item), inserter);
 }
 
+bool RawMenu::checkHardcodedPosition(std::string itemText)
+{
+    return findPositionOfItemWithText(hMenu, itemText) == MenuTextToPostion.at(itemText);
+};
 
 SubMenu::SubMenu(std::string menuText) :
     text{menuText.begin(), menuText.end()},
@@ -378,3 +382,5 @@ int BeforeNamedItem::getIndex(HMENU menu) const
     index = std::max<int>(0, index);
     return index;
 }
+
+
