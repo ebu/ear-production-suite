@@ -180,8 +180,8 @@ extern "C" {
         reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
 
         // Warning if the hard-coded fallback menu positions don't match anymore
-        if (!reaperMainMenu->checkHardcodedPosition("File")) api->ShowMessageBox("Positions of File menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
-        if (!reaperFileMenu->checkHardcodedPosition("Project templates")) api->ShowMessageBox("Positions of Project templates menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
+        if (!reaperMainMenu->checkHardcodedPosition("File")) api->ShowMessageBox("Position of File menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
+        if (!reaperFileMenu->checkHardcodedPosition("Project templates")) api->ShowMessageBox("Position of Project templates menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
     } else {
         reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
         reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
@@ -232,8 +232,8 @@ extern "C" {
         reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
 
         // Warning if the hard-coded fallback menu positions don't match anymore
-        if (!reaperMainMenu->checkHardcodedPosition("Insert")) api->ShowMessageBox("Positions of Insert menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
-        if (!reaperInsertMenu->checkHardcodedPosition("Empty item")) api->ShowMessageBox("Positions of Empty item menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
+        if (!reaperMainMenu->checkHardcodedPosition("Insert")) api->ShowMessageBox("Position of Insert menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
+        if (!reaperInsertMenu->checkHardcodedPosition("Empty item")) api->ShowMessageBox("Position of Empty item menu does not match hard-coded fallback index.", "ADM Extension Error", MB_ICONEXCLAMATION);
     } else {
         reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
         reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item") + 1));

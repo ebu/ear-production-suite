@@ -221,7 +221,7 @@ void RawMenu::insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserte
 bool RawMenu::checkHardcodedPosition(std::string itemText)
 {
     return findPositionOfItemWithText(hMenu, itemText) == MenuTextToPostion.at(itemText);
-};
+}
 
 SubMenu::SubMenu(std::string menuText) :
     text{menuText.begin(), menuText.end()},
