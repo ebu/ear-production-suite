@@ -201,8 +201,7 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                     for (auto& newError : newErrors) {
                         warningStrings.push_back(newError.what());
                     }
-                }
-                else if(param && env) {
+                } else if(param && env) {
                     // We have an envelope for this ADM parameter
                     auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
                     for(auto &newError : newErrors) {
@@ -367,16 +366,18 @@ std::optional<double> EarVstExportSources::getValueFor(std::shared_ptr<admplug::
 bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api)
 {
     bool envBypassed = false;
-    char chunk[1024]; // For a plugin parameter (PARMENV) the ACT flag should always be within the first couple bytes of the state chunk
-    bool getRes = api.GetEnvelopeStateChunk(env, chunk, 1024, false);
-    if (getRes) {
-        std::istringstream chunkSs(chunk);
-        std::string line;
-        while (std::getline(chunkSs, line)) {
-            auto activePos = line.rfind("ACT ", 0);
-            if ((activePos != std::string::npos) && (line.size() > (activePos + 4))) {
-                envBypassed = line.at(activePos + 4) == '0';
-                break;
+    if(env) {
+        char chunk[1024]; // For a plugin parameter (PARMENV) the ACT flag should always be within the first couple bytes of the state chunk
+        bool getRes = api.GetEnvelopeStateChunk(env, chunk, 1024, false);
+        if (getRes) {
+            std::istringstream chunkSs(chunk);
+            std::string line;
+            while (std::getline(chunkSs, line)) {
+                auto activePos = line.rfind("ACT ", 0);
+                if ((activePos != std::string::npos) && (line.size() > (activePos + 4))) {
+                    envBypassed = line.at(activePos + 4) == '0';
+                    break;
+                }
             }
         }
     }
