@@ -8,6 +8,7 @@ subtitle: A collection of production tools for Audio Definition Model (ADM) comp
 The EAR Production Suite (EPS) is a set of VST® plugins for digital audio workstations (DAWs) that enable sound engineers to produce immersive and personalizable content using the [Audio Definition Model](https://www.itu.int/rec/R-REC-BS.2076) (ADM) format and to monitor it for any [ITU-R BS.2051](https://www.itu.int/rec/R-REC-BS.2051/en) loudspeaker configuration using the [ITU ADM Renderer](https://www.itu.int/rec/R-REC-BS.2127/en). ADM is the only format available for codec-agnostic [Next Generation Audio](https://tech.ebu.ch/nga) (NGA) productions. Moreover, the EAR Production Suite enables professionals to import and export ADM files, compliant to the [EBU ADM Production profile](https://tech.ebu.ch/docs/tech/tech3392.pdf). The VST® plugins are currently optimized for the Reaper DAW, which features an extension interface that is used to import and export ADM files within a BW64 container. The EAR Production Suite was designed to demonstrate the intended use of the ADM in audio production workflows, so that the standards can be adopted in other professional tools in a consistent manner.
 
 The EAR Production Suite is a joint [open-source development](https://github.com/ebu/ear-production-suite) of [BBC R&D](https://bbc.co.uk/rd) and [IRT](https://www.irt.de/en/home).
+
 </div>
 
 <div class="features">
@@ -41,7 +42,6 @@ The EAR Production Suite is a joint [open-source development](https://github.com
     <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
 </div>
-
 
 <div markdown="1" class="text_section">
 ## Quickstart
@@ -114,9 +114,24 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
         <p>More generally, ADM support has been implemented by different manufacturers and there are currently some interoperability issues. The EBU ADM Production profile is not yet widely supported, but we are working with the industry to ensure proper interoperability, using common profiles at the various stages from production through to emission.</p>
       </div>
   </details>
+  <details>
+    <summary>Why are the plug-ins do not loading on MacOS Catalina or above?</summary>
+      <div class="text_section">
+        <p>The MacOS security gatekeeper service may block the plug-ins from loading.
+        You can validate the files after install by entering the following command in Terminal:</p>
+        <code>
+          sudo xattr -rd com.apple.quarantine \<br/>
+            &nbsp;&nbsp;~/Library/Application\ Support/REAPER/UserPlugins/reaper_adm.dylib \<br/>
+            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ADM\ Export\ Source.vst3 \<br/>
+            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ear-production-suite/
+        </code>
+        <p>On reloading your digital audio workstation or re-scanning for the plug-ins, you should now be able to load them.
+        If you have not installed the plug-ins to the default locations, then please change the above file paths accordingly.</p>
+      </div>
+  </details>
 </div>
 
 <div markdown="1" class="text_section">
 ## Contact
-You can contact the developers of the EAR Production Suite via [this mail](mailto:ear-production-suite-admins@list.ebu.ch). For feedback, feature request and bug reports, we would appreciate if you submit an [Issue](https://github.com/ebu/ear-production-suite/issues) on our Github page. If you are considering adding ADM support to your own tools, we would be happy to discuss and advise.
+You can contact the developers of the EAR Production Suite via [this mail](mailto:ear-production-suite-admins@list.ebu.ch). For feedback, feature requests and bug reports, we would appreciate if you submit an [Issue](https://github.com/ebu/ear-production-suite/issues) on our Github page. If you are considering adding ADM support to your own tools, we would be happy to discuss and advise.
 </div>
