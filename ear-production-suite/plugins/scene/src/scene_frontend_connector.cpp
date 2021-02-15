@@ -415,39 +415,25 @@ void JuceSceneFrontendConnector::doSetMultipleScenePluginsOverlayVisible(
 
 void JuceSceneFrontendConnector::removeFromProgrammes(
     communication::ConnectionId id) {
-  std::lock_guard<std::mutex> programmeViewsLock(programmeViewsMutex_);
-  if (auto programmesContainer = programmesContainer_.lock()) {
-    for (int programmeIndex = 0;
-         programmeIndex < programmesContainer->programmes.size();
-         ++programmeIndex) {
-      auto elements = programmesContainer->programmes.at(programmeIndex)
-                          ->getElementsContainer()
-                          ->elements;
-      auto element =
-          std::find_if(elements.begin(), elements.end(), [id](auto entry) {
-            if (auto objectView =
-                    std::dynamic_pointer_cast<ObjectView>(entry)) {
-              return communication::ConnectionId(
-                         objectView->getData().object.connection_id()) == id;
-            }
-            return false;
-          });
-      if (element != elements.end()) {
-        auto elementIndex = std::distance(elements.begin(), element);
-        removeElement(programmeIndex, elementIndex);
-        updateElementOverview(programmeIndex);
-      }
+  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
+  auto* progStore = p_->getProgrammeStore();
+  for (int programmeIndex = 0;
+       programmeIndex < progStore->programme_size();
+       ++programmeIndex) {
+    auto elements = progStore->mutable_programme(programmeIndex)->mutable_element();
+    auto element =
+        std::find_if(elements->begin(), elements->end(), [id](auto entry) {
+            return communication::ConnectionId(
+                      entry.object().connection_id()) == id;
+        });
+    if (element != elements->end()) {
+      auto elementIndex = std::distance(elements->begin(), element);
+      elements->erase(elements->begin() + elementIndex);
+      notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
+      
+      std::lock_guard<std::mutex> programmeViewsLock(programmeViewsMutex_);
+      updateElementOverview(programmeIndex);
     }
-  }
-  else {
-    auto* prog = p_->getProgrammeStore()->mutable_programme(p_->getProgrammeStore()->selected_programme_index());
-    for(int elementPos = 0; elementPos < prog->element().size(); ++elementPos) {
-        if(communication::ConnectionId(prog->element(elementPos).object().connection_id()) == id) {
-            prog->mutable_element()->erase(prog->mutable_element()->begin() + elementPos);
-            break;
-        }
-    }
-    notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
   }
 }
 
