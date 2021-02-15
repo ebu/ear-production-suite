@@ -7,6 +7,11 @@ file(GLOB_RECURSE c_files *.c)
 file(GLOB_RECURSE hpp_files *.hpp)
 file(GLOB_RECURSE h_files *.h)
 
+list(FILTER cpp_files EXCLUDE REGEX "\\._+")
+list(FILTER c_files EXCLUDE REGEX "\\._+")
+list(FILTER hpp_files EXCLUDE REGEX "\\._+")
+list(FILTER h_files EXCLUDE REGEX "\\._+")
+
 source_group("Header Files" FILES ${h_files} ${hpp_files})
 
 set(VST_SOURCES

@@ -3,12 +3,19 @@ add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
-file(GLOB_RECURSE cpp_files *.cpp)
-file(GLOB_RECURSE c_files *.c)
-file(GLOB_RECURSE hpp_files *.hpp)
-file(GLOB_RECURSE h_files *.h)
-file(GLOB_RECURSE rc_files *.rc)
-file(GLOB_RECURSE rc_mac_files *.rc_mac_*)
+file(GLOB_RECURSE cpp_files "*.cpp")
+file(GLOB_RECURSE c_files "*.c")
+file(GLOB_RECURSE hpp_files "*.hpp")
+file(GLOB_RECURSE h_files "*.h")
+file(GLOB_RECURSE rc_files "*.rc")
+file(GLOB_RECURSE rc_mac_files "*.rc_mac_*")
+
+list(FILTER cpp_files EXCLUDE REGEX "\\._+") 
+list(FILTER c_files EXCLUDE REGEX "\\._+")
+list(FILTER hpp_files EXCLUDE REGEX "\\._+") 
+list(FILTER h_files EXCLUDE REGEX "\\._+")
+list(FILTER rc_files EXCLUDE REGEX "\\._+") 
+list(FILTER rc_mac_files EXCLUDE REGEX "\\._+")
 
 
 add_library(reaper_adm_object OBJECT "")
@@ -20,10 +27,10 @@ target_sources(reaper_adm_object
 		${cpp_files}
 		${rc_files}
 		${rc_mac_files}
-		coordinate_conversion/coord_conv.cpp
-    )
+)
 	
 source_group("Headers" FILES ${h_files} ${hpp_files})
+
 source_group("Resources" FILES ${rc_files} ${rc_mac_files}) 
 
 target_compile_definitions(reaper_adm_object
