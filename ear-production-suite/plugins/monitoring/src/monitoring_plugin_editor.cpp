@@ -59,7 +59,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   addAndMakeVisible(speakerMeterBoxTop_.get());
   addAndMakeVisible(speakerMeterBoxBottom_.get());
 
-  auto speakers = ear::plugin::speakerSetupByName(SPEAKER_LAYOUT).speakers;
+  auto speakers = ear::plugin::speakerSetupByNameAndSpecification(SPEAKER_LAYOUT, "BS.2051").speakers;
   for (int i = 0; i < speakers.size(); ++i) {
     std::string ituLabel = speakers.at(i).label;
     auto pos = ituLabel.find("-");
