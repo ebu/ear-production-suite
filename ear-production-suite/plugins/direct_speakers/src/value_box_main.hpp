@@ -44,20 +44,9 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(speakerSetupLabel_.get());
     speakerSetupsComboBox_->setDefaultText("select speaker layout");
 
-    speakerSetupsComboBox_->addTextEntry("mono (0+1+0)");
-    speakerSetupsComboBox_->addTextEntry("stereo (0+2+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1 (0+5+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1+2H (2+5+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1+4H (4+5+0)");
-    speakerSetupsComboBox_->addTextEntry(" (4+5+1)");
-    speakerSetupsComboBox_->addTextEntry("7.2+3H (3+7+0)");
-    speakerSetupsComboBox_->addTextEntry("9.1+4H (4+9+0)");
-    speakerSetupsComboBox_->addTextEntry("22.2 (9+10+3)");
-    speakerSetupsComboBox_->addTextEntry("7.1 (0+7+0)");
-    speakerSetupsComboBox_->addTextEntry("7.1+4H (4+7+0)");
-    speakerSetupsComboBox_->addTextEntry("7.1+2H (2+7+0)");
-    speakerSetupsComboBox_->addTextEntry("3.0 (0+3+0)");
-    speakerSetupsComboBox_->addTextEntry("5.0 (0+5+0)");
+    for (auto const& setup : SPEAKER_SETUPS) {
+      speakerSetupsComboBox_->addTextEntry(setup.commonName + " (" + setup.name + ")");
+    }
     addAndMakeVisible(speakerSetupsComboBox_.get());
 
     for (auto colour : EarColours::Items) {
