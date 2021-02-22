@@ -22,38 +22,41 @@ struct Speaker {
 struct SpeakerSetup {
   SpeakerSetup() = default;
   SpeakerSetup(std::string initName, std::string initCommonName,
-    std::string initSpecification, std::vector<Speaker> initSpeakers)
-      : name(initName), commonName(initCommonName), specification(initSpecification), speakers(initSpeakers) {}
+    std::string initSpecification, std::string initDisplayName,
+    std::vector<Speaker> initSpeakers)
+      : name(initName), commonName(initCommonName), specification(initSpecification), 
+    displayName(initDisplayName), speakers(initSpeakers) {}
   std::string name;
   std::string commonName;
   std::vector<Speaker> speakers;
   std::string specification;
+  std::string displayName;
 };
 
 static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
-        SpeakerSetup("0+1+0", "mono", "BS.775",
+        SpeakerSetup("0+1+0", "mono", "BS.775", "mono",
                      std::vector<Speaker>{Speaker{"M", "M+000", 0.f, 0.f,
                                                   Layer::middle, false, false}}),
         SpeakerSetup(
-            "0+2+0", "stereo", "BS.2051",
+            "0+2+0", "stereo", "BS.2051", "stereo",
             std::vector<Speaker>{
                 Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                 Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+3+0", "3.0", "BS.775",
+                "0+3+0", "3.0", "BS.775", "3.0",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
                     Speaker{"C", "M+000", 0.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+4+0", "4.0", "BS.775",
+                "0+4+0", "4.0", "BS.775", "4.0",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
                     Speaker{"C", "M+000", 0.f, 0.f, Layer::middle, false, false},
                     Speaker{"BC", "M+180", 180.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+5+0", "5.1", "BS.2051",
+                "0+5+0", "5.1", "BS.2051", "5.1",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -62,7 +65,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Ls", "M+110", 110.f, 0.f, Layer::middle, false, false},
                     Speaker{"Rs", "M-110", -110.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-               "0+5+0", "5.0", "BS.2051",
+               "0+5+0", "5.0", "BS.2051", "5.0",
                std::vector<Speaker>{
                    Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                    Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -70,7 +73,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                    Speaker{"Ls", "M+110", 110.f, 0.f, Layer::middle, false, false},
                    Speaker{"Rs", "M-110", -110.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+6+0", "6.1", "BS.2051",
+                "0+6+0", "6.1", "BS.2051", "6.1",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -80,7 +83,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Rs", "M-110", -110.f, 0.f, Layer::middle, false, false},
                     Speaker{"BC", "M+180", 180.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+7+0", "7.1front", "BS.2094",
+                "0+7+0", "7.1front", "BS.2094", "7.1 Front",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -91,7 +94,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"FLM", "M+045", 45.f, 0.f, Layer::middle, false, false},
                     Speaker{"FRM", "M-045", -45.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "0+7+0", "7.1back", "BS.2051",
+                "0+7+0", "7.1back", "BS.2051", "7.1 Back",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -102,7 +105,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Lrs", "M+135", 135.f, 0.f, Layer::middle, false, false},
                     Speaker{"Rrs", "M-135", -135.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "2+5+0", "5.1+2H", "BS.2051",
+                "2+5+0", "5.1+2H", "BS.2051", "5.1+2H",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -113,7 +116,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Ltf", "U+030", 30.f, 45.f, Layer::upper, false, false},
                     Speaker{"Rtf", "U-030", -30.f, 45.f, Layer::upper, false, false}}),
       SpeakerSetup(
-                "0+7+0", "7.1side 5.1+sc", "BS.2094",
+                "0+7+0", "7.1side 5.1+sc", "BS.2094", "7.1 Side",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -124,7 +127,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Lsc", "M+SC", 15.f, 0.f, Layer::middle, false, false},
                     Speaker{"Rsc", "M-SC", -15.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "2+5+0", "7.1topside 5.1.2", "BS.2094",
+                "2+5+0", "7.1topside 5.1.2", "BS.2094", "5.1.2",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -135,7 +138,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{ "TpSiL", "U+090", 90.f, 45.f, Layer::upper, false, false },
                     Speaker{"TpSiR", "U-090", -90.f, 45.f, Layer::upper, false, false}}),
       SpeakerSetup(
-                "2+7+0", "9.1screen 5.1.2+sc 5.1.2", "BS.2094",
+                "2+7+0", "9.1screen 5.1.2+sc 5.1.2", "BS.2094", "9.1 Screen",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -148,7 +151,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{ "Lsc", "M+SC", 15.f, 0.f, Layer::middle, false, false },
                     Speaker{ "Rsc", "M-SC", -15.f, 0.f, Layer::middle, false, false }}),
       SpeakerSetup(
-                "2+7+0", "9.1 7.1.2", "BS.2094",
+                "2+7+0", "9.1 7.1.2", "BS.2094", "9.1",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -161,7 +164,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{ "TpSiL", "U+090", 90.f, 45.f, Layer::upper, false, false },
                     Speaker{ "TpSiR", "U-090", -90.f, 45.f, Layer::upper, false, false }}),
       SpeakerSetup(
-                "4+5+0", "9.1 5.1+4H", "BS.2051",
+                "4+5+0", "9.1 5.1+4H", "BS.2051", "5.1+4H",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -174,7 +177,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Ltr", "U+110", 110.f, 45.f, Layer::upper, false, false},
                     Speaker{"Rtr", "U-110", -110.f, 45.f, Layer::upper, false, false}}),
       SpeakerSetup(
-                "4+5+1", "10.1", "BS.2051",
+                "4+5+1", "10.1", "BS.2051", "10.1",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -188,7 +191,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Rtr", "U-110", -110.f, 45.f, Layer::upper, false, false},
                     Speaker{"Cbf", "B+000", 0.f, -30.f, Layer::bottom, false, false}}),
       SpeakerSetup(
-                "3+7+0", "10.2 7.2+3H", "BS.2051",
+                "3+7+0", "10.2 7.2+3H", "BS.2051", "7.2+3H",
                 std::vector<Speaker>{
                     Speaker{"C", "M+000", 0.f, 0.f, Layer::middle, false, false},
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
@@ -203,7 +206,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"LFE1", "LFE1", 45.f, -30.f, Layer::bottom, true, false},
                     Speaker{"LFE2", "LFE2", -45.f, -30.f, Layer::bottom, true, false}}),
       SpeakerSetup(
-                "4+7+0", "11.1 5.1.4+sc", "BS.2094",
+                "4+7+0", "11.1 5.1.4+sc", "BS.2094", "11.1",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -218,7 +221,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{ "Lsc", "M+SC", 15.f, 0.f, Layer::middle, false, false },
                     Speaker{ "Rsc", "M-SC", -15.f, 0.f, Layer::middle, false, false }}),
       SpeakerSetup(
-                "4+7+0", "11.1 7.1+4H", "BS.2051",
+                "4+7+0", "11.1 7.1+4H", "BS.2051", "7.1+4H",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -233,7 +236,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Ltb", "U+135", 135.f, 45.f, Layer::upper, false, false},
                     Speaker{"Rtb", "U-135", -135.f, 45.f, Layer::upper, false,false}}),
       SpeakerSetup(
-                "4+9+0", "13.1 9.1+4H", "BS.2051",
+                "4+9+0", "13.1 9.1+4H", "BS.2051", "9.1+4H",
                 std::vector<Speaker>{
                     Speaker{"L", "M+030", 30.f, 0.f, Layer::middle, false, false},
                     Speaker{"R", "M-030", -30.f, 0.f, Layer::middle, false, false},
@@ -250,7 +253,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"Lsc", "M+SC", 15.f, 0.f, Layer::middle, false, false},
                     Speaker{"Rsc", "M-SC", -15.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
-                "9+10+3", "22.2", "BS.2051",
+                "9+10+3", "22.2", "BS.2051", "22.2",
                 std::vector<Speaker>{
                     Speaker{"FL", "M+060", 60.f, 0.f, Layer::middle, false, false},
                     Speaker{"FR", "M-060", -60.f, 0.f, Layer::middle, false, false},
@@ -277,7 +280,7 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"BtFL", "B+045", 45.f, -30.f, Layer::bottom, false, false},
                     Speaker{"BtFR", "B-045", -45.f, -30.f, Layer::bottom, false,false}}),
       SpeakerSetup(
-                "9+9+0", "Auro-3D", "BS.2094",
+                "9+9+0", "Auro-3D", "BS.2094", "Auro-3D",
                 std::vector<Speaker>{
                     Speaker{ "L", "M+030", 30.f, 0.f, Layer::middle, false, false },
                     Speaker{ "R", "M-030", -30.f, 0.f, Layer::middle, false, false },

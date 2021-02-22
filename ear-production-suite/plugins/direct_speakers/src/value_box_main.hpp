@@ -45,7 +45,7 @@ class ValueBoxMain : public Component {
     speakerSetupsComboBox_->setDefaultText("select speaker layout");
 
     for (auto const& setup : SPEAKER_SETUPS) {
-      speakerSetupsComboBox_->addTextEntry(setup.commonName + " (" + setup.name + ")");
+      speakerSetupsComboBox_->addTextEntry(setup.displayName + " (" + setup.name + ")" + " - " + setup.specification);
     }
     addAndMakeVisible(speakerSetupsComboBox_.get());
 
