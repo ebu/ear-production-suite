@@ -24,7 +24,17 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "speaker_setup_index", "Speaker Setup Index",
       -1, static_cast<int>(SPEAKER_SETUPS.size() - 1), -1));
+      
+  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
+  
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+  
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(speakerSetupIndex_)->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
 
   connector_ = std::make_unique<ui::DirectSpeakersJuceFrontendConnector>(this);
   backend_ = std::make_unique<DirectSpeakersBackend>(connector_.get());
@@ -85,8 +95,10 @@ bool DirectSpeakersAudioProcessor::isBusesLayoutSupported(
 
 void DirectSpeakersAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                 MidiBuffer& midiMessages) {
-  levelMeter_->process(buffer);
-  backend_->triggerMetadataSend();
+  if(! bypass_->get()) {
+    levelMeter_->process(buffer);
+    backend_->triggerMetadataSend();
+  }
 }
 
 bool DirectSpeakersAudioProcessor::hasEditor() const { return true; }

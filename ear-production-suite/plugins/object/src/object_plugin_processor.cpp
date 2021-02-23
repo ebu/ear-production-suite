@@ -30,6 +30,10 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
   /* clang-format on */
 
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
+    gain_->setValueNotifyingHost(gain_->get());
+  };
+
   connector_ = std::make_unique<ui::ObjectsJuceFrontendConnector>(this);
   backend_ = std::make_unique<ObjectBackend>(connector_.get());
 
@@ -104,8 +108,8 @@ bool ObjectsAudioProcessor::isBusesLayoutSupported(
 
 void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                          MidiBuffer& midiMessages) {
-  levelMeter_->process(buffer);
-  backend_->triggerMetadataSend();
+    levelMeter_->process(buffer);
+    backend_->triggerMetadataSend();
 }
 
 bool ObjectsAudioProcessor::hasEditor() const { return true; }
