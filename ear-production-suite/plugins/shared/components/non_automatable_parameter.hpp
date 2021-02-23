@@ -26,6 +26,13 @@ class NonAutomatedParameter : public BaseParameter {
   using BaseParameter::BaseParameter;
 
   bool isAutomatable() const override { return false; }
+  
+  std::function<void()> markPluginStateAsDirty = [](){};
+  
+private:
+  void valueChanged(decltype(std::declval<BaseParameter>().get()) value) override {
+    markPluginStateAsDirty();
+  }
 };
 
 }  // namespace ui

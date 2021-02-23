@@ -51,6 +51,10 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
 
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getSpeakerSetupIndex() { return speakerSetupIndex_; }
+  
+  AudioProcessorParameter* getBypassParameter() {
+    return bypass_;
+  }
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
@@ -65,6 +69,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
 
   AudioParameterInt* routing_;
   AudioParameterInt* speakerSetupIndex_;
+  AudioParameterBool* bypass_;
 
   std::unique_ptr<ear::plugin::ui::DirectSpeakersJuceFrontendConnector>
       connector_;
