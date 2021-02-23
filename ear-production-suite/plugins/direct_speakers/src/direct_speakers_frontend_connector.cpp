@@ -188,12 +188,16 @@ void DirectSpeakersJuceFrontendConnector::parameterValueChanged(
   switch (parameterIndex) {
     case 0:
       notifyParameterChanged(ParameterId::ROUTING, p_->getRouting()->get());
-      setRouting(p_->getRouting()->get());
+      updater_.callOnMessageThread([this]() {
+        setRouting(p_->getRouting()->get());
+      });
       break;
     case 1:
       notifyParameterChanged(ParameterId::SPEAKER_SETUP_INDEX,
                              p_->getSpeakerSetupIndex()->get());
-      setSpeakerSetup(p_->getSpeakerSetupIndex()->get());
+      updater_.callOnMessageThread([this]() {
+        setSpeakerSetup(p_->getSpeakerSetupIndex()->get());
+      });
       break;
   }
 }
