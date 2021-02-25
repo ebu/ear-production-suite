@@ -26,3 +26,9 @@
 [submodule "submodules/vcpkg"]
 	path = submodules/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "submodules/rd-audio-bear"]
+	path = submodules/rd-audio-bear
+	url = https://github.com/bbc/rd-audio-bear.git
+[submodule "submodules/rd-audio-visr"]
+	path = submodules/rd-audio-visr
+	url = https://github.com/bbc/rd-audio-visr.git
