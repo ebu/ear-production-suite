@@ -28,10 +28,11 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   addParameter(divergence_ = new AudioParameterBool("divergence", "Divergence", false));
   addParameter(factor_ = new AudioParameterFloat("factor", "Factor", 0.f, 1.f, 0.f));
   addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
+  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
-    gain_->setValueNotifyingHost(gain_->get());
+    bypass_->setValueNotifyingHost(bypass_->get());
   };
 
   connector_ = std::make_unique<ui::ObjectsJuceFrontendConnector>(this);
@@ -108,8 +109,10 @@ bool ObjectsAudioProcessor::isBusesLayoutSupported(
 
 void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                          MidiBuffer& midiMessages) {
+  if(! bypass_->get()) {
     levelMeter_->process(buffer);
     backend_->triggerMetadataSend();
+  }
 }
 
 bool ObjectsAudioProcessor::hasEditor() const { return true; }

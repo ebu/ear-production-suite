@@ -63,6 +63,10 @@ class ObjectsAudioProcessor : public AudioProcessor {
   AudioParameterFloat* getFactor() { return factor_; }
   AudioParameterFloat* getRange() { return range_; }
 
+  AudioProcessorParameter* getBypassParameter() {
+    return bypass_;
+  }
+
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
   };
@@ -88,6 +92,7 @@ class ObjectsAudioProcessor : public AudioProcessor {
   AudioParameterBool* divergence_;
   AudioParameterFloat* factor_;
   AudioParameterFloat* range_;
+  AudioParameterBool* bypass_;
 
   std::unique_ptr<ear::plugin::ui::ObjectsJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::ObjectBackend> backend_;
