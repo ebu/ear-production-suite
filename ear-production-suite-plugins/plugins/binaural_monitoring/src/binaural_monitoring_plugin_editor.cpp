@@ -5,7 +5,6 @@
 #include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
-#include "speaker_setups.hpp"
 
 #include <string>
 
@@ -48,10 +47,9 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
 
-  auto speakers = ear::plugin::speakerSetupByName(SPEAKER_LAYOUT).speakers;
-  for (int i = 0; i < speakers.size(); ++i) {
+  for (int i = 0; i < 2; ++i) {
     headphoneMeters_.push_back(std::make_unique<HeadphoneChannelMeter>(
-        String(i + 1), speakers.at(i).spLabel));
+        String(i + 1), i == 0? "L" : "R"));
     headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(headphoneMeters_.back().get());
   }
