@@ -7,7 +7,7 @@
 #include "../../shared/components/onboarding.hpp"
 #include "../../shared/components/overlay.hpp"
 #include "../../shared/components/ear_header.hpp"
-#include "monitoring_plugin_processor.hpp"
+#include "binaural_monitoring_plugin_processor.hpp"
 #include "speaker_meter.hpp"
 #include "speaker_meter_box.hpp"
 

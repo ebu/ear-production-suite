@@ -1,5 +1,5 @@
-#include "monitoring_plugin_processor.hpp"
-#include "monitoring_plugin_editor.hpp"
+#include "binaural_monitoring_plugin_processor.hpp"
+#include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
 namespace ear {

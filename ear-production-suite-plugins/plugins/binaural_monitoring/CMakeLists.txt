@@ -1,8 +1,8 @@
 set(SOURCES_BINAURAL_MONITORING
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.cpp
-    src/monitoring_plugin_editor.cpp
-    src/monitoring_plugin_processor.cpp
+    src/binaural_monitoring_plugin_editor.cpp
+    src/binaural_monitoring_plugin_processor.cpp
 )
 
 add_juce_vst3_plugin(
