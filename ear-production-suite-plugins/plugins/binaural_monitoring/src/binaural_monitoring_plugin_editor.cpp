@@ -19,13 +19,10 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
       onBoardingContent_(std::make_unique<Onboarding>()),
-      speakerMeterBoxTop_(
-          std::make_unique<SpeakerMeterBox>(String::fromUTF8("1–12"))),
-      speakerMeterBoxBottom_(
-          std::make_unique<SpeakerMeterBox>(String::fromUTF8("13–24"))),
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
+
   header_->setText(" Binaural Monitoring");
 
   onBoardingButton_->setButtonText("?");
@@ -50,9 +47,6 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   addAndMakeVisible(header_.get());
   addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
-
-  addAndMakeVisible(speakerMeterBoxTop_.get());
-  //addAndMakeVisible(speakerMeterBoxBottom_.get());
 
   auto speakers = ear::plugin::speakerSetupByName(SPEAKER_LAYOUT).speakers;
   for (int i = 0; i < speakers.size(); ++i) {
@@ -87,22 +81,12 @@ void EarMonitoringAudioProcessorEditor::resized() {
   area.removeFromTop(10);
 
   auto topArea = area.removeFromTop(290).reduced(5, 5);
-  speakerMeterBoxTop_->setBounds(topArea);
-  auto bottomArea = area.removeFromTop(290).reduced(5, 5);
-  speakerMeterBoxBottom_->setBounds(bottomArea);
   topArea.removeFromTop(66);
   topArea.removeFromLeft(30);
   topArea.removeFromBottom(15);
   for (int i = 0; i < 12 && i < speakerMeters_.size(); ++i) {
     speakerMeters_.at(i)->setBounds(topArea.removeFromLeft(50));
     topArea.removeFromLeft(5);
-  }
-  bottomArea.removeFromTop(66);
-  bottomArea.removeFromLeft(30);
-  bottomArea.removeFromBottom(15);
-  for (int i = 12; i < 24 && i < speakerMeters_.size(); ++i) {
-    speakerMeters_.at(i)->setBounds(bottomArea.removeFromLeft(50));
-    bottomArea.removeFromLeft(5);
   }
 }
 
