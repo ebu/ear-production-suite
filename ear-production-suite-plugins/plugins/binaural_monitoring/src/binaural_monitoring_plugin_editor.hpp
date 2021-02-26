@@ -10,18 +10,18 @@
 #include "binaural_monitoring_plugin_processor.hpp"
 #include "headphone_channel_meter.hpp"
 
-class EarMonitoringAudioProcessorEditor
+class EarBinauralMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
       private ear::plugin::ui::Onboarding::Listener {
  public:
-  EarMonitoringAudioProcessorEditor(EarMonitoringAudioProcessor*);
-  ~EarMonitoringAudioProcessorEditor();
+  EarBinauralMonitoringAudioProcessorEditor(EarBinauralMonitoringAudioProcessor*);
+  ~EarBinauralMonitoringAudioProcessorEditor();
 
   void paint(Graphics&) override;
   void resized() override;
 
  private:
-  EarMonitoringAudioProcessor* p_;
+  EarBinauralMonitoringAudioProcessor* p_;
 
   std::unique_ptr<ear::plugin::ui::EarHeader> header_;
   std::unique_ptr<ear::plugin::ui::EarButton> onBoardingButton_;
@@ -38,5 +38,5 @@ class EarMonitoringAudioProcessorEditor
   void moreButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
-      EarMonitoringAudioProcessorEditor)
+      EarBinauralMonitoringAudioProcessorEditor)
 };

@@ -37,10 +37,10 @@ inline bool operator!=(ProcessorConfig const& lhs, ProcessorConfig const rhs) {
   return !(lhs == rhs);
 }
 
-class EarMonitoringAudioProcessor : public AudioProcessor {
+class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
  public:
-  EarMonitoringAudioProcessor();
-  ~EarMonitoringAudioProcessor();
+  EarBinauralMonitoringAudioProcessor();
+  ~EarBinauralMonitoringAudioProcessor();
 
   void prepareToPlay(double sampleRate, int samplesPerBlock) override;
   void releaseResources() override;
@@ -70,8 +70,6 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 
-  void speakerSetupChanged(std::string layout);
-
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
   };
@@ -87,5 +85,6 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
   int channels_;
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarMonitoringAudioProcessor)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
+      EarBinauralMonitoringAudioProcessor)
 };

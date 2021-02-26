@@ -11,8 +11,8 @@
 
 using namespace ear::plugin::ui;
 
-EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
-    EarMonitoringAudioProcessor* p)
+EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEditor(
+    EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
       header_(std::make_unique<EarHeader>()),
@@ -58,13 +58,13 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   setSize(600, 400);
 }
 
-EarMonitoringAudioProcessorEditor::~EarMonitoringAudioProcessorEditor() {}
+EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
 
-void EarMonitoringAudioProcessorEditor::paint(Graphics& g) {
+void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
 }
 
-void EarMonitoringAudioProcessorEditor::resized() {
+void EarBinauralMonitoringAudioProcessorEditor::resized() {
   auto area = getLocalBounds();
   onBoardingOverlay_->setBounds(area);
   area.reduce(5, 5);
@@ -78,18 +78,18 @@ void EarMonitoringAudioProcessorEditor::resized() {
   // All content to go below and to be fitted within `area`
 
   auto meterArea = area.withHeight(200).reduced(5, 5);
-  for (int i = 0; i < 12 && i < headphoneMeters_.size(); ++i) {
+  for (int i = 0; i < headphoneMeters_.size(); ++i) {
     headphoneMeters_.at(i)->setBounds(meterArea.removeFromLeft(50));
     meterArea.removeFromLeft(5);
   }
 }
 
-void EarMonitoringAudioProcessorEditor::endButtonClicked(
+void EarBinauralMonitoringAudioProcessorEditor::endButtonClicked(
     Onboarding* onboarding) {
   onBoardingOverlay_->setVisible(false);
   propertiesFile_->setValue("showOnboarding", false);
 }
-void EarMonitoringAudioProcessorEditor::moreButtonClicked(
+void EarBinauralMonitoringAudioProcessorEditor::moreButtonClicked(
     Onboarding* onboarding) {
   onBoardingOverlay_->setVisible(false);
   URL(ear::plugin::detail::MORE_INFO_URL).launchInDefaultBrowser();

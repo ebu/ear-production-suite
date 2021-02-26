@@ -28,7 +28,7 @@ struct BufferTraits<juce::AudioBuffer<float>> {
 #include "monitoring_backend.hpp"
 
 juce::AudioProcessor::BusesProperties
-EarMonitoringAudioProcessor::_getBusProperties() {
+EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   auto layout = ear::getLayout(SPEAKER_LAYOUT);
   channels_ = layout.channelNames().size();
   auto ret = BusesProperties().withInput(
@@ -40,7 +40,7 @@ EarMonitoringAudioProcessor::_getBusProperties() {
 }
 
 //==============================================================================
-EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
+EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
   backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
       nullptr, ear::getLayout(SPEAKER_LAYOUT), 64);
@@ -51,40 +51,40 @@ EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
   configureProcessor(newConfig);
 }
 
-EarMonitoringAudioProcessor::~EarMonitoringAudioProcessor() {}
+EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
 
 //==============================================================================
-const String EarMonitoringAudioProcessor::getName() const {
+const String EarBinauralMonitoringAudioProcessor::getName() const {
   return JucePlugin_Name;
 }
 
-bool EarMonitoringAudioProcessor::acceptsMidi() const { return false; }
+bool EarBinauralMonitoringAudioProcessor::acceptsMidi() const { return false; }
 
-bool EarMonitoringAudioProcessor::producesMidi() const { return false; }
+bool EarBinauralMonitoringAudioProcessor::producesMidi() const { return false; }
 
-bool EarMonitoringAudioProcessor::isMidiEffect() const { return false; }
+bool EarBinauralMonitoringAudioProcessor::isMidiEffect() const { return false; }
 
-double EarMonitoringAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+double EarBinauralMonitoringAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int EarMonitoringAudioProcessor::getNumPrograms() {
+int EarBinauralMonitoringAudioProcessor::getNumPrograms() {
   return 1;  // NB: some hosts don't cope very well if you tell them there are 0
              // programs, so this should be at least 1, even if you're not
              // really implementing programs.
 }
 
-int EarMonitoringAudioProcessor::getCurrentProgram() { return 0; }
+int EarBinauralMonitoringAudioProcessor::getCurrentProgram() { return 0; }
 
-void EarMonitoringAudioProcessor::setCurrentProgram(int index) {}
+void EarBinauralMonitoringAudioProcessor::setCurrentProgram(int index) {}
 
-const String EarMonitoringAudioProcessor::getProgramName(int index) {
+const String EarBinauralMonitoringAudioProcessor::getProgramName(int index) {
   return {};
 }
 
-void EarMonitoringAudioProcessor::changeProgramName(int index,
+void EarBinauralMonitoringAudioProcessor::changeProgramName(int index,
                                                     const String& newName) {}
 
 //==============================================================================
-void EarMonitoringAudioProcessor::prepareToPlay(double sampleRate,
+void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
                                                 int samplesPerBlock) {
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), samplesPerBlock,
@@ -94,16 +94,15 @@ void EarMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   levelMeter_->setup(newConfig.layout.channels().size(), sampleRate);
 }
 
-void EarMonitoringAudioProcessor::releaseResources() {
+void EarBinauralMonitoringAudioProcessor::releaseResources() {
   // When playback stops, you can use this as an opportunity to free up any
   // spare memory, etc.
 }
 
-bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
+bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  auto layout = ear::getLayout(SPEAKER_LAYOUT);
   if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(layout.channelNames().size()) &&
+          AudioChannelSet::discreteChannels(2) &&
       layouts.getMainInputChannelSet() ==
           AudioChannelSet::discreteChannels(64)) {
     return true;
@@ -112,7 +111,7 @@ bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
   return false;
 }
 
-void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
+void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                MidiBuffer&) {
   ScopedNoDenormals noDenormals;
   auto gains = backend_->currentGains();
@@ -131,31 +130,29 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool EarMonitoringAudioProcessor::hasEditor() const {
+bool EarBinauralMonitoringAudioProcessor::hasEditor() const {
   return true;  // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* EarMonitoringAudioProcessor::createEditor() {
-  return new EarMonitoringAudioProcessorEditor(this);
+AudioProcessorEditor* EarBinauralMonitoringAudioProcessor::createEditor() {
+  return new EarBinauralMonitoringAudioProcessorEditor(this);
 }
 
 //==============================================================================
-void EarMonitoringAudioProcessor::getStateInformation(MemoryBlock& destData) {
+void EarBinauralMonitoringAudioProcessor::getStateInformation(MemoryBlock& destData) {
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
 }
 
-void EarMonitoringAudioProcessor::setStateInformation(const void* data,
+void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
                                                       int sizeInBytes) {
   // You should use this method to restore your parameters from this memory
   // block, whose contents will have been created by the getStateInformation()
   // call.
 }
 
-void EarMonitoringAudioProcessor::speakerSetupChanged(std::string layout) {}
-
-void EarMonitoringAudioProcessor::configureProcessor(
+void EarBinauralMonitoringAudioProcessor::configureProcessor(
     const ProcessorConfig& config) {
   if (!processor_ || config != processorConfig_) {
     processor_ = std::make_unique<ear::plugin::MonitoringAudioProcessor>(
@@ -167,5 +164,5 @@ void EarMonitoringAudioProcessor::configureProcessor(
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
-  return new EarMonitoringAudioProcessor();
+  return new EarBinauralMonitoringAudioProcessor();
 }
