@@ -5,7 +5,7 @@
 #include <ear/ear.hpp>
 #include <memory>
 
-#include "../../shared/components/level_meter_calculator.hpp"
+#include "components/level_meter_calculator.hpp"
 
 // TODO: Temp
 #define SPEAKER_LAYOUT_NAME "Binaural"

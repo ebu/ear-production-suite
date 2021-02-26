@@ -2,13 +2,13 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_button.hpp"
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/onboarding.hpp"
-#include "../../shared/components/overlay.hpp"
-#include "../../shared/components/ear_header.hpp"
+#include "components/ear_button.hpp"
+#include "components/level_meter.hpp"
+#include "components/onboarding.hpp"
+#include "components/overlay.hpp"
+#include "components/ear_header.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
-#include "speaker_meter.hpp"
+#include "headphone_channel_meter.hpp"
 
 class EarMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
@@ -28,7 +28,7 @@ class EarMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::Overlay> onBoardingOverlay_;
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
 
-  std::vector<std::unique_ptr<ear::plugin::ui::SpeakerMeter>> speakerMeters_;
+  std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>> headphoneMeters_;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock_;
   std::unique_ptr<PropertiesFile> propertiesFile_;

@@ -2,29 +2,27 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
+#include "components/level_meter.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
 
-class SpeakerMeter : public Component {
+class HeadphoneChannelMeter : public Component {
  public:
-  SpeakerMeter(const String& index, const String& speakerName,
-               const String& speakerLabel)
+  HeadphoneChannelMeter(const String& index, const String& channelName)
       : index_(index),
         levelMeter_(std::make_unique<LevelMeter>()),
-        speakerName_(speakerName),
-        speakerLabel_(speakerLabel) {
+        channelName_(channelName) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
     levelMeter_->setOrientation(LevelMeter::Orientation::vertical);
     addAndMakeVisible(levelMeter_.get());
   }
 
-  ~SpeakerMeter() {}
+  ~HeadphoneChannelMeter() {}
 
   void paint(Graphics& g) override {
     g.fillAll(findColour(backgroundColourId));
@@ -35,20 +33,15 @@ class SpeakerMeter : public Component {
     g.drawText(index_, area.removeFromTop(30).reduced(5, 5),
                Justification::centredBottom, false);
 
-    g.setFont(EarFonts::Measures);
-    g.setColour(EarColours::Text.withAlpha(Emphasis::high));
-    g.drawText(speakerLabel_, area.removeFromBottom(15), Justification::centred,
-               false);
-
     g.setFont(EarFonts::Label);
     g.setColour(EarColours::Text);
-    g.drawText(speakerName_, area.removeFromBottom(30), Justification::centred,
+    g.drawText(channelName_, area.removeFromBottom(30), Justification::centred,
                false);
   }
 
   void resized() override {
     auto area = getLocalBounds();
-    area = area.reduced(5, 5).withTrimmedTop(30).withTrimmedBottom(15 + 30);
+    area = area.reduced(5, 5).withTrimmedTop(30).withTrimmedBottom(15 + 15);
     levelMeter_->setBounds(area.withSizeKeepingCentre(12, area.getHeight()));
   }
 
@@ -61,10 +54,9 @@ class SpeakerMeter : public Component {
  private:
   String index_;
   std::unique_ptr<LevelMeter> levelMeter_;
-  String speakerName_;
-  String speakerLabel_;
+  String channelName_;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpeakerMeter)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeadphoneChannelMeter)
 };
 
 }  // namespace ui

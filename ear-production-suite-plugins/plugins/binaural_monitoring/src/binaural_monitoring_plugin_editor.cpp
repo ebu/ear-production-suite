@@ -1,8 +1,8 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/helper/properties_file.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
 #include "speaker_setups.hpp"
@@ -50,17 +50,12 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
 
   auto speakers = ear::plugin::speakerSetupByName(SPEAKER_LAYOUT).speakers;
   for (int i = 0; i < speakers.size(); ++i) {
-    std::string ituLabel = speakers.at(i).label;
-    auto pos = ituLabel.find("-");
-    if (pos < ituLabel.size()) {
-      ituLabel.replace(pos, 1, "–");
-    }
-    speakerMeters_.push_back(std::make_unique<SpeakerMeter>(
-        String(i + 1), speakers.at(i).spLabel, ituLabel));
-    speakerMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
-    addAndMakeVisible(speakerMeters_.back().get());
+    headphoneMeters_.push_back(std::make_unique<HeadphoneChannelMeter>(
+        String(i + 1), speakers.at(i).spLabel));
+    headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
+    addAndMakeVisible(headphoneMeters_.back().get());
   }
-  setSize(735, 650);
+  setSize(600, 400);
 }
 
 EarMonitoringAudioProcessorEditor::~EarMonitoringAudioProcessorEditor() {}
@@ -78,15 +73,14 @@ void EarMonitoringAudioProcessorEditor::resized() {
       headingArea.removeFromRight(39).removeFromBottom(39));
   header_->setBounds(headingArea);
 
-  area.removeFromTop(10);
+  area.removeFromTop(10); // Padding between header and content
 
-  auto topArea = area.removeFromTop(290).reduced(5, 5);
-  topArea.removeFromTop(66);
-  topArea.removeFromLeft(30);
-  topArea.removeFromBottom(15);
-  for (int i = 0; i < 12 && i < speakerMeters_.size(); ++i) {
-    speakerMeters_.at(i)->setBounds(topArea.removeFromLeft(50));
-    topArea.removeFromLeft(5);
+  // All content to go below and to be fitted within `area`
+
+  auto meterArea = area.withHeight(200).reduced(5, 5);
+  for (int i = 0; i < 12 && i < headphoneMeters_.size(); ++i) {
+    headphoneMeters_.at(i)->setBounds(meterArea.removeFromLeft(50));
+    meterArea.removeFromLeft(5);
   }
 }
 
