@@ -1,6 +1,6 @@
 [submodule "submodules/libadm"]
 	path = submodules/libadm
-	url = https://github.com/rsjtaylor/libadm.git
+	url = https://github.com/merktj/libadm.git
 [submodule "submodules/libbw64"]
 	path = submodules/libbw64
 	url = https://github.com/ebu/libbw64.git
