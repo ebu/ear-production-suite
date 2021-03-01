@@ -304,30 +304,33 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       serializedObjects[connectionId] = objectHolder.audioObject;
     } else if (metadata.has_ds_metadata()) {
       auto layoutIndex = metadata.ds_metadata().layout();
-      std::string speakerSetupName;
       if (layoutIndex >= 0) {
-        speakerSetupName = SPEAKER_SETUPS.at(layoutIndex).name;
+        std::vector<std::string> speakerLabels;
+        std::vector<std::string> trackFormatIds;
+        auto& speakerSetup = SPEAKER_SETUPS.at(layoutIndex);
+        for (auto& speaker : speakerSetup.speakers) {
+          speakerLabels.push_back(speaker.label);
+          auto channelFormatId = speaker.channelFormatId;
+          auto trackFormatId = channelFormatId.replace(0, 2, "AT") + "_01";
+          trackFormatIds.push_back(trackFormatId);
+        }
+        auto objectHolder = addSimpleCommonDefinitionsObjectTo(
+            doc, metadata.name(), speakerSetup.packFormatId, trackFormatIds,
+            speakerLabels);
+        setInteractivity(*objectHolder.audioObject, object);
+        content.addReference(objectHolder.audioObject);
+        for (auto i{0u}; i < objectHolder.audioTrackUids.size(); ++i) {
+          auto speakerLabel = speakerLabels.at(i);
+          auto audioTrackUidId =
+              formatId(objectHolder.audioTrackUids.at(speakerLabel)
+                           ->get<adm::AudioTrackUidId>());
+          chna.addAudioId(
+              bw64::AudioId{static_cast<uint16_t>(metadata.routing() + i + 1),
+                            audioTrackUidId, trackFormatIds.at(i),
+                            speakerSetup.packFormatId});
+        }
+        serializedObjects[connectionId] = objectHolder.audioObject;
       }
-      auto objectHolder = addSimpleCommonDefinitionsObjectTo(
-          doc, metadata.name(), speakerSetupName);
-      setInteractivity(*objectHolder.audioObject, object);
-      content.addReference(objectHolder.audioObject);
-      auto audioPackFormatId =
-          adm::formatId(adm::audioPackFormatLookupTable().at(speakerSetupName));
-      std::vector<std::string> speakerLabels =
-          adm::speakerLabelsLookupTable().at(speakerSetupName);
-      for (auto i{0u}; i < objectHolder.audioTrackUids.size(); ++i) {
-        auto speakerLabel = speakerLabels.at(i);
-        auto audioTrackUidId =
-            formatId(objectHolder.audioTrackUids.at(speakerLabel)
-                         ->get<adm::AudioTrackUidId>());
-        auto audioTrackFormatId =
-            formatId(adm::audioTrackFormatLookupTable().at(speakerLabel));
-        chna.addAudioId(bw64::AudioId{
-            static_cast<uint16_t>(metadata.routing() + i + 1), audioTrackUidId,
-            audioTrackFormatId, audioPackFormatId});
-      }
-      serializedObjects[connectionId] = objectHolder.audioObject;
     }
   }
 }
