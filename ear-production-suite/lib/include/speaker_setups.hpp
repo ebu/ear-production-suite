@@ -10,7 +10,7 @@ namespace plugin {
 enum Layer { upper, middle, bottom };
 
 struct Speaker {
-  std::string trackFormatId;
+  std::string channelFormatId;
   std::string spLabel;
   std::string label;
   float azimuth;
