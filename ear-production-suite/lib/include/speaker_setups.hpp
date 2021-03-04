@@ -338,10 +338,10 @@ inline SpeakerSetup speakerSetupByIndex(int index) {
   }
 }
 
-inline SpeakerSetup speakerSetupByNameAndSpecification(const std::string& name, const std::string& specification) {
+inline SpeakerSetup speakerSetupByPackFormatId(const std::string& packFormatId) {
   auto it = std::find_if(
     SPEAKER_SETUPS.begin(), SPEAKER_SETUPS.end(),
-    [name, specification](auto speakerSetup) { return (speakerSetup.name == name) && (speakerSetup.specification == specification); });
+    [packFormatId](auto speakerSetup) { return speakerSetup.packFormatId == packFormatId; });
   if (it != SPEAKER_SETUPS.end()) {
     return *it;
   }
