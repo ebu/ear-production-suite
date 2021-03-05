@@ -151,6 +151,7 @@ class ReaperAPI {
     virtual double GetProjectLength(ReaProject* proj) const = 0;
     virtual int GetTrackNumMediaItems(MediaTrack* tr) const = 0;
     virtual MediaItem* GetTrackMediaItem(MediaTrack* tr, int itemidx) const = 0;
+    virtual double GetSetProjectInfo(ReaProject * project, const char* desc, double value, bool is_set) const = 0;
 
     static constexpr int RENDER_ITEMS_AS_NEW_TAKE_ID = 41999;
     static constexpr int CROP_TO_ACTIVE_TAKE_IN_ITEMS = 40131;
