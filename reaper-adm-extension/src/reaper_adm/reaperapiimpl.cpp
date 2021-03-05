@@ -483,6 +483,11 @@ MediaItem * admplug::ReaperAPIImpl::GetTrackMediaItem(MediaTrack * tr, int itemi
     return ::GetTrackMediaItem(tr, itemidx);
 }
 
+double admplug::ReaperAPIImpl::GetSetProjectInfo(ReaProject* project, const char* desc, double value, bool is_set) const
+{
+    return ::GetSetProjectInfo(project, desc, value, is_set);
+}
+
 void ReaperAPIImpl::UpdateArrangeForAutomation() const {
   // UpdateArrange() does not force draw of automation. Flipping master track visibility does.
   std::bitset<4> mstTrkSetting(GetMasterTrackVisibility());
