@@ -59,6 +59,14 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"AC_00010003", "C", "M+000", 0.f, 0.f, Layer::middle, false, false},
                     Speaker{"AC_00010009", "BC", "M+180", 180.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
+               "0+5+0", "5.0", "BS.2051", "5.0", "AP_0001000c",
+               std::vector<Speaker>{
+                   Speaker{"AC_00010001", "L", "M+030", 30.f, 0.f, Layer::middle, false, false},
+                   Speaker{"AC_00010002", "R", "M-030", -30.f, 0.f, Layer::middle, false, false},
+                   Speaker{"AC_00010003", "C", "M+000", 0.f, 0.f, Layer::middle, false, false},
+                   Speaker{"AC_00010005", "Ls", "M+110", 110.f, 0.f, Layer::middle, false, false},
+                   Speaker{"AC_00010006", "Rs", "M-110", -110.f, 0.f, Layer::middle, false, false}}),
+      SpeakerSetup(
                 "0+5+0", "5.1", "BS.2051", "5.1", "AP_00010003",
                 std::vector<Speaker>{
                     Speaker{"AC_00010001", "L", "M+030", 30.f, 0.f, Layer::middle, false, false},
@@ -67,14 +75,6 @@ static const std::vector<SpeakerSetup> SPEAKER_SETUPS = {
                     Speaker{"AC_00010004", "LFE", "LFE1", 45.f, -30.f, Layer::bottom, true, false},
                     Speaker{"AC_00010005", "Ls", "M+110", 110.f, 0.f, Layer::middle, false, false},
                     Speaker{"AC_00010006", "Rs", "M-110", -110.f, 0.f, Layer::middle, false, false}}),
-      SpeakerSetup(
-               "0+5+0", "5.0", "BS.2051", "5.0", "AP_0001000c",
-               std::vector<Speaker>{
-                   Speaker{"AC_00010001", "L", "M+030", 30.f, 0.f, Layer::middle, false, false},
-                   Speaker{"AC_00010002", "R", "M-030", -30.f, 0.f, Layer::middle, false, false},
-                   Speaker{"AC_00010003", "C", "M+000", 0.f, 0.f, Layer::middle, false, false},
-                   Speaker{"AC_00010005", "Ls", "M+110", 110.f, 0.f, Layer::middle, false, false},
-                   Speaker{"AC_00010006", "Rs", "M-110", -110.f, 0.f, Layer::middle, false, false}}),
       SpeakerSetup(
                 "0+6+0", "6.1", "BS.2051", "6.1", "AP_0001000d",
                 std::vector<Speaker>{

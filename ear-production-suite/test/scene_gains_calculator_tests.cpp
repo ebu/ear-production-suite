@@ -207,7 +207,7 @@ void updateExpectedGainMatrix(
 
 TEST_CASE("scene gain calculation (DirectSpeakers)") {
   proto::SceneStore store;
-  auto obj1 = proto::convertSpeakerSetupToEpsMetadata(4);
+  auto obj1 = proto::convertSpeakerSetupToEpsMetadata(14);
   REQUIRE(obj1->speakers_size() == 10);
 
   auto layout = ear::getLayout("0+5+0");
