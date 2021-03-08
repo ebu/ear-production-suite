@@ -7,18 +7,15 @@
 
 #include "components/level_meter_calculator.hpp"
 
-// TODO: Temp
-#define SPEAKER_LAYOUT_NAME "Binaural"
-#define SPEAKER_LAYOUT "0+2+0"
-
 namespace ear {
 namespace plugin {
-class MonitoringBackend;
-class MonitoringAudioProcessor;
+class BinauralMonitoringBackend;
+class BinauralMonitoringAudioProcessor;
 
 }  // namespace plugin
 }  // namespace ear
 
+/*
 struct ProcessorConfig {
   int inputChannels;
   int outputChannels;
@@ -36,6 +33,7 @@ inline bool operator==(ProcessorConfig const& lhs, ProcessorConfig const rhs) {
 inline bool operator!=(ProcessorConfig const& lhs, ProcessorConfig const rhs) {
   return !(lhs == rhs);
 }
+*/
 
 class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
  public:
@@ -76,13 +74,15 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
 
  private:
   BusesProperties _getBusProperties();
-  void configureProcessor(const ProcessorConfig& config);
-  ProcessorConfig processorConfig_{};
-  std::unique_ptr<ear::plugin::MonitoringBackend> backend_;
-  std::unique_ptr<ear::plugin::MonitoringAudioProcessor> processor_;
+  //void configureProcessor(const ProcessorConfig& config);
+ // ProcessorConfig processorConfig_{};
+  std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
+  std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
+  std::string bearDataFilePath;
 
   int samplerate_;
-  int channels_;
+  int blocksize_;
+  //int channels_;
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(

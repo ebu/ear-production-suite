@@ -18,37 +18,46 @@ struct BufferTraits<juce::AudioBuffer<float>> {
   static const SampleType* getChannel(Buffer const& b, std::size_t n) {
     return b.getReadPointer(static_cast<int>(n));
   }
+  static SampleType** getChannels(Buffer& b) {
+    return b.getArrayOfWritePointers();
+  }
+  static const SampleType** getChannels(Buffer const& b) {
+    return b.getArrayOfReadPointers();
+  }
 };
 
 }  // namespace plugin
 }  // namespace ear
 
-#include <ear/bs2051.hpp>
-#include "monitoring_audio_processor.hpp"
-#include "monitoring_backend.hpp"
+//include <ear/bs2051.hpp>
+#include "binaural_monitoring_audio_processor.hpp"
+#include "binaural_monitoring_backend.hpp"
 
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  auto layout = ear::getLayout(SPEAKER_LAYOUT);
-  channels_ = layout.channelNames().size();
-  auto ret = BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(64), true);
-  for (const std::string& name : layout.channelNames()) {
-    ret = ret.withOutput(name, AudioChannelSet::mono(), true);
-  }
-  return ret;
+  return BusesProperties().withInput(
+      "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
 }
 
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
-  backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
-      nullptr, ear::getLayout(SPEAKER_LAYOUT), 64);
+  backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
+    nullptr, 64);// , ear::getLayout(SPEAKER_LAYOUT), 64);
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
+  /*
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), 512,
                             ear::getLayout(SPEAKER_LAYOUT)};
   configureProcessor(newConfig);
+  */
+
+  auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
+  vstPath = vstPath.getParentDirectory();
+  vstPath = vstPath.getChildFile("default.tf");
+  bearDataFilePath = vstPath.getFullPathName().toStdString();
+
+
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
@@ -86,12 +95,26 @@ void EarBinauralMonitoringAudioProcessor::changeProgramName(int index,
 //==============================================================================
 void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
                                                 int samplesPerBlock) {
+  /*
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), samplesPerBlock,
                             ear::getLayout(SPEAKER_LAYOUT)};
   configureProcessor(newConfig);
+  */
   samplerate_ = sampleRate;
-  levelMeter_->setup(newConfig.layout.channels().size(), sampleRate);
+  blocksize_ = samplesPerBlock;
+
+
+
+  levelMeter_->setup(2, sampleRate);
+
+
+  auto numDs = backend_->getActiveDirectSpeakersIds()->size();
+  auto numObj = backend_->getActiveObjectIds()->size();
+
+  return;
+
+
 }
 
 void EarBinauralMonitoringAudioProcessor::releaseResources() {
@@ -114,19 +137,48 @@ bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
 void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                MidiBuffer&) {
   ScopedNoDenormals noDenormals;
-  auto gains = backend_->currentGains();
+  //auto gains = backend_->currentGains();
 
   // Make sure to reset the state if your inner loop is processing
   // the samples and the outer loop is handling the channels.
   // Alternatively, you can process the samples with the channels
   // interleaved by keeping the same state.
-  if (processor_) {
-    processor_->process(buffer, buffer, gains.direct, gains.diffuse);
+ // if (processor_) {
+ //   processor_->process(buffer, buffer, gains.direct, gains.diffuse);
     // Check enough channels - prevents crash if track/buffer too narrow
+    //if (buffer.getNumChannels() >= levelMeter_->channels()) {
+    //  levelMeter_->process(buffer);
+    //}
+ // }
+
+
+    size_t numObj = backend_->getActiveObjectIds()->size();
+    size_t numDs = backend_->getActiveDirectSpeakersIds()->size();
+    size_t numHoa = 0;
+
+    if(!processor_ || !processor_->configMatches(numObj, numDs, numHoa, samplerate_, blocksize_)) {
+      processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+        numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
+    }
+
+    for(auto& connId : *(backend_->getActiveObjectIds())) {
+      auto md = backend_->getLatestObjectsTypeMetadata(connId);
+      processor_->pushBearMetadata(md->channel, &(md->earMetadata));
+    }
+
+    for(auto& connId : *(backend_->getActiveDirectSpeakersIds())) {
+      auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
+      for(int index = 0; index < md->earMetadata.size(); index++) {
+        processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
+      }
+    }
+
+    processor_->process(buffer, buffer);
+
     if (buffer.getNumChannels() >= levelMeter_->channels()) {
       levelMeter_->process(buffer);
     }
-  }
+
 }
 
 //==============================================================================
@@ -152,6 +204,7 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
   // call.
 }
 
+/*
 void EarBinauralMonitoringAudioProcessor::configureProcessor(
     const ProcessorConfig& config) {
   if (!processor_ || config != processorConfig_) {
@@ -160,6 +213,7 @@ void EarBinauralMonitoringAudioProcessor::configureProcessor(
     processorConfig_ = config;
   }
 }
+*/
 
 //==============================================================================
 // This creates new instances of the plugin..

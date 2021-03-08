@@ -24,6 +24,8 @@ add_library(ear-plugin-base STATIC
   src/direct_speakers_backend.cpp
   src/helper/protobuf_utilities.cpp
   src/log.cpp
+  src/binaural_monitoring_audio_processor.cpp
+  src/binaural_monitoring_backend.cpp
   src/monitoring_audio_processor.cpp
   src/monitoring_backend.cpp
   src/multichannel_convolver.cpp
