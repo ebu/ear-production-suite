@@ -10,5 +10,6 @@ public:
     MOCK_METHOD1(totalFrames, void(uint64_t frames));
     MOCK_METHOD1(framesWritten, void(uint64_t frames));
     MOCK_METHOD1(error, void(const std::exception& e));
+    MOCK_METHOD1(warning, void(const std::string& e));
 };
 

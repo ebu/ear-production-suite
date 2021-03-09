@@ -35,7 +35,8 @@ std::map<ImportStatus, DialogControls> const dialogControlStates{
     {ImportStatus::CREATING_REAPER_ELEMENTS,    {noChange, noChange, "Cancel", false}},
     {ImportStatus::COMPLETE,                    {"Import Complete", "", "OK", true}},
     {ImportStatus::CANCELLED,                   {"Import Cancelled. Tidying up...", "", "Cancel", false}},
-    {ImportStatus::ERROR_OCCURRED,              {"Import Failed", noChange, "OK", true}}
+    {ImportStatus::ERROR_OCCURRED,              {"Import Failed", noChange, "OK", true}},
+    {ImportStatus::WARNING_OCCURRED,            {"Import Warning", noChange, "OK", true}}
 };
 }
 
@@ -158,7 +159,13 @@ INT_PTR ReaperDialogBox::process(HWND window, UINT msg, WPARAM wParam, LPARAM lP
         if(HIWORD(wParam) == BN_CLICKED) {
             // Should really check which button was clicked, but theres only one...
             //if ((HWND)lParam == buttonHwnd)...
-            finish();
+            if(currentState == ImportStatus::WARNING_OCCURRED) {
+              currentState = ImportStatus::AUDIO_READY;
+              onStateChanged();
+            }
+            else {
+              finish();
+            }
             return 0;
         }
         return DefWindowProc(window, msg, wParam, lParam);
@@ -211,6 +218,15 @@ void ReaperDialogBox::onStateChanged()
               setStatusText(*errorText);
           }
       }
+  }
+  if(currentState == ImportStatus::WARNING_OCCURRED) {
+    auto progress = parent.lock();
+    if(progress) {
+        auto warningText = progress->getWarning();
+        if(warningText) {
+            setStatusText(*warningText);
+        }
+    }
   }
 }
 

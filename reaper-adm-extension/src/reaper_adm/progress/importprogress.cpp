@@ -63,10 +63,23 @@ void ImportProgress::error(const std::exception &e)
     errorText = e.what();
 }
 
+void ImportProgress::warning(const std::string& textToShow)
+{
+    std::scoped_lock<std::mutex> lock(mutex);
+    state = ImportStatus::WARNING_OCCURRED;
+    warningText = textToShow;
+}
+
 std::optional<std::string> ImportProgress::getError() {
 
     std::scoped_lock<std::mutex> lock(mutex);
     return errorText;
+}
+
+std::optional<std::string> ImportProgress::getWarning() {
+
+    std::scoped_lock<std::mutex> lock(mutex);
+    return warningText;
 }
 
 

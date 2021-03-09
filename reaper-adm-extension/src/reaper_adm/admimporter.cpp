@@ -21,6 +21,7 @@
 #include "progress/importlistener.h"
 #include <WDL/swell/swell.h>
 #include <exception>
+#include "plugin_parameter_ranges.h"
 
 using namespace admplug;
 
@@ -177,6 +178,46 @@ void ADMImporter::parse() {
         applyRoutes(programmes, tracer, *project);
         applyRoutes(contents, tracer, *project);
         applyRoutes(objects, tracer, *project);
+        
+        auto checkParamRange = [this](const float value, const AdmParameter param) {
+          const auto range = PluginParameterRanges::values.at(param);
+          if(value < range.first || value > range.second) {
+            clippedParamInfo.at(param).first++;
+          }
+        };
+        
+        auto channelFormats = admDoc->getElements<adm::AudioChannelFormat>();
+        
+        for(auto& channelFormat : channelFormats) {
+        
+          auto blockFormats = channelFormat->getElements<adm::AudioBlockFormatObjects>();
+          
+          for(auto& blockFormat : blockFormats) {
+          
+            if(blockFormat.has<adm::SphericalPosition>()) {
+              auto param = blockFormat.get<adm::SphericalPosition>();
+              checkParamRange(param.get<adm::Azimuth>().get(), AdmParameter::OBJECT_AZIMUTH);
+              checkParamRange(param.get<adm::Elevation>().get(), AdmParameter::OBJECT_ELEVATION);
+              checkParamRange(param.get<adm::Distance>().get(), AdmParameter::OBJECT_DISTANCE);
+            }
+            
+            if(blockFormat.has<adm::Gain>()) {
+              checkParamRange(blockFormat.get<adm::Gain>().get(), AdmParameter::OBJECT_GAIN);
+            }
+            if(blockFormat.has<adm::Height>()) {
+              checkParamRange(blockFormat.get<adm::Height>().get(), AdmParameter::OBJECT_HEIGHT);
+            }
+            if(blockFormat.has<adm::Width>()) {
+              checkParamRange(blockFormat.get<adm::Width>().get(), AdmParameter::OBJECT_WIDTH);
+            }
+            if(blockFormat.has<adm::Depth>()) {
+              checkParamRange(blockFormat.get<adm::Depth>().get(), AdmParameter::OBJECT_DEPTH);
+            }
+            if(blockFormat.has<adm::Diffuse>()) {
+              checkParamRange(blockFormat.get<adm::Diffuse>().get(), AdmParameter::OBJECT_DIFFUSE);
+            }
+          }
+        }
     } catch (std::runtime_error const& e) {
         broadcast.error(e);
     }
@@ -199,11 +240,37 @@ void ADMImporter::extractAudio() {
       if(status == ImportStatus::CANCELLED) {
           broadcast.setStatus(ImportStatus::COMPLETE);
       } else {
-          broadcast.setStatus(ImportStatus::AUDIO_READY);
+          if(haveParametersBeenClipped()) {
+            sendWarningMessage();
+          } else {
+            broadcast.setStatus(ImportStatus::AUDIO_READY);
+          }
       }
     } catch (std::runtime_error const& e) {
         broadcast.error(e);
     }
+}
+
+bool ADMImporter::haveParametersBeenClipped() {
+
+  bool ret = false;
+  for(auto& element : clippedParamInfo) {
+    ret |= element.second.first > 0;
+  }
+  return ret;
+}
+
+void ADMImporter::sendWarningMessage() {
+
+  auto& broadcast = *context.broadcast;
+  std::string msg{};
+  
+  for(auto& element : clippedParamInfo) {
+    if(element.second.first > 0) {
+      msg.append(std::to_string(element.second.first)+" value(s) of parameter "+element.second.second+"\nwill be clipped to valid range\n");
+    }
+  }
+  broadcast.warning(msg);
 }
 
 void ADMImporter::buildProject() {
