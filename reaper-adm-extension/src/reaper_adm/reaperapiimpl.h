@@ -110,6 +110,7 @@ public:
     int GetTrackNumMediaItems(MediaTrack* tr) const override;
     MediaItem* GetTrackMediaItem(MediaTrack* tr, int itemidx) const override;
     double GetSetProjectInfo(ReaProject* project, const char* desc, double value, bool is_set) const override;
+    const char* GetAppVersion() const override;
 
     //Custom Funcs
     void UpdateArrangeForAutomation() const override;

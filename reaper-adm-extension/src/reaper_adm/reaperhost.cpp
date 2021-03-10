@@ -69,7 +69,7 @@ std::shared_ptr<admplug::TopLevelMenu> admplug::ReaperHost::getMenu(admplug::Men
     return menuMan.getReaperMenu(menuId);
 }
 
-admplug::FuncResolutionException::FuncResolutionException(int errorCount) : ReaperAPIException{std::to_string(errorCount) + " API functions not found."}
+admplug::FuncResolutionException::FuncResolutionException(int errorCount) : ReaperAPIException{std::to_string(errorCount) + " API functions not found. This could lead to issues when using the ADM extension. Please consider updating your REAPER version."}
 {
 }
 

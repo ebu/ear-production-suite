@@ -488,6 +488,11 @@ double admplug::ReaperAPIImpl::GetSetProjectInfo(ReaProject* project, const char
     return ::GetSetProjectInfo(project, desc, value, is_set);
 }
 
+const char* admplug::ReaperAPIImpl::GetAppVersion() const
+{
+    return ::GetAppVersion();
+}
+
 void ReaperAPIImpl::UpdateArrangeForAutomation() const {
   // UpdateArrange() does not force draw of automation. Flipping master track visibility does.
   std::bitset<4> mstTrkSetting(GetMasterTrackVisibility());
