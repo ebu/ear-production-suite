@@ -173,12 +173,15 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
         auto start = std::chrono::nanoseconds::zero();
         auto duration = toNs(api.GetProjectLength(nullptr));
 
-        // Check if Tail option in rendering dialog is activated and add length to duration if so
-        bool tailFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_TAILFLAG", 0., false)) & 0x2;
-        bool boundsFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_BOUNDSFLAG", 0., false)) == 1;
-        if (tailFlag && boundsFlag) {
-            const double tailLengthMs = api.GetSetProjectInfo(nullptr, "RENDER_TAILMS", 0., false);
-            duration += toNs(tailLengthMs / 1000.);
+        if(std::stof(api.GetAppVersion()) >= 6.01f)
+        { 
+            // Check if Tail option in rendering dialog is activated and add length to duration if so
+            bool tailFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_TAILFLAG", 0., false)) & 0x2;
+            bool boundsFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_BOUNDSFLAG", 0., false)) == 1;
+            if (tailFlag && boundsFlag) {
+                const double tailLengthMs = api.GetSetProjectInfo(nullptr, "RENDER_TAILMS", 0., false);
+                duration += toNs(tailLengthMs / 1000.);
+            }
         }
 
         if((*admElements).audioObject) {
