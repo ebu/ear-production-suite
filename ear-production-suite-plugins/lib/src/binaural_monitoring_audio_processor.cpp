@@ -114,8 +114,12 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(size_t channelNum, ear::
 
 bool BinauralMonitoringAudioProcessor::pushBearMetadata(size_t channelNum, ear::DirectSpeakersTypeMetadata * metadata)
 {
-  // TODO
-  return false;
+  bear::DirectSpeakersInput bearMetadata;
+  bearMetadata.rtime = metadataRtime;
+  bearMetadata.duration = metadataDuration;
+  bearMetadata.type_metadata = *metadata;
+  dsChannelMappings.push_back(channelNum);
+  return bearRenderer->add_direct_speakers_block(dsChannelMappings.size() - 1, bearMetadata);
 }
 
 std::size_t BinauralMonitoringAudioProcessor::delayInSamples() const {
