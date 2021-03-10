@@ -60,6 +60,8 @@ class BinauralMonitoringAudioProcessor {
 
   bool configMatches(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
                      std::size_t sampleRate, std::size_t blockSize);
+  bool configSupports(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
+                      std::size_t sampleRate, std::size_t blockSize);
 
  private:
   void doProcess(float** channelPointers, size_t maxChannels);

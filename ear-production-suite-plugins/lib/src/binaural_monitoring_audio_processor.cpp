@@ -132,7 +132,15 @@ bool BinauralMonitoringAudioProcessor::configMatches(std::size_t objChannels, st
   return true;
 }
 
-
+bool BinauralMonitoringAudioProcessor::configSupports(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels, std::size_t sampleRate, std::size_t blockSize)
+{
+  if(bearConfig.get_sample_rate() != sampleRate) return false;
+  if(bearConfig.get_period_size() != blockSize) return false;
+  if(bearConfig.get_num_objects_channels() < objChannels) return false;
+  if(bearConfig.get_num_direct_speakers_channels() < dsChannels) return false;
+  if(bearConfig.get_num_hoa_channels() < hoaChannels) return false;
+  return true;
+}
 
 
 

@@ -104,16 +104,7 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   samplerate_ = sampleRate;
   blocksize_ = samplesPerBlock;
 
-
-
   levelMeter_->setup(2, sampleRate);
-
-
-  auto numDs = backend_->getActiveDirectSpeakersIds()->size();
-  auto numObj = backend_->getActiveObjectIds()->size();
-
-  return;
-
 
 }
 
@@ -151,33 +142,39 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
     //}
  // }
 
+  auto objIds = backend_->getActiveObjectIds();
+  auto dsIds = backend_->getActiveDirectSpeakersIds();
 
-    size_t numObj = backend_->getActiveObjectIds()->size();
-    size_t numDs = backend_->getActiveDirectSpeakersIds()->size();
-    size_t numHoa = 0;
+  size_t numObj = objIds.size();
+  size_t numDs = dsIds.size();
+  size_t numHoa = 0;
 
-    if(!processor_ || !processor_->configMatches(numObj, numDs, numHoa, samplerate_, blocksize_)) {
-      processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-        numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
-    }
+  if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
+    processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+      numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
+  }
 
-    for(auto& connId : *(backend_->getActiveObjectIds())) {
-      auto md = backend_->getLatestObjectsTypeMetadata(connId);
+  for(auto& connId : objIds) {
+    auto md = backend_->getLatestObjectsTypeMetadata(connId);
+    if(md->channel >= 0 && md->channel < numObj) {
       processor_->pushBearMetadata(md->channel, &(md->earMetadata));
     }
+  }
 
-    for(auto& connId : *(backend_->getActiveDirectSpeakersIds())) {
-      auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
+  for(auto& connId : dsIds) {
+    auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
+    if(md->startingChannel >= 0 && (md->startingChannel + md->earMetadata.size() - 1) < numDs) {
       for(int index = 0; index < md->earMetadata.size(); index++) {
         processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
       }
     }
+  }
 
-    processor_->process(buffer, buffer);
+  processor_->process(buffer, buffer);
 
-    if (buffer.getNumChannels() >= levelMeter_->channels()) {
-      levelMeter_->process(buffer);
-    }
+  if (buffer.getNumChannels() >= levelMeter_->channels()) {
+    levelMeter_->process(buffer);
+  }
 
 }
 
