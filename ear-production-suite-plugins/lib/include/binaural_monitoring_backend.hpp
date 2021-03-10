@@ -12,16 +12,7 @@
 #include <optional>
 #include <map>
 
-
 using ConnId = std::string;
-/*
-struct RoutingInfo {
-  ConnId id;
-  int vectorIndex;
-};*/
-
-
-
 
 template <typename Key, typename Value>
 std::optional<Value> getFromMap(std::map<Key, Value>& targetMap, Key key) {
@@ -53,11 +44,6 @@ void setInMap(std::map<Key, Value>& targetMap, Key key, Value value) {
   }
 }
 
-
-
-
-
-
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -69,11 +55,6 @@ class MonitoringMetadataReceiver;
 
 class BinauralMonitoringBackend {
  public:
-  /*
- EAR_PLUGIN_BASE_EXPORT BinauralMonitoringBackend(
-     ui::MonitoringFrontendBackendConnector*, const Layout& targetLayout,
-     int inputChannelCount);
-     */
   EAR_PLUGIN_BASE_EXPORT BinauralMonitoringBackend(
       ui::MonitoringFrontendBackendConnector*, int inputChannelCount);
   EAR_PLUGIN_BASE_EXPORT ~BinauralMonitoringBackend();
@@ -99,20 +80,16 @@ class BinauralMonitoringBackend {
   std::optional<ObjectsEarMetadataAndRouting> getLatestObjectsTypeMetadata(ConnId id);
   std::optional<DirectSpeakersEarMetadataAndRouting> getLatestDirectSpeakersTypeMetadata(ConnId id);
 
-  // GainHolder currentGains();
-
  private:
   void onSceneReceived(proto::SceneStore store);
   void onConnection(communication::ConnectionId connectionId,
                     const std::string& streamEndpoint);
   void onConnectionLost();
-  // void updateActiveGains(proto::SceneStore store);
 
   std::mutex latestMonitoringItemMetadataMutex_;
   std::map<ConnId, ear::plugin::proto::MonitoringItemMetadata>
       latestMonitoringItemMetadata;
 
-  //std::vector<RoutingInfo> channelAllocations;
   std::mutex activeDirectSpeakersIdsMutex_;
   std::vector<ConnId> activeDirectSpeakersIds;
   std::mutex activeObjectIdsMutex_;
@@ -125,13 +102,7 @@ class BinauralMonitoringBackend {
   std::map<ConnId, ObjectsEarMetadataAndRouting>
       latestObjectsTypeMetadata;
 
-  //RoutingInfo blankRoutingInformation{ "", -1 };
-
   std::shared_ptr<spdlog::logger> logger_;
-  // std::mutex gainsMutex_;
-  // GainHolder gains_;
-  // std::mutex gainsCalculatorMutex_;
-  // SceneGainsCalculator gainsCalculator_;
   ui::MonitoringFrontendBackendConnector* frontendConnector_;
   std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
   communication::MonitoringControlConnection controlConnection_;

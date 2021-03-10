@@ -79,7 +79,6 @@ void BinauralMonitoringAudioProcessor::doProcess(float ** channelPointers, size_
     }
   }
 
-  // TODO: Output buffer - this might work???
   bearOutputBuffers_RawPointers[0] = channelPointers[0];
   bearOutputBuffers_RawPointers[1] = channelPointers[1];
 

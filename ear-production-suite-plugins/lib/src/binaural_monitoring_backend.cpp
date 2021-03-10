@@ -9,14 +9,7 @@ using std::placeholders::_2;
 
 namespace ear {
 namespace plugin {
-/*
-BinauralMonitoringBackend::BinauralMonitoringBackend(
-  ui::MonitoringFrontendBackendConnector* connector,
-  const Layout& targetLayout, int inputChannelCount)
-  :  gainsCalculator_(targetLayout, inputChannelCount),
-    frontendConnector_(connector),
-    controlConnection_() {
-    */
+
 BinauralMonitoringBackend::BinauralMonitoringBackend(
     ui::MonitoringFrontendBackendConnector* connector, int inputChannelCount)
     : frontendConnector_(connector), controlConnection_() {
@@ -29,12 +22,9 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   logger_->set_level(spdlog::level::off);
 #endif
 
-  //channelAllocations.resize(inputChannelCount, blankRoutingInformation);
   activeDirectSpeakersIds.reserve(inputChannelCount);
   activeObjectIds.reserve(inputChannelCount);
 
-  // gains_.direct = gainsCalculator_.directGains();
-  // gains_.diffuse = gainsCalculator_.diffuseGains();
   controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&BinauralMonitoringBackend::onConnection, this, _1, _2));
@@ -129,10 +119,6 @@ std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralM
 }
 
 void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
-  // updateActiveGains(std::move(store));
-
-  // TODO: Needs locks
-  //std::fill(channelAllocations.begin(), channelAllocations.end(), blankRoutingInformation);
   {
     std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
     activeDirectSpeakersIds.clear();
@@ -145,14 +131,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   for(const auto& item : store.items()) {
     if(item.has_connection_id() && item.connection_id() != "00000000-0000-0000-0000-000000000000" && item.connection_id() != "") {
       if(item.has_ds_metadata()) {
-        /*
-        if(item.routing() >= 0) {
-          for(int ch = 0; ch < item.ds_metadata().speakers_size(); ch++) {
-            channelAllocations[item.routing() + ch].id = item.connection_id();
-            channelAllocations[item.routing() + ch].vectorIndex = ch;
-          }
-        }
-        */
         if(item.changed()) {
           {
             std::lock_guard<std::mutex> lock(latestDirectSpeakersTypeMetadataMutex_);
@@ -172,13 +150,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         }
       }
       if(item.has_obj_metadata()) {
-        /*
-        if(item.routing() >= 0) {
-          channelAllocations[item.routing()].id = item.connection_id();
-          channelAllocations[item.routing()].vectorIndex = 0;
-        }
-        */
-        //if(item.changed()) {
+        if(item.changed()) {
         {
           std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
           removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
@@ -189,7 +161,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
             latestMonitoringItemMetadata, item.connection_id(), item);
         }
-        //}
+        }
         {
           std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
           activeObjectIds.push_back(item.connection_id());
@@ -198,25 +170,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
     }
   }
 }
-
-/*
-GainHolder BinauralMonitoringBackend::currentGains() {
-  std::lock_guard<std::mutex> lock(gainsMutex_);
-  return gains_;
-}
-
-void BinauralMonitoringBackend::updateActiveGains(proto::SceneStore store) {
-  {
-    std::lock_guard<std::mutex> lock(gainsCalculatorMutex_);
-    gainsCalculator_.update(std::move(store));
-  }
-  {
-    std::lock_guard<std::mutex> lock(gainsMutex_);
-    gains_.direct = gainsCalculator_.directGains();
-    gains_.diffuse = gainsCalculator_.diffuseGains();
-  }
-}
-*/
 
 void BinauralMonitoringBackend::onConnection(
     communication::ConnectionId id, const std::string& streamEndpoint) {
@@ -238,8 +191,6 @@ void BinauralMonitoringBackend::onConnection(
 void BinauralMonitoringBackend::onConnectionLost() {
   logger_->info("Lost connection to Scene");
   metadataReceiver_->shutdown();
-  // force update with an "empty" store to generate silence
-  // updateActiveGains(proto::SceneStore{});
   {
     std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
     activeDirectSpeakersIds.clear();

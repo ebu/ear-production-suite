@@ -87,13 +87,6 @@ class BinauralMonitoringAudioProcessor {
   std::vector<float*> bearDirectSpeakersInputBuffers_RawPointers;
   std::vector<float*> bearHoaInputBuffers_RawPointers;
 
-
-  /*
-  VariableBlockSizeAdapter<float> blockAdapter_;
-  void doBlockedProcess(const Eigen::Ref<const Eigen::MatrixXf>& in,
-                        Eigen::Ref<Eigen::MatrixXf> out);
-                        */
-
 };
 
 }  // namespace plugin
