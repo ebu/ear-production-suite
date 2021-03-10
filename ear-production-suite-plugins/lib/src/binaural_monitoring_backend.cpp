@@ -58,16 +58,16 @@ BinauralMonitoringBackend::~BinauralMonitoringBackend() {
   controlConnection_.onConnectionEstablished(nullptr);
 }
 
-std::vector<std::string>* BinauralMonitoringBackend::getActiveDirectSpeakersIds()
+std::vector<std::string> BinauralMonitoringBackend::getActiveDirectSpeakersIds()
 {
   // TODO: Needs locks
-  return &activeDirectSpeakersIds;
+  return activeDirectSpeakersIds;
 }
 
-std::vector<std::string>* BinauralMonitoringBackend::getActiveObjectIds()
+std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds()
 {
   // TODO: Needs locks
-  return &activeObjectIds;
+  return activeObjectIds;
 }
 
 BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting* BinauralMonitoringBackend::getLatestDirectSpeakersTypeMetadata(ConnId id)

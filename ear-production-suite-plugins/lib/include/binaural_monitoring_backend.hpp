@@ -83,8 +83,8 @@ class BinauralMonitoringBackend {
   BinauralMonitoringBackend& operator=(const BinauralMonitoringBackend&) =
       delete;
 
-  std::vector<ConnId>* getActiveObjectIds();
-  std::vector<ConnId>* getActiveDirectSpeakersIds();
+  std::vector<ConnId> getActiveObjectIds();
+  std::vector<ConnId> getActiveDirectSpeakersIds();
 
   struct ObjectsEarMetadataAndRouting {
     int channel;
