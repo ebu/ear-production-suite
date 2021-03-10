@@ -60,23 +60,25 @@ BinauralMonitoringBackend::~BinauralMonitoringBackend() {
 
 std::vector<std::string> BinauralMonitoringBackend::getActiveDirectSpeakersIds()
 {
-  // TODO: Needs locks
+  std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
   return activeDirectSpeakersIds;
 }
 
 std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds()
 {
-  // TODO: Needs locks
+  std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
   return activeObjectIds;
 }
 
 std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> BinauralMonitoringBackend::getLatestDirectSpeakersTypeMetadata(ConnId id)
 {
-  // TODO: Needs locks (need to do copies?)
+  std::lock_guard<std::mutex> lockA(latestDirectSpeakersTypeMetadataMutex_);
 
   auto earMD = getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
     (latestDirectSpeakersTypeMetadata, id);
   if(earMD) return *earMD;
+
+  std::lock_guard<std::mutex> lockB(latestMonitoringItemMetadataMutex_);
 
   auto epsMD = getValuePointerFromMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
       latestMonitoringItemMetadata, id);
@@ -99,11 +101,13 @@ std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> Bi
 
 std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id)
 {
-  // TODO: Needs locks (need to do copies?)
+  std::lock_guard<std::mutex> lockA(latestObjectsTypeMetadataMutex_);
 
   auto earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
     (latestObjectsTypeMetadata, id);
   if(earMD) return *earMD;
+
+  std::lock_guard<std::mutex> lockB(latestMonitoringItemMetadataMutex_);
 
   auto epsMD = getValuePointerFromMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
     latestMonitoringItemMetadata, id);
@@ -129,8 +133,14 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   // TODO: Needs locks
   //std::fill(channelAllocations.begin(), channelAllocations.end(), blankRoutingInformation);
-  activeDirectSpeakersIds.clear();
-  activeObjectIds.clear();
+  {
+    std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
+    activeDirectSpeakersIds.clear();
+  }
+  {
+    std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
+    activeObjectIds.clear();
+  }
 
   for(const auto& item : store.items()) {
     if(item.connection_id() != "00000000-0000-0000-0000-000000000000") {
@@ -143,13 +153,22 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         */
-        activeDirectSpeakersIds.push_back(item.connection_id());
         if(item.changed()) {
-          removeFromMap<ConnId,
-            DirectSpeakersEarMetadataAndRouting>(
-              latestDirectSpeakersTypeMetadata, item.connection_id());
-          setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
-            latestMonitoringItemMetadata, item.connection_id(), item);
+          {
+            std::lock_guard<std::mutex> lock(latestDirectSpeakersTypeMetadataMutex_);
+            removeFromMap<ConnId,
+              DirectSpeakersEarMetadataAndRouting>(
+                latestDirectSpeakersTypeMetadata, item.connection_id());
+          }
+          {
+            std::lock_guard<std::mutex> lock(latestMonitoringItemMetadataMutex_);
+            setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
+              latestMonitoringItemMetadata, item.connection_id(), item);
+          }
+        }
+        {
+          std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
+          activeDirectSpeakersIds.push_back(item.connection_id());
         }
       }
       if(item.has_obj_metadata()) {
@@ -159,12 +178,21 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           channelAllocations[item.routing()].vectorIndex = 0;
         }
         */
-        activeObjectIds.push_back(item.connection_id());
-        if(item.changed()) {
+        //if(item.changed()) {
+        {
+          std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
           removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
             latestObjectsTypeMetadata, item.connection_id());
+        }
+        {
+          std::lock_guard<std::mutex> lock(latestMonitoringItemMetadataMutex_);
           setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
             latestMonitoringItemMetadata, item.connection_id(), item);
+        }
+        //}
+        {
+          std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
+          activeObjectIds.push_back(item.connection_id());
         }
       }
     }
@@ -212,8 +240,14 @@ void BinauralMonitoringBackend::onConnectionLost() {
   metadataReceiver_->shutdown();
   // force update with an "empty" store to generate silence
   // updateActiveGains(proto::SceneStore{});
-  activeDirectSpeakersIds.clear();
-  activeObjectIds.clear();
+  {
+    std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
+    activeDirectSpeakersIds.clear();
+  }
+  {
+    std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
+    activeObjectIds.clear();
+  }
 }
 
 }  // namespace plugin

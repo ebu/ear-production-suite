@@ -108,15 +108,20 @@ class BinauralMonitoringBackend {
   void onConnectionLost();
   // void updateActiveGains(proto::SceneStore store);
 
+  std::mutex latestMonitoringItemMetadataMutex_;
   std::map<ConnId, ear::plugin::proto::MonitoringItemMetadata>
       latestMonitoringItemMetadata;
 
   //std::vector<RoutingInfo> channelAllocations;
+  std::mutex activeDirectSpeakersIdsMutex_;
   std::vector<ConnId> activeDirectSpeakersIds;
+  std::mutex activeObjectIdsMutex_;
   std::vector<ConnId> activeObjectIds;
 
+  std::mutex latestDirectSpeakersTypeMetadataMutex_;
   std::map<ConnId, DirectSpeakersEarMetadataAndRouting>
       latestDirectSpeakersTypeMetadata;
+  std::mutex latestObjectsTypeMetadataMutex_;
   std::map<ConnId, ObjectsEarMetadataAndRouting>
       latestObjectsTypeMetadata;
 
