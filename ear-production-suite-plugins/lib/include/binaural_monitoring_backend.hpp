@@ -96,8 +96,8 @@ class BinauralMonitoringBackend {
     std::vector<ear::DirectSpeakersTypeMetadata> earMetadata;
   };
 
-  ObjectsEarMetadataAndRouting* getLatestObjectsTypeMetadata(ConnId id);
-  DirectSpeakersEarMetadataAndRouting* getLatestDirectSpeakersTypeMetadata(ConnId id);
+  std::optional<ObjectsEarMetadataAndRouting> getLatestObjectsTypeMetadata(ConnId id);
+  std::optional<DirectSpeakersEarMetadataAndRouting> getLatestDirectSpeakersTypeMetadata(ConnId id);
 
   // GainHolder currentGains();
 

@@ -70,17 +70,19 @@ std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds()
   return activeObjectIds;
 }
 
-BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting* BinauralMonitoringBackend::getLatestDirectSpeakersTypeMetadata(ConnId id)
+std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> BinauralMonitoringBackend::getLatestDirectSpeakersTypeMetadata(ConnId id)
 {
   // TODO: Needs locks (need to do copies?)
 
   auto earMD = getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
     (latestDirectSpeakersTypeMetadata, id);
-  if(earMD) return earMD;
+  if(earMD) return *earMD;
 
   auto epsMD = getValuePointerFromMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
       latestMonitoringItemMetadata, id);
-  if(!epsMD || !epsMD->has_ds_metadata()) return nullptr;
+  if(!epsMD || !epsMD->has_ds_metadata()) {
+    return std::optional<DirectSpeakersEarMetadataAndRouting>();
+  }
 
   setInMap<ConnId, DirectSpeakersEarMetadataAndRouting>(latestDirectSpeakersTypeMetadata, id,
                                                         DirectSpeakersEarMetadataAndRouting{
@@ -88,30 +90,38 @@ BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting* BinauralMonitori
                                                           EpsToEarMetadataConverter::convert(epsMD->ds_metadata())
                                                         });
 
-  return getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
+  earMD = getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
     (latestDirectSpeakersTypeMetadata, id);
+  if(earMD) return *earMD;
+
+  return std::optional<DirectSpeakersEarMetadataAndRouting>();
 }
 
-BinauralMonitoringBackend::ObjectsEarMetadataAndRouting* BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id)
+std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id)
 {
   // TODO: Needs locks (need to do copies?)
 
   auto earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
     (latestObjectsTypeMetadata, id);
-  if(earMD) return earMD;
+  if(earMD) return *earMD;
 
   auto epsMD = getValuePointerFromMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
     latestMonitoringItemMetadata, id);
-  if(!epsMD || !epsMD->has_obj_metadata()) return nullptr;
+  if(!epsMD || !epsMD->has_obj_metadata()) {
+    return std::optional<ObjectsEarMetadataAndRouting>();
+  }
 
   setInMap<ConnId, ObjectsEarMetadataAndRouting>(latestObjectsTypeMetadata, id,
-                                                 ObjectsEarMetadataAndRouting{
-                                                   epsMD->has_routing() ? epsMD->routing() : -1,
-                                                   EpsToEarMetadataConverter::convert(epsMD->obj_metadata())
-                                                 });
+                                                  ObjectsEarMetadataAndRouting{
+                                                    epsMD->has_routing() ? epsMD->routing() : -1,
+                                                    EpsToEarMetadataConverter::convert(epsMD->obj_metadata())
+                                                  });
 
-  return getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
+  earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
     (latestObjectsTypeMetadata, id);
+  if(earMD) return *earMD;
+
+  return std::optional<ObjectsEarMetadataAndRouting>();
 }
 
 void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
