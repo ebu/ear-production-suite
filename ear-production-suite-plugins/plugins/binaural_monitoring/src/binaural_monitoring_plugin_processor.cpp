@@ -153,7 +153,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   //   remaining are passed through.
   auto buffMaxChns = buffer.getNumChannels();
   auto buffSamples = buffer.getNumSamples();
-  for(int ch = 0; ch < buffMaxChns; ch++) {
+  for(int ch = 2; ch < buffMaxChns; ch++) {
     buffer.clear(ch, 0, buffSamples);
   }
 
