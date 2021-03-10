@@ -149,10 +149,13 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   size_t numDs = dsIds.size();
   size_t numHoa = 0;
 
+  // Ensure BEAR has enough channels configured
   if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
     processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
       numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
   }
+
+  // BEAR Metadata
 
   for(auto& connId : objIds) {
     auto md = backend_->getLatestObjectsTypeMetadata(connId);
@@ -170,8 +173,19 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
     }
   }
 
+  // BEAR audio processing
   processor_->process(buffer, buffer);
 
+  // Zero unused output channels - probably not necessary in most cases;
+  // e.g, REAPER only takes the first n channels defined by the output bus width
+  //   remaining are passed through.
+  auto buffMaxChns = buffer.getNumChannels();
+  auto buffSamples = buffer.getNumSamples();
+  for(int ch = 0; ch < buffMaxChns; ch++) {
+    buffer.clear(ch, 0, buffSamples);
+  }
+
+  // Meters
   if (buffer.getNumChannels() >= levelMeter_->channels()) {
     levelMeter_->process(buffer);
   }
