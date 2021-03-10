@@ -143,7 +143,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   }
 
   for(const auto& item : store.items()) {
-    if(item.connection_id() != "00000000-0000-0000-0000-000000000000") {
+    if(item.has_connection_id() && item.connection_id() != "00000000-0000-0000-0000-000000000000" && item.connection_id() != "") {
       if(item.has_ds_metadata()) {
         /*
         if(item.routing() >= 0) {
