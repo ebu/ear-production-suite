@@ -66,7 +66,9 @@ std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> Bi
 
   auto earMD = getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
     (latestDirectSpeakersTypeMetadata, id);
-  if(earMD) return *earMD;
+  if(earMD) {
+    return std::optional<DirectSpeakersEarMetadataAndRouting>(*earMD);
+  }
 
   std::lock_guard<std::mutex> lockB(latestMonitoringItemMetadataMutex_);
 
@@ -84,7 +86,9 @@ std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> Bi
 
   earMD = getValuePointerFromMap<ConnId, DirectSpeakersEarMetadataAndRouting>
     (latestDirectSpeakersTypeMetadata, id);
-  if(earMD) return *earMD;
+  if(earMD) {
+    return std::optional<DirectSpeakersEarMetadataAndRouting>(*earMD);
+  }
 
   return std::optional<DirectSpeakersEarMetadataAndRouting>();
 }
@@ -95,7 +99,9 @@ std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralM
 
   auto earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
     (latestObjectsTypeMetadata, id);
-  if(earMD) return *earMD;
+  if(earMD) {
+    return std::optional<ObjectsEarMetadataAndRouting>(*earMD);
+  }
 
   std::lock_guard<std::mutex> lockB(latestMonitoringItemMetadataMutex_);
 
@@ -113,7 +119,9 @@ std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralM
 
   earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>
     (latestObjectsTypeMetadata, id);
-  if(earMD) return *earMD;
+  if(earMD) {
+    return std::optional<ObjectsEarMetadataAndRouting>(*earMD);
+  }
 
   return std::optional<ObjectsEarMetadataAndRouting>();
 }
