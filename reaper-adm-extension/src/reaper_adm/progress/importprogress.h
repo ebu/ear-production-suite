@@ -26,7 +26,7 @@ public:
     virtual void totalFrames(uint64_t frames) override;
     virtual void framesWritten(uint64_t frames) override;
     void error(const std::exception &e) override;
-    void warning(const std::string& textToShow) override;
+    void warning(const std::string& textToShow, const ImportStatus nextState) override;
     ImportStatus status() const override;
     ElementProgress getProgress();
     void dialogClosed();
@@ -34,10 +34,12 @@ public:
     std::pair<uint64_t, uint64_t> sampleProgress();
     std::optional<std::string> getError();
     std::optional<std::string> getWarning();
+    ImportStatus getStateToEnterAfterWarning() { return stateToEnterAfterWarning; }
 private:
     uint64_t frameCount{0};
     uint64_t currentFrames{0};
     ImportStatus state{ImportStatus::INIT};
+    ImportStatus stateToEnterAfterWarning{ImportStatus::AUDIO_READY};
     mutable std::mutex mutex;
     ElementProgress progress{};
     void setHeaderText(const std::string &text);

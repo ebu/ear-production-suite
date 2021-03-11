@@ -18,7 +18,7 @@ public:
     virtual void totalFrames(uint64_t frames) = 0;
     virtual void framesWritten(uint64_t frames) = 0;
     virtual void error(std::exception const& e) = 0;
-    virtual void warning(const std::string& textToShow) = 0;
+    virtual void warning(const std::string& textToShow, const ImportStatus nextState) = 0;
 };
 
 class ImportBroadcaster : public ImportListener {
@@ -32,7 +32,7 @@ public:
     virtual void totalFrames(uint64_t frames) override;
     virtual void framesWritten(uint64_t frames) override;
     virtual void error(const std::exception &e) override;
-    virtual void warning(const std::string& textToShow) override;
+    virtual void warning(const std::string& textToShow, const ImportStatus nextState) override;
 private:
     std::vector<std::shared_ptr<ImportListener>> listeners;
 };

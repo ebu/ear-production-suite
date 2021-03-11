@@ -270,7 +270,7 @@ void ADMImporter::sendWarningMessage() {
       msg.append(std::to_string(element.second.first)+" value(s) of parameter "+element.second.second+"\nwill be clipped to valid range\n");
     }
   }
-  broadcast.warning(msg);
+  broadcast.warning(msg, ImportStatus::AUDIO_READY);
 }
 
 void ADMImporter::buildProject() {

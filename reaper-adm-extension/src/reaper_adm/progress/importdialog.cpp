@@ -160,7 +160,10 @@ INT_PTR ReaperDialogBox::process(HWND window, UINT msg, WPARAM wParam, LPARAM lP
             // Should really check which button was clicked, but theres only one...
             //if ((HWND)lParam == buttonHwnd)...
             if(currentState == ImportStatus::WARNING_OCCURRED) {
-              currentState = ImportStatus::AUDIO_READY;
+              auto progress = parent.lock();
+              if(progress) {
+                  currentState = progress->getStateToEnterAfterWarning();
+              }
               onStateChanged();
             }
             else {
