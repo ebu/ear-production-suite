@@ -14,7 +14,7 @@ namespace plugin {
 BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
   std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels, std::size_t sampleRate, std::size_t blockSize, std::string dataFilePath)
 {
-  assert(hoaChannels == 0); // Dev reminder that HOA isn't implemented (it's missing in a whole chunk of the EPS anyway so no point implementing at this early stage)
+  assert(hoaChannels == 0); // Dev reminder that HOA isn't tested (it's missing in a whole chunk of the EPS anyway so unable to test at this early stage)
 
   framesProcessed = 0;
   metadataRtime = bear::Time{ framesProcessed, sampleRate };
@@ -116,6 +116,16 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(size_t channelNum, ear::
   bearMetadata.type_metadata = *metadata;
   dsChannelMappings.push_back(channelNum);
   return bearRenderer->add_direct_speakers_block(dsChannelMappings.size() - 1, bearMetadata);
+}
+
+bool BinauralMonitoringAudioProcessor::pushBearMetadata(size_t channelNum, ear::HOATypeMetadata* metadata)
+{
+  bear::HOAInput bearMetadata;
+  bearMetadata.rtime = metadataRtime;
+  bearMetadata.duration = metadataDuration;
+  bearMetadata.type_metadata = *metadata;
+  hoaChannelMappings.push_back(channelNum);
+  return bearRenderer->add_hoa_block(dsChannelMappings.size() - 1, bearMetadata);
 }
 
 std::size_t BinauralMonitoringAudioProcessor::delayInSamples() const {

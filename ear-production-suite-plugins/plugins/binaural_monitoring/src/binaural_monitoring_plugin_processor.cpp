@@ -116,8 +116,9 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
 
   auto objIds = backend_->getActiveObjectIds();
   auto dsIds = backend_->getActiveDirectSpeakersIds();
+  auto hoaIds = backend_->getActiveHoaIds();
 
-  size_t numHoa = 0;
+  size_t numHoa = backend_->getTotalHoaChannels();
   size_t numObj = backend_->getTotalObjectChannels();
   size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
@@ -138,7 +139,16 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
 
   for(auto& connId : dsIds) {
     auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
-    if(md->startingChannel >= 0 && (md->startingChannel + md->earMetadata.size() - 1) < numDs) {
+    if(md->startingChannel >= 0 && (md->startingChannel + md->earMetadata.size()) <= numDs) {
+      for(int index = 0; index < md->earMetadata.size(); index++) {
+        processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
+      }
+    }
+  }
+
+  for(auto& connId : hoaIds) {
+    auto md = backend_->getLatestHoaTypeMetadata(connId);
+    if(md->startingChannel >= 0 && (md->startingChannel + md->earMetadata.size()) <= numHoa) {
       for(int index = 0; index < md->earMetadata.size(); index++) {
         processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
       }

@@ -60,6 +60,18 @@ size_t BinauralMonitoringBackend::getTotalDirectSpeakersChannels()
   return directSpeakersChannelCount;
 }
 
+std::vector<ConnId> BinauralMonitoringBackend::getActiveHoaIds()
+{
+  std::lock_guard<std::mutex> lock(activeHoaIdsMutex_);
+  return activeHoaIds;
+}
+
+size_t BinauralMonitoringBackend::getTotalHoaChannels()
+{
+  std::lock_guard<std::mutex> lock(activeHoaIdsMutex_);
+  return hoaChannelCount;
+}
+
 std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds()
 {
   std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
@@ -105,6 +117,12 @@ std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> Bi
   return std::optional<DirectSpeakersEarMetadataAndRouting>();
 }
 
+std::optional<BinauralMonitoringBackend::HoaEarMetadataAndRouting> BinauralMonitoringBackend::getLatestHoaTypeMetadata(ConnId id)
+{
+  // TODO: Unsupported at the moment - needs EpsToEarMetadataConverter for HOA
+  return std::optional<HoaEarMetadataAndRouting>();
+}
+
 std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id)
 {
   std::lock_guard<std::mutex> lockA(latestObjectsTypeMetadataMutex_);
@@ -142,6 +160,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   size_t totalDsChannels = 0;
   size_t totalObjChannels = 0;
+  size_t totalHoaChannels = 0;
 
   std::lock_guard<std::mutex> lockDsIds(activeDirectSpeakersIdsMutex_);
   std::lock_guard<std::mutex> lockObjIds(activeObjectIdsMutex_);
@@ -150,6 +169,25 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   for(const auto& item : store.items()) {
     if(item.has_connection_id() && item.connection_id() != "00000000-0000-0000-0000-000000000000" && item.connection_id() != "") {
+      /* TODO: HOA can not be implemented at the moment due to incomplete protobuf
+      if(item.has_hoa_metadata()) {
+        if(item.changed()) {
+          {
+            std::lock_guard<std::mutex> lock(latestHoaTypeMetadataMutex_);
+            removeFromMap<ConnId,
+              HoaEarMetadataAndRouting>(
+                latestHoaTypeMetadata, item.connection_id());
+          }
+          {
+            std::lock_guard<std::mutex> lock(latestMonitoringItemMetadataMutex_);
+            setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
+              latestMonitoringItemMetadata, item.connection_id(), item);
+          }
+        }
+        activeHoaIds.push_back(item.connection_id());
+        //totalHoaChannels += item.hoa_metadata().???(); // TODO: Proto message currently incomplete for HOA
+      }
+      */
       if(item.has_ds_metadata()) {
         if(item.changed()) {
           {
@@ -188,6 +226,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   objectChannelCount = totalObjChannels;
   directSpeakersChannelCount = totalDsChannels;
+  hoaChannelCount = totalHoaChannels;
 }
 
 void BinauralMonitoringBackend::onConnection(

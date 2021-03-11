@@ -68,6 +68,8 @@ class BinauralMonitoringBackend {
   size_t getTotalObjectChannels();
   std::vector<ConnId> getActiveDirectSpeakersIds();
   size_t getTotalDirectSpeakersChannels();
+  std::vector<ConnId> getActiveHoaIds();
+  size_t getTotalHoaChannels();
 
   struct ObjectsEarMetadataAndRouting {
     int channel;
@@ -79,8 +81,14 @@ class BinauralMonitoringBackend {
     std::vector<ear::DirectSpeakersTypeMetadata> earMetadata;
   };
 
+  struct HoaEarMetadataAndRouting {
+    int startingChannel;
+    std::vector<ear::HOATypeMetadata> earMetadata;
+  };
+
   std::optional<ObjectsEarMetadataAndRouting> getLatestObjectsTypeMetadata(ConnId id);
   std::optional<DirectSpeakersEarMetadataAndRouting> getLatestDirectSpeakersTypeMetadata(ConnId id);
+  std::optional<HoaEarMetadataAndRouting> getLatestHoaTypeMetadata(ConnId id);
 
  private:
   void onSceneReceived(proto::SceneStore store);
@@ -98,6 +106,9 @@ class BinauralMonitoringBackend {
   std::mutex activeObjectIdsMutex_;
   std::vector<ConnId> activeObjectIds;
   size_t objectChannelCount{ 0 };
+  std::mutex activeHoaIdsMutex_;
+  std::vector<ConnId> activeHoaIds;
+  size_t hoaChannelCount{ 0 };
 
   std::mutex latestDirectSpeakersTypeMetadataMutex_;
   std::map<ConnId, DirectSpeakersEarMetadataAndRouting>
@@ -105,6 +116,9 @@ class BinauralMonitoringBackend {
   std::mutex latestObjectsTypeMetadataMutex_;
   std::map<ConnId, ObjectsEarMetadataAndRouting>
       latestObjectsTypeMetadata;
+  std::mutex latestHoaTypeMetadataMutex_;
+  std::map<ConnId, HoaEarMetadataAndRouting>
+    latestHoaTypeMetadata;
 
   std::shared_ptr<spdlog::logger> logger_;
   ui::MonitoringFrontendBackendConnector* frontendConnector_;
