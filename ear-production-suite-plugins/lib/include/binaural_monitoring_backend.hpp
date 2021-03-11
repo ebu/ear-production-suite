@@ -65,7 +65,9 @@ class BinauralMonitoringBackend {
       delete;
 
   std::vector<ConnId> getActiveObjectIds();
+  size_t getTotalObjectChannels();
   std::vector<ConnId> getActiveDirectSpeakersIds();
+  size_t getTotalDirectSpeakersChannels();
 
   struct ObjectsEarMetadataAndRouting {
     int channel;
@@ -92,8 +94,10 @@ class BinauralMonitoringBackend {
 
   std::mutex activeDirectSpeakersIdsMutex_;
   std::vector<ConnId> activeDirectSpeakersIds;
+  size_t directSpeakersChannelCount{ 0 };
   std::mutex activeObjectIdsMutex_;
   std::vector<ConnId> activeObjectIds;
+  size_t objectChannelCount{ 0 };
 
   std::mutex latestDirectSpeakersTypeMetadataMutex_;
   std::map<ConnId, DirectSpeakersEarMetadataAndRouting>

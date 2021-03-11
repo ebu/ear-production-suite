@@ -54,10 +54,22 @@ std::vector<std::string> BinauralMonitoringBackend::getActiveDirectSpeakersIds()
   return activeDirectSpeakersIds;
 }
 
+size_t BinauralMonitoringBackend::getTotalDirectSpeakersChannels()
+{
+  std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
+  return directSpeakersChannelCount;
+}
+
 std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds()
 {
   std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
   return activeObjectIds;
+}
+
+size_t BinauralMonitoringBackend::getTotalObjectChannels()
+{
+  std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
+  return objectChannelCount;
 }
 
 std::optional<BinauralMonitoringBackend::DirectSpeakersEarMetadataAndRouting> BinauralMonitoringBackend::getLatestDirectSpeakersTypeMetadata(ConnId id)
@@ -127,6 +139,10 @@ std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralM
 }
 
 void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
+
+  size_t totalDsChannels = 0;
+  size_t totalObjChannels = 0;
+
   std::lock_guard<std::mutex> lockDsIds(activeDirectSpeakersIdsMutex_);
   std::lock_guard<std::mutex> lockObjIds(activeObjectIdsMutex_);
   activeDirectSpeakersIds.clear();
@@ -149,6 +165,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         activeDirectSpeakersIds.push_back(item.connection_id());
+        totalDsChannels += item.ds_metadata().speakers_size();
       }
       if(item.has_obj_metadata()) {
         if(item.changed()) {
@@ -164,9 +181,13 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         activeObjectIds.push_back(item.connection_id());
+        totalObjChannels++;
       }
     }
   }
+
+  objectChannelCount = totalObjChannels;
+  directSpeakersChannelCount = totalDsChannels;
 }
 
 void BinauralMonitoringBackend::onConnection(
