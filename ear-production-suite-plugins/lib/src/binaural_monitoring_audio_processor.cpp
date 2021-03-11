@@ -13,9 +13,6 @@ namespace plugin {
 
 BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
   std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels, std::size_t sampleRate, std::size_t blockSize, std::string dataFilePath)
-  /* : blockAdapter_(
-      blockSize, dsChannels + hoaChannels + objChannels, 2,
-      std::bind(&BinauralMonitoringAudioProcessor::doBlockedProcess, this, _1, _2)),*/
 {
   assert(hoaChannels == 0); // Dev reminder that HOA isn't implemented (it's missing in a whole chunk of the EPS anyway so no point implementing at this early stage)
 
@@ -66,14 +63,14 @@ void BinauralMonitoringAudioProcessor::doProcess(float ** channelPointers, size_
   }
 
   tdLimit = std::min(dsChannelMappings.size(), bearConfig.get_num_direct_speakers_channels());
-  for(size_t tdChannel = 0; tdChannel < dsChannelMappings.size(); tdChannel++) {
+  for(size_t tdChannel = 0; tdChannel < tdLimit; tdChannel++) {
     if(dsChannelMappings[tdChannel] < maxChannels) {
       bearDirectSpeakersInputBuffers_RawPointers[tdChannel] = channelPointers[dsChannelMappings[tdChannel]];
     }
   }
 
   tdLimit = std::min(hoaChannelMappings.size(), bearConfig.get_num_hoa_channels());
-  for(size_t tdChannel = 0; tdChannel < hoaChannelMappings.size(); tdChannel++) {
+  for(size_t tdChannel = 0; tdChannel < tdLimit; tdChannel++) {
     if(hoaChannelMappings[tdChannel] < maxChannels) {
       bearHoaInputBuffers_RawPointers[tdChannel] = channelPointers[hoaChannelMappings[tdChannel]];
     }
