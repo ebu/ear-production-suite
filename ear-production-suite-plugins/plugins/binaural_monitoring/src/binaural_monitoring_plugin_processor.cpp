@@ -117,9 +117,9 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   auto objIds = backend_->getActiveObjectIds();
   auto dsIds = backend_->getActiveDirectSpeakersIds();
 
-  size_t numObj = objIds.size();
-  size_t numDs = dsIds.size();
   size_t numHoa = 0;
+  size_t numObj = backend_->getTotalObjectChannels();
+  size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
   // Ensure BEAR has enough channels configured
   if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
