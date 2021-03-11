@@ -127,14 +127,10 @@ std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting> BinauralM
 }
 
 void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
-  {
-    std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
-    activeDirectSpeakersIds.clear();
-  }
-  {
-    std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
-    activeObjectIds.clear();
-  }
+  std::lock_guard<std::mutex> lockDsIds(activeDirectSpeakersIdsMutex_);
+  std::lock_guard<std::mutex> lockObjIds(activeObjectIdsMutex_);
+  activeDirectSpeakersIds.clear();
+  activeObjectIds.clear();
 
   for(const auto& item : store.items()) {
     if(item.has_connection_id() && item.connection_id() != "00000000-0000-0000-0000-000000000000" && item.connection_id() != "") {
@@ -152,28 +148,22 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
               latestMonitoringItemMetadata, item.connection_id(), item);
           }
         }
-        {
-          std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
-          activeDirectSpeakersIds.push_back(item.connection_id());
-        }
+        activeDirectSpeakersIds.push_back(item.connection_id());
       }
       if(item.has_obj_metadata()) {
         if(item.changed()) {
-        {
-          std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
-          removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
-            latestObjectsTypeMetadata, item.connection_id());
+          {
+            std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
+            removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
+              latestObjectsTypeMetadata, item.connection_id());
+          }
+          {
+            std::lock_guard<std::mutex> lock(latestMonitoringItemMetadataMutex_);
+            setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
+              latestMonitoringItemMetadata, item.connection_id(), item);
+          }
         }
-        {
-          std::lock_guard<std::mutex> lock(latestMonitoringItemMetadataMutex_);
-          setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
-            latestMonitoringItemMetadata, item.connection_id(), item);
-        }
-        }
-        {
-          std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
-          activeObjectIds.push_back(item.connection_id());
-        }
+        activeObjectIds.push_back(item.connection_id());
       }
     }
   }
