@@ -31,7 +31,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   onBoardingButton_->onClick = [&]() { onBoardingOverlay_->setVisible(true); };
 
   onBoardingOverlay_->setContent(onBoardingContent_.get());
-  onBoardingOverlay_->setWindowSize(706, 596);
+  onBoardingOverlay_->setWindowSize(700, 550); // Min size to display contents correctly
   onBoardingOverlay_->setHeaderText(
       String::fromUTF8("Welcome – do you need help?"));
   onBoardingOverlay_->onClose = [&]() {
@@ -44,7 +44,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   onBoardingContent_->addListener(this);
 
   addAndMakeVisible(header_.get());
-  addAndMakeVisible(onBoardingButton_.get());
+  //addAndMakeVisible(onBoardingButton_.get()); // TODO: Commented out for now as doesn't fit in MVP window
   addChildComponent(onBoardingOverlay_.get());
 
   for (int i = 0; i < 2; ++i) {
@@ -53,7 +53,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(headphoneMeters_.back().get());
   }
-  setSize(600, 400);
+  //setSize(750, 600); // Min size to fit onboarding window.
+  setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
 }
 
 EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
