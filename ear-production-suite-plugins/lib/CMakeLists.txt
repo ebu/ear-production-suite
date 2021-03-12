@@ -105,8 +105,6 @@ set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
 source_group("Header Files" FILES ${EAR_BASE_HEADERS})
 target_sources(ear-plugin-base PRIVATE ${EAR_PROTO_INPUT} ${EAR_BASE_HEADERS})
 
-# nng links libcmtd in relwithdebinfo without the following line - warning on build due to mix of libcmt and libcmtd
-#set_target_properties(nng::nng PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
 target_link_libraries(ear-plugin-base PUBLIC
   ear
   bear
@@ -118,8 +116,6 @@ target_link_libraries(ear-plugin-base PUBLIC
   adm
   Eigen3::Eigen)
 if(SPDLOG_FMT_EXTERNAL)
-  # spdlog links wrong fmt library in relwithdebinfo without the following line - fails to build
-  #set_target_properties(fmt::fmt PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
   target_link_libraries(ear-plugin-base PUBLIC fmt::fmt)
 endif()
 
