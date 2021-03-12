@@ -4,7 +4,7 @@
 #include "actionmanager.h"
 #include "menu.h"
 
-admplug::ReaperHost::ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_plugin_info_t *plug_info) :
+admplug::ReaperHost::ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_plugin_info_t *plug_info, bool testAPI) :
     plug_info{ plug_info },
     plug_hinstance{ plug_hinstance },
     actionMan{ ActionManager::getManager(api()) },
@@ -23,9 +23,11 @@ admplug::ReaperHost::ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_p
         if (!plug_info->GetFunc) {
             throw ReaperAPIException{ "Host has not provided GetFunc pointer, unable to resolve API functions" };
         }
-        auto error_count = REAPERAPI_LoadAPI(plug_info->GetFunc);
-        if (error_count > 1) {
-            throw FuncResolutionException{ error_count };
+        if (testAPI) {
+            auto error_count = REAPERAPI_LoadAPI(plug_info->GetFunc);
+            if (error_count > 1) {
+                throw FuncResolutionException{ error_count, " API functions not found. This could lead to issues when using the ADM extension. Please consider updating your REAPER version." };
+            }
         }
     }
     else {
@@ -69,7 +71,7 @@ std::shared_ptr<admplug::TopLevelMenu> admplug::ReaperHost::getMenu(admplug::Men
     return menuMan.getReaperMenu(menuId);
 }
 
-admplug::FuncResolutionException::FuncResolutionException(int errorCount) : ReaperAPIException{std::to_string(errorCount) + " API functions not found. This could lead to issues when using the ADM extension. Please consider updating your REAPER version."}
+admplug::FuncResolutionException::FuncResolutionException(int errorCount, std::string what) : std::runtime_error{std::to_string(errorCount) + what}
 {
 }
 
