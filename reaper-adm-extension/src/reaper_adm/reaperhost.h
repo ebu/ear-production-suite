@@ -20,14 +20,14 @@ public:
     ReaperAPIException(std::string what);
 };
 
-class FuncResolutionException : public ReaperAPIException {
+class FuncResolutionException : public std::runtime_error {
 public:
-    FuncResolutionException(int errorCount);
+    FuncResolutionException(int errorCount, std::string what);
 };
 
 class ReaperHost {
 public:
-    ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_plugin_info_t* plug_info);
+    ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_plugin_info_t* plug_info, bool testAPI = true);
     ~ReaperHost();
     void prepareToClose();
 

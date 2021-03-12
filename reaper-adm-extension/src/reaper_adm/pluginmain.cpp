@@ -56,16 +56,23 @@ extern "C" {
     using namespace admplug;
     std::unique_ptr<ReaperHost> reaper;
 
-    try {
-      reaper = std::make_unique<ReaperHost>(hInstance, rec);
-    } catch (ReaperAPIException const& e) {
+    auto nonBlockingMessage = [rec](const char* text) {
 #ifdef WIN32
         // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(e.what(), "ADM Extension Error", MB_ICONEXCLAMATION);
+        winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
 #else
-        MessageBox(rec->hwnd_main, e.what(), "ADM Extension Error", MB_OK);
+        MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
 #endif
-      return 0;
+    };
+
+    try {
+        reaper = std::make_unique<ReaperHost>(hInstance, rec);
+    } catch (FuncResolutionException const& e) {
+        nonBlockingMessage(e.what());
+        reaper = std::make_unique<ReaperHost>(hInstance, rec, false);
+    } catch (ReaperAPIException const& e) {
+        nonBlockingMessage(e.what());
+        return 0;
     }
 
     if(!rec) {
