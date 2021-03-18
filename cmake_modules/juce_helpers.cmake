@@ -94,6 +94,7 @@ function (_generate_juce_sources VAR)
       juce_gui_extra
       juce_opengl
       juce_video
+      juce_osc
     )
     foreach(MODULE  ${MODULES})
         _generate_juce_module_stub(${MODULE}.cpp ${DESTINATION} GENERATED_FILE)
