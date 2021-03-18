@@ -78,7 +78,7 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
   Euler oscEulerInput{ 0.0, 0.0, 0.0 };
   Quaternion latestQuat{ 0.0, 0.0, 0.0, 0.0 };
 
-  void eulerToLatestQuat(EulerOrder order);
+  Quaternion eulerToQuaternion(Euler euler, EulerOrder order);
 
 
 

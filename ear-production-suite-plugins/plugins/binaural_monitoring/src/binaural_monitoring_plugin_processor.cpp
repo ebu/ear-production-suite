@@ -72,7 +72,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
     } else {
       return;
     }
-    eulerToLatestQuat(EulerOrder::YPR);
+    latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
 
   } else if(vals.size() == 3) {
     if(add.matches("/rotation")) {
@@ -80,21 +80,21 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.p = vals[0];
       oscEulerInput.y = vals[1];
       oscEulerInput.r = vals[2];
-      eulerToLatestQuat(EulerOrder::PYR);
+      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
 
     } else if(add.matches("/rendering/htrpy")) {
       // Messages understood by AudioLab SALTE
       oscEulerInput.r = vals[0];
       oscEulerInput.p = vals[1];
       oscEulerInput.y = vals[2];
-      eulerToLatestQuat(EulerOrder::RPY);
+      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::RPY);
 
     } else if(add.matches("/ypr")) {
       // Messages understood by SPARTA/COMPASS
       oscEulerInput.y = vals[0];
       oscEulerInput.p = vals[1];
       oscEulerInput.r = vals[2];
-      eulerToLatestQuat(EulerOrder::YPR);
+      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
 
     } else {
       return;
@@ -133,7 +133,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.p = vals[4];
       oscEulerInput.y = vals[5];
       oscEulerInput.r = vals[6];
-      eulerToLatestQuat(EulerOrder::PYR);
+      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
 
     } else {
       return;
@@ -149,11 +149,13 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
       "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
 }
 
-void EarBinauralMonitoringAudioProcessor::eulerToLatestQuat(EulerOrder order)
+EarBinauralMonitoringAudioProcessor::Quaternion EarBinauralMonitoringAudioProcessor::eulerToQuaternion(Euler euler, EulerOrder order)
 {
-  float hr = deg2rad(oscEulerInput.r) / 2.0f;
-  float hp = deg2rad(oscEulerInput.p) / 2.0f;
-  float hy = deg2rad(oscEulerInput.y) / 2.0f;
+  Quaternion quat{ 0.0f, 0.0f, 0.0f, 0.0f };
+
+  float hr = deg2rad(euler.r) / 2.0f;
+  float hp = deg2rad(euler.p) / 2.0f;
+  float hy = deg2rad(euler.y) / 2.0f;
 
   float cr = cos( hr );
   float cp = cos( hp );
@@ -164,47 +166,49 @@ void EarBinauralMonitoringAudioProcessor::eulerToLatestQuat(EulerOrder order)
 
   switch(order) {
     case YPR:
-      latestQuat.x = sr * cp * cy - cr * sp * sy;
-      latestQuat.y = cr * sp * cy + sr * cp * sy;
-      latestQuat.z = cr * cp * sy - sr * sp * cy;
-      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      quat.x = sr * cp * cy - cr * sp * sy;
+      quat.y = cr * sp * cy + sr * cp * sy;
+      quat.z = cr * cp * sy - sr * sp * cy;
+      quat.w = cr * cp * cy + sr * sp * sy;
       break;
 
     case PYR:
-      latestQuat.x = sr * cp * cy + cr * sp * sy;
-      latestQuat.y = cr * sp * cy + sr * cp * sy;
-      latestQuat.z = cr * cp * sy - sr * sp * cy;
-      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      quat.x = sr * cp * cy + cr * sp * sy;
+      quat.y = cr * sp * cy + sr * cp * sy;
+      quat.z = cr * cp * sy - sr * sp * cy;
+      quat.w = cr * cp * cy - sr * sp * sy;
       break;
 
     case RPY:
-      latestQuat.x = sr * cp * cy + cr * sp * sy;
-      latestQuat.y = cr * sp * cy - sr * cp * sy;
-      latestQuat.z = cr * cp * sy + sr * sp * cy;
-      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      quat.x = sr * cp * cy + cr * sp * sy;
+      quat.y = cr * sp * cy - sr * cp * sy;
+      quat.z = cr * cp * sy + sr * sp * cy;
+      quat.w = cr * cp * cy - sr * sp * sy;
       break;
 
     case PRY:
-      latestQuat.x = sr * cp * cy + cr * sp * sy;
-      latestQuat.y = cr * sp * cy - sr * cp * sy;
-      latestQuat.z = cr * cp * sy - sr * sp * cy;
-      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      quat.x = sr * cp * cy + cr * sp * sy;
+      quat.y = cr * sp * cy - sr * cp * sy;
+      quat.z = cr * cp * sy - sr * sp * cy;
+      quat.w = cr * cp * cy + sr * sp * sy;
       break;
 
     case YRP:
-      latestQuat.x = sr * cp * cy - cr * sp * sy;
-      latestQuat.y = cr * sp * cy + sr * cp * sy;
-      latestQuat.z = cr * cp * sy + sr * sp * cy;
-      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      quat.x = sr * cp * cy - cr * sp * sy;
+      quat.y = cr * sp * cy + sr * cp * sy;
+      quat.z = cr * cp * sy + sr * sp * cy;
+      quat.w = cr * cp * cy - sr * sp * sy;
       break;
 
     case RYP:
-      latestQuat.x = sr * cp * cy - cr * sp * sy;
-      latestQuat.y = cr * sp * cy - sr * cp * sy;
-      latestQuat.z = cr * cp * sy + sr * sp * cy;
-      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      quat.x = sr * cp * cy - cr * sp * sy;
+      quat.y = cr * sp * cy - sr * cp * sy;
+      quat.z = cr * cp * sy + sr * sp * cy;
+      quat.w = cr * cp * cy + sr * sp * sy;
       break;
   }
+
+  return quat;
 
 }
 
