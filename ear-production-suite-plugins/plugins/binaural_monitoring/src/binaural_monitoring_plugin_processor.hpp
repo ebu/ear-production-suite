@@ -67,7 +67,7 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   enum EulerOrder {
-    YPR, PYR, RPY
+    YPR, PYR, RPY, PRY, YRP, RYP
   };
 
   OSCReceiver osc;

@@ -183,6 +183,27 @@ void EarBinauralMonitoringAudioProcessor::eulerToLatestQuat(EulerOrder order)
       latestQuat.z = cr * cp * sy + sr * sp * cy;
       latestQuat.w = cr * cp * cy - sr * sp * sy;
       break;
+
+    case PRY:
+      latestQuat.x = sr * cp * cy + cr * sp * sy;
+      latestQuat.y = cr * sp * cy - sr * cp * sy;
+      latestQuat.z = cr * cp * sy - sr * sp * cy;
+      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      break;
+
+    case YRP:
+      latestQuat.x = sr * cp * cy - cr * sp * sy;
+      latestQuat.y = cr * sp * cy + sr * cp * sy;
+      latestQuat.z = cr * cp * sy + sr * sp * cy;
+      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      break;
+
+    case RYP:
+      latestQuat.x = sr * cp * cy - cr * sp * sy;
+      latestQuat.y = cr * sp * cy - sr * cp * sy;
+      latestQuat.z = cr * cp * sy + sr * sp * cy;
+      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      break;
   }
 
 }
