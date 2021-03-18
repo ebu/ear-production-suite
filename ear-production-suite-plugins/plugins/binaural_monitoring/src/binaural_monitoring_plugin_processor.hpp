@@ -82,8 +82,9 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
   Euler latestEuler{ 0.0, 0.0, 0.0 };
 
   Quaternion eulerToQuaternion(Euler euler, EulerOrder order);
-
-
+  Euler quaternionToEuler(Quaternion quat, EulerOrder order);
+  std::vector<float> quaternionToRotationMatrix(Quaternion quat);
+  Euler rotationMatrixToEuler(std::vector<float> matrix, EulerOrder order);
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)

@@ -133,7 +133,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
     } else {
       return;
     }
-    // TODO - latestEuler = quaternionToEuler(latestQuat, EulerOrder::YPR);
+    latestEuler = quaternionToEuler(latestQuat, EulerOrder::YPR);
 
   } else if(vals.size() == 7) {
     if(add.matches("/head_pose")) {
@@ -228,6 +228,129 @@ EarBinauralMonitoringAudioProcessor::Quaternion EarBinauralMonitoringAudioProces
 
   return quat;
 
+}
+
+EarBinauralMonitoringAudioProcessor::Euler EarBinauralMonitoringAudioProcessor::quaternionToEuler(Quaternion quat, EulerOrder order)
+{
+  return rotationMatrixToEuler(quaternionToRotationMatrix(quat), order);
+}
+
+std::vector<float> EarBinauralMonitoringAudioProcessor::quaternionToRotationMatrix(Quaternion quat)
+{
+  std::vector<float> matrix(16, 0.0f);
+
+  float xx = quat.x * quat.x * 2.0f;
+  float xy = quat.x * quat.y * 2.0f;
+  float xz = quat.x * quat.z * 2.0f;
+  float yy = quat.y * quat.y * 2.0f;
+  float yz = quat.y * quat.z * 2.0f;
+  float zz = quat.z * quat.z * 2.0f;
+  float wx = quat.w * quat.x * 2.0f;
+  float wy = quat.w * quat.y * 2.0f;
+  float wz = quat.w * quat.z * 2.0f;
+
+  matrix[0] = 1.0f - yy + zz;
+  matrix[1] = xy + wz;
+  matrix[2] = xz - wy;
+  matrix[3] = 0.0f;
+
+  matrix[4] = xy - wz;
+  matrix[5] = 1.0f - xx + zz;
+  matrix[6] = yz + wx;
+  matrix[7] = 0.0f;
+
+  matrix[8] = xz + wy;
+  matrix[9] = yz - wx;
+  matrix[10] = 1.0f - xx + yy;
+  matrix[11] = 0.0f;
+
+  matrix[12] = 0.0f;
+  matrix[13] = 0.0f;
+  matrix[14] = 0.0f;
+  matrix[15] = 1.0f;
+
+  return matrix;
+}
+
+EarBinauralMonitoringAudioProcessor::Euler EarBinauralMonitoringAudioProcessor::rotationMatrixToEuler(std::vector<float> matrix, EulerOrder order)
+{
+  Euler euler{ 0.0f, 0.0f, 0.0f };
+
+  switch ( order ) {
+    case RPY:
+      euler.p = asin(clamp(matrix[8], -1.0f, 1.0f));
+      if (abs(matrix[8]) < 0.9999999) {
+        euler.r = atan2(-matrix[9], matrix[10]);
+        euler.y = atan2(-matrix[4], matrix[0]);
+      } else {
+        euler.r = atan2(matrix[6], matrix[5]);
+        euler.y = 0;
+      }
+      break;
+
+    case YPR:
+      euler.p = asin(-clamp( matrix[2], -1.0f, 1.0f));
+      if (abs(matrix[2]) < 0.9999999) {
+        euler.r = atan2(matrix[6], matrix[10]);
+        euler.y = atan2(matrix[1], matrix[0]);
+      } else {
+        euler.r = 0;
+        euler.y = atan2(-matrix[4], matrix[5]);
+      }
+      break;
+
+    case PYR:
+      euler.y = asin(clamp(matrix[1], -1.0f, 1.0f));
+      if (abs(matrix[1]) < 0.9999999) {
+        euler.r = atan2(-matrix[9], matrix[5]);
+        euler.p = atan2(-matrix[2], matrix[0]);
+      } else {
+        euler.r = 0;
+        euler.p = atan2(matrix[8], matrix[10]);
+      }
+      break;
+
+    case PRY:
+      euler.r = asin(-clamp(matrix[9], -1.0f, 1.0f));
+      if (abs(matrix[9]) < 0.9999999) {
+        euler.p = atan2(matrix[8], matrix[10]);
+        euler.y = atan2(matrix[1], matrix[5]);
+      } else {
+        euler.p = atan2(-matrix[2], matrix[0]);
+        euler.y = 0;
+      }
+      break;
+
+    case YRP:
+      euler.r = asin(clamp(matrix[6], -1.0f, 1.0f));
+      if (abs(matrix[6]) < 0.9999999) {
+        euler.p = atan2(-matrix[2], matrix[10]);
+        euler.y = atan2(-matrix[4], matrix[5]);
+      } else {
+        euler.p = 0;
+        euler.y = atan2(matrix[1], matrix[0]);
+      }
+      break;
+
+
+    case RYP:
+      euler.y = asin(-clamp(matrix[4], -1.0f, 1.0f));
+      if (abs(matrix[4]) < 0.999999 ) {
+        euler.r = atan2(matrix[6], matrix[5]);
+        euler.p = atan2(matrix[8], matrix[0]);
+      } else {
+        euler.r = atan2(-matrix[9], matrix[10]);
+        euler.p = 0;
+      }
+      break;
+
+  }
+
+  euler.p = radiansToDegrees(euler.p);
+  euler.y = radiansToDegrees(euler.y);
+  euler.r = radiansToDegrees(euler.r);
+
+  return euler;
 }
 
 //==============================================================================
