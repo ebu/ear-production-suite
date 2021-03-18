@@ -4,6 +4,7 @@
 #include <bear/api.hpp>
 #include "variable_block_adapter.hpp"
 #include <chrono>
+#include <mutex>
 
 namespace ear {
 namespace plugin {
@@ -63,6 +64,8 @@ class BinauralMonitoringAudioProcessor {
   bool configSupports(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
                       std::size_t sampleRate, std::size_t blockSize);
 
+  void setListenerOrientation(float quatW, float quatX, float quatY, float quatZ);
+
  private:
   void doProcess(float** channelPointers, size_t maxChannels);
 
@@ -70,6 +73,7 @@ class BinauralMonitoringAudioProcessor {
 
   bear::Config bearConfig;
   std::shared_ptr<bear::Renderer> bearRenderer;
+  std::mutex bearListenerMutex_;
   bear::Listener bearListener;
 
   bear::Time metadataRtime;

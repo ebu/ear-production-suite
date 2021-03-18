@@ -1,7 +1,12 @@
 #include "binaural_monitoring_audio_processor.hpp"
 #include <functional>
-
 #include <iostream>
+
+//TODO - remove once OSC work done
+#ifdef _WIN32
+#define NOMINMAX
+#include <Windows.h>
+#endif
 
 #define DEFAULT_TENSORFILE_NAME "default.tf"
 
@@ -38,6 +43,8 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
   bearConfig.set_data_path(dataFilePath);
   bearConfig.set_fft_implementation("default");
 
+  bearListener.set_position_cart(std::array<double, 3>{0.0, 0.0, 0.0});
+
   try {
     bearRenderer = std::make_shared<bear::Renderer>(bearConfig);
     try {
@@ -54,6 +61,11 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
 
 void BinauralMonitoringAudioProcessor::doProcess(float ** channelPointers, size_t maxChannels)
 {
+  {
+    std::lock_guard<std::mutex> lock(bearListenerMutex_);
+    bearRenderer->set_listener(bearListener);
+  }
+
   // Set buffer pointers
   size_t tdLimit = std::min(objChannelMappings.size(), bearConfig.get_num_objects_channels());
   for(size_t tdChannel = 0; tdChannel < tdLimit; tdChannel++) {
@@ -150,6 +162,21 @@ bool BinauralMonitoringAudioProcessor::configSupports(std::size_t objChannels, s
   if(bearConfig.get_num_direct_speakers_channels() < dsChannels) return false;
   if(bearConfig.get_num_hoa_channels() < hoaChannels) return false;
   return true;
+}
+
+void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float quatX, float quatY, float quatZ)
+{
+//TODO - remove once OSC work done
+#ifdef _WIN32
+  std::string msg{ "Quat WXYZ: " };
+  msg += std::to_string(quatW) + "   ";
+  msg += std::to_string(quatX) + "   ";
+  msg += std::to_string(quatY) + "   ";
+  msg += std::to_string(quatZ) + "\n";
+  OutputDebugString(msg.c_str());
+#endif
+  std::lock_guard<std::mutex> lock(bearListenerMutex_);
+  bearListener.set_orientation_quaternion(std::array<double, 4>{quatW, quatX, quatY, quatZ});
 }
 
 
