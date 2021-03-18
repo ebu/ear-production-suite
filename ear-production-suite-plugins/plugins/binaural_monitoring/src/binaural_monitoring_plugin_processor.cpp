@@ -2,8 +2,6 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
-#define deg2rad(angleDegrees) ((angleDegrees) * 0.01745329)
-#define rad2deg(angleRadians) ((angleRadians) * 57.29577951)
 
 namespace ear {
 namespace plugin {
@@ -153,9 +151,9 @@ EarBinauralMonitoringAudioProcessor::Quaternion EarBinauralMonitoringAudioProces
 {
   Quaternion quat{ 0.0f, 0.0f, 0.0f, 0.0f };
 
-  float hr = deg2rad(euler.r) / 2.0f;
-  float hp = deg2rad(euler.p) / 2.0f;
-  float hy = deg2rad(euler.y) / 2.0f;
+  float hr = degreesToRadians(euler.r) / 2.0f;
+  float hp = degreesToRadians(euler.p) / 2.0f;
+  float hy = degreesToRadians(euler.y) / 2.0f;
 
   float cr = cos( hr );
   float cp = cos( hp );
