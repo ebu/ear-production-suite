@@ -166,17 +166,21 @@ bool BinauralMonitoringAudioProcessor::configSupports(std::size_t objChannels, s
 
 void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float quatX, float quatY, float quatZ)
 {
+  // X and Y need swapping and inverting for BEAR
+  std::array<double, 4> listenerQuats{ quatW, -quatY, -quatX, quatZ };
+
 //TODO - remove once OSC work done
 #ifdef _WIN32
   std::string msg{ "Quat WXYZ: " };
-  msg += std::to_string(quatW) + "   ";
-  msg += std::to_string(quatX) + "   ";
-  msg += std::to_string(quatY) + "   ";
-  msg += std::to_string(quatZ) + "\n";
+  msg += std::to_string(listenerQuats[0]) + "   ";
+  msg += std::to_string(listenerQuats[1]) + "   ";
+  msg += std::to_string(listenerQuats[2]) + "   ";
+  msg += std::to_string(listenerQuats[3]) + "\n";
   OutputDebugString(msg.c_str());
 #endif
+
   std::lock_guard<std::mutex> lock(bearListenerMutex_);
-  bearListener.set_orientation_quaternion(std::array<double, 4>{quatW, quatX, quatY, quatZ});
+  bearListener.set_orientation_quaternion(listenerQuats);
 }
 
 

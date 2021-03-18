@@ -103,42 +103,25 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
   } else if(vals.size() == 4) {
     if(add.matches("/quaternion")) {
       // Messages understood by Ambix
-      /*
       latestQuat.w = vals[0];
       latestQuat.y = vals[1];
       latestQuat.x = -vals[2];
       latestQuat.z = vals[3];
-      */
-      latestQuat.w = vals[0];
-      latestQuat.x = -vals[1];
-      latestQuat.y = vals[2];
-      latestQuat.z = vals[3];
+
 
     } else if(add.matches("/SceneRotator/quaternions")) {
       // Messages understood by IEM
-      /*
       latestQuat.w = vals[0];
       latestQuat.x = vals[1];
       latestQuat.y = -vals[2];
       latestQuat.z = -vals[3];
-      */
-      latestQuat.w = vals[0];
-      latestQuat.y = -vals[1];
-      latestQuat.x = vals[2];
-      latestQuat.z = -vals[3];
 
     } else if(add.matches("/quaternions")) {
       // Messages understood by Unity plugin
-      /*
       latestQuat.w = vals[0];
       latestQuat.x = -vals[1];
       latestQuat.z = -vals[2];
       latestQuat.y = -vals[3];
-      */
-      latestQuat.w = vals[0];
-      latestQuat.y = vals[1];
-      latestQuat.z = -vals[2];
-      latestQuat.x = vals[3];
 
     } else {
       return;
@@ -181,40 +164,22 @@ void EarBinauralMonitoringAudioProcessor::eulerToLatestQuat(EulerOrder order)
 
   switch(order) {
     case YPR:
-      /*
       latestQuat.x = sr * cp * cy - cr * sp * sy;
       latestQuat.y = cr * sp * cy + sr * cp * sy;
-      latestQuat.z = cr * cp * sy - sr * sp * cy;
-      latestQuat.w = cr * cp * cy + sr * sp * sy;
-      */
-      latestQuat.y = -(sr * cp * cy - cr * sp * sy);
-      latestQuat.x = -(cr * sp * cy + sr * cp * sy);
       latestQuat.z = cr * cp * sy - sr * sp * cy;
       latestQuat.w = cr * cp * cy + sr * sp * sy;
       break;
 
     case PYR:
-      /*
       latestQuat.x = sr * cp * cy + cr * sp * sy;
       latestQuat.y = cr * sp * cy + sr * cp * sy;
-      latestQuat.z = cr * cp * sy - sr * sp * cy;
-      latestQuat.w = cr * cp * cy - sr * sp * sy;
-      */
-      latestQuat.y = -(sr * cp * cy + cr * sp * sy);
-      latestQuat.x = -(cr * sp * cy + sr * cp * sy);
       latestQuat.z = cr * cp * sy - sr * sp * cy;
       latestQuat.w = cr * cp * cy - sr * sp * sy;
       break;
 
     case RPY:
-      /*
       latestQuat.x = sr * cp * cy + cr * sp * sy;
       latestQuat.y = cr * sp * cy - sr * cp * sy;
-      latestQuat.z = cr * cp * sy + sr * sp * cy;
-      latestQuat.w = cr * cp * cy - sr * sp * sy;
-      */
-      latestQuat.y = -(sr * cp * cy + cr * sp * sy);
-      latestQuat.x = -(cr * sp * cy - sr * cp * sy);
       latestQuat.z = cr * cp * sy + sr * sp * cy;
       latestQuat.w = cr * cp * cy - sr * sp * sy;
       break;
