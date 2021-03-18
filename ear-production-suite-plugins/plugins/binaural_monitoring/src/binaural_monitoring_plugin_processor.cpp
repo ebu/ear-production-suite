@@ -2,6 +2,11 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
+//TODO - remove once OSC work done
+#ifdef _WIN32
+#define NOMINMAX
+#include <Windows.h>
+#endif
 
 namespace ear {
 namespace plugin {
@@ -71,6 +76,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       return;
     }
     latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
+    latestEuler = oscEulerInput;
 
   } else if(vals.size() == 3) {
     if(add.matches("/rotation")) {
@@ -79,6 +85,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.y = vals[1];
       oscEulerInput.r = vals[2];
       latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
+      latestEuler = oscEulerInput;
 
     } else if(add.matches("/rendering/htrpy")) {
       // Messages understood by AudioLab SALTE
@@ -86,6 +93,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.p = vals[1];
       oscEulerInput.y = vals[2];
       latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::RPY);
+      latestEuler = oscEulerInput;
 
     } else if(add.matches("/ypr")) {
       // Messages understood by SPARTA/COMPASS
@@ -93,6 +101,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.p = vals[1];
       oscEulerInput.r = vals[2];
       latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
+      latestEuler = oscEulerInput;
 
     } else {
       return;
@@ -124,6 +133,7 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
     } else {
       return;
     }
+    // TODO - latestEuler = quaternionToEuler(latestQuat, EulerOrder::YPR);
 
   } else if(vals.size() == 7) {
     if(add.matches("/head_pose")) {
@@ -132,11 +142,21 @@ void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & 
       oscEulerInput.y = vals[5];
       oscEulerInput.r = vals[6];
       latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
+      latestEuler = oscEulerInput;
 
     } else {
       return;
     }
   }
+
+  //TODO - remove once OSC work done
+#ifdef _WIN32
+  std::string msg{ "Euler Y P R: " };
+  msg += std::to_string(latestEuler.y) + "   ";
+  msg += std::to_string(latestEuler.p) + "   ";
+  msg += std::to_string(latestEuler.r) + "\n";
+  OutputDebugString(msg.c_str());
+#endif
 
   processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
 }

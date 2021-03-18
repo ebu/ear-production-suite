@@ -73,10 +73,13 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
   OSCReceiver osc;
   uint16_t oscPort{ 8000 };
   bool oscConnected{ false };
+
   struct Euler { float y, p, r; };
   struct Quaternion { float w, x, y, z; };
   Euler oscEulerInput{ 0.0, 0.0, 0.0 };
+
   Quaternion latestQuat{ 0.0, 0.0, 0.0, 0.0 };
+  Euler latestEuler{ 0.0, 0.0, 0.0 };
 
   Quaternion eulerToQuaternion(Euler euler, EulerOrder order);
 
