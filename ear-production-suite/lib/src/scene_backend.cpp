@@ -256,6 +256,7 @@ void SceneBackend::onConnectionEvent(
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
   std::lock_guard<std::mutex> lock{storeMutex_};
   programmeStore_ = store;
+  rebuildSceneStore_ = true;
 }
 
 std::pair<ItemStore, proto::ProgrammeStore> SceneBackend::stores() {
