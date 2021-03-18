@@ -2,6 +2,9 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
+#define deg2rad(angleDegrees) ((angleDegrees) * 0.01745329)
+#define rad2deg(angleRadians) ((angleRadians) * 57.29577951)
+
 namespace ear {
 namespace plugin {
 template <>
@@ -32,10 +35,191 @@ struct BufferTraits<juce::AudioBuffer<float>> {
 #include "binaural_monitoring_audio_processor.hpp"
 #include "binaural_monitoring_backend.hpp"
 
+void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & message)
+{
+  auto add = message.getAddressPattern();
+
+  std::vector<float> vals(message.size(), 0.0);
+  for(int i = 0; i < vals.size(); i++) {
+    if(message[i].isFloat32()) {
+      vals[i] = message[i].getFloat32();
+    } else if(message[i].isInt32()) {
+      vals[i] = (float)message[i].getInt32();
+    } else {
+      return;
+    }
+  }
+
+  if(vals.size() == 1) {
+    if(add.matches("/yaw")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.y = vals[0];
+    } else if(add.matches("/pitch")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.p = vals[0];
+    } else if(add.matches("/roll")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.r = vals[0];
+    } else if(add.matches("/hedrot/yaw")) {
+      // Messages sent by Hedrot
+      oscEulerInput.y = vals[0];
+    } else if(add.matches("/hedrot/pitch")) {
+      // Messages sent by Hedrot
+      oscEulerInput.p = vals[0];
+    } else if(add.matches("/hedrot/roll")) {
+      // Messages sent by Hedrot
+      oscEulerInput.r = vals[0];
+    } else {
+      return;
+    }
+    eulerToLatestQuat(EulerOrder::YPR);
+
+  } else if(vals.size() == 3) {
+    if(add.matches("/rotation")) {
+      // Messages understood by Ambix
+      oscEulerInput.p = vals[0];
+      oscEulerInput.y = vals[1];
+      oscEulerInput.r = vals[2];
+      eulerToLatestQuat(EulerOrder::PYR);
+
+    } else if(add.matches("/rendering/htrpy")) {
+      // Messages understood by AudioLab SALTE
+      oscEulerInput.r = vals[0];
+      oscEulerInput.p = vals[1];
+      oscEulerInput.y = vals[2];
+      eulerToLatestQuat(EulerOrder::RPY);
+
+    } else if(add.matches("/ypr")) {
+      // Messages understood by SPARTA/COMPASS
+      oscEulerInput.y = vals[0];
+      oscEulerInput.p = vals[1];
+      oscEulerInput.r = vals[2];
+      eulerToLatestQuat(EulerOrder::YPR);
+
+    } else {
+      return;
+    }
+
+  } else if(vals.size() == 4) {
+    if(add.matches("/quaternion")) {
+      // Messages understood by Ambix
+      /*
+      latestQuat.w = vals[0];
+      latestQuat.y = vals[1];
+      latestQuat.x = -vals[2];
+      latestQuat.z = vals[3];
+      */
+      latestQuat.w = vals[0];
+      latestQuat.x = -vals[1];
+      latestQuat.y = vals[2];
+      latestQuat.z = vals[3];
+
+    } else if(add.matches("/SceneRotator/quaternions")) {
+      // Messages understood by IEM
+      /*
+      latestQuat.w = vals[0];
+      latestQuat.x = vals[1];
+      latestQuat.y = -vals[2];
+      latestQuat.z = -vals[3];
+      */
+      latestQuat.w = vals[0];
+      latestQuat.y = -vals[1];
+      latestQuat.x = vals[2];
+      latestQuat.z = -vals[3];
+
+    } else if(add.matches("/quaternions")) {
+      // Messages understood by Unity plugin
+      /*
+      latestQuat.w = vals[0];
+      latestQuat.x = -vals[1];
+      latestQuat.z = -vals[2];
+      latestQuat.y = -vals[3];
+      */
+      latestQuat.w = vals[0];
+      latestQuat.y = vals[1];
+      latestQuat.z = -vals[2];
+      latestQuat.x = vals[3];
+
+    } else {
+      return;
+    }
+
+  } else if(vals.size() == 7) {
+    if(add.matches("/head_pose")) {
+      // Messages understood by Ambix
+      oscEulerInput.p = vals[4];
+      oscEulerInput.y = vals[5];
+      oscEulerInput.r = vals[6];
+      eulerToLatestQuat(EulerOrder::PYR);
+
+    } else {
+      return;
+    }
+  }
+
+  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+}
+
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   return BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
+}
+
+void EarBinauralMonitoringAudioProcessor::eulerToLatestQuat(EulerOrder order)
+{
+  float hr = deg2rad(oscEulerInput.r) / 2.0f;
+  float hp = deg2rad(oscEulerInput.p) / 2.0f;
+  float hy = deg2rad(oscEulerInput.y) / 2.0f;
+
+  float cr = cos( hr );
+  float cp = cos( hp );
+  float cy = cos( hy );
+  float sr = sin( hr );
+  float sp = sin( hp );
+  float sy = sin( hy );
+
+  switch(order) {
+    case YPR:
+      /*
+      latestQuat.x = sr * cp * cy - cr * sp * sy;
+      latestQuat.y = cr * sp * cy + sr * cp * sy;
+      latestQuat.z = cr * cp * sy - sr * sp * cy;
+      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      */
+      latestQuat.y = -(sr * cp * cy - cr * sp * sy);
+      latestQuat.x = -(cr * sp * cy + sr * cp * sy);
+      latestQuat.z = cr * cp * sy - sr * sp * cy;
+      latestQuat.w = cr * cp * cy + sr * sp * sy;
+      break;
+
+    case PYR:
+      /*
+      latestQuat.x = sr * cp * cy + cr * sp * sy;
+      latestQuat.y = cr * sp * cy + sr * cp * sy;
+      latestQuat.z = cr * cp * sy - sr * sp * cy;
+      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      */
+      latestQuat.y = -(sr * cp * cy + cr * sp * sy);
+      latestQuat.x = -(cr * sp * cy + sr * cp * sy);
+      latestQuat.z = cr * cp * sy - sr * sp * cy;
+      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      break;
+
+    case RPY:
+      /*
+      latestQuat.x = sr * cp * cy + cr * sp * sy;
+      latestQuat.y = cr * sp * cy - sr * cp * sy;
+      latestQuat.z = cr * cp * sy + sr * sp * cy;
+      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      */
+      latestQuat.y = -(sr * cp * cy + cr * sp * sy);
+      latestQuat.x = -(cr * sp * cy - sr * cp * sy);
+      latestQuat.z = cr * cp * sy + sr * sp * cy;
+      latestQuat.w = cr * cp * cy - sr * sp * sy;
+      break;
+  }
+
 }
 
 //==============================================================================
@@ -49,9 +233,16 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   vstPath = vstPath.getParentDirectory();
   vstPath = vstPath.getChildFile("default.tf");
   bearDataFilePath = vstPath.getFullPathName().toStdString();
+
+  osc.addListener(this);
+  oscConnected = osc.connect(oscPort);
 }
 
-EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
+EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
+  osc.disconnect();
+  oscConnected = false;
+  osc.removeListener(this);
+}
 
 //==============================================================================
 const String EarBinauralMonitoringAudioProcessor::getName() const {

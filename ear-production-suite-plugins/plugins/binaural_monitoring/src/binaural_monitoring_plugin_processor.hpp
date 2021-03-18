@@ -15,7 +15,7 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace plugin
 }  // namespace ear
 
-class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
+class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCReceiver::Listener<OSCReceiver::RealtimeCallback> {
  public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
@@ -52,6 +52,8 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
     return levelMeter_;
   };
 
+  void oscMessageReceived(const OSCMessage& message) override;
+
  private:
   BusesProperties _getBusProperties();
 
@@ -63,6 +65,22 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
   int blocksize_;
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
+
+  enum EulerOrder {
+    YPR, PYR, RPY
+  };
+
+  OSCReceiver osc;
+  uint16_t oscPort{ 8000 };
+  bool oscConnected{ false };
+  struct Euler { float y, p, r; };
+  struct Quaternion { float w, x, y, z; };
+  Euler oscEulerInput{ 0.0, 0.0, 0.0 };
+  Quaternion latestQuat{ 0.0, 0.0, 0.0, 0.0 };
+
+  void eulerToLatestQuat(EulerOrder order);
+
+
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)
