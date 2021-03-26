@@ -20,4 +20,4 @@ add_juce_vst3_plugin(direct_speakers
   
 target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base)
 
-install_juce_vst3_plugin(direct_speakers "${EAR_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install_juce_vst3_plugin(direct_speakers "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

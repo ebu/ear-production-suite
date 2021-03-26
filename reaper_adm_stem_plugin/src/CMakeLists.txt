@@ -42,7 +42,7 @@ target_include_directories(adm_export_source_VST3
 target_compile_definitions(adm_export_source_VST3
     PUBLIC JUCE_DISABLE_ASSERTIONS)
 
-install_juce_vst3_plugin(adm_export_source "${EAR_PLUGIN_INSTALL_PREFIX}VST3")
+install_juce_vst3_plugin(adm_export_source "${EPS_PLUGIN_INSTALL_PREFIX}VST3")
 
 include(DeployVST3)
 
