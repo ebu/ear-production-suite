@@ -4,6 +4,7 @@
 
 #include <ear/ear.hpp>
 #include <memory>
+#include <optional>
 
 #include "components/level_meter_calculator.hpp"
 
@@ -15,7 +16,82 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace plugin
 }  // namespace ear
 
-class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCReceiver::Listener<OSCReceiver::RealtimeCallback> {
+
+class ListenerOrientation
+{
+public:
+  ListenerOrientation();
+  ~ListenerOrientation();
+
+  enum EulerOrder {
+    YPR, PYR, RPY, PRY, YRP, RYP
+  };
+
+  struct Euler {
+    double y, p, r;
+    EulerOrder order;
+  };
+  struct Quaternion {
+    double w, x, y, z;
+  };
+
+  Euler getEuler();
+  void setEuler(Euler e);
+
+  Quaternion getQuaternion();
+  void setQuaternion(Quaternion q);
+
+  void setCoordinateUpdateHandler(std::function<void()> callback);
+
+private:
+  std::optional<Euler> lastEulerInput;
+  std::optional<Quaternion> lastQuatInput;
+
+  std::optional<Euler> eulerOutput;
+  std::optional<Quaternion> quatOutput;
+
+  Euler toEuler(Quaternion q, EulerOrder o);
+  Quaternion toQuaternion(Euler e);
+
+  std::function<void()> coordinateUpdateCallback;
+};
+
+class ListenerOrientationOscReceiver :  private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private Timer
+{
+public:
+  ListenerOrientationOscReceiver();
+  ~ListenerOrientationOscReceiver();
+
+  void setListenerOrientationHandler(std::shared_ptr<ListenerOrientation>);
+  void setOnConnectionStatusChangeTextHandler(std::function<void(std::string newStatus)> callback);
+
+  void listenForConnections(uint16_t port);
+  void disconnect();
+
+  void oscMessageReceived(const OSCMessage& message) override;
+  void timerCallback() override;
+
+private:
+  std::function<void(std::string newStatus)> statusTextCallback;
+  std::string curStatusText{ "Disconnected" };
+  void updateStatusText(std::string& newStatus);
+  void updateStatusText();
+
+  bool attemptListen{ false };
+  bool isListening{ false };
+  uint16_t oscPort{ 8000 };
+
+  OSCReceiver osc;
+  std::shared_ptr<ListenerOrientation> listenerOrientation;
+
+  // Have to track this because we can receive one coord at a time, but they're only useful together
+  ListenerOrientation::Euler oscEulerInput{ 0.0, 0.0, 0.0, ListenerOrientation::EulerOrder::YPR };
+
+};
+
+
+
+class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
  public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
@@ -52,7 +128,8 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
     return levelMeter_;
   };
 
-  void oscMessageReceived(const OSCMessage& message) override;
+  std::shared_ptr<ListenerOrientation> listenerOrientation{};
+  ListenerOrientationOscReceiver oscReceiver{};
 
  private:
   BusesProperties _getBusProperties();
@@ -65,26 +142,6 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private OSCRe
   int blocksize_;
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
-
-  enum EulerOrder {
-    YPR, PYR, RPY, PRY, YRP, RYP
-  };
-
-  OSCReceiver osc;
-  uint16_t oscPort{ 8000 };
-  bool oscConnected{ false };
-
-  struct Euler { float y, p, r; };
-  struct Quaternion { float w, x, y, z; };
-  Euler oscEulerInput{ 0.0, 0.0, 0.0 };
-
-  Quaternion latestQuat{ 0.0, 0.0, 0.0, 0.0 };
-  Euler latestEuler{ 0.0, 0.0, 0.0 };
-
-  Quaternion eulerToQuaternion(Euler euler, EulerOrder order);
-  Euler quaternionToEuler(Quaternion quat, EulerOrder order);
-  std::vector<float> quaternionToRotationMatrix(Quaternion quat);
-  Euler rotationMatrixToEuler(std::vector<float> matrix, EulerOrder order);
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)

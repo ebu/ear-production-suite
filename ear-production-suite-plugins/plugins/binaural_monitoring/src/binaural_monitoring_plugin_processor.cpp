@@ -38,320 +38,6 @@ struct BufferTraits<juce::AudioBuffer<float>> {
 #include "binaural_monitoring_audio_processor.hpp"
 #include "binaural_monitoring_backend.hpp"
 
-void EarBinauralMonitoringAudioProcessor::oscMessageReceived(const OSCMessage & message)
-{
-  auto add = message.getAddressPattern();
-
-  std::vector<float> vals(message.size(), 0.0);
-  for(int i = 0; i < vals.size(); i++) {
-    if(message[i].isFloat32()) {
-      vals[i] = message[i].getFloat32();
-    } else if(message[i].isInt32()) {
-      vals[i] = (float)message[i].getInt32();
-    } else {
-      return;
-    }
-  }
-
-  if(vals.size() == 1) {
-    if(add.matches("/yaw")) {
-      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
-      oscEulerInput.y = vals[0];
-    } else if(add.matches("/pitch")) {
-      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
-      oscEulerInput.p = vals[0];
-    } else if(add.matches("/roll")) {
-      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
-      oscEulerInput.r = vals[0];
-    } else if(add.matches("/hedrot/yaw")) {
-      // Messages sent by Hedrot
-      oscEulerInput.y = vals[0];
-    } else if(add.matches("/hedrot/pitch")) {
-      // Messages sent by Hedrot
-      oscEulerInput.p = vals[0];
-    } else if(add.matches("/hedrot/roll")) {
-      // Messages sent by Hedrot
-      oscEulerInput.r = vals[0];
-    } else {
-      return;
-    }
-    latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
-    latestEuler = oscEulerInput;
-
-  } else if(vals.size() == 3) {
-    if(add.matches("/rotation")) {
-      // Messages understood by Ambix
-      oscEulerInput.p = vals[0];
-      oscEulerInput.y = vals[1];
-      oscEulerInput.r = vals[2];
-      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
-      latestEuler = oscEulerInput;
-
-    } else if(add.matches("/rendering/htrpy")) {
-      // Messages understood by AudioLab SALTE
-      oscEulerInput.r = vals[0];
-      oscEulerInput.p = vals[1];
-      oscEulerInput.y = vals[2];
-      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::RPY);
-      latestEuler = oscEulerInput;
-
-    } else if(add.matches("/ypr")) {
-      // Messages understood by SPARTA/COMPASS
-      oscEulerInput.y = vals[0];
-      oscEulerInput.p = vals[1];
-      oscEulerInput.r = vals[2];
-      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::YPR);
-      latestEuler = oscEulerInput;
-
-    } else {
-      return;
-    }
-
-  } else if(vals.size() == 4) {
-    if(add.matches("/quaternion")) {
-      // Messages understood by Ambix
-      latestQuat.w = vals[0];
-      latestQuat.y = vals[1];
-      latestQuat.x = -vals[2];
-      latestQuat.z = vals[3];
-
-
-    } else if(add.matches("/SceneRotator/quaternions")) {
-      // Messages understood by IEM
-      latestQuat.w = vals[0];
-      latestQuat.x = vals[1];
-      latestQuat.y = -vals[2];
-      latestQuat.z = -vals[3];
-
-    } else if(add.matches("/quaternions")) {
-      // Messages understood by Unity plugin
-      latestQuat.w = vals[0];
-      latestQuat.x = -vals[1];
-      latestQuat.z = -vals[2];
-      latestQuat.y = -vals[3];
-
-    } else {
-      return;
-    }
-    latestEuler = quaternionToEuler(latestQuat, EulerOrder::YPR);
-
-  } else if(vals.size() == 7) {
-    if(add.matches("/head_pose")) {
-      // Messages understood by Ambix
-      oscEulerInput.p = vals[4];
-      oscEulerInput.y = vals[5];
-      oscEulerInput.r = vals[6];
-      latestQuat = eulerToQuaternion(oscEulerInput, EulerOrder::PYR);
-      latestEuler = oscEulerInput;
-
-    } else {
-      return;
-    }
-  }
-
-  //TODO - remove once OSC work done
-#ifdef _WIN32
-  std::string msg{ "Euler Y P R: " };
-  msg += std::to_string(latestEuler.y) + "   ";
-  msg += std::to_string(latestEuler.p) + "   ";
-  msg += std::to_string(latestEuler.r) + "\n";
-  OutputDebugString(msg.c_str());
-#endif
-
-  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
-}
-
-juce::AudioProcessor::BusesProperties
-EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  return BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
-}
-
-EarBinauralMonitoringAudioProcessor::Quaternion EarBinauralMonitoringAudioProcessor::eulerToQuaternion(Euler euler, EulerOrder order)
-{
-  Quaternion quat{ 0.0f, 0.0f, 0.0f, 0.0f };
-
-  float hr = degreesToRadians(euler.r) / 2.0f;
-  float hp = degreesToRadians(euler.p) / 2.0f;
-  float hy = degreesToRadians(euler.y) / 2.0f;
-
-  float cr = cos( hr );
-  float cp = cos( hp );
-  float cy = cos( hy );
-  float sr = sin( hr );
-  float sp = sin( hp );
-  float sy = sin( hy );
-
-  switch(order) {
-    case YPR:
-      quat.x = sr * cp * cy - cr * sp * sy;
-      quat.y = cr * sp * cy + sr * cp * sy;
-      quat.z = cr * cp * sy - sr * sp * cy;
-      quat.w = cr * cp * cy + sr * sp * sy;
-      break;
-
-    case PYR:
-      quat.x = sr * cp * cy + cr * sp * sy;
-      quat.y = cr * sp * cy + sr * cp * sy;
-      quat.z = cr * cp * sy - sr * sp * cy;
-      quat.w = cr * cp * cy - sr * sp * sy;
-      break;
-
-    case RPY:
-      quat.x = sr * cp * cy + cr * sp * sy;
-      quat.y = cr * sp * cy - sr * cp * sy;
-      quat.z = cr * cp * sy + sr * sp * cy;
-      quat.w = cr * cp * cy - sr * sp * sy;
-      break;
-
-    case PRY:
-      quat.x = sr * cp * cy + cr * sp * sy;
-      quat.y = cr * sp * cy - sr * cp * sy;
-      quat.z = cr * cp * sy - sr * sp * cy;
-      quat.w = cr * cp * cy + sr * sp * sy;
-      break;
-
-    case YRP:
-      quat.x = sr * cp * cy - cr * sp * sy;
-      quat.y = cr * sp * cy + sr * cp * sy;
-      quat.z = cr * cp * sy + sr * sp * cy;
-      quat.w = cr * cp * cy - sr * sp * sy;
-      break;
-
-    case RYP:
-      quat.x = sr * cp * cy - cr * sp * sy;
-      quat.y = cr * sp * cy - sr * cp * sy;
-      quat.z = cr * cp * sy + sr * sp * cy;
-      quat.w = cr * cp * cy + sr * sp * sy;
-      break;
-  }
-
-  return quat;
-
-}
-
-EarBinauralMonitoringAudioProcessor::Euler EarBinauralMonitoringAudioProcessor::quaternionToEuler(Quaternion quat, EulerOrder order)
-{
-  return rotationMatrixToEuler(quaternionToRotationMatrix(quat), order);
-}
-
-std::vector<float> EarBinauralMonitoringAudioProcessor::quaternionToRotationMatrix(Quaternion quat)
-{
-  std::vector<float> matrix(16, 0.0f);
-
-  float xx = quat.x * quat.x * 2.0f;
-  float xy = quat.x * quat.y * 2.0f;
-  float xz = quat.x * quat.z * 2.0f;
-  float yy = quat.y * quat.y * 2.0f;
-  float yz = quat.y * quat.z * 2.0f;
-  float zz = quat.z * quat.z * 2.0f;
-  float wx = quat.w * quat.x * 2.0f;
-  float wy = quat.w * quat.y * 2.0f;
-  float wz = quat.w * quat.z * 2.0f;
-
-  matrix[0] = 1.0f - yy + zz;
-  matrix[1] = xy + wz;
-  matrix[2] = xz - wy;
-  matrix[3] = 0.0f;
-
-  matrix[4] = xy - wz;
-  matrix[5] = 1.0f - xx + zz;
-  matrix[6] = yz + wx;
-  matrix[7] = 0.0f;
-
-  matrix[8] = xz + wy;
-  matrix[9] = yz - wx;
-  matrix[10] = 1.0f - xx + yy;
-  matrix[11] = 0.0f;
-
-  matrix[12] = 0.0f;
-  matrix[13] = 0.0f;
-  matrix[14] = 0.0f;
-  matrix[15] = 1.0f;
-
-  return matrix;
-}
-
-EarBinauralMonitoringAudioProcessor::Euler EarBinauralMonitoringAudioProcessor::rotationMatrixToEuler(std::vector<float> matrix, EulerOrder order)
-{
-  Euler euler{ 0.0f, 0.0f, 0.0f };
-
-  switch ( order ) {
-    case RPY:
-      euler.p = asin(clamp(matrix[8], -1.0f, 1.0f));
-      if (abs(matrix[8]) < 0.9999999) {
-        euler.r = atan2(-matrix[9], matrix[10]);
-        euler.y = atan2(-matrix[4], matrix[0]);
-      } else {
-        euler.r = atan2(matrix[6], matrix[5]);
-        euler.y = 0;
-      }
-      break;
-
-    case YPR:
-      euler.p = asin(-clamp( matrix[2], -1.0f, 1.0f));
-      if (abs(matrix[2]) < 0.9999999) {
-        euler.r = atan2(matrix[6], matrix[10]);
-        euler.y = atan2(matrix[1], matrix[0]);
-      } else {
-        euler.r = 0;
-        euler.y = atan2(-matrix[4], matrix[5]);
-      }
-      break;
-
-    case PYR:
-      euler.y = asin(clamp(matrix[1], -1.0f, 1.0f));
-      if (abs(matrix[1]) < 0.9999999) {
-        euler.r = atan2(-matrix[9], matrix[5]);
-        euler.p = atan2(-matrix[2], matrix[0]);
-      } else {
-        euler.r = 0;
-        euler.p = atan2(matrix[8], matrix[10]);
-      }
-      break;
-
-    case PRY:
-      euler.r = asin(-clamp(matrix[9], -1.0f, 1.0f));
-      if (abs(matrix[9]) < 0.9999999) {
-        euler.p = atan2(matrix[8], matrix[10]);
-        euler.y = atan2(matrix[1], matrix[5]);
-      } else {
-        euler.p = atan2(-matrix[2], matrix[0]);
-        euler.y = 0;
-      }
-      break;
-
-    case YRP:
-      euler.r = asin(clamp(matrix[6], -1.0f, 1.0f));
-      if (abs(matrix[6]) < 0.9999999) {
-        euler.p = atan2(-matrix[2], matrix[10]);
-        euler.y = atan2(-matrix[4], matrix[5]);
-      } else {
-        euler.p = 0;
-        euler.y = atan2(matrix[1], matrix[0]);
-      }
-      break;
-
-
-    case RYP:
-      euler.y = asin(-clamp(matrix[4], -1.0f, 1.0f));
-      if (abs(matrix[4]) < 0.999999 ) {
-        euler.r = atan2(matrix[6], matrix[5]);
-        euler.p = atan2(matrix[8], matrix[0]);
-      } else {
-        euler.r = atan2(-matrix[9], matrix[10]);
-        euler.p = 0;
-      }
-      break;
-
-  }
-
-  euler.p = radiansToDegrees(euler.p);
-  euler.y = radiansToDegrees(euler.y);
-  euler.r = radiansToDegrees(euler.r);
-
-  return euler;
-}
 
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
@@ -365,17 +51,37 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   vstPath = vstPath.getChildFile("default.tf");
   bearDataFilePath = vstPath.getFullPathName().toStdString();
 
-  osc.addListener(this);
-  oscConnected = osc.connect(oscPort);
+  listenerOrientation = std::make_shared<ListenerOrientation>();
+  listenerOrientation->setCoordinateUpdateHandler(
+    [this]() {
+      // TODO - inform processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+      //   --- That should set a flag to let the proc method know to update bear listner orientation before DSPing
+      // Need locks for OSC messgae tread vs audio proc thread here?
+      auto latestQuat = listenerOrientation->getQuaternion();
+      processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+      // TODO - update editor - need to put on message queue or can do directly?
+    }
+  );
+
+  oscReceiver.setListenerOrientationHandler(listenerOrientation);
+  oscReceiver.setOnConnectionStatusChangeTextHandler(
+    [this](std::string newStatus) {
+      // TODO - update editor - need to put on message queue or can do directly?
+    }
+  );
+  oscReceiver.listenForConnections(8000);
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
-  osc.disconnect();
-  oscConnected = false;
-  osc.removeListener(this);
 }
 
 //==============================================================================
+juce::AudioProcessor::BusesProperties
+EarBinauralMonitoringAudioProcessor::_getBusProperties() {
+  return BusesProperties().withInput(
+      "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
+}
+
 const String EarBinauralMonitoringAudioProcessor::getName() const {
   return JucePlugin_Name;
 }
@@ -523,4 +229,435 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
   return new EarBinauralMonitoringAudioProcessor();
+}
+
+ListenerOrientationOscReceiver::ListenerOrientationOscReceiver()
+{
+  osc.addListener(this);
+}
+
+ListenerOrientationOscReceiver::~ListenerOrientationOscReceiver()
+{
+  osc.disconnect();
+  osc.removeListener(this);
+}
+
+void ListenerOrientationOscReceiver::setOnConnectionStatusChangeTextHandler(std::function<void(std::string newStatus)> callback)
+{
+  statusTextCallback = callback;
+}
+
+void ListenerOrientationOscReceiver::setListenerOrientationHandler(std::shared_ptr<ListenerOrientation>listenerOrientationInstance)
+{
+  listenerOrientation = listenerOrientationInstance;
+}
+
+void ListenerOrientationOscReceiver::listenForConnections(uint16_t port)
+{
+  disconnect();
+  isListening = osc.connect(port);
+  updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
+}
+
+void ListenerOrientationOscReceiver::disconnect()
+{
+  stopTimer();
+  osc.disconnect();
+  isListening = false;
+  updateStatusText(std::string("OSC Closed."));
+}
+
+void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & message)
+{
+  stopTimer();
+
+  auto add = message.getAddressPattern();
+
+  std::vector<float> vals(message.size(), 0.0);
+  for(int i = 0; i < vals.size(); i++) {
+    if(message[i].isFloat32()) {
+      vals[i] = message[i].getFloat32();
+    } else if(message[i].isInt32()) {
+      vals[i] = (float)message[i].getInt32();
+    } else {
+      return;
+    }
+  }
+
+  if(vals.size() == 1) {
+    if(add.matches("/yaw")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.y = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+    } else if(add.matches("/pitch")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.p = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+    } else if(add.matches("/roll")) {
+      // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
+      oscEulerInput.r = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+    } else if(add.matches("/hedrot/yaw")) {
+      // Messages sent by Hedrot
+      oscEulerInput.y = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+    } else if(add.matches("/hedrot/pitch")) {
+      // Messages sent by Hedrot
+      oscEulerInput.p = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+    } else if(add.matches("/hedrot/roll")) {
+      // Messages sent by Hedrot
+      oscEulerInput.r = vals[0];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+
+    } else {
+      return;
+    }
+
+  } else if(vals.size() == 3) {
+    if(add.matches("/rotation")) {
+      // Messages understood by Ambix
+      oscEulerInput.p = vals[0];
+      oscEulerInput.y = vals[1];
+      oscEulerInput.r = vals[2];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+
+    } else if(add.matches("/rendering/htrpy")) {
+      // Messages understood by AudioLab SALTE
+      oscEulerInput.r = vals[0];
+      oscEulerInput.p = vals[1];
+      oscEulerInput.y = vals[2];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::RPY;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+
+    } else if(add.matches("/ypr")) {
+      // Messages understood by SPARTA/COMPASS
+      oscEulerInput.y = vals[0];
+      oscEulerInput.p = vals[1];
+      oscEulerInput.r = vals[2];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+
+    } else {
+      return;
+    }
+
+  } else if(vals.size() == 4) {
+
+    if(add.matches("/quaternion")) {
+      // Messages understood by Ambix
+      if(listenerOrientation) {
+        ListenerOrientation::Quaternion quat;
+        quat.w = vals[0];
+        quat.y = vals[1];
+        quat.x = -vals[2];
+        quat.z = vals[3];
+        listenerOrientation->setQuaternion(quat);
+      }
+
+    } else if(add.matches("/SceneRotator/quaternions")) {
+      // Messages understood by IEM
+      if(listenerOrientation) {
+        ListenerOrientation::Quaternion quat;
+        quat.w = vals[0];
+        quat.x = vals[1];
+        quat.y = -vals[2];
+        quat.z = -vals[3];
+        listenerOrientation->setQuaternion(quat);
+      }
+
+    } else if(add.matches("/quaternions")) {
+      // Messages understood by Unity plugin
+      if(listenerOrientation) {
+        ListenerOrientation::Quaternion quat;
+        quat.w = vals[0];
+        quat.x = -vals[1];
+        quat.z = -vals[2];
+        quat.y = -vals[3];
+        listenerOrientation->setQuaternion(quat);
+      }
+
+    } else {
+      return;
+    }
+
+  } else if(vals.size() == 7) {
+    if(add.matches("/head_pose")) {
+      // Messages understood by Ambix
+      oscEulerInput.p = vals[4];
+      oscEulerInput.y = vals[5];
+      oscEulerInput.r = vals[6];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
+      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+
+    } else {
+      return;
+    }
+  }
+
+  updateStatusText(std::string("OSC Receiving..."));
+  startTimer(500);
+}
+
+void ListenerOrientationOscReceiver::timerCallback()
+{
+  // "Receiving..." timer done
+  stopTimer();
+  updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
+}
+
+void ListenerOrientationOscReceiver::updateStatusText(std::string & newStatus)
+{
+  curStatusText = newStatus;
+  updateStatusText();
+}
+
+void ListenerOrientationOscReceiver::updateStatusText()
+{
+  if(statusTextCallback) {
+    statusTextCallback(curStatusText);
+  }
+}
+
+ListenerOrientation::ListenerOrientation()
+{
+}
+
+ListenerOrientation::~ListenerOrientation()
+{
+}
+
+ListenerOrientation::Euler ListenerOrientation::getEuler()
+{
+  if(!eulerOutput.has_value()) {
+    if(lastQuatInput.has_value()) {
+      eulerOutput = toEuler(lastQuatInput.value(), YPR);
+    } else {
+      eulerOutput = Euler{ 0.0, 0.0, 0.0, YPR };
+    }
+  }
+  return eulerOutput.value();
+}
+
+void ListenerOrientation::setEuler(Euler e)
+{
+  lastQuatInput.reset();
+  if(lastEulerInput.has_value()) {
+    auto& lE = lastEulerInput.value();
+    if(lE.y == e.y && lE.p == e.p && lE.r == e.r && lE.order == e.order) return;
+  }
+  lastEulerInput = e;
+  eulerOutput = e;
+  // Other output need reconvert
+  quatOutput.reset();
+  if(coordinateUpdateCallback) coordinateUpdateCallback();
+}
+
+ListenerOrientation::Quaternion ListenerOrientation::getQuaternion()
+{
+  if(!quatOutput.has_value()) {
+    if(lastEulerInput.has_value()) {
+      quatOutput = toQuaternion(lastEulerInput.value());
+    } else {
+      quatOutput = toQuaternion(Euler{ 0.0, 0.0, 0.0, YPR });
+    }
+  }
+  return quatOutput.value();
+}
+
+void ListenerOrientation::setQuaternion(Quaternion q)
+{
+  lastEulerInput.reset();
+  if(lastQuatInput.has_value()) {
+    auto& lQ = lastQuatInput.value();
+    if(lQ.w == q.w && lQ.x == q.x && lQ.y == q.y && lQ.z == q.z) return;
+  }
+  lastQuatInput = q;
+  quatOutput = q;
+  // Other output need reconvert
+  eulerOutput.reset();
+  if(coordinateUpdateCallback) coordinateUpdateCallback();
+
+  //TODO - remove once OSC work done
+#ifdef _WIN32
+  auto latestEuler = getEuler();
+  std::string msg{ "Euler Y P R: " };
+  msg += std::to_string(latestEuler.y) + "   ";
+  msg += std::to_string(latestEuler.p) + "   ";
+  msg += std::to_string(latestEuler.r) + "\n";
+  OutputDebugString(msg.c_str());
+#endif
+}
+
+void ListenerOrientation::setCoordinateUpdateHandler(std::function<void()> callback)
+{
+  coordinateUpdateCallback = callback;
+}
+
+ListenerOrientation::Euler ListenerOrientation::toEuler(Quaternion q, EulerOrder order)
+{
+  double eRadX, eRadY, eRadZ;
+
+  auto x2 = q.x + q.x, y2 = q.y + q.y, z2 = q.z + q.z;
+  auto xx = q.x * x2, xy = q.x * y2, xz = q.x * z2;
+  auto yy = q.y * y2, yz = q.y * z2, zz = q.z * z2;
+  auto wx = q.w * x2, wy = q.w * y2, wz = q.w * z2;
+
+  double m11 = (1.0 - (yy + zz));
+  double m12 = (xy - wz);
+  double m13 = (xz + wy);
+  double m21 = (xy + wz);
+  double m22 = (1 - (xx + zz));
+  double m23 = (yz - wx);
+  double m31 = (xz - wy);
+  double m32 = (yz + wx);
+  double m33 = (1.0 - (xx + yy));
+
+  switch(order) {
+
+    case RPY: //XYZ:
+      eRadY = asin(clamp(m13, -1.0, 1.0));
+      if(abs(m13) < 0.9999999) {
+        eRadX = atan2(-m23, m33);
+        eRadZ = atan2(-m12, m11);
+      } else {
+        eRadX = atan2(m32, m22);
+        eRadZ = 0.0;
+      }
+      break;
+
+    case PRY: //YXZ:
+      eRadX = asin(-clamp(m23, -1.0, 1.0));
+      if(abs(m23) < 0.9999999) {
+        eRadY = atan2(m13, m33);
+        eRadZ = atan2(m21, m22);
+      } else {
+        eRadY = atan2(-m31, m11);
+        eRadZ = 0.0;
+      }
+      break;
+
+    case YRP: //ZXY:
+      eRadX = asin(clamp(m32, -1.0, 1.0));
+      if(abs(m32) < 0.9999999) {
+        eRadY = atan2(-m31, m33);
+        eRadZ = atan2(-m12, m22);
+      } else {
+        eRadY = 0.0;
+        eRadZ = atan2(m21, m11);
+      }
+      break;
+
+    case YPR: //ZYX:
+      eRadY = asin(-clamp(m31, -1.0, 1.0));
+      if(abs(m31) < 0.9999999) {
+        eRadX = atan2(m32, m33);
+        eRadZ = atan2(m21, m11);
+      } else {
+        eRadX = 0.0;
+        eRadZ = atan2(-m12, m22);
+      }
+      break;
+
+    case PYR: //YZX:
+      eRadZ = asin(clamp(m21, -1.0, 1.0));
+      if(abs(m21) < 0.9999999) {
+        eRadX = atan2(-m23, m22);
+        eRadY = atan2(-m31, m11);
+      } else {
+        eRadX = 0.0;
+        eRadY = atan2(m13, m33);
+      }
+      break;
+
+    case RYP: //XZY:
+      eRadZ = asin(-clamp(m12, -1.0, 1.0));
+      if(abs(m12) < 0.9999999) {
+        eRadX = atan2(m32, m22);
+        eRadY = atan2(m13, m11);
+      } else {
+        eRadX = atan2(-m23, m33);
+        eRadY = 0.0;
+      }
+      break;
+
+    default:
+      throw std::runtime_error("setFromRotationMatrix() encountered an unknown order");
+  }
+
+  return Euler{ radiansToDegrees(eRadZ), radiansToDegrees(eRadY), radiansToDegrees(eRadX), order };
+}
+
+ListenerOrientation::Quaternion ListenerOrientation::toQuaternion(Euler e)
+{
+  Quaternion q;
+
+  double eRadX = degreesToRadians(e.r);
+  double eRadY = degreesToRadians(e.p);
+  double eRadZ = degreesToRadians(e.y);
+
+  double c1 = cos(eRadX / 2.0);
+  double c2 = cos(eRadY / 2.0);
+  double c3 = cos(eRadZ / 2.0);
+
+  double s1 = sin(eRadX / 2.0);
+  double s2 = sin(eRadY / 2.0);
+  double s3 = sin(eRadZ / 2.0);
+
+  switch(e.order) {
+
+    case RPY: //XYZ:
+      q.x = s1 * c2 * c3 + c1 * s2 * s3;
+      q.y = c1 * s2 * c3 - s1 * c2 * s3;
+      q.z = c1 * c2 * s3 + s1 * s2 * c3;
+      q.w = c1 * c2 * c3 - s1 * s2 * s3;
+      break;
+
+    case PRY: //YXZ:
+      q.x = s1 * c2 * c3 + c1 * s2 * s3;
+      q.y = c1 * s2 * c3 - s1 * c2 * s3;
+      q.z = c1 * c2 * s3 - s1 * s2 * c3;
+      q.w = c1 * c2 * c3 + s1 * s2 * s3;
+      break;
+
+    case YRP: //ZXY:
+      q.x = s1 * c2 * c3 - c1 * s2 * s3;
+      q.y = c1 * s2 * c3 + s1 * c2 * s3;
+      q.z = c1 * c2 * s3 + s1 * s2 * c3;
+      q.w = c1 * c2 * c3 - s1 * s2 * s3;
+      break;
+
+    case YPR: //ZYX:
+      q.x = s1 * c2 * c3 - c1 * s2 * s3;
+      q.y = c1 * s2 * c3 + s1 * c2 * s3;
+      q.z = c1 * c2 * s3 - s1 * s2 * c3;
+      q.w = c1 * c2 * c3 + s1 * s2 * s3;
+      break;
+
+    case PYR: //YZX:
+      q.x = s1 * c2 * c3 + c1 * s2 * s3;
+      q.y = c1 * s2 * c3 + s1 * c2 * s3;
+      q.z = c1 * c2 * s3 - s1 * s2 * c3;
+      q.w = c1 * c2 * c3 - s1 * s2 * s3;
+      break;
+
+    case RYP: //XZY:
+      q.x = s1 * c2 * c3 - c1 * s2 * s3;
+      q.y = c1 * s2 * c3 - s1 * c2 * s3;
+      q.z = c1 * c2 * s3 + s1 * s2 * c3;
+      q.w = c1 * c2 * c3 + s1 * s2 * s3;
+      break;
+
+    default:
+      throw std::runtime_error("setFromEuler() encountered an unknown order");
+  }
+
+  return q;
 }
