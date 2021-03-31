@@ -57,7 +57,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
       // TODO - inform processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
       //   --- That should set a flag to let the proc method know to update bear listner orientation before DSPing
       // Need locks for OSC messgae tread vs audio proc thread here?
-    updateAudioProcessorListenerPosition();
+      updateAudioProcessorListenerPosition();
       // TODO - update editor - need to put on message queue or can do directly?
     }
   );
@@ -264,8 +264,8 @@ void ListenerOrientationOscReceiver::listenForConnections(uint16_t port)
 {
   disconnect();
   isListening = osc.connect(port);
+  updateStatusTextForListenAttempt();
   startTimer(timerIdPersistentListen, 1000);
-  updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
 }
 
 void ListenerOrientationOscReceiver::disconnect()
@@ -426,6 +426,7 @@ void ListenerOrientationOscReceiver::timerCallback(int timerId)
     // If this timer is running, we should be listening
     if(!isListening) {
       isListening = osc.connect(oscPort);
+      updateStatusTextForListenAttempt();
     }
   }
 }
@@ -441,6 +442,11 @@ void ListenerOrientationOscReceiver::updateStatusText()
   if(statusTextCallback) {
     statusTextCallback(curStatusText);
   }
+}
+
+void ListenerOrientationOscReceiver::updateStatusTextForListenAttempt()
+{
+  updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
 }
 
 ListenerOrientation::ListenerOrientation()

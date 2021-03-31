@@ -76,6 +76,7 @@ private:
   std::string curStatusText{ "Disconnected" };
   void updateStatusText(std::string& newStatus);
   void updateStatusText();
+  void updateStatusTextForListenAttempt();
 
   bool isListening{ false };
   uint16_t oscPort{ 8000 };
