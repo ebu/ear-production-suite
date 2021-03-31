@@ -56,7 +56,7 @@ private:
   std::function<void()> coordinateUpdateCallback;
 };
 
-class ListenerOrientationOscReceiver :  private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private Timer
+class ListenerOrientationOscReceiver :  private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private MultiTimer
 {
 public:
   ListenerOrientationOscReceiver();
@@ -69,7 +69,7 @@ public:
   void disconnect();
 
   void oscMessageReceived(const OSCMessage& message) override;
-  void timerCallback() override;
+  void timerCallback(int timerId) override;
 
 private:
   std::function<void(std::string newStatus)> statusTextCallback;
@@ -77,9 +77,11 @@ private:
   void updateStatusText(std::string& newStatus);
   void updateStatusText();
 
-  bool attemptListen{ false };
   bool isListening{ false };
   uint16_t oscPort{ 8000 };
+
+  const int timerIdStatusTextReset = 0;
+  const int timerIdPersistentListen = 1;
 
   OSCReceiver osc;
   std::shared_ptr<ListenerOrientation> listenerOrientation;

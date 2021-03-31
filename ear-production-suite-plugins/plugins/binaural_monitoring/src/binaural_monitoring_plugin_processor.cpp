@@ -260,12 +260,14 @@ void ListenerOrientationOscReceiver::listenForConnections(uint16_t port)
 {
   disconnect();
   isListening = osc.connect(port);
+  startTimer(timerIdPersistentListen, 1000);
   updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
 }
 
 void ListenerOrientationOscReceiver::disconnect()
 {
-  stopTimer();
+  stopTimer(timerIdStatusTextReset);
+  stopTimer(timerIdPersistentListen);
   osc.disconnect();
   isListening = false;
   updateStatusText(std::string("OSC Closed."));
@@ -273,7 +275,7 @@ void ListenerOrientationOscReceiver::disconnect()
 
 void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & message)
 {
-  stopTimer();
+  stopTimer(timerIdStatusTextReset);
 
   auto add = message.getAddressPattern();
 
@@ -407,14 +409,21 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
   }
 
   updateStatusText(std::string("OSC Receiving..."));
-  startTimer(500);
+  startTimer(timerIdStatusTextReset, 500);
 }
 
-void ListenerOrientationOscReceiver::timerCallback()
+void ListenerOrientationOscReceiver::timerCallback(int timerId)
 {
-  // "Receiving..." timer done
-  stopTimer();
-  updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
+  if(timerId == timerIdStatusTextReset) {
+    // "Receiving..." timer done
+    stopTimer(timerIdStatusTextReset);
+    updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
+  } else if(timerId == timerIdPersistentListen) {
+    // If this timer is running, we should be listening
+    if(!isListening) {
+      isListening = osc.connect(oscPort);
+    }
+  }
 }
 
 void ListenerOrientationOscReceiver::updateStatusText(std::string & newStatus)
