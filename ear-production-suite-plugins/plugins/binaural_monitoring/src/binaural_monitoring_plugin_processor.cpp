@@ -57,10 +57,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
       // TODO - inform processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
       //   --- That should set a flag to let the proc method know to update bear listner orientation before DSPing
       // Need locks for OSC messgae tread vs audio proc thread here?
-      if(processor_) {
-        auto latestQuat = listenerOrientation->getQuaternion();
-        processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
-      }
+    updateAudioProcessorListenerPosition();
       // TODO - update editor - need to put on message queue or can do directly?
     }
   );
@@ -82,6 +79,14 @@ juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   return BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
+}
+
+void EarBinauralMonitoringAudioProcessor::updateAudioProcessorListenerPosition()
+{
+  if(processor_) {
+    auto latestQuat = listenerOrientation->getQuaternion();
+    processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+  }
 }
 
 const String EarBinauralMonitoringAudioProcessor::getName() const {
@@ -156,8 +161,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
     processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
       numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
-      auto latestQuat = listenerOrientation->getQuaternion();
-      processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+    updateAudioProcessorListenerPosition();
   }
 
   // BEAR Metadata

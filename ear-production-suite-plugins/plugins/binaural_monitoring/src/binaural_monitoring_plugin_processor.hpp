@@ -136,6 +136,8 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
  private:
   BusesProperties _getBusProperties();
 
+  void updateAudioProcessorListenerPosition();
+
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;
