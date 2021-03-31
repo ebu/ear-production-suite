@@ -61,9 +61,10 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
 
 void BinauralMonitoringAudioProcessor::doProcess(float ** channelPointers, size_t maxChannels)
 {
-  {
+  if(listenerQuatsDirty) {
     std::lock_guard<std::mutex> lock(bearListenerMutex_);
     bearRenderer->set_listener(bearListener);
+    listenerQuatsDirty = false;
   }
 
   // Set buffer pointers
@@ -167,7 +168,11 @@ bool BinauralMonitoringAudioProcessor::configSupports(std::size_t objChannels, s
 void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float quatX, float quatY, float quatZ)
 {
   // X and Y need swapping and inverting for BEAR
-  std::array<double, 4> listenerQuats{ quatW, -quatY, -quatX, quatZ };
+  listenerQuats[0] = quatW;
+  listenerQuats[1] = -quatY;
+  listenerQuats[2] = -quatX;
+  listenerQuats[3] = quatZ;
+  listenerQuatsDirty = true;
 
 //TODO - remove once OSC work done
 #ifdef _WIN32
@@ -178,9 +183,6 @@ void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float
   msg += std::to_string(listenerQuats[3]) + "\n";
   OutputDebugString(msg.c_str());
 #endif
-
-  std::lock_guard<std::mutex> lock(bearListenerMutex_);
-  bearListener.set_orientation_quaternion(listenerQuats);
 }
 
 

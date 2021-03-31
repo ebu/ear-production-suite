@@ -76,6 +76,9 @@ class BinauralMonitoringAudioProcessor {
   std::mutex bearListenerMutex_;
   bear::Listener bearListener;
 
+  bool listenerQuatsDirty{ false };
+  std::array<double, 4> listenerQuats{ 1.0, 0.0, 0.0, 0.0 };
+
   bear::Time metadataRtime;
   bear::Time metadataDuration;
 
