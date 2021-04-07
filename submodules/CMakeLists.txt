@@ -65,31 +65,33 @@ set(VISR_TARGET_TYPE static_pic)
 add_subdirectory(rd-audio-visr EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
 
 set(VISR_TARGET_NAMES
-    apputilities
-    audiointerfaces
-    efl
-    objectmodel
-    panning
-    panningdsp
-    pml
-    rbbl
-    rcl
-    reverbobject
-    rrl
-    signalflows
-    signalflowspython
-    visr)
+    apputilities_${VISR_TARGET_TYPE}
+    audiointerfaces_${VISR_TARGET_TYPE}
+    efl_${VISR_TARGET_TYPE}
+    efl_${VISR_TARGET_TYPE}_AVX
+    efl_${VISR_TARGET_TYPE}_FMA
+    efl_${VISR_TARGET_TYPE}_SSE
+    objectmodel_${VISR_TARGET_TYPE}
+    panning_${VISR_TARGET_TYPE}
+    panningdsp_${VISR_TARGET_TYPE}
+    pml_${VISR_TARGET_TYPE}
+    rbbl_${VISR_TARGET_TYPE}
+    rcl_${VISR_TARGET_TYPE}
+    reverbobject_${VISR_TARGET_TYPE}
+    rrl_${VISR_TARGET_TYPE}
+    signalflows_${VISR_TARGET_TYPE}
+    signalflowspython_${VISR_TARGET_TYPE}
+    visr_${VISR_TARGET_TYPE})
 
-foreach(VISR_TARGET_NAME ${VISR_TARGET_NAMES} )
-  set(VISR_TARGET "${VISR_TARGET_NAME}_${VISR_TARGET_TYPE}")
-  set_target_properties(${VISR_TARGET} PROPERTIES FOLDER VISR)
+foreach(VISR_TARGET ${VISR_TARGET_NAMES} )
+  set_target_properties(${VISR_TARGET} PROPERTIES FOLDER submodules/VISR)
   # Put library in VISR namespace so BEAR can find it
   add_library(VISR::${VISR_TARGET} ALIAS ${VISR_TARGET})
   # Clear header properties so they don't install - we don't need them, and causes issues due to relative paths on OSX
   set_target_properties(${VISR_TARGET} PROPERTIES PUBLIC_HEADER "" )
   set_target_properties(${VISR_TARGET} PROPERTIES PRIVATE_HEADER "" )
 endforeach()
-set_target_properties(ffts_static kissfft_static PROPERTIES FOLDER VISR-3rd)
+set_target_properties(ffts_static kissfft_static PROPERTIES FOLDER submodules/VISR/3rd)
 
 ### BEAR
 
@@ -98,10 +100,10 @@ set(BEAR_UNIT_TESTS OFF CACHE BOOL "bear unit tests" FORCE)
 set(BEAR_DOWNLOAD_DATA ON CACHE BOOL "bear data files" FORCE)
 set(BEAR_VISR_LIB_TYPE "${VISR_TARGET_TYPE}" CACHE BOOL "bear visr lib type" FORCE)
 add_subdirectory(rd-audio-bear/visr_bear)
-set_target_properties(bear libear_resource_embedder PROPERTIES FOLDER bear)
-set_target_properties(ear PROPERTIES FOLDER libear)
+set_target_properties(bear libear_resource_embedder PROPERTIES FOLDER submodules/bear)
+set_target_properties(ear PROPERTIES FOLDER submodules/libear)
 foreach(VISR_TARGET_NAME ${VISR_TARGET_NAMES} )
-  add_dependencies(bear "${VISR_TARGET_NAME}_${VISR_TARGET_TYPE}")
+  add_dependencies(bear "${VISR_TARGET_NAME}")
 endforeach()
 
 

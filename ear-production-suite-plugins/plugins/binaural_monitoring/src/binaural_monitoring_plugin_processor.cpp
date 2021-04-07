@@ -1,4 +1,7 @@
 #include "binaural_monitoring_plugin_processor.hpp"
+#include "../../shared/components/non_automatable_parameter.hpp"
+#include "binaural_monitoring_backend.hpp"
+#include "binaural_monitoring_frontend_connector.hpp"
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
@@ -38,13 +41,36 @@ struct BufferTraits<juce::AudioBuffer<float>> {
 #include "binaural_monitoring_audio_processor.hpp"
 #include "binaural_monitoring_backend.hpp"
 
+using namespace ear::plugin;
 
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
+  levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
+
+  /* clang-format off */
+  /*
+  // TODO - these NonAutomatedParameter will not set plugin state dirty! Need to use dummy param as in PR !67
+  addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
+  addParameter(yaw_ = new ui::NonAutomatedParameter<AudioParameterFloat>("yaw", "Yaw", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(pitch_ = new ui::NonAutomatedParameter<AudioParameterFloat>("pitch", "Pitch", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(roll_ = new ui::NonAutomatedParameter<AudioParameterFloat>("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(oscEnable_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscEnable", "Enable OSC", false));
+  */
+  /* clang-format on */
+
   backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
     nullptr, 64);
-  levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
+  /*
+  connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
+
+  //TODO - does oscPort and useOSC need connecting? OSC is JUCE-based so maybe shouldn't use the abstraction layer.
+  connector_->parameterValueChanged(0, yaw_->get());
+  connector_->parameterValueChanged(1, pitch_->get());
+  connector_->parameterValueChanged(2, roll_->get());
+  connector_->parameterValueChanged(3, oscEnable_->get());
+  connector_->parameterValueChanged(4, oscPort_->get());
+  */
 
   auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
@@ -224,6 +250,15 @@ void EarBinauralMonitoringAudioProcessor::getStateInformation(MemoryBlock& destD
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
+  /*
+  std::unique_ptr<XmlElement> xml(new XmlElement("BinauralMonitoringPlugin"));
+  xml->setAttribute("oscPort", (int)*oscPort_);
+  xml->setAttribute("yaw", (double)*yaw_);
+  xml->setAttribute("pitch", (double)*pitch_);
+  xml->setAttribute("roll", (double)*roll_);
+  xml->setAttribute("useOsc", (bool)*oscEnable_);
+  copyXmlToBinary(*xml, destData);
+  */
 }
 
 void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
@@ -231,6 +266,19 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
   // You should use this method to restore your parameters from this memory
   // block, whose contents will have been created by the getStateInformation()
   // call.
+  /*
+  std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+  if (xmlState.get() != nullptr) {
+    if (xmlState->hasTagName("BinauralMonitoringPlugin")) {
+      // TODO - need to push these values to backend and OSC receiver, or just works?
+      *yaw_ = xmlState->getDoubleAttribute("yaw", 0.0);
+      *pitch_ = xmlState->getDoubleAttribute("pitch", 0.0);
+      *roll_ = xmlState->getDoubleAttribute("roll", 0.0);
+      *oscEnable_ = xmlState->getBoolAttribute("useOsc", false);
+      *oscPort_ = xmlState->getIntAttribute("oscPort", 8000);
+    }
+  }
+  */
 }
 
 //==============================================================================

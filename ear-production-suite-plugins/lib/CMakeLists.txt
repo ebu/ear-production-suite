@@ -39,6 +39,7 @@ add_library(ear-plugin-base STATIC
   src/ui/direct_speakers_frontend_backend_connector.cpp
   src/ui/object_frontend_backend_connector.cpp
   src/ui/scene_frontend_backend_connector.cpp
+  src/ui/binaural_monitoring_frontend_backend_connector.cpp
   ${EAR_PROTO_SRC}
         include/proto_printers.hpp src/proto_printers.cpp)
 		

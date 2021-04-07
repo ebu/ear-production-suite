@@ -5,6 +5,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(SOURCES_BINAURAL_MONITORING
     ${EPS_SHARED_DIR}/binary_data.cpp
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
+	src/binaural_monitoring_frontend_connector.cpp
     src/binaural_monitoring_plugin_editor.cpp
     src/binaural_monitoring_plugin_processor.cpp
 )

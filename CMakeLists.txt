@@ -17,6 +17,10 @@ message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE}
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
 message(STATUS "-----------------------------------------------------------------------------------\n")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 include(FeatureSummary)
 
 include(eps_set_install_paths)

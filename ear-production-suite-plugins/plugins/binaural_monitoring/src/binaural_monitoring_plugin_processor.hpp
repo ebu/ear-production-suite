@@ -10,6 +10,9 @@
 
 namespace ear {
 namespace plugin {
+namespace ui {
+  class BinauralMonitoringJuceFrontendConnector;
+}
 class BinauralMonitoringBackend;
 class BinauralMonitoringAudioProcessor;
 
@@ -134,11 +137,29 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
   std::shared_ptr<ListenerOrientation> listenerOrientation{};
   ListenerOrientationOscReceiver oscReceiver{};
 
+  /*
+  AudioParameterInt* getOscPort() { return oscPort_; }
+  AudioParameterFloat* getYaw() { return yaw_; }
+  AudioParameterFloat* getPitch() { return pitch_; }
+  AudioParameterFloat* getRoll() { return roll_; }
+  AudioParameterBool* getOscEnable() { return oscEnable_; }
+  std::string getOscStatus() { return oscReceiver.getStatus(); }
+  */
+
  private:
   BusesProperties _getBusProperties();
 
   void updateAudioProcessorListenerPosition();
 
+  /*
+  AudioParameterInt* oscPort_;
+  AudioParameterFloat* yaw_;
+  AudioParameterFloat* pitch_;
+  AudioParameterFloat* roll_;
+  AudioParameterBool* oscEnable_;
+
+  std::unique_ptr<ear::plugin::ui::BinauralMonitoringJuceFrontendConnector> connector_;
+  */
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;

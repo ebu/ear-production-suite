@@ -14,6 +14,10 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
+      /*
+      oscValueBox(std::make_unique<ValueBoxOsc>()),
+      orientationViewValueBox(std::make_unique<ValueBoxOrientation>()),
+      */
       header_(std::make_unique<EarHeader>()),
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
@@ -21,6 +25,17 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
+
+  /* clang-format off */
+  /*
+  p->getFrontendConnector()->setOscPortLabel(oscValueBox->getOscPortLabel());
+  p->getFrontendConnector()->setOscEnableButton(oscValueBox->getOscEnableButton());
+  p->getFrontendConnector()->setOscStatusLabel(oscValueBox->getOscStatusLabel());
+  p->getFrontendConnector()->setYawControl(orientationViewValueBox->getYawView());
+  p->getFrontendConnector()->setPitchControl(orientationViewValueBox->getPitchView());
+  p->getFrontendConnector()->setRollControl(orientationViewValueBox->getRollView());
+  */
+  /* clang-format on */
 
   header_->setText(" Binaural Monitoring");
 
@@ -53,6 +68,19 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(headphoneMeters_.back().get());
   }
+
+  /*
+  addAndMakeVisible(oscValueBox.get());
+  addAndMakeVisible(orientationViewValueBox.get());
+
+  oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(), dontSendNotification);
+  oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(), dontSendNotification);
+  oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(), dontSendNotification);
+  orientationViewValueBox->getYawView()->setYaw(p->getYaw()->get(), dontSendNotification);
+  orientationViewValueBox->getPitchView()->setPitch(p->getPitch()->get(), dontSendNotification);
+  orientationViewValueBox->getRollView()->setRoll(p->getRoll()->get(), dontSendNotification);
+  */
+
   //setSize(750, 600); // Min size to fit onboarding window.
   setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
 }
@@ -61,6 +89,11 @@ EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorE
 
 void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
+
+  /*
+  Shadows::elevation01dp.drawForRectangle(g, oscValueBox->getBounds());
+  Shadows::elevation01dp.drawForRectangle(g, orientationViewValueBox->getBounds());
+  */
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::resized() {
@@ -73,14 +106,20 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   header_->setBounds(headingArea);
 
   area.removeFromTop(10); // Padding between header and content
-
   // All content to go below and to be fitted within `area`
+  auto leftColumn = area.withWidth(120);
+  auto rightColumn = area.withTrimmedLeft(120);
 
-  auto meterArea = area.withHeight(200).reduced(5, 5);
+  auto meterArea = leftColumn.withHeight(200).reduced(5, 5);
   for (int i = 0; i < headphoneMeters_.size(); ++i) {
     headphoneMeters_.at(i)->setBounds(meterArea.removeFromLeft(50));
     meterArea.removeFromLeft(5);
   }
+
+  /*
+  orientationViewValueBox->setBounds(rightColumn.removeFromTop(200).reduced(5, 5));
+  oscValueBox->setBounds(rightColumn.removeFromTop(100).reduced(5, 5));
+  */
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::endButtonClicked(

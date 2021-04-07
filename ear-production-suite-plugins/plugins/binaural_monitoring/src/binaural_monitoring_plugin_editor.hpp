@@ -10,6 +10,11 @@
 #include "binaural_monitoring_plugin_processor.hpp"
 #include "headphone_channel_meter.hpp"
 
+/*
+#include "value_box_osc.hpp"
+#include "value_box_orientation.hpp"
+*/
+
 class EarBinauralMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
       private ear::plugin::ui::Onboarding::Listener {
@@ -19,6 +24,11 @@ class EarBinauralMonitoringAudioProcessorEditor
 
   void paint(Graphics&) override;
   void resized() override;
+
+  /*
+  std::unique_ptr<ear::plugin::ui::ValueBoxOsc> oscValueBox;
+  std::unique_ptr<ear::plugin::ui::ValueBoxOrientation> orientationValueBox;
+  */
 
  private:
   EarBinauralMonitoringAudioProcessor* p_;
