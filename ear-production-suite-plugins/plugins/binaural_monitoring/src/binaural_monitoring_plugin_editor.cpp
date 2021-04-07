@@ -69,6 +69,10 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     addAndMakeVisible(headphoneMeters_.back().get());
   }
 
+  test = std::make_unique<OrientationView>();
+  addAndMakeVisible(test.get());
+
+
   /*
   addAndMakeVisible(oscValueBox.get());
   addAndMakeVisible(orientationViewValueBox.get());
@@ -82,7 +86,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   */
 
   //setSize(750, 600); // Min size to fit onboarding window.
-  setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
+  //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
+  setSize(580, 480);
 }
 
 EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
@@ -115,6 +120,8 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
     headphoneMeters_.at(i)->setBounds(meterArea.removeFromLeft(50));
     meterArea.removeFromLeft(5);
   }
+
+  test->setBounds(rightColumn.withHeight(400).withWidth(400));
 
   /*
   orientationViewValueBox->setBounds(rightColumn.removeFromTop(200).reduced(5, 5));
