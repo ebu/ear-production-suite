@@ -281,27 +281,21 @@ class OrientationView : public Component,
   };
 
   void setLabelsSizeAndPosition(float atRad, juce::Rectangle<float> &valLabelRect, juce::String &valLabelStr, juce::Rectangle<float> &txtLabelRect, juce::String &txtLabelStr) {
-    if(txtLabelStr.isEmpty()) {
-      valLabelRect.setSize(EarFonts::Measures.getStringWidthFloat(valLabelStr), labelHeight_);
-      float hyp = getRectangeCentreToPerimeterDistance(atRad, valLabelRect.getWidth(), valLabelRect.getHeight());
-      valLabelRect.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad));
+    float labelWidth = EarFonts::Measures.getStringWidthFloat(valLabelStr);
+    if(txtLabelStr.isNotEmpty()) {
+      labelWidth = std::max(labelWidth, EarFonts::Values.getStringWidthFloat(txtLabelStr));
+    }
+
+    valLabelRect.setSize(labelWidth, labelHeight_);
+    txtLabelRect.setSize(labelWidth, labelHeight_);
+    float hyp = getRectangeCentreToPerimeterDistance(atRad, valLabelRect.getWidth(), valLabelRect.getHeight());
+    valLabelRect.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad));
+
+    if(atRad > (MathConstants<float>::pi * 0.51f) && atRad < (MathConstants<float>::pi * 1.49f)) {
+      // txtLabels in bottom half sit under value label
+      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() + labelSeperation_ + labelHeight_);
     } else {
-      auto width = std::max(EarFonts::Measures.getStringWidthFloat(valLabelStr), EarFonts::Values.getStringWidthFloat(txtLabelStr));
-      auto height = labelHeight_ + labelHeight_ + labelSeperation_;
-      valLabelRect.setSize(width, height);
-      txtLabelRect.setSize(width, height);
-      float hyp = getRectangeCentreToPerimeterDistance(atRad, width, height);
-      auto totalCentre = getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad);
-      Point<float> topLabelCentre{ totalCentre.getX(), totalCentre.getY() - ((labelHeight_ + labelSeperation_) / 2.f) };
-      Point<float> bottomLabelCentre{ totalCentre.getX(), totalCentre.getY() + ((labelHeight_ + labelSeperation_) / 2.f) };
-      if(atRad > (MathConstants<float>::pi * 0.75f) && atRad < (MathConstants<float>::pi * 1.25f)) {
-        // Bottom quadrant labels are in reverse order
-        valLabelRect.setCentre(topLabelCentre);
-        txtLabelRect.setCentre(bottomLabelCentre);
-      } else {
-        valLabelRect.setCentre(bottomLabelCentre);
-        txtLabelRect.setCentre(topLabelCentre);
-      }
+      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() - labelSeperation_ - labelHeight_);
     }
   }
 
