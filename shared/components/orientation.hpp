@@ -76,6 +76,12 @@ class OrientationView : public Component,
                   getHeight() / 2.f - yPos - knobSize_ / 2.f, knobSize_,
                   knobSize_);
 
+    // directional line
+    g.setColour(findColour(trackColourId));
+    auto tps = getPointOnCentredCircle(outerDiameter_, handlePos_);
+    auto tpe = getPointOnCentredCircle(outerDiameter_, handlePos_ + MathConstants<float>::pi);
+    g.drawLine(tps.getX(), tps.getY(), tpe.getX(), tpe.getY());
+
     // labeling
     g.setColour(findColour(angleLabelColourId));
     g.setFont(EarFonts::Measures);
