@@ -288,7 +288,7 @@ class OrientationView : public Component,
       auto totalCentre = getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad);
       Point<float> topLabelCentre{ totalCentre.getX(), totalCentre.getY() - ((labelHeight_ + labelSeperation_) / 2.f) };
       Point<float> bottomLabelCentre{ totalCentre.getX(), totalCentre.getY() + ((labelHeight_ + labelSeperation_) / 2.f) };
-      if(atRad > (MathConstants<float>::pi * 0.75f) && atRad > (MathConstants<float>::pi * 1.25f)) {
+      if(atRad > (MathConstants<float>::pi * 0.75f) && atRad < (MathConstants<float>::pi * 1.25f)) {
         // Bottom quadrant labels are in reverse order
         valLabelRect.setCentre(bottomLabelCentre);
         txtLabelRect.setCentre(topLabelCentre);
