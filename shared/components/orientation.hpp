@@ -49,10 +49,13 @@ class OrientationView : public Component,
     g.drawEllipse(getWidth() / 2.f - outerDiameter_ / 2.f,
                   getHeight() / 2.f - outerDiameter_ / 2.f, outerDiameter_,
                   outerDiameter_, outerTrackWidth_);
-    g.drawLine(topTick_, tickWidth_);
-    g.drawLine(bottomTick_, tickWidth_);
-    g.drawLine(leftTick_, tickWidth_);
-    g.drawLine(rightTick_, tickWidth_);
+
+    // ticks
+    g.setColour(findColour(trackColourId));
+    g.drawLine(ccwTick_, tickWidth_);
+    g.drawLine(centreTick_, tickWidth_);
+    g.drawLine(cwTick_, tickWidth_);
+    if(arcStartPos_ == arcEndPos_) g.drawLine(jointTick_, tickWidth_);
 
     // inner track
     const float innerDiameter = distance_ * outerDiameter_;
@@ -195,6 +198,10 @@ class OrientationView : public Component,
     }
   }
 
+  Point<float> getPointOnCentredCircle(float dia, float rads) {
+    return Point<float>((getWidth() / 2.f), (getHeight() / 2.f)).getPointOnCircumference(dia / 2.f, rads);
+  }
+
 
   void handleDragStart() {
     mouseDragActive_ = true;
@@ -235,6 +242,22 @@ class OrientationView : public Component,
         outerDiameter_ + outerTrackWidth_ + knobSize_,
         outerDiameter_ + outerTrackWidth_ + knobSize_);
 
+    if(arcStartPos_ == arcEndPos_) {
+      // Full Circle
+      jointTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_));
+      ccwTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_ + MathConstants<float>::halfPi), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_ + MathConstants<float>::halfPi));
+      centreTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_+ MathConstants<float>::pi), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_ + MathConstants<float>::pi));
+      cwTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_ - MathConstants<float>::halfPi), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_ - MathConstants<float>::halfPi ));
+
+    } else {
+      // Arc
+      float halfArcRange = radsBetween(arcStartPos_, arcEndPos_) / 2.f;
+      ccwTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_));
+      centreTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_+ halfArcRange), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_ + halfArcRange));
+      cwTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcEndPos_), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcEndPos_));
+    }
+
+    /*
     topTick_ = Line<float>(
         getWidth() / 2.f,
         getHeight() / 2.f - outerDiameter_ / 2.f - outerTrackWidth_ / 2.f,
@@ -255,6 +278,7 @@ class OrientationView : public Component,
         getHeight() / 2.f,
         getWidth() / 2.f + outerDiameter_ / 2.f + tickLength_,
         getHeight() / 2.f);
+    */
 
     topTickLabelRect_ = juce::Rectangle<float>(
         getWidth() / 2.f - labelWidth_ / 2.f,
@@ -368,10 +392,22 @@ class OrientationView : public Component,
   NormalisableRange<double> normRangeAzimuth_{-180.0, 180.0};
   NormalisableRange<double> normRangeDistance_{0.0, 1.0};
 
+  Line<float> ccwTick_;
+  Line<float> centreTick_;
+  Line<float> cwTick_;
+  Line<float> jointTick_;
+  /*
+  juce::Rectangle<float> ccwTickLabelRect_;
+  juce::Rectangle<float> centreTickLabelRect_;
+  juce::Rectangle<float> cwTickLabelRect_;
+  juce::Rectangle<float> jointTickLabelRect_;
+  juce::Rectangle<float> centreLabelRect_;
+  juce::Rectangle<float> jointLabelRect_;
   Line<float> topTick_;
   Line<float> bottomTick_;
   Line<float> leftTick_;
   Line<float> rightTick_;
+  */
   juce::Rectangle<float> topTickLabelRect_;
   juce::Rectangle<float> bottomTickLabelRect_;
   juce::Rectangle<float> leftTickLabelRect_;
