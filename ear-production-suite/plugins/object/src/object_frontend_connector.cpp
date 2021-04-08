@@ -389,9 +389,13 @@ void ObjectsJuceFrontendConnector::setSize(float size) {
   if (auto sizeSliderLocked = sizeSlider_.lock()) {
     sizeSliderLocked->setValue(size, dontSendNotification);
   }
-  setWidth(size);
-  setHeight(size);
-  setDepth(size);
+  if (auto linkSizeLocked = linkSizeButton_.lock()) {
+    if(linkSizeLocked->getToggleState()) {
+      setWidth(size);
+      setHeight(size);
+      setDepth(size);
+    }
+  }
   cachedSize_ = size;
 }
 
