@@ -162,11 +162,7 @@ class OrientationView : public Component,
       float posRad = std::atan2(-posRel.getX(), posRel.getY());
       float posRadCirc = (posRad < 0.f) ? posRad + MathConstants<float>::twoPi : posRad;
 
-      float arcRange = arcEndPos_ - arcStartPos_;
-      // Deal with wrap-around
-      if(arcRange <= 0.f) arcRange += MathConstants<float>::twoPi;
-      if(arcRange > MathConstants<float>::twoPi) arcRange -= MathConstants<float>::twoPi;
-
+      float arcRange = radsBetween(arcStartPos_, arcEndPos_);
       float arcOffset = arcStartPos_;
       if(arcStartPos_ > arcEndPos_) arcOffset = MathConstants<float>::twoPi - arcStartPos_;
 
