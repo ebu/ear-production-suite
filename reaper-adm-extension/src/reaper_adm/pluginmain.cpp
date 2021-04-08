@@ -176,9 +176,9 @@ extern "C" {
     if (reaperFileMenu) {
         reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
 
-        // Warning if the hard-coded fallback menu positions don't match anymore
-        if (!reaperMainMenu->checkHardcodedPosition("File")) nonBlockingMessage("Position of File menu does not match hard-coded fallback index.");
-        if (!reaperFileMenu->checkHardcodedPosition("Project templates")) nonBlockingMessage("Position of Project templates menu does not match hard-coded fallback index.");
+        // Assertions to check that the hard-coded fallback menu positions still match
+        assert(reaperMainMenu->checkHardcodedPosition("File"));
+        assert(reaperFileMenu->checkHardcodedPosition("Project templates"));
     } else {
         reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
         reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
@@ -228,9 +228,9 @@ extern "C" {
     if (reaperInsertMenu) {
         reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
 
-        // Warning if the hard-coded fallback menu positions don't match anymore
-        if (!reaperMainMenu->checkHardcodedPosition("Insert")) nonBlockingMessage("Position of Insert menu does not match hard-coded fallback index.");
-        if (!reaperInsertMenu->checkHardcodedPosition("Empty item")) nonBlockingMessage("Position of Empty item menu does not match hard-coded fallback index.");
+        // Assertions to check that the hard-coded fallback menu positions still match
+        assert(reaperMainMenu->checkHardcodedPosition("Insert"));
+        assert(reaperInsertMenu->checkHardcodedPosition("Empty item"));
     } else {
         reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
         reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item") + 1));
