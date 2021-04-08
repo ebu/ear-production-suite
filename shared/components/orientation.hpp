@@ -126,14 +126,14 @@ class OrientationView : public Component,
     g.drawText(ccwTickLabelText_, ccwTickLabelRect_, Justification::centred);
     g.drawText(centreTickLabelText_, centreTickLabelRect_, Justification::centred);
     g.drawText(cwTickLabelText_, cwTickLabelRect_, Justification::centred);
-    if(arcStartPos_ == arcEndPos_) g.drawText(jointTickLabelText_, jointTickLabelRect_, Justification::centred);
+    if(arcStartPos_ == arcEndPos_)  g.drawText(jointTickLabelText_, jointTickLabelRect_, Justification::centred);
 
-    /*
     g.setColour(findColour(directionLabelColourId));
     g.setFont(EarFonts::Values);
-    g.drawText(String("Front"), frontLabelRect_, Justification::centredBottom);
-    g.drawText(String("Back"), backLabelRect_, Justification::centredTop);
-    */
+    if(centreLabelText_.isNotEmpty()) g.drawText(centreLabelText_, centreLabelRect_, Justification::centred);
+    if(arcStartPos_ == arcEndPos_) {
+      if(jointLabelText_.isNotEmpty()) g.drawText(jointLabelText_, jointLabelRect_, Justification::centred);
+    }
   }
 
   void mouseDown(const MouseEvent& event) override {
@@ -301,28 +301,28 @@ class OrientationView : public Component,
       jointTickLabelText_ = String(tickVal);
       jointTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(jointTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, jointTickLabelRect_.getWidth(), jointTickLabelRect_.getHeight());
-      jointTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      jointTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
       tickVal = (valRange * 0.25f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 1.0f) + arcStartPos_;
       ccwTickLabelText_ = String(tickVal);
       ccwTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(ccwTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, ccwTickLabelRect_.getWidth(), ccwTickLabelRect_.getHeight());
-      ccwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      ccwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
       tickVal = (valRange * 0.5f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 2.0f) + arcStartPos_;
       centreTickLabelText_ = String(tickVal);
       centreTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(centreTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, centreTickLabelRect_.getWidth(), centreTickLabelRect_.getHeight());
-      centreTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      centreTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
       tickVal = (valRange * 0.75f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 3.0f) + arcStartPos_;
       cwTickLabelText_ = String(tickVal);
       cwTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(cwTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, cwTickLabelRect_.getWidth(), cwTickLabelRect_.getHeight());
-      cwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      cwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
     } else {
       // Arc
@@ -342,21 +342,40 @@ class OrientationView : public Component,
       ccwTickLabelText_ = String(tickVal);
       ccwTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(ccwTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, ccwTickLabelRect_.getWidth(), ccwTickLabelRect_.getHeight());
-      ccwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      ccwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
       tickVal = (valRange * 0.5f) + arcStartVal_;
       tickPos = (posRange * 0.5f) + arcStartPos_;
       centreTickLabelText_ = String(tickVal);
-      centreTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(centreTickLabelText_), labelHeight_);
-      hyp = getRectangeCentreToPerimeterDistance(tickPos, centreTickLabelRect_.getWidth(), centreTickLabelRect_.getHeight());
-      centreTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      if(centreLabelText_.isEmpty()) {
+        centreTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(centreTickLabelText_), labelHeight_);
+        hyp = getRectangeCentreToPerimeterDistance(tickPos, centreTickLabelRect_.getWidth(), centreTickLabelRect_.getHeight());
+        centreTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
+      } else {
+        auto width = std::max(EarFonts::Measures.getStringWidthFloat(centreTickLabelText_), EarFonts::Values.getStringWidthFloat(centreLabelText_));
+        auto height = labelHeight_ + labelHeight_ + labelSeperation_;
+        centreTickLabelRect_.setSize(width, height);
+        centreLabelRect_.setSize(width, height);
+        hyp = getRectangeCentreToPerimeterDistance(tickPos, width, height);
+        auto totalCentre = getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos);
+        Point<float> topLabelCentre{ totalCentre.getX(), totalCentre.getY() - ((labelHeight_ + labelSeperation_) / 2.f) };
+        Point<float> bottomLabelCentre{ totalCentre.getX(), totalCentre.getY() + ((labelHeight_ + labelSeperation_) / 2.f) };
+        if(tickPos > (MathConstants<float>::pi * 0.75f) && tickPos > (MathConstants<float>::pi * 1.25f)) {
+          // Bottom quadrant labels are in reverse order
+          centreTickLabelRect_.setCentre(bottomLabelCentre);
+          centreLabelRect_.setCentre(topLabelCentre);
+        } else {
+          centreTickLabelRect_.setCentre(topLabelCentre);
+          centreLabelRect_.setCentre(bottomLabelCentre);
+        }
+      }
 
       tickVal = arcEndVal_;
       tickPos = arcEndPos_;
       cwTickLabelText_ = String(tickVal);
       cwTickLabelRect_.setSize(EarFonts::Measures.getStringWidthFloat(cwTickLabelText_), labelHeight_);
       hyp = getRectangeCentreToPerimeterDistance(tickPos, cwTickLabelRect_.getWidth(), cwTickLabelRect_.getHeight());
-      cwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + 5.f) * 2.f), tickPos));
+      cwTickLabelRect_.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), tickPos));
 
     }
 
@@ -472,7 +491,7 @@ class OrientationView : public Component,
   juce::String jointTickLabelText_;
 
   juce::Rectangle<float> centreLabelRect_;
-  juce::String centreLabelText_;
+  juce::String centreLabelText_{ "Forward" };
   juce::Rectangle<float> jointLabelRect_;
   juce::String jointLabelText_;
 
@@ -488,13 +507,14 @@ class OrientationView : public Component,
   const float tickWidth_ = 1.f;
   const float labelWidth_ = 50.f;
   const float labelHeight_ = 12.f;
+  const float labelSeperation_ = 2.f;
   const float padding_ = 2.f;
   const float knobSize_ = 19.f;
   const float crossSize_ = 28.f;
   const float crossWidth_ = 1.f;
 
-  const float arcStartPos_ = (float_Pi * 2.f) - 1.0;
-  const float arcEndPos_ = float_Pi - 1.0;
+  const float arcStartPos_ = 2.0;
+  const float arcEndPos_ = float_Pi + 2.0;
   const float arcStartVal_ = 90.f;
   const float arcEndVal_ = -90.f;
 
