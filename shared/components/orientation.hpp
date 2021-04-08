@@ -320,7 +320,7 @@ class OrientationView : public Component,
       float tickPos;
       float valRange = arcEndVal_ - arcStartVal_;
 
-      tickVal = (valRange * 0.0f) + arcStartVal_;
+      tickVal = (arcStartVal_ < 0.f && arcEndVal_ >= 0.0)? arcEndVal_ : arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 0.0f) + arcStartPos_;
       jointTickLabelText_ = String(tickVal);
       setLabelsSizeAndPosition(tickPos, jointTickLabelRect_, jointTickLabelText_, jointLabelRect_, jointLabelText_);
