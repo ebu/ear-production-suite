@@ -69,8 +69,12 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     addAndMakeVisible(headphoneMeters_.back().get());
   }
 
-  test = std::make_unique<OrientationView>();
-  addAndMakeVisible(test.get());
+  yawControl = std::make_unique<OrientationView>(MathConstants<float>::pi, MathConstants<float>::pi * 3.f, -180.f, 180.f, String("Front"), String("Back") );
+  addAndMakeVisible(yawControl.get());
+  pitchControl = std::make_unique<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, String("Horizon"), String() );
+  addAndMakeVisible(pitchControl.get());
+  rollControl = std::make_unique<OrientationView>(MathConstants<float>::halfPi * 3.f, MathConstants<float>::halfPi, -90.f, 90.f, String("Upright"), String() );
+  addAndMakeVisible(rollControl.get());
 
 
   /*
@@ -87,7 +91,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
 
   //setSize(750, 600); // Min size to fit onboarding window.
   //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
-  setSize(580, 480);
+  setSize(1100, 480);
 }
 
 EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
@@ -121,7 +125,9 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
     meterArea.removeFromLeft(5);
   }
 
-  test->setBounds(rightColumn.withHeight(400).withWidth(400));
+  yawControl->setBounds(rightColumn.withHeight(300).withWidth(300));
+  pitchControl->setBounds(rightColumn.withTrimmedLeft(300).withHeight(300).withWidth(300));
+  rollControl->setBounds(rightColumn.withTrimmedLeft(600).withHeight(300).withWidth(300));
 
   /*
   orientationViewValueBox->setBounds(rightColumn.removeFromTop(200).reduced(5, 5));

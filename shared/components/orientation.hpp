@@ -12,13 +12,21 @@ class OrientationView : public Component,
                       public AsyncUpdater,
                       private Value::Listener {
  public:
-   OrientationView() {
+   OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Item01);
     setColour(angleLabelColourId, EarColours::Text.withAlpha(Emphasis::medium));
     setColour(directionLabelColourId,
               EarColours::Text.withAlpha(Emphasis::high));
+    arcStartPos_ = startRad;
+    arcEndPos_ = endRad;
+    arcStartVal_ = startVal;
+    arcEndVal_ = endVal;
+    centreLabelText_ = centreLabel;
+    jointLabelText_ = jointLabel;
+    fullCircle = (endRad == startRad + MathConstants<float>::twoPi);
+
     currentAzimuthValue_.addListener(this);
     currentDistanceValue_.addListener(this);
   }
@@ -93,7 +101,7 @@ class OrientationView : public Component,
     g.drawLine(ccwTick_, tickWidth_);
     g.drawLine(centreTick_, tickWidth_);
     g.drawLine(cwTick_, tickWidth_);
-    if(arcStartPos_ == arcEndPos_) g.drawLine(jointTick_, tickWidth_);
+    if(fullCircle) g.drawLine(jointTick_, tickWidth_);
 
     // inner track
     const float innerDiameter = distance_ * outerDiameter_;
@@ -126,14 +134,12 @@ class OrientationView : public Component,
     g.drawText(ccwTickLabelText_, ccwTickLabelRect_, Justification::centred);
     g.drawText(centreTickLabelText_, centreTickLabelRect_, Justification::centred);
     g.drawText(cwTickLabelText_, cwTickLabelRect_, Justification::centred);
-    if(arcStartPos_ == arcEndPos_)  g.drawText(jointTickLabelText_, jointTickLabelRect_, Justification::centred);
+    if(fullCircle) g.drawText(jointTickLabelText_, jointTickLabelRect_, Justification::centred);
 
     g.setColour(findColour(directionLabelColourId));
     g.setFont(EarFonts::Values);
     if(centreLabelText_.isNotEmpty()) g.drawText(centreLabelText_, centreLabelRect_, Justification::centred);
-    if(arcStartPos_ == arcEndPos_) {
-      if(jointLabelText_.isNotEmpty()) g.drawText(jointLabelText_, jointLabelRect_, Justification::centred);
-    }
+    if(fullCircle && jointLabelText_.isNotEmpty()) g.drawText(jointLabelText_, jointLabelRect_, Justification::centred);
   }
 
   void mouseDown(const MouseEvent& event) override {
@@ -212,13 +218,13 @@ class OrientationView : public Component,
       if(arcStartPos_ > arcEndPos_) arcOffset = MathConstants<float>::twoPi - arcStartPos_;
 
       bool inBounds = false;
-      if(arcStartPos_ > arcEndPos_) {
+      if(fullCircle) {
+        inBounds = true;
+      } else if(arcStartPos_ > arcEndPos_) {
         if(posRadCirc >= arcStartPos_ && posRadCirc >= arcEndPos_) inBounds = true;
         if(posRadCirc <= arcStartPos_ && posRadCirc <= arcEndPos_) inBounds = true;
-      } else if(arcStartPos_ < arcEndPos_){
+      } else { //arcStartPos_ > arcEndPos_
         if(posRadCirc >= arcStartPos_ && posRadCirc <= arcEndPos_) inBounds = true;
-      } else {
-        inBounds = true;
       }
 
       if(inBounds) {
@@ -290,11 +296,11 @@ class OrientationView : public Component,
       Point<float> bottomLabelCentre{ totalCentre.getX(), totalCentre.getY() + ((labelHeight_ + labelSeperation_) / 2.f) };
       if(atRad > (MathConstants<float>::pi * 0.75f) && atRad < (MathConstants<float>::pi * 1.25f)) {
         // Bottom quadrant labels are in reverse order
-        valLabelRect.setCentre(bottomLabelCentre);
-        txtLabelRect.setCentre(topLabelCentre);
-      } else {
         valLabelRect.setCentre(topLabelCentre);
         txtLabelRect.setCentre(bottomLabelCentre);
+      } else {
+        valLabelRect.setCentre(bottomLabelCentre);
+        txtLabelRect.setCentre(topLabelCentre);
       }
     }
   }
@@ -309,7 +315,7 @@ class OrientationView : public Component,
         outerDiameter_ + outerTrackWidth_ + knobSize_,
         outerDiameter_ + outerTrackWidth_ + knobSize_);
 
-    if(arcStartPos_ == arcEndPos_) {
+    if(fullCircle) {
       // Full Circle
       jointTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_));
       ccwTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_ + MathConstants<float>::halfPi), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_ + MathConstants<float>::halfPi));
@@ -485,10 +491,11 @@ class OrientationView : public Component,
   const float crossSize_ = 28.f;
   const float crossWidth_ = 1.f;
 
-  const float arcStartPos_ = 2.0;
-  const float arcEndPos_ = float_Pi + 2.0;
-  const float arcStartVal_ = 90.f;
-  const float arcEndVal_ = -90.f;
+  float arcStartPos_ = 2.0;
+  float arcEndPos_ = float_Pi + 2.0;
+  float arcStartVal_ = 90.f;
+  float arcEndVal_ = -90.f;
+  bool fullCircle = false;
 
   float handlePos_ = 0.f;
 

@@ -40,7 +40,9 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::Overlay> onBoardingOverlay_;
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
 
-  std::unique_ptr<ear::plugin::ui::OrientationView> test;
+  std::unique_ptr<ear::plugin::ui::OrientationView> yawControl;
+  std::unique_ptr<ear::plugin::ui::OrientationView> pitchControl;
+  std::unique_ptr<ear::plugin::ui::OrientationView> rollControl;
 
   std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>> headphoneMeters_;
 
