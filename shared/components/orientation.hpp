@@ -37,7 +37,6 @@ class OrientationView : public Component,
 
     arcStartVal_ = startVal;
     arcEndVal_ = endVal;
-    normRange_ = NormalisableRange<double> {std::min(startVal, endVal), std::max(startVal, endVal)};
     valueDefault_ = defaultVal;
     setValue(valueDefault_, dontSendNotification);
     centreLabelText_ = centreLabel;
@@ -437,7 +436,6 @@ private:
   float getValue() { return currentValue_.getValue(); }
 
   void setValue(double newValue, NotificationType notification) {
-    newValue = normRange_.snapToLegalValue(newValue);
     if (currentValue_ != newValue) {
       currentValue_ = newValue;
       handlePos_ = valueToHandlePos(newValue);
@@ -453,7 +451,6 @@ private:
 
   double valueDefault_ = 0.f;
   Value currentValue_;
-  NormalisableRange<double> normRange_;
 
   Line<float> ccwTick_;
   juce::Rectangle<float> ccwTickLabelRect_;
