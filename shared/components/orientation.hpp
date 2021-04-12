@@ -12,7 +12,7 @@ class OrientationView : public Component,
                       public AsyncUpdater,
                       private Value::Listener {
  public:
-    OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
+  OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Item01);
@@ -40,51 +40,15 @@ class OrientationView : public Component,
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
 
-    currentAzimuthValue_.addListener(this);
-    currentDistanceValue_.addListener(this);
+    // TODO - OLD CODE
+    //currentAzimuthValue_.addListener(this);
+    //currentDistanceValue_.addListener(this);
   }
 
   ~OrientationView() {
-    currentAzimuthValue_.removeListener(this);
-    currentDistanceValue_.removeListener(this);
-  }
-
-  Point<float> getPointOnRect(float angle, float w, float h) {
-    Point<float> intersection;
-
-    float xRad = h / 2.f;
-    float yRad = w / 2.f;
-
-    float tangent = tan(angle);
-    float y = xRad * tangent;
-
-      if (fabs(y) <= yRad) {
-
-        if (angle < (float_Pi / 2.f) || angle > 3.f * (float_Pi / 2.f)) {
-          intersection.x = xRad;
-          intersection.y = y;
-        } else {
-          intersection.x = -xRad;
-          intersection.y = -y;
-        }
-      } else {
-        float x = yRad / tangent;
-
-          if (angle < float_Pi) {
-            intersection.x = x;
-            intersection.y = yRad;
-          } else {
-            intersection.x = -x;
-            intersection.y = -yRad;
-          }
-      }
-
-      return intersection;
-  }
-
-  float getRectangeCentreToPerimeterDistance(float angle, float w, float h) {
-    Point<float> intersection = getPointOnRect(angle, w, h);
-    return sqrt((intersection.x * intersection.x) + (intersection.y * intersection.y));
+    // TODO - OLD CODE
+    //currentAzimuthValue_.removeListener(this);
+    //currentDistanceValue_.removeListener(this);
   }
 
   void paint(Graphics& g) override {
@@ -117,7 +81,6 @@ class OrientationView : public Component,
     if(fullCircle) g.drawLine(jointTick_, tickWidth_);
 
     // inner track
-    const float innerDiameter = distance_ * outerDiameter_;
     g.setColour(findColour(highlightColourId));
     Path p;
     float arcEndPos = (arcEndPos_ < arcStartPos_) ? arcEndPos_ + MathConstants<float>::twoPi : arcEndPos_;
@@ -128,9 +91,8 @@ class OrientationView : public Component,
 
     // thumb
     g.setColour(findColour(highlightColourId));
-    float azimuthDeg = azimuth_ / 180.f * MathConstants<float>::pi;
-    float xPos = -std::sin(handlePos_) * innerDiameter / 2.f;
-    float yPos = std::cos(handlePos_) * innerDiameter / 2.f;
+    float xPos = -std::sin(handlePos_) * outerDiameter_ / 2.f;
+    float yPos = std::cos(handlePos_) * outerDiameter_ / 2.f;
     g.fillEllipse(getWidth() / 2.f - xPos - knobSize_ / 2.f,
                   getHeight() / 2.f - yPos - knobSize_ / 2.f, knobSize_,
                   knobSize_);
@@ -153,179 +115,6 @@ class OrientationView : public Component,
     g.setFont(EarFonts::Values);
     if(centreLabelText_.isNotEmpty()) g.drawText(centreLabelText_, centreLabelRect_, Justification::centred);
     if(fullCircle && jointLabelText_.isNotEmpty()) g.drawText(jointLabelText_, jointLabelRect_, Justification::centred);
-  }
-
-  void mouseDown(const MouseEvent& event) override {
-    if (isEnabled() && activeArea_.contains(getMouseXYRelative().toFloat())) {
-      handleDragStart();
-    }
-  }
-
-  void mouseUp(const MouseEvent& event) override { handleDragEnd(); }
-
-  MouseCursor getMouseCursor() override {
-    if (isEnabled()) {
-      if (mouseDragActive_) {
-        return MouseCursor::DraggingHandCursor;
-      } else if (activeArea_.contains(getMouseXYRelative().toFloat())) {
-        return MouseCursor::PointingHandCursor;
-      }
-    }
-    return MouseCursor::NormalCursor;
-  }
-
-  void mouseDoubleClick(const MouseEvent&) override {
-    if (isEnabled()) {
-      setDistance(distanceDefault_, sendNotificationSync);
-      setAzimuth(azimuthDefault_, sendNotificationSync);
-    }
-  }
-
-  double radsBetween(double a, double b) {
-    return std::abs(a - b);
-  }
-
-  double circRadsBetween(double a, double b) {
-    return std::min(
-      std::abs(a - b),
-      std::min(
-        std::abs(a - b - MathConstants<double>::twoPi),
-        std::abs(a - b + MathConstants<double>::twoPi)
-      )
-    );
-  }
-
-  double unwrapRadsToBounds(double rads, double boundA, double boundB, bool clampToBounds = false) {
-    double minRad = std::min(boundA, boundB);
-    double maxRad = std::max(boundA, boundB);
-
-    while(rads < minRad) {
-      rads += MathConstants<double>::twoPi;
-    }
-    while(rads > maxRad) {
-      rads -= MathConstants<double>::twoPi;
-    }
-
-    if(rads >= minRad) {
-      // Now in bounds
-      return rads;
-    }
-
-    // Not fitting in bounds (rads is now < minRad)
-    double lowerVal = rads;
-    double upperVal = rads + MathConstants<double>::twoPi;
-    double lowerValDist = radsBetween(lowerVal, minRad);
-    double upperValDist = radsBetween(upperVal, maxRad);
-
-    if(clampToBounds) {
-      return (lowerValDist < upperValDist) ? minRad : maxRad;
-    }
-
-    return (lowerValDist < upperValDist) ? lowerVal : upperVal;
-  }
-
-  double handlePosToValue(double handlePos) {
-    double posRange = arcEndPos_ - arcStartPos_;
-    double valRange = arcEndVal_ - arcStartVal_;
-
-    handlePos = unwrapRadsToBounds(handlePos, arcStartPos_, arcEndPos_);
-    double curPosRangeProportion = (handlePos - arcStartPos_) / posRange;
-
-    double ret = (valRange * curPosRangeProportion) + arcStartVal_;
-    return ret;
-  }
-
-  double valueToHandlePos(double val) {
-    double posRange = arcEndPos_ - arcStartPos_;
-    double valRange = arcEndVal_ - arcStartVal_;
-
-    double curValRangeProportion = (val - arcStartVal_) / valRange;
-    double ret = (posRange * curValRangeProportion) + arcStartPos_;
-    return ret;
-  }
-
-  void mouseDrag(const MouseEvent& event) override {
-    if (isEnabled() && mouseDragActive_) {
-      auto position = event.getPosition();
-      const auto posRel = juce::Point<float>(
-          getWidth() / 2.f - static_cast<float>(position.getX()),
-          getHeight() / 2.f - static_cast<float>(position.getY()));
-      double posRad = std::atan2(-posRel.getX(), posRel.getY());
-      handlePos_ = unwrapRadsToBounds(posRad, arcStartPos_, arcEndPos_, true);
-
-
-
-
-
-      // TODO - OLD CODE
-      float newAzimuth = std::atan2(posRel.getX(), posRel.getY()) * 180.f / MathConstants<float>::pi;
-      setAzimuth(newAzimuth, sendNotificationSync);
-    }
-  }
-
-  Point<float> getPointOnCentredCircle(float dia, float rads) {
-    return Point<float>((getWidth() / 2.f), (getHeight() / 2.f)).getPointOnCircumference(dia / 2.f, rads);
-  }
-
-
-  void handleDragStart() {
-    mouseDragActive_ = true;
-    Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker,
-                           [&](Listener& l) { l.pannerDragStarted(this); });
-    if (checker.shouldBailOut()) {
-      return;
-    }
-  }
-
-  void handleDragEnd() {
-    mouseDragActive_ = false;
-    Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker,
-                           [this](Listener& l) { l.pannerDragEnded(this); });
-
-    if (checker.shouldBailOut()) {
-      return;
-    }
-  }
-
-  enum ColourIds {
-    backgroundColourId = 0x00010001,
-    trackColourId = 0x00010002,
-    highlightColourId = 0x00010003,
-    directionLabelColourId = 0x00010004,
-    angleLabelColourId = 0x00010005,
-  };
-
-  double unwrapRads(double rads) {
-    while(rads < 0.f) {
-      rads += MathConstants<double>::twoPi;
-    }
-    while(rads > MathConstants<double>::twoPi) {
-      rads -= MathConstants<double>::twoPi;
-    }
-    return rads;
-  }
-
-  void setLabelsSizeAndPosition(float atRad, juce::Rectangle<float> &valLabelRect, juce::String &valLabelStr, juce::Rectangle<float> &txtLabelRect, juce::String &txtLabelStr) {
-    atRad = unwrapRads(atRad);
-
-    float labelWidth = EarFonts::Measures.getStringWidthFloat(valLabelStr);
-    if(txtLabelStr.isNotEmpty()) {
-      labelWidth = std::max(labelWidth, EarFonts::Values.getStringWidthFloat(txtLabelStr));
-    }
-
-    valLabelRect.setSize(labelWidth, labelHeight_);
-    txtLabelRect.setSize(labelWidth, labelHeight_);
-    float hyp = getRectangeCentreToPerimeterDistance(atRad, valLabelRect.getWidth(), valLabelRect.getHeight());
-    valLabelRect.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad));
-
-    if(atRad > (MathConstants<float>::pi * 0.51f) && atRad < (MathConstants<float>::pi * 1.49f)) {
-      // txtLabels in bottom half sit under value label
-      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() + labelSeperation_ + labelHeight_);
-    } else {
-      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() - labelSeperation_ - labelHeight_);
-    }
   }
 
   void resized() override {
@@ -399,6 +188,274 @@ class OrientationView : public Component,
     }
   }
 
+  void mouseDown(const MouseEvent& event) override {
+    if (isEnabled() && activeArea_.contains(getMouseXYRelative().toFloat())) {
+      handleDragStart();
+    }
+  }
+
+  void mouseUp(const MouseEvent& event) override { handleDragEnd(); }
+
+  MouseCursor getMouseCursor() override {
+    if (isEnabled()) {
+      if (mouseDragActive_) {
+        return MouseCursor::DraggingHandCursor;
+      } else if (activeArea_.contains(getMouseXYRelative().toFloat())) {
+        return MouseCursor::PointingHandCursor;
+      }
+    }
+    return MouseCursor::NormalCursor;
+  }
+
+  void mouseDoubleClick(const MouseEvent&) override {
+    if (isEnabled()) {
+      // TODO - OLD CODE
+      //setDistance(distanceDefault_, sendNotificationSync);
+      //setAzimuth(azimuthDefault_, sendNotificationSync);
+    }
+  }
+
+  void mouseDrag(const MouseEvent& event) override {
+    if (isEnabled() && mouseDragActive_) {
+      auto position = event.getPosition();
+      const auto posRel = juce::Point<float>(
+          getWidth() / 2.f - static_cast<float>(position.getX()),
+          getHeight() / 2.f - static_cast<float>(position.getY()));
+      double posRad = std::atan2(-posRel.getX(), posRel.getY());
+      handlePos_ = unwrapRadsToBounds(posRad, arcStartPos_, arcEndPos_, true);
+
+
+
+
+
+      // TODO - OLD CODE
+      //float newAzimuth = std::atan2(posRel.getX(), posRel.getY()) * 180.f / MathConstants<float>::pi;
+      //setAzimuth(newAzimuth, sendNotificationSync);
+      // setAzimuth would normally do the following:
+      repaint();
+      handleAsyncUpdate();
+    }
+  }
+
+  void triggerChangeMessage(NotificationType notification) {
+    if (notification != dontSendNotification) {
+      if (notification == sendNotificationSync)
+        handleAsyncUpdate();
+      else
+        triggerAsyncUpdate();
+    }
+  }
+
+  void handleAsyncUpdate() override {
+    cancelPendingUpdate();
+
+    Component::BailOutChecker checker(this);
+    listeners_.callChecked(checker,
+                           [this](Listener& l) { l.pannerValueChanged(this); });
+    if (checker.shouldBailOut()) {
+      return;
+    }
+  }
+
+  void valueChanged(Value& value) override {
+    /*
+    if (value.refersToSameSourceAs(currentAzimuthValue_)) {
+      // TODO - OLD CODE
+      //setAzimuth(currentAzimuthValue_.getValue(), dontSendNotification);
+    } else if (value.refersToSameSourceAs(currentDistanceValue_)) {
+      // TODO - OLD CODE
+      //setDistance(currentDistanceValue_.getValue(), dontSendNotification);
+    }
+    */
+  }
+
+  enum ColourIds {
+    backgroundColourId = 0x00010001,
+    trackColourId = 0x00010002,
+    highlightColourId = 0x00010003,
+    directionLabelColourId = 0x00010004,
+    angleLabelColourId = 0x00010005,
+  };
+
+  class Listener {
+   public:
+    virtual ~Listener() = default;
+
+    virtual void pannerValueChanged(OrientationView* panner) = 0;
+    virtual void pannerDragStarted(OrientationView* panner) = 0;
+    virtual void pannerDragEnded(OrientationView* panner) = 0;
+  };
+
+  void addListener(Listener* l) { listeners_.add(l); }
+  void removeListener(Listener* l) { listeners_.remove(l); }
+
+private:
+
+  void handleDragStart() {
+    mouseDragActive_ = true;
+    Component::BailOutChecker checker(this);
+    listeners_.callChecked(checker,
+                           [&](Listener& l) { l.pannerDragStarted(this); });
+    if (checker.shouldBailOut()) {
+      return;
+    }
+  }
+
+  void handleDragEnd() {
+    mouseDragActive_ = false;
+    Component::BailOutChecker checker(this);
+    listeners_.callChecked(checker,
+                           [this](Listener& l) { l.pannerDragEnded(this); });
+
+    if (checker.shouldBailOut()) {
+      return;
+    }
+  }
+
+  Point<float> getPointOnRect(float angle, float w, float h) {
+    Point<float> intersection;
+
+    float xRad = h / 2.f;
+    float yRad = w / 2.f;
+
+    float tangent = tan(angle);
+    float y = xRad * tangent;
+
+      if (fabs(y) <= yRad) {
+
+        if (angle < (float_Pi / 2.f) || angle > 3.f * (float_Pi / 2.f)) {
+          intersection.x = xRad;
+          intersection.y = y;
+        } else {
+          intersection.x = -xRad;
+          intersection.y = -y;
+        }
+      } else {
+        float x = yRad / tangent;
+
+          if (angle < float_Pi) {
+            intersection.x = x;
+            intersection.y = yRad;
+          } else {
+            intersection.x = -x;
+            intersection.y = -yRad;
+          }
+      }
+
+      return intersection;
+  }
+
+  float getRectangeCentreToPerimeterDistance(float angle, float w, float h) {
+    Point<float> intersection = getPointOnRect(angle, w, h);
+    return sqrt((intersection.x * intersection.x) + (intersection.y * intersection.y));
+  }
+
+  Point<float> getPointOnCentredCircle(float dia, float rads) {
+    return Point<float>((getWidth() / 2.f), (getHeight() / 2.f)).getPointOnCircumference(dia / 2.f, rads);
+  }
+
+  double radsBetween(double a, double b) {
+    return std::abs(a - b);
+  }
+
+  double circRadsBetween(double a, double b) {
+    return std::min(
+      std::abs(a - b),
+      std::min(
+        std::abs(a - b - MathConstants<double>::twoPi),
+        std::abs(a - b + MathConstants<double>::twoPi)
+      )
+    );
+  }
+
+  double unwrapRads(double rads) {
+    while(rads < 0.f) {
+      rads += MathConstants<double>::twoPi;
+    }
+    while(rads > MathConstants<double>::twoPi) {
+      rads -= MathConstants<double>::twoPi;
+    }
+    return rads;
+  }
+
+  double unwrapRadsToBounds(double rads, double boundA, double boundB, bool clampToBounds = false) {
+    double minRad = std::min(boundA, boundB);
+    double maxRad = std::max(boundA, boundB);
+
+    while(rads < minRad) {
+      rads += MathConstants<double>::twoPi;
+    }
+    while(rads > maxRad) {
+      rads -= MathConstants<double>::twoPi;
+    }
+
+    if(rads >= minRad) {
+      // Now in bounds
+      return rads;
+    }
+
+    // Not fitting in bounds (rads is now < minRad)
+    double lowerVal = rads;
+    double upperVal = rads + MathConstants<double>::twoPi;
+    double lowerValDist = radsBetween(lowerVal, minRad);
+    double upperValDist = radsBetween(upperVal, maxRad);
+
+    if(clampToBounds) {
+      return (lowerValDist < upperValDist) ? minRad : maxRad;
+    }
+
+    return (lowerValDist < upperValDist) ? lowerVal : upperVal;
+  }
+
+  double handlePosToValue(double handlePos) {
+    double posRange = arcEndPos_ - arcStartPos_;
+    double valRange = arcEndVal_ - arcStartVal_;
+
+    handlePos = unwrapRadsToBounds(handlePos, arcStartPos_, arcEndPos_);
+    double curPosRangeProportion = (handlePos - arcStartPos_) / posRange;
+
+    double ret = (valRange * curPosRangeProportion) + arcStartVal_;
+    return ret;
+  }
+
+  double valueToHandlePos(double val) {
+    double posRange = arcEndPos_ - arcStartPos_;
+    double valRange = arcEndVal_ - arcStartVal_;
+
+    double curValRangeProportion = (val - arcStartVal_) / valRange;
+    double ret = (posRange * curValRangeProportion) + arcStartPos_;
+    return ret;
+  }
+
+  void setLabelsSizeAndPosition(float atRad, juce::Rectangle<float> &valLabelRect, juce::String &valLabelStr, juce::Rectangle<float> &txtLabelRect, juce::String &txtLabelStr) {
+    atRad = unwrapRads(atRad);
+
+    float labelWidth = EarFonts::Measures.getStringWidthFloat(valLabelStr);
+    if(txtLabelStr.isNotEmpty()) {
+      labelWidth = std::max(labelWidth, EarFonts::Values.getStringWidthFloat(txtLabelStr));
+    }
+
+    valLabelRect.setSize(labelWidth, labelHeight_);
+    txtLabelRect.setSize(labelWidth, labelHeight_);
+    float hyp = getRectangeCentreToPerimeterDistance(atRad, valLabelRect.getWidth(), valLabelRect.getHeight());
+    valLabelRect.setCentre(getPointOnCentredCircle(outerDiameter_ + ((tickLength_ + hyp + labelSeperation_) * 2.f), atRad));
+
+    if(atRad > (MathConstants<float>::pi * 0.51f) && atRad < (MathConstants<float>::pi * 1.49f)) {
+      // txtLabels in bottom half sit under value label
+      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() + labelSeperation_ + labelHeight_);
+    } else {
+      txtLabelRect.setCentre(valLabelRect.getCentreX(), valLabelRect.getCentreY() - labelSeperation_ - labelHeight_);
+    }
+  }
+
+
+
+
+
+
+
+/* OLD CODE
+
   Value& getAzimuthValueObject() noexcept { return currentAzimuthValue_; }
   Value& getDistanceValueObject() noexcept { return currentDistanceValue_; }
 
@@ -426,62 +483,30 @@ class OrientationView : public Component,
     }
   }
 
-  void triggerChangeMessage(NotificationType notification) {
-    if (notification != dontSendNotification) {
-      if (notification == sendNotificationSync)
-        handleAsyncUpdate();
-      else
-        triggerAsyncUpdate();
-    }
-  }
-
-  void handleAsyncUpdate() override {
-    cancelPendingUpdate();
-
-    Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker,
-                           [this](Listener& l) { l.pannerValueChanged(this); });
-    if (checker.shouldBailOut()) {
-      return;
-    }
-  }
-
-  void valueChanged(Value& value) override {
-    if (value.refersToSameSourceAs(currentAzimuthValue_)) {
-      setAzimuth(currentAzimuthValue_.getValue(), dontSendNotification);
-    } else if (value.refersToSameSourceAs(currentDistanceValue_)) {
-      setDistance(currentDistanceValue_.getValue(), dontSendNotification);
-    }
-  }
-
   float getAzimuth() { return currentAzimuthValue_.getValue(); }
   float getDistance() { return currentDistanceValue_.getValue(); }
 
-  class Listener {
-   public:
-    virtual ~Listener() = default;
+ */
 
-    virtual void pannerValueChanged(OrientationView* panner) = 0;
-    virtual void pannerDragStarted(OrientationView* panner) = 0;
-    virtual void pannerDragEnded(OrientationView* panner) = 0;
-  };
 
-  void addListener(Listener* l) { listeners_.add(l); }
-  void removeListener(Listener* l) { listeners_.remove(l); }
+
+
+
+
 
  private:
   bool mouseDragActive_;
   Path activeArea_;
 
-  double azimuthDefault_ = 0.f;
-  double distanceDefault_ = 1.f;
-  double azimuth_ = 0.f;
-  double distance_ = 1.f;
+  //double azimuthDefault_ = 0.f;
+  //double distanceDefault_ = 1.f;
+  //double azimuth_ = 0.f;
+  //double distance_ = 1.f;
 
-  Value currentAzimuthValue_;
-  Value currentDistanceValue_;
-  NormalisableRange<double> normRangeAzimuth_{-180.0, 180.0};
-  NormalisableRange<double> normRangeDistance_{0.0, 1.0};
+  //Value currentAzimuthValue_;
+  //Value currentDistanceValue_;
+  //NormalisableRange<double> normRangeAzimuth_{-180.0, 180.0};
+  //NormalisableRange<double> normRangeDistance_{0.0, 1.0};
 
   Line<float> ccwTick_;
   juce::Rectangle<float> ccwTickLabelRect_;
