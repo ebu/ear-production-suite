@@ -12,7 +12,7 @@ class OrientationView : public Component,
                       public AsyncUpdater,
                       private Value::Listener {
  public:
-  OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
+  OrientationView(float startRad, float endRad, float startVal, float endVal, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Item01);
@@ -37,18 +37,22 @@ class OrientationView : public Component,
 
     arcStartVal_ = startVal;
     arcEndVal_ = endVal;
+    valueDefault_ = defaultVal;
+    setValue(valueDefault_, dontSendNotification);
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
 
     // TODO - OLD CODE
     //currentAzimuthValue_.addListener(this);
     //currentDistanceValue_.addListener(this);
+    currentValue_.addListener(this);
   }
 
   ~OrientationView() {
     // TODO - OLD CODE
     //currentAzimuthValue_.removeListener(this);
     //currentDistanceValue_.removeListener(this);
+    currentValue_.removeListener(this);
   }
 
   void paint(Graphics& g) override {
@@ -212,6 +216,7 @@ class OrientationView : public Component,
       // TODO - OLD CODE
       //setDistance(distanceDefault_, sendNotificationSync);
       //setAzimuth(azimuthDefault_, sendNotificationSync);
+      setValue(valueDefault_, sendNotificationSync);
     }
   }
 
@@ -232,8 +237,9 @@ class OrientationView : public Component,
       //float newAzimuth = std::atan2(posRel.getX(), posRel.getY()) * 180.f / MathConstants<float>::pi;
       //setAzimuth(newAzimuth, sendNotificationSync);
       // setAzimuth would normally do the following:
-      repaint();
-      handleAsyncUpdate();
+      double newValue = handlePosToValue(handlePos_);
+      setValue(newValue, sendNotificationSync);
+
     }
   }
 
@@ -267,6 +273,9 @@ class OrientationView : public Component,
       //setDistance(currentDistanceValue_.getValue(), dontSendNotification);
     }
     */
+    if (value.refersToSameSourceAs(currentValue_)) {
+      setValue(currentValue_.getValue(), dontSendNotification);
+    }
   }
 
   enum ColourIds {
@@ -488,6 +497,22 @@ private:
 
  */
 
+  Value& getValueObject() noexcept { return currentValue_; }
+
+  float getValue() { return currentValue_.getValue(); }
+
+  void setValue(double newValue, NotificationType notification) {
+    newValue = normRange_.snapToLegalValue(newValue);
+    handlePos_ = valueToHandlePos(newValue);
+    if (newValue != value_) {
+      value_ = newValue;
+      if (currentValue_ != newValue) {
+        currentValue_ = newValue;
+      }
+      repaint();
+      triggerChangeMessage(notification);
+    }
+  }
 
 
 
@@ -507,6 +532,11 @@ private:
   //Value currentDistanceValue_;
   //NormalisableRange<double> normRangeAzimuth_{-180.0, 180.0};
   //NormalisableRange<double> normRangeDistance_{0.0, 1.0};
+
+  double valueDefault_ = 0.f;
+  double value_ = 0.f;
+  Value currentValue_;
+  NormalisableRange<double> normRange_{-180.0, 180.0};
 
   Line<float> ccwTick_;
   juce::Rectangle<float> ccwTickLabelRect_;
