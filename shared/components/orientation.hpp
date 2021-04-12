@@ -251,36 +251,13 @@ class OrientationView : public Component,
           getWidth() / 2.f - static_cast<float>(position.getX()),
           getHeight() / 2.f - static_cast<float>(position.getY()));
       double posRad = std::atan2(-posRel.getX(), posRel.getY());
-      double posRadCirc = unwrapRads(posRad);
-
-      bool inBounds = false;
-      if(fullCircle) {
-        inBounds = true;
-      } else if(posRadCirc >= arcStartPos_) {
-        if(posRadCirc <= arcEndPos_) {
-          inBounds = true;
-        }
-      } else {
-        posRadCirc += MathConstants<double>::twoPi;
-        if(posRadCirc >= arcStartPos_ && posRadCirc <= arcEndPos_) {
-          inBounds = true;
-        }
-      }
-
-      if(inBounds) {
-        handlePos_ = posRadCirc;
-      } else {
-        double radsToStart = circRadsBetween(posRadCirc, arcStartPos_);
-        double radsToEnd = circRadsBetween(posRadCirc, arcEndPos_);
-        handlePos_ = (radsToStart < radsToEnd) ? arcStartPos_ : arcEndPos_;
-      }
+      handlePos_ = unwrapRadsToBounds(posRad, arcStartPos_, arcEndPos_, true);
 
 
 
 
 
-
-
+      // TODO - OLD CODE
       float newAzimuth = std::atan2(posRel.getX(), posRel.getY()) * 180.f / MathConstants<float>::pi;
       setAzimuth(newAzimuth, sendNotificationSync);
     }
