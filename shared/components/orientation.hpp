@@ -42,16 +42,10 @@ class OrientationView : public Component,
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
 
-    // TODO - OLD CODE
-    //currentAzimuthValue_.addListener(this);
-    //currentDistanceValue_.addListener(this);
     currentValue_.addListener(this);
   }
 
   ~OrientationView() {
-    // TODO - OLD CODE
-    //currentAzimuthValue_.removeListener(this);
-    //currentDistanceValue_.removeListener(this);
     currentValue_.removeListener(this);
   }
 
@@ -84,7 +78,7 @@ class OrientationView : public Component,
     g.drawLine(cwTick_, tickWidth_);
     if(fullCircle) g.drawLine(jointTick_, tickWidth_);
 
-    // inner track
+    // highlighted arc
     g.setColour(findColour(highlightColourId));
     Path p;
     float arcEndPos = (arcEndPos_ < arcStartPos_) ? arcEndPos_ + MathConstants<float>::twoPi : arcEndPos_;
@@ -213,9 +207,6 @@ class OrientationView : public Component,
 
   void mouseDoubleClick(const MouseEvent&) override {
     if (isEnabled()) {
-      // TODO - OLD CODE
-      //setDistance(distanceDefault_, sendNotificationSync);
-      //setAzimuth(azimuthDefault_, sendNotificationSync);
       setValue(valueDefault_, sendNotificationSync);
     }
   }
@@ -227,19 +218,11 @@ class OrientationView : public Component,
           getWidth() / 2.f - static_cast<float>(position.getX()),
           getHeight() / 2.f - static_cast<float>(position.getY()));
       double posRad = std::atan2(-posRel.getX(), posRel.getY());
+
       handlePos_ = unwrapRadsToBounds(posRad, arcStartPos_, arcEndPos_, true);
 
-
-
-
-
-      // TODO - OLD CODE
-      //float newAzimuth = std::atan2(posRel.getX(), posRel.getY()) * 180.f / MathConstants<float>::pi;
-      //setAzimuth(newAzimuth, sendNotificationSync);
-      // setAzimuth would normally do the following:
       double newValue = handlePosToValue(handlePos_);
       setValue(newValue, sendNotificationSync);
-
     }
   }
 
@@ -264,15 +247,6 @@ class OrientationView : public Component,
   }
 
   void valueChanged(Value& value) override {
-    /*
-    if (value.refersToSameSourceAs(currentAzimuthValue_)) {
-      // TODO - OLD CODE
-      //setAzimuth(currentAzimuthValue_.getValue(), dontSendNotification);
-    } else if (value.refersToSameSourceAs(currentDistanceValue_)) {
-      // TODO - OLD CODE
-      //setDistance(currentDistanceValue_.getValue(), dontSendNotification);
-    }
-    */
     if (value.refersToSameSourceAs(currentValue_)) {
       setValue(currentValue_.getValue(), dontSendNotification);
     }
@@ -457,84 +431,26 @@ private:
     }
   }
 
-
-
-
-
-
-
-/* OLD CODE
-
-  Value& getAzimuthValueObject() noexcept { return currentAzimuthValue_; }
-  Value& getDistanceValueObject() noexcept { return currentDistanceValue_; }
-
-  void setAzimuth(double newValue, NotificationType notification) {
-    newValue = normRangeAzimuth_.snapToLegalValue(newValue);
-    if (newValue != azimuth_) {
-      azimuth_ = newValue;
-      if (currentAzimuthValue_ != newValue) {
-        currentAzimuthValue_ = newValue;
-      }
-      repaint();
-      triggerChangeMessage(notification);
-    }
-  }
-
-  void setDistance(double newValue, NotificationType notification) {
-    newValue = normRangeDistance_.snapToLegalValue(newValue);
-    if (newValue != distance_) {
-      distance_ = newValue;
-      if (currentDistanceValue_ != newValue) {
-        currentDistanceValue_ = newValue;
-      }
-      repaint();
-      triggerChangeMessage(notification);
-    }
-  }
-
-  float getAzimuth() { return currentAzimuthValue_.getValue(); }
-  float getDistance() { return currentDistanceValue_.getValue(); }
-
- */
-
   Value& getValueObject() noexcept { return currentValue_; }
 
   float getValue() { return currentValue_.getValue(); }
 
   void setValue(double newValue, NotificationType notification) {
     newValue = normRange_.snapToLegalValue(newValue);
-    handlePos_ = valueToHandlePos(newValue);
-    if (newValue != value_) {
-      value_ = newValue;
-      if (currentValue_ != newValue) {
-        currentValue_ = newValue;
-      }
+    if (currentValue_ != newValue) {
+      currentValue_ = newValue;
+      handlePos_ = valueToHandlePos(newValue);
       repaint();
       triggerChangeMessage(notification);
     }
   }
 
 
-
-
-
-
  private:
   bool mouseDragActive_;
   Path activeArea_;
 
-  //double azimuthDefault_ = 0.f;
-  //double distanceDefault_ = 1.f;
-  //double azimuth_ = 0.f;
-  //double distance_ = 1.f;
-
-  //Value currentAzimuthValue_;
-  //Value currentDistanceValue_;
-  //NormalisableRange<double> normRangeAzimuth_{-180.0, 180.0};
-  //NormalisableRange<double> normRangeDistance_{0.0, 1.0};
-
   double valueDefault_ = 0.f;
-  double value_ = 0.f;
   Value currentValue_;
   NormalisableRange<double> normRange_{-180.0, 180.0};
 
