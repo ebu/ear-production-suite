@@ -226,6 +226,19 @@ class OrientationView : public Component,
     }
   }
 
+  Value& getValueObject() noexcept { return currentValue_; }
+
+  float getValue() { return currentValue_.getValue(); }
+
+  void setValue(double newValue, NotificationType notification) {
+    if (currentValue_ != newValue) {
+      currentValue_ = newValue;
+      handlePos_ = valueToHandlePos(newValue);
+      repaint();
+      triggerChangeMessage(notification);
+    }
+  }
+
   void triggerChangeMessage(NotificationType notification) {
     if (notification != dontSendNotification) {
       if (notification == sendNotificationSync)
@@ -431,21 +444,6 @@ private:
     }
   }
 
-  Value& getValueObject() noexcept { return currentValue_; }
-
-  float getValue() { return currentValue_.getValue(); }
-
-  void setValue(double newValue, NotificationType notification) {
-    if (currentValue_ != newValue) {
-      currentValue_ = newValue;
-      handlePos_ = valueToHandlePos(newValue);
-      repaint();
-      triggerChangeMessage(notification);
-    }
-  }
-
-
- private:
   bool mouseDragActive_;
   Path activeArea_;
 
