@@ -12,20 +12,33 @@ class OrientationView : public Component,
                       public AsyncUpdater,
                       private Value::Listener {
  public:
-   OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
+    OrientationView(float startRad, float endRad, float startVal, float endVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Item01);
     setColour(angleLabelColourId, EarColours::Text.withAlpha(Emphasis::medium));
     setColour(directionLabelColourId,
               EarColours::Text.withAlpha(Emphasis::high));
-    arcStartPos_ = startRad;
-    arcEndPos_ = endRad;
+
+    double fullCircWithTolerance = MathConstants<double>::twoPi - (MathConstants<double>::pi / 18000.0);
+    fullCircle = (startRad == endRad || radsBetween(startRad, endRad) >= fullCircWithTolerance);
+
+    if(fullCircle) {
+      arcStartPos_ = unwrapRads(startRad);
+      arcEndPos_ = arcStartPos_ + MathConstants<double>::twoPi;
+
+    } else {
+      arcStartPos_ = unwrapRads(startRad);
+      arcEndPos_ = unwrapRads(endRad);
+      while(arcEndPos_ < arcStartPos_) {
+        arcEndPos_ += MathConstants<double>::twoPi;
+      }
+    }
+
     arcStartVal_ = startVal;
     arcEndVal_ = endVal;
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
-    fullCircle = (endRad == startRad + MathConstants<float>::twoPi);
 
     currentAzimuthValue_.addListener(this);
     currentDistanceValue_.addListener(this);
@@ -168,40 +181,67 @@ class OrientationView : public Component,
     }
   }
 
-  float radsBetween(float a, float b) {
+  double radsBetween(double a, double b) {
+    return std::abs(a - b);
+  }
+
+  double circRadsBetween(double a, double b) {
     return std::min(
       std::abs(a - b),
       std::min(
-        std::abs(a - b - MathConstants<float>::twoPi),
-        std::abs(a - b + MathConstants<float>::twoPi)
+        std::abs(a - b - MathConstants<double>::twoPi),
+        std::abs(a - b + MathConstants<double>::twoPi)
       )
     );
   }
 
-  float handlePosToValue(float handlePos) {
-    float posRangeMin = (arcStartPos_ > arcEndPos_) ? arcStartPos_ - MathConstants<float>::twoPi : arcStartPos_;
-    float posRangeMax = arcEndPos_;
-    float posRange = posRangeMax - posRangeMin;
-    float valRange = arcEndVal_ - arcStartVal_;
+  double unwrapRadsToBounds(double rads, double boundA, double boundB, bool clampToBounds = false) {
+    double minRad = std::min(boundA, boundB);
+    double maxRad = std::max(boundA, boundB);
 
-    float curPos = (handlePos > arcEndPos_)? handlePos - MathConstants<float>::twoPi : handlePos;
-    float curPosRangeProportion = (curPos - posRangeMin) / posRange;
+    while(rads < minRad) {
+      rads += MathConstants<double>::twoPi;
+    }
+    while(rads > maxRad) {
+      rads -= MathConstants<double>::twoPi;
+    }
 
-    return (valRange * curPosRangeProportion) + arcStartVal_ ;
+    if(rads >= minRad) {
+      // Now in bounds
+      return rads;
+    }
+
+    // Not fitting in bounds (rads is now < minRad)
+    double lowerVal = rads;
+    double upperVal = rads + MathConstants<double>::twoPi;
+    double lowerValDist = radsBetween(lowerVal, minRad);
+    double upperValDist = radsBetween(upperVal, maxRad);
+
+    if(clampToBounds) {
+      return (lowerValDist < upperValDist) ? minRad : maxRad;
+    }
+
+    return (lowerValDist < upperValDist) ? lowerVal : upperVal;
   }
 
-  float valueToHandlePos(float val) {
-    float posRangeMin = (arcStartPos_ > arcEndPos_) ? arcStartPos_ - MathConstants<float>::twoPi : arcStartPos_;
-    float posRangeMax = arcEndPos_;
-    float posRange = posRangeMax - posRangeMin;
-    float valRange = arcEndVal_ - arcStartVal_;
+  double handlePosToValue(double handlePos) {
+    double posRange = arcEndPos_ - arcStartPos_;
+    double valRange = arcEndVal_ - arcStartVal_;
 
-    float curValRangeProportion = (val - arcStartVal_) / valRange;
-    float handlePos = (posRange * curValRangeProportion) + posRangeMin;
-    if(handlePos < 0.f) handlePos += MathConstants<float>::twoPi;
-    if(handlePos > MathConstants<float>::twoPi) handlePos -= MathConstants<float>::twoPi;
+    handlePos = unwrapRadsToBounds(handlePos, arcStartPos_, arcEndPos_);
+    double curPosRangeProportion = (handlePos - arcStartPos_) / posRange;
 
-    return handlePos;
+    double ret = (valRange * curPosRangeProportion) + arcStartVal_;
+    return ret;
+  }
+
+  double valueToHandlePos(double val) {
+    double posRange = arcEndPos_ - arcStartPos_;
+    double valRange = arcEndVal_ - arcStartVal_;
+
+    double curValRangeProportion = (val - arcStartVal_) / valRange;
+    double ret = (posRange * curValRangeProportion) + arcStartPos_;
+    return ret;
   }
 
   void mouseDrag(const MouseEvent& event) override {
@@ -210,28 +250,28 @@ class OrientationView : public Component,
       const auto posRel = juce::Point<float>(
           getWidth() / 2.f - static_cast<float>(position.getX()),
           getHeight() / 2.f - static_cast<float>(position.getY()));
-      float posRad = std::atan2(-posRel.getX(), posRel.getY());
-      float posRadCirc = (posRad < 0.f) ? posRad + MathConstants<float>::twoPi : posRad;
-
-      float arcRange = radsBetween(arcStartPos_, arcEndPos_);
-      float arcOffset = arcStartPos_;
-      if(arcStartPos_ > arcEndPos_) arcOffset = MathConstants<float>::twoPi - arcStartPos_;
+      double posRad = std::atan2(-posRel.getX(), posRel.getY());
+      double posRadCirc = unwrapRads(posRad);
 
       bool inBounds = false;
       if(fullCircle) {
         inBounds = true;
-      } else if(arcStartPos_ > arcEndPos_) {
-        if(posRadCirc >= arcStartPos_ && posRadCirc >= arcEndPos_) inBounds = true;
-        if(posRadCirc <= arcStartPos_ && posRadCirc <= arcEndPos_) inBounds = true;
-      } else { //arcStartPos_ > arcEndPos_
-        if(posRadCirc >= arcStartPos_ && posRadCirc <= arcEndPos_) inBounds = true;
+      } else if(posRadCirc >= arcStartPos_) {
+        if(posRadCirc <= arcEndPos_) {
+          inBounds = true;
+        }
+      } else {
+        posRadCirc += MathConstants<double>::twoPi;
+        if(posRadCirc >= arcStartPos_ && posRadCirc <= arcEndPos_) {
+          inBounds = true;
+        }
       }
 
       if(inBounds) {
         handlePos_ = posRadCirc;
       } else {
-        float radsToStart = radsBetween(posRadCirc, arcStartPos_);
-        float radsToEnd = radsBetween(posRadCirc, arcEndPos_);
+        double radsToStart = circRadsBetween(posRadCirc, arcStartPos_);
+        double radsToEnd = circRadsBetween(posRadCirc, arcEndPos_);
         handlePos_ = (radsToStart < radsToEnd) ? arcStartPos_ : arcEndPos_;
       }
 
@@ -280,7 +320,19 @@ class OrientationView : public Component,
     angleLabelColourId = 0x00010005,
   };
 
+  double unwrapRads(double rads) {
+    while(rads < 0.f) {
+      rads += MathConstants<double>::twoPi;
+    }
+    while(rads > MathConstants<double>::twoPi) {
+      rads -= MathConstants<double>::twoPi;
+    }
+    return rads;
+  }
+
   void setLabelsSizeAndPosition(float atRad, juce::Rectangle<float> &valLabelRect, juce::String &valLabelStr, juce::Rectangle<float> &txtLabelRect, juce::String &txtLabelStr) {
+    atRad = unwrapRads(atRad);
+
     float labelWidth = EarFonts::Measures.getStringWidthFloat(valLabelStr);
     if(txtLabelStr.isNotEmpty()) {
       labelWidth = std::max(labelWidth, EarFonts::Values.getStringWidthFloat(txtLabelStr));
@@ -472,26 +524,24 @@ class OrientationView : public Component,
   juce::Rectangle<float> jointLabelRect_;
   juce::String jointLabelText_;
 
-  const float outerDiameter_ = 205.f;
+  const float outerDiameter_ = 100.f;
   const float trackWidth_ = 1.f;
-  const float outerTrackWidth_ = 5.f;
-  const float tickLength_ = 13.5f;
+  const float outerTrackWidth_ = 3.f;
+  const float tickLength_ = 7.f;
   const float tickWidth_ = 1.f;
-  const float labelWidth_ = 50.f;
   const float labelHeight_ = 12.f;
   const float labelSeperation_ = 2.f;
-  const float padding_ = 2.f;
-  const float knobSize_ = 19.f;
-  const float crossSize_ = 28.f;
+  const float knobSize_ = 10.f;
+  const float crossSize_ = 14.f;
   const float crossWidth_ = 1.f;
 
-  float arcStartPos_ = 2.0;
-  float arcEndPos_ = float_Pi + 2.0;
-  float arcStartVal_ = 90.f;
-  float arcEndVal_ = -90.f;
+  double arcStartPos_ = 0.0;
+  double arcEndPos_ = 0.0;
+  double arcStartVal_ = -180.0;
+  double arcEndVal_ = 180.0;
   bool fullCircle = false;
 
-  float handlePos_ = 0.f;
+  double handlePos_ = 0.0;
 
 
   ListenerList<Listener> listeners_;
