@@ -69,11 +69,11 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     addAndMakeVisible(headphoneMeters_.back().get());
   }
 
-  yawControl = std::make_unique<OrientationView>(MathConstants<float>::pi, MathConstants<float>::pi * 3.f, -180.f, 180.f, String("Front"), String("Back") );
+  yawControl = std::make_unique<OrientationView>(-MathConstants<float>::pi, MathConstants<float>::pi, -180.f, 180.f, 0.f, String("Front"), String("Back") );
   addAndMakeVisible(yawControl.get());
-  pitchControl = std::make_unique<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, String("Horizon"), String() );
+  pitchControl = std::make_unique<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, 0.f, String("Horizon"), String() );
   addAndMakeVisible(pitchControl.get());
-  rollControl = std::make_unique<OrientationView>(MathConstants<float>::halfPi * 3.f, MathConstants<float>::halfPi, -90.f, 90.f, String("Upright"), String() );
+  rollControl = std::make_unique<OrientationView>(-MathConstants<float>::halfPi, MathConstants<float>::halfPi, -90.f, 90.f, 0.f, String("Upright"), String() );
   addAndMakeVisible(rollControl.get());
 
 
@@ -125,9 +125,9 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
     meterArea.removeFromLeft(5);
   }
 
-  yawControl->setBounds(rightColumn.withHeight(300).withWidth(300));
-  pitchControl->setBounds(rightColumn.withTrimmedLeft(300).withHeight(300).withWidth(300));
-  rollControl->setBounds(rightColumn.withTrimmedLeft(600).withHeight(300).withWidth(300));
+  yawControl->setBounds(rightColumn.withHeight(200).withWidth(200));
+  pitchControl->setBounds(rightColumn.withTrimmedLeft(200).withHeight(200).withWidth(200));
+  rollControl->setBounds(rightColumn.withTrimmedLeft(400).withHeight(200).withWidth(200));
 
   /*
   orientationViewValueBox->setBounds(rightColumn.removeFromTop(200).reduced(5, 5));

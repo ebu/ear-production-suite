@@ -16,6 +16,7 @@ class OrientationView : public Component,
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Item01);
+    //setColour(highlightColourId, Colour(0, 128, 255));
     setColour(angleLabelColourId, EarColours::Text.withAlpha(Emphasis::medium));
     setColour(directionLabelColourId,
               EarColours::Text.withAlpha(Emphasis::high));
@@ -51,8 +52,8 @@ class OrientationView : public Component,
 
   void paint(Graphics& g) override {
     // background
-    //g.fillAll(juce::Colours::grey);
     g.fillAll(findColour(backgroundColourId));
+    //g.fillAll(Colour(29, 29, 29));
 
     // center cross
     Line<float> horizontalLine(
