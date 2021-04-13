@@ -3,6 +3,8 @@
 #include "JuceHeader.h"
 #include "look_and_feel/colours.hpp"
 #include "look_and_feel/fonts.hpp"
+#include "look_and_feel/slider.hpp"
+#include "ear_slider.hpp"
 
 namespace ear {
 namespace plugin {
@@ -42,6 +44,26 @@ class OrientationView : public Component,
     setValue(valueDefault_, dontSendNotification);
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
+
+    readout_ = std::make_shared<EarSlider>();
+    readout_->setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
+    readout_->setUnit("Degree");
+    readout_->textFromValueFunction = [&](double val) {
+      return String(val, 1).replaceCharacters(StringRef(String::fromUTF8("-")),
+                                              StringRef(String::fromUTF8("–")));
+    };
+    readout_->valueFromTextFunction = [&](const String& text) {
+      return text
+        .replaceCharacters(StringRef(String::fromUTF8("–")),
+                           StringRef(String::fromUTF8("-")))
+        .retainCharacters("0123456789.,-+")
+        .getDoubleValue();
+    };
+    readout_->setTextBoxStyle(Slider::TextBoxRight, false, 44, 40);
+    readout_->setRange(startVal, endVal);
+    readout_->setNumDecimalPlacesToDisplay(1);
+    readout_->setDoubleClickReturnValue(true, defaultVal);
+    addAndMakeVisible(readout_.get());
 
     currentValue_.addListener(this);
   }
@@ -125,6 +147,8 @@ class OrientationView : public Component,
             (outerDiameter_ + outerTrackWidth_ + knobSize_) / 2.f,
         outerDiameter_ + outerTrackWidth_ + knobSize_,
         outerDiameter_ + outerTrackWidth_ + knobSize_);
+
+    readout_->setBounds(getWidth() - 44, getHeight() - 40, 44, 40);
 
     if(fullCircle) {
       // Full Circle
@@ -487,6 +511,8 @@ private:
   bool fullCircle = false;
 
   double handlePos_ = 0.0;
+
+  std::shared_ptr<ear::plugin::ui::EarSlider> readout_;
 
 
   ListenerList<Listener> listeners_;

@@ -4,6 +4,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES_BINAURAL_MONITORING
     ${EPS_SHARED_DIR}/binary_data.cpp
+    ${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
+    ${EPS_SHARED_DIR}/components/ear_header.cpp
+    ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
 	src/binaural_monitoring_frontend_connector.cpp
     src/binaural_monitoring_plugin_editor.cpp
