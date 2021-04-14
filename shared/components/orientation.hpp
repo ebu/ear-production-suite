@@ -5,6 +5,7 @@
 #include "look_and_feel/fonts.hpp"
 #include "look_and_feel/slider.hpp"
 #include "ear_slider.hpp"
+#include "ear_inverted_slider.hpp"
 
 namespace ear {
 namespace plugin {
@@ -17,7 +18,7 @@ class OrientationView : public Component,
   OrientationView(float startRad, float endRad, float startVal, float endVal, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
-    setColour(highlightColourId, EarColours::Item01);
+    setColour(highlightColourId, EarColours::Primary);
     //setColour(highlightColourId, Colour(0, 128, 255));
     setColour(angleLabelColourId, EarColours::Text.withAlpha(Emphasis::medium));
     setColour(directionLabelColourId,
@@ -45,7 +46,8 @@ class OrientationView : public Component,
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
 
-    readout_ = std::make_shared<EarSlider>();
+    readout_ = (startVal > endVal)? std::make_shared<EarSlider>() : std::make_shared<EarInvertedSlider>(); // Ensures drag down turns clockwise, regardless of min/max order of limits
+
     readout_->setSliderStyle(juce::Slider::SliderStyle::IncDecButtons);
     readout_->setUnit("Degree");
     readout_->textFromValueFunction = [&](double val) {
@@ -60,7 +62,7 @@ class OrientationView : public Component,
         .getDoubleValue();
     };
     readout_->setTextBoxStyle(Slider::TextBoxRight, false, 44, 40);
-    readout_->setRange(startVal, endVal);
+    readout_->setRange(std::min(startVal, endVal), std::max(startVal, endVal));
     readout_->setNumDecimalPlacesToDisplay(1);
     readout_->setDoubleClickReturnValue(true, defaultVal);
     addAndMakeVisible(readout_.get());
