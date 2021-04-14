@@ -283,7 +283,7 @@ class OrientationView : public Component,
 
     Component::BailOutChecker checker(this);
     listeners_.callChecked(checker,
-                           [this](Listener& l) { l.valueChanged(this); });
+                           [this](Listener& l) { l.orientationValueChanged(this); });
     if (checker.shouldBailOut()) {
       return;
     }
@@ -312,9 +312,9 @@ class OrientationView : public Component,
    public:
     virtual ~Listener() = default;
 
-    virtual void valueChanged(OrientationView* panner) = 0;
-    virtual void dragStarted(OrientationView* panner) = 0;
-    virtual void dragEnded(OrientationView* panner) = 0;
+    virtual void orientationValueChanged(OrientationView* panner) = 0;
+    virtual void orientationDragStarted(OrientationView* panner) = 0;
+    virtual void orientationDragEnded(OrientationView* panner) = 0;
   };
 
   void addListener(Listener* l) { listeners_.add(l); }
@@ -326,7 +326,7 @@ private:
     mouseDragActive_ = true;
     Component::BailOutChecker checker(this);
     listeners_.callChecked(checker,
-                           [&](Listener& l) { l.dragStarted(this); });
+                           [&](Listener& l) { l.orientationDragStarted(this); });
     if (checker.shouldBailOut()) {
       return;
     }
@@ -336,7 +336,7 @@ private:
     mouseDragActive_ = false;
     Component::BailOutChecker checker(this);
     listeners_.callChecked(checker,
-                           [this](Listener& l) { l.dragEnded(this); });
+                           [this](Listener& l) { l.orientationDragEnded(this); });
 
     if (checker.shouldBailOut()) {
       return;

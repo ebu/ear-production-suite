@@ -49,19 +49,17 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
 
   /* clang-format off */
-  /*
   // TODO - these NonAutomatedParameter will not set plugin state dirty! Need to use dummy param as in PR !67
-  addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   addParameter(yaw_ = new ui::NonAutomatedParameter<AudioParameterFloat>("yaw", "Yaw", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(pitch_ = new ui::NonAutomatedParameter<AudioParameterFloat>("pitch", "Pitch", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(roll_ = new ui::NonAutomatedParameter<AudioParameterFloat>("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(oscEnable_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscEnable", "Enable OSC", false));
-  */
+  addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   /* clang-format on */
 
   backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
     nullptr, 64);
-  /*
+
   connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
 
   //TODO - does oscPort and useOSC need connecting? OSC is JUCE-based so maybe shouldn't use the abstraction layer.
@@ -70,7 +68,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(2, roll_->get());
   connector_->parameterValueChanged(3, oscEnable_->get());
   connector_->parameterValueChanged(4, oscPort_->get());
-  */
+
 
   auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();

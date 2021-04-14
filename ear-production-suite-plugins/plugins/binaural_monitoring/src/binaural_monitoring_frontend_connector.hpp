@@ -3,10 +3,11 @@
 
 #include "JuceHeader.h"
 
-#include "components/ear_button.hpp"
-#include "components/ear_combo_box.hpp"
-#include "components/panner_top_view.hpp"
-#include "components/panner_side_view.hpp"
+#include "components/orientation.hpp"
+//#include "components/ear_button.hpp"
+//#include "components/ear_combo_box.hpp"
+//#include "components/panner_top_view.hpp"
+//#include "components/panner_side_view.hpp"
 #include "helper/multi_async_updater.h"
 #include "binaural_monitoring_plugin_processor.hpp"
 #include <memory>
@@ -15,7 +16,8 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class EarComboBox;
+class OrientationView;
+
 class EarNameTextEditor;
 class EarSlider;
 class EarInvertedSlider;
@@ -25,13 +27,15 @@ class PannerSideView;
 class BinauralMonitoringJuceFrontendConnector
     : public ear::plugin::ui::BinauralMonitoringFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
-      TextEditor::Listener,
-      Slider::Listener,
-      Button::Listener,
-      ear::plugin::ui::PannerTopView::Listener,
-      ear::plugin::ui::PannerSideView::Listener,
-      ear::plugin::ui::EarComboBox::Listener {
- public:
+      //TextEditor::Listener,
+      //Slider::Listener,
+      //Button::Listener,
+      //ear::plugin::ui::PannerTopView::Listener,
+      //ear::plugin::ui::PannerSideView::Listener,
+      //ear::plugin::ui::EarComboBox::Listener {
+      ear::plugin::ui::OrientationView::Listener {
+
+public:
   /**
    * Note: Make sure that all AudioProcessorParameters are already
    * added to the ObjectsAudioProcessor at the time the ctor
@@ -44,8 +48,17 @@ class BinauralMonitoringJuceFrontendConnector
   void parameterGestureChanged(int parameterIndex,
                                bool gestureIsStarting) override{};
 
-  /*
+  // Orientation Controls
+  void setYawView(std::shared_ptr<OrientationView> view);
+  void setPitchView(std::shared_ptr<OrientationView> view);
+  void setRollView(std::shared_ptr<OrientationView> view);
 
+  // Value Setters
+  void setYaw(float yaw);
+  void setPitch(float pitch);
+  void setRoll(float roll);
+
+  /*
   // Main Value Box
   void setStatusBarLabel(std::shared_ptr<Label> statusBarLabel);
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> nameTextEditor);
@@ -100,21 +113,27 @@ class BinauralMonitoringJuceFrontendConnector
   void setRange(float value);
   */
 
- protected:
+protected:
+  // Orientation::Listener
+  void orientationValueChanged(ear::plugin::ui::OrientationView* view) override;
+  void orientationDragStarted(ear::plugin::ui::OrientationView* view) override;
+  void orientationDragEnded(ear::plugin::ui::OrientationView* view) override;
+
+  /*
   // Slider::Listener
   void sliderValueChanged(Slider* slider) override;
   void sliderDragStarted(Slider*) override;
   void sliderDragEnded(Slider*) override;
 
   // PannerTopView::Listener
-  //void pannerValueChanged(ear::plugin::ui::PannerTopView* panner) override;
-  //void pannerDragStarted(ear::plugin::ui::PannerTopView* panner) override;
-  //void pannerDragEnded(ear::plugin::ui::PannerTopView* panner) override;
+  void pannerValueChanged(ear::plugin::ui::PannerTopView* panner) override;
+  void pannerDragStarted(ear::plugin::ui::PannerTopView* panner) override;
+  void pannerDragEnded(ear::plugin::ui::PannerTopView* panner) override;
 
   // PannerSideView::Listener
-  //void pannerValueChanged(ear::plugin::ui::PannerSideView* panner) override;
-  //void pannerDragStarted(ear::plugin::ui::PannerSideView* panner) override;
-  //void pannerDragEnded(ear::plugin::ui::PannerSideView* panner) override;
+  void pannerValueChanged(ear::plugin::ui::PannerSideView* panner) override;
+  void pannerDragStarted(ear::plugin::ui::PannerSideView* panner) override;
+  void pannerDragEnded(ear::plugin::ui::PannerSideView* panner) override;
 
   // EarComboBox::Listener
   void comboBoxChanged(
@@ -122,11 +141,18 @@ class BinauralMonitoringJuceFrontendConnector
 
   // Button::Listener
   void buttonClicked(Button*) override;
+  */
 
- private:
+private:
   EarBinauralMonitoringAudioProcessor* p_;
   std::map<int, RangedAudioParameter*> parameters_;
 
+  // Orientation Controls
+  std::weak_ptr<OrientationView> yawControl_;
+  std::weak_ptr<OrientationView> pitchControl_;
+  std::weak_ptr<OrientationView> rollControl_;
+
+  /*
   // Main Value Box
   std::weak_ptr<EarComboBox> colourComboBox_;
   std::weak_ptr<EarComboBox> routingComboBox_;
@@ -160,9 +186,16 @@ class BinauralMonitoringJuceFrontendConnector
   std::weak_ptr<PannerSideView> pannerSideView_;
 
   std::weak_ptr<Label> statusBar_;
+  */
 
   MultiAsyncUpdater updater_;
 
+  // Values
+  double cachedYaw_;
+  double cachedPitch_;
+  double cachedRoll_;
+
+  /*
   // Values
   Colour cachedColour_;
   int cachedRouting_;
@@ -181,6 +214,7 @@ class BinauralMonitoringJuceFrontendConnector
   float cachedFactor_;
   float cachedRange_;
   std::string cachedStatusBarText_;
+  */
 };
 
 }  // namespace ui

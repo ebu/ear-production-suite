@@ -1,17 +1,17 @@
 #include "binaural_monitoring_frontend_connector.hpp"
 
-#include "components/ear_combo_box.hpp"
-#include "components/ear_name_text_editor.hpp"
+//#include "components/ear_combo_box.hpp"
+//#include "components/ear_name_text_editor.hpp"
 #include "components/ear_slider.hpp"
 #include "components/ear_inverted_slider.hpp"
-#include "components/panner_top_view.hpp"
-#include "components/panner_side_view.hpp"
+//#include "components/panner_top_view.hpp"
+//#include "components/panner_side_view.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
 
-inline bool clipToBool(float value) { return value < 0.5 ? false : true; }
+//inline bool clipToBool(float value) { return value < 0.5 ? false : true; }
 
 BinauralMonitoringJuceFrontendConnector::BinauralMonitoringJuceFrontendConnector(
   EarBinauralMonitoringAudioProcessor* processor)
@@ -37,6 +37,18 @@ BinauralMonitoringJuceFrontendConnector::~BinauralMonitoringJuceFrontendConnecto
       parameter.second->removeListener(this);
     }
   }
+
+  if (auto orientationControl = yawControl_.lock()) {
+    orientationControl->removeListener(this);
+  }
+  if (auto orientationControl = pitchControl_.lock()) {
+    orientationControl->removeListener(this);
+  }
+  if (auto orientationControl = rollControl_.lock()) {
+    orientationControl->removeListener(this);
+  }
+
+  /*
   if (auto comboBox = routingComboBox_.lock()) {
     comboBox->removeListener(this);
   }
@@ -88,7 +100,30 @@ BinauralMonitoringJuceFrontendConnector::~BinauralMonitoringJuceFrontendConnecto
   if (auto panner = pannerSideView_.lock()) {
     panner->removeListener(this);
   }
+  */
 }
+
+void BinauralMonitoringJuceFrontendConnector::setYawView(std::shared_ptr<OrientationView> view)
+{
+  view->addListener(this);
+  yawControl_ = view;
+  setYaw(cachedYaw_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setPitchView(std::shared_ptr<OrientationView> view)
+{
+  view->addListener(this);
+  pitchControl_ = view;
+  setPitch(cachedPitch_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setRollView(std::shared_ptr<OrientationView> view)
+{
+  view->addListener(this);
+  rollControl_ = view;
+  setRoll(cachedRoll_);
+}
+
 /*
 void BinauralMonitoringJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
@@ -238,7 +273,33 @@ void BinauralMonitoringJuceFrontendConnector::setRangeSlider(
   setRange(cachedRange_);
   setDivergence(cachedDivergence_);
 }
+*/
 
+void BinauralMonitoringJuceFrontendConnector::setYaw(float yaw)
+{
+  if(auto orientationControl = yawControl_.lock()) {
+    orientationControl->setValue(yaw, dontSendNotification);
+  }
+  cachedYaw_ = yaw;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setPitch(float pitch)
+{
+  if(auto orientationControl = pitchControl_.lock()) {
+    orientationControl->setValue(pitch, dontSendNotification);
+  }
+  cachedPitch_ = pitch;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setRoll(float roll)
+{
+  if(auto orientationControl = rollControl_.lock()) {
+    orientationControl->setValue(roll, dontSendNotification);
+  }
+  cachedRoll_ = roll;
+}
+
+/*
 void BinauralMonitoringJuceFrontendConnector::setName(const std::string& name) {
   if (auto nameTextEditorLocked = nameTextEditor_.lock()) {
     nameTextEditorLocked->setText(name);
@@ -451,6 +512,21 @@ void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(int paramete
                                                          float newValue) {
   updater_.callOnMessageThread([this, parameterIndex, newValue]() {
     using ParameterId = ui::BinauralMonitoringFrontendBackendConnector::ParameterId;
+    switch(parameterIndex) {
+      case 0:
+        notifyParameterChanged(ParameterId::YAW, p_->getYaw()->get());
+        setYaw(p_->getYaw()->get());
+        break;
+      case 1:
+        notifyParameterChanged(ParameterId::PITCH, p_->getPitch()->get());
+        setPitch(p_->getPitch()->get());
+        break;
+      case 2:
+        notifyParameterChanged(ParameterId::ROLL, p_->getRoll()->get());
+        setRoll(p_->getRoll()->get());
+        break;
+    }
+
     /*
     switch (parameterIndex) {
       case 0:
@@ -520,8 +596,47 @@ void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(int paramete
   });
 }
 
+void BinauralMonitoringJuceFrontendConnector::orientationValueChanged(ear::plugin::ui::OrientationView * view)
+{
+  if(!yawControl_.expired() && view == yawControl_.lock().get()) {
+    *(p_->getYaw()) = view->getValue();
+
+  } else if(!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+    *(p_->getPitch()) = view->getValue();
+
+  } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
+    *(p_->getRoll()) = view->getValue();
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::orientationDragStarted(ear::plugin::ui::OrientationView * view)
+{
+  if(!yawControl_.expired() && view == yawControl_.lock().get()) {
+    p_->getYaw()->beginChangeGesture();
+
+  } else if(!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+    p_->getPitch()->beginChangeGesture();
+
+  } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
+    p_->getRoll()->beginChangeGesture();
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::orientationDragEnded(ear::plugin::ui::OrientationView * view)
+{
+  if(!yawControl_.expired() && view == yawControl_.lock().get()) {
+    p_->getYaw()->endChangeGesture();
+
+  } else if(!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+    p_->getPitch()->endChangeGesture();
+
+  } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
+    p_->getRoll()->endChangeGesture();
+  }
+}
+
+/*
 void BinauralMonitoringJuceFrontendConnector::sliderValueChanged(Slider* slider) {
-  /*
   if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
     *(p_->getGain()) = slider->getValue();
   } else if (!azimuthSlider_.expired() &&
@@ -549,11 +664,9 @@ void BinauralMonitoringJuceFrontendConnector::sliderValueChanged(Slider* slider)
   } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
     *(p_->getRange()) = slider->getValue();
   }
-  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::sliderDragStarted(Slider* slider) {
-  /*
   if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
     p_->getGain()->beginChangeGesture();
   } else if (!azimuthSlider_.expired() &&
@@ -581,11 +694,9 @@ void BinauralMonitoringJuceFrontendConnector::sliderDragStarted(Slider* slider) 
   } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
     p_->getRange()->beginChangeGesture();
   }
-  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::sliderDragEnded(Slider* slider) {
-  /*
   if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
     p_->getGain()->endChangeGesture();
   } else if (!azimuthSlider_.expired() &&
@@ -613,9 +724,8 @@ void BinauralMonitoringJuceFrontendConnector::sliderDragEnded(Slider* slider) {
   } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
     p_->getRange()->endChangeGesture();
   }
-  */
 }
-/*
+
 void BinauralMonitoringJuceFrontendConnector::pannerValueChanged(
     ear::plugin::ui::PannerTopView* panner) {
   if (!pannerTopView_.expired() && panner == pannerTopView_.lock().get()) {
@@ -660,18 +770,15 @@ void BinauralMonitoringJuceFrontendConnector::pannerDragEnded(
     p_->getElevation()->endChangeGesture();
   }
 }
-*/
+
 void BinauralMonitoringJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
-  /*
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {
     *(p_->getRouting()) = comboBox->getSelectedEntryIndex();
   }
-  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::buttonClicked(Button* button) {
-  /*
   if (!divergenceButton_.expired() &&
       button == divergenceButton_.lock().get()) {
     // note: getToggleState still has the old value when this is called
@@ -680,8 +787,8 @@ void BinauralMonitoringJuceFrontendConnector::buttonClicked(Button* button) {
              button == linkSizeButton_.lock().get()) {
     *(p_->getLinkSize()) = !button->getToggleState();
   }
-  */
 }
+*/
 
 }  // namespace ui
 }  // namespace plugin

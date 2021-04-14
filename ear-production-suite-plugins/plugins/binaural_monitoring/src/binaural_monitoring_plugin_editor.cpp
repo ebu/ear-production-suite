@@ -5,6 +5,7 @@
 #include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
+#include "binaural_monitoring_frontend_connector.hpp"
 
 #include <string>
 
@@ -25,17 +26,6 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
-
-  /* clang-format off */
-  /*
-  p->getFrontendConnector()->setOscPortLabel(oscValueBox->getOscPortLabel());
-  p->getFrontendConnector()->setOscEnableButton(oscValueBox->getOscEnableButton());
-  p->getFrontendConnector()->setOscStatusLabel(oscValueBox->getOscStatusLabel());
-  p->getFrontendConnector()->setYawControl(orientationViewValueBox->getYawView());
-  p->getFrontendConnector()->setPitchControl(orientationViewValueBox->getPitchView());
-  p->getFrontendConnector()->setRollControl(orientationViewValueBox->getRollView());
-  */
-  /* clang-format on */
 
   header_->setText(" Binaural Monitoring");
 
@@ -69,13 +59,21 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     addAndMakeVisible(headphoneMeters_.back().get());
   }
 
-  yawControl = std::make_unique<OrientationView>(-MathConstants<float>::pi, MathConstants<float>::pi, -180.f, 180.f, 0.f, String("Front"), String("Back") );
+  yawControl = std::make_shared<OrientationView>(-MathConstants<float>::pi, MathConstants<float>::pi, -180.f, 180.f, 0.f, String("Front"), String("Back") );
   addAndMakeVisible(yawControl.get());
-  pitchControl = std::make_unique<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, 0.f, String("Horizon"), String() );
+  pitchControl = std::make_shared<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, 0.f, String("Horizon"), String() );
   addAndMakeVisible(pitchControl.get());
-  rollControl = std::make_unique<OrientationView>(-MathConstants<float>::halfPi, MathConstants<float>::halfPi, -90.f, 90.f, 0.f, String("Upright"), String() );
+  rollControl = std::make_shared<OrientationView>(-MathConstants<float>::halfPi, MathConstants<float>::halfPi, -90.f, 90.f, 0.f, String("Upright"), String() );
   addAndMakeVisible(rollControl.get());
 
+  /* clang-format off */
+  //p->getFrontendConnector()->setOscPortLabel(oscValueBox->getOscPortLabel());
+  //p->getFrontendConnector()->setOscEnableButton(oscValueBox->getOscEnableButton());
+  //p->getFrontendConnector()->setOscStatusLabel(oscValueBox->getOscStatusLabel());
+  p->getFrontendConnector()->setYawView(yawControl); // orientationViewValueBox->getYawView());
+  p->getFrontendConnector()->setPitchView(pitchControl); // orientationViewValueBox->getPitchView());
+  p->getFrontendConnector()->setRollView(rollControl); // orientationViewValueBox->getRollView());
+  /* clang-format on */
 
   /*
   addAndMakeVisible(oscValueBox.get());
@@ -88,6 +86,9 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   orientationViewValueBox->getPitchView()->setPitch(p->getPitch()->get(), dontSendNotification);
   orientationViewValueBox->getRollView()->setRoll(p->getRoll()->get(), dontSendNotification);
   */
+  yawControl->setValue(p->getYaw()->get(), dontSendNotification);
+  pitchControl->setValue(p->getPitch()->get(), dontSendNotification);
+  rollControl->setValue(p->getRoll()->get(), dontSendNotification);
 
   //setSize(750, 600); // Min size to fit onboarding window.
   //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
