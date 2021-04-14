@@ -15,6 +15,18 @@ class OrientationView : public Component,
                       public AsyncUpdater,
                       private Value::Listener {
  public:
+
+  class ReadoutListener : public ear::plugin::ui::EarSlider::Listener {
+  public:
+    ReadoutListener() {}
+    ~ReadoutListener() {}
+
+    void sliderValueChanged(Slider* slider) override {
+      auto orientationView = static_cast<OrientationView*>(slider->getParentComponent());
+      orientationView->setValue(slider->getValue(), juce::NotificationType::sendNotificationSync);
+    }
+  };
+
   OrientationView(float startRad, float endRad, float startVal, float endVal, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
@@ -42,7 +54,6 @@ class OrientationView : public Component,
     arcStartVal_ = startVal;
     arcEndVal_ = endVal;
     valueDefault_ = defaultVal;
-    setValue(valueDefault_, dontSendNotification);
     centreLabelText_ = centreLabel;
     jointLabelText_ = jointLabel;
 
@@ -65,12 +76,15 @@ class OrientationView : public Component,
     readout_->setRange(std::min(startVal, endVal), std::max(startVal, endVal));
     readout_->setNumDecimalPlacesToDisplay(1);
     readout_->setDoubleClickReturnValue(true, defaultVal);
+    readout_->addListener(&readoutListener_);
     addAndMakeVisible(readout_.get());
 
+    setValue(valueDefault_, dontSendNotification);
     currentValue_.addListener(this);
   }
 
   ~OrientationView() {
+    readout_->removeListener(&readoutListener_);
     currentValue_.removeListener(this);
   }
 
@@ -260,6 +274,7 @@ class OrientationView : public Component,
   void setValue(double newValue, NotificationType notification) {
     if (currentValue_ != newValue) {
       currentValue_ = newValue;
+      readout_->setValue(newValue, juce::NotificationType::dontSendNotification);
       handlePos_ = valueToHandlePos(newValue);
       repaint();
       triggerChangeMessage(notification);
@@ -515,7 +530,7 @@ private:
   double handlePos_ = 0.0;
 
   std::shared_ptr<ear::plugin::ui::EarSlider> readout_;
-
+  ReadoutListener readoutListener_{};
 
   ListenerList<Listener> listeners_;
 
@@ -525,3 +540,4 @@ private:
 }  // namespace ui
 }  // namespace plugin
 }  // namespace ear
+
