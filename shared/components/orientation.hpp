@@ -13,25 +13,14 @@ namespace ui {
 
 class OrientationView : public Component,
                       public AsyncUpdater,
-                      private Value::Listener {
+                      private Value::Listener,
+                      private EarSlider::Listener {
  public:
-
-  class ReadoutListener : public ear::plugin::ui::EarSlider::Listener {
-  public:
-    ReadoutListener() {}
-    ~ReadoutListener() {}
-
-    void sliderValueChanged(Slider* slider) override {
-      auto orientationView = static_cast<OrientationView*>(slider->getParentComponent());
-      orientationView->setValue(slider->getValue(), juce::NotificationType::sendNotificationSync);
-    }
-  };
 
   OrientationView(float startRad, float endRad, float startVal, float endVal, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Primary);
-    //setColour(highlightColourId, Colour(0, 128, 255));
     setColour(angleLabelColourId, EarColours::Text.withAlpha(Emphasis::medium));
     setColour(directionLabelColourId,
               EarColours::Text.withAlpha(Emphasis::high));
@@ -76,7 +65,7 @@ class OrientationView : public Component,
     readout_->setRange(std::min(startVal, endVal), std::max(startVal, endVal));
     readout_->setNumDecimalPlacesToDisplay(1);
     readout_->setDoubleClickReturnValue(true, defaultVal);
-    readout_->addListener(&readoutListener_);
+    readout_->addListener(this);
     addAndMakeVisible(readout_.get());
 
     setValue(valueDefault_, dontSendNotification);
@@ -84,14 +73,13 @@ class OrientationView : public Component,
   }
 
   ~OrientationView() {
-    readout_->removeListener(&readoutListener_);
+    readout_->removeListener(this);
     currentValue_.removeListener(this);
   }
 
   void paint(Graphics& g) override {
     // background
     g.fillAll(findColour(backgroundColourId));
-    //g.fillAll(Colour(29, 29, 29));
 
     // center cross
     Line<float> horizontalLine(
@@ -305,6 +293,11 @@ class OrientationView : public Component,
     if (value.refersToSameSourceAs(currentValue_)) {
       setValue(currentValue_.getValue(), dontSendNotification);
     }
+  }
+
+  void sliderValueChanged(Slider* slider) override {
+    // Note that this is actually from the readout control (it uses a slider component)
+    setValue(readout_->getValue(), juce::NotificationType::sendNotificationSync);
   }
 
   enum ColourIds {
@@ -530,7 +523,6 @@ private:
   double handlePos_ = 0.0;
 
   std::shared_ptr<ear::plugin::ui::EarSlider> readout_;
-  ReadoutListener readoutListener_{};
 
   ListenerList<Listener> listeners_;
 
