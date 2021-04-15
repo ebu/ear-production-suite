@@ -17,7 +17,7 @@ class OrientationView : public Component,
                       private EarSlider::Listener {
  public:
 
-  OrientationView(float startRad, float endRad, float startVal, float endVal, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
+  OrientationView(float startRad, float endRad, float startVal, float endVal, float readoutMin, float readoutMax, float defaultVal, juce::String centreLabel, juce::String jointLabel) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
     setColour(highlightColourId, EarColours::Primary);
@@ -62,7 +62,7 @@ class OrientationView : public Component,
         .getDoubleValue();
     };
     readout_->setTextBoxStyle(Slider::TextBoxRight, false, 44, 40);
-    readout_->setRange(std::min(startVal, endVal), std::max(startVal, endVal));
+    readout_->setRange(readoutMin, readoutMax);
     readout_->setNumDecimalPlacesToDisplay(1);
     readout_->setDoubleClickReturnValue(true, defaultVal);
     readout_->addListener(this);

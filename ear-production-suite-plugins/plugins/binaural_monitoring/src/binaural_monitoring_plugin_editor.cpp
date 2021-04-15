@@ -17,8 +17,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
       p_(p),
       /*
       oscValueBox(std::make_unique<ValueBoxOsc>()),
-      orientationViewValueBox(std::make_unique<ValueBoxOrientation>()),
       */
+      orientationValueBox(std::make_unique<ValueBoxOrientation>()),
       header_(std::make_unique<EarHeader>()),
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
@@ -59,36 +59,27 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     addAndMakeVisible(headphoneMeters_.back().get());
   }
 
-  yawControl = std::make_shared<OrientationView>(-MathConstants<float>::pi, MathConstants<float>::pi, -180.f, 180.f, 0.f, String("Front"), String("Back") );
-  addAndMakeVisible(yawControl.get());
-  pitchControl = std::make_shared<OrientationView>(0.f, MathConstants<float>::pi, 90.f, -90.f, 0.f, String("Horizon"), String() );
-  addAndMakeVisible(pitchControl.get());
-  rollControl = std::make_shared<OrientationView>(-MathConstants<float>::halfPi, MathConstants<float>::halfPi, -90.f, 90.f, 0.f, String("Upright"), String() );
-  addAndMakeVisible(rollControl.get());
 
   /* clang-format off */
   //p->getFrontendConnector()->setOscPortLabel(oscValueBox->getOscPortLabel());
   //p->getFrontendConnector()->setOscEnableButton(oscValueBox->getOscEnableButton());
   //p->getFrontendConnector()->setOscStatusLabel(oscValueBox->getOscStatusLabel());
-  p->getFrontendConnector()->setYawView(yawControl); // orientationViewValueBox->getYawView());
-  p->getFrontendConnector()->setPitchView(pitchControl); // orientationViewValueBox->getPitchView());
-  p->getFrontendConnector()->setRollView(rollControl); // orientationViewValueBox->getRollView());
+  p->getFrontendConnector()->setYawView(orientationValueBox->getYawControl());
+  p->getFrontendConnector()->setPitchView(orientationValueBox->getPitchControl());
+  p->getFrontendConnector()->setRollView(orientationValueBox->getRollControl());
   /* clang-format on */
 
+  addAndMakeVisible(orientationValueBox.get());
   /*
   addAndMakeVisible(oscValueBox.get());
-  addAndMakeVisible(orientationViewValueBox.get());
 
   oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(), dontSendNotification);
   oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(), dontSendNotification);
   oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(), dontSendNotification);
-  orientationViewValueBox->getYawView()->setYaw(p->getYaw()->get(), dontSendNotification);
-  orientationViewValueBox->getPitchView()->setPitch(p->getPitch()->get(), dontSendNotification);
-  orientationViewValueBox->getRollView()->setRoll(p->getRoll()->get(), dontSendNotification);
   */
-  yawControl->setValue(p->getYaw()->get(), dontSendNotification);
-  pitchControl->setValue(p->getPitch()->get(), dontSendNotification);
-  rollControl->setValue(p->getRoll()->get(), dontSendNotification);
+  orientationValueBox->getYawControl()->setValue(p->getYaw()->get(), dontSendNotification);
+  orientationValueBox->getPitchControl()->setValue(p->getPitch()->get(), dontSendNotification);
+  orientationValueBox->getRollControl()->setValue(p->getRoll()->get(), dontSendNotification);
 
   //setSize(750, 600); // Min size to fit onboarding window.
   //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
@@ -100,9 +91,9 @@ EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorE
 void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
 
+  Shadows::elevation01dp.drawForRectangle(g, orientationValueBox->getBounds());
   /*
   Shadows::elevation01dp.drawForRectangle(g, oscValueBox->getBounds());
-  Shadows::elevation01dp.drawForRectangle(g, orientationViewValueBox->getBounds());
   */
 }
 
@@ -126,12 +117,9 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
     meterArea.removeFromLeft(5);
   }
 
-  yawControl->setBounds(rightColumn.withHeight(200).withWidth(200));
-  pitchControl->setBounds(rightColumn.withTrimmedLeft(200).withHeight(200).withWidth(200));
-  rollControl->setBounds(rightColumn.withTrimmedLeft(400).withHeight(200).withWidth(200));
+  orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5).withWidth(685));
 
   /*
-  orientationViewValueBox->setBounds(rightColumn.removeFromTop(200).reduced(5, 5));
   oscValueBox->setBounds(rightColumn.removeFromTop(100).reduced(5, 5));
   */
 }
