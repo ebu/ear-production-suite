@@ -11,7 +11,7 @@ namespace plugin {
 namespace ui {
 
 class ValueBoxOrientation : public Component {
- public:
+public:
    ValueBoxOrientation()
       : headingLabel_(std::make_unique<Label>()),
         yawLabel_(std::make_unique<Label>()),
@@ -103,7 +103,7 @@ class ValueBoxOrientation : public Component {
   std::shared_ptr<OrientationView> getPitchControl() { return pitchControl_; }
   std::shared_ptr<OrientationView> getRollControl() { return rollControl_; }
 
- private:
+private:
   std::unique_ptr<Label> headingLabel_;
 
   std::unique_ptr<Label> yawLabel_;

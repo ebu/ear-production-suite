@@ -15,9 +15,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
     EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
-      /*
       oscValueBox(std::make_unique<ValueBoxOsc>()),
-      */
       orientationValueBox(std::make_unique<ValueBoxOrientation>()),
       header_(std::make_unique<EarHeader>()),
       onBoardingButton_(std::make_unique<EarButton>()),
@@ -73,9 +71,9 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   /* clang-format on */
 
   addAndMakeVisible(orientationValueBox.get());
-  /*
   addAndMakeVisible(oscValueBox.get());
 
+  /*
   oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(), dontSendNotification);
   oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(), dontSendNotification);
   oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(), dontSendNotification);
@@ -86,7 +84,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
 
   //setSize(750, 600); // Min size to fit onboarding window.
   //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
-  setSize(1100, 480);
+  setSize(850, 425);
 }
 
 EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
@@ -95,9 +93,7 @@ void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
 
   Shadows::elevation01dp.drawForRectangle(g, orientationValueBox->getBounds());
-  /*
   Shadows::elevation01dp.drawForRectangle(g, oscValueBox->getBounds());
-  */
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::resized() {
@@ -114,7 +110,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   auto leftColumn = area.removeFromLeft(145);
   auto rightColumn = area.withWidth(695);
 
-  auto meterArea = leftColumn.removeFromTop(300).reduced(5, 5);
+  auto meterArea = leftColumn.removeFromTop(350).reduced(5, 5);
   headphoneMeterBox_->setBounds(meterArea);
   meterArea.removeFromTop(40);
   meterArea = meterArea.reduced(15, 15);
@@ -125,10 +121,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   }
 
   orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5));
-
-  /*
-  oscValueBox->setBounds(rightColumn.removeFromTop(100).reduced(5, 5));
-  */
+  oscValueBox->setBounds(rightColumn.removeFromTop(50).reduced(5, 5));
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::endButtonClicked(
