@@ -23,6 +23,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
       onBoardingContent_(std::make_unique<Onboarding>()),
+      headphoneMeterBox_(
+          std::make_unique<HeadphoneChannelMeterBox>(String::fromUTF8("Output"))),
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
@@ -51,6 +53,7 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   addAndMakeVisible(header_.get());
   //addAndMakeVisible(onBoardingButton_.get()); // TODO: Commented out for now as doesn't fit in MVP window
   addChildComponent(onBoardingOverlay_.get());
+  addAndMakeVisible(headphoneMeterBox_.get());
 
   for (int i = 0; i < 2; ++i) {
     headphoneMeters_.push_back(std::make_unique<HeadphoneChannelMeter>(
@@ -108,16 +111,20 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
 
   area.removeFromTop(10); // Padding between header and content
   // All content to go below and to be fitted within `area`
-  auto leftColumn = area.withWidth(120);
-  auto rightColumn = area.withTrimmedLeft(120);
+  auto leftColumn = area.removeFromLeft(145);
+  auto rightColumn = area.withWidth(695);
 
-  auto meterArea = leftColumn.withHeight(200).reduced(5, 5);
+  auto meterArea = leftColumn.removeFromTop(300).reduced(5, 5);
+  headphoneMeterBox_->setBounds(meterArea);
+  meterArea.removeFromTop(40);
+  meterArea = meterArea.reduced(15, 15);
+
   for (int i = 0; i < headphoneMeters_.size(); ++i) {
     headphoneMeters_.at(i)->setBounds(meterArea.removeFromLeft(50));
     meterArea.removeFromLeft(5);
   }
 
-  orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5).withWidth(685));
+  orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5));
 
   /*
   oscValueBox->setBounds(rightColumn.removeFromTop(100).reduced(5, 5));

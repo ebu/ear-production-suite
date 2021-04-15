@@ -9,7 +9,7 @@
 #include "components/ear_header.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
 #include "headphone_channel_meter.hpp"
-#include "components/orientation.hpp"
+#include "headphone_channel_meter_box.hpp"
 #include "value_box_orientation.hpp"
 
 /*
@@ -40,6 +40,7 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::Overlay> onBoardingOverlay_;
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
 
+  std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeterBox> headphoneMeterBox_;
   std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>> headphoneMeters_;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock_;
