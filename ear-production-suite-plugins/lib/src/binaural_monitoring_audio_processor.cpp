@@ -174,7 +174,7 @@ void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float
   listenerQuats[3] = quatZ;
   // TODO: check for actual change before setting dirty
   listenerQuatsDirty = true;
-
+/*
 //TODO - remove once OSC work done
 #ifdef _WIN32
   std::string msg{ "Quat WXYZ: " };
@@ -184,6 +184,7 @@ void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float
   msg += std::to_string(listenerQuats[3]) + "\n";
   OutputDebugString(msg.c_str());
 #endif
+*/
 }
 
 

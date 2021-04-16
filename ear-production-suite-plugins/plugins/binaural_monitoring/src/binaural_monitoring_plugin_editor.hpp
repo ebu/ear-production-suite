@@ -16,7 +16,7 @@
 class EarBinauralMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
       private ear::plugin::ui::Onboarding::Listener {
- public:
+public:
   EarBinauralMonitoringAudioProcessorEditor(EarBinauralMonitoringAudioProcessor*);
   ~EarBinauralMonitoringAudioProcessorEditor();
 
@@ -26,7 +26,7 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::ValueBoxOrientation> orientationValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxOsc> oscValueBox;
 
- private:
+private:
   EarBinauralMonitoringAudioProcessor* p_;
 
   std::unique_ptr<ear::plugin::ui::EarHeader> header_;

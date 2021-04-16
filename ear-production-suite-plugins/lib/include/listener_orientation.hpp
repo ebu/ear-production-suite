@@ -70,6 +70,7 @@ private:
   std::vector<EulerListener*> eulerListeners;
 
   void callListeners();
+  bool runningListeners{ false };
 
 };
 

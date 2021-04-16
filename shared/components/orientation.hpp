@@ -313,8 +313,8 @@ class OrientationView : public Component,
     virtual ~Listener() = default;
 
     virtual void orientationValueChanged(OrientationView* panner) = 0;
-    virtual void orientationDragStarted(OrientationView* panner) = 0;
-    virtual void orientationDragEnded(OrientationView* panner) = 0;
+    virtual void orientationDragStarted(OrientationView* panner) {};
+    virtual void orientationDragEnded(OrientationView* panner) {};
   };
 
   void addListener(Listener* l) { listeners_.add(l); }

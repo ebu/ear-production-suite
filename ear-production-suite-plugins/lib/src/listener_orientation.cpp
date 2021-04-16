@@ -45,6 +45,7 @@ ListenerOrientation::Euler ListenerOrientation::getEuler()
 
 void ListenerOrientation::setEuler(Euler e)
 {
+  if(runningListeners) return; // Prevent listeners causing recursive loop
   lastQuatInput.reset();
   if(lastEulerInput.has_value()) {
     auto& lE = lastEulerInput.value();
@@ -54,6 +55,12 @@ void ListenerOrientation::setEuler(Euler e)
   eulerOutput = e;
   // Other output need reconvert
   quatOutput.reset();
+
+#ifdef _WIN32
+  //TODO - remove once OSC work done
+  OutputDebugString("ListenerOrientation::setEuler\n");
+#endif
+
   callListeners();
 }
 
@@ -71,6 +78,7 @@ ListenerOrientation::Quaternion ListenerOrientation::getQuaternion()
 
 void ListenerOrientation::setQuaternion(Quaternion q)
 {
+  if(runningListeners) return; // Prevent listeners causing recursive loop
   lastEulerInput.reset();
   if(lastQuatInput.has_value()) {
     auto& lQ = lastQuatInput.value();
@@ -80,17 +88,13 @@ void ListenerOrientation::setQuaternion(Quaternion q)
   quatOutput = q;
   // Other output need reconvert
   eulerOutput.reset();
-  callListeners();
 
-  //TODO - remove once OSC work done
 #ifdef _WIN32
-  auto latestEuler = getEuler();
-  std::string msg{ "Euler Y P R: " };
-  msg += std::to_string(latestEuler.y) + "   ";
-  msg += std::to_string(latestEuler.p) + "   ";
-  msg += std::to_string(latestEuler.r) + "\n";
-  OutputDebugString(msg.c_str());
+  //TODO - remove once OSC work done
+  OutputDebugString("ListenerOrientation::setQuaternion\n");
 #endif
+
+  callListeners();
 }
 
 ListenerOrientation::Euler ListenerOrientation::toEuler(Quaternion q, EulerOrder order)
@@ -271,6 +275,8 @@ void ListenerOrientation::removeListener(EulerListener* listener) {
 }
 
 void ListenerOrientation::callListeners() {
+  if(runningListeners) return; // Prevent listeners causing recursive loop
+  runningListeners = true;
   if(quatListeners.size() > 0) {
     auto quat = getQuaternion();
     for(auto listener : quatListeners) {
@@ -283,6 +289,7 @@ void ListenerOrientation::callListeners() {
       listener->orientationChange(euler);
     }
   }
+  runningListeners = false;
 }
 
 ListenerOrientation::QuaternionListener::QuaternionListener() {}

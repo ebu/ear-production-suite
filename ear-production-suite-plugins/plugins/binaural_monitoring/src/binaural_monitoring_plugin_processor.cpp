@@ -52,10 +52,9 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   /* clang-format on */
 
-  backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
-    nullptr, 64);
-
+  backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(nullptr, 64);
   connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
+  connector_->setListenerOrientationInstance(backend_->listenerOrientation);
 
   connector_->parameterValueChanged(0, yaw_->get());
   connector_->parameterValueChanged(1, pitch_->get());
@@ -67,20 +66,17 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   bearDataFilePath = vstPath.getFullPathName().toStdString();
 
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
-    backend_->listenerOrientation->setEuler(euler);
+    connector_->setEuler(euler);
   };
 
   oscReceiver.onReceiveQuaternion = [this](ListenerOrientation::Quaternion quat) {
-    backend_->listenerOrientation->setQuaternion(quat);
+    connector_->setQuaternion(quat);
   };
 
   oscReceiver.listenForConnections(8000);
-
-  backend_->listenerOrientation->addListener(this);
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
-  backend_->listenerOrientation->removeListener(this);
 }
 
 //==============================================================================
@@ -88,13 +84,6 @@ juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   return BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
-}
-
-void EarBinauralMonitoringAudioProcessor::orientationChange(ear::plugin::ListenerOrientation::Euler euler)
-{
-  yaw_->setValueNotifyingHost(yaw_->convertTo0to1(euler.y));
-  pitch_->setValueNotifyingHost(pitch_->convertTo0to1(euler.p));
-  roll_->setValueNotifyingHost(roll_->convertTo0to1(euler.r));
 }
 
 const String EarBinauralMonitoringAudioProcessor::getName() const {

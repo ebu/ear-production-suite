@@ -22,7 +22,7 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace ear
 
 
-class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private ear::plugin::ListenerOrientation::EulerListener {
+class EarBinauralMonitoringAudioProcessor : public AudioProcessor{
  public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
@@ -90,8 +90,6 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private ear::
   int blocksize_;
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
-
-  void orientationChange(ear::plugin::ListenerOrientation::Euler euler) override;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)
