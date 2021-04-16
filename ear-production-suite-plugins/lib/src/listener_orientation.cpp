@@ -54,7 +54,7 @@ void ListenerOrientation::setEuler(Euler e)
   eulerOutput = e;
   // Other output need reconvert
   quatOutput.reset();
-  if(coordinateUpdateCallback) coordinateUpdateCallback();
+  callListeners();
 }
 
 ListenerOrientation::Quaternion ListenerOrientation::getQuaternion()
@@ -80,7 +80,7 @@ void ListenerOrientation::setQuaternion(Quaternion q)
   quatOutput = q;
   // Other output need reconvert
   eulerOutput.reset();
-  if(coordinateUpdateCallback) coordinateUpdateCallback();
+  callListeners();
 
   //TODO - remove once OSC work done
 #ifdef _WIN32
@@ -91,11 +91,6 @@ void ListenerOrientation::setQuaternion(Quaternion q)
   msg += std::to_string(latestEuler.r) + "\n";
   OutputDebugString(msg.c_str());
 #endif
-}
-
-void ListenerOrientation::setCoordinateUpdateHandler(std::function<void()> callback)
-{
-  coordinateUpdateCallback = callback;
 }
 
 ListenerOrientation::Euler ListenerOrientation::toEuler(Quaternion q, EulerOrder order)
@@ -258,6 +253,44 @@ ListenerOrientation::Quaternion ListenerOrientation::toQuaternion(Euler e)
 
   return q;
 }
+
+void ListenerOrientation::addListener(QuaternionListener* listener) {
+  quatListeners.push_back(listener);
+}
+
+void ListenerOrientation::addListener(EulerListener* listener) {
+  eulerListeners.push_back(listener);
+}
+
+void ListenerOrientation::removeListener(QuaternionListener* listener) {
+  quatListeners.erase(std::remove(quatListeners.begin(), quatListeners.end(), listener), quatListeners.end());
+}
+
+void ListenerOrientation::removeListener(EulerListener* listener) {
+  eulerListeners.erase(std::remove(eulerListeners.begin(), eulerListeners.end(), listener), eulerListeners.end());
+}
+
+void ListenerOrientation::callListeners() {
+  if(quatListeners.size() > 0) {
+    auto quat = getQuaternion();
+    for(auto listener : quatListeners) {
+      listener->orientationChange(quat);
+    }
+  }
+  if(eulerListeners.size() > 0) {
+    auto euler = getEuler();
+    for(auto listener : eulerListeners) {
+      listener->orientationChange(euler);
+    }
+  }
+}
+
+ListenerOrientation::QuaternionListener::QuaternionListener() {}
+ListenerOrientation::QuaternionListener::~QuaternionListener() {}
+void ListenerOrientation::QuaternionListener::orientationChange(ListenerOrientation::Quaternion quat) {}
+ListenerOrientation::EulerListener::EulerListener() {}
+ListenerOrientation::EulerListener::~EulerListener() {}
+void ListenerOrientation::EulerListener::orientationChange(ListenerOrientation::Euler euler) {}
 
 }
 }

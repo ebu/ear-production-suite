@@ -8,7 +8,6 @@
 
 #include "components/level_meter_calculator.hpp"
 
-#include "listener_orientation.hpp"
 #include "orientation_osc.hpp"
 
 namespace ear {
@@ -23,7 +22,7 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace ear
 
 
-class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
+class EarBinauralMonitoringAudioProcessor : public AudioProcessor, private ear::plugin::ListenerOrientation::EulerListener {
  public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
@@ -60,7 +59,6 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
     return levelMeter_;
   };
 
-  std::shared_ptr<ear::plugin::ListenerOrientation> listenerOrientation{};
   ear::plugin::ListenerOrientationOscReceiver oscReceiver{};
 
   AudioParameterFloat* getYaw() { return yaw_; }
@@ -75,8 +73,6 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
 
  private:
   BusesProperties _getBusProperties();
-
-  void updateAudioProcessorListenerPosition();
 
   AudioParameterFloat* yaw_;
   AudioParameterFloat* pitch_;
@@ -94,6 +90,8 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
   int blocksize_;
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
+
+  void orientationChange(ear::plugin::ListenerOrientation::Euler euler) override;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)

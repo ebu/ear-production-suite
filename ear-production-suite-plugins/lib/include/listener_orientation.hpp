@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <functional>
+#include <vector>
 #include "ear-plugin-base/export.h"
 
 namespace ear {
@@ -32,7 +33,28 @@ public:
   EAR_PLUGIN_BASE_EXPORT Quaternion getQuaternion();
   EAR_PLUGIN_BASE_EXPORT void setQuaternion(Quaternion q);
 
-  EAR_PLUGIN_BASE_EXPORT void setCoordinateUpdateHandler(std::function<void()> callback);
+  class QuaternionListener
+  {
+  public:
+    EAR_PLUGIN_BASE_EXPORT QuaternionListener();
+    EAR_PLUGIN_BASE_EXPORT ~QuaternionListener();
+
+    EAR_PLUGIN_BASE_EXPORT virtual void orientationChange(ListenerOrientation::Quaternion quat);
+  };
+
+  class EulerListener
+  {
+  public:
+    EAR_PLUGIN_BASE_EXPORT EulerListener();
+    EAR_PLUGIN_BASE_EXPORT ~EulerListener();
+
+    EAR_PLUGIN_BASE_EXPORT virtual void orientationChange(ListenerOrientation::Euler euler);
+  };
+
+  EAR_PLUGIN_BASE_EXPORT void addListener(QuaternionListener* listener);
+  EAR_PLUGIN_BASE_EXPORT void addListener(EulerListener* listener);
+  EAR_PLUGIN_BASE_EXPORT void removeListener(QuaternionListener* listener);
+  EAR_PLUGIN_BASE_EXPORT void removeListener(EulerListener* listener);
 
 private:
   std::optional<Euler> lastEulerInput;
@@ -44,7 +66,11 @@ private:
   Euler toEuler(Quaternion q, EulerOrder o);
   Quaternion toQuaternion(Euler e);
 
-  std::function<void()> coordinateUpdateCallback;
+  std::vector<QuaternionListener*> quatListeners;
+  std::vector<EulerListener*> eulerListeners;
+
+  void callListeners();
+
 };
 
 }

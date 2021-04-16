@@ -172,6 +172,7 @@ void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float
   listenerQuats[1] = -quatY;
   listenerQuats[2] = -quatX;
   listenerQuats[3] = quatZ;
+  // TODO: check for actual change before setting dirty
   listenerQuatsDirty = true;
 
 //TODO - remove once OSC work done

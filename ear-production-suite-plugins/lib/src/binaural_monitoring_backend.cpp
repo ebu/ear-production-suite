@@ -31,6 +31,8 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   controlConnection_.onConnectionLost(
       std::bind(&BinauralMonitoringBackend::onConnectionLost, this));
   controlConnection_.start(detail::SCENE_MASTER_CONTROL_ENDPOINT);
+
+  listenerOrientation = std::make_shared<ListenerOrientation>();
 }
 
 BinauralMonitoringBackend::~BinauralMonitoringBackend() {

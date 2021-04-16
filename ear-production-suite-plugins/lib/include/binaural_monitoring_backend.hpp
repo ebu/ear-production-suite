@@ -5,6 +5,7 @@
 #include "log.hpp"
 #include "ear-plugin-base/export.h"
 #include "scene_gains_calculator.hpp"
+#include "listener_orientation.hpp"
 
 #include <string>
 #include <memory>
@@ -89,6 +90,8 @@ class BinauralMonitoringBackend {
   std::optional<ObjectsEarMetadataAndRouting> getLatestObjectsTypeMetadata(ConnId id);
   std::optional<DirectSpeakersEarMetadataAndRouting> getLatestDirectSpeakersTypeMetadata(ConnId id);
   std::optional<HoaEarMetadataAndRouting> getLatestHoaTypeMetadata(ConnId id);
+
+  std::shared_ptr<ear::plugin::ListenerOrientation> listenerOrientation;
 
  private:
   void onSceneReceived(proto::SceneStore store);

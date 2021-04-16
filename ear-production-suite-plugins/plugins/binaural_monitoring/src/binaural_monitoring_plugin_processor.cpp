@@ -57,13 +57,9 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
 
-  //TODO - does oscPort and useOSC need connecting? OSC is JUCE-based so maybe shouldn't use the abstraction layer.
   connector_->parameterValueChanged(0, yaw_->get());
   connector_->parameterValueChanged(1, pitch_->get());
   connector_->parameterValueChanged(2, roll_->get());
-  connector_->parameterValueChanged(3, oscEnable_->get());
-  connector_->parameterValueChanged(4, oscPort_->get());
-
 
   auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
@@ -87,9 +83,12 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   };
 
   oscReceiver.listenForConnections(8000);
+
+  backend_->listenerOrientation->addListener(this);
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
+  backend_->listenerOrientation->removeListener(this);
 }
 
 //==============================================================================
@@ -99,12 +98,11 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
       "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
 }
 
-void EarBinauralMonitoringAudioProcessor::updateAudioProcessorListenerPosition()
+void EarBinauralMonitoringAudioProcessor::orientationChange(ear::plugin::ListenerOrientation::Euler euler)
 {
-  if(processor_) {
-    auto latestQuat = listenerOrientation->getQuaternion();
-    processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
-  }
+  yaw_->setValueNotifyingHost(yaw_->convertTo0to1(euler.y));
+  pitch_->setValueNotifyingHost(pitch_->convertTo0to1(euler.p));
+  roll_->setValueNotifyingHost(roll_->convertTo0to1(euler.r));
 }
 
 const String EarBinauralMonitoringAudioProcessor::getName() const {
@@ -179,8 +177,12 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
     processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
       numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
-    updateAudioProcessorListenerPosition();
   }
+
+  // Listener Position
+
+  auto latestQuat = backend_->listenerOrientation->getQuaternion();
+  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
 
   // BEAR Metadata
 
