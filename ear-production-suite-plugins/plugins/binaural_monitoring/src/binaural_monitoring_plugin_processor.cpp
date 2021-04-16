@@ -70,23 +70,22 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   vstPath = vstPath.getChildFile("default.tf");
   bearDataFilePath = vstPath.getFullPathName().toStdString();
 
-  listenerOrientation = std::make_shared<ListenerOrientation>();
-  listenerOrientation->setCoordinateUpdateHandler(
-    [this]() {
-      // TODO - inform processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
-      //   --- That should set a flag to let the proc method know to update bear listner orientation before DSPing
-      // Need locks for OSC messgae tread vs audio proc thread here?
-      updateAudioProcessorListenerPosition();
-      // TODO - update editor - need to put on message queue or can do directly?
+  oscReceiver.onStatusChange = [this](std::string status) {
+    // TODO: Move to editor
+    if(auto e = getActiveEditor()) {
+      auto castEditor = static_cast<EarBinauralMonitoringAudioProcessorEditor*>(e);
+      castEditor->oscValueBox->getStatusLabel()->setText(status, juce::NotificationType::sendNotificationSync);
     }
-  );
+  };
 
-  oscReceiver.setListenerOrientationHandler(listenerOrientation);
-  oscReceiver.setOnConnectionStatusChangeTextHandler(
-    [this](std::string newStatus) {
-      // TODO - update editor - need to put on message queue or can do directly?
-    }
-  );
+  oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
+    backend_->listenerOrientation->setEuler(euler);
+  };
+
+  oscReceiver.onReceiveQuaternion = [this](ListenerOrientation::Quaternion quat) {
+    backend_->listenerOrientation->setQuaternion(quat);
+  };
+
   oscReceiver.listenForConnections(8000);
 }
 

@@ -63,12 +63,11 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
   std::shared_ptr<ear::plugin::ListenerOrientation> listenerOrientation{};
   ear::plugin::ListenerOrientationOscReceiver oscReceiver{};
 
-  AudioParameterInt* getOscPort() { return oscPort_; }
   AudioParameterFloat* getYaw() { return yaw_; }
   AudioParameterFloat* getPitch() { return pitch_; }
   AudioParameterFloat* getRoll() { return roll_; }
   AudioParameterBool* getOscEnable() { return oscEnable_; }
-  //std::string getOscStatus() { return oscReceiver.getStatus(); }
+  AudioParameterInt* getOscPort() { return oscPort_; }
 
   ear::plugin::ui::BinauralMonitoringJuceFrontendConnector* getFrontendConnector() {
     return connector_.get();
@@ -79,11 +78,11 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
 
   void updateAudioProcessorListenerPosition();
 
-  AudioParameterInt* oscPort_;
   AudioParameterFloat* yaw_;
   AudioParameterFloat* pitch_;
   AudioParameterFloat* roll_;
   AudioParameterBool* oscEnable_;
+  AudioParameterInt* oscPort_;
 
   std::unique_ptr<ear::plugin::ui::BinauralMonitoringJuceFrontendConnector> connector_;
 

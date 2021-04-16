@@ -14,16 +14,6 @@ ListenerOrientationOscReceiver::~ListenerOrientationOscReceiver()
   osc.removeListener(this);
 }
 
-void ListenerOrientationOscReceiver::setOnConnectionStatusChangeTextHandler(std::function<void(std::string newStatus)> callback)
-{
-  statusTextCallback = callback;
-}
-
-void ListenerOrientationOscReceiver::setListenerOrientationHandler(std::shared_ptr<ListenerOrientation>listenerOrientationInstance)
-{
-  listenerOrientation = listenerOrientationInstance;
-}
-
 void ListenerOrientationOscReceiver::listenForConnections(uint16_t port)
 {
   disconnect();
@@ -63,32 +53,32 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
       oscEulerInput.y = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if(add.matches("/pitch")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
       oscEulerInput.p = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if(add.matches("/roll")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead, but it expects normalised values - will not implement.
       oscEulerInput.r = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if(add.matches("/hedrot/yaw")) {
       // Messages sent by Hedrot
       oscEulerInput.y = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if(add.matches("/hedrot/pitch")) {
       // Messages sent by Hedrot
       oscEulerInput.p = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if(add.matches("/hedrot/roll")) {
       // Messages sent by Hedrot
       oscEulerInput.r = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else {
       return;
@@ -101,7 +91,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
       oscEulerInput.y = vals[1];
       oscEulerInput.r = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else if(add.matches("/rendering/htrpy")) {
       // Messages understood by AudioLab SALTE
@@ -109,7 +99,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
       oscEulerInput.p = vals[1];
       oscEulerInput.y = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::RPY;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else if(add.matches("/ypr")) {
       // Messages understood by SPARTA/COMPASS
@@ -117,7 +107,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
       oscEulerInput.p = vals[1];
       oscEulerInput.r = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else {
       return;
@@ -127,35 +117,35 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
 
     if(add.matches("/quaternion")) {
       // Messages understood by Ambix
-      if(listenerOrientation) {
+      if(onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
         quat.y = vals[1];
         quat.x = -vals[2];
         quat.z = vals[3];
-        listenerOrientation->setQuaternion(quat);
+        onReceiveQuaternion(quat);
       }
 
     } else if(add.matches("/SceneRotator/quaternions")) {
       // Messages understood by IEM
-      if(listenerOrientation) {
+      if(onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
         quat.x = vals[1];
         quat.y = -vals[2];
         quat.z = -vals[3];
-        listenerOrientation->setQuaternion(quat);
+        onReceiveQuaternion(quat);
       }
 
     } else if(add.matches("/quaternions")) {
       // Messages understood by Unity plugin
-      if(listenerOrientation) {
+      if(onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
         quat.x = -vals[1];
         quat.z = -vals[2];
         quat.y = -vals[3];
-        listenerOrientation->setQuaternion(quat);
+        onReceiveQuaternion(quat);
       }
 
     } else {
@@ -169,7 +159,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(const OSCMessage & messa
       oscEulerInput.y = vals[5];
       oscEulerInput.r = vals[6];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
-      if(listenerOrientation) listenerOrientation->setEuler(oscEulerInput);
+      if(onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else {
       return;
@@ -203,8 +193,8 @@ void ListenerOrientationOscReceiver::updateStatusText(std::string & newStatus)
 
 void ListenerOrientationOscReceiver::updateStatusText()
 {
-  if(statusTextCallback) {
-    statusTextCallback(curStatusText);
+  if(onStatusChange) {
+    onStatusChange(curStatusText);
   }
 }
 

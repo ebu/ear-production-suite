@@ -14,8 +14,9 @@ public:
   ListenerOrientationOscReceiver();
   ~ListenerOrientationOscReceiver();
 
-  void setListenerOrientationHandler(std::shared_ptr<ListenerOrientation>);
-  void setOnConnectionStatusChangeTextHandler(std::function<void(std::string newStatus)> callback);
+  std::function<void(ListenerOrientation::Euler euler)> onReceiveEuler;
+  std::function<void(ListenerOrientation::Quaternion quat)> onReceiveQuaternion;
+  std::function<void(std::string newStatus)> onStatusChange;
 
   void listenForConnections(uint16_t port);
   void disconnect();
@@ -24,7 +25,6 @@ public:
   void timerCallback(int timerId) override;
 
 private:
-  std::function<void(std::string newStatus)> statusTextCallback;
   std::string curStatusText{ "Disconnected" };
   void updateStatusText(std::string& newStatus);
   void updateStatusText();
@@ -37,7 +37,6 @@ private:
   const int timerIdPersistentListen = 1;
 
   OSCReceiver osc;
-  std::shared_ptr<ListenerOrientation> listenerOrientation;
 
   // Have to track this because we can receive one coord at a time, but they're only useful together
   ListenerOrientation::Euler oscEulerInput{ 0.0, 0.0, 0.0, ListenerOrientation::EulerOrder::YPR };
