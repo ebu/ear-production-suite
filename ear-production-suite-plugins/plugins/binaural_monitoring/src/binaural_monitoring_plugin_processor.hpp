@@ -7,7 +7,8 @@
 #include <optional>
 
 #include "components/level_meter_calculator.hpp"
-#include "orientation.hpp"
+
+#include "listener_orientation.hpp"
 #include "orientation_osc.hpp"
 
 namespace ear {
@@ -59,8 +60,8 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor {
     return levelMeter_;
   };
 
-  std::shared_ptr<ListenerOrientation> listenerOrientation{};
-  ListenerOrientationOscReceiver oscReceiver{};
+  std::shared_ptr<ear::plugin::ListenerOrientation> listenerOrientation{};
+  ear::plugin::ListenerOrientationOscReceiver oscReceiver{};
 
   AudioParameterInt* getOscPort() { return oscPort_; }
   AudioParameterFloat* getYaw() { return yaw_; }

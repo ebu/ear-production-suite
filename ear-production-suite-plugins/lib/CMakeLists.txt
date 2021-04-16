@@ -26,6 +26,7 @@ add_library(ear-plugin-base STATIC
   src/log.cpp
   src/binaural_monitoring_audio_processor.cpp
   src/binaural_monitoring_backend.cpp
+  src/listener_orientation.cpp
   src/monitoring_audio_processor.cpp
   src/monitoring_backend.cpp
   src/multichannel_convolver.cpp

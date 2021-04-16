@@ -1,16 +1,18 @@
 #pragma once
 
-#include "JuceHeader.h"
-
 #include <memory>
 #include <optional>
 #include <functional>
+#include "ear-plugin-base/export.h"
+
+namespace ear {
+namespace plugin {
 
 class ListenerOrientation
 {
 public:
-  ListenerOrientation();
-  ~ListenerOrientation();
+  EAR_PLUGIN_BASE_EXPORT ListenerOrientation();
+  EAR_PLUGIN_BASE_EXPORT ~ListenerOrientation();
 
   enum EulerOrder {
     YPR, PYR, RPY, PRY, YRP, RYP
@@ -24,13 +26,13 @@ public:
     double w, x, y, z;
   };
 
-  Euler getEuler();
-  void setEuler(Euler e);
+  EAR_PLUGIN_BASE_EXPORT Euler getEuler();
+  EAR_PLUGIN_BASE_EXPORT void setEuler(Euler e);
 
-  Quaternion getQuaternion();
-  void setQuaternion(Quaternion q);
+  EAR_PLUGIN_BASE_EXPORT Quaternion getQuaternion();
+  EAR_PLUGIN_BASE_EXPORT void setQuaternion(Quaternion q);
 
-  void setCoordinateUpdateHandler(std::function<void()> callback);
+  EAR_PLUGIN_BASE_EXPORT void setCoordinateUpdateHandler(std::function<void()> callback);
 
 private:
   std::optional<Euler> lastEulerInput;
@@ -44,3 +46,6 @@ private:
 
   std::function<void()> coordinateUpdateCallback;
 };
+
+}
+}

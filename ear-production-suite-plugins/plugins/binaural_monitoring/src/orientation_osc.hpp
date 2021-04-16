@@ -3,9 +3,12 @@
 #include "JuceHeader.h"
 
 #include <memory>
-#include "orientation.hpp"
+#include "listener_orientation.hpp"
 
-class ListenerOrientationOscReceiver :  private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private MultiTimer
+namespace ear {
+namespace plugin {
+
+class ListenerOrientationOscReceiver : private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private MultiTimer
 {
 public:
   ListenerOrientationOscReceiver();
@@ -40,3 +43,6 @@ private:
   ListenerOrientation::Euler oscEulerInput{ 0.0, 0.0, 0.0, ListenerOrientation::EulerOrder::YPR };
 
 };
+
+}
+}

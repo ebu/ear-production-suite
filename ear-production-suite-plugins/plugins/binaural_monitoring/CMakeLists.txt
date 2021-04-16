@@ -11,6 +11,7 @@ set(SOURCES_BINAURAL_MONITORING
 	src/binaural_monitoring_frontend_connector.cpp
     src/binaural_monitoring_plugin_editor.cpp
     src/binaural_monitoring_plugin_processor.cpp
+	src/orientation_osc.cpp
 )
 
 add_juce_vst3_plugin(
