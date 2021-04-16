@@ -24,6 +24,8 @@ public:
   void oscMessageReceived(const OSCMessage& message) override;
   void timerCallback(int timerId) override;
 
+  std::string getStatus();
+
 private:
   std::string curStatusText{ "Disconnected" };
   void updateStatusText(std::string& newStatus);

@@ -66,14 +66,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   vstPath = vstPath.getChildFile("default.tf");
   bearDataFilePath = vstPath.getFullPathName().toStdString();
 
-  oscReceiver.onStatusChange = [this](std::string status) {
-    // TODO: Move to editor
-    if(auto e = getActiveEditor()) {
-      auto castEditor = static_cast<EarBinauralMonitoringAudioProcessorEditor*>(e);
-      castEditor->oscValueBox->getStatusLabel()->setText(status, juce::NotificationType::sendNotificationSync);
-    }
-  };
-
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
     backend_->listenerOrientation->setEuler(euler);
   };

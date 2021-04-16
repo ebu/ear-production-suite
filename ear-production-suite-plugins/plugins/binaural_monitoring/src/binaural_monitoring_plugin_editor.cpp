@@ -85,9 +85,16 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   //setSize(750, 600); // Min size to fit onboarding window.
   //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
   setSize(850, 425);
+
+  p_->oscReceiver.onStatusChange = [this](std::string status) {
+    oscValueBox->getStatusLabel()->setText(status, juce::NotificationType::dontSendNotification);
+  };
+  oscValueBox->getStatusLabel()->setText(p_->oscReceiver.getStatus(), juce::NotificationType::dontSendNotification);
 }
 
-EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {}
+EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {
+  p_->oscReceiver.onStatusChange = nullptr;
+}
 
 void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
