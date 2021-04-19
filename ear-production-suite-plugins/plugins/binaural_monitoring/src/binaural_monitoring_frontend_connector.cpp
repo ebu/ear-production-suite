@@ -89,9 +89,6 @@ void BinauralMonitoringJuceFrontendConnector::setYaw(float yaw)
     auto euler = listenerOrientation->getEuler();
     euler.y = yaw;
     listenerOrientation->setEuler(euler);
-    if(auto orientationControl = yawControl_.lock()) {
-      orientationControl->setValue(yaw, dontSendNotification);
-    }
   }
 }
 
@@ -101,9 +98,6 @@ void BinauralMonitoringJuceFrontendConnector::setPitch(float pitch)
     auto euler = listenerOrientation->getEuler();
     euler.p = pitch;
     listenerOrientation->setEuler(euler);
-    if(auto orientationControl = pitchControl_.lock()) {
-      orientationControl->setValue(pitch, dontSendNotification);
-    }
   }
 }
 
@@ -113,9 +107,6 @@ void BinauralMonitoringJuceFrontendConnector::setRoll(float roll)
     auto euler = listenerOrientation->getEuler();
     euler.r = roll;
     listenerOrientation->setEuler(euler);
-    if(auto orientationControl = rollControl_.lock()) {
-      orientationControl->setValue(roll, dontSendNotification);
-    }
   }
 }
 
@@ -135,42 +126,59 @@ void BinauralMonitoringJuceFrontendConnector::setQuaternion(ListenerOrientation:
 
 void BinauralMonitoringJuceFrontendConnector::orientationChange(ear::plugin::ListenerOrientation::Euler euler)
 {
+  // ListenerOrientation callback from backend
+  // ALL other orientation I/O to be set from here
+
+  // Parameters - Temporarily disable listeners to avoid recursive loop
+  parameterListenersEnabled = false;
   *(p_->getYaw()) = euler.y;
   *(p_->getPitch()) = euler.p;
   *(p_->getRoll()) = euler.r;
+  parameterListenersEnabled = true;
+
+  // UI - dontSendNotification to avoid recursive loop
+  if(auto orientationControl = yawControl_.lock()) {
+    orientationControl->setValue(euler.y, dontSendNotification);
+  }
+  if(auto orientationControl = pitchControl_.lock()) {
+    orientationControl->setValue(euler.p, dontSendNotification);
+  }
+  if(auto orientationControl = rollControl_.lock()) {
+    orientationControl->setValue(euler.r, dontSendNotification);
+  }
+
 }
 
 void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(int parameterIndex,
                                                          float newValue) {
-  updater_.callOnMessageThread([this, parameterIndex, newValue]() {
-    using ParameterId = ui::BinauralMonitoringFrontendBackendConnector::ParameterId;
-    switch(parameterIndex) {
-      case 0:
-        notifyParameterChanged(ParameterId::YAW, p_->getYaw()->get());
-        setYaw(p_->getYaw()->get());
-        break;
-      case 1:
-        notifyParameterChanged(ParameterId::PITCH, p_->getPitch()->get());
-        setPitch(p_->getPitch()->get());
-        break;
-      case 2:
-        notifyParameterChanged(ParameterId::ROLL, p_->getRoll()->get());
-        setRoll(p_->getRoll()->get());
-        break;
-    }
-  });
+  // Parameter change callback from JUCE Processor
+
+  if(parameterListenersEnabled && listenerOrientation) {
+    listenerOrientation->setEuler(ear::plugin::ListenerOrientation::Euler{
+      p_->getYaw()->get(),
+      p_->getPitch()->get(),
+      p_->getRoll()->get(),
+      ear::plugin::ListenerOrientation::EulerOrder::YPR});
+  }
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationValueChanged(ear::plugin::ui::OrientationView * view)
 {
-  if(!yawControl_.expired() && view == yawControl_.lock().get()) {
-    *(p_->getYaw()) = view->getValue();
+  // Control callback from UI
+  if(listenerOrientation) {
+    auto euler = listenerOrientation->getEuler();
 
-  } else if(!pitchControl_.expired() && view == pitchControl_.lock().get()) {
-    *(p_->getPitch()) = view->getValue();
+    if(!yawControl_.expired() && view == yawControl_.lock().get()) {
+      euler.y = view->getValue();
 
-  } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
-    *(p_->getRoll()) = view->getValue();
+    } else if(!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+      euler.p = view->getValue();
+
+    } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
+      euler.r = view->getValue();
+    }
+
+    listenerOrientation->setEuler(euler);
   }
 }
 

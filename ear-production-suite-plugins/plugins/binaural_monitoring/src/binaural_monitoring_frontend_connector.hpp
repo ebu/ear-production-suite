@@ -67,6 +67,8 @@ private:
   EarBinauralMonitoringAudioProcessor* p_;
   std::map<int, RangedAudioParameter*> parameters_;
 
+  bool parameterListenersEnabled{ true };
+
   // Orientation Controls
   std::weak_ptr<OrientationView> yawControl_;
   std::weak_ptr<OrientationView> pitchControl_;
