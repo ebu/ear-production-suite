@@ -154,11 +154,15 @@ void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(int paramete
   // Parameter change callback from JUCE Processor
 
   if(parameterListenersEnabled && listenerOrientation) {
-    listenerOrientation->setEuler(ear::plugin::ListenerOrientation::Euler{
-      p_->getYaw()->get(),
-      p_->getPitch()->get(),
-      p_->getRoll()->get(),
-      ear::plugin::ListenerOrientation::EulerOrder::YPR});
+    if(parameterIndex == (int)ParameterId::YAW ||
+       parameterIndex == (int)ParameterId::PITCH ||
+       parameterIndex == (int)ParameterId::ROLL) {
+      listenerOrientation->setEuler(ear::plugin::ListenerOrientation::Euler{
+        p_->getYaw()->get(),
+        p_->getPitch()->get(),
+        p_->getRoll()->get(),
+        ear::plugin::ListenerOrientation::EulerOrder::YPR });
+    }
   }
 }
 
