@@ -168,12 +168,23 @@ bool BinauralMonitoringAudioProcessor::configSupports(std::size_t objChannels, s
 void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW, float quatX, float quatY, float quatZ)
 {
   // X and Y need swapping and inverting for BEAR
-  listenerQuats[0] = quatW;
-  listenerQuats[1] = -quatY;
-  listenerQuats[2] = -quatX;
-  listenerQuats[3] = quatZ;
-  // TODO: check for actual change before setting dirty
-  listenerQuatsDirty = true;
+  if(listenerQuats[0] != quatW) {
+    listenerQuats[0] = quatW;
+    listenerQuatsDirty = true;
+  }
+  if(listenerQuats[1] != -quatY) {
+    listenerQuats[1] = -quatY;
+    listenerQuatsDirty = true;
+  }
+  if(listenerQuats[2] != -quatX) {
+    listenerQuats[2] = -quatX;
+    listenerQuatsDirty = true;
+  }
+  if(listenerQuats[3] != quatZ) {
+    listenerQuats[3] = quatZ;
+    listenerQuatsDirty = true;
+  }
+
 /*
 //TODO - remove once OSC work done
 #ifdef _WIN32
