@@ -62,9 +62,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
 
 
   /* clang-format off */
-  //p->getFrontendConnector()->setOscPortLabel(oscValueBox->getOscPortLabel());
-  //p->getFrontendConnector()->setOscEnableButton(oscValueBox->getOscEnableButton());
-  //p->getFrontendConnector()->setOscStatusLabel(oscValueBox->getOscStatusLabel());
+  p->getFrontendConnector()->setOscPortControl(oscValueBox->getPortControl());
+  p->getFrontendConnector()->setOscEnableButton(oscValueBox->getEnableButton());
   p->getFrontendConnector()->setYawView(orientationValueBox->getYawControl());
   p->getFrontendConnector()->setPitchView(orientationValueBox->getPitchControl());
   p->getFrontendConnector()->setRollView(orientationValueBox->getRollControl());

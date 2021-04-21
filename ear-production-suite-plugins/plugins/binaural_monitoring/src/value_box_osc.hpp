@@ -22,8 +22,9 @@ public:
 
     enableButton_->setButtonText("Enable OSC");
     enableButton_->setShape(EarButton::Shape::Toggle);
-    enableButton_->setClickingTogglesState(true);
-    //enableButton_->onClick = [this] { this->toggleChannelLink(); };
+    // Note: Do NOT enableButton_->setClickingTogglesState(true);
+    /// It is false by default and State is handled completely by
+    ///  BinauralMonitoringJuceFrontendConnector
     enableButton_->setEnabled(true);
     addAndMakeVisible(enableButton_.get());
 

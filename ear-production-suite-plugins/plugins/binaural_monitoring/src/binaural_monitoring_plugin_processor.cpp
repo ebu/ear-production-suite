@@ -59,6 +59,8 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(0, yaw_->get());
   connector_->parameterValueChanged(1, pitch_->get());
   connector_->parameterValueChanged(2, roll_->get());
+  connector_->parameterValueChanged(3, oscEnable_->get());
+  connector_->parameterValueChanged(4, oscPort_->get());
 
   auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();

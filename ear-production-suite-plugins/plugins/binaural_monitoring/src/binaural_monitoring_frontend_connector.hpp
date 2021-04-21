@@ -4,7 +4,10 @@
 #include "JuceHeader.h"
 
 #include "components/orientation.hpp"
+#include "components/ear_button.hpp"
+#include "components/ear_slider.hpp"
 #include "helper/multi_async_updater.h"
+
 #include "binaural_monitoring_plugin_processor.hpp"
 #include <memory>
 
@@ -15,6 +18,8 @@ namespace ui {
 class BinauralMonitoringJuceFrontendConnector
     : public ear::plugin::ui::BinauralMonitoringFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
+      Slider::Listener,
+      Button::Listener,
       ear::plugin::ui::OrientationView::Listener,
       ear::plugin::ListenerOrientation::EulerListener {
 
@@ -36,6 +41,10 @@ public:
   void setPitchView(std::shared_ptr<OrientationView> view);
   void setRollView(std::shared_ptr<OrientationView> view);
 
+  // OSC Controls
+  void setOscEnableButton(std::shared_ptr<EarButton> button);
+  void setOscPortControl(std::shared_ptr<EarSlider> slider);
+
   // Listener Orientation Object
   void setListenerOrientationInstance(std::shared_ptr<ListenerOrientation> lo);
 
@@ -46,11 +55,22 @@ public:
   void setEuler(ListenerOrientation::Euler euler);
   void setQuaternion(ListenerOrientation::Quaternion quat);
 
+  void setOscEnable(bool enable);
+  void setOscPort(int port);
+
 protected:
   // Orientation::Listener
   void orientationValueChanged(ear::plugin::ui::OrientationView* view) override;
   void orientationDragStarted(ear::plugin::ui::OrientationView* view) override;
   void orientationDragEnded(ear::plugin::ui::OrientationView* view) override;
+
+  // Button::Listener
+  void buttonClicked(Button* button) override;
+
+  // Slider::Listener
+  void sliderValueChanged(Slider* slider) override;
+  void sliderDragStarted(Slider*) override;
+  void sliderDragEnded(Slider*) override;
 
   // ListenerOrientation::EulerListener
   void orientationChange(ear::plugin::ListenerOrientation::Euler euler) override;
@@ -66,7 +86,14 @@ private:
   std::weak_ptr<OrientationView> pitchControl_;
   std::weak_ptr<OrientationView> rollControl_;
 
-  // Listener Orientation Object
+  // OSC Controls
+  std::weak_ptr<EarButton> oscEnableButton_;
+  std::weak_ptr<EarSlider> oscPortControl_;
+
+  // Values
+  bool cachedOscEnable_;
+  int cachedOscPort_;
+  /// Listener Orientation Object
   std::shared_ptr<ListenerOrientation> listenerOrientation;
 
    MultiAsyncUpdater updater_;

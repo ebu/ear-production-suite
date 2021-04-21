@@ -41,6 +41,12 @@ BinauralMonitoringJuceFrontendConnector::~BinauralMonitoringJuceFrontendConnecto
   if (auto orientationControl = rollControl_.lock()) {
     orientationControl->removeListener(this);
   }
+  if (auto oscControl = oscEnableButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscPortControl_.lock()) {
+    oscControl->removeListener(this);
+  }
 
   if(listenerOrientation) {
     listenerOrientation->removeListener(this);
@@ -75,6 +81,20 @@ void BinauralMonitoringJuceFrontendConnector::setRollView(std::shared_ptr<Orient
     auto euler = listenerOrientation->getEuler();
     setRoll(euler.r);
   }
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscEnableButton(std::shared_ptr<EarButton> button)
+{
+  button->addListener(this);
+  oscEnableButton_ = button;
+  setOscEnable(cachedOscEnable_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscPortControl(std::shared_ptr<EarSlider> slider)
+{
+  slider->addListener(this);
+  oscPortControl_ = slider;
+  setOscPort(cachedOscPort_);
 }
 
 void BinauralMonitoringJuceFrontendConnector::setListenerOrientationInstance(std::shared_ptr<ListenerOrientation> lo)
@@ -124,6 +144,22 @@ void BinauralMonitoringJuceFrontendConnector::setQuaternion(ListenerOrientation:
   }
 }
 
+void BinauralMonitoringJuceFrontendConnector::setOscEnable(bool enableState)
+{
+  if (auto oscEnableButtonLocked = oscEnableButton_.lock()) {
+    oscEnableButtonLocked->setToggleState(enableState, dontSendNotification);
+  }
+  cachedOscEnable_ = enableState;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscPort(int port)
+{
+  if (auto oscPortLabelLocked = oscPortControl_.lock()) {
+    oscPortLabelLocked->setValue(port, dontSendNotification);
+  }
+  cachedOscPort_ = port;
+}
+
 void BinauralMonitoringJuceFrontendConnector::orientationChange(ear::plugin::ListenerOrientation::Euler euler)
 {
   // ListenerOrientation callback from backend
@@ -152,18 +188,43 @@ void BinauralMonitoringJuceFrontendConnector::orientationChange(ear::plugin::Lis
 void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(int parameterIndex,
                                                          float newValue) {
   // Parameter change callback from JUCE Processor
+  if(!parameterListenersEnabled) return;
 
-  if(parameterListenersEnabled && listenerOrientation) {
-    if(parameterIndex == (int)ParameterId::YAW ||
-       parameterIndex == (int)ParameterId::PITCH ||
-       parameterIndex == (int)ParameterId::ROLL) {
+  if(parameterIndex == (int)ParameterId::YAW ||
+     parameterIndex == (int)ParameterId::PITCH ||
+     parameterIndex == (int)ParameterId::ROLL) {
+
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      if(parameterIndex == (int)ParameterId::YAW) {
+        notifyParameterChanged(ParameterId::YAW, p_->getYaw()->get());
+      } else if(parameterIndex == (int)ParameterId::PITCH) {
+        notifyParameterChanged(ParameterId::PITCH, p_->getPitch()->get());
+      } else if(parameterIndex == (int)ParameterId::ROLL) {
+        notifyParameterChanged(ParameterId::ROLL, p_->getRoll()->get());
+      }
+    });
+
+    if(listenerOrientation) {
       listenerOrientation->setEuler(ear::plugin::ListenerOrientation::Euler{
         p_->getYaw()->get(),
         p_->getPitch()->get(),
         p_->getRoll()->get(),
         ear::plugin::ListenerOrientation::EulerOrder::YPR });
     }
+
+  } else if(parameterIndex == (int)ParameterId::OSC_ENABLE) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_ENABLE, p_->getOscEnable()->get());
+      setOscEnable(p_->getOscEnable()->get());
+    });
+
+  } else if(parameterIndex == (int)ParameterId::OSC_PORT) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_PORT, p_->getOscPort()->get());
+      setOscPort(p_->getOscPort()->get());
+    });
   }
+
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationValueChanged(ear::plugin::ui::OrientationView * view)
@@ -209,6 +270,38 @@ void BinauralMonitoringJuceFrontendConnector::orientationDragEnded(ear::plugin::
 
   } else if(!rollControl_.expired() && view == rollControl_.lock().get()) {
     p_->getRoll()->endChangeGesture();
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::buttonClicked(Button* button)
+{
+  if (!oscEnableButton_.expired() &&
+      button == oscEnableButton_.lock().get()) {
+    // note: getToggleState still has the old value when this is called
+    //       due to setClickingTogglesState on the button being false
+    bool newState = !button->getToggleState();
+    *(p_->getOscEnable()) = newState;
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::sliderValueChanged(Slider* slider)
+{
+  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
+    *(p_->getOscPort()) = slider->getValue();
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::sliderDragStarted(Slider* slider)
+{
+  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
+    p_->getOscPort()->beginChangeGesture();
+  }
+}
+
+void BinauralMonitoringJuceFrontendConnector::sliderDragEnded(Slider* slider)
+{
+  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
+    p_->getOscPort()->endChangeGesture();
   }
 }
 
