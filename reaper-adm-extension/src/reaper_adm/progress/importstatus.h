@@ -11,6 +11,7 @@ enum class ImportStatus {
     CREATING_REAPER_ELEMENTS,
     COMPLETE,
     CANCELLED,
-    ERROR_OCCURRED
+    ERROR_OCCURRED,
+    WARNING_OCCURRED
 };
 }

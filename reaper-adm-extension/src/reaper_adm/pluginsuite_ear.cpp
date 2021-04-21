@@ -15,6 +15,7 @@
 #include <adm/write.hpp>
 #include <adm/common_definitions.hpp>
 #include <bw64/bw64.hpp>
+#include "plugin_parameter_ranges.h"
 
 using namespace admplug;
 
@@ -52,30 +53,47 @@ namespace {
     std::vector<std::unique_ptr<PluginParameter>> createAutomatedObjectPluginParameters()
     {
         std::vector<std::unique_ptr<PluginParameter>> parameters;
+        
+        auto range = PluginParameterRanges::values.at(AdmParameter::OBJECT_AZIMUTH);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::AZIMUTH),
                                                    AdmParameter::OBJECT_AZIMUTH,
-                                                   { -180.0, 180.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_DISTANCE);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::DISTANCE),
                                                    AdmParameter::OBJECT_DISTANCE,
-                                                   { 0.0, 1.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_ELEVATION);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::ELEVATION),
                                                    AdmParameter::OBJECT_ELEVATION,
-                                                   { -90.0, 90.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_GAIN);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::GAIN),
                                                    AdmParameter::OBJECT_GAIN,
-                                                   map::linearToDb({ -100.0, 6.0 })));
-       parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::HEIGHT),
+                                                   map::linearToDb({range.first, range.second})));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_HEIGHT);
+        parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::HEIGHT),
                                                    AdmParameter::OBJECT_HEIGHT,
-                                                   { 0.0, 90.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_WIDTH);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::WIDTH),
                                                    AdmParameter::OBJECT_WIDTH,
-                                                   { 0.0, 360.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_DEPTH);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::DEPTH),
                                                    AdmParameter::OBJECT_DEPTH,
-                                                   { 0.0, 1.0 }));
+                                                   {range.first, range.second}));
+                                                   
+        range = PluginParameterRanges::values.at(AdmParameter::OBJECT_DIFFUSE);
         parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::DIFFUSE),
                                                    AdmParameter::OBJECT_DIFFUSE,
-                                                   { 0.0, 1.0 }));
+                                                   {range.first, range.second}));
+                                                   
 //        parameters.push_back(createPluginParameter(static_cast<int>(EarObjectParameters::DIVERGENCE),
 //                                                   AdmParameter::OBJECT_DIVERGENCE,
 //                                                   {0.0, 1.0}));
