@@ -12,14 +12,6 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class OrientationView;
-
-class EarNameTextEditor;
-class EarSlider;
-class EarInvertedSlider;
-class PannerTopView;
-class PannerSideView;
-
 class BinauralMonitoringJuceFrontendConnector
     : public ear::plugin::ui::BinauralMonitoringFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
