@@ -44,13 +44,21 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
 
   /* clang-format off */
-  // TODO - these NonAutomatedParameter will not set plugin state dirty! Need to use dummy param as in PR !67
+  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false)); // Used for setting plugin state dirty
   addParameter(yaw_ = new ui::NonAutomatedParameter<AudioParameterFloat>("yaw", "Yaw", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(pitch_ = new ui::NonAutomatedParameter<AudioParameterFloat>("pitch", "Pitch", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(roll_ = new ui::NonAutomatedParameter<AudioParameterFloat>("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(oscEnable_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscEnable", "Enable OSC", false));
   addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   /* clang-format on */
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscEnable_)->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(oscPort_)->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
 
   backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(nullptr, 64);
   connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
@@ -147,6 +155,8 @@ bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
 void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                MidiBuffer&) {
   ScopedNoDenormals noDenormals;
+
+  if(bypass_->get()) return;
 
   auto objIds = backend_->getActiveObjectIds();
   auto dsIds = backend_->getActiveDirectSpeakersIds();

@@ -61,6 +61,7 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor{
 
   ear::plugin::ListenerOrientationOscReceiver oscReceiver{};
 
+  AudioProcessorParameter* getBypassParameter() { return bypass_; }
   AudioParameterFloat* getYaw() { return yaw_; }
   AudioParameterFloat* getPitch() { return pitch_; }
   AudioParameterFloat* getRoll() { return roll_; }
@@ -74,6 +75,7 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor{
  private:
   BusesProperties _getBusProperties();
 
+  AudioParameterBool* bypass_;
   AudioParameterFloat* yaw_;
   AudioParameterFloat* pitch_;
   AudioParameterFloat* roll_;

@@ -27,6 +27,7 @@ class EAR_PLUGIN_BASE_EXPORT BinauralMonitoringFrontendBackendConnector {
   using ParameterValue = boost::variant<float, bool, int, uint32_t,
                                         boost::optional<float>, std::string>;
   enum class ParameterId {
+    BYPASS,
     YAW,
     PITCH,
     ROLL,
