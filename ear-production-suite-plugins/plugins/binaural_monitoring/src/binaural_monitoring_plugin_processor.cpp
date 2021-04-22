@@ -83,10 +83,27 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     connector_->setQuaternion(quat);
   };
 
-  oscReceiver.listenForConnections(8000);
+  oscEnable_->addListener(this);
+  oscPort_->addListener(this);
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
+}
+
+void EarBinauralMonitoringAudioProcessor::parameterValueChanged(int parameterIndex, float newValue)
+{
+  if(parameterIndex == 4 || parameterIndex == 5) {
+    // OSC controls
+    if(oscEnable_->get()) {
+      oscReceiver.listenForConnections(oscPort_->get());
+    } else {
+      oscReceiver.disconnect();
+    }
+  }
+}
+
+void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
+{
 }
 
 //==============================================================================

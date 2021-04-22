@@ -27,7 +27,7 @@ public:
   std::string getStatus();
 
 private:
-  std::string curStatusText{ "Disconnected" };
+  std::string curStatusText{ "OSC Closed." };
   void updateStatusText(std::string& newStatus);
   void updateStatusText();
   void updateStatusTextForListenAttempt();

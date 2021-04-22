@@ -22,8 +22,10 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace ear
 
 
-class EarBinauralMonitoringAudioProcessor : public AudioProcessor{
- public:
+class EarBinauralMonitoringAudioProcessor
+  : private AudioProcessorParameter::Listener,
+    public AudioProcessor {
+public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
 
@@ -72,7 +74,11 @@ class EarBinauralMonitoringAudioProcessor : public AudioProcessor{
     return connector_.get();
   }
 
- private:
+protected:
+  void parameterValueChanged (int parameterIndex, float newValue) override;
+  void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override;
+
+private:
   BusesProperties _getBusProperties();
 
   AudioParameterBool* bypass_;
