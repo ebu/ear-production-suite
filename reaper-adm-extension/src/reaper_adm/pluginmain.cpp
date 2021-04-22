@@ -53,32 +53,32 @@ CrtBreakAllocSetter g_crtBreakAllocSetter;
 extern "C" {
   int REAPER_PLUGIN_DLL_EXPORT REAPER_PLUGIN_ENTRYPOINT(REAPER_PLUGIN_HINSTANCE hInstance, reaper_plugin_info_t *rec)
   {
-      using namespace admplug;
-      std::unique_ptr<ReaperHost> reaper;
+    using namespace admplug;
+    std::unique_ptr<ReaperHost> reaper;
 
-      auto nonBlockingMessage = [rec](const char* text) {
+    auto nonBlockingMessage = [rec](const char* text) {
 #ifdef WIN32
-          // Windows version of Reaper locks up if you try show a message box during splash
-          winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
+        // Windows version of Reaper locks up if you try show a message box during splash
+        winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
 #else
-          MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
+        MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
 #endif
-      };
+    };
 
-      try {
-          reaper = std::make_unique<ReaperHost>(hInstance, rec);
-      } catch (FuncResolutionException const& e) {
-          nonBlockingMessage(e.what());
-          reaper = std::make_unique<ReaperHost>(hInstance, rec, false);
-      } catch (ReaperAPIException const& e) {
-          nonBlockingMessage(e.what());
-          return 0;
-      }
+    try {
+        reaper = std::make_unique<ReaperHost>(hInstance, rec);
+    } catch (FuncResolutionException const& e) {
+        nonBlockingMessage(e.what());
+        reaper = std::make_unique<ReaperHost>(hInstance, rec, false);
+    } catch (ReaperAPIException const& e) {
+        nonBlockingMessage(e.what());
+        return 0;
+    }
 
-      if (!rec) {
-          // unload plugin
-          return 0;
-      }
+    if (!rec) {
+        // unload plugin
+        return 0;
+    }
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
