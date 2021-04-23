@@ -154,6 +154,9 @@ class OrientationView : public Component,
 
     readout_->setBounds(getWidth() - 44, getHeight() - 40, 44, 40);
 
+    juce::Rectangle<float> dummyRect;
+    juce::String dummyString;
+      
     if(fullCircle) {
       // Full Circle
       jointTick_ = Line<float>(getPointOnCentredCircle(outerDiameter_, arcStartPos_), getPointOnCentredCircle(outerDiameter_ + tickLength_ + tickLength_, arcStartPos_));
@@ -173,7 +176,7 @@ class OrientationView : public Component,
       tickVal = (valRange * 0.25f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 1.0f) + arcStartPos_;
       ccwTickLabelText_ = String(tickVal);
-      setLabelsSizeAndPosition(tickPos, ccwTickLabelRect_, ccwTickLabelText_, juce::Rectangle<float>{}, juce::String{});
+      setLabelsSizeAndPosition(tickPos, ccwTickLabelRect_, ccwTickLabelText_, dummyRect, dummyString);
 
       tickVal = (valRange * 0.5f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 2.0f) + arcStartPos_;
@@ -183,7 +186,7 @@ class OrientationView : public Component,
       tickVal = (valRange * 0.75f) + arcStartVal_;
       tickPos = (MathConstants<float>::halfPi * 3.0f) + arcStartPos_;
       cwTickLabelText_ = String(tickVal);
-      setLabelsSizeAndPosition(tickPos, cwTickLabelRect_, cwTickLabelText_, juce::Rectangle<float>{}, juce::String{});
+      setLabelsSizeAndPosition(tickPos, cwTickLabelRect_, cwTickLabelText_, dummyRect, dummyString);
 
     } else {
       // Arc
@@ -200,7 +203,7 @@ class OrientationView : public Component,
       tickVal = arcStartVal_;
       tickPos = arcStartPos_;
       ccwTickLabelText_ = String(tickVal);
-      setLabelsSizeAndPosition(tickPos, ccwTickLabelRect_, ccwTickLabelText_, juce::Rectangle<float>{}, juce::String{});
+      setLabelsSizeAndPosition(tickPos, ccwTickLabelRect_, ccwTickLabelText_, dummyRect, dummyString);
 
       tickVal = (valRange * 0.5f) + arcStartVal_;
       tickPos = (posRange * 0.5f) + arcStartPos_;
@@ -210,7 +213,7 @@ class OrientationView : public Component,
       tickVal = arcEndVal_;
       tickPos = arcEndPos_;
       cwTickLabelText_ = String(tickVal);
-      setLabelsSizeAndPosition(tickPos, cwTickLabelRect_, cwTickLabelText_, juce::Rectangle<float>{}, juce::String{});
+      setLabelsSizeAndPosition(tickPos, cwTickLabelRect_, cwTickLabelText_, dummyRect, dummyString);
 
     }
   }

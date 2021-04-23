@@ -190,7 +190,7 @@ std::string ListenerOrientationOscReceiver::getStatus()
   return curStatusText;
 }
 
-void ListenerOrientationOscReceiver::updateStatusText(std::string & newStatus)
+void ListenerOrientationOscReceiver::updateStatusText(std::string newStatus)
 {
   curStatusText = newStatus;
   updateStatusText();
