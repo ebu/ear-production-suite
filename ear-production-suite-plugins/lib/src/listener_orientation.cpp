@@ -1,6 +1,7 @@
 #include "listener_orientation.hpp"
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 //TODO - remove once OSC work done
 #ifdef _WIN32
@@ -35,12 +36,12 @@ ListenerOrientation::Euler ListenerOrientation::getEuler()
 {
   if(!eulerOutput.has_value()) {
     if(lastQuatInput.has_value()) {
-      eulerOutput = toEuler(lastQuatInput.value(), YPR);
+      eulerOutput = toEuler(*lastQuatInput, YPR);
     } else {
       eulerOutput = Euler{ 0.0, 0.0, 0.0, YPR };
     }
   }
-  return eulerOutput.value();
+  return *eulerOutput;
 }
 
 void ListenerOrientation::setEuler(Euler e)
@@ -48,7 +49,7 @@ void ListenerOrientation::setEuler(Euler e)
   if(runningListeners) return; // Prevent listeners causing recursive loop
   lastQuatInput.reset();
   if(lastEulerInput.has_value()) {
-    auto& lE = lastEulerInput.value();
+    auto& lE = *lastEulerInput;
     if(lE.y == e.y && lE.p == e.p && lE.r == e.r && lE.order == e.order) return;
   }
   lastEulerInput = e;
@@ -68,12 +69,12 @@ ListenerOrientation::Quaternion ListenerOrientation::getQuaternion()
 {
   if(!quatOutput.has_value()) {
     if(lastEulerInput.has_value()) {
-      quatOutput = toQuaternion(lastEulerInput.value());
+      quatOutput = toQuaternion(*lastEulerInput);
     } else {
       quatOutput = toQuaternion(Euler{ 0.0, 0.0, 0.0, YPR });
     }
   }
-  return quatOutput.value();
+  return *quatOutput;
 }
 
 void ListenerOrientation::setQuaternion(Quaternion q)
@@ -81,7 +82,7 @@ void ListenerOrientation::setQuaternion(Quaternion q)
   if(runningListeners) return; // Prevent listeners causing recursive loop
   lastEulerInput.reset();
   if(lastQuatInput.has_value()) {
-    auto& lQ = lastQuatInput.value();
+    auto& lQ = *lastQuatInput;
     if(lQ.w == q.w && lQ.x == q.x && lQ.y == q.y && lQ.z == q.z) return;
   }
   lastQuatInput = q;
