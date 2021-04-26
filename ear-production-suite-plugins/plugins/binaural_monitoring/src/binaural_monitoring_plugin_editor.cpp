@@ -75,14 +75,11 @@ EarBinauralMonitoringAudioProcessorEditor::
   addAndMakeVisible(oscValueBox.get());
   addChildComponent(errorOverlay_.get());
 
-  /*
-  oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(),
-  dontSendNotification);
-  oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(),
-  dontSendNotification);
-  oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(),
-  dontSendNotification);
-  */
+  oscValueBox->getPortControl()->setValue(p->getOscPort()->get(),
+                                          dontSendNotification);
+  oscValueBox->getEnableButton()->setToggleState(p->getOscEnable()->get(),
+                                                 dontSendNotification);
+
   orientationValueBox->getYawControl()->setValue(p->getYaw()->get(),
                                                  dontSendNotification);
   orientationValueBox->getPitchControl()->setValue(p->getPitch()->get(),
