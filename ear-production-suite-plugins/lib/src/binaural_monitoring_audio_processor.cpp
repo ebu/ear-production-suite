@@ -63,6 +63,7 @@ void BinauralMonitoringAudioProcessor::doProcess(float ** channelPointers, size_
 {
   if(listenerQuatsDirty) {
     std::lock_guard<std::mutex> lock(bearListenerMutex_);
+    bearListener.set_orientation_quaternion(listenerQuats);
     bearRenderer->set_listener(bearListener);
     listenerQuatsDirty = false;
   }
