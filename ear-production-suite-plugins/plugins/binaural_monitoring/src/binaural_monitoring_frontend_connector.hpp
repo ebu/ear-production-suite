@@ -22,14 +22,14 @@ class BinauralMonitoringJuceFrontendConnector
       Button::Listener,
       ear::plugin::ui::OrientationView::Listener,
       ear::plugin::ListenerOrientation::EulerListener {
-
-public:
+ public:
   /**
    * Note: Make sure that all AudioProcessorParameters are already
    * added to the ObjectsAudioProcessor at the time the ctor
    * is called.
    */
-   BinauralMonitoringJuceFrontendConnector(EarBinauralMonitoringAudioProcessor* processor);
+  BinauralMonitoringJuceFrontendConnector(
+      EarBinauralMonitoringAudioProcessor* processor);
   ~BinauralMonitoringJuceFrontendConnector();
 
   void parameterValueChanged(int parameterIndex, float newValue) override;
@@ -58,7 +58,7 @@ public:
   void setOscEnable(bool enable);
   void setOscPort(int port);
 
-protected:
+ protected:
   // Orientation::Listener
   void orientationValueChanged(ear::plugin::ui::OrientationView* view) override;
   void orientationDragStarted(ear::plugin::ui::OrientationView* view) override;
@@ -73,13 +73,14 @@ protected:
   void sliderDragEnded(Slider*) override;
 
   // ListenerOrientation::EulerListener
-  void orientationChange(ear::plugin::ListenerOrientation::Euler euler) override;
+  void orientationChange(
+      ear::plugin::ListenerOrientation::Euler euler) override;
 
-private:
+ private:
   EarBinauralMonitoringAudioProcessor* p_;
   std::map<int, RangedAudioParameter*> parameters_;
 
-  bool parameterListenersEnabled{ true };
+  bool parameterListenersEnabled{true};
 
   // Orientation Controls
   std::weak_ptr<OrientationView> yawControl_;
@@ -96,8 +97,7 @@ private:
   /// Listener Orientation Object
   std::shared_ptr<ListenerOrientation> listenerOrientation;
 
-   MultiAsyncUpdater updater_;
-
+  MultiAsyncUpdater updater_;
 };
 
 }  // namespace ui

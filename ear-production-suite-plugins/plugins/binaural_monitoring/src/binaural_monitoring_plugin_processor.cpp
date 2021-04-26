@@ -52,16 +52,20 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   /* clang-format on */
 
-  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscEnable_)->markPluginStateAsDirty = [this]() {
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscEnable_)
+      ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(oscPort_)->markPluginStateAsDirty = [this]() {
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(oscPort_)
+      ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-  backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(nullptr, 64);
-  connector_ = std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
+  backend_ =
+      std::make_unique<ear::plugin::BinauralMonitoringBackend>(nullptr, 64);
+  connector_ =
+      std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
   connector_->setListenerOrientationInstance(backend_->listenerOrientation);
 
   connector_->parameterValueChanged(1, yaw_->get());
@@ -70,7 +74,8 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(4, oscEnable_->get());
   connector_->parameterValueChanged(5, oscPort_->get());
 
-  auto vstPath = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile);
+  auto vstPath = juce::File::getSpecialLocation(
+      juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
   vstPath = vstPath.getChildFile("default.tf");
   bearDataFilePath = vstPath.getFullPathName().toStdString();
@@ -79,22 +84,22 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     connector_->setEuler(euler);
   };
 
-  oscReceiver.onReceiveQuaternion = [this](ListenerOrientation::Quaternion quat) {
-    connector_->setQuaternion(quat);
-  };
+  oscReceiver.onReceiveQuaternion =
+      [this](ListenerOrientation::Quaternion quat) {
+        connector_->setQuaternion(quat);
+      };
 
   oscEnable_->addListener(this);
   oscPort_->addListener(this);
 }
 
-EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {
-}
+EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
 
-void EarBinauralMonitoringAudioProcessor::parameterValueChanged(int parameterIndex, float newValue)
-{
-  if(parameterIndex == 4 || parameterIndex == 5) {
+void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
+    int parameterIndex, float newValue) {
+  if (parameterIndex == 4 || parameterIndex == 5) {
     // OSC controls
-    if(oscEnable_->get()) {
+    if (oscEnable_->get()) {
       oscReceiver.listenForConnections(oscPort_->get());
     } else {
       oscReceiver.disconnect();
@@ -102,15 +107,16 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(int parameterInd
   }
 }
 
-void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
-{
-}
+void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(
+    int parameterIndex, bool gestureIsStarting) {}
 
 //==============================================================================
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  return BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(64), true).withOutput("Left Ear", AudioChannelSet::mono(), true).withOutput("Right Ear", AudioChannelSet::mono(), true);
+  return BusesProperties()
+      .withInput("Input", AudioChannelSet::discreteChannels(64), true)
+      .withOutput("Left Ear", AudioChannelSet::mono(), true)
+      .withOutput("Right Ear", AudioChannelSet::mono(), true);
 }
 
 const String EarBinauralMonitoringAudioProcessor::getName() const {
@@ -123,7 +129,9 @@ bool EarBinauralMonitoringAudioProcessor::producesMidi() const { return false; }
 
 bool EarBinauralMonitoringAudioProcessor::isMidiEffect() const { return false; }
 
-double EarBinauralMonitoringAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+double EarBinauralMonitoringAudioProcessor::getTailLengthSeconds() const {
+  return 0.0;
+}
 
 int EarBinauralMonitoringAudioProcessor::getNumPrograms() {
   return 1;  // NB: some hosts don't cope very well if you tell them there are 0
@@ -139,17 +147,16 @@ const String EarBinauralMonitoringAudioProcessor::getProgramName(int index) {
   return {};
 }
 
-void EarBinauralMonitoringAudioProcessor::changeProgramName(int index,
-                                                    const String& newName) {}
+void EarBinauralMonitoringAudioProcessor::changeProgramName(
+    int index, const String& newName) {}
 
 //==============================================================================
 void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
-                                                int samplesPerBlock) {
+                                                        int samplesPerBlock) {
   samplerate_ = sampleRate;
   blocksize_ = samplesPerBlock;
 
   levelMeter_->setup(2, sampleRate);
-
 }
 
 void EarBinauralMonitoringAudioProcessor::releaseResources() {
@@ -169,11 +176,11 @@ bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
   return false;
 }
 
-void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
-                                               MidiBuffer&) {
+void EarBinauralMonitoringAudioProcessor::processBlock(
+    AudioBuffer<float>& buffer, MidiBuffer&) {
   ScopedNoDenormals noDenormals;
 
-  if(bypass_->get()) return;
+  if (bypass_->get()) return;
 
   auto objIds = backend_->getActiveObjectIds();
   auto dsIds = backend_->getActiveDirectSpeakersIds();
@@ -184,39 +191,44 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
   // Ensure BEAR has enough channels configured
-  if(!processor_ || !processor_->configSupports(numObj, numDs, numHoa, samplerate_, blocksize_)) {
-    processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-      numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
+  if (!processor_ || !processor_->configSupports(numObj, numDs, numHoa,
+                                                 samplerate_, blocksize_)) {
+    processor_ =
+        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+            numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
   }
 
   // Listener Position
 
   auto latestQuat = backend_->listenerOrientation->getQuaternion();
-  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y, latestQuat.z);
+  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
+                                     latestQuat.z);
 
   // BEAR Metadata
 
-  for(auto& connId : objIds) {
+  for (auto& connId : objIds) {
     auto md = backend_->getLatestObjectsTypeMetadata(connId);
-    if(md->channel >= 0) {
+    if (md->channel >= 0) {
       processor_->pushBearMetadata(md->channel, &(md->earMetadata));
     }
   }
 
-  for(auto& connId : dsIds) {
+  for (auto& connId : dsIds) {
     auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
-    if(md->startingChannel >= 0) {
-      for(int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
+    if (md->startingChannel >= 0) {
+      for (int index = 0; index < md->earMetadata.size(); index++) {
+        processor_->pushBearMetadata(md->startingChannel + index,
+                                     &(md->earMetadata[index]));
       }
     }
   }
 
-  for(auto& connId : hoaIds) {
+  for (auto& connId : hoaIds) {
     auto md = backend_->getLatestHoaTypeMetadata(connId);
-    if(md->startingChannel >= 0) {
-      for(int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(md->startingChannel + index, &(md->earMetadata[index]));
+    if (md->startingChannel >= 0) {
+      for (int index = 0; index < md->earMetadata.size(); index++) {
+        processor_->pushBearMetadata(md->startingChannel + index,
+                                     &(md->earMetadata[index]));
       }
     }
   }
@@ -229,7 +241,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   //   remaining are passed through.
   auto buffMaxChns = buffer.getNumChannels();
   auto buffSamples = buffer.getNumSamples();
-  for(int ch = 2; ch < buffMaxChns; ch++) {
+  for (int ch = 2; ch < buffMaxChns; ch++) {
     buffer.clear(ch, 0, buffSamples);
   }
 
@@ -237,7 +249,6 @@ void EarBinauralMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffe
   if (buffer.getNumChannels() >= levelMeter_->channels()) {
     levelMeter_->process(buffer);
   }
-
 }
 
 //==============================================================================
@@ -250,7 +261,8 @@ AudioProcessorEditor* EarBinauralMonitoringAudioProcessor::createEditor() {
 }
 
 //==============================================================================
-void EarBinauralMonitoringAudioProcessor::getStateInformation(MemoryBlock& destData) {
+void EarBinauralMonitoringAudioProcessor::getStateInformation(
+    MemoryBlock& destData) {
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
@@ -262,7 +274,7 @@ void EarBinauralMonitoringAudioProcessor::getStateInformation(MemoryBlock& destD
 }
 
 void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
-                                                      int sizeInBytes) {
+                                                              int sizeInBytes) {
   // You should use this method to restore your parameters from this memory
   // block, whose contents will have been created by the getStateInformation()
   // call.
@@ -270,11 +282,12 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
   std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
   if (xmlState.get() != nullptr) {
     if (xmlState->hasTagName("BinauralMonitoringPlugin")) {
-      // TODO - need to push these values to backend and OSC receiver, or just works?
-      if(xmlState->hasAttribute("oscEnable")) {
+      // TODO - need to push these values to backend and OSC receiver, or just
+      // works?
+      if (xmlState->hasAttribute("oscEnable")) {
         *oscEnable_ = xmlState->getBoolAttribute("oscEnable", false);
       }
-      if(xmlState->hasAttribute("oscPort")) {
+      if (xmlState->hasAttribute("oscPort")) {
         *oscPort_ = xmlState->getIntAttribute("oscPort", 8000);
       }
     }

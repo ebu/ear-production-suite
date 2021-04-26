@@ -52,16 +52,17 @@ class EAR_PLUGIN_BASE_EXPORT BinauralMonitoringFrontendBackendConnector {
    */
   void onParameterChanged(ParameterChangedCallback callback);
 
-  BinauralMonitoringFrontendBackendConnector(const BinauralMonitoringFrontendBackendConnector&) =
-      delete;
+  BinauralMonitoringFrontendBackendConnector(
+      const BinauralMonitoringFrontendBackendConnector&) = delete;
   BinauralMonitoringFrontendBackendConnector& operator=(
       const BinauralMonitoringFrontendBackendConnector&) = delete;
-  BinauralMonitoringFrontendBackendConnector(BinauralMonitoringFrontendBackendConnector&&) = delete;
+  BinauralMonitoringFrontendBackendConnector(
+      BinauralMonitoringFrontendBackendConnector&&) = delete;
   BinauralMonitoringFrontendBackendConnector& operator=(
-    BinauralMonitoringFrontendBackendConnector&&) = delete;
+      BinauralMonitoringFrontendBackendConnector&&) = delete;
 
  protected:
-   BinauralMonitoringFrontendBackendConnector();
+  BinauralMonitoringFrontendBackendConnector();
   void notifyParameterChanged(ParameterId parameterID,
                               const ParameterValue& newValue);
 

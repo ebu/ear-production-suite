@@ -13,7 +13,7 @@
 namespace ear {
 namespace plugin {
 namespace ui {
-  class BinauralMonitoringJuceFrontendConnector;
+class BinauralMonitoringJuceFrontendConnector;
 }
 class BinauralMonitoringBackend;
 class BinauralMonitoringAudioProcessor;
@@ -21,11 +21,10 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace plugin
 }  // namespace ear
 
-
 class EarBinauralMonitoringAudioProcessor
-  : private AudioProcessorParameter::Listener,
-    public AudioProcessor {
-public:
+    : private AudioProcessorParameter::Listener,
+      public AudioProcessor {
+ public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
 
@@ -70,15 +69,17 @@ public:
   AudioParameterBool* getOscEnable() { return oscEnable_; }
   AudioParameterInt* getOscPort() { return oscPort_; }
 
-  ear::plugin::ui::BinauralMonitoringJuceFrontendConnector* getFrontendConnector() {
+  ear::plugin::ui::BinauralMonitoringJuceFrontendConnector*
+  getFrontendConnector() {
     return connector_.get();
   }
 
-protected:
-  void parameterValueChanged (int parameterIndex, float newValue) override;
-  void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override;
+ protected:
+  void parameterValueChanged(int parameterIndex, float newValue) override;
+  void parameterGestureChanged(int parameterIndex,
+                               bool gestureIsStarting) override;
 
-private:
+ private:
   BusesProperties _getBusProperties();
 
   AudioParameterBool* bypass_;
@@ -88,7 +89,8 @@ private:
   AudioParameterBool* oscEnable_;
   AudioParameterInt* oscPort_;
 
-  std::unique_ptr<ear::plugin::ui::BinauralMonitoringJuceFrontendConnector> connector_;
+  std::unique_ptr<ear::plugin::ui::BinauralMonitoringJuceFrontendConnector>
+      connector_;
 
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;

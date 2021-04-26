@@ -11,8 +11,9 @@
 
 using namespace ear::plugin::ui;
 
-EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEditor(
-    EarBinauralMonitoringAudioProcessor* p)
+EarBinauralMonitoringAudioProcessorEditor::
+    EarBinauralMonitoringAudioProcessorEditor(
+        EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
       oscValueBox(std::make_unique<ValueBoxOsc>()),
@@ -21,12 +22,11 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
       onBoardingContent_(std::make_unique<Onboarding>()),
-      headphoneMeterBox_(
-          std::make_unique<HeadphoneChannelMeterBox>(String::fromUTF8("Output"))),
+      headphoneMeterBox_(std::make_unique<HeadphoneChannelMeterBox>(
+          String::fromUTF8("Output"))),
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
-
   header_->setText(" Binaural Monitoring");
 
   onBoardingButton_->setButtonText("?");
@@ -36,7 +36,8 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   onBoardingButton_->onClick = [&]() { onBoardingOverlay_->setVisible(true); };
 
   onBoardingOverlay_->setContent(onBoardingContent_.get());
-  onBoardingOverlay_->setWindowSize(700, 550); // Min size to display contents correctly
+  onBoardingOverlay_->setWindowSize(
+      700, 550);  // Min size to display contents correctly
   onBoardingOverlay_->setHeaderText(
       String::fromUTF8("Welcome – do you need help?"));
   onBoardingOverlay_->onClose = [&]() {
@@ -49,17 +50,17 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   onBoardingContent_->addListener(this);
 
   addAndMakeVisible(header_.get());
-  //addAndMakeVisible(onBoardingButton_.get()); // TODO: Commented out for now as doesn't fit in MVP window
+  // TODO: Commented out for now as doesn't fit in window
+  // addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
   addAndMakeVisible(headphoneMeterBox_.get());
 
   for (int i = 0; i < 2; ++i) {
     headphoneMeters_.push_back(std::make_unique<HeadphoneChannelMeter>(
-        String(i + 1), i == 0? "L" : "R"));
+        String(i + 1), i == 0 ? "L" : "R"));
     headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(headphoneMeters_.back().get());
   }
-
 
   /* clang-format off */
   p->getFrontendConnector()->setOscPortControl(oscValueBox->getPortControl());
@@ -73,25 +74,34 @@ EarBinauralMonitoringAudioProcessorEditor::EarBinauralMonitoringAudioProcessorEd
   addAndMakeVisible(oscValueBox.get());
 
   /*
-  oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(), dontSendNotification);
-  oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(), dontSendNotification);
-  oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(), dontSendNotification);
+  oscValueBox->getOscPortLabel()->setText(p->getOscPort()->get(),
+  dontSendNotification);
+  oscValueBox->getOscEnableButton()->setValue(p->getOscEnable()->get(),
+  dontSendNotification);
+  oscValueBox->getOscStatusLabel()->setText(p->getOscStatus(),
+  dontSendNotification);
   */
-  orientationValueBox->getYawControl()->setValue(p->getYaw()->get(), dontSendNotification);
-  orientationValueBox->getPitchControl()->setValue(p->getPitch()->get(), dontSendNotification);
-  orientationValueBox->getRollControl()->setValue(p->getRoll()->get(), dontSendNotification);
+  orientationValueBox->getYawControl()->setValue(p->getYaw()->get(),
+                                                 dontSendNotification);
+  orientationValueBox->getPitchControl()->setValue(p->getPitch()->get(),
+                                                   dontSendNotification);
+  orientationValueBox->getRollControl()->setValue(p->getRoll()->get(),
+                                                  dontSendNotification);
 
-  //setSize(750, 600); // Min size to fit onboarding window.
-  //setSize(380, 280); // ideal size for MVP (meters only) but doesn't allow enough space for onboarding window
+  // setSize(750, 600); // Min size to fit onboarding window.
   setSize(850, 425);
 
   p_->oscReceiver.onStatusChange = [this](std::string status) {
-    oscValueBox->getStatusLabel()->setText(status, juce::NotificationType::dontSendNotification);
+    oscValueBox->getStatusLabel()->setText(
+        status, juce::NotificationType::dontSendNotification);
   };
-  oscValueBox->getStatusLabel()->setText(p_->oscReceiver.getStatus(), juce::NotificationType::dontSendNotification);
+  oscValueBox->getStatusLabel()->setText(
+      p_->oscReceiver.getStatus(),
+      juce::NotificationType::dontSendNotification);
 }
 
-EarBinauralMonitoringAudioProcessorEditor::~EarBinauralMonitoringAudioProcessorEditor() {
+EarBinauralMonitoringAudioProcessorEditor::
+    ~EarBinauralMonitoringAudioProcessorEditor() {
   p_->oscReceiver.onStatusChange = nullptr;
 }
 
@@ -111,7 +121,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
       headingArea.removeFromRight(39).removeFromBottom(39));
   header_->setBounds(headingArea);
 
-  area.removeFromTop(10); // Padding between header and content
+  area.removeFromTop(10);  // Padding between header and content
   // All content to go below and to be fitted within `area`
   auto leftColumn = area.removeFromLeft(145);
   auto rightColumn = area.withWidth(695);

@@ -9,8 +9,6 @@
 namespace ear {
 namespace plugin {
 
-
-
 /**
  * @brief Binaural monitoring plugin dsp implementation
  *
@@ -18,7 +16,6 @@ namespace plugin {
  */
 class BinauralMonitoringAudioProcessor {
  public:
-
   /**
    * @brief
    * Initializes audio processor and BEAR.
@@ -38,13 +35,17 @@ class BinauralMonitoringAudioProcessor {
    * @param hoaChannels number of HOA channels to support
    * @param blockSize processing block size
    */
-  BinauralMonitoringAudioProcessor(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
-                                   std::size_t sampleRate, std::size_t blockSize, std::string dataFilePath);
+  BinauralMonitoringAudioProcessor(
+      std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
+      std::size_t sampleRate, std::size_t blockSize, std::string dataFilePath);
 
-  BinauralMonitoringAudioProcessor(const BinauralMonitoringAudioProcessor&) = delete;
+  BinauralMonitoringAudioProcessor(const BinauralMonitoringAudioProcessor&) =
+      delete;
   BinauralMonitoringAudioProcessor(BinauralMonitoringAudioProcessor&&) = delete;
-  BinauralMonitoringAudioProcessor& operator=(const BinauralMonitoringAudioProcessor&) = delete;
-  BinauralMonitoringAudioProcessor& operator=(BinauralMonitoringAudioProcessor&&) = delete;
+  BinauralMonitoringAudioProcessor& operator=(
+      const BinauralMonitoringAudioProcessor&) = delete;
+  BinauralMonitoringAudioProcessor& operator=(
+      BinauralMonitoringAudioProcessor&&) = delete;
 
   template <typename InBuffer, typename OutBuffer>
   void process(const InBuffer& in, OutBuffer& out) {
@@ -54,17 +55,21 @@ class BinauralMonitoringAudioProcessor {
   }
 
   bool pushBearMetadata(size_t channelNum, ear::ObjectsTypeMetadata* metadata);
-  bool pushBearMetadata(size_t channelNum, ear::DirectSpeakersTypeMetadata* metadata);
+  bool pushBearMetadata(size_t channelNum,
+                        ear::DirectSpeakersTypeMetadata* metadata);
   bool pushBearMetadata(size_t channelNum, ear::HOATypeMetadata* metadata);
 
   std::size_t delayInSamples() const;
 
-  bool configMatches(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
-                     std::size_t sampleRate, std::size_t blockSize);
-  bool configSupports(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels,
-                      std::size_t sampleRate, std::size_t blockSize);
+  bool configMatches(std::size_t objChannels, std::size_t dsChannels,
+                     std::size_t hoaChannels, std::size_t sampleRate,
+                     std::size_t blockSize);
+  bool configSupports(std::size_t objChannels, std::size_t dsChannels,
+                      std::size_t hoaChannels, std::size_t sampleRate,
+                      std::size_t blockSize);
 
-  void setListenerOrientation(float quatW, float quatX, float quatY, float quatZ);
+  void setListenerOrientation(float quatW, float quatX, float quatY,
+                              float quatZ);
 
  private:
   void doProcess(float** channelPointers, size_t maxChannels);
@@ -76,24 +81,25 @@ class BinauralMonitoringAudioProcessor {
   std::mutex bearListenerMutex_;
   bear::Listener bearListener;
 
-  bool listenerQuatsDirty{ false };
-  std::array<double, 4> listenerQuats{ 1.0, 0.0, 0.0, 0.0 };
+  bool listenerQuatsDirty{false};
+  std::array<double, 4> listenerQuats{1.0, 0.0, 0.0, 0.0};
 
   bear::Time metadataRtime;
   bear::Time metadataDuration;
 
-  // We need to map original channel numbers to contiguous channel numbers within the different type definitions
+  // We need to map original channel numbers to contiguous channel numbers
+  //   within the different type definitions
   std::vector<int> objChannelMappings;
   std::vector<int> dsChannelMappings;
   std::vector<int> hoaChannelMappings;
 
   // Bear temp buffers - Save redeclaring on each process call
   std::vector<float> reusableZeroedChannel;
-  std::vector<float*> bearOutputBuffers_RawPointers; // Bear wants array of raw pointers
+  std::vector<float*>
+      bearOutputBuffers_RawPointers;  // Bear wants array of raw pointers
   std::vector<float*> bearObjectInputBuffers_RawPointers;
   std::vector<float*> bearDirectSpeakersInputBuffers_RawPointers;
   std::vector<float*> bearHoaInputBuffers_RawPointers;
-
 };
 
 }  // namespace plugin

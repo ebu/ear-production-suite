@@ -5,8 +5,10 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-  BinauralMonitoringFrontendBackendConnector::BinauralMonitoringFrontendBackendConnector() {}
-  BinauralMonitoringFrontendBackendConnector::~BinauralMonitoringFrontendBackendConnector() {}
+BinauralMonitoringFrontendBackendConnector::
+    BinauralMonitoringFrontendBackendConnector() {}
+BinauralMonitoringFrontendBackendConnector::
+    ~BinauralMonitoringFrontendBackendConnector() {}
 
 void BinauralMonitoringFrontendBackendConnector::onParameterChanged(
     ParameterChangedCallback callback) {

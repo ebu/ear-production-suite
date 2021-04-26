@@ -16,8 +16,9 @@
 class EarBinauralMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
       private ear::plugin::ui::Onboarding::Listener {
-public:
-  EarBinauralMonitoringAudioProcessorEditor(EarBinauralMonitoringAudioProcessor*);
+ public:
+  EarBinauralMonitoringAudioProcessorEditor(
+      EarBinauralMonitoringAudioProcessor*);
   ~EarBinauralMonitoringAudioProcessorEditor();
 
   void paint(Graphics&) override;
@@ -26,7 +27,7 @@ public:
   std::unique_ptr<ear::plugin::ui::ValueBoxOrientation> orientationValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxOsc> oscValueBox;
 
-private:
+ private:
   EarBinauralMonitoringAudioProcessor* p_;
 
   std::unique_ptr<ear::plugin::ui::EarHeader> header_;
@@ -35,7 +36,8 @@ private:
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
 
   std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeterBox> headphoneMeterBox_;
-  std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>> headphoneMeters_;
+  std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>>
+      headphoneMeters_;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock_;
   std::unique_ptr<PropertiesFile> propertiesFile_;

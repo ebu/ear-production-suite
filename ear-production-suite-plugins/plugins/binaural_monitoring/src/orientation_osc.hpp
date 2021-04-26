@@ -8,9 +8,10 @@
 namespace ear {
 namespace plugin {
 
-class ListenerOrientationOscReceiver : private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>, private MultiTimer
-{
-public:
+class ListenerOrientationOscReceiver
+    : private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
+      private MultiTimer {
+ public:
   ListenerOrientationOscReceiver();
   ~ListenerOrientationOscReceiver();
 
@@ -26,24 +27,25 @@ public:
 
   std::string getStatus();
 
-private:
-  std::string curStatusText{ "Disconnected" };
+ private:
+  std::string curStatusText{"OSC Closed."};
   void updateStatusText(std::string newStatus);
   void updateStatusText();
   void updateStatusTextForListenAttempt();
 
-  bool isListening{ false };
-  uint16_t oscPort{ 8000 };
+  bool isListening{false};
+  uint16_t oscPort{8000};
 
   const int timerIdStatusTextReset = 0;
   const int timerIdPersistentListen = 1;
 
   OSCReceiver osc;
 
-  // Have to track this because we can receive one coord at a time, but they're only useful together
-  ListenerOrientation::Euler oscEulerInput{ 0.0, 0.0, 0.0, ListenerOrientation::EulerOrder::YPR };
-
+  // Have to track this because we can receive one coord at a time,
+  //   but they're only useful together
+  ListenerOrientation::Euler oscEulerInput{
+      0.0, 0.0, 0.0, ListenerOrientation::EulerOrder::YPR};
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace ear
