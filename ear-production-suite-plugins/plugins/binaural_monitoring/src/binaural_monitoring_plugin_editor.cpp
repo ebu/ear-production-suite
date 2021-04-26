@@ -51,8 +51,7 @@ EarBinauralMonitoringAudioProcessorEditor::
   onBoardingContent_->addListener(this);
 
   addAndMakeVisible(header_.get());
-  // TODO: Commented out for now as doesn't fit in window
-  // addAndMakeVisible(onBoardingButton_.get());
+  addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
   addAndMakeVisible(headphoneMeterBox_.get());
 
@@ -88,7 +87,8 @@ EarBinauralMonitoringAudioProcessorEditor::
                                                   dontSendNotification);
 
   // setSize(750, 600); // Min size to fit onboarding window.
-  setSize(850, 425);
+  // setSize(850, 425); // Min size for UI controls
+  setSize(850, 600);
 
   p_->oscReceiver.onStatusChange = [this](std::string status) {
     oscValueBox->getStatusLabel()->setText(
