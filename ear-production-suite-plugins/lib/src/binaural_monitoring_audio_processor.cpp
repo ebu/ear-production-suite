@@ -49,15 +49,19 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
     try {
       bearRenderer->set_listener(bearListener);
     } catch (std::exception &e) {
+      bearRenderer.reset();
       assert(false);
     }
   } catch (std::exception &e) {
+    bearRenderer.reset();
     assert(false);
   }
 }
 
 void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
                                                  size_t maxChannels) {
+  if(!bearRenderer) return;
+
   if (listenerQuatsDirty) {
     std::lock_guard<std::mutex> lock(bearListenerMutex_);
     bearListener.set_orientation_quaternion(listenerQuats);

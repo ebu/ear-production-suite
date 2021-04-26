@@ -91,9 +91,17 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   oscEnable_->addListener(this);
   oscPort_->addListener(this);
+
+  processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+      0, 0, 0, 48000, 512,
+      bearDataFilePath);  // Used to verify if BEAR can be initialised
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
+
+bool EarBinauralMonitoringAudioProcessor::rendererError() {
+  return (!processor_ || processor_->rendererError());
+}
 
 void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
     int parameterIndex, float newValue) {
@@ -190,13 +198,14 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   size_t numObj = backend_->getTotalObjectChannels();
   size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
-  // Ensure BEAR has enough channels configured
+  // Ensure BEAR has enough channels configured and is not erroring
   if (!processor_ || !processor_->configSupports(numObj, numDs, numHoa,
                                                  samplerate_, blocksize_)) {
     processor_ =
         std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
             numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
   }
+  if (processor_->rendererError()) return;
 
   // Listener Position
 

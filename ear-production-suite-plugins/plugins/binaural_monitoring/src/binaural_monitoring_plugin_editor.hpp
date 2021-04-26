@@ -12,6 +12,7 @@
 #include "headphone_channel_meter_box.hpp"
 #include "value_box_orientation.hpp"
 #include "value_box_osc.hpp"
+#include "error_overlay.hpp"
 
 class EarBinauralMonitoringAudioProcessorEditor
     : public AudioProcessorEditor,
@@ -34,6 +35,7 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::EarButton> onBoardingButton_;
   std::unique_ptr<ear::plugin::ui::Overlay> onBoardingOverlay_;
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
+  std::shared_ptr<ear::plugin::ui::BinauralRendererErrorOverlay> errorOverlay_;
 
   std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeterBox> headphoneMeterBox_;
   std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>>

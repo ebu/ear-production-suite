@@ -74,6 +74,8 @@ class EarBinauralMonitoringAudioProcessor
     return connector_.get();
   }
 
+  bool rendererError();
+
  protected:
   void parameterValueChanged(int parameterIndex, float newValue) override;
   void parameterGestureChanged(int parameterIndex,

@@ -71,6 +71,8 @@ class BinauralMonitoringAudioProcessor {
   void setListenerOrientation(float quatW, float quatX, float quatY,
                               float quatZ);
 
+  bool rendererError() { return !bearRenderer; }
+
  private:
   void doProcess(float** channelPointers, size_t maxChannels);
 
