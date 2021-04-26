@@ -65,6 +65,13 @@ extern "C" {
 #endif
     };
 
+    auto uft8ToUtf16 = [](std::string utf8) {
+        const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), NULL, 0);
+        std::wstring utf16(wchars_num, ' ');
+        MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), utf16.data(), wchars_num);
+        return utf16;
+    };
+
     try {
         reaper = std::make_unique<ReaperHost>(hInstance, rec);
     } catch (FuncResolutionException const& e) {
@@ -174,14 +181,23 @@ extern "C" {
         admFileMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperFileMenu = reaperMainMenu->getMenuByText("File");
-    if (reaperFileMenu) {
-        reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
-
-        // Assertions to check that the hard-coded fallback menu positions still match
-        assert(reaperMainMenu->checkHardcodedPosition("File"));
-        assert(reaperFileMenu->checkHardcodedPosition("Project templates"));
+    std::shared_ptr<admplug::RawMenu> reaperFileMenu;
+    if (std::stof(api->GetAppVersion()) >= 6.11f) {
+        reaperFileMenu = reaperMainMenu->getMenuByText(uft8ToUtf16(api->LocalizeString("&File", "common", 0))); 
+        if (reaperFileMenu) {
+            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItemW>(uft8ToUtf16(api->LocalizeString("Project &templates", "MENU_102", 0))));
+        }
     } else {
+        reaperFileMenu = reaperMainMenu->getMenuByText("File");
+        if (reaperFileMenu) {
+            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
+
+            // Assertions to check that the hard-coded fallback menu positions still match
+            assert(reaperMainMenu->checkHardcodedPosition("File"));
+            assert(reaperFileMenu->checkHardcodedPosition("Project templates"));
+        }
+    }
+    if (!reaperFileMenu) {
         reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
         reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
     }
@@ -226,14 +242,23 @@ extern "C" {
         admInsertMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    auto reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");
-    if (reaperInsertMenu) {
-        reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
-
-        // Assertions to check that the hard-coded fallback menu positions still match
-        assert(reaperMainMenu->checkHardcodedPosition("Insert"));
-        assert(reaperInsertMenu->checkHardcodedPosition("Empty item"));
+    std::shared_ptr<admplug::RawMenu> reaperInsertMenu;
+    if (std::stof(api->GetAppVersion()) >= 6.11f) {
+        reaperInsertMenu = reaperMainMenu->getMenuByText(uft8ToUtf16(api->LocalizeString("&Insert", "common", 0)));
+        if (reaperInsertMenu) {
+            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItemW>(uft8ToUtf16(api->LocalizeString("Empty item", "MENU_102", 0))));
+        }
     } else {
+        reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");
+        if (reaperInsertMenu) {
+            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
+
+            // Assertions to check that the hard-coded fallback menu positions still match
+            assert(reaperMainMenu->checkHardcodedPosition("Insert"));
+            assert(reaperInsertMenu->checkHardcodedPosition("Empty item"));
+        }
+    }
+    if (!reaperInsertMenu) {
         reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
         reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item") + 1));
     }
