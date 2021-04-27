@@ -65,13 +65,6 @@ extern "C" {
 #endif
     };
 
-    auto uft8ToUtf16 = [](std::string utf8) {
-        const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), NULL, 0);
-        std::wstring utf16(wchars_num, ' ');
-        MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), utf16.data(), wchars_num);
-        return utf16;
-    };
-
     try {
         reaper = std::make_unique<ReaperHost>(hInstance, rec);
     } catch (FuncResolutionException const& e) {
@@ -183,9 +176,9 @@ extern "C" {
 
     std::shared_ptr<admplug::RawMenu> reaperFileMenu;
     if (std::stof(api->GetAppVersion()) >= 6.11f) {
-        reaperFileMenu = reaperMainMenu->getMenuByText(uft8ToUtf16(api->LocalizeString("&File", "common", 0))); 
+        reaperFileMenu = reaperMainMenu->getMenuByText(api->LocalizeString("&File", "common", 0)); 
         if (reaperFileMenu) {
-            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItemW>(uft8ToUtf16(api->LocalizeString("Project &templates", "MENU_102", 0))));
+            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>(api->LocalizeString("Project &templates", "MENU_102", 0)));
         }
     } else {
         reaperFileMenu = reaperMainMenu->getMenuByText("File");
@@ -244,9 +237,9 @@ extern "C" {
 
     std::shared_ptr<admplug::RawMenu> reaperInsertMenu;
     if (std::stof(api->GetAppVersion()) >= 6.11f) {
-        reaperInsertMenu = reaperMainMenu->getMenuByText(uft8ToUtf16(api->LocalizeString("&Insert", "common", 0)));
+        reaperInsertMenu = reaperMainMenu->getMenuByText(api->LocalizeString("&Insert", "common", 0));
         if (reaperInsertMenu) {
-            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItemW>(uft8ToUtf16(api->LocalizeString("Empty item", "MENU_102", 0))));
+            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>(api->LocalizeString("Empty item", "MENU_102", 0)));
         }
     } else {
         reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");

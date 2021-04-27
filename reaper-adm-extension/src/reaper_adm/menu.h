@@ -96,7 +96,6 @@ public:
     void update(std::string menuId, HMENU menu) override;
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
     std::shared_ptr<admplug::RawMenu> getMenuByText(std::string menuText);
-    std::shared_ptr<admplug::RawMenu> getMenuByText(std::wstring menuText);
     std::shared_ptr<admplug::RawMenu> getMenuByPosition(int menuPosition);
     bool checkHardcodedPosition(std::string menuText);
     void init();
@@ -136,23 +135,6 @@ public:
     int getIndex(HMENU) const override;
 private:
     std::string itemName;
-
-};
-
-class AfterNamedItemW : public MenuInserter {
-public:
-    AfterNamedItemW(std::wstring itemName);
-    int getIndex(HMENU) const override;
-private:
-    std::wstring itemName;
-};
-
-class BeforeNamedItemW : public MenuInserter {
-public:
-    BeforeNamedItemW(std::wstring itemName);
-    int getIndex(HMENU) const override;
-private:
-    std::wstring itemName;
 
 };
 
