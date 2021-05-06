@@ -346,8 +346,8 @@ private:
     }
   }
 
-  Point<float> getPointOnRect(float angle, float w, float h) {
-    Point<float> intersection;
+  juce::Point<float> getPointOnRect(float angle, float w, float h) {
+    juce::Point<float> intersection;
 
     float xRad = h / 2.f;
     float yRad = w / 2.f;
@@ -380,12 +380,12 @@ private:
   }
 
   float getRectangeCentreToPerimeterDistance(float angle, float w, float h) {
-    Point<float> intersection = getPointOnRect(angle, w, h);
+    juce::Point<float> intersection = getPointOnRect(angle, w, h);
     return sqrt((intersection.x * intersection.x) + (intersection.y * intersection.y));
   }
 
-  Point<float> getPointOnCentredCircle(float dia, float rads) {
-    return Point<float>((getWidth() / 2.f), (getHeight() / 2.f)).getPointOnCircumference(dia / 2.f, rads);
+  juce::Point<float> getPointOnCentredCircle(float dia, float rads) {
+    return juce::Point<float>((getWidth() / 2.f), (getHeight() / 2.f)).getPointOnCircumference(dia / 2.f, rads);
   }
 
   double radsBetween(double a, double b) {
