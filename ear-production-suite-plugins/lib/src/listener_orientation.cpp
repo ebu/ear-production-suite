@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 template <typename T>
 T clamp(const T& n, const T& lower, const T& upper) {
