@@ -28,5 +28,12 @@ if(MSVC)
             string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
             endif(${flag_var} MATCHES "/MD")
         endforeach(flag_var)
+		
+		# Despite the above, for some reason both FFTS and kissfft resort to /MD (despite also being static) without the following;
+		add_compile_options(
+			$<$<CONFIG:>:/MT>
+			$<$<CONFIG:Debug>:/MTd>
+			$<$<CONFIG:Release>:/MT>
+		)
     endif()
 endif()
