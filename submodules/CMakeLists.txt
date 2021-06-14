@@ -84,12 +84,16 @@ set(VISR_TARGET_NAMES
     visr_${VISR_TARGET_TYPE})
 
 foreach(VISR_TARGET ${VISR_TARGET_NAMES} )
-  set_target_properties(${VISR_TARGET} PROPERTIES FOLDER submodules/VISR)
-  # Put library in VISR namespace so BEAR can find it
-  add_library(VISR::${VISR_TARGET} ALIAS ${VISR_TARGET})
-  # Clear header properties so they don't install - we don't need them, and causes issues due to relative paths on OSX
-  set_target_properties(${VISR_TARGET} PROPERTIES PUBLIC_HEADER "" )
-  set_target_properties(${VISR_TARGET} PROPERTIES PRIVATE_HEADER "" )
+  if(TARGET ${VISR_TARGET})
+    set_target_properties(${VISR_TARGET} PROPERTIES FOLDER submodules/VISR)
+    # Put library in VISR namespace so BEAR can find it
+    add_library(VISR::${VISR_TARGET} ALIAS ${VISR_TARGET})
+    # Clear header properties so they don't install - we don't need them, and causes issues due to relative paths on OSX
+    set_target_properties(${VISR_TARGET} PROPERTIES PUBLIC_HEADER "" )
+    set_target_properties(${VISR_TARGET} PROPERTIES PRIVATE_HEADER "" )
+  else()
+	message(WARNING "VISR target not found: "${VISR_TARGET})
+  endif()
 endforeach()
 set_target_properties(ffts_static kissfft_static PROPERTIES FOLDER submodules/VISR/3rd)
 
@@ -100,8 +104,8 @@ set(BEAR_UNIT_TESTS OFF CACHE BOOL "bear unit tests" FORCE)
 set(BEAR_DOWNLOAD_DATA ON CACHE BOOL "bear data files" FORCE)
 set(BEAR_VISR_LIB_TYPE "${VISR_TARGET_TYPE}" CACHE BOOL "bear visr lib type" FORCE)
 add_subdirectory(rd-audio-bear/visr_bear)
-set_target_properties(bear libear_resource_embedder PROPERTIES FOLDER submodules/bear)
-set_target_properties(ear PROPERTIES FOLDER submodules/libear)
+set_target_properties(bear PROPERTIES FOLDER submodules/bear)
+set_target_properties(ear libear_resource_embedder PROPERTIES FOLDER submodules/libear)
 foreach(VISR_TARGET_NAME ${VISR_TARGET_NAMES} )
   add_dependencies(bear "${VISR_TARGET_NAME}")
 endforeach()
