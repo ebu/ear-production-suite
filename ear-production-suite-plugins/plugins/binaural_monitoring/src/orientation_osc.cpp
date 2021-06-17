@@ -14,8 +14,11 @@ ListenerOrientationOscReceiver::~ListenerOrientationOscReceiver() {
 
 void ListenerOrientationOscReceiver::listenForConnections(uint16_t port) {
   disconnect();
-  isListening = osc.connect(port);
+  oscPort = port;
+  isListening = osc.connect(oscPort);
   updateStatusTextForListenAttempt();
+  // osc.connect always returns true, even if it failed to bind.
+  // instead, we constantly try closing and rebinding if we've not received a message yet.
   startTimer(timerIdPersistentListen, 1000);
 }
 
@@ -29,6 +32,10 @@ void ListenerOrientationOscReceiver::disconnect() {
 
 void ListenerOrientationOscReceiver::oscMessageReceived(
     const OSCMessage& message) {
+
+  // If we have a message, we must be connected - we don't need to keep trying the rebinding
+  stopTimer(timerIdPersistentListen);
+
   stopTimer(timerIdStatusTextReset);
   updateStatusText(std::string("OSC Receiving..."));
   startTimer(timerIdStatusTextReset, 500);
@@ -175,10 +182,8 @@ void ListenerOrientationOscReceiver::timerCallback(int timerId) {
     updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
   } else if (timerId == timerIdPersistentListen) {
     // If this timer is running, we should be listening
-    if (!isListening) {
-      isListening = osc.connect(oscPort);
-      updateStatusTextForListenAttempt();
-    }
+    isListening = osc.connect(oscPort);
+    updateStatusTextForListenAttempt();
   }
 }
 
