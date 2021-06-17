@@ -30,6 +30,8 @@ void ListenerOrientationOscReceiver::disconnect() {
 void ListenerOrientationOscReceiver::oscMessageReceived(
     const OSCMessage& message) {
   stopTimer(timerIdStatusTextReset);
+  updateStatusText(std::string("OSC Receiving..."));
+  startTimer(timerIdStatusTextReset, 500);
 
   auto add = message.getAddressPattern();
 
@@ -164,8 +166,6 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
     }
   }
 
-  updateStatusText(std::string("OSC Receiving..."));
-  startTimer(timerIdStatusTextReset, 500);
 }
 
 void ListenerOrientationOscReceiver::timerCallback(int timerId) {
