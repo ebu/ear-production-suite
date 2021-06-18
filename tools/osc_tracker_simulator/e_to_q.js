@@ -10,6 +10,8 @@ function deg2rad(deg){
 	return deg * Math.PI / 180.0;
 }
 
+var ensureFloat = 0.00000000000001; // prevents Max making a float an int which it does automatically if its a whole number
+
 var i = {
     "yaw_z_deg":   0,
     "pitch_y_deg": 1,
@@ -42,10 +44,12 @@ var flavours = [
 	"ambix_head_pose_int",
 	"iem",
 	"unity",
-	"ambihead",
+	"mach1",
 	"audiolab",
 	"sparta_ypr",
 	"sparta_euler_individual",
+	"sparta_quaternion",
+	"3d_tune-in",
 	"hedrot"
 ]
 
@@ -84,10 +88,11 @@ function msg_float(f){
 		}
 		outlet(o.osc_flavour, flavour);
 		if(flavour.substr(0,6) === "ambix_") outlet(o.osc_port, 7120);
-		if(flavour === "ambihead") outlet(o.osc_port, 4040);
+		if(flavour === "mach1") outlet(o.osc_port, 9898);
 		if(flavour === "audiolab") outlet(o.osc_port, 9000);
 		if(flavour.substr(0,7) === "sparta_") outlet(o.osc_port, 9000);
 		if(flavour === "hedrot") outlet(o.osc_port, 2001);
+		if(flavour === "3d_tune-in") outlet(o.osc_port, 12300);
 	}
 	process();
 }
@@ -124,61 +129,59 @@ function process()
 		
 	// Do output
 	
-	var yawfloat = yaw + 0.00000000000001;
-	var pitchfloat = pitch + 0.00000000000001;
-	var rollfloat = roll + 0.00000000000001;
+	var yawfloat = yaw + ensureFloat;
+	var pitchfloat = pitch + ensureFloat;
+	var rollfloat = roll + ensureFloat;
 	
 	if(flavour === "ambix_quaternion"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/quaternion", quat_w, quat_y, -quat_x, quat_z]);
+		outlet(o.osc_msg, ["/quaternion", quat_w, -quat_x, quat_y, quat_z]);
 	}
 	if(flavour === "ambix_rotation_float"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/rotation", pitchfloat, yawfloat, rollfloat]);
+		outlet(o.osc_msg, ["/rotation", -pitchfloat, -yawfloat, -rollfloat]);
 	}
 	if(flavour === "ambix_rotation_int"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/rotation", pitch, yaw, roll]);
+		outlet(o.osc_msg, ["/rotation", -pitch, -yaw, -roll]);
 	}
 	if(flavour === "ambix_head_pose_float"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/head_pose", 0, 0.00000000000001, 0.00000000000001, 0.00000000000001, pitchfloat, yawfloat, rollfloat]);
+		outlet(o.osc_msg, ["/head_pose", 0, ensureFloat, ensureFloat, ensureFloat, -pitchfloat, -yawfloat, -rollfloat]);
 	}
 	if(flavour === "ambix_head_pose_int"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/head_pose", 0, 0, 0, 0, pitch, yaw, roll]);
+		outlet(o.osc_msg, ["/head_pose", 0, 0, 0, 0, -pitch, -yaw, -roll]);
 	}
 	if(flavour === "iem"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/SceneRotator/quaternions", quat_w, quat_x, -quat_y, -quat_z]);
+		outlet(o.osc_msg, ["/SceneRotator/quaternions", quat_w, -quat_x, quat_y, quat_z]);
 	}
 	if(flavour === "unity"){
-		outlet(o.osc_msg, ["/quaternions", quat_w, -quat_x, -quat_z, -quat_y]);
+		outlet(o.osc_msg, ["/quaternions", quat_w, -quat_y, quat_z, -quat_x]);
 	}
-	if(flavour === "ambihead"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/roll", ((rollfloat + 180.0) / 360.0)]);
-		outlet(o.osc_msg, ["/pitch", ((pitchfloat + 180.0) / 360.0)]);
-		outlet(o.osc_msg, ["/yaw", ((yawfloat + 180.0) / 360.0)]);
+	if(flavour === "mach1"){
+		outlet(o.osc_msg, ["/orientation", yawfloat, pitchfloat, rollfloat]);
 	}
 	if(flavour === "audiolab"){
 		outlet(o.osc_msg, ["/rendering/htrpy", rollfloat, pitchfloat, yawfloat]);
 	}
 	if(flavour === "sparta_ypr"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/ypr", yawfloat, pitchfloat, rollfloat]);
+		outlet(o.osc_msg, ["/ypr", -yawfloat, -pitchfloat, rollfloat]);
 	}
 	if(flavour === "sparta_euler_individual"){
-		// TESTED WORKING
-		outlet(o.osc_msg, ["/yaw", yawfloat]);
-		outlet(o.osc_msg, ["/pitch", pitchfloat]);
+		outlet(o.osc_msg, ["/yaw", -yawfloat]);
+		outlet(o.osc_msg, ["/pitch", -pitchfloat]);
 		outlet(o.osc_msg, ["/roll", rollfloat]);
 	}
+	if(flavour === "sparta_quaternion"){
+		outlet(o.osc_msg, ["/quaternion", quat_w, -quat_x, quat_y, quat_z]);
+	}
+	if(flavour === "3d_tune-in"){
+		outlet(o.osc_msg, ["/3DTI-OSC/receiver/pry", deg2rad(pitchfloat), deg2rad(rollfloat), deg2rad(yawfloat)]);
+	}
 	if(flavour === "hedrot"){
-		// TESTED WORKING (although pitch and roll seem swapped in my bino)
+		// (although pitch and roll seem swapped in my bino)
 		outlet(o.osc_msg, ["/hedrot/yaw", yawfloat]);
 		outlet(o.osc_msg, ["/hedrot/pitch", pitchfloat]);
 		outlet(o.osc_msg, ["/hedrot/roll", rollfloat]);
 	}
+	
+	// NX Bridge - always send so can be used in parallel
+	//outlet(o.osc_msg, ["/bridge/quat", quat_w, quat_y, quat_x, -quat_z]);
 
 }
