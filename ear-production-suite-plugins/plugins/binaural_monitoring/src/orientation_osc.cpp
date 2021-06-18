@@ -59,13 +59,13 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
     if (add.matches("/yaw")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead,
       //   but it expects normalised values - will not implement.
-      oscEulerInput.y = vals[0];
+      oscEulerInput.y = -vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if (add.matches("/pitch")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead,
       //   but it expects normalised values - will not implement.
-      oscEulerInput.p = vals[0];
+      oscEulerInput.p = -vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if (add.matches("/roll")) {
