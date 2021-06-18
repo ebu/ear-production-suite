@@ -3,6 +3,8 @@
 namespace ear {
 namespace plugin {
 
+const float oneRadInDegs = 180.f / juce::float_Pi;
+
 ListenerOrientationOscReceiver::ListenerOrientationOscReceiver() {
   osc.addListener(this);
 }
@@ -95,9 +97,9 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
   } else if (vals.size() == 3) {
     if (add.matches("/rotation")) {
       // Messages understood by Ambix
-      oscEulerInput.p = vals[0];
-      oscEulerInput.y = vals[1];
-      oscEulerInput.r = vals[2];
+      oscEulerInput.p = -vals[0];
+      oscEulerInput.y = -vals[1];
+      oscEulerInput.r = -vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
 
@@ -111,10 +113,27 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
 
     } else if (add.matches("/ypr")) {
       // Messages understood by SPARTA/COMPASS
+      oscEulerInput.y = -vals[0];
+      oscEulerInput.p = -vals[1];
+      oscEulerInput.r = vals[2];
+      oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+
+    } else if (add.matches("/orientation")) {
+      // Messages understood by Mach1 monitor.
+      // Can support AirPods with https://github.com/Mach1Studios/M1-AirPodOSC
       oscEulerInput.y = vals[0];
       oscEulerInput.p = vals[1];
       oscEulerInput.r = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
+      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+
+    } else if (add.matches("/3DTI-OSC/receiver/pry")) {
+      // Messages understood by 3D Tune-In Toolkit
+      oscEulerInput.p = vals[0] * oneRadInDegs;
+      oscEulerInput.r = vals[1] * oneRadInDegs;
+      oscEulerInput.y = vals[2] * oneRadInDegs;
+      oscEulerInput.order = ListenerOrientation::EulerOrder::PRY;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
 
     } else {
@@ -127,8 +146,8 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       if (onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
-        quat.y = vals[1];
-        quat.x = -vals[2];
+        quat.x = -vals[1];
+        quat.y = vals[2];
         quat.z = vals[3];
         onReceiveQuaternion(quat);
       }
@@ -138,9 +157,9 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       if (onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
-        quat.x = vals[1];
-        quat.y = -vals[2];
-        quat.z = -vals[3];
+        quat.x = -vals[1];
+        quat.y = vals[2];
+        quat.z = vals[3];
         onReceiveQuaternion(quat);
       }
 
@@ -149,9 +168,9 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       if (onReceiveQuaternion) {
         ListenerOrientation::Quaternion quat;
         quat.w = vals[0];
-        quat.x = -vals[1];
-        quat.z = -vals[2];
-        quat.y = -vals[3];
+        quat.y = -vals[1];
+        quat.z = vals[2];
+        quat.x = -vals[3];
         onReceiveQuaternion(quat);
       }
 
@@ -162,9 +181,9 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
   } else if (vals.size() == 7) {
     if (add.matches("/head_pose")) {
       // Messages understood by Ambix
-      oscEulerInput.p = vals[4];
-      oscEulerInput.y = vals[5];
-      oscEulerInput.r = vals[6];
+      oscEulerInput.p = -vals[4];
+      oscEulerInput.y = -vals[5];
+      oscEulerInput.r = -vals[6];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
 
