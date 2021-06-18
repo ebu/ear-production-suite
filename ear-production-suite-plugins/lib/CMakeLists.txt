@@ -13,6 +13,7 @@ protobuf_generate_cpp(EAR_PROTO_SRC EAR_PROTO_HDR ${EAR_PROTO_INPUT})
 add_library(ear-plugin-base STATIC
   src/communication/commands.cpp
   src/communication/direct_speakers_metadata_sender.cpp
+  src/communication/hoa_metadata_sender.cpp
   src/communication/input_control_connection.cpp
   src/communication/monitoring_control_connection.cpp
   src/communication/monitoring_metadata_receiver.cpp
@@ -22,6 +23,7 @@ add_library(ear-plugin-base STATIC
   src/communication/scene_connection_registry.cpp
   src/communication/scene_metadata_receiver.cpp
   src/direct_speakers_backend.cpp
+  src/hoa_backend.cpp
   src/helper/protobuf_utilities.cpp
   src/log.cpp
   src/binaural_monitoring_audio_processor.cpp
@@ -38,6 +40,7 @@ add_library(ear-plugin-base STATIC
   src/programme_store_adm_populator.cpp
   src/programme_store_adm_serializer.cpp
   src/ui/direct_speakers_frontend_backend_connector.cpp
+  src/ui/hoa_frontend_backend_connector.cpp
   src/ui/object_frontend_backend_connector.cpp
   src/ui/scene_frontend_backend_connector.cpp
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
