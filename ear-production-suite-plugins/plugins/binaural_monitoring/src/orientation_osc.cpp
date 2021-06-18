@@ -75,6 +75,12 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
       if (onReceiveEuler) onReceiveEuler(oscEulerInput);
     } else if (add.matches("/hedrot/yaw")) {
+
+      /* NOTE:
+        Hedrot TOTALLY UNTESTED due to lack of working reference implementation
+        (e.g, mybino has pitch and roll swapped)
+      */
+
       // Messages sent by Hedrot
       oscEulerInput.y = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
