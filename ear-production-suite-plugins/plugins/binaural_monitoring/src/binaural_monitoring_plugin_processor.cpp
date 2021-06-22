@@ -45,9 +45,9 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   /* clang-format off */
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false)); // Used for setting plugin state dirty
-  addParameter(yaw_ = new ui::NonAutomatedParameter<AudioParameterFloat>("yaw", "Yaw", NormalisableRange<float>{-180.f, 180.f}, 0.f));
-  addParameter(pitch_ = new ui::NonAutomatedParameter<AudioParameterFloat>("pitch", "Pitch", NormalisableRange<float>{-180.f, 180.f}, 0.f));
-  addParameter(roll_ = new ui::NonAutomatedParameter<AudioParameterFloat>("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(yaw_ = new AudioParameterFloat("yaw", "Yaw", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(pitch_ = new AudioParameterFloat("pitch", "Pitch", NormalisableRange<float>{-180.f, 180.f}, 0.f));
+  addParameter(roll_ = new AudioParameterFloat("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(oscEnable_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscEnable", "Enable OSC", false));
   addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
   /* clang-format on */
