@@ -11,6 +11,17 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
+    class TooltipLookAndFeel : public LookAndFeel_V4
+    {
+    public:
+      TooltipLookAndFeel()
+      {
+        setColour(TooltipWindow::backgroundColourId, EarColours::Primary.darker());
+        setColour(TooltipWindow::textColourId, juce::Colours::white);
+      }
+    };
+
+
 class ValueBoxOsc : public Component {
 public:
    ValueBoxOsc() :
@@ -26,7 +37,11 @@ public:
     /// It is false by default and State is handled completely by
     ///  BinauralMonitoringJuceFrontendConnector
     enableButton_->setEnabled(true);
+    enableButton_->setTooltip ("Note: To minimise head-tracking latency, turn off any anticipative processing in the DAW.");
     addAndMakeVisible(enableButton_.get());
+
+    tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
+    tooltipWindow.setOpaque(false);
 
     portLabel_->setFont(EarFonts::Values); //(EarFonts::Label);
     portLabel_->setColour(Label::textColourId, EarColours::Label);
@@ -83,6 +98,8 @@ private:
   std::shared_ptr<ear::plugin::ui::EarButton> enableButton_;
   std::shared_ptr<EarSlider> portControl_;
   std::shared_ptr<Label> statusLabel_;
+  TooltipWindow tooltipWindow{ this };
+  TooltipLookAndFeel tooltipLookAndFeel;
 
   const float marginSmall_ = 5.f;
   const float marginBig_ = 10.f;
