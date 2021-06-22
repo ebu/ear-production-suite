@@ -23,6 +23,9 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
+  //Me add likewise option for chooosin common definition
+  p->getFrontendConnector()->setCommonDefinitionComboBox(
+      content_->mainValueBox->getCommonDefinitionComboBox());
   /* Old DS Code
   // TODO - we only need to connect to UI components present in HOA plugin.
   Rewrite this.

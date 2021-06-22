@@ -16,6 +16,9 @@ class ValueBoxMain : public Component {
   ValueBoxMain()
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
+    //ME add in common definition version
+        commonDefinitionLabel_(std::make_unique<Label>()),
+        commonDefinitionComboBox_(std::make_shared<EarComboBox>()),
         /* Old DS Code
         // Need a similar thing for HOA type
         speakerSetupLabel_(std::make_unique<Label>()),
@@ -38,6 +41,22 @@ class ValueBoxMain : public Component {
 
     routingComboBox_->setDefaultText("enter receiving Channel");
     addAndMakeVisible(routingComboBox_.get());
+    
+    //ME added this
+    commonDefinitionLabel_->setFont(EarFonts::Label);
+    commonDefinitionLabel_->setText( "HOA type",
+                           juce::NotificationType::dontSendNotification);
+    commonDefinitionLabel_->setColour(Label::textColourId, EarColours::Label);
+    commonDefinitionLabel_->setJustificationType(Justification::right);
+    addAndMakeVisible(commonDefinitionLabel_.get());
+
+    commonDefinitionComboBox_->setDefaultText("enter HOA type");
+    commonDefinitionComboBox_->addTextEntry("one");
+    commonDefinitionComboBox_->addTextEntry("two");
+    commonDefinitionComboBox_->addTextEntry("three");
+    addAndMakeVisible(commonDefinitionComboBox_.get());
+    //ME end
+
 
     /* Old DS Code
     // Need a similar thing for HOA type
@@ -94,6 +113,14 @@ class ValueBoxMain : public Component {
 
     area.removeFromTop(15.f);
 
+    //ME add for HOA
+    auto commonDefinitionArea = area.removeFromTop(rowHeight_);
+    auto commonDefinitionLabelArea = commonDefinitionArea.withWidth(labelWidth_);
+    auto commonDefinitionComboBoxArea = commonDefinitionArea.withTrimmedLeft(labelWidth_ + marginBig_).reduced(0, marginSmall_);
+    commonDefinitionLabel_->setBounds(commonDefinitionLabelArea);
+    commonDefinitionComboBox_->setBounds(commonDefinitionComboBoxArea);
+    //end ME
+
     /* Old DS Code
     // Need a similar thing for HOA type
     auto speakerSetupArea = area.removeFromTop(rowHeight_);
@@ -117,6 +144,9 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarNameTextEditor> getNameTextEditor() { return name_; }
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
+  //ME add likewise for common definition of HOA
+  std::shared_ptr<EarComboBox> getCommonDefinitionComboBox() { return commonDefinitionComboBox_;  }
+
   /* Old DS Code
   // Need similar for HOA type
   std::shared_ptr<EarComboBox> getSpeakerSetupsComboBox() {
@@ -132,6 +162,10 @@ class ValueBoxMain : public Component {
 
   std::shared_ptr<EarComboBox> colourComboBox_;
   std::shared_ptr<EarNameTextEditor> name_;
+  //ME add similar for commonDefinition
+  std::unique_ptr<Label> commonDefinitionLabel_;
+  std::shared_ptr<EarComboBox> commonDefinitionComboBox_;
+
   /* Old DS Code
   // Need a similar selector for HOA type
   std::unique_ptr<Label> speakerSetupLabel_;

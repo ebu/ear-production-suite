@@ -127,6 +127,20 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
   }
   cachedRouting_ = routing;
 }
+//ME new added methods for adding common definition
+void HoaJuceFrontendConnector::setCommonDefinitionComboBox(
+    std::shared_ptr<EarComboBox> comboBox) {
+  comboBox->addListener(this);
+  commonDefinitionComboBox_ = comboBox;
+  setCommonDefinition(cachedCommonDefinition_);
+}
+void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {
+  if (auto routingComboBoxLocked = commonDefinitionComboBox_.lock()) {
+    routingComboBoxLocked->selectEntry(commonDefinition, dontSendNotification);
+  }
+  cachedCommonDefinition_ = commonDefinition;
+}
+//end ME
 
 /* Old DS Code - see header for info
 // This code also sets the entries in the "Routing" combo-box based on the number of channels required.

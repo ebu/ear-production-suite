@@ -108,7 +108,7 @@ bool HoaAudioProcessor::isBusesLayoutSupported(
 }
 
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
-                                                MidiBuffer& midiMessages) {
+MidiBuffer& midiMessages) {
   if(! bypass_->get()) {
     levelMeter_->process(buffer);
     backend_->triggerMetadataSend();
