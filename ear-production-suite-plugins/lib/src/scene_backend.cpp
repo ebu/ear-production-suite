@@ -247,6 +247,7 @@ void SceneBackend::onConnectionEvent(
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
+    triggerMetadataSend();
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Monitoring {} disconnected", id.string());
@@ -254,9 +255,12 @@ void SceneBackend::onConnectionEvent(
 }
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
-  std::lock_guard<std::mutex> lock{storeMutex_};
-  programmeStore_ = store;
-  rebuildSceneStore_ = true;
+  {
+    std::lock_guard<std::mutex> lock{ storeMutex_ };
+    programmeStore_ = store;
+    rebuildSceneStore_ = true;
+  }
+  triggerMetadataSend(); // Allows monitoring plugins to know that renderer channel counts likely need to update.
 }
 
 std::pair<ItemStore, proto::ProgrammeStore> SceneBackend::stores() {
