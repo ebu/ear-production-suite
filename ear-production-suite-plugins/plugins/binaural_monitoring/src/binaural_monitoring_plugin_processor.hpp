@@ -22,7 +22,7 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace ear
 
 class EarBinauralMonitoringAudioProcessor
-    : private AudioProcessorParameter::Listener,
+    : private AudioProcessorParameter::Listener, Timer,
       public AudioProcessor {
  public:
   EarBinauralMonitoringAudioProcessor();
@@ -80,6 +80,7 @@ class EarBinauralMonitoringAudioProcessor
   void parameterValueChanged(int parameterIndex, float newValue) override;
   void parameterGestureChanged(int parameterIndex,
                                bool gestureIsStarting) override;
+  void timerCallback() override;
 
  private:
   BusesProperties _getBusProperties();

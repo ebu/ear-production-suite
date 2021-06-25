@@ -93,7 +93,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   oscPort_->addListener(this);
 
   processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-      0, 0, 0, 48000, 512,
+      64, 64, 64, 48000, 512,
       bearDataFilePath);  // Used to verify if BEAR can be initialised
 }
 
@@ -117,6 +117,12 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
 
 void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(
     int parameterIndex, bool gestureIsStarting) {}
+
+void EarBinauralMonitoringAudioProcessor::timerCallback()
+{
+  stopTimer();
+  processor_->setIsPlaying(false);
+}
 
 //==============================================================================
 juce::AudioProcessor::BusesProperties
@@ -188,6 +194,9 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     AudioBuffer<float>& buffer, MidiBuffer&) {
   ScopedNoDenormals noDenormals;
 
+  stopTimer();
+  processor_->setIsPlaying(true);
+
   if (bypass_->get()) return;
 
   auto objIds = backend_->getActiveObjectIds();
@@ -199,13 +208,11 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
   // Ensure BEAR has enough channels configured and is not erroring
-  if (!processor_ || !processor_->configSupports(numObj, numDs, numHoa,
-                                                 samplerate_, blocksize_)) {
-    processor_ =
-        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-            numObj, numDs, numHoa, samplerate_, blocksize_, bearDataFilePath);
+  if (!processor_ || processor_->rendererError()) return;
+  if (!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
+    assert(false);
+    return;
   }
-  if (processor_->rendererError()) return;
 
   // Listener Position
 
@@ -258,6 +265,8 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   if (buffer.getNumChannels() >= levelMeter_->channels()) {
     levelMeter_->process(buffer);
   }
+
+  startTimer(500);
 }
 
 //==============================================================================

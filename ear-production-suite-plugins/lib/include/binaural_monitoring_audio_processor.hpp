@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <bear/api.hpp>
+#include <../src/dynamic_renderer.hpp>
 #include "variable_block_adapter.hpp"
 #include <chrono>
 #include <mutex>
@@ -61,25 +61,26 @@ class BinauralMonitoringAudioProcessor {
 
   std::size_t delayInSamples() const;
 
-  bool configMatches(std::size_t objChannels, std::size_t dsChannels,
-                     std::size_t hoaChannels, std::size_t sampleRate,
-                     std::size_t blockSize);
-  bool configSupports(std::size_t objChannels, std::size_t dsChannels,
-                      std::size_t hoaChannels, std::size_t sampleRate,
-                      std::size_t blockSize);
+  bool configMatches(std::size_t sampleRate, std::size_t blockSize);
 
   void setListenerOrientation(float quatW, float quatX, float quatY,
                               float quatZ);
 
   bool rendererError() { return !bearRenderer; }
 
+  void setIsPlaying(bool state) { isPlaying = state; }
+  bool getIsPlaying() { return isPlaying; }
+  bool updateChannelCounts(std::size_t objChannels, std::size_t dsChannels,
+                           std::size_t hoaChannels);
+
  private:
   void doProcess(float** channelPointers, size_t maxChannels);
 
-  uint64_t framesProcessed;
+  uint64_t framesProcessed{ 0 };
+  bool isPlaying{ false };
 
   bear::Config bearConfig;
-  std::shared_ptr<bear::Renderer> bearRenderer;
+  std::shared_ptr<bear::DynamicRenderer> bearRenderer; // TODO - why shared?
   std::mutex bearListenerMutex_;
   bear::Listener bearListener;
 
