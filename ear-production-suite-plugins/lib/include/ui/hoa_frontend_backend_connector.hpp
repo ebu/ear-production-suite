@@ -32,6 +32,7 @@ class EAR_PLUGIN_BASE_EXPORT HoaFrontendBackendConnector {
     ROUTING,
     NAME,
     COLOUR,
+    HOA_TYPE//ME added this
     /* Old DS Code
     // Other params to be added here. Will need one for HOA type
     SPEAKER_SETUP_INDEX,

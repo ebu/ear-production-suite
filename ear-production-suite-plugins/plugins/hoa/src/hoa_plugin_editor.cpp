@@ -9,7 +9,7 @@
 
 using namespace ear::plugin::ui;
 
-HoaAudioProcessorEditor::HoaAudioProcessorEditor(
+HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
     HoaAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
@@ -17,15 +17,17 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(
       viewport_(std::make_unique<Viewport>()) {
   p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
 
+
+  //ME here we set what is in the main box, these are all grouped together in a value_box_main object
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
-  //Me add likewise option for chooosin common definition
-  p->getFrontendConnector()->setCommonDefinitionComboBox(
-      content_->mainValueBox->getCommonDefinitionComboBox());
+  //ME add: add likewise option for chooosing common definition
+  p->getFrontendConnector()->setCommonDefinitionComboBox(//here we are defining a new dropdown box for commonDefinition i.e. HOA type
+      content_->mainValueBox->getCommonDefinitionComboBox());//mainValueBox specifies that we want this dropdown to be in the main box (must also define in header file)
   /* Old DS Code
   // TODO - we only need to connect to UI components present in HOA plugin.
   Rewrite this.
@@ -51,7 +53,16 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(
   setResizable(true, false);
   setResizeLimits(0, 0, 726, 930);
   setSize(726, 930);
+  
+  //ME add
+  //auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
+  /* for (auto const& [id, tdData] : elementRelationships) {
+    content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(tdData->name);
+  }
+  */
+  //ME emd
 }
+
 
 HoaAudioProcessorEditor::~HoaAudioProcessorEditor() {}
 

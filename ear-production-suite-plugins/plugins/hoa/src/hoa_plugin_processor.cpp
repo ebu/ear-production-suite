@@ -24,8 +24,15 @@ HoaAudioProcessor::HoaAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
       -1, 63, -1));
+  //ME add
+  addParameter(hoaTypeIndex_ =
+    new ui::NonAutomatedParameter<AudioParameterInt>(
+      "hoa_type_index", "HOA Type Index",
+      -1, static_cast<int>(10 - 1), -1));//input 10 for the time being TODO create a hoa_type.hpp file
+  //Me end
 
-  /* Old DS Code
+  /*
+   Old DS Code
   //TODO - we need an equivelent for HOA types
   addParameter(speakerSetupIndex_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(

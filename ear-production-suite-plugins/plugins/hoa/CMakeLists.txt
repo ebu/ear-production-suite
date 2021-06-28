@@ -8,6 +8,8 @@ set(SOURCES_HOA_INPUT
     ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
 	
+	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	
     src/hoa_frontend_connector.cpp
     src/hoa_plugin_editor.cpp
     src/hoa_plugin_processor.cpp

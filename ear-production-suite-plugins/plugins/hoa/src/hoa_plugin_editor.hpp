@@ -11,9 +11,10 @@ class HoaAudioProcessorEditor : public AudioProcessorEditor {
   HoaAudioProcessorEditor(HoaAudioProcessor*);
   ~HoaAudioProcessorEditor();
 
+  //auto getElementRelationships();//ME added, needs to be deleted
   void paint(Graphics&) override;
   void resized() override;
-
+  
  private:
   HoaAudioProcessor* p_;
 

@@ -10,15 +10,17 @@
 namespace ear {
 namespace plugin {
 namespace ui {
-
+  //here we are setting up the main box
 class ValueBoxMain : public Component {
  public:
   ValueBoxMain()
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
     //ME add in common definition version
-        commonDefinitionLabel_(std::make_unique<Label>()),
-        commonDefinitionComboBox_(std::make_shared<EarComboBox>()),
+        commonDefinitionLabel_(std::make_unique<Label>()),//unique pointer
+        commonDefinitionComboBox_(std::make_shared<EarComboBox>()),//shared pointer
+        commonDefinitionComboBoxPopup_(
+            std::make_shared<EarComboBoxPopup>(commonDefinitionComboBox_.get())),
         /* Old DS Code
         // Need a similar thing for HOA type
         speakerSetupLabel_(std::make_unique<Label>()),
@@ -27,7 +29,7 @@ class ValueBoxMain : public Component {
         routingLabel_(std::make_unique<Label>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     name_->setLabelText("Name");
-    name_->setText("HOA_1");
+    name_->setText("HOA_1");//not sure what this does
     name_->setEnabled(false);
     name_->setAlpha(0.38f);
     addAndMakeVisible(name_.get());
@@ -42,7 +44,7 @@ class ValueBoxMain : public Component {
     routingComboBox_->setDefaultText("enter receiving Channel");
     addAndMakeVisible(routingComboBox_.get());
     
-    //ME added this
+    //ME added this. Up here in public decide what to actually do with the variables defined in private
     commonDefinitionLabel_->setFont(EarFonts::Label);
     commonDefinitionLabel_->setText( "HOA type",
                            juce::NotificationType::dontSendNotification);
@@ -51,12 +53,40 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(commonDefinitionLabel_.get());
 
     commonDefinitionComboBox_->setDefaultText("enter HOA type");
-    commonDefinitionComboBox_->addTextEntry("one");
-    commonDefinitionComboBox_->addTextEntry("two");
-    commonDefinitionComboBox_->addTextEntry("three");
+    commonDefinitionComboBox_->addTextEntry("3D order1 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order2 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order3 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order4 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order5 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order6 SN3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order1 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order2 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order3 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order4 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order5 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order6 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3D order1 FuMa");
+    commonDefinitionComboBox_->addTextEntry("3D order2 FuMa");
+    commonDefinitionComboBox_->addTextEntry("3D order3 FuMa");
+    commonDefinitionComboBox_->addTextEntry("2D Order1 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("2D Order2 N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("2H1P N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("3H1P N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");
     addAndMakeVisible(commonDefinitionComboBox_.get());
-    //ME end
 
+    commonDefinitionComboBoxPopup_->setName("HOA type box popup");
+    commonDefinitionComboBoxPopup_->show();
+    commonDefinitionComboBoxPopup_->setVisible(true);
+    addAndMakeVisible(commonDefinitionComboBoxPopup_.get());
+    /*
+    //ME exoeriementing
+    /auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
+    for (auto const& [id, tdData] : elementRelationships) {
+      commonDefinitionComboBox_->addTextEntry(tdData->name, id);
+    }
+    //ME end
+    */
 
     /* Old DS Code
     // Need a similar thing for HOA type
@@ -162,9 +192,11 @@ class ValueBoxMain : public Component {
 
   std::shared_ptr<EarComboBox> colourComboBox_;
   std::shared_ptr<EarNameTextEditor> name_;
-  //ME add similar for commonDefinition
+  //ME add similar for commonDefinition. Define variables down here in the private section. Define what we want and group it together in this box. in FEconnector we actually set it
   std::unique_ptr<Label> commonDefinitionLabel_;
   std::shared_ptr<EarComboBox> commonDefinitionComboBox_;
+  std::shared_ptr<EarComboBoxPopup> commonDefinitionComboBoxPopup_;
+  //ME end
 
   /* Old DS Code
   // Need a similar selector for HOA type

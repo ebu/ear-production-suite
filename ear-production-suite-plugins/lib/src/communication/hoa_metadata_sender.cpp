@@ -120,15 +120,25 @@ void HoaMetadataSender::colour(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   data_.set_colour(value);
 }
+//ME add
 
-/* Old DS Code
+void HoaMetadataSender::hoa_type(int valueHOAtypeIndex) {
+  std::lock_guard<std::mutex> lock(dataMutex_);
+  proto::HoaTypeMetadata* hoa_metadata;
+  hoa_metadata->set_hoatypeindex(1);
+  data_.set_allocated_hoa_metadata(hoa_metadata);
+}
+//ME end
+
+/*
+ Old DS Code
 // Will need similar method for HOA type
 void HoaMetadataSender::speakerSetupIndex(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   data_.set_allocated_ds_metadata(
       proto::convertSpeakerSetupToEpsMetadata(value));
 }
-*/
+ */
 
 }  // namespace communication
 }  // namespace plugin

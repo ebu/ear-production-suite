@@ -90,6 +90,14 @@ void HoaBackend::onParameterChanged(
     auto extractedValue = boost::get<unsigned int>(value);
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
+    // ME add
+    /*
+  } else if (parameter == ParameterId::HOA_TYPE){
+    auto extractedValue = boost::get<unsigned int>(value);
+    EAR_LOGGER_DEBUG(logger_, "HOA_type -> {}", extractedValue);
+    metadataSender_.(extractedValue);
+ */
+    //ME end
   /* Old DS Code
   // Any other params to be added here. We will want to add HOA type
   } else if (parameter == ParameterId::SPEAKER_SETUP_INDEX) {

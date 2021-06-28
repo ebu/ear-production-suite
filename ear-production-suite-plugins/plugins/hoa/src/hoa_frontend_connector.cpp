@@ -127,14 +127,14 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
   }
   cachedRouting_ = routing;
 }
-//ME new added methods for adding common definition
+//ME new added methods for adding common definition. this is where we actually set what we hve defined in value_boxmain.hpp and editor
 void HoaJuceFrontendConnector::setCommonDefinitionComboBox(
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);
   commonDefinitionComboBox_ = comboBox;
   setCommonDefinition(cachedCommonDefinition_);
 }
-void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {
+void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {//this is only used in the method above
   if (auto routingComboBoxLocked = commonDefinitionComboBox_.lock()) {
     routingComboBoxLocked->selectEntry(commonDefinition, dontSendNotification);
   }
