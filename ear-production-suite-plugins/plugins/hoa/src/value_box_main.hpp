@@ -52,7 +52,7 @@ class ValueBoxMain : public Component {
     commonDefinitionLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(commonDefinitionLabel_.get());
 
-    commonDefinitionComboBox_->setDefaultText("enter HOA type");
+    /* commonDefinitionComboBox_->setDefaultText("enter HOA type");
     commonDefinitionComboBox_->addTextEntry("3D order1 SN3D ACN");
     commonDefinitionComboBox_->addTextEntry("3D order2 SN3D ACN");
     commonDefinitionComboBox_->addTextEntry("3D order3 SN3D ACN");
@@ -72,7 +72,7 @@ class ValueBoxMain : public Component {
     commonDefinitionComboBox_->addTextEntry("2D Order2 N3D ACN");
     commonDefinitionComboBox_->addTextEntry("2H1P N3D ACN");
     commonDefinitionComboBox_->addTextEntry("3H1P N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");
+    commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");*/
     addAndMakeVisible(commonDefinitionComboBox_.get());
 
     commonDefinitionComboBoxPopup_->setName("HOA type box popup");

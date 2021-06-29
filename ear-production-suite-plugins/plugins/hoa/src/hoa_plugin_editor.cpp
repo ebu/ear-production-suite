@@ -55,11 +55,19 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   setSize(726, 930);
   
   //ME add
-  //auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
-  /* for (auto const& [id, tdData] : elementRelationships) {
-    content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(tdData->name);
+  //auto packFormats = p->admCommonDefinitions->getElements<adm::AudioPackFormat>();
+  auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
+  //auto elementRelationships = p->admCommonDefinitions.populateElementRelationshipsFor(adm::TypeDefinition::HOA);
+  for (auto const& [id, tdData] : elementRelationships) {
+    if (id == 4) {
+      auto packData = tdData->relatedPackFormats;
+      for (auto const& pfData : packData) {
+        content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
+            pfData->niceName);
+      }
+    }
   }
-  */
+  
   //ME emd
 }
 
