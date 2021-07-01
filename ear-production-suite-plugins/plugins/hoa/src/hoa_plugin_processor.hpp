@@ -54,9 +54,7 @@ class HoaAudioProcessor : public AudioProcessor {
   AdmCommonDefinitionHelper admCommonDefinitions{};  // ME added
 
   AudioParameterInt* getRouting() { return routing_; }
-  /* Old DS Code
-  AudioParameterInt* getSpeakerSetupIndex() { return speakerSetupIndex_; }
-  */
+  AudioParameterInt* getHoaType() { return hoaTypeIndex_; }  // ME added, similar to DS
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -69,16 +67,18 @@ class HoaAudioProcessor : public AudioProcessor {
   ear::plugin::ui::HoaJuceFrontendConnector* getFrontendConnector() {
     return connector_.get();
   }
+  //ME add not sure if good
+  //void setNumHoaTypes(int numHoaTypes);
+  //ME end
+
 
  private:
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;
-  AudioParameterInt* hoaTypeIndex_;//ME add
-  /* Old DS Code
-  AudioParameterInt* speakerSetupIndex_;
-  */
+  AudioParameterInt* hoaTypeIndex_;//ME add, similar to DS
   AudioParameterBool* bypass_;
+  //AudioParameterInt* numHoaTypes_;//ME added, not sure if good
 
   std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector>
       connector_;

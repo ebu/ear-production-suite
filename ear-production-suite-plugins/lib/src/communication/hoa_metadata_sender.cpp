@@ -13,7 +13,8 @@ HoaMetadataSender::HoaMetadataSender(
     : logger_(logger), maxSendInterval_(100ms) {
   lastSendTimestamp_ = std::chrono::system_clock::now();
   // TODO - this is what defines the plugin as DirectSpeakers. We need to implement a set_allocated_hoa_metadata method and a proto::HoaTypeMetadata
-  data_.set_allocated_ds_metadata(new proto::DirectSpeakersTypeMetadata{});
+  //data_.set_allocated_ds_metadata(new proto::DirectSpeakersTypeMetadata{});
+  data_.set_allocated_hoa_metadata(new proto::HoaTypeMetadata{});
 }
 
 HoaMetadataSender::~HoaMetadataSender() {
@@ -124,8 +125,8 @@ void HoaMetadataSender::colour(int value) {
 
 void HoaMetadataSender::hoa_type(int valueHOAtypeIndex) {
   std::lock_guard<std::mutex> lock(dataMutex_);
-  proto::HoaTypeMetadata* hoa_metadata;
-  hoa_metadata->set_hoatypeindex(1);
+  proto::HoaTypeMetadata* hoa_metadata = new proto::HoaTypeMetadata();
+  hoa_metadata->set_hoatypeindex(valueHOAtypeIndex);
   data_.set_allocated_hoa_metadata(hoa_metadata);
 }
 //ME end
@@ -137,8 +138,8 @@ void HoaMetadataSender::speakerSetupIndex(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   data_.set_allocated_ds_metadata(
       proto::convertSpeakerSetupToEpsMetadata(value));
-}
- */
+}*/
+ 
 
 }  // namespace communication
 }  // namespace plugin

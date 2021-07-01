@@ -41,13 +41,11 @@ HoaJuceFrontendConnector::~HoaJuceFrontendConnector() {
   if (auto comboBox = routingComboBox_.lock()) {
     comboBox->removeListener(this);
   }
-
-  /* Old DS code
-  // We must remove any listeners we have assigned when this class is destroyed!
-  if (auto comboBox = speakerSetupsComboBox_.lock()) {
+  //ME add, similar to DS
+  if (auto comboBox = commonDefinitionComboBox_.lock()) {
     comboBox->removeListener(this);
   }
-  */
+  //Me end
 }
 
 void HoaJuceFrontendConnector::setStatusBarLabel(
@@ -128,15 +126,16 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
   cachedRouting_ = routing;
 }
 //ME new added methods for adding common definition. this is where we actually set what we hve defined in value_boxmain.hpp and editor
-void HoaJuceFrontendConnector::setCommonDefinitionComboBox(
+void HoaJuceFrontendConnector::setCommonDefinitionComboBox(//alt_2nd when the user chooses what they want it will be set here. this is just the box so what is displayed. This is called from the editor.
     std::shared_ptr<EarComboBox> comboBox) {
-  comboBox->addListener(this);
-  commonDefinitionComboBox_ = comboBox;
-  setCommonDefinition(cachedCommonDefinition_);
+  comboBox->addListener(this);//what does this line do?
+  commonDefinitionComboBox_ = comboBox;//set the box value of the class here
+  setCommonDefinition(cachedCommonDefinition_);//set the actual value not just the box. This line seems a bit redundant as it calls a function to set it to what it already is?
 }
-void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {//this is only used in the method above
-  if (auto routingComboBoxLocked = commonDefinitionComboBox_.lock()) {
-    routingComboBoxLocked->selectEntry(commonDefinition, dontSendNotification);
+void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {//2nd here the value from the display is cached, so the common box value is actual set and saved. This is called from the front end connector, parameter_changed method
+  if (auto commonDefinitionComboBoxLocked = commonDefinitionComboBox_.lock()) {
+    commonDefinitionComboBoxLocked->selectEntry(commonDefinition,
+                                                dontSendNotification);
   }
   cachedCommonDefinition_ = commonDefinition;
 }
@@ -210,7 +209,7 @@ void HoaJuceFrontendConnector::setChannelGainsValueBox(
 }
 */
 
-void HoaJuceFrontendConnector::parameterValueChanged(
+void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st
     int parameterIndex, float newValue) {
   using ParameterId = ui::HoaFrontendBackendConnector::ParameterId;
   switch (parameterIndex) {
@@ -220,6 +219,13 @@ void HoaJuceFrontendConnector::parameterValueChanged(
         setRouting(p_->getRouting()->get());
       });
       break;
+      //ME add
+    case 1:
+      notifyParameterChanged(ParameterId::HOA_TYPE, p_->getHoaType()->get());//(2.)
+      updater_.callOnMessageThread(
+          [this]() { setCommonDefinition(p_->getHoaType()->get()); });//1st value is set based on display
+      break;
+      //ME end
     /* Old DS Code
     // Other parameters should be added here
     case 1:
@@ -267,6 +273,11 @@ void HoaJuceFrontendConnector::comboBoxChanged(
     *(p_->getSpeakerSetupIndex()) = comboBox->getSelectedEntryIndex();
   }
   */
+  //ME add, similar to DS
+  if (!commonDefinitionComboBox_.expired() &&
+      comboBox == commonDefinitionComboBox_.lock().get()) {
+    *(p_->getHoaType()) = comboBox->getSelectedEntryIndex();
+  }//Me end
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {
     *(p_->getRouting()) = comboBox->getSelectedEntryIndex();

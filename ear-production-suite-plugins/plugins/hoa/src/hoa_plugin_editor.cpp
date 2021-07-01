@@ -26,8 +26,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
   //ME add: add likewise option for chooosing common definition
-  p->getFrontendConnector()->setCommonDefinitionComboBox(//here we are defining a new dropdown box for commonDefinition i.e. HOA type
-      content_->mainValueBox->getCommonDefinitionComboBox());//mainValueBox specifies that we want this dropdown to be in the main box (must also define in header file)
+  p->getFrontendConnector()->setCommonDefinitionComboBox(//here we are saying what we want to display. alt_1st, when editor called
+      content_->mainValueBox->getCommonDefinitionComboBox());//arguments is pointer to a combo box
   /* Old DS Code
   // TODO - we only need to connect to UI components present in HOA plugin.
   Rewrite this.
@@ -61,6 +61,7 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   for (auto const& [id, tdData] : elementRelationships) {
     if (id == 4) {
       auto packData = tdData->relatedPackFormats;
+      //p->setNumHoaTypes(packData.size());
       for (auto const& pfData : packData) {
         content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
             pfData->niceName);
@@ -68,6 +69,10 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
     }
   }
   
+  
+ // addAndMakeVisible(packFormatSelector);
+
+
   //ME emd
 }
 

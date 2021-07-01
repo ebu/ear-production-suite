@@ -24,17 +24,14 @@ HoaAudioProcessor::HoaAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
       -1, 63, -1));
-  //ME add
-  addParameter(hoaTypeIndex_ =
+  //ME add, similar to DS
+  addParameter(hoaTypeIndex_ =//THIS NEEDS TO BE EDITTED TO ACTUAL IDs
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "hoa_type_index", "HOA Type Index",
       -1, static_cast<int>(10 - 1), -1));//input 10 for the time being TODO create a hoa_type.hpp file
   //Me end
-
-  /*
-   Old DS Code
-  //TODO - we need an equivelent for HOA types
-  addParameter(speakerSetupIndex_ =
+  /*DS code
+    addParameter(speakerSetupIndex_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "speaker_setup_index", "Speaker Setup Index",
       -1, static_cast<int>(SPEAKER_SETUPS.size() - 1), -1));
@@ -54,14 +51,22 @@ HoaAudioProcessor::HoaAudioProcessor()
     bypass_->setValueNotifyingHost(bypass_->get());
   };
   */
+  //ME add similar to SD but don't fully get
+// Any NonAutomatedParameter will not set the plugin state as dirty when changed.
+// We used this hack to make sure the host (REAPER) knows something has changed (by "changing" a standard parameter to it's current value)
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(hoaTypeIndex_)
+      ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+//ME end
+
 
   connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);
   backend_ = std::make_unique<HoaBackend>(connector_.get());
 
   connector_->parameterValueChanged(0, routing_->get());
-  /* Old DS Code
-  connector_->parameterValueChanged(1, speakerSetupIndex_->get());
-  */
+  connector_->parameterValueChanged(1, hoaTypeIndex_->get());//ME added, similar to DS (1.)
+
 }
 
 HoaAudioProcessor::~HoaAudioProcessor() {}
@@ -86,6 +91,11 @@ int HoaAudioProcessor::getNumPrograms() {
 
 int HoaAudioProcessor::getCurrentProgram() { return 0; }
 void HoaAudioProcessor::setCurrentProgram(int index) {}
+
+//ME add not sure if good
+//void HoaAudioProcessor::setNumHoaTypes(int numHoaTypes) {
+  //*numHoaTypes_ = numHoaTypes;
+//}//Me end
 
 const String HoaAudioProcessor::getProgramName(int index) {
   return {};
@@ -124,7 +134,7 @@ MidiBuffer& midiMessages) {
 
 bool HoaAudioProcessor::hasEditor() const { return true; }
 
-AudioProcessorEditor* HoaAudioProcessor::createEditor() {
+AudioProcessorEditor* HoaAudioProcessor::createEditor() {//(1)
   return new HoaAudioProcessorEditor(this);
 }
 
@@ -133,9 +143,8 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
   connectionId_ = backend_->getConnectionId();
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
-  /* Old DS Code
-  xml->setAttribute("speaker_setup_index", (int)*speakerSetupIndex_);
-  */
+  xml->setAttribute("hoa type", (int)*hoaTypeIndex_);//ME added, similar to DS, not completely sure about
+
   copyXmlToBinary(*xml, destData);
 }
 
@@ -151,10 +160,8 @@ void HoaAudioProcessor::setStateInformation(const void* data,
               .toStdString()};
       backend_->setConnectionId(connectionId_);
       *routing_ = xmlState->getIntAttribute("routing", -1);
-      /* Old DS Code
-      *speakerSetupIndex_ =
-          xmlState->getIntAttribute("speaker_setup_index", -1);
-      */
+      *hoaTypeIndex_ = xmlState->getIntAttribute("hoa type", -1);//ME added, similar to DS but don't really know what this does
+
     }
 }
 

@@ -16,16 +16,12 @@ class ValueBoxMain : public Component {
   ValueBoxMain()
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
-    //ME add in common definition version
+    //ME add in common definition version, similar to DS
         commonDefinitionLabel_(std::make_unique<Label>()),//unique pointer
         commonDefinitionComboBox_(std::make_shared<EarComboBox>()),//shared pointer
-        commonDefinitionComboBoxPopup_(
-            std::make_shared<EarComboBoxPopup>(commonDefinitionComboBox_.get())),
-        /* Old DS Code
-        // Need a similar thing for HOA type
-        speakerSetupLabel_(std::make_unique<Label>()),
-        speakerSetupsComboBox_(std::make_shared<EarComboBox>()),
-        */
+        //below is just an experiment, ME
+        //commonDefinitionComboBoxPopup_(
+          //  std::make_shared<EarComboBoxPopup>(commonDefinitionComboBox_.get())),
         routingLabel_(std::make_unique<Label>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     name_->setLabelText("Name");
@@ -42,9 +38,10 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(routingLabel_.get());
 
     routingComboBox_->setDefaultText("enter receiving Channel");
+    routingComboBox_->addTextEntry("test");
     addAndMakeVisible(routingComboBox_.get());
     
-    //ME added this. Up here in public decide what to actually do with the variables defined in private
+    //ME added this. Up here in public decide what combo box defined in private actually looks like
     commonDefinitionLabel_->setFont(EarFonts::Label);
     commonDefinitionLabel_->setText( "HOA type",
                            juce::NotificationType::dontSendNotification);
@@ -75,10 +72,10 @@ class ValueBoxMain : public Component {
     commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");*/
     addAndMakeVisible(commonDefinitionComboBox_.get());
 
-    commonDefinitionComboBoxPopup_->setName("HOA type box popup");
+    /* commonDefinitionComboBoxPopup_->setName("HOA type box popup");
     commonDefinitionComboBoxPopup_->show();
     commonDefinitionComboBoxPopup_->setVisible(true);
-    addAndMakeVisible(commonDefinitionComboBoxPopup_.get());
+    addAndMakeVisible(commonDefinitionComboBoxPopup_.get());*///this was just an experiment
     /*
     //ME exoeriementing
     /auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
@@ -121,6 +118,11 @@ class ValueBoxMain : public Component {
     colourComboBox_->setEnabled(false);
     colourComboBox_->setAlpha(0.38f);
     addAndMakeVisible(colourComboBox_.get());
+
+    //commonDefinitionComboBox_->onValueChange = [this](int) {
+      //comboBoxStateChanged(&packFormatSelector);
+    //};
+
   }
 
   ~ValueBoxMain() {}
@@ -195,7 +197,7 @@ class ValueBoxMain : public Component {
   //ME add similar for commonDefinition. Define variables down here in the private section. Define what we want and group it together in this box. in FEconnector we actually set it
   std::unique_ptr<Label> commonDefinitionLabel_;
   std::shared_ptr<EarComboBox> commonDefinitionComboBox_;
-  std::shared_ptr<EarComboBoxPopup> commonDefinitionComboBoxPopup_;
+  //std::shared_ptr<EarComboBoxPopup> commonDefinitionComboBoxPopup_;//this was just an experiment
   //ME end
 
   /* Old DS Code

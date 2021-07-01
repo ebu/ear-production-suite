@@ -76,7 +76,7 @@ void HoaBackend::onConnectionLost() {
 
 void HoaBackend::onParameterChanged(
     ui::HoaFrontendBackendConnector::ParameterId parameter,
-    ui::HoaFrontendBackendConnector::ParameterValue value) {
+    ui::HoaFrontendBackendConnector::ParameterValue value) {//(4.)
   using ParameterId = ui::HoaFrontendBackendConnector::ParameterId;
   if (parameter == ParameterId::ROUTING) {
     auto extractedValue = boost::get<int>(value);
@@ -91,12 +91,10 @@ void HoaBackend::onParameterChanged(
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
     // ME add
-    /*
   } else if (parameter == ParameterId::HOA_TYPE){
-    auto extractedValue = boost::get<unsigned int>(value);
+    auto extractedValue = boost::get<int>(value);
     EAR_LOGGER_DEBUG(logger_, "HOA_type -> {}", extractedValue);
-    metadataSender_.(extractedValue);
- */
+    metadataSender_.hoa_type(extractedValue);
     //ME end
   /* Old DS Code
   // Any other params to be added here. We will want to add HOA type
