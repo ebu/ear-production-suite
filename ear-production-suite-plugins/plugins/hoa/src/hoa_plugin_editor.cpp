@@ -65,7 +65,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
       //p->setNumHoaTypes(size);
       for (auto const& pfData : packData) {
         content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
-            pfData->niceName);
+            pfData->niceName, pfData->id);
+        //content_->mainValueBox->getCommonDefinitionComboBox()->setSelectedId
       }
     }
   }
