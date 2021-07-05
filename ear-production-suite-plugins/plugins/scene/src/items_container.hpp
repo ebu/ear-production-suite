@@ -110,14 +110,15 @@ class ItemsContainer : public Component {
     //auto hoaArea = area;//ME add
     auto objectsArea = area.removeFromLeft(getWidth() / 3);
     auto remainingArea = area.removeFromRight(getWidth() * 2 / 3);
-    auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 2);
+    auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 3);
     auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);  // ME add
 
     g.setColour(EarColours::WindowBorder);
     g.fillRect(objectsArea.removeFromRight(2));
-    g.setColour(EarColours::WindowBorder);
+    g.fillRect(objectsArea.removeFromLeft(2));
+    //g.setColour(EarColours::WindowBorder);
     g.fillRect(directSpeakersArea.removeFromLeft(2));
-    g.setColour(EarColours::WindowBorder);
+   // g.setColour(EarColours::WindowBorder);
     g.fillRect(hoaArea.removeFromLeft(2));
   }
 
@@ -128,7 +129,7 @@ class ItemsContainer : public Component {
 
     auto objectsArea = area.removeFromLeft(getWidth() / 3);
     auto remainingArea = area.removeFromRight(getWidth()*2 / 3);
-    auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 2);
+    auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 3);
     auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);  // ME add
     //objectsArea.removeFromRight(2);
     //directSpeakersArea.removeFromLeft(2);
