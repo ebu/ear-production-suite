@@ -11,7 +11,7 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-EarComboBoxEntry::EarComboBoxEntry() {
+EarComboBoxEntry::EarComboBoxEntry(int id) : id_{id} {
   setColour(backgroundColourId, EarColours::Transparent);
   setColour(selectedColourId, EarColours::ComboBoxPopupBackground);
   setColour(highlightColourId, EarColours::Area04dp);
@@ -26,6 +26,8 @@ bool EarComboBoxEntry::isHighlighted() const { return highlighted_; }
 void EarComboBoxEntry::setHighlighted(bool highlighted) {
   highlighted_ = highlighted;
 }
+
+int EarComboBoxEntry::getId() { return id_; }
 
 void EarComboBoxEntry::paint(Graphics& g) {
   EarComboBoxPopup* popup = findParentComponentOfClass<EarComboBoxPopup>();
@@ -43,7 +45,8 @@ void EarComboBoxEntry::paint(Graphics& g) {
   }
 }
 
-EarComboBoxTextEntry::EarComboBoxTextEntry(const String& text) : text_(text) {
+EarComboBoxTextEntry::EarComboBoxTextEntry(const String& text, int id)
+    : EarComboBoxEntry(id), text_(text) {
   setColour(textColourId, EarColours::ComboBoxText);
   // only necessary to set height -> width will be overwritten
   setSize(300, 40);
@@ -69,8 +72,8 @@ void EarComboBoxTextEntry::drawEntryInButton(Graphics& g,
              Justification::left);
 }
 
-EarComboBoxSectionEntry::EarComboBoxSectionEntry(const String& text)
-    : text_(text) {
+EarComboBoxSectionEntry::EarComboBoxSectionEntry(const String& text, int id)
+    : EarComboBoxEntry(id), text_(text) {
   setColour(textColourId, EarColours::ComboBoxText);
   isSelectable_ = false;
   // only necessary to set height -> width will be overwritten
@@ -95,8 +98,8 @@ void EarComboBoxSectionEntry::drawEntryInButton(Graphics& g,
   drawEntryInList(g, area);
 }
 
-EarComboBoxColourEntry::EarComboBoxColourEntry(Colour colour)
-    : colour_(colour) {
+EarComboBoxColourEntry::EarComboBoxColourEntry(Colour colour, int id)
+    : EarComboBoxEntry(id), colour_(colour) {
   setColour(backgroundColourId, EarColours::Transparent);
   setColour(highlightColourId, EarColours::Area04dp);
   setSize(100, 33);
@@ -490,20 +493,20 @@ void EarComboBox::addEntry(std::unique_ptr<EarComboBoxEntry> entry) {
   popup_->addEntry(std::move(entry));
 }
 
-void EarComboBox::addTextEntry(const String& text) {
-  addEntry(std::make_unique<EarComboBoxTextEntry>(text));
+void EarComboBox::addTextEntry(const String& text, int id) {
+  addEntry(std::make_unique<EarComboBoxTextEntry>(text, id));
 }
 
-void EarComboBox::addColourEntry(const Colour& colour) {
-  addEntry(std::make_unique<EarComboBoxColourEntry>(colour));
+void EarComboBox::addColourEntry(const Colour& colour, int id) {
+  addEntry(std::make_unique<EarComboBoxColourEntry>(colour, id));
 }
 
-void EarComboBox::addSectionEntry(const String& text) {
-  addEntry(std::make_unique<EarComboBoxSectionEntry>(text));
+void EarComboBox::addSectionEntry(const String& text, int id) {
+  addEntry(std::make_unique<EarComboBoxSectionEntry>(text, id));
 }
 
 void EarComboBox::clearEntries() {
-  currentSelectedId_ = -1;
+  currentSelectedIndex_ = -1;
   popup_->clearEntries();
 }
 
