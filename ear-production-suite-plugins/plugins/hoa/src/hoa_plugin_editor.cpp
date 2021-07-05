@@ -61,7 +61,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   for (auto const& [id, tdData] : elementRelationships) {
     if (id == 4) {
       auto packData = tdData->relatedPackFormats;
-      //p->setNumHoaTypes(packData.size());
+      //int size{static_cast<int>(packData.size())};
+      //p->setNumHoaTypes(size);
       for (auto const& pfData : packData) {
         content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
             pfData->niceName);

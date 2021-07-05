@@ -28,7 +28,7 @@ HoaAudioProcessor::HoaAudioProcessor()
   addParameter(hoaTypeIndex_ =//THIS NEEDS TO BE EDITTED TO ACTUAL IDs
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "hoa_type_index", "HOA Type Index",
-      -1, static_cast<int>(10 - 1), -1));//input 10 for the time being TODO create a hoa_type.hpp file
+      -1, 20, -1));
   //Me end
   /*DS code
     addParameter(speakerSetupIndex_ =
@@ -60,9 +60,8 @@ HoaAudioProcessor::HoaAudioProcessor()
   };
 //ME end
 
-
-  connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);
-  backend_ = std::make_unique<HoaBackend>(connector_.get());
+  connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);//creates instance of front end connector
+  backend_ = std::make_unique<HoaBackend>(connector_.get());//creates instance of backend, passing to it a pointer to front end connector
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, hoaTypeIndex_->get());//ME added, similar to DS (1.)
@@ -93,9 +92,9 @@ int HoaAudioProcessor::getCurrentProgram() { return 0; }
 void HoaAudioProcessor::setCurrentProgram(int index) {}
 
 //ME add not sure if good
-//void HoaAudioProcessor::setNumHoaTypes(int numHoaTypes) {
-  //*numHoaTypes_ = numHoaTypes;
-//}//Me end
+void HoaAudioProcessor::setNumHoaTypes(int &numHoaTypes) {
+  numHoaTypes_ = numHoaTypes;//THIS LINE CAUSING PROBLEMS
+}//Me end
 
 const String HoaAudioProcessor::getProgramName(int index) {
   return {};

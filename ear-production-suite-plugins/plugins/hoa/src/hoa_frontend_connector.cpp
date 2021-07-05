@@ -209,7 +209,7 @@ void HoaJuceFrontendConnector::setChannelGainsValueBox(
 }
 */
 
-void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st
+void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this will be called from JUCE interface and then it notifies to implementation agnostic front end
     int parameterIndex, float newValue) {
   using ParameterId = ui::HoaFrontendBackendConnector::ParameterId;
   switch (parameterIndex) {
