@@ -198,6 +198,21 @@ void JuceSceneFrontendConnector::reloadItemListCache() {
         } else {
           (*it)->setData({item, false});
         }
+      } else if (item.has_hoa_metadata()) {
+        auto it = std::find_if(
+            container->hoaItems.begin(), container->hoaItems.end(),
+            [item](auto entry) {
+              return communication::ConnectionId{item.connection_id()} ==
+                     entry->getId();
+            });
+        if (it == container->hoaItems.end()) {
+          auto view = std::make_shared<ItemView>();
+          view->setData({item, false});
+          container->hoaItems.push_back(view);
+          container->hoaList->addItem(view.get());
+        } else {
+          (*it)->setData({item, false});
+        }
       }
     }
   }
@@ -320,6 +335,16 @@ void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
         container->objectsItems.push_back(view);
         container->objectsList->addItem(view.get());
       }
+    } else if (item.has_hoa_metadata()) {
+      auto it = std::find_if(container->hoaItems.begin(), container->hoaItems.end(),
+                       [id](auto entry) { return id == entry->getId(); });
+      if (it != container->hoaItems.end()){(*it)->setData({item,false});
+      } else {
+        auto view = std::make_shared<ItemView>();
+        view->setData({item, false});
+        container->hoaItems.push_back(view);
+        container->hoaList->addItem(view.get());
+      }
     }
   }
 }
@@ -391,6 +416,13 @@ void JuceSceneFrontendConnector::removeFromItemView(
     if (it_obj != container->objectsItems.end()) {
       container->objectsList->removeItem(it_obj->get());
       container->objectsItems.erase(it_obj);
+    }
+    auto it_hoa = std::find_if(
+        container->hoaItems.begin(), container->hoaItems.end(),
+        [id](auto entry) { return id == entry->getId(); });
+    if (it_hoa != container->hoaItems.end()) {
+      container->hoaList->removeItem(it_hoa->get());
+      container->hoaItems.erase(it_hoa);
     }
   }
 }
@@ -606,6 +638,17 @@ void JuceSceneFrontendConnector::addItemClicked(ProgrammeView* view) {
       }
     }
     for (auto item : itemsContainer->objectsItems) {
+      if (isItemInProgramme(item->getId(), programme)) {
+        item->setEnabled(false);
+        item->setAlpha(Emphasis::disabled);
+        item->setSelected(true);
+      } else {
+        item->setEnabled(true);
+        item->setAlpha(Emphasis::full);
+        item->setSelected(false);
+      }
+    }
+    for (auto item : itemsContainer->hoaItems) {
       if (isItemInProgramme(item->getId(), programme)) {
         item->setEnabled(false);
         item->setAlpha(Emphasis::disabled);
