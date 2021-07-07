@@ -124,9 +124,6 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
     routingComboBoxLocked->selectEntry(routing, dontSendNotification);
   }
   cachedRouting_ = routing;
-  auto size =
-      p_->admCommonDefinitions.getPackFormatData(4, p_->getHoaType()->get());
-  auto size_2 = size->relatedChannelFormats.size();
 }
 //ME new added methods for adding common definition. this is where we actually set what we hve defined in value_boxmain.hpp and editor
 void HoaJuceFrontendConnector::setCommonDefinitionComboBox(//alt_2nd when the user chooses what they want it will be set here. this is just the box so what is displayed. This is called from the editor.
@@ -141,6 +138,22 @@ void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {//2nd 
                                                 dontSendNotification);
   }
   cachedCommonDefinition_ = commonDefinition;
+  
+  if (auto routingComboBoxLocked = routingComboBox_.lock()) {
+    auto hoaId = p_->getHoaType()->get();
+    auto pfData = p_->admCommonDefinitions.getPackFormatData(4, hoaId+1);
+
+    if (pfData) {
+      routingComboBoxLocked->clearEntries();
+      auto cfCount = pfData->relatedChannelFormats.size();
+      auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
+      for (int i = 1; i + cfCountFixed <= 64; ++i) {
+        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
+                                            String(i + cfCountFixed));
+      }
+      routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
+    }
+  }
 }
 //end ME
 

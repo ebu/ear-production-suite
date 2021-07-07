@@ -55,42 +55,16 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   setSize(726, 930);
   
   //ME add
-  //auto packFormats = p->admCommonDefinitions->getElements<adm::AudioPackFormat>();
   auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
-  //int layoutSize{0};
-  //auto elementRelationships = p->admCommonDefinitions.populateElementRelationshipsFor(adm::TypeDefinition::HOA);
   for (auto const& [id, tdData] : elementRelationships) {
     if (id == 4) {
       auto packData = tdData->relatedPackFormats;
-      //int size{static_cast<int>(packData.size())};
-      //p->setNumHoaTypes(size);
       for (auto const& pfData : packData) {
         content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
             pfData->niceName, pfData->id);
-        //layoutSize = pfData->relatedChannelFormats.size();
-        //content_->mainValueBox->getCommonDefinitionComboBox()->setSelectedId
       }
     }
   }
-  /* if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-
-    if (0 <= cachedCommonDefinition_ && cachedCommonDefinition_ < 0xFFFF) {
-      layoutSize = SPEAKER_SETUPS.at(cachedCommonDefinition_).speakers.size();
-    } else {
-      layoutSize = SpeakerSetup{}.speakers.size();
-    }
-
-    routingComboBoxLocked->clearEntries();
-    auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
-    for (int i = 1; i + layoutSizeFixed <= 64; ++i) {
-      routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                          String(i + layoutSizeFixed));
-    }
-    routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
-  }*/
-  
- // addAndMakeVisible(packFormatSelector);
-
 
   //ME emd
 }

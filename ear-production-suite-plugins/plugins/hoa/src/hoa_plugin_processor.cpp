@@ -28,7 +28,7 @@ HoaAudioProcessor::HoaAudioProcessor()
   addParameter(hoaTypeIndex_ =//THIS NEEDS TO BE EDITTED TO ACTUAL IDs
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "hoa_type_index", "HOA Type Index",
-      0, 0xFFFF, 0x0000));
+      -1, 0xFFFF, -1));
   //Me end
   /*DS code
     addParameter(speakerSetupIndex_ =

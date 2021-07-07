@@ -38,7 +38,6 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(routingLabel_.get());
 
     routingComboBox_->setDefaultText("enter receiving Channel");
-    routingComboBox_->addTextEntry("test");
     addAndMakeVisible(routingComboBox_.get());
     
     //ME added this. Up here in public decide what combo box defined in private actually looks like
