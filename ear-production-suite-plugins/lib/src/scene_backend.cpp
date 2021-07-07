@@ -139,8 +139,8 @@ inline ItemStore::const_iterator findObject(proto::Object const& object,
 }
 
 void SceneBackend::updateSceneStore() {
-  sceneStore_.clear_items();
 
+  sceneStore_.clear_monitoring_items();
   if (auto programme = getSelectedProgramme()) {
     for (auto& element : programme->element()) {
       addGroupToSceneStore(element);
@@ -150,7 +150,7 @@ void SceneBackend::updateSceneStore() {
   }
 
   previousScene_.clear();
-  for (auto const& item : sceneStore_.items()) {
+  for (auto const& item : sceneStore_.monitoring_items()) {
     previousScene_.emplace(item.connection_id());
   }
 }
@@ -197,7 +197,7 @@ void SceneBackend::addElementToSceneStore(
 }
 
 void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
-  auto monitoringItem = sceneStore_.add_items();
+  auto monitoringItem = sceneStore_.add_monitoring_items();
   monitoringItem->set_connection_id(inputItem.connection_id());
   monitoringItem->set_routing(inputItem.routing());
   auto newItem =

@@ -30,7 +30,7 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
                 diffuse_[routing.track + i].end(), 0.0f);
     }
   }
-  for (const auto& item : store.items()) {
+  for (const auto& item : store.monitoring_items()) {
     if (item.changed()) {
       if (item.has_ds_metadata()) {
         auto earMetadata =
@@ -103,10 +103,10 @@ std::vector<communication::ConnectionId> SceneGainsCalculator::removedIds(
   for (auto& entry : routingCache_) {
     auto id = entry.first;
     auto it = std::find_if(
-        store.items().begin(), store.items().end(), [id](auto& item) {
+        store.monitoring_items().begin(), store.monitoring_items().end(), [id](auto& item) {
           return communication::ConnectionId{item.connection_id()} == id;
         });
-    if (it == store.items().end()) {
+    if (it == store.monitoring_items().end()) {
       removedIds.push_back(entry.first);
     }
   }
@@ -116,7 +116,7 @@ std::vector<communication::ConnectionId> SceneGainsCalculator::removedIds(
 std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
     const proto::SceneStore& store) {
   std::vector<Routing> changedRouting;
-  for (auto& item : store.items()) {
+  for (auto& item : store.monitoring_items()) {
     if (item.changed()) {
       int size = 1;
       if (item.has_ds_metadata()) {

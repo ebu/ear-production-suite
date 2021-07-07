@@ -168,7 +168,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   activeDirectSpeakersIds.clear();
   activeObjectIds.clear();
 
-  for (const auto& item : store.items()) {
+  for (const auto& item : store.monitoring_items()) {
     if (item.has_connection_id() &&
         item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
         item.connection_id() != "") {
