@@ -48,7 +48,7 @@ class HoaJuceFrontendConnector
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> textEditor);
   void setRoutingComboBox(std::shared_ptr<EarComboBox> comboBox);
   //ME adds bit for common definition
-  void setCommonDefinitionComboBox(std::shared_ptr<EarComboBox> comboBox);
+  void setHoaTypeComboBox(std::shared_ptr<EarComboBox> comboBox);
 
   /* Old DS Code
   // These setters allow other classes (I.e, the editor) to pass pointers to current UI controls
@@ -63,7 +63,7 @@ class HoaJuceFrontendConnector
   void setColour(Colour colour);
   void setRouting(int routing);
   //ME add likewise for common definition
-  void setCommonDefinition(int commonDefinition);
+  void setHoaType(int hoaType);
 
   /* Old DS Code
   // These setters are used to set the state of controls
@@ -109,8 +109,8 @@ class HoaJuceFrontendConnector
   std::weak_ptr<EarComboBox> routingComboBox_;
   int cachedRouting_;
   //ME define the box for common definitions, set as int for now
-  std::weak_ptr<EarComboBox> commonDefinitionComboBox_;
-  int cachedCommonDefinition_;
+  std::weak_ptr<EarComboBox> hoaTypeComboBox_;
+  int cachedHoaType_;
   //ear::plugin::HoaBackend cachedCommonDefinition_;
   /* Old DS Code
   // For each parameter, we hold a pointer to the UI control which sets it, and cache the last known value

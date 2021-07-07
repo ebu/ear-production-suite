@@ -26,8 +26,11 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
   //ME add: add likewise option for chooosing common definition
-  p->getFrontendConnector()->setCommonDefinitionComboBox(//here we are saying what we want to display. alt_1st, when editor called
-      content_->mainValueBox->getCommonDefinitionComboBox());//arguments is pointer to a combo box
+  p->getFrontendConnector()
+      ->setHoaTypeComboBox(  // here we are saying what we want to display.
+                             // alt_1st, when editor called
+          content_->mainValueBox
+              ->getHoaTypeComboBox());  // arguments is pointer to a combo box
   /* Old DS Code
   // TODO - we only need to connect to UI components present in HOA plugin.
   Rewrite this.
@@ -60,7 +63,7 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
     if (id == 4) {
       auto packData = tdData->relatedPackFormats;
       for (auto const& pfData : packData) {
-        content_->mainValueBox->getCommonDefinitionComboBox()->addTextEntry(
+        content_->mainValueBox->getHoaTypeComboBox()->addTextEntry(
             pfData->niceName, pfData->id);
       }
     }

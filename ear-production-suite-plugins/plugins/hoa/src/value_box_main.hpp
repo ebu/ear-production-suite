@@ -17,8 +17,8 @@ class ValueBoxMain : public Component {
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
     //ME add in common definition version, similar to DS
-        commonDefinitionLabel_(std::make_unique<Label>()),//unique pointer
-        commonDefinitionComboBox_(std::make_shared<EarComboBox>()),//shared pointer
+        hoaTypeLabel_(std::make_unique<Label>()),//unique pointer
+        hoaTypeComboBox_(std::make_shared<EarComboBox>()),//shared pointer
         //below is just an experiment, ME
         //commonDefinitionComboBoxPopup_(
           //  std::make_shared<EarComboBoxPopup>(commonDefinitionComboBox_.get())),
@@ -41,12 +41,12 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(routingComboBox_.get());
     
     //ME added this. Up here in public decide what combo box defined in private actually looks like
-    commonDefinitionLabel_->setFont(EarFonts::Label);
-    commonDefinitionLabel_->setText( "HOA type",
+    hoaTypeLabel_->setFont(EarFonts::Label);
+    hoaTypeLabel_->setText("HOA type",
                            juce::NotificationType::dontSendNotification);
-    commonDefinitionLabel_->setColour(Label::textColourId, EarColours::Label);
-    commonDefinitionLabel_->setJustificationType(Justification::right);
-    addAndMakeVisible(commonDefinitionLabel_.get());
+    hoaTypeLabel_->setColour(Label::textColourId, EarColours::Label);
+    hoaTypeLabel_->setJustificationType(Justification::right);
+    addAndMakeVisible(hoaTypeLabel_.get());
 
     /* commonDefinitionComboBox_->setDefaultText("enter HOA type");
     commonDefinitionComboBox_->addTextEntry("3D order1 SN3D ACN");
@@ -69,7 +69,7 @@ class ValueBoxMain : public Component {
     commonDefinitionComboBox_->addTextEntry("2H1P N3D ACN");
     commonDefinitionComboBox_->addTextEntry("3H1P N3D ACN");
     commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");*/
-    addAndMakeVisible(commonDefinitionComboBox_.get());
+    addAndMakeVisible(hoaTypeComboBox_.get());
 
     /* commonDefinitionComboBoxPopup_->setName("HOA type box popup");
     commonDefinitionComboBoxPopup_->show();
@@ -145,11 +145,13 @@ class ValueBoxMain : public Component {
     area.removeFromTop(15.f);
 
     //ME add for HOA
-    auto commonDefinitionArea = area.removeFromTop(rowHeight_);
-    auto commonDefinitionLabelArea = commonDefinitionArea.withWidth(labelWidth_);
-    auto commonDefinitionComboBoxArea = commonDefinitionArea.withTrimmedLeft(labelWidth_ + marginBig_).reduced(0, marginSmall_);
-    commonDefinitionLabel_->setBounds(commonDefinitionLabelArea);
-    commonDefinitionComboBox_->setBounds(commonDefinitionComboBoxArea);
+    auto hoaTypeArea = area.removeFromTop(rowHeight_);
+    auto hoaTypeLabelArea = hoaTypeArea.withWidth(labelWidth_);
+    auto hoaTypeComboBoxArea =
+        hoaTypeArea.withTrimmedLeft(labelWidth_ + marginBig_)
+            .reduced(0, marginSmall_);
+    hoaTypeLabel_->setBounds(hoaTypeLabelArea);
+    hoaTypeComboBox_->setBounds(hoaTypeComboBoxArea);
     //end ME
 
     /* Old DS Code
@@ -176,8 +178,9 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
   //ME add likewise for common definition of HOA
-  std::shared_ptr<EarComboBox> getCommonDefinitionComboBox() { return commonDefinitionComboBox_;  }
-
+  std::shared_ptr<EarComboBox> getHoaTypeComboBox() {
+    return hoaTypeComboBox_;
+  }
   /* Old DS Code
   // Need similar for HOA type
   std::shared_ptr<EarComboBox> getSpeakerSetupsComboBox() {
@@ -194,8 +197,8 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> colourComboBox_;
   std::shared_ptr<EarNameTextEditor> name_;
   //ME add similar for commonDefinition. Define variables down here in the private section. Define what we want and group it together in this box. in FEconnector we actually set it
-  std::unique_ptr<Label> commonDefinitionLabel_;
-  std::shared_ptr<EarComboBox> commonDefinitionComboBox_;
+  std::unique_ptr<Label> hoaTypeLabel_;
+  std::shared_ptr<EarComboBox> hoaTypeComboBox_;
   //std::shared_ptr<EarComboBoxPopup> commonDefinitionComboBoxPopup_;//this was just an experiment
   //ME end
 

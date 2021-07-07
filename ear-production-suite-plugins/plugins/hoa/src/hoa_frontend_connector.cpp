@@ -42,7 +42,7 @@ HoaJuceFrontendConnector::~HoaJuceFrontendConnector() {
     comboBox->removeListener(this);
   }
   //ME add, similar to DS
-  if (auto comboBox = commonDefinitionComboBox_.lock()) {
+  if (auto comboBox = hoaTypeComboBox_.lock()) {
     comboBox->removeListener(this);
   }
   //Me end
@@ -126,18 +126,25 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
   cachedRouting_ = routing;
 }
 //ME new added methods for adding common definition. this is where we actually set what we hve defined in value_boxmain.hpp and editor
-void HoaJuceFrontendConnector::setCommonDefinitionComboBox(//alt_2nd when the user chooses what they want it will be set here. this is just the box so what is displayed. This is called from the editor.
+void HoaJuceFrontendConnector::setHoaTypeComboBox(//alt_2nd when the user chooses what they want it will be set here. this is just the box so what is displayed. This is called from the editor.
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);//what does this line do?
-  commonDefinitionComboBox_ = comboBox;//set the box value of the class here
-  setCommonDefinition(cachedCommonDefinition_);//set the actual value not just the box. This line seems a bit redundant as it calls a function to set it to what it already is?
+  hoaTypeComboBox_ = comboBox;  // set the box value of the class here
+  setHoaType(
+      cachedHoaType_);  // set the actual value not just the box. This line
+                        // seems a bit redundant as it calls a function to set it
+                        // to what it already is?
 }
-void HoaJuceFrontendConnector::setCommonDefinition(int commonDefinition) {//2nd here the value from the display is cached, so the common box value is actual set and saved. This is called from the front end connector, parameter_changed method
-  if (auto commonDefinitionComboBoxLocked = commonDefinitionComboBox_.lock()) {
-    commonDefinitionComboBoxLocked->selectEntry(commonDefinition,
+void HoaJuceFrontendConnector::setHoaType(
+    int hoaType) {  // 2nd here the value from the display is cached,
+                             // so the common box value is actual set and saved.
+                             // This is called from the front end connector,
+                             // parameter_changed method
+  if (auto hoaTypeComboBoxLocked = hoaTypeComboBox_.lock()) {
+    hoaTypeComboBoxLocked->selectEntry(hoaType,
                                                 dontSendNotification);
   }
-  cachedCommonDefinition_ = commonDefinition;
+  cachedHoaType_ = hoaType;
   
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
     auto hoaId = p_->getHoaType()->get();
@@ -238,8 +245,9 @@ void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this
       //ME add
     case 1:
       notifyParameterChanged(ParameterId::HOA_TYPE, p_->getHoaType()->get());//(2.)
-      updater_.callOnMessageThread(
-          [this]() { setCommonDefinition(p_->getHoaType()->get()); });//1st value is set based on display
+      updater_.callOnMessageThread([this]() {
+        setHoaType(p_->getHoaType()->get());
+      });  // 1st value is set based on display
       break;
       //ME end
     /* Old DS Code
@@ -290,8 +298,8 @@ void HoaJuceFrontendConnector::comboBoxChanged(
   }
   */
   //ME add, similar to DS
-  if (!commonDefinitionComboBox_.expired() &&
-      comboBox == commonDefinitionComboBox_.lock().get()) {
+  if (!hoaTypeComboBox_.expired() &&
+      comboBox == hoaTypeComboBox_.lock().get()) {
     *(p_->getHoaType()) = comboBox->getSelectedEntryIndex();
   }//Me end
   if (!routingComboBox_.expired() &&
