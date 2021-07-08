@@ -130,21 +130,16 @@ void HoaJuceFrontendConnector::setHoaTypeComboBox(//alt_2nd when the user choose
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);//what does this line do?
   hoaTypeComboBox_ = comboBox;  // set the box value of the class here
-  setHoaType(
-      cachedHoaType_);  // set the actual value not just the box. This line
-                        // seems a bit redundant as it calls a function to set it
-                        // to what it already is?
+  setHoaType(cachedHoaType_);  // set the actual value not just the box to the cached value using function below
 }
-void HoaJuceFrontendConnector::setHoaType(
-    int hoaType) {  // 2nd here the value from the display is cached,
+void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value from the display is cached,
                              // so the common box value is actual set and saved.
                              // This is called from the front end connector,
                              // parameter_changed method
   if (auto hoaTypeComboBoxLocked = hoaTypeComboBox_.lock()) {
-    hoaTypeComboBoxLocked->selectEntry(hoaType,
-                                                dontSendNotification);
+    hoaTypeComboBoxLocked->selectEntry(hoaType, dontSendNotification);
   }
-  cachedHoaType_ = hoaType;
+  cachedHoaType_ = hoaType;//when editor is called this gets set to what it already is...
   
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
     auto hoaId = p_->getHoaType()->get();

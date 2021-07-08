@@ -37,7 +37,7 @@ class ValueBoxMain : public Component {
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
 
-    routingComboBox_->setDefaultText("enter receiving Channel");
+    routingComboBox_->setDefaultText("Enter Routing");
     addAndMakeVisible(routingComboBox_.get());
     
     //ME added this. Up here in public decide what combo box defined in private actually looks like
@@ -48,27 +48,19 @@ class ValueBoxMain : public Component {
     hoaTypeLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(hoaTypeLabel_.get());
 
-    /* commonDefinitionComboBox_->setDefaultText("enter HOA type");
-    commonDefinitionComboBox_->addTextEntry("3D order1 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order2 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order3 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order4 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order5 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order6 SN3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order1 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order2 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order3 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order4 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order5 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order6 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3D order1 FuMa");
-    commonDefinitionComboBox_->addTextEntry("3D order2 FuMa");
-    commonDefinitionComboBox_->addTextEntry("3D order3 FuMa");
-    commonDefinitionComboBox_->addTextEntry("2D Order1 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("2D Order2 N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("2H1P N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("3H1P N3D ACN");
-    commonDefinitionComboBox_->addTextEntry("2H1V N3D ACN");*/
+    auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+    auto elementRelationships = commonDefinitionHelper->getElementRelationships();
+    for (auto const& [id, tdData] : elementRelationships) {
+      if (id == 4) {
+        auto packData = tdData->relatedPackFormats;
+        for (auto const& pfData : packData) {
+          hoaTypeComboBox_->addTextEntry(
+              pfData->niceName, pfData->id);
+        }
+      }
+    }
+
+    hoaTypeComboBox_->setDefaultText("Enter HOA Type");
     addAndMakeVisible(hoaTypeComboBox_.get());
 
     /* commonDefinitionComboBoxPopup_->setName("HOA type box popup");
@@ -84,32 +76,7 @@ class ValueBoxMain : public Component {
     //ME end
     */
 
-    /* Old DS Code
-    // Need a similar thing for HOA type
-    speakerSetupLabel_->setFont(EarFonts::Label);
-    speakerSetupLabel_->setColour(Label::textColourId, EarColours::Label);
-    speakerSetupLabel_->setText("Layout",
-                                juce::NotificationType::dontSendNotification);
-    speakerSetupLabel_->setJustificationType(Justification::right);
-    addAndMakeVisible(speakerSetupLabel_.get());
-    speakerSetupsComboBox_->setDefaultText("select speaker layout");
 
-    speakerSetupsComboBox_->addTextEntry("mono (0+1+0)");
-    speakerSetupsComboBox_->addTextEntry("stereo (0+2+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1 (0+5+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1+2H (2+5+0)");
-    speakerSetupsComboBox_->addTextEntry("5.1+4H (4+5+0)");
-    speakerSetupsComboBox_->addTextEntry(" (4+5+1)");
-    speakerSetupsComboBox_->addTextEntry("7.2+3H (3+7+0)");
-    speakerSetupsComboBox_->addTextEntry("9.1+4H (4+9+0)");
-    speakerSetupsComboBox_->addTextEntry("22.2 (9+10+3)");
-    speakerSetupsComboBox_->addTextEntry("7.1 (0+7+0)");
-    speakerSetupsComboBox_->addTextEntry("7.1+4H (4+7+0)");
-    speakerSetupsComboBox_->addTextEntry("7.1+2H (2+7+0)");
-    speakerSetupsComboBox_->addTextEntry("3.0 (0+3+0)");
-    speakerSetupsComboBox_->addTextEntry("5.0 (0+5+0)");
-    addAndMakeVisible(speakerSetupsComboBox_.get());
-    */
 
     for (auto colour : EarColours::Items) {
       colourComboBox_->addColourEntry(colour);

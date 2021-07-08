@@ -9,7 +9,7 @@
 
 using namespace ear::plugin::ui;
 
-HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
+HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
     HoaAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
@@ -26,11 +26,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
   //ME add: add likewise option for chooosing common definition
-  p->getFrontendConnector()
-      ->setHoaTypeComboBox(  // here we are saying what we want to display.
-                             // alt_1st, when editor called
-          content_->mainValueBox
-              ->getHoaTypeComboBox());  // arguments is pointer to a combo box
+  p->getFrontendConnector()->setHoaTypeComboBox(  // here we are setting the HOA combo box to the cached value
+      content_->mainValueBox->getHoaTypeComboBox());  // arguments is pointer to a combo box
   /* Old DS Code
   // TODO - we only need to connect to UI components present in HOA plugin.
   Rewrite this.
@@ -58,7 +55,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
   setSize(726, 930);
   
   //ME add
-  auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
+  /* auto elementRelationships =
+      p->admCommonDefinitions.getElementRelationships();
   for (auto const& [id, tdData] : elementRelationships) {
     if (id == 4) {
       auto packData = tdData->relatedPackFormats;
@@ -67,8 +65,9 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor
             pfData->niceName, pfData->id);
       }
     }
-  }
-
+  }*/
+ // content_->mainValueBox->getHoaTypeComboBox()->setDefaultText("Enter HOA Type");
+  //addAndMakeVisible(content_->mainValueBox->getHoaTypeComboBox().get());
   //ME emd
 }
 
