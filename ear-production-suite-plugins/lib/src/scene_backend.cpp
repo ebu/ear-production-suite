@@ -149,6 +149,10 @@ void SceneBackend::updateSceneStore() {
     }
   }
 
+  sceneStore_.clear_all_available_items();
+  addAvailableInputItemsToSceneStore();
+
+  // TODO - MF: Not sure what this is for... does it need to track available intput items too? Needs investigating (is it used to determine if scenestore needs update? if so available input items SHOULD be tracked)
   previousScene_.clear();
   for (auto const& item : sceneStore_.monitoring_items()) {
     previousScene_.emplace(item.connection_id());
@@ -218,6 +222,16 @@ void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
   } else if (inputItem.has_bin_metadata()) {
     monitoringItem->set_allocated_bin_metadata(
         new proto::BinauralTypeMetadata{inputItem.bin_metadata()});
+  }
+}
+
+void SceneBackend::addAvailableInputItemsToSceneStore()
+{
+  for (auto const& itemPair : itemStore_)
+  {
+    auto& itemStoreInputItem = itemPair.second;
+    auto sceneStoreInputItem = sceneStore_.add_all_available_items();
+    sceneStoreInputItem->CopyFrom(itemStoreInputItem);
   }
 }
 

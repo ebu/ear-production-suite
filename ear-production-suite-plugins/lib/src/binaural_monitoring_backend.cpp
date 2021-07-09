@@ -163,6 +163,19 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   size_t totalObjChannels = 0;
   size_t totalHoaChannels = 0;
 
+  for(const auto& item : store.all_available_items()) {
+    if(item.has_ds_metadata()) {
+      totalDsChannels += item.ds_metadata().speakers_size();
+    }
+    if(item.has_obj_metadata()) {
+      totalObjChannels++;
+    }
+    if(item.has_hoa_metadata()) {
+      // TODO: Proto message currently incomplete for HOA
+      //totalHoaChannels += item.hoa_metadata().???();
+    }
+  }
+
   std::lock_guard<std::mutex> lockDsIds(activeDirectSpeakersIdsMutex_);
   std::lock_guard<std::mutex> lockObjIds(activeObjectIdsMutex_);
   std::lock_guard<std::mutex> lockHoaIds(activeHoaIdsMutex_);
@@ -207,7 +220,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         activeDirectSpeakersIds.push_back(item.connection_id());
-        totalDsChannels += item.ds_metadata().speakers_size();
       }
       if (item.has_obj_metadata()) {
         if (item.changed()) {
@@ -224,7 +236,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         activeObjectIds.push_back(item.connection_id());
-        totalObjChannels++;
       }
     }
   }
