@@ -44,6 +44,7 @@ add_library(ear-plugin-base STATIC
   src/ui/object_frontend_backend_connector.cpp
   src/ui/scene_frontend_backend_connector.cpp
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
+  ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
   ${EAR_PROTO_SRC}
         include/proto_printers.hpp src/proto_printers.cpp)
 		
@@ -135,6 +136,7 @@ target_include_directories(ear-plugin-base PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>  # config.h / export.h
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # protobuf
+	${EPS_SHARED_DIR}
 )
 target_compile_features(ear-plugin-base PUBLIC cxx_std_14)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
