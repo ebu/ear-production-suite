@@ -137,13 +137,14 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
                              // This is called from the front end connector,
                              // parameter_changed method
   if (auto hoaTypeComboBoxLocked = hoaTypeComboBox_.lock()) {
-    hoaTypeComboBoxLocked->selectEntry(hoaType, dontSendNotification);
+                               hoaTypeComboBoxLocked->setSelectedId(
+                                   hoaType, dontSendNotification);
   }
   cachedHoaType_ = hoaType;//when editor is called this gets set to what it already is...
   
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
     auto hoaId = p_->getHoaType()->get();
-    auto pfData = p_->admCommonDefinitions.getPackFormatData(4, hoaId+1);
+    auto pfData = p_->admCommonDefinitions.getPackFormatData(4, hoaId);
 
     if (pfData) {
       routingComboBoxLocked->clearEntries();
@@ -295,7 +296,7 @@ void HoaJuceFrontendConnector::comboBoxChanged(
   //ME add, similar to DS
   if (!hoaTypeComboBox_.expired() &&
       comboBox == hoaTypeComboBox_.lock().get()) {
-    *(p_->getHoaType()) = comboBox->getSelectedEntryIndex();
+    *(p_->getHoaType()) = comboBox->getSelectedId();
   }//Me end
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {
