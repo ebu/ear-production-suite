@@ -24,6 +24,7 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
 
   activeDirectSpeakersIds.reserve(inputChannelCount);
   activeObjectIds.reserve(inputChannelCount);
+  activeHoaIds.reserve(inputChannelCount);
 
   controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
@@ -206,7 +207,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         //auto hoaId = getLatestHoaTypeMetadata(item.connection_id());
         auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
         auto hoaId = item.hoa_metadata().hoatypeindex();
-        auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId + 1);
+        auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
         auto cfCount = pfData->relatedChannelFormats.size();
         totalHoaChannels += cfCount;
 

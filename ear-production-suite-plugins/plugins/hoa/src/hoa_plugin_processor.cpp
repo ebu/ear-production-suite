@@ -158,6 +158,7 @@ void HoaAudioProcessor::setStateInformation(const void* data,
                                    "00000000-0000-0000-0000-000000000000")
               .toStdString()};
       backend_->setConnectionId(connectionId_);
+      auto con_id = connectionId_;
       *routing_ = xmlState->getIntAttribute("routing", -1);
       *hoaTypeId_ = xmlState->getIntAttribute("hoa_type", 0);//ME added, similar to DS but don't really know what this does
 
