@@ -389,9 +389,13 @@ void ObjectsJuceFrontendConnector::setSize(float size) {
   if (auto sizeSliderLocked = sizeSlider_.lock()) {
     sizeSliderLocked->setValue(size, dontSendNotification);
   }
-  setWidth(size);
-  setHeight(size);
-  setDepth(size);
+  if (auto linkSizeLocked = linkSizeButton_.lock()) {
+    if(linkSizeLocked->getToggleState()) {
+      setWidth(size);
+      setHeight(size);
+      setDepth(size);
+    }
+  }
   cachedSize_ = size;
 }
 
@@ -566,13 +570,17 @@ void ObjectsJuceFrontendConnector::sliderValueChanged(Slider* slider) {
              slider == distanceSlider_.lock().get()) {
     *(p_->getDistance()) = slider->getValue();
   } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
-    *(p_->getWidth()) = slider->getValue();
-    *(p_->getHeight()) = slider->getValue();
-    *(p_->getDepth()) = slider->getValue();
+    auto value = static_cast<float>(slider->getValue());
+    *(p_->getSize()) = value;
+    *(p_->getWidth()) = value;
+    *(p_->getHeight()) = value;
+    *(p_->getDepth()) = value;
   } else if (!widthSlider_.expired() && slider == widthSlider_.lock().get()) {
     *(p_->getWidth()) = slider->getValue();
   } else if (!heightSlider_.expired() && slider == heightSlider_.lock().get()) {
     *(p_->getHeight()) = slider->getValue();
+  } else if (!depthSlider_.expired() && slider == depthSlider_.lock().get()) {
+    *(p_->getDepth()) = slider->getValue();
   } else if (!diffuseSlider_.expired() &&
              slider == diffuseSlider_.lock().get()) {
     *(p_->getDiffuse()) = slider->getValue();
@@ -596,6 +604,7 @@ void ObjectsJuceFrontendConnector::sliderDragStarted(Slider* slider) {
              slider == distanceSlider_.lock().get()) {
     p_->getDistance()->beginChangeGesture();
   } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
+    p_->getSize()->beginChangeGesture();
     p_->getWidth()->beginChangeGesture();
     p_->getHeight()->beginChangeGesture();
     p_->getDepth()->beginChangeGesture();
@@ -626,6 +635,7 @@ void ObjectsJuceFrontendConnector::sliderDragEnded(Slider* slider) {
              slider == distanceSlider_.lock().get()) {
     p_->getDistance()->endChangeGesture();
   } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
+    p_->getSize()->endChangeGesture();
     p_->getWidth()->endChangeGesture();
     p_->getHeight()->endChangeGesture();
     p_->getDepth()->endChangeGesture();
