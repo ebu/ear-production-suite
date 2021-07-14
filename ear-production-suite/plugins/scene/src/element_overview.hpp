@@ -21,7 +21,9 @@ class ElementOverview : public Component, private Timer {
       : rotateLeftButton_(std::make_unique<EarButton>()),
         rotateRightButton_(std::make_unique<EarButton>()),
         currentViewingAngle_(180.f),
-        endViewingAngle_(180.f) {
+        endViewingAngle_(180.f),
+        dirty_(true),
+        overviewUpdate_(true) {
     rotateLeftButton_->setOffStateIcon(std::unique_ptr<Drawable>(
         Drawable::createFromImageData(binary_data::previous_icon_svg,
                                       binary_data::previous_icon_svgSize)));
@@ -64,10 +66,19 @@ class ElementOverview : public Component, private Timer {
   }
 
   void paint(Graphics& g) override {
-    {  // draw background
-      g.drawImageAt(cachedBackground_, 0, 0);
+    std::unique_lock<std::mutex> lock(dirtyMutex_);
+    if (overviewUpdate_ == false) {
+      g.drawImageAt(cachedOverview_, 0, 0);
+      return;
     }
-    {  // draw elements
+
+    Image img(Image::PixelFormat::ARGB, getWidth(), getHeight(), false);
+    Graphics glocal(img);
+
+    {  // draw background
+      glocal.drawImageAt(cachedBackground_, 0, 0);
+    }
+    if (overviewUpdate_ == true) {  // draw elements
       for (auto element : programme_.element()) {
         if (element.has_object()) {
           communication::ConnectionId id(element.object().connection_id());
@@ -78,12 +89,12 @@ class ElementOverview : public Component, private Timer {
               for (auto speaker : item.ds_metadata().speakers()) {
                 if (!speaker.is_lfe()) {
                   auto position = speaker.position();
-                  drawCircle(g, position, colour);
+                  drawCircle(glocal, position, colour);
                 }
               }
             } else if (item.has_obj_metadata()) {
               auto position = item.obj_metadata().position();
-              drawCircle(g, position, colour);
+              drawCircle(glocal, position, colour);
             }
           }
         }
@@ -96,10 +107,10 @@ class ElementOverview : public Component, private Timer {
                         .removeFromLeft(156.f)
                         .withTrimmedLeft(50.f)
                         .withTrimmedBottom(20.f);
-      g.setColour(EarColours::Sphere);
-      drawSphereInRect(g, sphere, 1.f);
-      g.setFont(EarFonts::Description);
-      g.setColour(EarColours::Label);
+      glocal.setColour(EarColours::Sphere);
+      drawSphereInRect(glocal, sphere, 1.f);
+      glocal.setFont(EarFonts::Description);
+      glocal.setColour(EarColours::Label);
       auto depthSphere = sphere.withSizeKeepingCentre(
           sphere.getWidth(), depthFactor_ * sphere.getHeight());
 
@@ -109,18 +120,21 @@ class ElementOverview : public Component, private Timer {
 
       int startIndex = getSectorIndex(endViewingAngle_);
       auto frontLabelArea = depthSphere.withY(depthSphere.getBottom() + 2.f);
-      g.drawText(labels.at(startIndex), frontLabelArea,
-                 Justification::centredTop);
+      glocal.drawText(labels.at(startIndex), frontLabelArea,
+                      Justification::centredTop);
       auto rightLabelArea = sphere.withX(sphere.getRight() + 5.f);
-      g.drawText(labels.at((startIndex + 1) % 4), rightLabelArea,
-                 Justification::left);
+      glocal.drawText(labels.at((startIndex + 1) % 4), rightLabelArea,
+                      Justification::left);
       auto backLabelArea = depthSphere.withBottom(depthSphere.getY() - 2.f);
-      g.drawText(labels.at((startIndex + 2) % 4), backLabelArea,
-                 Justification::centredBottom);
+      glocal.drawText(labels.at((startIndex + 2) % 4), backLabelArea,
+                      Justification::centredBottom);
       auto leftLabelArea = sphere.withRightX(sphere.getX() - 5.f);
-      g.drawText(labels.at((startIndex + 3) % 4), leftLabelArea,
-                 Justification::right);
+      glocal.drawText(labels.at((startIndex + 3) % 4), leftLabelArea,
+                      Justification::right);
     }
+    dirty_ = false;
+    g.drawImageAt(cachedOverview_, 0, 0);
+    cachedOverview_ = img;
   }
 
   void drawSphereInRect(Graphics& g, Rectangle<float> rect, float linewidth) {
@@ -159,9 +173,18 @@ class ElementOverview : public Component, private Timer {
   }
 
   void setProgramme(proto::Programme programme, ItemStore itemStore) {
-    programme_ = programme;
-    itemStore_ = itemStore;
-    repaint();
+    if (overviewUpdate_ == false) {
+      return;
+    }
+    std::unique_lock<std::mutex> lock(dirtyMutex_, std::defer_lock);
+    if (lock.try_lock()) {
+      if (dirty_ == false) {
+        programme_ = programme;
+        itemStore_ = itemStore;
+        repaint();
+        dirty_ = true;
+      }
+    }
   }
 
   void rotate(float angle) {
@@ -179,8 +202,14 @@ class ElementOverview : public Component, private Timer {
   }
 
   void timerCallback() override {
-    updateViewingAngle();
-    repaint();
+    std::unique_lock<std::mutex> lock(dirtyMutex_, std::defer_lock);
+    if (lock.try_lock()) {
+      updateViewingAngle();
+      if (dirty_ == false) {
+        repaint();
+        dirty_ = true;
+      }
+    }
   }
 
   void updateViewingAngle() {
@@ -199,6 +228,7 @@ class ElementOverview : public Component, private Timer {
   void resized() override {
     {
       Image img(Image::PixelFormat::ARGB, getWidth(), getHeight(), false);
+      cachedOverview_ = img;
       Graphics g(img);
 
       // draw background
@@ -270,6 +300,23 @@ class ElementOverview : public Component, private Timer {
     rotateRightButton_->setBounds(area.removeFromLeft(30));
   }
 
+  void mouseDown(const MouseEvent& event) override {
+    if (rotateLeftButton_->isMouseButtonDown() ||
+        rotateRightButton_->isMouseButtonDown()) {
+      return;
+    }
+
+    overviewUpdate_ = !overviewUpdate_;
+
+    if (overviewUpdate_ == false) {
+      rotateLeftButton_->setEnabled(false);
+      rotateRightButton_->setEnabled(false);
+    } else {
+      rotateLeftButton_->setEnabled(true);
+      rotateRightButton_->setEnabled(true);
+    }
+  }
+
  private:
   proto::Programme programme_;
   ItemStore itemStore_;
@@ -278,6 +325,7 @@ class ElementOverview : public Component, private Timer {
   std::unique_ptr<EarButton> rotateRightButton_;
 
   Image cachedBackground_;
+  Image cachedOverview_;
 
   juce::Rectangle<float> sphereArea_;
   const float depthFactor_ = 0.3f;
@@ -286,6 +334,11 @@ class ElementOverview : public Component, private Timer {
   float startViewingAngle_;
   float endViewingAngle_;
   float currentViewingAngle_;
+
+  std::mutex dirtyMutex_;
+
+  bool dirty_;
+  bool overviewUpdate_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElementOverview)
 };
