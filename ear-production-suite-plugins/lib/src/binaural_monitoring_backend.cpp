@@ -210,7 +210,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
         auto cfCount = pfData->relatedChannelFormats.size();
         totalHoaChannels += cfCount;
-
+        //totalHoaChannels = 9;
       //currently incomplete for HOA
       }
 
