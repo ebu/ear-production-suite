@@ -128,6 +128,9 @@ class BinauralMonitoringBackend {
   ui::MonitoringFrontendBackendConnector* frontendConnector_;
   std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
   communication::MonitoringControlConnection controlConnection_;
+
+  std::mutex commonDefinitionHelperMutex_;
+  AdmCommonDefinitionHelper commonDefinitionHelper{};
 };
 
 }  // namespace plugin

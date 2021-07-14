@@ -34,6 +34,8 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   controlConnection_.start(detail::SCENE_MASTER_CONTROL_ENDPOINT);
 
   listenerOrientation = std::make_shared<ListenerOrientation>();
+
+  commonDefinitionHelper.getElementRelationships(); // Save doing it later in time-critical calls
 }
 
 BinauralMonitoringBackend::~BinauralMonitoringBackend() {
@@ -205,11 +207,15 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         activeHoaIds.push_back(item.connection_id());
         //totalHoaChannels += item.hoa_metadata().???(); // TODO: Proto message
         //auto hoaId = getLatestHoaTypeMetadata(item.connection_id());
-        auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
         auto hoaId = item.hoa_metadata().hoatypeindex();
-        auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
-        auto cfCount = pfData->relatedChannelFormats.size();
-        totalHoaChannels += cfCount;
+        {
+          std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
+          // TODO: May need to revisit later - 
+          //       this is a high-frequency call but may be slow to to execute
+          auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
+          auto cfCount = pfData->relatedChannelFormats.size();
+          totalHoaChannels += cfCount;
+        }
         //totalHoaChannels = 9;
       //currently incomplete for HOA
       }
