@@ -493,6 +493,11 @@ const char* admplug::ReaperAPIImpl::GetAppVersion() const
     return ::GetAppVersion();
 }
 
+const char* admplug::ReaperAPIImpl::LocalizeString(const char* src_string, const char* section, int flagsOptional) const
+{
+    return ::LocalizeString(src_string, section, flagsOptional);
+}
+
 void ReaperAPIImpl::UpdateArrangeForAutomation() const {
   // UpdateArrange() does not force draw of automation. Flipping master track visibility does.
   std::bitset<4> mstTrkSetting(GetMasterTrackVisibility());
