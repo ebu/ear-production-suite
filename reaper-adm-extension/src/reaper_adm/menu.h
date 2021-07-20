@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <optional>
 #include "actionmanager.h"
 
 namespace admplug {
@@ -44,7 +45,6 @@ public:
 
 class TopLevelMenu : public MenuContainer {
 public:
-    virtual ~TopLevelMenu() = default;
     virtual void init(std::string menuId, HMENU menu) = 0;
     virtual void update(std::string menuId, HMENU menu) = 0;
 };
@@ -65,7 +65,7 @@ private:
 
 class SubMenu : public MenuContainer, public MenuItem {
 public:
-    SubMenu(std::string menuText);
+    explicit SubMenu(std::string menuText);
     void addTo(HMENU menu, int position) override;
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
     void update(HMENU menu) override;
@@ -80,7 +80,7 @@ private:
 
 class ReaperMenu : public TopLevelMenu {
 public:
-    ReaperMenu(std::string menuId);
+    explicit ReaperMenu(std::string menuId);
     void init(std::string menuId, HMENU menu) override;
     void update(std::string menuId, HMENU menu) override;
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
@@ -91,13 +91,15 @@ private:
 
 class RawMenu : public TopLevelMenu {
 public:
-    RawMenu(HMENU menuHandle);
+    explicit RawMenu(HMENU menuHandle);
     void init(std::string menuId, HMENU menu) override;
     void update(std::string menuId, HMENU menu) override;
     void insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserter> inserter) override;
-    std::shared_ptr<admplug::RawMenu> getMenuByText(std::string menuText);
-    std::shared_ptr<admplug::RawMenu> getMenuByPosition(int menuPosition);
-    bool checkHardcodedPosition(std::string menuText);
+    std::shared_ptr<admplug::RawMenu> getMenuByText(std::string menuText,
+                                                    std::string section,
+                                                    int fallbackPosition,
+                                                    ReaperAPI const &api);
+    int positionOfItemWithText(std::string text) const;
     void init();
 private:
     HMENU hMenu;
@@ -107,7 +109,7 @@ private:
 
 class StartOffset : public MenuInserter {
 public:
-    StartOffset(std::size_t offset);
+    explicit StartOffset(std::size_t offset);
     int getIndex(HMENU) const override;
 private:
     std::size_t offset;
@@ -115,7 +117,7 @@ private:
 
 class EndOffset : public MenuInserter {
 public:
-    EndOffset(std::size_t offset);
+    explicit EndOffset(std::size_t offset);
     int getIndex(HMENU) const override;
 private:
     std::size_t offset;
@@ -123,19 +125,24 @@ private:
 
 class AfterNamedItem : public MenuInserter {
 public:
-    AfterNamedItem(std::string itemName);
+    explicit AfterNamedItem(std::string itemName);
+    AfterNamedItem(std::string itemName, std::string section,
+                   int fallbackPosition, ReaperAPI const &api);
     int getIndex(HMENU) const override;
 private:
     std::string itemName;
+    std::optional<int> fallbackPosition;
 };
 
 class BeforeNamedItem : public MenuInserter {
 public:
-    BeforeNamedItem(std::string itemName);
+    explicit BeforeNamedItem(std::string itemName);
+  BeforeNamedItem(std::string itemName, std::string section,
+                  int fallbackPosition, ReaperAPI const &api);
     int getIndex(HMENU) const override;
 private:
     std::string itemName;
-
+    std::optional<int> fallbackPosition;
 };
 
 enum class MenuID {
@@ -158,19 +165,10 @@ public:
 
 private:
     MenuManager(ReaperAPI const* api, reaper_plugin_info_t *rec);
-    void init(std::string menuId, HMENU menu);
     std::vector<std::shared_ptr<TopLevelMenu>> menus;
     std::map<MenuID, std::string> menuIdentifiers {{
             {MenuID::MEDIA_ITEM_CONTEXT, "Media item context"}
                                                        }};
     HMENU mainMenu;
 };
-
-static const std::map<const std::string, const int> MenuTextToPostion = {
-    {"File", 0},
-    {"Insert", 3},
-    {"Project templates", 8},
-    {"Empty item", 2}
-};
-
 }

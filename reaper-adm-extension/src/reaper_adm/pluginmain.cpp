@@ -1,6 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <memory>
+#include <map>
+#include <string>
 #include "reaperhost.h"
 #include "reaperapi.h"
 #include "actionmanager.h"
@@ -49,6 +51,24 @@ struct CrtBreakAllocSetter {
 
 CrtBreakAllocSetter g_crtBreakAllocSetter;
 */
+namespace {
+#ifdef WIN32
+const std::map<const std::string, const int> defaultMenuPositions = {
+    {"&File", 0},
+    {"&Insert", 3},
+    {"Project &templates", 8},
+    {"Empty item", 2},
+    {"Group", 4}};
+}
+#else
+const std::map<const std::string, const int> defaultMenuPositions = {
+    {"&File", 1},
+    {"&Insert", 4},
+    {"Project &templates", 8},
+    {"Empty item", 2},
+    {"Group", 4}};
+}
+#endif
 
 extern "C" {
   int REAPER_PLUGIN_DLL_EXPORT REAPER_PLUGIN_ENTRYPOINT(REAPER_PLUGIN_HINSTANCE hInstance, reaper_plugin_info_t *rec)
@@ -130,8 +150,10 @@ extern "C" {
     }
 
     auto mediaContextMenu = reaper->getMenu(MenuID::MEDIA_ITEM_CONTEXT);
-    mediaContextMenu->insert(std::move(admContextMenu), std::make_shared<AfterNamedItem>("Group"));
-
+  mediaContextMenu->insert(
+      std::move(admContextMenu),
+      std::make_shared<AfterNamedItem>("Group", "common",
+                                       defaultMenuPositions.at("Group"), *api));
     // File menu
 
     auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM file");
@@ -174,27 +196,14 @@ extern "C" {
         admFileMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    std::shared_ptr<admplug::RawMenu> reaperFileMenu;
-    if (std::stof(api->GetAppVersion()) >= 6.11f) {
-        reaperFileMenu = reaperMainMenu->getMenuByText(api->LocalizeString("&File", "common", 0)); 
-        if (reaperFileMenu) {
-            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>(api->LocalizeString("Project &templates", "MENU_102", 0)));
-        }
-    } else {
-        reaperFileMenu = reaperMainMenu->getMenuByText("File");
-        if (reaperFileMenu) {
-            reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<BeforeNamedItem>("Project templates"));
-
-            // Assertions to check that the hard-coded fallback menu positions still match
-            assert(reaperMainMenu->checkHardcodedPosition("File"));
-            assert(reaperFileMenu->checkHardcodedPosition("Project templates"));
-        }
-    }
-    if (!reaperFileMenu) {
-        reaperFileMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("File"));
-        reaperFileMenu->insert(std::move(admFileMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Project templates")));
-    }
+  auto projectTemplateString = "Project &templates";
+  auto admFileMenuInserter = std::make_shared<BeforeNamedItem>(
+      projectTemplateString, "MENU_102",
+      defaultMenuPositions.at(projectTemplateString), *api);
+  auto reaperFileMenu = reaperMainMenu->getMenuByText(
+      "&File", "common", defaultMenuPositions.at("&File"), *api);
     assert(reaperFileMenu);
+  reaperFileMenu->insert(std::move(admFileMenu), admFileMenuInserter);
     reaperFileMenu->init();
 
     // Insert menu
@@ -235,26 +244,13 @@ extern "C" {
         admInsertMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
     }
 
-    std::shared_ptr<admplug::RawMenu> reaperInsertMenu;
-    if (std::stof(api->GetAppVersion()) >= 6.11f) {
-        reaperInsertMenu = reaperMainMenu->getMenuByText(api->LocalizeString("&Insert", "common", 0));
-        if (reaperInsertMenu) {
-            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>(api->LocalizeString("Empty item", "MENU_102", 0)));
-        }
-    } else {
-        reaperInsertMenu = reaperMainMenu->getMenuByText("Insert");
-        if (reaperInsertMenu) {
-            reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<AfterNamedItem>("Empty item"));
-
-            // Assertions to check that the hard-coded fallback menu positions still match
-            assert(reaperMainMenu->checkHardcodedPosition("Insert"));
-            assert(reaperInsertMenu->checkHardcodedPosition("Empty item"));
-        }
-    }
-    if (!reaperInsertMenu) {
-        reaperInsertMenu = reaperMainMenu->getMenuByPosition(MenuTextToPostion.at("Insert"));
-        reaperInsertMenu->insert(std::move(admInsertMenu), std::make_shared<StartOffset>(MenuTextToPostion.at("Empty item") + 1));
-    }
+  auto reaperInsertMenu = reaperMainMenu->getMenuByText(
+      "&Insert", "common", defaultMenuPositions.at("&Insert"), *api);
+  assert(reaperInsertMenu);
+  reaperInsertMenu->insert(std::move(admInsertMenu),
+                           std::make_shared<AfterNamedItem>(
+                               "Empty item", "MENU_102",
+                               defaultMenuPositions.at("Empty item"), *api));
     assert(reaperInsertMenu);
     reaperInsertMenu->init();
 
