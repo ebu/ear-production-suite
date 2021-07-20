@@ -70,6 +70,24 @@ namespace {
       }
       return {};
     }
+    bool supportsLocalisation(ReaperAPI const &api) {
+      return std::stof(api.GetAppVersion()) >= 6.11f;
+    }
+
+    std::string localise(std::string const &name, std::string const &section,
+                         ReaperAPI const &api) {
+      return api.LocalizeString(name.c_str(), section.c_str(), 0);
+    }
+
+    void checkDefaultItemIndex(int defaultIndex, int actualIndex) {
+      assert(defaultIndex == actualIndex);
+    }
+
+    void checkDefaultItemIndex(std::optional<int> defaultIndex, int actualIndex) {
+      if(defaultIndex) {
+        checkDefaultItemIndex(*defaultIndex, actualIndex);
+      }
+    }
 
     int findPositionOfItemWithText(HMENU menu, std::string textOrig) {
       boost::erase_all(textOrig, "&");
@@ -85,6 +103,21 @@ namespace {
         }
       }
       return -1;
+    }
+
+    int constrain(int val, int max) {
+      return std::max<int>(std::min<int>(val, max), 0);
+    }
+
+    int findInsertionPosition(HMENU menu, std::string itemName, int offset, std::optional<int> fallbackPosition) {
+      auto itemCount = GetMenuItemCount(menu);
+      auto index = findPositionOfItemWithText(menu, itemName);
+      if (index >= 0) {
+        checkDefaultItemIndex(fallbackPosition, index);
+        return constrain(itemCount, index + offset);
+      }
+      return fallbackPosition ? constrain(*fallbackPosition + offset, itemCount)
+                              : itemCount;
     }
 
     HMENU findHmenuOfItemWithText(HMENU menu, std::string text) {
@@ -223,18 +256,25 @@ void RawMenu::init()
     }
 }
 
-std::shared_ptr<RawMenu> RawMenu::getMenuByText(std::string menuText)
-{
-    auto hmenu = findHmenuOfItemWithText(hMenu, menuText);
-    if(hmenu == nullptr) return nullptr;
-    return std::make_shared<RawMenu>(hmenu);
+std::shared_ptr<RawMenu> RawMenu::getMenuByText(std::string menuText,
+                                                std::string section,
+                                                int fallbackPosition,
+                                                ReaperAPI const &api) {
+  if (std::stof(api.GetAppVersion()) >= 6.11f) {
+    auto localised = localise(menuText, section, api);
+    if(!localised.empty()) {
+      menuText = localised;
 }
-
-std::shared_ptr<RawMenu> RawMenu::getMenuByPosition(int menuPosition)
-{
-    auto hmenu = findHmenuOfItemWithPosition(hMenu, menuPosition);
-    if (hmenu == nullptr) return nullptr;
-    return std::make_shared<RawMenu>(hmenu);
+  }
+  auto submenu = findHmenuOfItemWithText(hMenu, menuText);
+  if(submenu) {
+    checkDefaultItemIndex(fallbackPosition, positionOfItemWithText(menuText));
+  }
+  if(!submenu) {
+    submenu = findHmenuOfItemWithPosition(hMenu, fallbackPosition);
+  }
+  if(!submenu) return nullptr;
+  return std::make_shared<RawMenu>(submenu);
 }
 
 void RawMenu::update(std::string, HMENU)
@@ -249,9 +289,8 @@ void RawMenu::insert(std::unique_ptr<MenuItem> item, std::shared_ptr<MenuInserte
     items.emplace_back(std::move(item), inserter);
 }
 
-bool RawMenu::checkHardcodedPosition(std::string itemText)
-{
-    return findPositionOfItemWithText(hMenu, itemText) == MenuTextToPostion.at(itemText);
+int RawMenu::positionOfItemWithText(std::string text) const {
+  return findPositionOfItemWithText(hMenu, std::move(text));
 }
 
 SubMenu::SubMenu(std::string menuText) :
@@ -392,14 +431,17 @@ AfterNamedItem::AfterNamedItem(std::string itemName) : itemName{itemName}
 {
 }
 
+
+
+AfterNamedItem::AfterNamedItem(std::string itemName, std::string section,
+                               int fallbackPosition, ReaperAPI const &api)
+    : itemName{supportsLocalisation(api) ? localise(itemName, section, api)
+                                         : itemName},
+      fallbackPosition{fallbackPosition} {}
+
 int AfterNamedItem::getIndex(HMENU menu) const
 {
-    auto itemCount = GetMenuItemCount(menu);
-    auto index = findPositionOfItemWithText(menu, itemName);
-    if (index >= 0) {
-        return std::min<int>(itemCount, index + 1);
-    }
-    return itemCount;
+    return findInsertionPosition(menu, itemName, 1, fallbackPosition);
 }
 
 BeforeNamedItem::BeforeNamedItem(std::string itemName) : itemName{itemName}
@@ -407,9 +449,13 @@ BeforeNamedItem::BeforeNamedItem(std::string itemName) : itemName{itemName}
 
 }
 
+BeforeNamedItem::BeforeNamedItem(std::string itemName, std::string section,
+                               int fallbackPosition, ReaperAPI const &api)
+    : itemName{supportsLocalisation(api) ? localise(itemName, section, api)
+                                         : itemName},
+      fallbackPosition{fallbackPosition} {}
+
 int BeforeNamedItem::getIndex(HMENU menu) const
 {
-    auto index = findPositionOfItemWithText(menu, itemName);
-    index = std::max<int>(0, index);
-    return index;
+  return findInsertionPosition(menu, itemName, 0, fallbackPosition);
 }
