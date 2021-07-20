@@ -21,7 +21,7 @@ using namespace admplug;
 #define TRACK_MAPPING_MIN -1
 #define TRACK_MAPPING_MAX 63
 #define SPEAKER_LAYOUT_MIN -1
-#define SPEAKER_LAYOUT_MAX 13
+#define SPEAKER_LAYOUT_MAX 21
 
 namespace {
 
@@ -93,18 +93,26 @@ namespace {
     std::vector<std::string> speakerLayoutIndexToPackFormatMapping {
         "AP_00010001",// mono
         "AP_00010002",// stereo
+        "AP_0001000a",// LCR
+        "AP_0001000b",// 0+4+0
+        "AP_0001000c",// 5.0
         "AP_00010003",// 5.1
+        "AP_0001000d",// 0+6+0
+        "AP_0001000e",// 0+7+0 Front
+        "AP_0001000f",// 0+7+0 Back
         "AP_00010004",//"2+5+0","5.1+2H" - 2 options, but this one has "U+030" + "U-030"
+        "AP_00010012",//0+7+0 side
+        "AP_00010013",//2+5+0
+        "AP_00010014",//2+7+0 screen
+        "AP_00010016",//2+7+0
         "AP_00010005",//"4+5+0"
         "AP_00010010",//"4+5+1"
         "AP_00010007",//"3+7+0"
+        "AP_00010015",
+        "AP_00010017",
         "AP_00010008",//"4+9+0"
         "AP_00010009",//"9+10+3+
-        "AP_0001000f",//"0+7+0","7.1"  - 3 options, but this one has "M+090" + "M-090" + "M+135" + "M-135"
-        "AP_00010017",//"4+7+0","7.1+4H" - 2 options, but this one has "M+090"+ "M-090" + "M+135" + "M-135" + "U+045" + "U-045" + "U+135" + "U-135"
-        "AP_00010016",// 2+7+0 - Mid + top side surrounds
-        "AP_00010004",// 0+3+0 LCR
-        "AP_0001000c"// 0+5+0 5.0
+        "AP_00010011" // 9+9+0
     };
 
     std::optional<std::string> getPackFormatIdFromSpeakerLayoutIndex(int layoutIndex)
