@@ -48,95 +48,92 @@ Substituting paths as needed if you have not installed to the default locations.
 
 ## Building from source
 
-### Dependencies
+### Using vcpkg and cmake presets
 
-Required tools:
+The recommended way to build the plugins is via CMake's preset mechanism. Before you can make use of that you'll need a few tools.
+
 - Compiler with C++14 support
-- [CMake](https://www.cmake.org) build systerm (version 3.8 or higher)
+- [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.8 or higher for manual build)
+- [Ninja](https://ninja-build.org/)
 
-Required additional libraries:
-- [JUCE](https://github.com/WeAreROLI/JUCE), tested with version 5.4.3
-- [VST3 SDK](https://github.com/steinbergmedia/vst3sdk), tested with version 3.6.12
-- [Boost](https://www.boost.org) (version 1.66 or higher)
-- protobuf
-- nng
-- spdlog
-- yaml-cpp
+Note that 3.21.0 is a very recent revision of CMake, if you already have it installed you may need to upgrade.
 
-### Building from source
-
-#### Get required SDKs
-
-By default the required SDKs will be included from their location in submodules. If you would like to include them from elsewhere follow the steps below:
-
-If not installed already, get the dependencies first, store them in some arbitrary directory,
-in the following referenced by `$PATH_TO_SDKS`.
-
-```
-mkdir $PATH_TO_SDKS
-git clone --branch vstsdk3612_03_12_2018_build_67 --recursive https://github.com/steinbergmedia/vst3sdk.git $PATH_TO_SDKS/VST3
-git clone --branch 5.4.3 https://github.com/WeAreROLI/JUCE.git $PATH_TO_SDKS/JUCE
+### MacOS
+##### Build environment
+The easiest way to set up a suitable environment is to follow the [homebrew](https://brew.sh/) setup instructions. Once you have a working homebrew:
+```shell
+brew update
+brew install cmake ninja
 ```
 
-#### Install library dependencies
+#### Building
 
-It is recommended to install the required dependencies using a package manager:
-  - [Vcpkg](https://github.com/microsoft/vcpkg) on Windows: `vcpkg install protobuf nng spdlog yaml-cpp boost`
-  - [Homebrew](https://brew.sh/) on OSX: `brew install protobuf nng spdlog yaml-cpp`
-
-Please **note** that the *default and preferred way* on Windows is to link with the static windows runtime.
-This means that you need to use a suitable `vcpkg` target triplet, e.g. `VCPKG_TARGET_TRIPLET=x64-windows-static` or `VCPKG_TARGET_TRIPLET=x86-windows-static`.
-
-#### Build
+```shell
+git clone --recursive https://github.com/ebu/ear-production-suite.git
+cd ear-production-suite
+cmake --preset macos-default         # configures project, downloads & builds dependencies
+cmake --build --preset macos-default # builds project
 ```
-mkdir build
-cd build
-cmake .. 
-cmake --build .
+#### Installing
+```shell
+cmake --build --preset macos-default --target install
 ```
 
-If you would like to specify custom sdk locations, you can do so when configuring by passing the following parameters to cmake
+The location of the installed VST3 plugins will be 
+```shell
+~/Library/Audio/Plug-Ins/VST3/
 ```
-cmake .. -DJUCE_ROOT_DIR=$PATH_TO_SDKS/JUCE -DVST3_ROOT_DIR=$PATH_TO_SDKS/VST3
-```
-
-Instead of specifying the paths to JUCE / VST3 SDKs on the command line, you
-may also set the environment variables `JUCE_ROOT_DIR` and `VST3_ROOT_DIR` accordingly.
-
-Depending on your build setup and toolchain, you may need to provide additional options, e.g. to configure and use `Vcpkg` etc. Please consult the documentation of those tools on how to integrate and them with `CMake`.
-
-#### Usage
-
-The build VST3 plugins can be found within the build folder: 
-
-`build/ear-production-suite/VST3` For the ear production suite plugins
-`build/reaper_adm_export/VST3` For the adm export plugin used with other plugin suites
-
-##### OSX
-
-To use the plugins, one can either copy the plugins to one of the standard plugin locations
- - `/Library/Audio/Plug-Ins/VST3`
- - `~/Library/Audio/Plug-Ins/VST3`
-
-or one has to adjust the VST3 plugin search path of the respective audio workstation (DAW) so the plugins can be found.
-
-To create **standalone** plugin bundles (i.e. plugins that can be used on non-development machines without installing the dependencies first), the cmake installation step must be run within the build folder:
-```
-cd build
-cmake --build . --target install
+The location of the installed REAPER extension will be
+```shell
+~/Library/Application Support/REAPER/UserPlugins/
 ```
 
-##### Windows
+### Windows
+[Microsoft Visual Studio 2019](https://visualstudio.microsoft.com/vs/), installed with C++ support provides a suitable compiler. 
 
-To use the plugins, one can either copy the plugins to the system plugin location.
- - `C:\Program Files\Common Files\VST3` 
+You'll need to install [CMake](https://www.cmake.org) and [Ninja](https://ninja-build.org/) manually, add their installation locations to your PATH. Then, execute the following steps from a Visual Studio x64 developer command prompt.
 
-It is also possible to add the `build/VST3` folder  the VST3 plugin search path of the respective audio workstation (DAW) so the plugins can be found.
+#### Building
 
-**Note**: It is **required** to amend the `PATH` environment variable so the library dependencies can be found.
-That means that after building the plugins from source using `Vcpkg`, the following directories
- must be added:
-- `build\ear-plugin-suite\VST3`
-- `build\ear-plugin-suite\lib`
+```bash
+git clone --recursive https://github.com/ebu/ear-production-suite.git
+cd ear-production-suite
+cmake --preset windows-default         # configures project, downloads & builds dependencies
+cmake --build --preset windows-default # builds project
+```
+#### Installing
+From an administrator command prompt, run
+```bash
+cmake --build --preset windows-default --target install
+```
 
-If the installation build step has been run, only the installation target directory must be added to the `PATH` variable.
+Both VST3 plugins and REAPER extension will be installed to your Windows Program Files directory.
+The location of the installed VST3 plugins will be
+```shell
+<Program Files>/CommonFiles/VST3/
+```
+The location of the installed REAPER extension will be
+```shell
+<Program Files>/REAPER (x64)/Plugins/
+```
+
+### Customising installation location
+
+If the defaults do not suit you, they can be customised with two CMake variables
+
+```shell
+EPS_PLUGIN_INSTALL_PREFIX  # This specifies the directory containing the VST3 subdirectory
+                           # to which the plugins should be installed
+````
+```shell
+EPS_EXTENSION_INSTALL_PREFIX  # This specifies the directory containing the REAPER plugins subdirectory
+                              # to which the extension should be installed
+```
+If manually set, both of these variables must end with a trailing `/`.
+
+They should be provided at configure stage using CMake's `-D` flag (set cache variable). For example:
+
+```shell
+cmake --preset macos-default -DEPS_PLUGIN_INSTALL_PREFIX="/a/hidden/place/" -DEPS_EXTENSION_INSTALL_PREFIX="/top/secret/location/"
+```
+

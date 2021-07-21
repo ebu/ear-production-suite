@@ -1,0 +1,270 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja"
+    },
+    {
+      "name": "release-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Release"
+        }
+      }
+    },
+    {
+      "name": "debug-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        }
+      }
+    },
+    {
+      "name": "relwithdebinfo-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/RelWithDebInfo",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "RelWithDebInfo"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "PATH",
+          "value": "${sourceDir}/submodules/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        }
+      }
+    },
+    {
+      "name": "macos-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_OSX_DEPLOYMENT_TARGET": {
+          "type": "STRING",
+          "value": "10.14"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "environment": {
+        "CXX": "cl.exe",
+        "CC": "cl.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "packaging-base",
+      "hidden": true,
+      "inherits": [
+        "ninja-base"
+      ],
+      "cacheVariables": {
+        "EPS_BUILD_PACKAGE": {
+          "type": "BOOL",
+          "value": true
+        }
+      }
+    },
+    {
+      "name": "vcpkg-windows-x64",
+      "hidden": true,
+      "inherits": ["vcpkg-base", "windows-base"],
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-windows-static"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-macos-x64",
+      "hidden": true,
+      "inherits": [
+        "vcpkg-base",
+        "macos-base"
+      ],
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-osx-10_14"
+        },
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
+      }
+    },
+    {
+      "name": "windows-default",
+      "displayName": "Default windows build",
+      "description": "Release build for windows using Ninja and vcpkg",
+      "inherits": [
+        "ninja-base",
+        "vcpkg-windows-x64",
+        "release-base"
+      ]
+    },
+    {
+      "name": "macos-default",
+      "displayName": "Default macOS Release build",
+      "description": "Release build for macOS using Ninja and vcpkg",
+      "inherits": [
+        "ninja-base",
+        "vcpkg-macos-x64",
+        "release-base"
+      ]
+    },
+    {
+      "name": "windows-packaging-release",
+      "displayName": "Windows x64 Release packaging configuration",
+      "description": "Packaging build for Windows using Ninja generator",
+      "inherits": [
+        "vcpkg-windows-x64",
+        "packaging-base",
+        "release-base"
+      ]
+    },
+    {
+      "name": "windows-packaging-relwithdebinfo",
+      "displayName": "Windows x64 packaging Release build with Debug symbols",
+      "description": "Packaging build for Windows with Debug symbols using Ninja generator",
+      "inherits": [
+        "vcpkg-windows-x64",
+        "packaging-base",
+        "relwithdebinfo-base"
+      ]
+    },
+    {
+      "name": "macos-packaging-release",
+      "displayName": "macOS x64 packaging configuration",
+      "description": "Packaging build for macOS 10.14+ using Ninja generator",
+      "inherits": [
+        "vcpkg-macos-x64",
+        "packaging-base",
+        "release-base"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "macos",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-default",
+      "configurePreset": "windows-default",
+      "inherits": "windows"
+    },
+    {
+      "name": "macos-default",
+      "configurePreset": "macos-default",
+      "inherits": "macos"
+    },
+    {
+      "name": "windows-packaging-release",
+      "configurePreset": "windows-packaging-release",
+      "inherits": "windows"
+    },
+    {
+      "name": "windows-packaging-relwithdebinfo",
+      "configurePreset": "windows-packaging-relwithdebinfo",
+      "inherits": "windows"
+    },
+    {
+      "name": "macos-packaging-release",
+      "configurePreset": "macos-packaging-release",
+      "inherits": "macos"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-config",
+      "hidden": true,
+      "output": {"outputOnFailure": true},
+      "execution": {"noTestsAction": "error"}
+    },
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "macos",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-default",
+      "configurePreset": "windows-default",
+      "inherits": ["windows", "test-config"]
+    },
+    {
+      "name": "macos-default",
+      "configurePreset": "macos-default",
+      "inherits": ["macos", "test-config"]
+    },
+    {
+      "name": "windows-packaging-release",
+      "configurePreset": "windows-packaging-release",
+      "inherits": ["windows", "test-config"]
+    },
+    {
+      "name": "windows-packaging-relwithdebinfo",
+      "configurePreset": "windows-packaging-relwithdebinfo",
+      "inherits": ["windows", "test-config"]
+    },
+    {
+      "name": "macos-packaging-release",
+      "configurePreset": "macos-packaging-release",
+      "inherits": ["macos", "test-config"]
+    }
+  ]
+}
