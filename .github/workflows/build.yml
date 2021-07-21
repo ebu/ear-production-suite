@@ -1,77 +1,66 @@
 name: Build
-on: [push, pull_request]
+# Run workflow when manually triggered, part of a pull request or on a tag push (release)
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     env:
+      CCACHE_WIN_VERSION: 4.2.1
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPRESS: 'true'
-      CCACHE_COMPRESSLEVEL: '6'
+      CCACHE_COMPRESSLEVEL: '5'
       CCACHE_MAXSIZE: '500M'
-      CCACHE_WIN_VERSION: 3.7.7
-      MACOSX_DEPLOYMENT_TARGET: 10.12
+      CCACHE_BASEDIR: '${{ github.workspace }}'
+      VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
+      VCPKG_CACHE_LOCATION: '${{ github.workspace }}/vcpkg_cache'
     strategy:
       matrix:
         config:
           - name: "Windows Latest MSVC"
             os: windows-latest
             package: true
-            vcpkg_toolchain: x64-windows-static
-            cmake_config: >-
-              -DEPS_BUILD_PACKAGE=ON
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache
-              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-              -DCMAKE_BUILD_TYPE=Release
-              -GNinja        
-          - name: "Windows Latest MSVC RelWithDebInfo" 
+            cmake_preset: "windows-packaging-release"
+            vcpkg_triplet: x64-windows-static
+          - name: "Windows Latest MSVC RelWithDebInfo"
             os: windows-latest
             package: true
-            vcpkg_toolchain: x64-windows-static 
-            cmake_config: >-
-              -DEPS_BUILD_PACKAGE=ON
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache
-              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-              -DCMAKE_BUILD_TYPE=RelWithDebInfo
-              -GNinja
+            cmake_preset: "windows-packaging-relwithdebinfo"
+            vcpkg_triplet: x64-windows-static
           - name: "macOS Latest Clang"
             os: macos-latest
             package: true
-            vcpkg_toolchain: x64-osx
-            cmake_config: >-
-              -DEPS_BUILD_PACKAGE=ON
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache
-              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-              -DCMAKE_BUILD_TYPE=Release
-              -DCMAKE_OSX_DEPLOYMENT_TARGET="10.12"
-              -GNinja
+            cmake_preset: "macos-packaging-release"
+            vcpkg_triplet: x64-osx-10_14
     steps:
-      # checkout to workspace
-      - uses: actions/checkout@v2
+      - name: 'Checkout repo recursively.'
+        uses: actions/checkout@v2
         with:
           submodules: recursive
-      # Install latest CMake.
-      - uses: lukka/get-cmake@latest
 
-      # Restore from cache the previously built ports. If "cache miss", then provision vcpkg, install desired ports, finally cache everything for the next run.
-      - name: Restore from cache and run vcpkg
-        uses: lukka/run-vcpkg@v4
-        env: 
-          vcpkgResponseFile: '${{github.workspace}}/response_file.txt'
+      - name: 'Install ninja-build tool.'
+        uses: seanmiddleditch/gha-setup-ninja@v3
+
+      - name: 'Create vcpkg cache dir.'
+        run: cmake -E make_directory ${{ env.VCPKG_CACHE_LOCATION }}
+
+      # See https://github.com/lukka/CppBuildTasks-Validation/blob/master/.github/workflows/hosted-pure-workflow.yml
+      # We use cache key from above, possibly redundant due to vcpkg's own hashing, but it doesn't hurt while we're
+      # still using a binary cache per repo/triplet rather than a global package repo.
+      - name: 'Restore vcpkg and its artifacts.'
+        uses: actions/cache@v2
         with:
-          # Response file stored in source control, it provides the list of ports and triplet(s).
-          vcpkgArguments: '@${{ env.vcpkgResponseFile }} --triplet ${{ matrix.config.vcpkg_toolchain }}'
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/submodules/vcpkg'
-          # Since the cache must be invalidated when content of the response file changes, let's
-          # compute its hash and append this to the computed cache's key.
-          appendedCacheKey: ${{ hashFiles(env.vcpkgResponseFile) }}
-      
-      - name: 'Install ubuntu dependencies'
-        if: matrix.config.os == 'ubuntu-20.04'
-        run: sudo apt-get update && sudo apt-get install ccache libboost-dev libboost-filesystem-dev libboost-math-dev libboost-mpi-dev protobuf-compiler libprotobuf-dev libnng-dev libspdlog-dev libyaml-cpp-dev libasound2-dev 
-      
-      - name: 'Install ccache on windows'
+          path: ${{ env.VCPKG_CACHE_LOCATION }}
+          key: |
+            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}-${{ matrix.config.vcpkg_triplet }}-invalidate
+
+      - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
         shell: cmake -P {0}
         run: |
@@ -79,48 +68,39 @@ jobs:
           file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
         working-directory: ${{ runner.workspace }}
-        
-      - name: 'Config env for ccache on windows'
+
+      - name: 'Windows: Add ccache location to PATH.'
         if: matrix.config.os == 'windows-latest'
         run: |
           echo "${{ runner.workspace }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          echo "CCACHE_BASEDIR=${{ github.workspace }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "CCACHE_DIR=${{ github.workspace }}/.ccache" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      
-      - name: 'Install ccache on macos'
+
+      - name: 'macOS: Install ccache.'
         if: matrix.config.os == 'macos-latest'
         run: |
           brew install ccache
-          
-      - name: 'Config env for ccache on macos'
-        if: matrix.config.os == 'macos-latest'
-        run: |
-          echo "${{ runner.workspace }}" >> $GITHUB_PATH
-          echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV
-          echo "CCACHE_DIR=${{ github.workspace }}/.ccache" >> $GITHUB_ENV
-          
-      - name: Prepare ccache timestamp
+
+      - name: 'Prepare ccache timestamp.'
         id: ccache_cache_timestamp
         shell: cmake -P {0}
         run: |
           string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
           message("::set-output name=timestamp::${current_date}")
 
-      - name: ccache cache files
-        uses: actions/cache@v1.1.0
+      - name: 'Cache ccache files.'
+        uses: actions/cache@v2
         with:
-          path: ${{ runner.workspace }}/.ccache
+          path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-ccache-
-              
-      - name: 'zero ccache stats'
+
+      - name: 'Zero ccache stats.'
         run: ccache -z
-        
-      - name: 'print ccache config'
+
+      - name: 'Print ccache config.'
         run: ccache -p
 
-      - name: 'Set install prefix'
+      - name: 'Set install prefix.'
         id: cmake_install_prefix
         env:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
@@ -134,38 +114,41 @@ jobs:
           message("::set-output name=install_prefix::${PREFIX}")
           message("::set-output name=install_dir::${INSTALL_DIR}")
 
-      - name: 'Build with CMake and Ninja'
-        env:
-          CCACHE_BASEDIR: '${{ github.workspace }}'
-          CCACHE_DIR: '${{ runner.workspace }}/.ccache'
-          CCACHE_COMPRESS: 'true'
-          CCACHE_COMPRESSLEVEL: '6'
-          CCACHE_MAXSIZE: '500M'
-        uses: lukka/run-cmake@v3
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          useVcpkgToolchainFile: ${{ matrix.config.os != 'ubuntu*' }}
-          buildDirectory: '${{ runner.workspace }}/b/ninja'
-          cmakeAppendedArgs: '-DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" ${{ matrix.config.cmake_config }}'
+      - name: 'Windows: set up developer environment'
+        uses: ilammy/msvc-dev-cmd@v1
+        if: matrix.config.os == 'windows-latest'
 
-      - name: 'print ccache stats'
+      - name: 'Configure with CMake, vcpkg and ccmake.'
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}"
+        env:
+          # See https://vcpkg.io/en/docs/users/binarycaching.html for syntax of this variable. We want to clear out
+          # the default locations and both restore from and save to our custom .vcpkg directory.
+          VCPKG_BINARY_SOURCES: 'clear;files,${{ env.VCPKG_CACHE_LOCATION }},readwrite'
+          CMAKE_C_COMPILER_LAUNCHER: 'ccache'
+          CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
+
+        # This is for the windows relwithdebinfo build as otherwise we run out of disk space
+      - name: 'Clean up vcpkg temporary files.'
+        run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
+
+      - name: 'Build using CMake and Ninja via CMake preset.'
+        run: cmake --build --preset ${{ matrix.config.cmake_preset }}
+
+      - name: 'Print ccache stats.'
         run: ccache -s
 
-      - name: 'Run tests'
-        run: ctest . --output-on-failure
-        working-directory: '${{ runner.workspace }}/b/ninja'
+      - name: 'Run tests.'
+        run: ctest --preset '${{ matrix.config.cmake_preset }}'
 
-      - name: 'Install to output dir'
+      - name: 'Install to output dir.'
         if: ${{ matrix.config.package }}
         run: |
-          cmake -E make_directory ${{ steps.cmake_install_prefix.outputs.install_prefix }} && cmake --install .
-        working-directory: '${{ runner.workspace }}/b/ninja'
+          cmake -E make_directory "${{ steps.cmake_install_prefix.outputs.install_prefix }}"
+          cmake --build --preset ${{ matrix.config.cmake_preset }} --target install
 
-      - name: 'upload output dir as build artifact'
+      - name: 'Upload output dir as build artifact.'
         if: ${{ matrix.config.package }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
-
