@@ -56,7 +56,7 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
 void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
                                                  size_t maxChannels) {
   if(!bearRenderer) return;
-
+  auto test = listenerQuatsDirty;
   if (listenerQuatsDirty) {
     std::lock_guard<std::mutex> lock(bearListenerMutex_);
     bearListener.set_orientation_quaternion(listenerQuats);
@@ -146,7 +146,7 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
   hoaChannelMappings.push_back(channelNum);
-  return bearRenderer->add_hoa_block(dsChannelMappings.size() - 1,
+  return bearRenderer->add_hoa_block(hoaChannelMappings.size() - 1,
                                      bearMetadata);
 }
 

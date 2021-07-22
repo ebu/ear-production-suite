@@ -242,10 +242,8 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   for (auto& connId : hoaIds) {
     auto md = backend_->getLatestHoaTypeMetadata(connId);
     if (md->startingChannel >= 0) {
-      for (int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(md->startingChannel + index,
-                                     &(md->earMetadata[index]));
-      }
+        processor_->pushBearMetadata(md->startingChannel,
+                                     &(md->earMetadata));
     }
   }
 

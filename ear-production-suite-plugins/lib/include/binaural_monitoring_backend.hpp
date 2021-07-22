@@ -85,7 +85,7 @@ class BinauralMonitoringBackend {
 
   struct HoaEarMetadataAndRouting {
     int startingChannel;
-    std::vector<ear::HOATypeMetadata> earMetadata;
+    ear::HOATypeMetadata earMetadata;
   };
 
   std::optional<ObjectsEarMetadataAndRouting> getLatestObjectsTypeMetadata(
