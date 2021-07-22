@@ -64,8 +64,8 @@ struct EpsToEarMetadataConverter {
       auto bfData = cfData[channelNum]->channelFormat->getElements<adm::AudioBlockFormatHoa>();
       int order = bfData[0].get<adm::Order>().get();
       int degree = bfData[0].get<adm::Degree>().get();
-      earMetadata.degrees.push_back(degree);
-      earMetadata.orders.push_back(order);
+      earMetadata.degrees[channelNum] = degree;
+      earMetadata.orders[channelNum] = order;
 
       if (channelNum == 0) {
         std::string normalisation = bfData[0].get<adm::Normalization>().get();

@@ -142,10 +142,17 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(
 bool BinauralMonitoringAudioProcessor::pushBearMetadata(
     size_t channelNum, ear::HOATypeMetadata *metadata) {
   bear::HOAInput bearMetadata;
+  bearMetadata.channels.reserve(metadata->degrees.size());
+
+  for (int i = 0; i < metadata->degrees.size(); i++) {
+    bearMetadata.channels.push_back(channelNum + i);
+    hoaChannelMappings.push_back(channelNum + i);
+  }
+
   bearMetadata.rtime = metadataRtime;
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
-  hoaChannelMappings.push_back(channelNum);
+
   return bearRenderer->add_hoa_block(hoaChannelMappings.size() - 1,
                                      bearMetadata);
 }
