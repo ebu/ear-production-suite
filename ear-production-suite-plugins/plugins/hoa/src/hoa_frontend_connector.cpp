@@ -220,13 +220,13 @@ void HoaJuceFrontendConnector::setBottomLayerValueBox(
   layer->setHighlightColour(cachedColour_);
   layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
   bottomLayer_ = layer;
-}
+}*/
 void HoaJuceFrontendConnector::setChannelGainsValueBox(
     std::shared_ptr<ValueBoxChannelGain> gains) {
-  gains->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
+  gains->setHoaType(cachedHoaType_);
   channelGains_ = gains;
 }
-*/
+
 
 void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this will be called from JUCE interface and then it notifies to implementation agnostic front end
     int parameterIndex, float newValue) {

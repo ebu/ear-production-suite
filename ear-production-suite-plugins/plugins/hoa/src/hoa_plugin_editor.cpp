@@ -7,6 +7,7 @@
 #include "hoa_plugin_processor.hpp"
 #include "hoa_frontend_connector.hpp"
 
+
 using namespace ear::plugin::ui;
 
 HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
@@ -18,9 +19,10 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
 
 
-  //ME here we set what is in the main box, these are all grouped together in a value_box_main object
+  //ME here we set what is in the main box, these are all grouped together in a value_box_main 
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
+  
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
@@ -38,10 +40,10 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   p->getFrontendConnector()->setMiddleLayerValueBox(
       content_->middleLayerValueBox);
   p->getFrontendConnector()->setBottomLayerValueBox(
-      content_->bottomLayerValueBox);
+      content_->bottomLayerValueBox);*/
   p->getFrontendConnector()->setChannelGainsValueBox(
       content_->channelGainValueBox);
-  */
+  
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);
   viewport_->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId,

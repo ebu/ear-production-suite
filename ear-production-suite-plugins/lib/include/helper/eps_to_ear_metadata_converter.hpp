@@ -1,7 +1,7 @@
 #pragma once
 
 #include "helper/protobuf_utilities.hpp"
-#include "../../../common_helpers/common_definition_helper.h"
+#include "helper/common_definition_helper.h"
 
 namespace ear {
 namespace plugin {
@@ -59,7 +59,7 @@ struct EpsToEarMetadataConverter {
     ear::HOATypeMetadata earMetadata;
     earMetadata.degrees.resize(cfData.size());
     earMetadata.orders.resize(cfData.size());
-    
+
     for (int channelNum = 0; channelNum < cfData.size(); channelNum++) {
       auto bfData = cfData[channelNum]->channelFormat->getElements<adm::AudioBlockFormatHoa>();
       int order = bfData[0].get<adm::Order>().get();
@@ -76,7 +76,7 @@ struct EpsToEarMetadataConverter {
   }
   /*
   //ME ADDED THIS IN THE IMAGE OF OBJECT RATHER THAN DS. NOT SURE IF THIS IS RIGHT, MAY NEED REWORKING
-  static ear::HoaTypeMetadata convert(//FIRST NEED TO ADD SUPPORT FOR HOATYPE METADATA, POTENTIALLY IN METADATA.HPP? 
+  static ear::HoaTypeMetadata convert(//FIRST NEED TO ADD SUPPORT FOR HOATYPE METADATA, POTENTIALLY IN METADATA.HPP?
       const proto::ObjectsTypeMetadata &epsMetadata) {
     ear::HoaTypeMetadata earMetadata;
     //earMetadata.gain = epsMetadata.gain();
@@ -93,7 +93,7 @@ struct EpsToEarMetadataConverter {
     return earMetadata;
     //ME END
     */
-    
+
 };
 
 }  // namespace plugin

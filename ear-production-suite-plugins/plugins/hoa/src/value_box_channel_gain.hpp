@@ -2,14 +2,14 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_slider.hpp"
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/ear_button.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/components/look_and_feel/slider.hpp"
+#include "components/ear_slider.hpp"
+#include "components/level_meter.hpp"
+#include "components/ear_button.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/slider.hpp"
 #include "channel_gains_box.hpp"
-#include "speaker_setups.hpp"
+//#include "speaker_setups.hpp"
 
 namespace ear {
 namespace plugin {
@@ -42,7 +42,7 @@ class ValueBoxChannelGain : public Component {
     channels13to18Button_->setButtonText(String::fromUTF8("13–18"));
     channels19to24Button_->setButtonText(String::fromUTF8("19–24"));
 
-    clearSpeakerSetup();
+    clearHoaSetup();
 
     channels1to6Button_->onClick = [this]() { this->selectChannelGainsTab(0); };
     channels7to12Button_->onClick = [this]() {
@@ -104,7 +104,7 @@ class ValueBoxChannelGain : public Component {
     channelGainsBox19to24_->setBounds(area.reduced(0, 10));
   }
 
-  void clearSpeakerSetup() {
+  void clearHoaSetup() {
     channelGainsBox1to6_->removeAllChannelGains();
     channelGainsBox7to12_->removeAllChannelGains();
     channelGainsBox13to18_->removeAllChannelGains();
@@ -131,18 +131,26 @@ class ValueBoxChannelGain : public Component {
     channelLinkButton_->setEnabled(false);
     channelLinkButton_->setAlpha(Emphasis::disabled);
   }
+  void setHoaType(int hoaId) {
+    clearHoaSetup();
+    auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+    auto elementRelationships =
+          commonDefinitionHelper->getElementRelationships();
+    auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
+    size_t cfCount(0);
+    if (pfData) {
+      cfCount = static_cast<size_t>(pfData->relatedChannelFormats.size());
+    }
 
-  void setSpeakerSetup(SpeakerSetup speakerSetup) {
-    clearSpeakerSetup();
-    for (int i = 0; i < speakerSetup.speakers.size(); ++i) {
+    for (int i = 0; i < cfCount; ++i) {
       channelGains_.push_back(
-          std::make_unique<ChannelGain>(speakerSetup.speakers.at(i).spLabel));
+          std::make_unique<ChannelGain>(std::to_string(i)));
       channelGains_.back()->getLevelMeter()->setMeter(levelMeter_, i);
       if (i < 6) {
         channelGainsBox1to6_->addChannelGain(channelGains_.back().get());
       } else if (i < 12) {
         channelGainsBox7to12_->addChannelGain(channelGains_.back().get());
-      } else if (i < 18) {
+      } else  if (i < 18) {
         channelGainsBox13to18_->addChannelGain(channelGains_.back().get());
       } else {
         channelGainsBox19to24_->addChannelGain(channelGains_.back().get());
@@ -151,21 +159,21 @@ class ValueBoxChannelGain : public Component {
 
     channels1to6Button_->setEnabled(true);
     channels1to6Button_->setAlpha(Emphasis::full);
-    if (speakerSetup.speakers.size() > 6) {
+    if (cfCount > 6) {
       channels7to12Button_->setEnabled(true);
       channels7to12Button_->setAlpha(Emphasis::full);
     }
-    if (speakerSetup.speakers.size() > 12) {
+    if (cfCount > 12) {
       channels13to18Button_->setEnabled(true);
       channels13to18Button_->setAlpha(Emphasis::full);
     }
-    if (speakerSetup.speakers.size() > 18) {
+    if (cfCount > 18) {
       channels19to24Button_->setEnabled(true);
       channels19to24Button_->setAlpha(Emphasis::full);
     }
 
-    // channelLinkButton_->setEnabled(true);
-    // channelLinkButton_->setAlpha(Emphasis::full);
+    channelLinkButton_->setEnabled(true);
+    channelLinkButton_->setAlpha(Emphasis::full);
     linkChannels();
 
     selectChannelGainsTab(0);
@@ -247,6 +255,8 @@ class ValueBoxChannelGain : public Component {
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox19to24_;
 
   std::unique_ptr<ear::plugin::ui::EarButton> channelLinkButton_;
+
+  //std::mutex commonDefinitionHelperMutex_;
 
   const float labelWidth_ = 71.f;
   const float labelPaddingBottom_ = 0.f;

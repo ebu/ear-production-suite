@@ -12,11 +12,10 @@
 /* Old DS code
 // These were the individual UI control panels in the DS UI
 // We need a similar structure for HOA plugin
-#include "value_box_channel_gain.hpp"
 #include "value_box_speaker_layer.hpp"
 */
 #include "value_box_main.hpp"
-
+#include "value_box_channel_gain.hpp"
 #include <memory>
 
 namespace ear {
@@ -33,10 +32,9 @@ class HoaComponent : public Component,
         onBoardingOverlay(std::make_unique<Overlay>()),
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
+        channelGainValueBox(std::make_shared<ValueBoxChannelGain>(p->getLevelMeter())),
         /* Old DS Code
-        // We want to put our new component panels in here
-        channelGainValueBox(
-            std::make_shared<ValueBoxChannelGain>(p->getLevelMeter())),
+            // We want to put our new component panels in here
         upperLayerValueBox(
             std::make_shared<ValueBoxSpeakerLayer>("Upper Layer")),
         middleLayerValueBox(
@@ -74,11 +72,9 @@ class HoaComponent : public Component,
     addChildComponent(onBoardingOverlay.get());
 
     addAndMakeVisible(mainValueBox.get());
-
+    addAndMakeVisible(channelGainValueBox.get());
     /* Old DS code
     // Add components to the UI here
-    addAndMakeVisible(channelGainValueBox.get());
-
     upperLayerValueBox->setLayer(ear::plugin::Layer::upper);
     middleLayerValueBox->setLayer(ear::plugin::Layer::middle);
     bottomLayerValueBox->setLayer(ear::plugin::Layer::bottom);
@@ -119,13 +115,9 @@ class HoaComponent : public Component,
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
-
+    channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
     /* Old DS Code
     // This is where we position our panels
-
-    // left column (cont...)
-    channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
-
     // right column
     upperLayerValueBox->setBounds(rightColumn.removeFromTop(278).reduced(5, 5));
     middleLayerValueBox->setBounds(
@@ -142,9 +134,10 @@ class HoaComponent : public Component,
 
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
 
+  
+  std::shared_ptr<ear::plugin::ui::ValueBoxChannelGain> channelGainValueBox;
   /* Old DS Code
   // TODO - We need to store smart-pointers to our new component panels here
-  std::shared_ptr<ear::plugin::ui::ValueBoxChannelGain> channelGainValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> upperLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> middleLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
