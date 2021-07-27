@@ -112,10 +112,14 @@ class HoaComponent : public Component,
 
     auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);
     auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
+    auto channelGainArea = area.withTrimmedTop(197);
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
-    channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
+    
+    channelGainValueBox->setBounds(channelGainArea.reduced(5, 5));
+    //channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
+    
     /* Old DS Code
     // This is where we position our panels
     // right column

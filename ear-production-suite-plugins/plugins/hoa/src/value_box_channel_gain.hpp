@@ -21,10 +21,14 @@ class ValueBoxChannelGain : public Component {
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter)
       : levelMeter_(levelMeter),
         headingLabel_(std::make_unique<Label>()),
+        //channels1to12Button_(std::make_unique<EarButton>()),
+        //channels13to24Button_(std::make_unique<EarButton>()),
         channels1to6Button_(std::make_unique<EarButton>()),
         channels7to12Button_(std::make_unique<EarButton>()),
         channels13to18Button_(std::make_unique<EarButton>()),
         channels19to24Button_(std::make_unique<EarButton>()),
+        //channelGainsBox1to12_(std::make_unique<ChannelGainsBox>()),
+        //channelGainsBox13to24_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox1to6_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox7to12_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox13to18_(std::make_unique<ChannelGainsBox>()),
@@ -37,6 +41,8 @@ class ValueBoxChannelGain : public Component {
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
 
+    //channels1to12Button_->setButtonText(String::fromUTF8("1–12"));
+    //channels13to24Button_->setButtonText(String::fromUTF8("13–24"));
     channels1to6Button_->setButtonText(String::fromUTF8("1–6"));
     channels7to12Button_->setButtonText(String::fromUTF8("7–12"));
     channels13to18Button_->setButtonText(String::fromUTF8("13–18"));
@@ -44,7 +50,11 @@ class ValueBoxChannelGain : public Component {
 
     clearHoaSetup();
 
-    channels1to6Button_->onClick = [this]() { this->selectChannelGainsTab(0); };
+    //channels1to12Button_->onClick = [this]() { this->selectChannelGainsTab(0); };
+    //channels13to24Button_->onClick = [this]() {      this->selectChannelGainsTab(1);    };
+   channels1to6Button_->onClick = [this]() {
+      this->selectChannelGainsTab(0);
+    };
     channels7to12Button_->onClick = [this]() {
       this->selectChannelGainsTab(1);
     };
@@ -55,11 +65,15 @@ class ValueBoxChannelGain : public Component {
       this->selectChannelGainsTab(3);
     };
 
+    //addAndMakeVisible(channels1to12Button_.get());
+    //addAndMakeVisible(channels13to24Button_.get());
     addAndMakeVisible(channels1to6Button_.get());
     addAndMakeVisible(channels7to12Button_.get());
     addAndMakeVisible(channels13to18Button_.get());
     addAndMakeVisible(channels19to24Button_.get());
 
+    //addAndMakeVisible(channelGainsBox1to12_.get());
+    //addChildComponent(channelGainsBox13to24_.get());
     addAndMakeVisible(channelGainsBox1to6_.get());
     addChildComponent(channelGainsBox7to12_.get());
     addChildComponent(channelGainsBox13to18_.get());
@@ -88,6 +102,10 @@ class ValueBoxChannelGain : public Component {
 
     auto channelsButtonArea =
         area.removeFromTop(40).withSizeKeepingCentre(260, 40);
+    /*channels1to12Button_->setBounds(
+        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
+    channels13to24Button_->setBounds(
+        channelsButtonArea.removeFromLeft(65).reduced(5, 5)); */
     channels1to6Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels7to12Button_->setBounds(
@@ -98,6 +116,8 @@ class ValueBoxChannelGain : public Component {
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
 
     channelLinkButton_->setBounds(area.removeFromBottom(40));
+    //channelGainsBox1to12_->setBounds(area.reduced(0, 10));
+    //channelGainsBox13to24_->setBounds(area.reduced(0, 10)); 
     channelGainsBox1to6_->setBounds(area.reduced(0, 10));
     channelGainsBox7to12_->setBounds(area.reduced(0, 10));
     channelGainsBox13to18_->setBounds(area.reduced(0, 10));
@@ -105,11 +125,17 @@ class ValueBoxChannelGain : public Component {
   }
 
   void clearHoaSetup() {
+    //channelGainsBox1to12_->removeAllChannelGains();
+    //channelGainsBox13to24_->removeAllChannelGains(); 
     channelGainsBox1to6_->removeAllChannelGains();
     channelGainsBox7to12_->removeAllChannelGains();
     channelGainsBox13to18_->removeAllChannelGains();
     channelGainsBox19to24_->removeAllChannelGains();
 
+    /*channels1to12Button_->setEnabled(false);
+    channels1to12Button_->setAlpha(Emphasis::disabled);
+    channels13to24Button_->setEnabled(false);
+    channels13to24Button_->setAlpha(Emphasis::disabled); */
     channels1to6Button_->setEnabled(false);
     channels1to6Button_->setAlpha(Emphasis::disabled);
     channels7to12Button_->setEnabled(false);
@@ -119,10 +145,14 @@ class ValueBoxChannelGain : public Component {
     channels19to24Button_->setEnabled(false);
     channels19to24Button_->setAlpha(Emphasis::disabled);
 
+    /*channels1to12Button_->setToggleState(false, dontSendNotification);
+    channels13to24Button_->setToggleState(false, dontSendNotification); */
     channels1to6Button_->setToggleState(false, dontSendNotification);
     channels7to12Button_->setToggleState(false, dontSendNotification);
     channels13to18Button_->setToggleState(false, dontSendNotification);
     channels19to24Button_->setToggleState(false, dontSendNotification);
+    /*channelGainsBox1to12_->setVisible(true);
+    channelGainsBox13to24_->setVisible(false); */
     channelGainsBox1to6_->setVisible(true);
     channelGainsBox7to12_->setVisible(false);
     channelGainsBox13to18_->setVisible(false);
@@ -144,8 +174,13 @@ class ValueBoxChannelGain : public Component {
 
     for (int i = 0; i < cfCount; ++i) {
       channelGains_.push_back(
-          std::make_unique<ChannelGain>(std::to_string(i)));
+          std::make_unique<ChannelGain>(std::to_string(i+1)));
       channelGains_.back()->getLevelMeter()->setMeter(levelMeter_, i);
+      /*if (i < 12) {
+        channelGainsBox1to12_->addChannelGain(channelGains_.back().get());
+      } else {
+        channelGainsBox13to24_->addChannelGain(channelGains_.back().get());
+      }*/
       if (i < 6) {
         channelGainsBox1to6_->addChannelGain(channelGains_.back().get());
       } else if (i < 12) {
@@ -156,7 +191,12 @@ class ValueBoxChannelGain : public Component {
         channelGainsBox19to24_->addChannelGain(channelGains_.back().get());
       }
     }
-
+    /*channels1to12Button_->setEnabled(true);
+    channels1to12Button_->setAlpha(Emphasis::full);
+    if (cfCount > 12) {
+      channels13to24Button_->setEnabled(true);
+      channels13to24Button_->setAlpha(Emphasis::full);
+    }*/
     channels1to6Button_->setEnabled(true);
     channels1to6Button_->setAlpha(Emphasis::full);
     if (cfCount > 6) {
@@ -180,6 +220,11 @@ class ValueBoxChannelGain : public Component {
   }
 
   void selectChannelGainsTab(int tabIndex) {
+    /*channels1to12Button_->setToggleState(false, dontSendNotification);
+    channels13to24Button_->setToggleState(false, dontSendNotification);
+    channelGainsBox1to12_->setVisible(false);
+    channelGainsBox13to24_->setVisible(false);
+    */
     channels1to6Button_->setToggleState(false, dontSendNotification);
     channels7to12Button_->setToggleState(false, dontSendNotification);
     channels13to18Button_->setToggleState(false, dontSendNotification);
@@ -190,6 +235,14 @@ class ValueBoxChannelGain : public Component {
     channelGainsBox19to24_->setVisible(false);
 
     switch (tabIndex) {
+      /*case 0:
+        channels1to12Button_->setToggleState(true, dontSendNotification);
+        channelGainsBox1to12_->setVisible(true);
+        break;
+      case 1:
+        channels13to24Button_->setToggleState(true, dontSendNotification);
+        channelGainsBox13to24_->setVisible(true);
+        break;*/
       case 0:
         channels1to6Button_->setToggleState(true, dontSendNotification);
         channelGainsBox1to6_->setVisible(true);
@@ -243,12 +296,16 @@ class ValueBoxChannelGain : public Component {
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   std::unique_ptr<Label> headingLabel_;
+  /*std::unique_ptr<ear::plugin::ui::EarButton> channels1to12Button_;
+  std::unique_ptr<ear::plugin::ui::EarButton> channels13to24Button_;*/
   std::unique_ptr<ear::plugin::ui::EarButton> channels1to6Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels7to12Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels13to18Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels19to24Button_;
 
   std::vector<std::unique_ptr<ear::plugin::ui::ChannelGain>> channelGains_;
+  /*std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox1to12_;
+  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox13to24_;*/
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox1to6_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox7to12_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox13to18_;

@@ -156,6 +156,10 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
       }
       routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
     }
+    if (auto channelGainsLocked = channelGains_.lock()) {
+      channelGainsLocked->setHoaType(hoaId);
+    }
+
   }
 }
 //end ME
