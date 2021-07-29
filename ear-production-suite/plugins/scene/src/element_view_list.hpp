@@ -27,7 +27,7 @@ class ElementViewList : public Component,
   int getHeightOfAllItems() const;
 
   bool isInterestedInDragSource(
-    const SourceDetails& dragSourceDetails) override;
+      const SourceDetails& dragSourceDetails) override;
 
   void itemDragEnter(const SourceDetails& dragSourceDetails) override;
 

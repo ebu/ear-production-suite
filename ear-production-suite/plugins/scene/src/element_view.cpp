@@ -16,9 +16,9 @@ ElementView::ElementView()
       Drawable::createFromImageData(binary_data::drag_handle_icon_svg,
                                     binary_data::drag_handle_icon_svgSize)));
   handleButton_->setColour(EarButton::highlightColourId,
-                            EarColours::Transparent);
+                           EarColours::Transparent);
   handleButton_->setColour(EarButton::backgroundColourId,
-                            EarColours::Transparent);
+                           EarColours::Transparent);
   handleButton_->setColour(EarButton::hoverColourId, EarColours::Transparent);
   addAndMakeVisible(handleButton_.get());
 
@@ -30,9 +30,9 @@ ElementView::ElementView()
       Drawable::createFromImageData(binary_data::delete_icon_red_svg,
                                     binary_data::delete_icon_red_svgSize)));
   removeButton_->setColour(EarButton::highlightColourId,
-                            EarColours::Transparent);
+                           EarColours::Transparent);
   removeButton_->setColour(EarButton::backgroundColourId,
-                            EarColours::Transparent);
+                           EarColours::Transparent);
   removeButton_->setColour(EarButton::hoverColourId, EarColours::Transparent);
 
   addAndMakeVisible(removeButton_.get());
@@ -58,34 +58,22 @@ void ElementView::mouseDown(const MouseEvent& event) {
     auto image = createComponentSnapshot(getLocalBounds());
     image.multiplyAllAlphas(Emphasis::medium);
     dragContainer->startDragging("element", this, image, true,
-                                  &dragStartOffset_);
+                                 &dragStartOffset_);
     setAlpha(Emphasis::disabled);
   }
 }
 
-void ElementView::mouseEnter(const MouseEvent& event) {
-  repaint();
-}
+void ElementView::mouseEnter(const MouseEvent& event) { repaint(); }
 
-void ElementView::mouseExit(const MouseEvent& event) {
-  repaint();
-}
+void ElementView::mouseExit(const MouseEvent& event) { repaint(); }
 
-void ElementView::mouseUp(const MouseEvent& event) {
-  setAlpha(Emphasis::full);
-}
+void ElementView::mouseUp(const MouseEvent& event) { setAlpha(Emphasis::full); }
 
-void ElementView::resized() {
-  setSize(getParentWidth(), 100);
-}
+void ElementView::resized() { setSize(getParentWidth(), 100); }
 
-EarButton* ElementView::getHandleButton() {
-  return handleButton_.get();
-}
+EarButton* ElementView::getHandleButton() { return handleButton_.get(); }
 
-EarButton* ElementView::getRemoveButton() {
-  return removeButton_.get();
-}
+EarButton* ElementView::getRemoveButton() { return removeButton_.get(); }
 
 }  // namespace ui
 }  // namespace plugin

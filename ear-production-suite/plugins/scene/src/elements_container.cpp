@@ -14,7 +14,7 @@ ElementsContainer::ElementsContainer()
   viewport->setViewedComponent(list.get(), false);
   viewport->setScrollBarsShown(true, false);
   viewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId,
-                                              EarColours::Area04dp);
+                                             EarColours::Area04dp);
   addAndMakeVisible(viewport.get());
 }
 
@@ -30,8 +30,8 @@ void ElementsContainer::resized() {
 
 void ElementsContainer::removeElement(ElementView* element) {
   auto it = std::find_if(
-    elements.begin(), elements.end(),
-    [element](auto candidate) { return candidate.get() == element; });
+      elements.begin(), elements.end(),
+      [element](auto candidate) { return candidate.get() == element; });
   auto index = std::distance(elements.begin(), it);
   elements.erase(it);
   list->removeChildComponent(element);
@@ -68,13 +68,9 @@ void ElementsContainer::addElement(std::shared_ptr<ElementView> element) {
   resized();
 }
 
-void ElementsContainer::addListener(Listener* l) {
-  listeners_.add(l);
-}
+void ElementsContainer::addListener(Listener* l) { listeners_.add(l); }
 
-void ElementsContainer::removeListener(Listener* l) {
-  listeners_.remove(l);
-}
+void ElementsContainer::removeListener(Listener* l) { listeners_.remove(l); }
 
 }  // namespace ui
 }  // namespace plugin

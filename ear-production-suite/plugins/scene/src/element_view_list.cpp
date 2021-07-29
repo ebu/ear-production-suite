@@ -29,18 +29,14 @@ ElementViewList::ElementViewList(ElementsContainer* parentContainer)
   addAndMakeVisible(helpLabel_.get());
 }
 
-void ElementViewList::paint(Graphics& g) {
-  g.fillAll(EarColours::Background);
-}
+void ElementViewList::paint(Graphics& g) { g.fillAll(EarColours::Background); }
 
 void ElementViewList::parentSizeChanged() {
-  setSize(getParentWidth(),
-          std::max(getParentHeight(), getHeightOfAllItems()));
+  setSize(getParentWidth(), std::max(getParentHeight(), getHeightOfAllItems()));
 }
 
 void ElementViewList::resized() {
-  setSize(getParentWidth(),
-          std::max(getParentHeight(), getHeightOfAllItems()));
+  setSize(getParentWidth(), std::max(getParentHeight(), getHeightOfAllItems()));
   auto labelBounds = getLocalBounds().removeFromTop(60);
   helpLabel_->setVisible(parentContainer->elements.size() == 0);
   helpLabel_->setBounds(labelBounds.reduced(30, 20));
@@ -51,11 +47,12 @@ void ElementViewList::resized() {
           area.removeFromTop(indicatorHeight_).reduced(0, 2));
       area.removeFromTop(margin_);
     }
-    parentContainer->elements.at(i)->setBounds(
-        area.removeFromTop(parentContainer->elements.at(i)->getDesiredHeight()));
+    parentContainer->elements.at(i)->setBounds(area.removeFromTop(
+        parentContainer->elements.at(i)->getDesiredHeight()));
     area.removeFromTop(margin_);
   }
-  if (dropIndicator_->isVisible() && dropIndex_ == parentContainer->elements.size()) {
+  if (dropIndicator_->isVisible() &&
+      dropIndex_ == parentContainer->elements.size()) {
     dropIndicator_->setBounds(
         area.removeFromTop(indicatorHeight_).reduced(0, 2));
     area.removeFromTop(margin_);
@@ -88,8 +85,7 @@ int ElementViewList::getDropIndexForPosition(int yPos) {
   int currentHeight = 0;
   for (int i = 0; i < parentContainer->elements.size(); ++i) {
     currentHeight = parentContainer->elements.at(i)->getHeight();
-    if (y - 0.5f * previousHeight < yPos &&
-        yPos < y + 0.51f * currentHeight) {
+    if (y - 0.5f * previousHeight < yPos && yPos < y + 0.51f * currentHeight) {
       return i;
     }
     y += currentHeight;
@@ -99,8 +95,7 @@ int ElementViewList::getDropIndexForPosition(int yPos) {
 }
 
 void ElementViewList::itemDragMove(const SourceDetails& dragSourceDetails) {
-  dropIndex_ =
-      getDropIndexForPosition(dragSourceDetails.localPosition.getY());
+  dropIndex_ = getDropIndexForPosition(dragSourceDetails.localPosition.getY());
   resized();
 }
 
@@ -108,8 +103,8 @@ void ElementViewList::itemDropped(const SourceDetails& dragSourceDetails) {
   if (auto component = dragSourceDetails.sourceComponent.get()) {
     if (auto element = dynamic_cast<ElementView*>(component)) {
       auto it = std::find_if(
-        parentContainer->elements.begin(), parentContainer->elements.end(),
-        [element](auto candidate) { return candidate.get() == element; });
+          parentContainer->elements.begin(), parentContainer->elements.end(),
+          [element](auto candidate) { return candidate.get() == element; });
       size_t oldIndex = std::distance(parentContainer->elements.begin(), it);
       int newIndex = dropIndex_ > oldIndex ? dropIndex_ - 1 : dropIndex_;
       parentContainer->moveElement(oldIndex, newIndex);
