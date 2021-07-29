@@ -2,7 +2,6 @@
 
 #include "JuceHeader.h"
 
-#include "helper/move.hpp"
 #include "element_view_list.hpp"
 #include "elements_container.hpp"
 #include "../../shared/components/ear_colour_indicator.hpp"
@@ -45,74 +44,32 @@ void ElementViewList::resized() {
   auto labelBounds = getLocalBounds().removeFromTop(60);
   helpLabel_->setBounds(labelBounds.reduced(30, 20));
   auto area = getLocalBounds();
-  for (int i = 0; i < elements_.size(); ++i) {
+  for (int i = 0; i < parentContainer->elements.size(); ++i) {
     if (dropIndicator_->isVisible() && i == dropIndex_) {
       dropIndicator_->setBounds(
           area.removeFromTop(indicatorHeight_).reduced(0, 2));
       area.removeFromTop(margin_);
     }
-    elements_.at(i)->setBounds(
-        area.removeFromTop(elements_.at(i)->getDesiredHeight()));
+    parentContainer->elements.at(i)->setBounds(
+        area.removeFromTop(parentContainer->elements.at(i)->getDesiredHeight()));
     area.removeFromTop(margin_);
   }
-  if (dropIndicator_->isVisible() && dropIndex_ == elements_.size()) {
+  if (dropIndicator_->isVisible() && dropIndex_ == parentContainer->elements.size()) {
     dropIndicator_->setBounds(
         area.removeFromTop(indicatorHeight_).reduced(0, 2));
     area.removeFromTop(margin_);
   }
 }
 
-void ElementViewList::addElement(ElementView* element) {
-  elements_.push_back(element);
-  element->getRemoveButton()->onClick = [this, element]() {
-    auto it =
-        std::find(this->elements_.begin(), this->elements_.end(), element);
-    auto index = std::distance(this->elements_.begin(), it);
-    Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker, [this, index](Listener& l) {
-      l.removeElementClicked(this, index);
-    });
-    if (checker.shouldBailOut()) {
-      return;
-    }
-  };
-  addAndMakeVisible(element);
-  helpLabel_->setVisible(elements_.size() == 0);
-  resized();
-}
-
-void ElementViewList::removeElement(ElementView* item) {
-  auto it = std::find(elements_.begin(), elements_.end(), item);
-  if (it != elements_.end()) {
-    elements_.erase(it);
-    helpLabel_->setVisible(elements_.size() == 0);
-    resized();
-  }
-}
-
 int ElementViewList::getHeightOfAllItems() const {
   int ret = 0;
-  for (const auto element : elements_) {
+  for (const auto element : parentContainer->elements) {
     ret += element->getDesiredHeight() + margin_;
   }
   if (dropIndicator_->isVisible()) {
     ret += indicatorHeight_ + margin_;
   }
   return ret;
-}
-
-void ElementViewList::moveElementTo(int oldIndex, int newIndex) {
-  if (oldIndex < elements_.size() && newIndex < elements_.size() &&
-      oldIndex != newIndex) {
-    move(elements_.begin(), oldIndex, newIndex);
-  }
-  Component::BailOutChecker checker(this);
-  listeners_.callChecked(checker, [this, oldIndex, newIndex](Listener& l) {
-    l.elementMoved(this, oldIndex, newIndex);
-  });
-  if (checker.shouldBailOut()) {
-    return;
-  }
 }
 
 bool ElementViewList::isInterestedInDragSource(
@@ -128,8 +85,8 @@ int ElementViewList::getDropIndexForPosition(int yPos) {
   int y = 0;
   int previousHeight = 0;
   int currentHeight = 0;
-  for (int i = 0; i < elements_.size(); ++i) {
-    currentHeight = elements_.at(i)->getHeight();
+  for (int i = 0; i < parentContainer->elements.size(); ++i) {
+    currentHeight = parentContainer->elements.at(i)->getHeight();
     if (y - 0.5f * previousHeight < yPos &&
         yPos < y + 0.51f * currentHeight) {
       return i;
@@ -137,7 +94,7 @@ int ElementViewList::getDropIndexForPosition(int yPos) {
     y += currentHeight;
     previousHeight = currentHeight;
   }
-  return elements_.size();
+  return parentContainer->elements.size();
 }
 
 void ElementViewList::itemDragMove(const SourceDetails& dragSourceDetails) {
@@ -149,10 +106,10 @@ void ElementViewList::itemDragMove(const SourceDetails& dragSourceDetails) {
 void ElementViewList::itemDropped(const SourceDetails& dragSourceDetails) {
   if (auto component = dragSourceDetails.sourceComponent.get()) {
     if (auto element = dynamic_cast<ElementView*>(component)) {
-      auto it = std::find(elements_.begin(), elements_.end(), element);
-      size_t oldIndex = std::distance(elements_.begin(), it);
+      auto it = std::find(parentContainer->elements.begin(), parentContainer->elements.end(), element);
+      size_t oldIndex = std::distance(parentContainer->elements.begin(), it);
       int newIndex = dropIndex_ > oldIndex ? dropIndex_ - 1 : dropIndex_;
-      moveElementTo(oldIndex, newIndex);
+      parentContainer->moveElement(oldIndex, newIndex);
     }
   }
   dropIndicator_->setVisible(false);
@@ -162,14 +119,6 @@ void ElementViewList::itemDropped(const SourceDetails& dragSourceDetails) {
 void ElementViewList::itemDragExit(const SourceDetails& dragSourceDetails) {
   dropIndicator_->setVisible(false);
   resized();
-}
-
-void ElementViewList::addListener(Listener* l) {
-  listeners_.add(l);
-}
-
-void ElementViewList::removeListener(Listener* l) {
-  listeners_.remove(l);
 }
 
 }  // namespace ui
