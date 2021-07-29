@@ -106,7 +106,9 @@ void ElementViewList::itemDragMove(const SourceDetails& dragSourceDetails) {
 void ElementViewList::itemDropped(const SourceDetails& dragSourceDetails) {
   if (auto component = dragSourceDetails.sourceComponent.get()) {
     if (auto element = dynamic_cast<ElementView*>(component)) {
-      auto it = std::find(parentContainer->elements.begin(), parentContainer->elements.end(), element);
+      auto it = std::find_if(
+        parentContainer->elements.begin(), parentContainer->elements.end(),
+        [element](auto candidate) { return candidate.get() == element; });
       size_t oldIndex = std::distance(parentContainer->elements.begin(), it);
       int newIndex = dropIndex_ > oldIndex ? dropIndex_ - 1 : dropIndex_;
       parentContainer->moveElement(oldIndex, newIndex);
