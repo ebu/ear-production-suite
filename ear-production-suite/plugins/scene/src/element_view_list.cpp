@@ -42,6 +42,7 @@ void ElementViewList::resized() {
   setSize(getParentWidth(),
           std::max(getParentHeight(), getHeightOfAllItems()));
   auto labelBounds = getLocalBounds().removeFromTop(60);
+  helpLabel_->setVisible(parentContainer->elements.size() == 0);
   helpLabel_->setBounds(labelBounds.reduced(30, 20));
   auto area = getLocalBounds();
   for (int i = 0; i < parentContainer->elements.size(); ++i) {
