@@ -16,6 +16,9 @@ set(SOURCES_SCENE_MASTER
   src/backend_setup_timer.cpp
   src/scene_plugin_editor.cpp
   src/scene_plugin_processor.cpp
+  src/elements_container.cpp
+  src/element_view_list.cpp
+  src/element_view.cpp
 )
 
 add_juce_vst3_plugin(scene

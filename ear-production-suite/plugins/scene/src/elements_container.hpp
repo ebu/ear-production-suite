@@ -13,25 +13,11 @@ namespace ui {
 
 class ElementsContainer : public Component {
  public:
-  ElementsContainer()
-      : viewport(std::make_unique<Viewport>()),
-        list(std::make_unique<ElementViewList>()) {
-    viewport->setViewedComponent(list.get(), false);
-    viewport->setScrollBarsShown(true, false);
-    viewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId,
-                                               EarColours::Area04dp);
-    addAndMakeVisible(viewport.get());
-  }
+  ElementsContainer();
 
-  void paint(Graphics& g) override {
-    g.fillAll(EarColours::ComboBoxPopupBackground);
-  }
+  void paint(Graphics& g) override;
 
-  void resized() override {
-    auto area = getLocalBounds();
-    viewport->setBounds(area.reduced(2, 2));
-    list->setBounds(area.reduced(2, 2));
-  }
+  void resized() override;
 
   std::unique_ptr<Viewport> viewport;
   std::unique_ptr<ElementViewList> list;
