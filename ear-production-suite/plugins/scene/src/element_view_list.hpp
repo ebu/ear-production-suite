@@ -11,12 +11,13 @@ namespace plugin {
 namespace ui {
 
 class ElementView;
+class ElementsContainer;
 
 class ElementViewList : public Component,
                         public DragAndDropTarget,
                         public DragAndDropContainer {
  public:
-  ElementViewList();
+  ElementViewList(ElementsContainer* parentContainer);
 
   void paint(Graphics& g) override;
 
@@ -61,6 +62,8 @@ class ElementViewList : public Component,
   std::vector<ElementView*> elements_;
   std::unique_ptr<EarDropIndicator> dropIndicator_;
   std::unique_ptr<Label> helpLabel_;
+
+  ElementsContainer* parentContainer;
 
   int dropIndex_ = 0;
 

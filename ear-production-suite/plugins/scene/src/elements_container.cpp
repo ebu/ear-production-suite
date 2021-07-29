@@ -9,8 +9,8 @@ namespace plugin {
 namespace ui {
 
 ElementsContainer::ElementsContainer()
-    : viewport(std::make_unique<Viewport>()),
-      list(std::make_unique<ElementViewList>()) {
+    : viewport(std::make_unique<Viewport>()) {
+  list = std::make_unique<ElementViewList>(this);
   viewport->setViewedComponent(list.get(), false);
   viewport->setScrollBarsShown(true, false);
   viewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId,

@@ -10,15 +10,18 @@
 #include "../../shared/components/look_and_feel/colours.hpp"
 #include "../../shared/components/look_and_feel/fonts.hpp"
 
+#include <cassert>
+
 namespace ear {
 namespace plugin {
 namespace ui {
 
-ElementViewList::ElementViewList()
+ElementViewList::ElementViewList(ElementsContainer* parentContainer)
     : dropIndicator_(std::make_unique<EarDropIndicator>()),
+      parentContainer{parentContainer},
       helpLabel_(std::make_unique<Label>()) {
   addChildComponent(dropIndicator_.get());
-
+  assert(parentContainer);
   helpLabel_->setText("Add Items by clicking the Buttons above",
                       dontSendNotification);
   helpLabel_->setFont(EarFonts::Items);
