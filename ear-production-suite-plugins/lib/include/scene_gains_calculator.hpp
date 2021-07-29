@@ -8,6 +8,7 @@
 #include <Eigen/Eigen>
 #include <map>
 #include <vector>
+#include "../../common_helpers/common_definition_helper.h"//ME add
 
 namespace ear {
 namespace plugin {
@@ -49,7 +50,10 @@ class SceneGainsCalculator {
   std::vector<std::vector<float>> diffuse_;
   ear::GainCalculatorObjects objectCalculator_;
   ear::GainCalculatorDirectSpeakers directSpeakersCalculator_;
+  ear::GainCalculatorHOA hoaCalculator_;  // ME add
   std::map<communication::ConnectionId, Routing> routingCache_;
+  std::mutex commonDefinitionHelperMutex_;
+  AdmCommonDefinitionHelper commonDefinitionHelper{};//ME add
 };
 
 }  // namespace plugin

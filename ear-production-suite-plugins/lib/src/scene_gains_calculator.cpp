@@ -7,8 +7,11 @@ namespace plugin {
 
 SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
                                            int inputChannelCount)
-    : objectCalculator_{outputLayout}, directSpeakersCalculator_{outputLayout} {
+    : objectCalculator_{outputLayout},
+      directSpeakersCalculator_{outputLayout},
+      hoaCalculator_{outputLayout} {
   resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
+  commonDefinitionHelper.getElementRelationships();  // ME add
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
@@ -57,7 +60,25 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
         }
       }
       if (item.has_hoa_metadata()) {
-        throw std::runtime_error("received unsupported HOA type metadata");
+        //ME ADD
+        {
+          std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
+          auto earMetadata = EpsToEarMetadataConverter::convert(
+              item.hoa_metadata(), commonDefinitionHelper);
+          //std::vector<std::vector<float>> hoaGains(
+            //  earMetadata.degrees.size(), std::vector<float>(direct_[0].size(), 0));
+          std::vector<std::vector<float>> hoaGains(
+              direct_[0].size(), std::vector<float>(earMetadata.degrees.size(), 0));
+          hoaCalculator_.calculate(earMetadata, hoaGains);
+
+          auto routing = static_cast<std::size_t>(item.routing());
+          for (int i(0); i < earMetadata.degrees.size(); i++) {
+            direct_[routing + i] = hoaGains[i];
+          }
+        }
+        //auto routing = static_cast<std::size_t>(item.routing());
+
+        //ME END
       }
       if (item.has_bin_metadata()) {
         throw std::runtime_error("received unsupported binaural type metadata");
