@@ -157,7 +157,7 @@ void JuceSceneFrontendConnector::reloadProgrammeCache() {
   if (auto overlay = autoModeOverlay_.lock()) {
     overlay->setVisible(autoMode);
   }
-  selectProgramme(selectedProgramme);
+  //selectProgramme(selectedProgramme); - selectProgrammeView will trigger selectProgramme anyway
   selectProgrammeView(selectedProgramme);
 }
 
