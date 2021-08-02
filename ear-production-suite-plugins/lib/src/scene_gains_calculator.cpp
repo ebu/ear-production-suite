@@ -1,6 +1,7 @@
 #include "scene_gains_calculator.hpp"
 #include "ear/metadata.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
+#include <future>
 
 namespace ear {
 namespace plugin {
@@ -15,76 +16,87 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
-  for (auto id : removedIds(store)) {
-    auto routing = routingCache_[id];
-    for (int i = 0; i < routing.size; ++i) {
-      std::fill(direct_[routing.track + i].begin(),
-                direct_[routing.track + i].end(), 0.0f);
-      std::fill(diffuse_[routing.track + i].begin(),
-                diffuse_[routing.track + i].end(), 0.0f);
+  // Called by NNG callback on thread with small stack.
+  // Launch task in another thread to overcome stack limitation.
+  auto future = std::async(std::launch::async, [this, store]() {
+
+    for (auto id : removedIds(store)) {
+      auto routing = routingCache_[id];
+      for (int i = 0; i < routing.size; ++i) {
+        std::fill(direct_[routing.track + i].begin(),
+                  direct_[routing.track + i].end(), 0.0f);
+        std::fill(diffuse_[routing.track + i].begin(),
+                  diffuse_[routing.track + i].end(), 0.0f);
+      }
+      routingCache_.erase(id);
     }
-    routingCache_.erase(id);
-  }
-  for (auto routing : updateRoutingCache(store)) {
-    for (int i = 0; i < routing.size; ++i) {
-      std::fill(direct_[routing.track + i].begin(),
-                direct_[routing.track + i].end(), 0.0f);
-      std::fill(diffuse_[routing.track + i].begin(),
-                diffuse_[routing.track + i].end(), 0.0f);
+    for (auto routing : updateRoutingCache(store)) {
+      for (int i = 0; i < routing.size; ++i) {
+        std::fill(direct_[routing.track + i].begin(),
+                  direct_[routing.track + i].end(), 0.0f);
+        std::fill(diffuse_[routing.track + i].begin(),
+                  diffuse_[routing.track + i].end(), 0.0f);
+      }
     }
-  }
-  for (const auto& item : store.monitoring_items()) {
-    if (item.changed()) {
-      if (item.has_ds_metadata()) {
-        auto earMetadata =
-            EpsToEarMetadataConverter::convert(item.ds_metadata());
-        auto routing = static_cast<std::size_t>(item.routing());
-        if (item.routing() >= 0 &&
-            routing + earMetadata.size() < direct_.size()) {
-          for (int i = 0; i < earMetadata.size(); ++i) {
-            directSpeakersCalculator_.calculate(earMetadata.at(i),
-                                                direct_[routing + i]);
+
+    for (const auto& item : store.monitoring_items()) {
+      if (item.changed()) {
+        if (item.has_ds_metadata()) {
+          auto earMetadata =
+              EpsToEarMetadataConverter::convert(item.ds_metadata());
+          auto routing = static_cast<std::size_t>(item.routing());
+          if (item.routing() >= 0 &&
+              routing + earMetadata.size() < direct_.size()) {
+            for (int i = 0; i < earMetadata.size(); ++i) {
+              directSpeakersCalculator_.calculate(earMetadata.at(i),
+                                                  direct_[routing + i]);
+            }
           }
         }
-      }
-      if (item.has_mtx_metadata()) {
-        throw std::runtime_error("received unsupported Matrix type metadata");
-      }
-      if (item.has_obj_metadata()) {
-        auto earMetadata =
-            EpsToEarMetadataConverter::convert(item.obj_metadata());
-        auto routing = static_cast<std::size_t>(item.routing());
-        if (item.routing() >= 0 && routing < direct_.size()) {
-          objectCalculator_.calculate(earMetadata, direct_[routing],
-                                      diffuse_[routing]);
+        if (item.has_mtx_metadata()) {
+          throw std::runtime_error("received unsupported Matrix type metadata");
         }
-      }
-      if (item.has_hoa_metadata()) {
-        //ME ADD
-        ear::HOATypeMetadata earMetadata;
-        {
-          std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-          earMetadata = EpsToEarMetadataConverter::convert(
-              item.hoa_metadata(), commonDefinitionHelper);
+        if (item.has_obj_metadata()) {
+          auto earMetadata =
+              EpsToEarMetadataConverter::convert(item.obj_metadata());
+          auto routing = static_cast<std::size_t>(item.routing());
+          if (item.routing() >= 0 && routing < direct_.size()) {
+            objectCalculator_.calculate(earMetadata, direct_[routing],
+                                        diffuse_[routing]);
+          }
         }
-        std::vector<std::vector<float>> hoaGains(
-            earMetadata.degrees.size(),
-            std::vector<float>(direct_[0].size(), 0));
-        hoaCalculator_.calculate(earMetadata, hoaGains);
+        if (item.has_hoa_metadata()) {
+          // ME ADD
+          ear::HOATypeMetadata earMetadata;
+          {
+            std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
+            earMetadata = EpsToEarMetadataConverter::convert(
+                item.hoa_metadata(), commonDefinitionHelper);
+          }
+
+          std::vector<std::vector<float>> hoaGains(
+              earMetadata.degrees.size(),
+              std::vector<float>(direct_[0].size(), 0));
+          hoaCalculator_.calculate(earMetadata, hoaGains);
 
           auto routing = static_cast<std::size_t>(item.routing());
           for (int i(0); i < earMetadata.degrees.size(); i++) {
             direct_[routing + i] = hoaGains[i];
           }
-        //auto routing = static_cast<std::size_t>(item.routing());
 
-        //ME END
-      }
-      if (item.has_bin_metadata()) {
-        throw std::runtime_error("received unsupported binaural type metadata");
+          // auto routing = static_cast<std::size_t>(item.routing());
+
+          // ME END
+        }
+        if (item.has_bin_metadata()) {
+          throw std::runtime_error(
+              "received unsupported binaural type metadata");
+        }
       }
     }
-  }
+  });
+
+  future.get();
   return true;
 }
 
@@ -144,8 +156,12 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
         size = item.ds_metadata().speakers().size();
       }
       if (item.has_hoa_metadata()) {//ME add
-        auto pfData = commonDefinitionHelper.getPackFormatData(
-            4, item.hoa_metadata().hoatypeindex());
+        std::shared_ptr<AdmCommonDefinitionHelper::PackFormatData> pfData;
+        {
+          std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
+          pfData = commonDefinitionHelper.getPackFormatData(
+              4, item.hoa_metadata().hoatypeindex());
+        }
         auto cfData = pfData->relatedChannelFormats;
         size = cfData.size();
       }

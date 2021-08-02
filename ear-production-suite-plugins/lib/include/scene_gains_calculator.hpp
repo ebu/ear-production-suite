@@ -8,7 +8,7 @@
 #include <Eigen/Eigen>
 #include <map>
 #include <vector>
-#include "../../common_helpers/common_definition_helper.h"//ME add
+#include "helper/common_definition_helper.h"//ME add
 
 namespace ear {
 namespace plugin {
