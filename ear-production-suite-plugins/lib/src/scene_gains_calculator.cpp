@@ -61,21 +61,21 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
       }
       if (item.has_hoa_metadata()) {
         //ME ADD
+        ear::HOATypeMetadata earMetadata;
         {
           std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-          auto earMetadata = EpsToEarMetadataConverter::convert(
+          earMetadata = EpsToEarMetadataConverter::convert(
               item.hoa_metadata(), commonDefinitionHelper);
-          //std::vector<std::vector<float>> hoaGains(
-            //  earMetadata.degrees.size(), std::vector<float>(direct_[0].size(), 0));
-          std::vector<std::vector<float>> hoaGains(
-              direct_[0].size(), std::vector<float>(earMetadata.degrees.size(), 0));
-          hoaCalculator_.calculate(earMetadata, hoaGains);
+        }
+        std::vector<std::vector<float>> hoaGains(
+            earMetadata.degrees.size(),
+            std::vector<float>(direct_[0].size(), 0));
+        hoaCalculator_.calculate(earMetadata, hoaGains);
 
           auto routing = static_cast<std::size_t>(item.routing());
           for (int i(0); i < earMetadata.degrees.size(); i++) {
             direct_[routing + i] = hoaGains[i];
           }
-        }
         //auto routing = static_cast<std::size_t>(item.routing());
 
         //ME END
@@ -142,6 +142,12 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
       int size = 1;
       if (item.has_ds_metadata()) {
         size = item.ds_metadata().speakers().size();
+      }
+      if (item.has_hoa_metadata()) {//ME add
+        auto pfData = commonDefinitionHelper.getPackFormatData(
+            4, item.hoa_metadata().hoatypeindex());
+        auto cfData = pfData->relatedChannelFormats;
+        size = cfData.size();
       }
       Routing newRouting{item.routing(), size};
       auto it = routingCache_.find(item.connection_id());
