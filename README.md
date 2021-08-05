@@ -107,14 +107,15 @@ From an administrator command prompt, run
 cmake --build --preset windows-default --target install
 ```
 
-Both VST3 plugins and REAPER extension will be installed to your Windows Program Files directory.
+The VST3 plugins will be installed to your Windows Program Files directory.
 The location of the installed VST3 plugins will be
 ```shell
-<Program Files>/CommonFiles/VST3/
+<Program Files>\Common Files\VST3\
 ```
+The REAPER extension will be installed to the AppData directory for the current user (as specified by the `AppData` environment variable, which will normally resolve to the `Roaming` subdirectory.)
 The location of the installed REAPER extension will be
 ```shell
-<Program Files>/REAPER (x64)/Plugins/
+<~\AppData\Roaming>\REAPER\UserPlugins\
 ```
 
 ### Customising installation location
