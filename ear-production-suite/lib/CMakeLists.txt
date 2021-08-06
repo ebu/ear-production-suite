@@ -39,9 +39,69 @@ add_library(ear-plugin-base STATIC
   src/ui/scene_frontend_backend_connector.cpp
   ${EAR_PROTO_SRC}
         include/proto_printers.hpp src/proto_printers.cpp)
+		
+set(EAR_BASE_HEADERS		
+	include/communication/commands.hpp
+	include/communication/common_types.hpp
+	include/communication/direct_speakers_metadata_sender.hpp
+	include/communication/input_control_connection.hpp
+	include/communication/message_buffer.hpp
+	include/communication/monitoring_control_connection.hpp
+	include/communication/monitoring_metadata_receiver.hpp
+	include/communication/object_metadata_sender.hpp
+	include/communication/scene_command_receiver.hpp
+	include/communication/scene_connection_manager.hpp
+	include/communication/scene_connection_registry.hpp
+	include/communication/scene_metadata_receiver.hpp
+	include/detail/constants.hpp
+	include/detail/log_config.hpp
+	include/detail/named_type.hpp
+	include/detail/spdl_nng_sink.hpp
+	include/direct_speakers_backend.hpp
+	include/helper/eps_to_ear_metadata_converter.hpp
+	include/helper/protobuf_utilities.hpp
+	include/item_store.hpp
+	include/log.hpp
+	include/monitoring_audio_processor.hpp
+	include/monitoring_backend.hpp
+	include/multichannel_convolver.hpp
+	include/nng-cpp/asyncio.hpp
+	include/nng-cpp/buffer.hpp
+	include/nng-cpp/dialer.hpp
+	include/nng-cpp/enum_bitmask.hpp
+	include/nng-cpp/error_handling.hpp
+	include/nng-cpp/message.hpp
+	include/nng-cpp/nng.hpp
+	include/nng-cpp/pipe.hpp
+	include/nng-cpp/placeholders.hpp
+	include/nng-cpp/protocols/protocol_traits.hpp
+	include/nng-cpp/protocols/pub.hpp
+	include/nng-cpp/protocols/pull.hpp
+	include/nng-cpp/protocols/push.hpp
+	include/nng-cpp/protocols/rep.hpp
+	include/nng-cpp/protocols/req.hpp
+	include/nng-cpp/protocols/socket_options.hpp
+	include/nng-cpp/protocols/sub.hpp
+	include/nng-cpp/socket_base.hpp
+	include/object_backend.hpp
+	include/programme_element_visitor.hpp
+	include/programme_store_adm_populator.hpp
+	include/programme_store_adm_serializer.hpp
+	include/programme_types.hpp
+	include/proto_printers.hpp
+	include/scene_backend.hpp
+	include/scene_gains_calculator.hpp
+	include/speaker_setups.hpp
+	include/ui/direct_speakers_frontend_backend_connector.hpp
+	include/ui/item_colour.hpp
+	include/ui/object_frontend_backend_connector.hpp
+	include/ui/scene_frontend_backend_connector.hpp
+	include/variable_block_adapter.hpp
+	)
 
 set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
-target_sources(ear-plugin-base PRIVATE ${EAR_PROTO_INPUT})
+source_group("Header Files" FILES ${EAR_BASE_HEADERS})
+target_sources(ear-plugin-base PRIVATE ${EAR_PROTO_INPUT} ${EAR_BASE_HEADERS})
 
 
 target_link_libraries(ear-plugin-base PUBLIC
