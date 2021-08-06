@@ -4,15 +4,9 @@ project(ear-production-suite VERSION 0.6.0
                              DESCRIPTION "AudioPlugins for next generation audio productions"
                              LANGUAGES CXX)
 
-include("cmake/get_git_version.cmake")
 update_version_from_git(CMAKE_PROJECT_VERSION)
 
 message(STATUS "EAR Production Suite Version: " ${CMAKE_PROJECT_VERSION})
-###########################################################
-# set global paths
-############################################################
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ############################################################
 # user config options
@@ -30,7 +24,6 @@ find_package(JUCE REQUIRED)
 find_package(VST3 REQUIRED)
 find_package(Boost 1.66 REQUIRED)
 find_package(nng REQUIRED)
-include(cmake/check_nng.cmake)
 check_nng_pipe_callback_signature()
 set(Protobuf_USE_STATIC_LIBS ON)
 find_package(Protobuf REQUIRED)

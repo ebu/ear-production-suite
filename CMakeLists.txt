@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(ear-production-combined VERSION 0.6.0.0 LANGUAGES CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 
+include(get_git_version)
+include(check_nng)
+
 include(eps_set_install_paths)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     eps_set_install_paths()
