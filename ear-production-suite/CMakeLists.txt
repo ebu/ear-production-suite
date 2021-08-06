@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(ear-production-suite VERSION 0.6.0
+project(ear-production-suite VERSION ${EPS_VERSION_BASE}
                              DESCRIPTION "AudioPlugins for next generation audio productions"
                              LANGUAGES CXX)
-
-update_version_from_git(CMAKE_PROJECT_VERSION)
-
-message(STATUS "EAR Production Suite Version: " ${CMAKE_PROJECT_VERSION})
+							 
+set(CMAKE_PROJECT_VERSION ${EPS_VERSION_CURRENT})
+message(STATUS "Project ear-production-suite version: " ${CMAKE_PROJECT_VERSION})
 
 ############################################################
 # user config options
