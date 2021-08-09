@@ -1,5 +1,5 @@
 
-find_package(Boost COMPONENTS filesystem REQUIRED)
+find_package(Boost COMPONENTS filesystem REQUIRED QUIET)
 
 add_library(plugin_test_tools STATIC plugin_test_tools/mockup_host.cpp plugin_test_tools/mockup_scene.cpp plugin_test_tools/mockup_monitoring.cpp plugin_test_tools/mockup_input_plugin.cpp)
 target_include_directories(plugin_test_tools PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/plugin_test_tools)

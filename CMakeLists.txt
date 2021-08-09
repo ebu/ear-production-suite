@@ -13,6 +13,8 @@ message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE}
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
 message(STATUS "-----------------------------------------------------------------------------------\n")
 
+include(FeatureSummary)
+
 include(eps_set_install_paths)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     eps_set_install_paths()
@@ -123,3 +125,6 @@ endif()
 if(EPS_BUILD_PACKAGE)
     add_subdirectory(packaging)
 endif()
+
+message(STATUS "\n")
+feature_summary(WHAT ALL)
