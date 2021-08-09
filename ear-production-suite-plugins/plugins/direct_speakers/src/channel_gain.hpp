@@ -46,15 +46,15 @@ class ChannelGain : public Component {
           .retainCharacters("0123456789.,-+")
           .getDoubleValue();
     };
-    gainSlider_->setSliderStyle(Slider::LinearVertical);
+    /*gainSlider_->setSliderStyle(Slider::LinearVertical);
     gainSlider_->setTextBoxStyle(Slider::TextBoxAbove, false, 44, 40);
     gainSlider_->setRange(-100.f, 6.f);
     gainSlider_->setNumDecimalPlacesToDisplay(1);
     gainSlider_->setDoubleClickReturnValue(true, 0.f);
     gainSlider_->setSkewFactorFromMidPoint(-20.f);
     gainSlider_->setEnabled(false);
-    gainSlider_->setAlpha(Emphasis::disabled);
-    addAndMakeVisible(gainSlider_.get());
+    gainSlider_->setAlpha(Emphasis::disabled);*/
+    //addAndMakeVisible(gainSlider_.get());
   }
   ~ChannelGain() {}
 
@@ -62,11 +62,11 @@ class ChannelGain : public Component {
 
   void resized() override {
     auto area = getLocalBounds();
-    area.removeFromTop(5);
+    area.removeFromTop(5).removeFromBottom(100);
     levelMeter_->setBounds(
         area.removeFromTop(120).withSizeKeepingCentre(13, 120));
-    speakerLabel_->setBounds(area.removeFromTop(30));
-    gainSlider_->setBounds(area);
+    speakerLabel_->setBounds(area.removeFromTop(30));//ME added remove from bottom
+    //gainSlider_->setBounds(area);
   }
 
   EarSlider* getGainSlider() { return gainSlider_.get(); }

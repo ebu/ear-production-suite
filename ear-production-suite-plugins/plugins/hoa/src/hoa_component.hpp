@@ -90,7 +90,7 @@ class HoaComponent : public Component,
 
   ~HoaComponent() {}
 
-  void paint(Graphics& g) override {
+  void paint(Graphics& g) override {//here we specify area fr the whole box
     g.fillAll(EarColours::Background);
     Shadows::elevation04dp.drawForRectangle(g, mainValueBox->getBounds());
     /* Old DS code

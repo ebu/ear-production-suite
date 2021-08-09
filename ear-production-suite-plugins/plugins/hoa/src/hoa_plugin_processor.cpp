@@ -25,7 +25,7 @@ HoaAudioProcessor::HoaAudioProcessor()
       "routing", "Routing",
       -1, 63, -1));
   //ME add, similar to DS
-  addParameter(hoaTypeId_ =//THIS NEEDS TO BE EDITTED TO ACTUAL IDs
+  addParameter(hoaTypeId_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "hoa_type", "HOA Type",
       0, 0xFFFF, 0));

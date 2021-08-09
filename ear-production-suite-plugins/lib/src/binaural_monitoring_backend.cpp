@@ -241,7 +241,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         activeHoaIds.push_back(item.connection_id());
         //totalHoaChannels += item.hoa_metadata().???(); // TODO: Proto message
         //auto hoaId = getLatestHoaTypeMetadata(item.connection_id());
-        auto hoaId = item.hoa_metadata().hoatypeindex();
+        auto hoaId = item.hoa_metadata().packformatidvalue();
         {
           std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
           // TODO: May need to revisit later - 

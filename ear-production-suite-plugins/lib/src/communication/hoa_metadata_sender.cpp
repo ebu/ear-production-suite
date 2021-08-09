@@ -126,7 +126,7 @@ void HoaMetadataSender::colour(int value) {
 void HoaMetadataSender::hoa_type(int valueHOAtypeIndex) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   proto::HoaTypeMetadata* hoa_metadata = new proto::HoaTypeMetadata();
-  hoa_metadata->set_hoatypeindex(valueHOAtypeIndex);
+  hoa_metadata->set_packformatidvalue(valueHOAtypeIndex);
   data_.set_allocated_hoa_metadata(hoa_metadata);
 }
 //ME end

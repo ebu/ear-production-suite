@@ -34,12 +34,12 @@ class ValueBoxChannelGain : public Component {
         channelGainsBox13to24_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox25to36_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox37to48_(std::make_unique<ChannelGainsBox>()),
-        channelGainsBox49to60_(std::make_unique<ChannelGainsBox>()), /*
+        channelGainsBox49to60_(std::make_unique<ChannelGainsBox>())/*,
         channelGainsBox1to6_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox7to12_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox13to18_(std::make_unique<ChannelGainsBox>()),
         channelGainsBox19to24_(std::make_unique<ChannelGainsBox>()),*/
-        channelLinkButton_(std::make_unique<EarButton>()) {
+        /*channelLinkButton_(std::make_unique<EarButton>())*/ {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Channel Gain",
@@ -96,32 +96,33 @@ class ValueBoxChannelGain : public Component {
     addAndMakeVisible(channelGainsBox1to12_.get());
     addChildComponent(channelGainsBox13to24_.get());
     addChildComponent(channelGainsBox25to36_.get());
-    addChildComponent(channelGainsBox37to48_.get()); 
+    addChildComponent(channelGainsBox37to48_.get());
     addChildComponent(channelGainsBox49to60_.get()); /*
     addAndMakeVisible(channelGainsBox1to6_.get());
     addChildComponent(channelGainsBox7to12_.get());
     addChildComponent(channelGainsBox13to18_.get());
     addChildComponent(channelGainsBox19to24_.get());*/
 
-    channelLinkButton_->setButtonText("Channel Link");
+    /*channelLinkButton_->setButtonText("Channel Link");
     channelLinkButton_->setShape(EarButton::Shape::Toggle);
     channelLinkButton_->setClickingTogglesState(true);
     channelLinkButton_->onClick = [this] { this->toggleChannelLink(); };
     channelLinkButton_->setEnabled(false);
     channelLinkButton_->setAlpha(Emphasis::disabled);
 
-    addAndMakeVisible(channelLinkButton_.get());
+    addAndMakeVisible(channelLinkButton_.get());*/
   }
 
   ~ValueBoxChannelGain() {}
 
-  void paint(Graphics& g) override { g.fillAll(EarColours::Area01dp); }
+  void paint(Graphics& g) override {
+    g.fillAll(EarColours::Area01dp);
+  }
 
   void resized() override {
     auto area = getLocalBounds();
     area.reduce(10, 5);
     headingLabel_->setBounds(area.removeFromTop(30));
-
     area.removeFromTop(2.f * marginBig_);
 
     auto channelsButtonArea =
@@ -129,11 +130,11 @@ class ValueBoxChannelGain : public Component {
     channels1to12Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels13to24Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5)); 
+        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels25to36Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels37to48Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5)); 
+        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels49to60Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5)); /*
     channels1to6Button_->setBounds(
@@ -145,11 +146,11 @@ class ValueBoxChannelGain : public Component {
     channels19to24Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));*/
 
-    channelLinkButton_->setBounds(area.removeFromBottom(40));
+    //channelLinkButton_->setBounds(area.removeFromBottom(40));
     channelGainsBox1to12_->setBounds(area.reduced(0, 10));
-    channelGainsBox13to24_->setBounds(area.reduced(0, 10)); 
-    channelGainsBox25to36_->setBounds(area.reduced(0, 10)); 
-    channelGainsBox37to48_->setBounds(area.reduced(0, 10)); 
+    channelGainsBox13to24_->setBounds(area.reduced(0, 10));
+    channelGainsBox25to36_->setBounds(area.reduced(0, 10));
+    channelGainsBox37to48_->setBounds(area.reduced(0, 10));
     channelGainsBox49to60_->setBounds(area.reduced(0, 10)); /*
     channelGainsBox1to6_->setBounds(area.reduced(0, 10));
     channelGainsBox7to12_->setBounds(area.reduced(0, 10));
@@ -159,7 +160,7 @@ class ValueBoxChannelGain : public Component {
 
   void clearHoaSetup() {
     channelGainsBox1to12_->removeAllChannelGains();
-    channelGainsBox13to24_->removeAllChannelGains(); 
+    channelGainsBox13to24_->removeAllChannelGains();
     channelGainsBox25to36_->removeAllChannelGains();
     channelGainsBox37to48_->removeAllChannelGains();
     channelGainsBox49to60_->removeAllChannelGains(); /*
@@ -175,7 +176,7 @@ class ValueBoxChannelGain : public Component {
     channels25to36Button_->setEnabled(false);
     channels25to36Button_->setAlpha(Emphasis::disabled);
     channels37to48Button_->setEnabled(false);
-    channels37to48Button_->setAlpha(Emphasis::disabled); 
+    channels37to48Button_->setAlpha(Emphasis::disabled);
     channels49to60Button_->setEnabled(false);
     channels49to60Button_->setAlpha(Emphasis::disabled); /*
     channels1to6Button_->setEnabled(false);
@@ -190,7 +191,7 @@ class ValueBoxChannelGain : public Component {
     channels1to12Button_->setToggleState(false, dontSendNotification);
     channels13to24Button_->setToggleState(false, dontSendNotification);
     channels25to36Button_->setToggleState(false, dontSendNotification);
-    channels37to48Button_->setToggleState(false, dontSendNotification); 
+    channels37to48Button_->setToggleState(false, dontSendNotification);
     channels49to60Button_->setToggleState(false, dontSendNotification); /*
     channels1to6Button_->setToggleState(false, dontSendNotification);
     channels7to12Button_->setToggleState(false, dontSendNotification);
@@ -199,16 +200,17 @@ class ValueBoxChannelGain : public Component {
     channelGainsBox1to12_->setVisible(true);
     channelGainsBox13to24_->setVisible(false);
     channelGainsBox25to36_->setVisible(false);
-    channelGainsBox37to48_->setVisible(false); 
+    channelGainsBox37to48_->setVisible(false);
     channelGainsBox49to60_->setVisible(false); /*
     channelGainsBox1to6_->setVisible(true);
     channelGainsBox7to12_->setVisible(false);
     channelGainsBox13to18_->setVisible(false);
     channelGainsBox19to24_->setVisible(false);*/
 
-    channelLinkButton_->setEnabled(false);
-    channelLinkButton_->setAlpha(Emphasis::disabled);
+    //channelLinkButton_->setEnabled(false);
+    //channelLinkButton_->setAlpha(Emphasis::disabled);
   }
+
   void setHoaType(int hoaId) {
     clearHoaSetup();
     auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
@@ -254,7 +256,7 @@ class ValueBoxChannelGain : public Component {
     if (cfCount > 24) {
       channels25to36Button_->setEnabled(true);
       channels25to36Button_->setAlpha(Emphasis::full);
-    } 
+    }
     if (cfCount > 36) {
       channels37to48Button_->setEnabled(true);
       channels37to48Button_->setAlpha(Emphasis::full);
@@ -278,9 +280,9 @@ class ValueBoxChannelGain : public Component {
       channels19to24Button_->setAlpha(Emphasis::full);
     }*/
 
-    channelLinkButton_->setEnabled(true);
-    channelLinkButton_->setAlpha(Emphasis::full);
-    linkChannels();
+    //channelLinkButton_->setEnabled(true);
+    //channelLinkButton_->setAlpha(Emphasis::full);
+    //linkChannels();
 
     selectChannelGainsTab(0);
   }
@@ -349,16 +351,16 @@ class ValueBoxChannelGain : public Component {
   }
 
   void toggleChannelLink() {
-    if (channelLinkButton_->getToggleState()) {
-      linkChannels();
-    } else {
-      unlinkChannels();
-    }
+    //if (channelLinkButton_->getToggleState()) {
+     // linkChannels();
+    //} else {
+    //  unlinkChannels();
+    //}
   }
 
  private:
   void linkChannels() {
-    channelLinkButton_->setToggleState(true, dontSendNotification);
+    //channelLinkButton_->setToggleState(true, dontSendNotification);
     for (const auto& channelGain : channelGains_) {
       channelGain->getGainSlider()->getValueObject().referTo(
           channelGains_.at(0)->getGainSlider()->getValueObject());
@@ -366,7 +368,7 @@ class ValueBoxChannelGain : public Component {
   }
 
   void unlinkChannels() {
-    channelLinkButton_->setToggleState(false, dontSendNotification);
+    //channelLinkButton_->setToggleState(false, dontSendNotification);
     float lastValue = 0.f;
     if (!channelGains_.empty()) {
       lastValue = channelGains_.at(0)->getGainSlider()->getValue();
@@ -382,7 +384,7 @@ class ValueBoxChannelGain : public Component {
   std::unique_ptr<Label> headingLabel_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels1to12Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels13to24Button_;
-  std::unique_ptr<ear::plugin::ui::EarButton> channels25to36Button_; 
+  std::unique_ptr<ear::plugin::ui::EarButton> channels25to36Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels37to48Button_;
   std::unique_ptr<ear::plugin::ui::EarButton> channels49to60Button_; /*
   std::unique_ptr<ear::plugin::ui::EarButton> channels1to6Button_;
@@ -393,15 +395,15 @@ class ValueBoxChannelGain : public Component {
   std::vector<std::unique_ptr<ear::plugin::ui::ChannelGain>> channelGains_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox1to12_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox13to24_;
-  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox25to36_; 
-  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox37to48_; 
+  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox25to36_;
+  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox37to48_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox49to60_; /*
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox1to6_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox7to12_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox13to18_;
   std::unique_ptr<ear::plugin::ui::ChannelGainsBox> channelGainsBox19to24_;*/
 
-  std::unique_ptr<ear::plugin::ui::EarButton> channelLinkButton_;
+  //std::unique_ptr<ear::plugin::ui::EarButton> channelLinkButton_;
 
   //std::mutex commonDefinitionHelperMutex_;
 

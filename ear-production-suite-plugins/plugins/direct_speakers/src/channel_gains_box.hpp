@@ -41,6 +41,7 @@ class ChannelGainsBox : public Component {
 
   void updateChannelGainBounds() {
     auto area = getLocalBounds();
+    area.removeFromBottom(350);//ME add 
     for (auto channelGain : channelGains_) {
       channelGain->setBounds(area.removeFromLeft(50));
       area.removeFromLeft(6);

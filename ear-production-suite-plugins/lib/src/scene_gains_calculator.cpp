@@ -160,7 +160,7 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
         {
           std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
           pfData = commonDefinitionHelper.getPackFormatData(
-              4, item.hoa_metadata().hoatypeindex());
+              4, item.hoa_metadata().packformatidvalue());
         }
         auto cfData = pfData->relatedChannelFormats;
         size = cfData.size();

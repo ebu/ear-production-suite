@@ -53,7 +53,7 @@ struct EpsToEarMetadataConverter {
     //auto elementRelationships =
     //    commonDefinitionHelper.getElementRelationships();
     auto pfData = commonDefinitionHelper.getPackFormatData(
-        4, epsMetadata.hoatypeindex());
+        4, epsMetadata.packformatidvalue());
     auto cfData = pfData->relatedChannelFormats;
 
     ear::HOATypeMetadata earMetadata;
