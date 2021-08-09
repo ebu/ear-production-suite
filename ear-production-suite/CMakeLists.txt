@@ -4,7 +4,6 @@ project(ear-production-suite VERSION ${EPS_VERSION_BASE}
                              DESCRIPTION "AudioPlugins for next generation audio productions"
                              LANGUAGES CXX)
 							 
-set(CMAKE_PROJECT_VERSION ${EPS_VERSION_CURRENT})
 message(STATUS "Project ear-production-suite version: " ${CMAKE_PROJECT_VERSION})
 
 ############################################################

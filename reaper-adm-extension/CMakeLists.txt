@@ -4,7 +4,6 @@ project(reaper_adm VERSION ${EPS_VERSION_BASE}
                    DESCRIPTION "Extension to provide ADM Import and Export capabilities in REAPER"
                    LANGUAGES CXX)
 							 
-set(CMAKE_PROJECT_VERSION ${EPS_VERSION_CURRENT})
 message(STATUS "Project reaper_adm version: " ${CMAKE_PROJECT_VERSION})
 
 include(CTest)

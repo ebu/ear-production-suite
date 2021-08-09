@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
-set(EPS_VERSION_BASE 0.6.0)
+set(EPS_VERSION_BASE 0.6.0) # This is used as fallback if getting from git fails. Must be only numeric.
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 include(get_git_version)
+set(GIT_VERSION_BASE ${EPS_VERSION_BASE})
 set(EPS_VERSION_CURRENT ${EPS_VERSION_BASE})
-update_version_from_git(EPS_VERSION_CURRENT)
+update_version_from_git(GIT_VERSION_BASE EPS_VERSION_CURRENT)
+if(${GIT_VERSION_BASE} VERSION_GREATER ${EPS_VERSION_BASE} AND (NOT(EPS_PACKAGING)))
+    message(WARNING "EPS_VERSION_BASE is lower than most recent git tag. Do you need to update it?")
+endif()
+set(EPS_VERSION_BASE ${GIT_VERSION_BASE})
 
 project(ear-production-combined VERSION ${EPS_VERSION_BASE} LANGUAGES CXX)
-set(CMAKE_PROJECT_VERSION ${EPS_VERSION_CURRENT})
 message(STATUS "\n-----------------------------------------------------------------------------------")
 message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE})
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
