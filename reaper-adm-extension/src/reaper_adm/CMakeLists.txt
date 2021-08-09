@@ -1,7 +1,7 @@
 add_library(reaper_adm SHARED "dummy.cpp")
 add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 
 set(EXTENSION_SOURCES
 	actionmanager.cpp
@@ -180,7 +180,7 @@ target_include_directories(reaper_adm_dependencies
         $<TARGET_PROPERTY:adm,INCLUDE_DIRECTORIES>
 )
 
-find_package(WDL REQUIRED)
+find_package(WDL REQUIRED QUIET)
 
 target_include_directories(reaper_adm_object
     PRIVATE

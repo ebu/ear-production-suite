@@ -19,21 +19,20 @@ if(JUCE_DISABLE_ASSERTIONS)
 	add_compile_definitions(JUCE_DISABLE_ASSERTIONS)
 endif()
 
-find_package(JUCE REQUIRED)
-find_package(VST3 REQUIRED)
-find_package(Boost 1.66 REQUIRED)
-find_package(nng REQUIRED)
+find_package(JUCE REQUIRED QUIET)
+find_package(VST3 REQUIRED QUIET)
+find_package(Boost 1.66 REQUIRED QUIET)
+find_package(nng REQUIRED QUIET)
 check_nng_pipe_callback_signature()
 set(Protobuf_USE_STATIC_LIBS ON)
-find_package(Protobuf REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(Protobuf REQUIRED QUIET)
+find_package(spdlog REQUIRED QUIET)
 
 ############################################################
 # add targets
 ############################################################
 
 configure_file(${PROJECT_SOURCE_DIR}/resources/config.h.in ${PROJECT_BINARY_DIR}/ear-plugin-base/config.h)
-
 add_subdirectory(lib)
 add_subdirectory(plugins)
 add_subdirectory(tools)

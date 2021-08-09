@@ -26,7 +26,7 @@ target_compile_options(testreaper_adm
     "/bigobj")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 
 target_link_libraries(testreaper_adm
     PRIVATE

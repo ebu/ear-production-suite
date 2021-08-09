@@ -1,4 +1,10 @@
+message(STATUS "Processing submodules...")
+
 set(isTesting ${BUILD_TESTING})
+set(LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
+set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
+set(DEPRECATION_WARN ${CMAKE_WARN_DEPRECATED})
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Enable cmake deprecation warnings")
 
 
 
@@ -42,3 +48,7 @@ set_target_properties(catch2 gmock gmock_main gtest gtest_main PROPERTIES FOLDER
 
 
 set(BUILD_TESTING ${isTesting})
+set(CMAKE_MESSAGE_LOG_LEVEL ${LOG_LEVEL})
+set(CMAKE_WARN_DEPRECATED ${DEPRECATION_WARN} CACHE BOOL "Enable cmake deprecation warnings" FORCE)
+
+message(STATUS "Processing submodules DONE!")

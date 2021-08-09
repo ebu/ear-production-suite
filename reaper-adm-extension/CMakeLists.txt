@@ -13,6 +13,3 @@ add_subdirectory(src)
 if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
-
-message(${CMAKE_SYSTEM_NAME})
-
