@@ -1,3 +1,5 @@
+set(REAPER_ADM_EXTENSION_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 add_library(reaper_adm SHARED "dummy.cpp")
 add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 

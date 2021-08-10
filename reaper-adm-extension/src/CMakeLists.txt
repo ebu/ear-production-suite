@@ -1,1 +1,2 @@
 add_subdirectory(reaper_adm)
+set(REAPER_ADM_EXTENSION_SRC_DIR ${REAPER_ADM_EXTENSION_SRC_DIR} PARENT_SCOPE)
