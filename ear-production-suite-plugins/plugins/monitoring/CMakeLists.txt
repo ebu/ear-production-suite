@@ -1,35 +1,35 @@
 set(SOURCES_MONITORING
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.cpp
+    ${EPS_SHARED_DIR}/binary_data.cpp
+    ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
     src/monitoring_plugin_editor.cpp
     src/monitoring_plugin_processor.cpp
 )
 
 set(HEADERS_MONITORING
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/detail/constants.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/monitoring_audio_processor.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/monitoring_backend.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/speaker_setups.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/variable_block_adapter.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/monitoring_audio_processor.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/monitoring_backend.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/variable_block_adapter.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.hpp
+	${EPS_SHARED_DIR}/binary_data.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_button.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_header.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding_slide.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/overlay.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/ear_button.hpp
+	${EPS_SHARED_DIR}/components/ear_header.hpp
+	${EPS_SHARED_DIR}/components/level_meter.hpp
+	${EPS_SHARED_DIR}/components/level_meter_calculator.hpp
+	${EPS_SHARED_DIR}/components/onboarding.hpp
+	${EPS_SHARED_DIR}/components/onboarding_slide.hpp
+	${EPS_SHARED_DIR}/components/overlay.hpp
+	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/colours.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/fonts.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/shadows.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/graphics.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/properties_file.hpp
+	${EPS_SHARED_DIR}/helper/graphics.hpp
+	${EPS_SHARED_DIR}/helper/properties_file.hpp
 
 	src/monitoring_plugin_editor.hpp
 	src/monitoring_plugin_processor.hpp

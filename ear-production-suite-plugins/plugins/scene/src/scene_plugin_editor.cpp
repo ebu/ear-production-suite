@@ -1,8 +1,8 @@
 #include "scene_plugin_editor.hpp"
 
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/helper/properties_file.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "scene_plugin_processor.hpp"
 #include "scene_frontend_connector.hpp"

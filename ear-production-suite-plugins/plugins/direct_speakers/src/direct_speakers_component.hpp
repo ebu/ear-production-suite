@@ -2,11 +2,11 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/onboarding.hpp"
-#include "../../shared/components/overlay.hpp"
-#include "../../shared/helper/properties_file.hpp"
-#include "../../shared/components/ear_header.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/onboarding.hpp"
+#include "components/overlay.hpp"
+#include "helper/properties_file.hpp"
+#include "components/ear_header.hpp"
 #include "detail/constants.hpp"
 #include "value_box_channel_gain.hpp"
 #include "value_box_main.hpp"

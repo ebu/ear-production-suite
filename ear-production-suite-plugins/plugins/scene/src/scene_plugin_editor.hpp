@@ -4,11 +4,11 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_tabbed_component.hpp"
-#include "../../shared/components/onboarding.hpp"
-#include "../../shared/components/overlay.hpp"
-#include "../../shared/components/ear_header.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_tabbed_component.hpp"
+#include "components/onboarding.hpp"
+#include "components/overlay.hpp"
+#include "components/ear_header.hpp"
 #include "items_container.hpp"
 #include "auto_mode_overlay.hpp"
 #include "multiple_scene_plugins_overlay.hpp"

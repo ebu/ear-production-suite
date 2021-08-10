@@ -4,9 +4,9 @@
 
 #include "direct_speakers_plugin_processor.hpp"
 #include "ui/direct_speakers_frontend_backend_connector.hpp"
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_name_text_editor.hpp"
-#include "../../shared/helper/multi_async_updater.h"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_name_text_editor.hpp"
+#include "helper/multi_async_updater.h"
 #include "value_box_channel_gain.hpp"
 #include "value_box_speaker_layer.hpp"
 

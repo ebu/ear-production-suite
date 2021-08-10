@@ -6,12 +6,12 @@
 #include "gain_interaction_settings.hpp"
 #include "position_interaction_settings.hpp"
 #include "speaker_setups.hpp"
-#include "../../shared/components/ear_expansion_panel.hpp"
-#include "../../shared/components/ear_colour_indicator.hpp"
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/ear_slider_range.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
+#include "components/ear_expansion_panel.hpp"
+#include "components/ear_colour_indicator.hpp"
+#include "components/level_meter.hpp"
+#include "components/ear_slider_range.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
 #include "programme_store.pb.h"
 
 #include <memory>

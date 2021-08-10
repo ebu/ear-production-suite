@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/helper/iso_lang_codes.hpp"
+#include "helper/iso_lang_codes.hpp"
 #include "auto_mode_overlay.hpp"
 #include "multiple_scene_plugins_overlay.hpp"
 #include "item_store.hpp"
@@ -10,7 +10,7 @@
 #include "object_view.hpp"
 #include "programmes_container.hpp"
 #include "scene_plugin_processor.hpp"
-#include "../../shared/helper/multi_async_updater.h"
+#include "helper/multi_async_updater.h"
 
 #include <optional>
 #include <memory>

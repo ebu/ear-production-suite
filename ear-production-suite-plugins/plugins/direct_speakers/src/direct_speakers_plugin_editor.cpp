@@ -1,8 +1,8 @@
 #include "direct_speakers_plugin_editor.hpp"
 
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/components/look_and_feel/shadows.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/shadows.hpp"
 #include "direct_speakers_plugin_processor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 

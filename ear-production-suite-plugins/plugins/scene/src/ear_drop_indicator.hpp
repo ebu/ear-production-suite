@@ -2,10 +2,10 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_colour_indicator.hpp"
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
+#include "components/ear_colour_indicator.hpp"
+#include "components/level_meter.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
 
 #include <memory>
 

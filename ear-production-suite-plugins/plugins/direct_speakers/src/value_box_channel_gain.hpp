@@ -2,12 +2,12 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_slider.hpp"
-#include "../../shared/components/level_meter.hpp"
-#include "../../shared/components/ear_button.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/components/look_and_feel/slider.hpp"
+#include "components/ear_slider.hpp"
+#include "components/level_meter.hpp"
+#include "components/ear_button.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/slider.hpp"
 #include "channel_gains_box.hpp"
 #include "speaker_setups.hpp"
 

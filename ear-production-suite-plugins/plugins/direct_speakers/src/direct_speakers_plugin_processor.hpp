@@ -3,7 +3,7 @@
 #include "JuceHeader.h"
 
 #include "direct_speakers_backend.hpp"
-#include "../../shared/components/level_meter_calculator.hpp"
+#include "components/level_meter_calculator.hpp"
 
 #include <memory>
 

@@ -2,9 +2,9 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/components/look_and_feel/shadows.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/shadows.hpp"
 
 #include <memory>
 

@@ -1,11 +1,11 @@
 #include "object_frontend_connector.hpp"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_name_text_editor.hpp"
-#include "../../shared/components/ear_slider.hpp"
-#include "../../shared/components/ear_inverted_slider.hpp"
-#include "../../shared/components/panner_top_view.hpp"
-#include "../../shared/components/panner_side_view.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_name_text_editor.hpp"
+#include "components/ear_slider.hpp"
+#include "components/ear_inverted_slider.hpp"
+#include "components/panner_top_view.hpp"
+#include "components/panner_side_view.hpp"
 
 namespace ear {
 namespace plugin {

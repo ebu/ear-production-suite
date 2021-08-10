@@ -5,7 +5,7 @@
 #include <ear/ear.hpp>
 #include <memory>
 
-#include "../../shared/components/level_meter_calculator.hpp"
+#include "components/level_meter_calculator.hpp"
 
 namespace ear {
 namespace plugin {

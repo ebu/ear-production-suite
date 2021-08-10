@@ -4,7 +4,7 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_button.hpp"
+#include "components/ear_button.hpp"
 #include "communication/common_types.hpp"
 #include "item_view.hpp"
 #include "item_view_list.hpp"

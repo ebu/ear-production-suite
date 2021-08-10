@@ -4,7 +4,7 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_tabbed_component.hpp"
+#include "components/ear_tabbed_component.hpp"
 #include "programme_view.hpp"
 
 namespace ear {

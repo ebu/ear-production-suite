@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_button.hpp"
+#include "components/ear_button.hpp"
 
 #include <memory>
 

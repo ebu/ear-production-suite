@@ -2,9 +2,9 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/panner_side_view.hpp"
-#include "../../shared/components/panner_top_view.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/panner_side_view.hpp"
+#include "components/panner_top_view.hpp"
 
 namespace ear {
 namespace plugin {

@@ -1,7 +1,7 @@
 #include "direct_speakers_frontend_connector.hpp"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_name_text_editor.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_name_text_editor.hpp"
 
 namespace ear {
 namespace plugin {

@@ -1,7 +1,7 @@
 #include "direct_speakers_plugin_processor.hpp"
 #include "speaker_setups.hpp"
 
-#include "../../shared/components/non_automatable_parameter.hpp"
+#include "components/non_automatable_parameter.hpp"
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 

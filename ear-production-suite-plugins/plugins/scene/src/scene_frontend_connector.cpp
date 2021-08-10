@@ -2,8 +2,8 @@
 
 #include "speaker_setups.hpp"
 #include "helper/move.hpp"
-#include "../../shared/components/overlay.hpp"
-#include "../../shared/helper/iso_lang_codes.hpp"
+#include "components/overlay.hpp"
+#include "helper/iso_lang_codes.hpp"
 
 #include <numeric>
 

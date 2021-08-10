@@ -4,13 +4,13 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_name_text_editor.hpp"
-#include "../../shared/components/ear_tabbed_component.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
-#include "../../shared/components/look_and_feel/slider.hpp"
-#include "../../shared/helper/iso_lang_codes.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_name_text_editor.hpp"
+#include "components/ear_tabbed_component.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/slider.hpp"
+#include "helper/iso_lang_codes.hpp"
 #include "elements_container.hpp"
 #include "element_overview.hpp"
 

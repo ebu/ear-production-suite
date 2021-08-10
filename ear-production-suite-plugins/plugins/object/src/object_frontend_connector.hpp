@@ -3,11 +3,11 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_button.hpp"
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/panner_top_view.hpp"
-#include "../../shared/components/panner_side_view.hpp"
-#include "../../shared/helper/multi_async_updater.h"
+#include "components/ear_button.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/panner_top_view.hpp"
+#include "components/panner_side_view.hpp"
+#include "helper/multi_async_updater.h"
 #include "object_plugin_processor.hpp"
 #include <memory>
 

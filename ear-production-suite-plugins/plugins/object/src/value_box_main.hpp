@@ -2,10 +2,10 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/components/ear_combo_box.hpp"
-#include "../../shared/components/ear_name_text_editor.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
+#include "components/ear_combo_box.hpp"
+#include "components/ear_name_text_editor.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
 
 namespace ear {
 namespace plugin {

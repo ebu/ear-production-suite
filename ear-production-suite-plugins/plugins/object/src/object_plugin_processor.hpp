@@ -3,7 +3,7 @@
 #include "JuceHeader.h"
 
 #include <memory>
-#include "../shared/components/level_meter_calculator.hpp"
+#include "components/level_meter_calculator.hpp"
 #include "communication/common_types.hpp"
 
 namespace ear {

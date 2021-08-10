@@ -3,15 +3,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES_SCENE
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/name_text_editor.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/slider.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_combo_box.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_slider_label.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_tab_button.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_tab_button_bar.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_tabbed_component.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.cpp
+  ${EPS_SHARED_DIR}/binary_data.cpp
+  ${EPS_SHARED_DIR}/components/look_and_feel/name_text_editor.cpp
+  ${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
+  ${EPS_SHARED_DIR}/components/ear_combo_box.cpp
+  ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
+  ${EPS_SHARED_DIR}/components/ear_tab_button.cpp
+  ${EPS_SHARED_DIR}/components/ear_tab_button_bar.cpp
+  ${EPS_SHARED_DIR}/components/ear_tabbed_component.cpp
+  ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
   src/scene_frontend_connector.cpp
   src/backend_setup_timer.cpp
   src/scene_plugin_editor.cpp
@@ -22,50 +22,50 @@ set(SOURCES_SCENE
 )
 
 set(HEADERS_SCENE
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/communication/common_types.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/detail/constants.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/helper/move.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/item_store.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/programme_store_adm_populator.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/programme_store_adm_serializer.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/scene_backend.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/speaker_setups.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/ui/scene_frontend_backend_connector.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/communication/common_types.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/helper/move.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/item_store.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_populator.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_serializer.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/scene_backend.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
+	${EPS_PLUGIN_BASE_DIR}/include/ui/scene_frontend_backend_connector.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.hpp
+	${EPS_SHARED_DIR}/binary_data.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_bounds_constrainer.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_button.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_colour_indicator.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_combo_box.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_expansion_panel.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_header.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_inverted_slider.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_name_text_editor.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_slider.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_slider_label.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_slider_range.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_tab_button_bar.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_tabbed_component.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding_slide.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/overlay.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/read_only_audio_parameter_int.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/ear_bounds_constrainer.hpp
+	${EPS_SHARED_DIR}/components/ear_button.hpp
+	${EPS_SHARED_DIR}/components/ear_colour_indicator.hpp
+	${EPS_SHARED_DIR}/components/ear_combo_box.hpp
+	${EPS_SHARED_DIR}/components/ear_expansion_panel.hpp
+	${EPS_SHARED_DIR}/components/ear_header.hpp
+	${EPS_SHARED_DIR}/components/ear_inverted_slider.hpp
+	${EPS_SHARED_DIR}/components/ear_name_text_editor.hpp
+	${EPS_SHARED_DIR}/components/ear_slider.hpp
+	${EPS_SHARED_DIR}/components/ear_slider_label.hpp
+	${EPS_SHARED_DIR}/components/ear_slider_range.hpp
+	${EPS_SHARED_DIR}/components/ear_tab_button_bar.hpp
+	${EPS_SHARED_DIR}/components/ear_tabbed_component.hpp
+	${EPS_SHARED_DIR}/components/level_meter.hpp
+	${EPS_SHARED_DIR}/components/level_meter_calculator.hpp
+	${EPS_SHARED_DIR}/components/onboarding.hpp
+	${EPS_SHARED_DIR}/components/onboarding_slide.hpp
+	${EPS_SHARED_DIR}/components/overlay.hpp
+	${EPS_SHARED_DIR}/components/read_only_audio_parameter_int.hpp
+	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/colours.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/fonts.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/name_text_editor.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/roboto.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/shadows.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/name_text_editor.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/roboto.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/graphics.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/iso_lang_codes.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/multi_async_updater.h
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/properties_file.hpp
+	${EPS_SHARED_DIR}/helper/graphics.hpp
+	${EPS_SHARED_DIR}/helper/iso_lang_codes.hpp
+	${EPS_SHARED_DIR}/helper/multi_async_updater.h
+	${EPS_SHARED_DIR}/helper/properties_file.hpp
 
 	src/auto_mode_overlay.hpp
 	src/backend_setup_timer.hpp

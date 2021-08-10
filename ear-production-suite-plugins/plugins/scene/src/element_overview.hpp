@@ -2,10 +2,10 @@
 
 #include "JuceHeader.h"
 
-#include "../../shared/binary_data.hpp"
-#include "../../shared/components/ear_button.hpp"
-#include "../../shared/components/look_and_feel/colours.hpp"
-#include "../../shared/components/look_and_feel/fonts.hpp"
+#include "binary_data.hpp"
+#include "components/ear_button.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
 #include "item_store.hpp"
 #include "programme_store.pb.h"
 

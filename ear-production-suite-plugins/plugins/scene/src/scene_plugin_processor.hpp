@@ -4,8 +4,8 @@
 #include "JuceHeader.h"
 #include "nng_wrappers.h"
 #include "programme_store.pb.h"
-#include "../../shared/components/read_only_audio_parameter_int.hpp"
-#include "../../shared/components/level_meter_calculator.hpp"
+#include "components/read_only_audio_parameter_int.hpp"
+#include "components/level_meter_calculator.hpp"
 #include "backend_setup_timer.hpp"
 
 namespace ear {

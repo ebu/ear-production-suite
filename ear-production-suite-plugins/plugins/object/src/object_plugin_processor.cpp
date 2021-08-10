@@ -1,6 +1,6 @@
 #include "object_plugin_processor.hpp"
 
-#include "../../shared/components/non_automatable_parameter.hpp"
+#include "components/non_automatable_parameter.hpp"
 #include "object_backend.hpp"
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
