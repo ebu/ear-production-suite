@@ -11,7 +11,7 @@ if(${GIT_VERSION_BASE} VERSION_GREATER ${EPS_VERSION_BASE} AND (NOT(EPS_PACKAGIN
 endif()
 set(EPS_VERSION_BASE ${GIT_VERSION_BASE})
 
-project(ear-production-combined VERSION ${EPS_VERSION_BASE} LANGUAGES CXX)
+project(ear-production-suite VERSION ${EPS_VERSION_BASE} LANGUAGES CXX)
 message(STATUS "\n-----------------------------------------------------------------------------------")
 message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE})
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
