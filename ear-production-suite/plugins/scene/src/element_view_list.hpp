@@ -16,7 +16,7 @@ class ElementViewList : public Component,
                         public DragAndDropTarget,
                         public DragAndDropContainer {
  public:
-  ElementViewList(ElementsContainer* parentContainer);
+  explicit ElementViewList(ElementsContainer* parentContainer);
 
   void paint(Graphics& g) override;
 

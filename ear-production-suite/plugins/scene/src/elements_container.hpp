@@ -35,8 +35,8 @@ class ElementsContainer : public Component {
   void addListener(Listener* l);
   void removeListener(Listener* l);
 
-  std::unique_ptr<Viewport> viewport;
   std::unique_ptr<ElementViewList> list;
+  std::unique_ptr<Viewport> viewport;
   std::vector<std::shared_ptr<ElementView>> elements;
 
  private:
