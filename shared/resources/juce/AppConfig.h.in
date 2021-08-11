@@ -357,7 +357,7 @@
 #define JucePlugin_ManufacturerCode 0x45425520  // 'EBU '
 #endif
 #ifndef JucePlugin_PluginCode
-#define JucePlugin_PluginCode 0x41444D65  // 'ADMe'
+#define JucePlugin_PluginCode 0x@PLUGIN_CODE_PREFIX@@PLUGIN_CODE_SUFFIX@
 #endif
 #ifndef JucePlugin_IsSynth
 #define JucePlugin_IsSynth 0

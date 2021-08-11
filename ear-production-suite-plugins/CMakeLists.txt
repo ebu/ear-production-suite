@@ -33,7 +33,7 @@ find_package(spdlog REQUIRED QUIET)
 # add targets
 ############################################################
 
-configure_file(${PROJECT_SOURCE_DIR}/resources/config.h.in ${PROJECT_BINARY_DIR}/ear-plugin-base/config.h)
+configure_file(${JUCE_SUPPORT_RESOURCES}/config.h.in ${PROJECT_BINARY_DIR}/ear-plugin-base/config.h)
 set(EPS_PLUGIN_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 add_subdirectory(lib)
 add_subdirectory(plugins)

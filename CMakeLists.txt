@@ -38,6 +38,7 @@ find_package(nng REQUIRED QUIET)
 add_subdirectory(submodules)
 
 set(EPS_SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shared)
+set(JUCE_SUPPORT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/shared/resources)
 
 add_subdirectory(ear-production-suite-plugins)
 add_subdirectory(reaper-adm-extension)
