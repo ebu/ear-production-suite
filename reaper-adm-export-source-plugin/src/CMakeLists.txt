@@ -3,7 +3,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(VST_SOURCES
-	common_definition_helper.cpp
+	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	
 	PluginEditor.cpp
 	PluginProcessor.cpp
 	PluginProcessorUtils.cpp
@@ -12,9 +13,9 @@ set(VST_SOURCES
 	)
 
 set(VST_HEADERS
+	${EPS_SHARED_DIR}/helper/common_definition_helper.h
 	${EPS_SHARED_DIR}/helper/nng_wrappers.h
 	
-	common_definition_helper.h
 	JuceHeader_Wrapper.h
 	PluginEditor.h
 	PluginProcessor.h

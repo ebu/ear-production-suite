@@ -7,7 +7,7 @@
 #include "admmetadata.h"
 #include "admchannel.h"
 #include <adm/adm.hpp>
-#include "common_definition_helper.h"
+#include "helper/common_definition_helper.h"
 
 namespace admplug {
     class ProjectNode;

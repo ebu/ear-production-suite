@@ -71,7 +71,8 @@ endif()
 
 target_include_directories(testacceptreaper_adm
   PRIVATE
-    $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>)
+    $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
+	${EPS_SHARED_DIR})
 	
 set_property(TARGET testacceptreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
 

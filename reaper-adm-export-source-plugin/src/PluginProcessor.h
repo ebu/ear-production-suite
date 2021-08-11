@@ -11,7 +11,7 @@
 #pragma once
 
 #include "JuceHeader_Wrapper.h"
-#include "common_definition_helper.h"
+#include "helper/common_definition_helper.h"
 #include "helper/nng_wrappers.h"
 #include "PluginProcessorUtils.h"
 #include <functional>

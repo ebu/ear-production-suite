@@ -7,7 +7,7 @@
 #include "exportaction_parameterprocessing.h"
 #include "pluginsuite.h"
 #include "admvstcontrol.h"
-#include "common_definition_helper.h"
+#include "helper/common_definition_helper.h"
 
 #include <memory>
 
