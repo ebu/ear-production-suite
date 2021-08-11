@@ -36,7 +36,8 @@ target_link_libraries(testreaper_adm
 
 target_include_directories(testreaper_adm
   PRIVATE
-    $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>)
+    $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
+	${EPS_SHARED_DIR})
 	
 set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
 

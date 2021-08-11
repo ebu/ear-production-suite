@@ -2,7 +2,7 @@
 
 #include <map>
 #include "JuceHeader.h"
-#include "nng_wrappers.h"
+#include "helper/nng_wrappers.h"
 #include "programme_store.pb.h"
 #include "components/read_only_audio_parameter_int.hpp"
 #include "components/level_meter_calculator.hpp"

@@ -5,7 +5,7 @@
 #include <memory>
 #include "exportaction_pcmsink.h"
 #include "exportaction_dialogcontrol.h"
-#include "nng_wrappers.h"
+#include "helper/nng_wrappers.h"
 
 namespace admplug {
 

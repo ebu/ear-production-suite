@@ -18,6 +18,27 @@
 #include <vector>
 #include <cstdlib>
 
+/*
+NOTE:
+
+This is an NNG wrapper used for communication between either
+the ADM Export Source plugin or EPS Scene plugin,
+and the REAPER extension.
+
+It is used for configuring renders, and sending metadata
+and audio from plugins to the extension.
+
+There is a seperate wrapper used for comms between
+the EPS plugins themselves.
+
+(Ideally, we want to consolidate these at some point.
+We will still need something very lightweight like this for
+ quickly shifting audio between plugins and the extension.)
+ 
+*/
+
+
+
 class NngSelfRegister {
 public:
     NngSelfRegister() : nngFinaliser{getNngFinaliser()} {}
@@ -320,7 +341,7 @@ public:
 
             case RECV:
                 resAioRes = nng_aio_result(aio);
-                if (resAioRes == NNG_ECANCELED) break;
+                if (resAioRes == NNG_ECANCELED || resAioRes == NNG_ECLOSED) break;
                 assert(resAioRes == 0);
 
                 nngMsg = nng_aio_get_msg(aio);

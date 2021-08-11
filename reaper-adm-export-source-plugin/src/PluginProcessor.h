@@ -12,7 +12,7 @@
 
 #include "JuceHeader_Wrapper.h"
 #include "common_definition_helper.h"
-#include "nng_wrappers.h"
+#include "helper/nng_wrappers.h"
 #include "PluginProcessorUtils.h"
 #include <functional>
 #include <memory>

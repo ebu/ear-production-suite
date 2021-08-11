@@ -73,6 +73,8 @@ set(EXTENSION_SOURCES
 	)
 	
 set(EXTENSION_HEADERS
+    ${EPS_SHARED_DIR}/helper/nng_wrappers.h
+	
 	actionmanager.h
 	admchannel.h
 	admextraction.h
@@ -110,7 +112,6 @@ set(EXTENSION_HEADERS
 	mediatakeelement.h
 	mediatrackelement.h
 	menu.h
-	nng_wrappers.h
 	nodefactory.h
 	objectautomationelement.h
 	parameter.h
@@ -190,6 +191,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
+	${EPS_SHARED_DIR}
     )
 
 target_link_libraries(reaper_adm_dependencies

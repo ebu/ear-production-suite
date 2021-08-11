@@ -65,6 +65,7 @@ set(HEADERS_SCENE
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/iso_lang_codes.hpp
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h
+	${EPS_SHARED_DIR}/helper/nng_wrappers.h
 	${EPS_SHARED_DIR}/helper/properties_file.hpp
 
 	src/auto_mode_overlay.hpp
@@ -79,7 +80,6 @@ set(HEADERS_SCENE
 	src/item_view_list.hpp
 	src/items_container.hpp
 	src/multiple_scene_plugins_overlay.hpp
-	src/nng_wrappers.h
 	src/object_view.hpp
 	src/position_interaction_settings.hpp
 	src/programme_view.hpp

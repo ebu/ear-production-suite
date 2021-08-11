@@ -12,9 +12,10 @@ set(VST_SOURCES
 	)
 
 set(VST_HEADERS
+	${EPS_SHARED_DIR}/helper/nng_wrappers.h
+	
 	common_definition_helper.h
 	JuceHeader_Wrapper.h
-	nng_wrappers.h
 	PluginEditor.h
 	PluginProcessor.h
 	PluginProcessorUtils.h
