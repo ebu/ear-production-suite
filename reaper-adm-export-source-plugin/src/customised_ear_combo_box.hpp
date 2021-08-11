@@ -3,8 +3,7 @@
 #include "JuceHeader.h"
 #include <cassert>
 
-//#include "../helper/graphics.hpp"
-#include "look_and_feel/colours.hpp"
+#include "components/look_and_feel/colours.hpp"
 
 #include <vector>
 

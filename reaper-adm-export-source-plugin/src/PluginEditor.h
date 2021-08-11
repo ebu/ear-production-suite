@@ -5,9 +5,9 @@
 #include "PluginProcessor.h"
 #include <adm/adm.hpp>
 
-#include "ear_theming/components/customised_ear_combo_box.hpp"
-#include "ear_theming/helper/graphics.hpp"
-#include "ear_theming/components/look_and_feel/fonts.hpp"
+#include "customised_ear_combo_box.hpp"
+#include "helper/graphics.hpp"
+#include "components/look_and_feel/fonts.hpp"
 
 #include <functional>
 #include <memory>

@@ -1,9 +1,9 @@
 #include "customised_ear_combo_box.hpp"
 
-#include "../helper/graphics.hpp"
-#include "look_and_feel/colours.hpp"
-#include "look_and_feel/fonts.hpp"
-#include "look_and_feel/shadows.hpp"
+#include "helper/graphics.hpp"
+#include "components/look_and_feel/colours.hpp"
+#include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/shadows.hpp"
 
 #include <vector>
 

@@ -3,16 +3,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(VST_SOURCES
+	${EPS_SHARED_DIR}/binary_data.cpp
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
 	
 	PluginEditor.cpp
 	PluginProcessor.cpp
 	PluginProcessorUtils.cpp
-	ear_theming/binary_data.cpp
-	ear_theming/components/customised_ear_combo_box.cpp
+	customised_ear_combo_box.cpp
 	)
 
 set(VST_HEADERS
+	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/roboto.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
+	${EPS_SHARED_DIR}/helper/graphics.hpp
+	${EPS_SHARED_DIR}/helper/singleton.hpp
 	${EPS_SHARED_DIR}/helper/common_definition_helper.h
 	${EPS_SHARED_DIR}/helper/nng_wrappers.h
 	
@@ -20,14 +27,7 @@ set(VST_HEADERS
 	PluginEditor.h
 	PluginProcessor.h
 	PluginProcessorUtils.h
-	ear_theming/binary_data.hpp
-	ear_theming/components/customised_ear_combo_box.hpp
-	ear_theming/components/look_and_feel/colours.hpp
-	ear_theming/components/look_and_feel/fonts.hpp
-	ear_theming/components/look_and_feel/roboto.hpp
-	ear_theming/components/look_and_feel/shadows.hpp
-	ear_theming/helper/graphics.hpp
-	ear_theming/helper/singleton.hpp
+	customised_ear_combo_box.hpp
 	)
 
 source_group("Header Files" FILES ${VST_HEADERS})
