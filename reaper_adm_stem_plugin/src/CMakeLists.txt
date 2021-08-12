@@ -2,29 +2,40 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-file(GLOB_RECURSE cpp_files *.cpp)
-file(GLOB_RECURSE c_files *.c)
-file(GLOB_RECURSE hpp_files *.hpp)
-file(GLOB_RECURSE h_files *.h)
-
-list(FILTER cpp_files EXCLUDE REGEX "\\._+")
-list(FILTER c_files EXCLUDE REGEX "\\._+")
-list(FILTER hpp_files EXCLUDE REGEX "\\._+")
-list(FILTER h_files EXCLUDE REGEX "\\._+")
-
-source_group("Header Files" FILES ${h_files} ${hpp_files})
-
 set(VST_SOURCES
-		${h_files}
-		${hpp_files}
-		${c_files}
-		${cpp_files}
-)
+	common_definition_helper.cpp
+	PluginEditor.cpp
+	PluginProcessor.cpp
+	PluginProcessorUtils.cpp
+	ear_theming/binary_data.cpp
+	ear_theming/components/customised_ear_combo_box.cpp
+	)
 
-add_juce_vst3_plugin(adm_export_source SOURCES ${VST_SOURCES}
+set(VST_HEADERS
+	common_definition_helper.h
+	JuceHeader_Wrapper.h
+	nng_wrappers.h
+	PluginEditor.h
+	PluginProcessor.h
+	PluginProcessorUtils.h
+	ear_theming/binary_data.hpp
+	ear_theming/components/customised_ear_combo_box.hpp
+	ear_theming/components/look_and_feel/colours.hpp
+	ear_theming/components/look_and_feel/fonts.hpp
+	ear_theming/components/look_and_feel/roboto.hpp
+	ear_theming/components/look_and_feel/shadows.hpp
+	ear_theming/helper/graphics.hpp
+	ear_theming/helper/singleton.hpp
+	)
+
+source_group("Header Files" FILES ${VST_HEADERS})
+
+add_juce_vst3_plugin(adm_export_source SOURCES ${VST_SOURCES} ${VST_HEADERS}
                                   DISPLAY_NAME "ADM Export Source"
                                   DESCRIPTION "Plug-in to describe and stream audio from a REAPER track to the REAPER ADM Extension during export"
-                                  OUTPUT_NAME "ADM Export Source")
+                                  OUTPUT_NAME "ADM Export Source"
+                                  IDE_FOLDER "EPS-AdmExportSourcePlugin"
+								  )
 
 
 target_link_libraries(adm_export_source_VST3 PRIVATE

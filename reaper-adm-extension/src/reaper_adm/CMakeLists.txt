@@ -1,37 +1,172 @@
+set(REAPER_ADM_EXTENSION_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 add_library(reaper_adm SHARED "dummy.cpp")
 add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 
-file(GLOB_RECURSE cpp_files "*.cpp")
-file(GLOB_RECURSE c_files "*.c")
-file(GLOB_RECURSE hpp_files "*.hpp")
-file(GLOB_RECURSE h_files "*.h")
-file(GLOB_RECURSE rc_files "*.rc")
-file(GLOB_RECURSE rc_mac_files "*.rc_mac_*")
-
-list(FILTER cpp_files EXCLUDE REGEX "\\._+") 
-list(FILTER c_files EXCLUDE REGEX "\\._+")
-list(FILTER hpp_files EXCLUDE REGEX "\\._+") 
-list(FILTER h_files EXCLUDE REGEX "\\._+")
-list(FILTER rc_files EXCLUDE REGEX "\\._+") 
-list(FILTER rc_mac_files EXCLUDE REGEX "\\._+")
-
+set(EXTENSION_SOURCES
+	actionmanager.cpp
+	admchannel.cpp
+	admextraction.cpp
+	admimporter.cpp
+	admmetadata.cpp
+	admtraits.cpp
+	admtypehelpers.cpp
+	admvstcontrol.cpp
+	automationenvelope.cpp
+	automationpoint.cpp
+	cartesianspeakerlayouts.cpp
+	channelindexer.cpp
+	channelrouter.cpp
+	color.cpp
+	commontrackpool.cpp
+	common_definition_helper.cpp
+	communicators.cpp
+	directspeakerautomationelement.cpp
+	elementcomparator.cpp
+	envelopecreator.cpp
+	exportaction.cpp
+	exportaction_admsource-admvst.cpp
+	exportaction_admsource-earvst.cpp
+	exportaction_admsourcescontainer.cpp
+	exportaction_dialogcontrol.cpp
+	exportaction_parameterprocessing.cpp
+	exportaction_pcmsink.cpp
+	filehelpers.cpp
+	hoaautomationelement.cpp
+	importaction.cpp
+	importelement.cpp
+	importexecutor.cpp
+	mediatakeelement.cpp
+	mediatrackelement.cpp
+	menu.cpp
+	nodefactory.cpp
+	objectautomationelement.cpp
+	parameter.cpp
+	parametervaluemapping.cpp
+	pcmgroup.cpp
+	pcmgroupregistry.cpp
+	pcmreader.cpp
+	pcmsourcecreator.cpp
+	pcmwriter.cpp
+	pcmwriterfactory.cpp
+	plugin.cpp
+	pluginmain.cpp
+	pluginregistry.cpp
+	pluginsuite.cpp
+	pluginsuite_ear.cpp
+	pluginsuite_fb360.cpp
+	pluginsuite_visr.cpp
+	projectelements.cpp
+	projectnode.cpp
+	projecttree.cpp
+	reaperapi.cpp
+	reaperapiimpl.cpp
+	reaperguid.cpp
+	reaperhost.cpp
+	track.cpp
+	coordinate_conversion/coord_conv.cpp
+	progress/importdialog.cpp
+	progress/importlistener.cpp
+	progress/importprogress.cpp
+	)
+	
+set(EXTENSION_HEADERS
+	actionmanager.h
+	admchannel.h
+	admextraction.h
+	admimporter.h
+	admmetadata.h
+	admtraits.h
+	admtypehelpers.h
+	admvstcontrol.h
+	automate.h
+	automationenvelope.h
+	automationpoint.h
+	cartesianspeakerlayouts.h
+	channelindexer.h
+	channelrouter.h
+	color.h
+	commontrackpool.h
+	common_definition_helper.h
+	communicators.h
+	directspeakerautomationelement.h
+	elementcomparator.h
+	envelopecreator.h
+	exportaction.h
+	exportaction_admsource-admvst.h
+	exportaction_admsource-earvst.h
+	exportaction_admsourcescontainer.h
+	exportaction_dialogcontrol.h
+	exportaction_issues.h
+	exportaction_parameterprocessing.h
+	exportaction_pcmsink.h
+	filehelpers.h
+	hoaautomationelement.h
+	importaction.h
+	importelement.h
+	importexecutor.h
+	mediatakeelement.h
+	mediatrackelement.h
+	menu.h
+	nng_wrappers.h
+	nodefactory.h
+	objectautomationelement.h
+	parameter.h
+	parametervaluemapping.h
+	parametised.h
+	pcmgroup.h
+	pcmgroupregistry.h
+	pcmreader.h
+	pcmsourcecreator.h
+	pcmwriter.h
+	pcmwriterfactory.h
+	plugin.h
+	pluginregistry.h
+	pluginsuite.h
+	pluginsuite_ear.h
+	pluginsuite_fb360.h
+	pluginsuite_visr.h
+	projectelements.h
+	projectnode.h
+	projecttree.h
+	reaperapi.h
+	reaperapiimpl.h
+	reaperapivalues.h
+	reaperguid.h
+	reaperhost.h
+	reaper_plugin.h
+	reaper_plugin_functions.h
+	resource.h
+	track.h
+	win_mem_debug.h
+	win_nonblock_msg.h
+	coordinate_conversion/coord_conv.cpp
+	progress/importdialog.h
+	progress/importlistener.h
+	progress/importprogress.h
+	progress/importreporter.h
+	progress/importstatus.h
+	)
+	
+set(EXTENSION_RESOURCES
+	reaper_adm_object.rc
+	reaper_adm_object.rc_mac_dlg
+	reaper_adm_object.rc_mac_menu
+	)
 
 add_library(reaper_adm_object OBJECT "")
 target_sources(reaper_adm_object
     PRIVATE
-		${h_files} 
-		${hpp_files}
-		${c_files} 
-		${cpp_files}
-		${rc_files}
-		${rc_mac_files}
+		${EXTENSION_SOURCES} 
+		${EXTENSION_HEADERS}
+		${EXTENSION_RESOURCES} 
 )
 	
-source_group("Headers" FILES ${h_files} ${hpp_files})
+source_group("Header Files" FILES ${EXTENSION_HEADERS})
 
-source_group("Resources" FILES ${rc_files} ${rc_mac_files}) 
+source_group("Resources" FILES ${EXTENSION_RESOURCES}) 
 
 target_compile_definitions(reaper_adm_object
     PUBLIC $<TARGET_PROPERTY:WDL::swell,INTERFACE_COMPILE_DEFINITIONS>)
@@ -47,7 +182,7 @@ target_include_directories(reaper_adm_dependencies
         $<TARGET_PROPERTY:adm,INCLUDE_DIRECTORIES>
 )
 
-find_package(WDL REQUIRED)
+find_package(WDL REQUIRED QUIET)
 
 target_include_directories(reaper_adm_object
     PRIVATE
@@ -96,7 +231,7 @@ add_custom_command(
 endif()
 
 
-set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}Plugins")
+set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(linux_install_dir "share/REAPER/UserPlugins")
 

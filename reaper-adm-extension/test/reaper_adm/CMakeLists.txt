@@ -26,7 +26,7 @@ target_compile_options(testreaper_adm
     "/bigobj")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 
 target_link_libraries(testreaper_adm
     PRIVATE
@@ -39,6 +39,9 @@ target_include_directories(testreaper_adm
     $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>)
 	
 set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
+
+add_custom_command(TARGET testreaper_adm POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${REAPER_ADM_EXTENSION_SRC_DIR}/ADMPresets ${CMAKE_CURRENT_SOURCE_DIR}/data/UserPlugins/ADMPresets)
 
 add_test(
     NAME reaper_admtest

@@ -18,12 +18,14 @@ function(add_ear_test name)
     COMMAND $<TARGET_FILE:${name}>
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/test_data"
   )
+  set_target_properties(${name} PROPERTIES FOLDER ${IDE_FOLDER_TESTS})
 endfunction()
 
 
 add_executable(test_host_runner test_host_runner.cpp)
 target_include_directories(test_host_runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/plugin_test_tools)
 target_link_libraries(test_host_runner plugin_test_tools)
+set_target_properties(test_host_runner PROPERTIES FOLDER ${IDE_FOLDER_TESTS})
 
 # copy test files so unit test can find them relative to their running location
 # when executed as "test" target

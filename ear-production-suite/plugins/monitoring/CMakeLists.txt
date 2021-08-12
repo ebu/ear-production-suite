@@ -5,15 +5,51 @@ set(SOURCES_MONITORING
     src/monitoring_plugin_processor.cpp
 )
 
+set(HEADERS_MONITORING
+	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/detail/constants.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/monitoring_audio_processor.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/monitoring_backend.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/speaker_setups.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../../lib/include/variable_block_adapter.hpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/binary_data.hpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_button.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/ear_header.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/level_meter_calculator.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/onboarding_slide.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/overlay.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/segment_progress_bar.hpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/colours.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/fonts.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/shadows.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/components/look_and_feel/slider.hpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/graphics.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../shared/helper/properties_file.hpp
+
+	src/monitoring_plugin_editor.hpp
+	src/monitoring_plugin_processor.hpp
+	src/speaker_meter.hpp
+	src/speaker_meter_box.hpp
+)
+
+source_group("Header Files" FILES ${HEADERS_MONITORING})
+
 
 function(add_monitoring_plugin SPEAKER_LAYOUT SPEAKER_LAYOUT_NAME AUDIO_PACK_FORMAT_ID PLUGIN_CODE_SUFFIX)
   add_juce_vst3_plugin(
     ear_monitoring_${SPEAKER_LAYOUT}
-    SOURCES ${SOURCES_MONITORING}
+    SOURCES ${SOURCES_MONITORING} ${HEADERS_MONITORING}
 	CODE_SUFFIX ${PLUGIN_CODE_SUFFIX}
     DISPLAY_NAME "EAR Monitoring ${SPEAKER_LAYOUT}"
     DESCRIPTION "The monitoring plugin (${SPEAKER_LAYOUT})"
-  OUTPUT_NAME "EAR Monitoring ${SPEAKER_LAYOUT}")
+    OUTPUT_NAME "EAR Monitoring ${SPEAKER_LAYOUT}"
+    IDE_FOLDER ${IDE_FOLDER_PLUGINS}
+  )
   target_compile_definitions(
     ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE
     SPEAKER_LAYOUT="${SPEAKER_LAYOUT}"

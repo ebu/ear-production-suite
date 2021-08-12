@@ -1,1 +1,4 @@
 add_subdirectory(reaper_adm)
+set(REAPER_ADM_EXTENSION_SRC_DIR ${REAPER_ADM_EXTENSION_SRC_DIR} PARENT_SCOPE)
+set_target_properties(reaper_adm PROPERTIES FOLDER EPS-ReaperExtension)
+set_target_properties(reaper_adm_object PROPERTIES FOLDER EPS-ReaperExtension)
