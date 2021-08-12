@@ -157,7 +157,7 @@ void JuceSceneFrontendConnector::reloadProgrammeCache() {
   if (auto overlay = autoModeOverlay_.lock()) {
     overlay->setVisible(autoMode);
   }
-  selectProgramme(selectedProgramme);
+  //selectProgramme(selectedProgramme); - selectProgrammeView will trigger selectProgramme anyway
   selectProgrammeView(selectedProgramme);
 }
 
@@ -430,7 +430,7 @@ void JuceSceneFrontendConnector::removeFromProgrammes(
       auto elementIndex = std::distance(elements->begin(), element);
       elements->erase(elements->begin() + elementIndex);
       notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
-      
+
       std::lock_guard<std::mutex> programmeViewsLock(programmeViewsMutex_);
       updateElementOverview(programmeIndex);
     }
@@ -457,8 +457,7 @@ void JuceSceneFrontendConnector::removeFromObjectViews(
             return false;
           });
       if (it != container->elements.end()) {
-        container->list->removeElement(it->get());
-        container->elements.erase(it);
+        container->removeElement(it->get());
       }
     }
   }
@@ -484,7 +483,7 @@ void JuceSceneFrontendConnector::addProgrammeView(
     view->getLanguageComboBox()->selectEntry(
         getIndexForAlpha3(programme.language()), dontSendNotification);
     view->addListener(this);
-    view->getElementsContainer()->list->addListener(this);
+    view->getElementsContainer()->addListener(this);
     view->getElementOverview()->setProgramme(programme, itemStore_);
     container->programmes.push_back(view);
     container->tabs->addTab(programme.name(), view.get(), false);
@@ -784,8 +783,7 @@ void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
     std::vector<int> routing(numberOfChannels);
     std::iota(routing.begin(), routing.end(), item.routing());
     view->getLevelMeter()->setMeter(p_->getLevelMeter(), routing);
-    container->list->addElement(view.get());
-    container->elements.push_back(view);
+    container->addElement(view);
   }
 }
 
@@ -825,19 +823,7 @@ void JuceSceneFrontendConnector::removeElement(int programmeIndex,
   notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
 }
 
-void JuceSceneFrontendConnector::removeElementView(int programmeIndex,
-                                                   int elementIndex) {
-  std::lock_guard<std::mutex> programmeViewsLock(programmeViewsMutex_);
-  if (auto programmesContainer = programmesContainer_.lock()) {
-    auto container = programmesContainer->programmes.at(programmeIndex)
-                         ->getElementsContainer();
-    container->list->removeElement(
-        (container->elements.begin() + elementIndex)->get());
-    container->elements.erase(container->elements.begin() + elementIndex);
-  }
-}
-
-// ElementViewList::Listener
+// ElementsContainer::Listener
 void JuceSceneFrontendConnector::elementMoved(ElementViewList* list,
                                               int oldIndex, int newIndex) {
   int programmeIndex = -1;
@@ -874,7 +860,6 @@ void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
   }
   assert(programmeIndex >= 0);
   removeElement(programmeIndex, index);
-  removeElementView(programmeIndex, index);
   updateElementOverview(programmeIndex);
 }
 

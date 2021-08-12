@@ -13,31 +13,34 @@ namespace ui {
 
 class ElementsContainer : public Component {
  public:
-  ElementsContainer()
-      : viewport(std::make_unique<Viewport>()),
-        list(std::make_unique<ElementViewList>()) {
-    viewport->setViewedComponent(list.get(), false);
-    viewport->setScrollBarsShown(true, false);
-    viewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId,
-                                               EarColours::Area04dp);
-    addAndMakeVisible(viewport.get());
-  }
+  ElementsContainer();
 
-  void paint(Graphics& g) override {
-    g.fillAll(EarColours::ComboBoxPopupBackground);
-  }
+  void paint(Graphics& g) override;
 
-  void resized() override {
-    auto area = getLocalBounds();
-    viewport->setBounds(area.reduced(2, 2));
-    list->setBounds(area.reduced(2, 2));
-  }
+  void resized() override;
 
-  std::unique_ptr<Viewport> viewport;
+  void addElement(std::shared_ptr<ElementView> element);
+  void removeElement(ElementView* element);
+  void moveElement(int oldIndex, int newIndex);
+
+  class Listener {
+   public:
+    virtual ~Listener() = default;
+
+    virtual void elementMoved(ElementViewList* list, int oldIndex,
+                              int newIndex) = 0;
+    virtual void removeElementClicked(ElementViewList* list, int index) = 0;
+  };
+
+  void addListener(Listener* l);
+  void removeListener(Listener* l);
+
   std::unique_ptr<ElementViewList> list;
+  std::unique_ptr<Viewport> viewport;
   std::vector<std::shared_ptr<ElementView>> elements;
 
  private:
+  ListenerList<Listener> listeners_;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElementsContainer)
 };
 

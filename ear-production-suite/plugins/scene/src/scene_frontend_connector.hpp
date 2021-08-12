@@ -29,7 +29,7 @@ class ToggleView;
 
 class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
                                    private ProgrammeView::Listener,
-                                   private ElementViewList::Listener,
+                                   private ElementsContainer::Listener,
                                    private ItemsContainer::Listener,
                                    private AutoModeOverlay::Listener,
                                    private EarTabbedComponent::Listener,
@@ -92,7 +92,6 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
   void addToggleView(int programmeIndex, const proto::Toggle& toggle);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void removeElement(int programmeIndex, int elmentIndex);
-  void removeElementView(int programmeIndex, int elmentIndex);
 
   // --- ElementOverview
   void updateElementOverview(int programmeIndex);
