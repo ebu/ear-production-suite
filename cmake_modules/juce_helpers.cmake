@@ -2,7 +2,7 @@ set(_JUCE_SUPPORT_RESOURCES ${PROJECT_SOURCE_DIR}/resources)
 
 function(add_juce_vst3_plugin PLUGIN_NAME)
   set(options)
-  set(oneValueArgs DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_SUFFIX)
+  set(oneValueArgs IDE_FOLDER DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_SUFFIX)
   set(multiValueArgs SOURCES)
   cmake_parse_arguments(PLUGIN "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
@@ -40,11 +40,15 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/VST3"
     COMPILE_PDB_NAME "${PLUGIN_OUTPUT_NAME}"
     COMPILE_PDB_OUTPUT_DIR "${PROJECT_BINARY_DIR}/VST3"
-
   )
-set_source_files_properties( ${_SUPPORT_PATH}/PkgInfo
- PROPERTIES
- MACOSX_PACKAGE_LOCATION .)
+  
+  if(PLUGIN_IDE_FOLDER)
+    set_target_properties(${PLUGIN_NAME}_VST3 PROPERTIES FOLDER ${PLUGIN_IDE_FOLDER})
+  endif()
+  
+  set_source_files_properties( ${_SUPPORT_PATH}/PkgInfo PROPERTIES
+    MACOSX_PACKAGE_LOCATION .
+  )
 
 endfunction()
 

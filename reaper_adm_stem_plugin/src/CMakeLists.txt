@@ -33,7 +33,9 @@ source_group("Header Files" FILES ${VST_HEADERS})
 add_juce_vst3_plugin(adm_export_source SOURCES ${VST_SOURCES} ${VST_HEADERS}
                                   DISPLAY_NAME "ADM Export Source"
                                   DESCRIPTION "Plug-in to describe and stream audio from a REAPER track to the REAPER ADM Extension during export"
-                                  OUTPUT_NAME "ADM Export Source")
+                                  OUTPUT_NAME "ADM Export Source"
+                                  IDE_FOLDER "EPS-AdmExportSourcePlugin"
+								  )
 
 
 target_link_libraries(adm_export_source_VST3 PRIVATE

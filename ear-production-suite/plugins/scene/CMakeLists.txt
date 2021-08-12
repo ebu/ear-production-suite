@@ -90,6 +90,7 @@ source_group("Header Files" FILES ${HEADERS_SCENE})
 
 add_juce_vst3_plugin(scene
   SOURCES ${SOURCES_SCENE} ${HEADERS_SCENE}
+  IDE_FOLDER ${IDE_FOLDER_PLUGINS}
   CODE_SUFFIX "FF"  
   DISPLAY_NAME "EAR Scene"
   DESCRIPTION "The scene plugin"

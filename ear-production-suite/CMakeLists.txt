@@ -5,6 +5,8 @@ project(ear-production-suite-plugins VERSION ${EPS_VERSION_BASE}
                                      LANGUAGES CXX)
 							 
 message(STATUS "Project ear-production-suite-plugins version: " ${CMAKE_PROJECT_VERSION})
+set(IDE_FOLDER_PLUGINS "EPS-Plugins")
+set(IDE_FOLDER_TESTS "EPS-Plugins/tests")
 
 ############################################################
 # user config options
@@ -46,4 +48,3 @@ endif()
 ############################################################
 add_feature_info(EAR_PLUGINS_UNIT_TESTS ${EAR_PLUGINS_UNIT_TESTS} "Build and run unit tests")
 add_feature_info(EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS ${EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS} "Build monitoring plugin for each speaker setup")
-

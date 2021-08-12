@@ -1,1 +1,3 @@
 add_subdirectory(reaper_adm)
+set_target_properties(testreaper_adm PROPERTIES FOLDER EPS-ReaperExtension/tests)
+set_target_properties(testacceptreaper_adm PROPERTIES FOLDER EPS-ReaperExtension/tests)

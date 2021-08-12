@@ -127,6 +127,7 @@ target_include_directories(ear-plugin-base PUBLIC
 target_compile_features(ear-plugin-base PUBLIC cxx_std_14)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
 set_target_properties(ear-plugin-base PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_EXTENSIONS OFF)
+set_target_properties(ear-plugin-base PROPERTIES FOLDER ${IDE_FOLDER_PLUGINS})
 
 include(GenerateExportHeader)
 generate_export_header(ear-plugin-base

@@ -65,6 +65,7 @@ source_group("Header Files" FILES ${HEADERS_OBJECT_INPUT})
 # Input plugin code suffixes to start from 10
 add_juce_vst3_plugin(object
   SOURCES ${SOURCES_OBJECT_INPUT} ${HEADERS_OBJECT_INPUT}
+  IDE_FOLDER ${IDE_FOLDER_PLUGINS}
   CODE_SUFFIX "11"
   DISPLAY_NAME "EAR Object"
   DESCRIPTION "The metadata input plugin for objects"

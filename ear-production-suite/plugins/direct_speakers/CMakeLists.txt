@@ -61,6 +61,7 @@ source_group("Header Files" FILES ${HEADERS_DIRECT_SPEAKERS_INPUT})
 # Input plugin code suffixes to start from 10
 add_juce_vst3_plugin(direct_speakers
   SOURCES ${SOURCES_DIRECT_SPEAKERS_INPUT} ${HEADERS_DIRECT_SPEAKERS_INPUT}
+  IDE_FOLDER ${IDE_FOLDER_PLUGINS}
   CODE_SUFFIX "10"
   DISPLAY_NAME "EAR DirectSpeakers" 
   DESCRIPTION "The metadata input plugin for channel-based audio"
