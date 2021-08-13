@@ -174,8 +174,6 @@ void EarMonitoringAudioProcessor::setStateInformation(const void* data,
   // call.
 }
 
-void EarMonitoringAudioProcessor::speakerSetupChanged(std::string layout) {}
-
 void EarMonitoringAudioProcessor::configureProcessor(
     const ProcessorConfig& config) {
   if (!processor_ || config != processorConfig_) {

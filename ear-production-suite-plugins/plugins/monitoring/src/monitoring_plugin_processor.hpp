@@ -66,8 +66,6 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 
-  void speakerSetupChanged(std::string layout);
-
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
   };
