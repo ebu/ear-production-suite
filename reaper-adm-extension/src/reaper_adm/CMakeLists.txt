@@ -6,6 +6,8 @@ add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 
 set(EXTENSION_SOURCES
+	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	
 	actionmanager.cpp
 	admchannel.cpp
 	admextraction.cpp
@@ -21,7 +23,6 @@ set(EXTENSION_SOURCES
 	channelrouter.cpp
 	color.cpp
 	commontrackpool.cpp
-	common_definition_helper.cpp
 	communicators.cpp
 	directspeakerautomationelement.cpp
 	elementcomparator.cpp
@@ -73,6 +74,9 @@ set(EXTENSION_SOURCES
 	)
 	
 set(EXTENSION_HEADERS
+	${EPS_SHARED_DIR}/helper/common_definition_helper.h
+    ${EPS_SHARED_DIR}/helper/nng_wrappers.h
+	
 	actionmanager.h
 	admchannel.h
 	admextraction.h
@@ -89,7 +93,6 @@ set(EXTENSION_HEADERS
 	channelrouter.h
 	color.h
 	commontrackpool.h
-	common_definition_helper.h
 	communicators.h
 	directspeakerautomationelement.h
 	elementcomparator.h
@@ -110,7 +113,6 @@ set(EXTENSION_HEADERS
 	mediatakeelement.h
 	mediatrackelement.h
 	menu.h
-	nng_wrappers.h
 	nodefactory.h
 	objectautomationelement.h
 	parameter.h
@@ -190,6 +192,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
+	${EPS_SHARED_DIR}
     )
 
 target_link_libraries(reaper_adm_dependencies

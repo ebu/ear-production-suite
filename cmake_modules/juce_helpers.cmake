@@ -1,11 +1,13 @@
-set(_JUCE_SUPPORT_RESOURCES ${PROJECT_SOURCE_DIR}/resources)
-
 function(add_juce_vst3_plugin PLUGIN_NAME)
   set(options)
-  set(oneValueArgs IDE_FOLDER DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_SUFFIX)
+  set(oneValueArgs IDE_FOLDER DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_PREFIX CODE_SUFFIX)
   set(multiValueArgs SOURCES)
   cmake_parse_arguments(PLUGIN "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
+
+  if(NOT PLUGIN_CODE_PREFIX)
+    set(PLUGIN_CODE_PREFIX "455053") # Hex for "EPS"
+  endif()
 
   if(NOT PLUGIN_CODE_SUFFIX)
     set(PLUGIN_CODE_SUFFIX "00")
@@ -21,12 +23,12 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
 
   set(PRODUCT_BUNDLE_IDENTIFIER "ear.${PLUGIN_NAME}")
   set(_SUPPORT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}_resources/)
-  configure_file(${_JUCE_SUPPORT_RESOURCES}/juce/AppConfig.h.in ${_SUPPORT_PATH}/AppConfig.h)
-  configure_file(${_JUCE_SUPPORT_RESOURCES}/juce/JuceHeader.h.in ${_SUPPORT_PATH}/JuceHeader.h)
-  configure_file(${_JUCE_SUPPORT_RESOURCES}/osx/VST-Info.plist.in ${_SUPPORT_PATH}/Info.plist)
-  file(COPY ${_JUCE_SUPPORT_RESOURCES}/osx/PkgInfo DESTINATION ${_SUPPORT_PATH})
+  configure_file(${JUCE_SUPPORT_RESOURCES}/juce/AppConfig.h.in ${_SUPPORT_PATH}/AppConfig.h)
+  configure_file(${JUCE_SUPPORT_RESOURCES}/juce/JuceHeader.h.in ${_SUPPORT_PATH}/JuceHeader.h)
+  configure_file(${JUCE_SUPPORT_RESOURCES}/osx/VST-Info.plist.in ${_SUPPORT_PATH}/Info.plist)
+  file(COPY ${JUCE_SUPPORT_RESOURCES}/osx/PkgInfo DESTINATION ${_SUPPORT_PATH})
   add_library(${PLUGIN_NAME}_VST3 MODULE ${PLUGIN_SOURCES} ${_SUPPORT_PATH}/AppConfig.h  ${_SUPPORT_PATH}/JuceHeader.h  ${_SUPPORT_PATH}/Info.plist  ${_SUPPORT_PATH}/PkgInfo)
-  target_include_directories(${PLUGIN_NAME}_VST3 PRIVATE ${_SUPPORT_PATH}/)
+  target_include_directories(${PLUGIN_NAME}_VST3 PRIVATE ${_SUPPORT_PATH}/ ${EPS_SHARED_DIR})
   target_link_libraries(${PLUGIN_NAME}_VST3 PRIVATE Juce::VST3)
 
   set_target_properties(${PLUGIN_NAME}_VST3 PROPERTIES

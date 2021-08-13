@@ -1,5 +1,5 @@
 #pragma once
-#include "nng_wrappers.h"
+#include "helper/nng_wrappers.h"
 
 class CommunicatorBase
 {
