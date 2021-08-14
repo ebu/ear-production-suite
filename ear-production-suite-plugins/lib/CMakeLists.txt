@@ -45,6 +45,8 @@ add_library(ear-plugin-base STATIC
         include/proto_printers.hpp src/proto_printers.cpp)
 		
 set(EAR_BASE_HEADERS		
+	include/binaural_monitoring_audio_processor.hpp
+	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
 	include/communication/common_types.hpp
 	include/communication/direct_speakers_metadata_sender.hpp
@@ -63,9 +65,11 @@ set(EAR_BASE_HEADERS
 	include/detail/spdl_nng_sink.hpp
 	include/direct_speakers_backend.hpp
 	include/helper/eps_to_ear_metadata_converter.hpp
+	include/helper/move.hpp
 	include/helper/protobuf_utilities.hpp
 	include/item_store.hpp
 	include/log.hpp
+	include/listener_orientation.hpp
 	include/monitoring_audio_processor.hpp
 	include/monitoring_backend.hpp
 	include/multichannel_convolver.hpp
@@ -96,6 +100,7 @@ set(EAR_BASE_HEADERS
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
 	include/speaker_setups.hpp
+	include/ui/binaural_monitoring_frontend_backend_connector.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
