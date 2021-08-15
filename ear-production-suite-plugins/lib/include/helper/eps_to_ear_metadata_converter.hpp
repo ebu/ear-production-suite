@@ -54,24 +54,28 @@ struct EpsToEarMetadataConverter {
     //    commonDefinitionHelper.getElementRelationships();
     auto pfData = commonDefinitionHelper.getPackFormatData(
         4, epsMetadata.packformatidvalue());
-    auto cfData = pfData->relatedChannelFormats;
 
     ear::HOATypeMetadata earMetadata;
-    earMetadata.degrees.resize(cfData.size());
-    earMetadata.orders.resize(cfData.size());
 
-    for (int channelNum = 0; channelNum < cfData.size(); channelNum++) {
-      auto bfData = cfData[channelNum]->channelFormat->getElements<adm::AudioBlockFormatHoa>();
-      int order = bfData[0].get<adm::Order>().get();
-      int degree = bfData[0].get<adm::Degree>().get();
-      earMetadata.degrees[channelNum] = degree;
-      earMetadata.orders[channelNum] = order;
+    if(pfData) {
+      auto cfData = pfData->relatedChannelFormats;
+      earMetadata.degrees.resize(cfData.size());
+      earMetadata.orders.resize(cfData.size());
 
-      if (channelNum == 0) {
-        std::string normalisation = bfData[0].get<adm::Normalization>().get();
-        earMetadata.normalization = normalisation;
+      for(int channelNum = 0; channelNum < cfData.size(); channelNum++) {
+        auto bfData = cfData[channelNum]->channelFormat->getElements<adm::AudioBlockFormatHoa>();
+        int order = bfData[0].get<adm::Order>().get();
+        int degree = bfData[0].get<adm::Degree>().get();
+        earMetadata.degrees[channelNum] = degree;
+        earMetadata.orders[channelNum] = order;
+
+        if(channelNum == 0) {
+          std::string normalisation = bfData[0].get<adm::Normalization>().get();
+          earMetadata.normalization = normalisation;
+        }
       }
     }
+
     return earMetadata;
   }
   /*

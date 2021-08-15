@@ -25,7 +25,7 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   activeDirectSpeakersIds.reserve(inputChannelCount);
   activeObjectIds.reserve(inputChannelCount);
   activeHoaIds.reserve(inputChannelCount);
-  
+
   commonDefinitionHelper.getElementRelationships();  // Save doing it later in time-critical calls
 
   controlConnection_.logger(logger_);
@@ -244,11 +244,13 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         auto hoaId = item.hoa_metadata().packformatidvalue();
         {
           std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-          // TODO: May need to revisit later - 
+          // TODO: May need to revisit later -
           //       this is a high-frequency call but may be slow to to execute
           auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
-          auto cfCount = pfData->relatedChannelFormats.size();
-          totalHoaChannels += cfCount;
+          if(pfData) {
+            auto cfCount = pfData->relatedChannelFormats.size();
+            totalHoaChannels += cfCount;
+          }
         }
         //totalHoaChannels = 9;
       //currently incomplete for HOA
