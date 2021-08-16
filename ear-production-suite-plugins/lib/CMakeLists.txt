@@ -109,13 +109,14 @@ target_link_libraries(ear-plugin-base PUBLIC
   Boost::boost
   protobuf::libprotobuf
   nng::nng
+  fmt::fmt
   spdlog::spdlog
   bw64
   adm
   Eigen3::Eigen)
-if(SPDLOG_FMT_EXTERNAL)
-  target_link_libraries(ear-plugin-base PUBLIC fmt::fmt)
-endif()
+
+target_compile_definitions(ear-plugin-base PUBLIC
+		SPDLOG_FMT_EXTERNAL)
 
 target_include_directories(ear-plugin-base PUBLIC 
   # Headers used from source/build location:

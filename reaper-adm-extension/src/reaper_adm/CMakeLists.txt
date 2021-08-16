@@ -200,6 +200,7 @@ target_include_directories(reaper_adm_object
 target_link_libraries(reaper_adm_dependencies
     INTERFACE
       $<TARGET_OBJECTS:reaper_adm_object>
+	  fmt::fmt
       IRT::bw64
       adm
       WDL::swell
