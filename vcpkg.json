@@ -5,6 +5,7 @@
   "dependencies": [
     "protobuf",
     "nng",
+    "fmt",
     "spdlog",
     "yaml-cpp",
     "boost-algorithm",

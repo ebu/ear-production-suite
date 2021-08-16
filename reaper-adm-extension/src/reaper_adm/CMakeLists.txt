@@ -67,6 +67,7 @@ set(EXTENSION_SOURCES
 	reaperguid.cpp
 	reaperhost.cpp
 	track.cpp
+	ui_text.cpp
 	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
@@ -142,6 +143,7 @@ set(EXTENSION_HEADERS
 	reaper_plugin_functions.h
 	resource.h
 	track.h
+	ui_text.h
 	win_mem_debug.h
 	win_nonblock_msg.h
 	coordinate_conversion/coord_conv.cpp
@@ -198,6 +200,7 @@ target_include_directories(reaper_adm_object
 target_link_libraries(reaper_adm_dependencies
     INTERFACE
       $<TARGET_OBJECTS:reaper_adm_object>
+	  fmt::fmt
       IRT::bw64
       adm
       WDL::swell

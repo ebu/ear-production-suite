@@ -7,11 +7,10 @@
 #include "reaperapi.h"
 #include "actionmanager.h"
 #include "menu.h"
-#include "admmetadata.h"
 #include "importaction.h"
-#include "exportaction.h"
 #include "pluginsuite.h"
 #include "pluginregistry.h"
+#include "ui_text.h"
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -70,6 +69,9 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 }
 #endif
 
+using eps::TextID;
+using eps::uiText;
+
 extern "C" {
   int REAPER_PLUGIN_DLL_EXPORT REAPER_PLUGIN_ENTRYPOINT(REAPER_PLUGIN_HINSTANCE hInstance, reaper_plugin_info_t *rec)
   {
@@ -77,11 +79,14 @@ extern "C" {
     std::unique_ptr<ReaperHost> reaper;
 
     auto nonBlockingMessage = [rec](const char* text) {
+      auto title = uiText(TextID::EXTENSION_ERROR_TITLE);
 #ifdef WIN32
-        // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
+      // Windows version of Reaper locks up if you try show a message box during
+      // splash
+      winhelpers::NonBlockingMessageBox(text, title.c_str(),
+                                        MB_ICONEXCLAMATION);
 #else
-        MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
+      MessageBox(rec->hwnd_main, text, title.c_str(), MB_OK);
 #endif
     };
 
@@ -108,7 +113,8 @@ extern "C" {
 
     // Item right-click menu
 
-    auto admContextMenu = std::make_unique<SubMenu>("ADM");
+    auto admContextMenu =
+        std::make_unique<SubMenu>(uiText(TextID::CONTEXT_MENU));
     auto admContextMenuUpdateCallback = [api](MenuItem& item) {
         int numMediaItems = api->CountSelectedMediaItems(0);
         if (numMediaItems == 1) { // For now, lets just deal with one selection
@@ -125,7 +131,7 @@ extern "C" {
     admContextMenu->updateCallback = admContextMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Explode using ");
+        auto actionName = uiText(TextID::EXPLODE_ACTION_PREFIX);
         actionName += pluginSuite.first;
         std::string actionSID("ADM_EXPLODE_");
         actionSID += std::to_string(actionCounter++);
@@ -140,7 +146,11 @@ extern "C" {
                     importer.import(mediaItem, api);
                 }
                 else {
-                    api.ShowMessageBox("Please select a source before running this action.", "ADM: Explode to Takes", 0);
+                  api.ShowMessageBox(
+                      uiText(TextID::EXPLODE_ERROR_DESCRIPTION)
+                          .c_str(),
+                      uiText(TextID::EXPLODE_ERROR_TITLE).c_str(),
+                      0);
                 }
             });
         explodeAction->setEnabled(pluginSuite.second->pluginSuiteUsable(*api));
@@ -156,13 +166,14 @@ extern "C" {
                                        defaultMenuPositions.at("Group"), *api));
     // File menu
 
-    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM file");
-    auto admFileMenuUpdateCallback = [api](MenuItem& item) {};
+  auto admFileMenu =
+      std::make_unique<SubMenu>(uiText(TextID::CREATE_PROJECT_MENU));
+  auto admFileMenuUpdateCallback = [api](MenuItem& item) {};
     admFileMenu->updateCallback = admFileMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Create from ADM using ");
-        actionName += pluginSuite.first;
+      std::string actionName(uiText(TextID::CREATE_PROJECT_ACTION_PREFIX));
+      actionName += pluginSuite.first;
         std::string actionSID("ADM_CREATE_PROJECT_");
         actionSID += std::to_string(actionCounter++);
 
@@ -180,12 +191,21 @@ extern "C" {
                 auto filenameStr = std::string(filename);
                 filenameStr += "/.wav";
                 memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-                if(api.GetUserFileNameForRead(filename, "ADM File to Open", "wav")) {
-                    filenameStr = std::string(filename);
+                if (api.GetUserFileNameForRead(
+                        filename,
+                        uiText(TextID::CREATE_PROJECT_FILE_PROMPT)
+                            .c_str(),
+                        "wav")) {
+                  filenameStr = std::string(filename);
                     if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                         importer.import(filenameStr, api);
                     } else {
-                        api.ShowMessageBox("Error: This file can not be imported.", "ADM Open", 0);
+                      api.ShowMessageBox(
+                          uiText(TextID::CREATE_PROJECT_ERROR_DESCRIPTION)
+                              .c_str(),
+                          uiText(TextID::CREATE_PROJECT_ERROR_TITLE)
+                              .c_str(),
+                          0);
                     }
                 }
             }
@@ -208,12 +228,13 @@ extern "C" {
 
     // Insert menu
 
-    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM file in to current project");
+    auto admInsertMenu =
+        std::make_unique<SubMenu>(uiText(TextID::IMPORT_MENU));
     auto admInsertMenuUpdateCallback = [api](MenuItem& item) {};
     admInsertMenu->updateCallback = admInsertMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Import ADM file using ");
+        std::string actionName(uiText(TextID::IMPORT_ACTION_PREFIX));
         actionName += pluginSuite.first;
         std::string actionSID("ADM_IMPORT_");
         actionSID += std::to_string(actionCounter++);
@@ -229,12 +250,16 @@ extern "C" {
             auto filenameStr = std::string(filename);
             filenameStr += "/.wav";
             memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-            if (api.GetUserFileNameForRead(filename, "ADM File to Import", "wav")) {
-                filenameStr = std::string(filename);
+            if (api.GetUserFileNameForRead(
+                    filename, uiText(TextID::IMPORT_FILE_PROMPT).c_str(),
+                    "wav")) {
+              filenameStr = std::string(filename);
                 if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                     importer.import(filenameStr, api);
                 } else {
-                    api.ShowMessageBox("Error: This file can not be imported.", "ADM Import", 0);
+                  api.ShowMessageBox(
+                      uiText(TextID::IMPORT_ERROR_DESCRIPTION).c_str(),
+                      uiText(TextID::IMPORT_ERROR_TITLE).c_str(), 0);
                 }
             }
         });

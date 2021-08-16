@@ -35,6 +35,7 @@ if(UNIX)
 endif()
 include(check_nng)
 find_package(nng REQUIRED QUIET)
+find_package(fmt REQUIRED QUIET)
 add_subdirectory(submodules)
 
 set(EPS_SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shared)
