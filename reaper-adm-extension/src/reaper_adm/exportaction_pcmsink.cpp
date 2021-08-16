@@ -1,8 +1,8 @@
 #include "exportaction_pcmsink.h"
 
 #include "adm/adm.hpp"
-#include "adm/utilities/id_assignment.hpp"
-#include "adm/write.hpp"
+#include "ui_text.h"
+#include <fmt/core.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -39,8 +39,11 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     auto admExportSources = admExportHandler->getAdmExportSources();
 
     if(!admExportSources) {
-        api->ShowMessageBox("No suitable export sources within the current project.\r\nCan not continue with render.", "No Export Sources", 0);
-        abortRender();
+      api->ShowMessageBox(
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_SOURCES).c_str(),
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_SOURCES_TITLE).c_str(),
+          0);
+      abortRender();
         return;
     }
 
@@ -48,32 +51,38 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     totalChannels = admExportSources->getTotalExportChannels();
 
     if (totalChannels == 0) {
-        api->ShowMessageBox("The current configuration of export sources will export 0 channels of audio.\r\nCan not continue with render.", "No Audio To Export", 0);
-        abortRender();
+      api->ShowMessageBox(
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_SOURCES).c_str(),
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_CHANNELS_TITLE).c_str(),
+          0);
+      abortRender();
         return;
     }
 
     if(sRate != admExportSources->getSampleRate())
     {
-        std::string msg("Error: Sink sample rate (");
-        msg.append(std::to_string(sRate));
-        msg.append(") does not match VST sample rate (");
-        msg.append(std::to_string(admExportSources->getSampleRate()));
-        msg.append(")!\r\nThis is likely an internal issue.\r\nCan not continue with render.");
-        api->ShowMessageBox(msg.c_str(), "Sample Rate Mismatch", 0);
-        abortRender();
-        return;
+      auto msg =
+          fmt::format(eps::uiText(eps::TextID::EXPORT_SINK_ERROR_SAMPLE_RATE),
+                      sRate, admExportSources->getSampleRate());
+      api->ShowMessageBox(
+          msg.c_str(),
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_SAMPLE_RATE_TITLE).c_str(),
+          0);
+      abortRender();
+      return;
     }
 
     // Check other errors (warnings/infos are fine... we can continue with those)
     auto errors = admExportHandler->generateExportErrorStrings();
-    if(errors.size() > 0) {
-        auto op = std::string("Can not render due to the following issues:\r\n");
+    if(!errors.empty()) {
+      auto op = eps::uiText(eps::TextID::EXPORT_HANDLER_ERROR_NO_VALID_SOURCES);
         for(auto& error : errors) {
             op.append("\r\n");
             op.append(error);
         }
-        api->ShowMessageBox(op.c_str() , "Render Issues", 0);
+        api->ShowMessageBox(
+            op.c_str(),
+            eps::uiText(eps::TextID::EXPORT_SINK_ISSUES_TITLE).c_str(), 0);
         abortRender();
         return;
     }
@@ -81,9 +90,11 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     // Check ADM
     auto doc = admExportSources->getAdmDocument();
     if(!doc) {
-        api->ShowMessageBox("Error: No ADM metadata available for export.\r\nThis is likely an internal issue.\r\nCan not continue with render.", "No ADM Metadata", 0);
-        abortRender();
-        return;
+      api->ShowMessageBox(
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_ADM).c_str(),
+          eps::uiText(eps::TextID::EXPORT_SINK_ERROR_NO_ADM_TITLE).c_str(), 0);
+      abortRender();
+      return;
     }
 
     // Configure ADM document
@@ -130,19 +141,18 @@ PCM_sink_adm::~PCM_sink_adm()
         }
 
         if (actualFramesWritten < expectedFramesWritten) {
-            // Warn user - didn't receive all the frames we expected
-            auto msg = std::string("Warning:\r\n");
-            msg += "Received ";
-            msg += std::to_string(actualFramesWritten);
-            msg += " frames from export source \"";
-            msg += admExportHandler->getAdmExportSources()->getExportSourcesName();
-            msg += "\".\r\n";
-            msg += "Expected ";
-            msg += std::to_string(expectedFramesWritten);
-            msg += " frames.";
-            api->ShowMessageBox(msg.c_str(), "Render", 0);
+          // Warn user - didn't receive all the frames we expected
+          auto msg = fmt::format(
+              eps::uiText(eps::TextID::EXPORT_SINK_WARNING_FRAMES),
+              actualFramesWritten,
+              admExportHandler->getAdmExportSources()->getExportSourcesName(),
+              expectedFramesWritten);
+          api->ShowMessageBox(
+              msg.c_str(),
+              eps::uiText(eps::TextID::EXPORT_SINK_WARNING_FRAMES_TITLE)
+                  .c_str(),
+              0);
         }
-
         writer.reset();
     }
 
@@ -169,16 +179,16 @@ INT64 PCM_sink_adm::GetFileSize()
     return 0;
 }
 
-void PCM_sink_adm::GetOutputInfoString(char *buf, int buflen)
-{
-    if (writer) {
-        strncpy(buf, "Rendering ADM tracks...", buflen);
-    }
-    else {
-        strncpy(buf, "WARNING: Unable to render - invalid project structure!", buflen);
-    }
+void PCM_sink_adm::GetOutputInfoString(char *buf, int buflen) {
+  if (writer) {
+    strncpy(buf, eps::uiText(eps::TextID::EXPORT_SINK_INFO_RENDERING).c_str(),
+            buflen);
+  } else {
+    strncpy(buf,
+            eps::uiText(eps::TextID::EXPORT_SINK_WARNING_BAD_STRUCTURE).c_str(),
+            buflen);
+  }
 }
-
 
 void PCM_sink_adm::WriteDoubles(double **samples, int len, int nch, int offset, int spacing)
 {

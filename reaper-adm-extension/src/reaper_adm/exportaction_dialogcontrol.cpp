@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "exportaction_issues.h"
 #include "exportaction.h"
+#include "ui_text.h"
 
 // Lots of assumptions made here! May need more re-jigging if future versions differ
 #define EXPECTED_RENDER_DIALOG_WINDOW_TITLE "Render to File"
@@ -13,9 +14,6 @@
 #define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
 #define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
-
-#define TAKEOVER_TEXT_FOR_CHANNEL_COUNT "Auto" // What we will display for "Channels" when our PCM Sink is selected
-#define FALLBACK_VALUE_FOR_CHANNEL_COUNT "Stereo" // Value once we restore state, if we didn't know what it was before
 
 #define TIMER_ID 1
 
@@ -153,7 +151,7 @@ void RenderDialogControl::RenderDialogState::startPreparingRenderControls(HWND h
 {
     startedPrepareDialogControls = true; // Prevents paint message relauching this
     EnableWindow(GetDlgItem(hwndDlg, IDC_BUTTON_REFRESH), false);
-    SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), LPCSTR("\r\nValidating Project Structure...\r\n\r\nPlease Wait..."));
+    SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), eps::uiText(eps::TextID::RENDERER_VALIDATING_DIALOG).c_str());
     SetTimer(hwndDlg,
              TIMER_ID,            // timer identifier
              100,                 // interval(ms)
@@ -221,7 +219,7 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2
                 if(channelsLastOption.length() == 0 && currentOption.length() > 0){
                     channelsLastOption = currentOption;
                 }
-                channelsControlSetError |= (SetWindowText(editControl, TAKEOVER_TEXT_FOR_CHANNEL_COUNT) == 0);
+                channelsControlSetError |= (SetWindowText(editControl, eps::uiText(eps::TextID::EXPORT_DIALOG_TAKEOVER_TEXT_FOR_CHANNEL_COUNT).c_str()) == 0);
                 EnableWindow(editControl, false);
                 UpdateWindow(editControl);
             }
@@ -246,11 +244,11 @@ std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString()
 
     auto exportSources = admExportHandler->getAdmExportSources();
     if(exportSources) {
-        op += "Using export source: \"";
+        op += eps::uiText(eps::TextID::RENDERER_EXPORT_SOURCE_PREFIX);
         op += admExportHandler->getAdmExportSources()->getExportSourcesName();
         op += "\"";
     } else {
-        op += "No suitable export sources!";
+        op += eps::uiText(eps::TextID::RENDERER_ERROR_NO_EXPORT_SOURCES);
     }
 
     auto errors = admExportHandler->generateExportErrorStrings();
@@ -258,7 +256,7 @@ std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString()
     auto infos = admExportHandler->generateExportInfoStrings();
 
     if (errors.size() > 0) {
-        op.append("\r\n\r\nERRORS:");
+        op.append(eps::uiText(eps::TextID::RENDER_LOG_ERROR_HEADER));
         for(auto &msg : errors) {
             op.append(itemStarter);
             op.append(msg);
@@ -266,7 +264,7 @@ std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString()
     }
 
     if (warnings.size() > 0) {
-        op.append("\r\n\r\nWARNINGS:");
+        op.append(eps::uiText(eps::TextID::RENDER_LOG_WARNING_HEADER));
         for(auto &msg : warnings) {
             op.append(itemStarter);
             op.append(msg);
@@ -276,7 +274,7 @@ std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString()
     if (infos.size() > 0) {
         op.append("\r\n");
         if(warnings.size() > 0 || errors.size() > 0) {
-            op.append("\r\nINFO:");
+            op.append(eps::uiText(eps::TextID::RENDER_LOG_INFO_HEADER));
         }
         for(auto &msg : infos) {
             op.append(itemStarter);
@@ -360,7 +358,7 @@ WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, 
             channelsControlHwnd.has_value() &&
             !sampleRateControlSetError && !channelsControlSetError;
         if(!allControlsSuccessful) {
-            infoPaneText = "WARNING: Unable to takeover all render controls. REAPER version may be unsupported and render may fail.\r\n\r\n" + infoPaneText;
+            infoPaneText = eps::uiText(eps::TextID::RENDERER_ERROR_FAILED_CONTROL_OVERRIDE) + infoPaneText;
         }
 
         SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), LPCSTR(infoPaneText.c_str()));
@@ -423,8 +421,15 @@ WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, 
         if(channelsControlHwnd) {
             auto editControl = getComboBoxEdit(*channelsControlHwnd);
             if(channelsLastOption.length() > 0){
-                std::string opt = channelsLastOption == TAKEOVER_TEXT_FOR_CHANNEL_COUNT ? FALLBACK_VALUE_FOR_CHANNEL_COUNT : channelsLastOption;
-                selectInComboBox(*channelsControlHwnd, opt);
+              std::string opt =
+                  channelsLastOption ==
+                          eps::uiText(
+                              eps::TextID::
+                                  EXPORT_DIALOG_TAKEOVER_TEXT_FOR_CHANNEL_COUNT)
+                      ? uiText(eps::TextID::
+                            EXPORT_DIALOG_FALLBACK_VALUE_FOR_CHANNEL_COUNT)
+                      : channelsLastOption;
+              selectInComboBox(*channelsControlHwnd, opt);
                 SetWindowText(editControl, opt.c_str());
             }
             EnableWindow(editControl, true);

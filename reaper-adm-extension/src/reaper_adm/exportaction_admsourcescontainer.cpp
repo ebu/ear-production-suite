@@ -3,6 +3,7 @@
 
 #include "exportaction_admsource-admvst.h"
 #include "exportaction_admsource-earvst.h"
+#include "ui_text.h"
 
 void AdmExportHandler::repopulate(ReaperAPI const & api)
 {
@@ -47,12 +48,12 @@ std::vector<std::string> AdmExportHandler::generateExportErrorStrings()
     std::vector<std::string> msgs;
 
     if(!admExportSources) {
-        msgs.push_back(std::string("No Valid Export Sources!"));
+        msgs.push_back(eps::uiText(eps::TextID::EXPORT_HANDLER_ERROR_NO_VALID_SOURCES));
     }
 
     if(admExportSources) {
         if (admExportSources->getTotalExportChannels() == 0) {
-            msgs.push_back("Current configuration of export sources provides 0 channels of audio.");
+            msgs.push_back(eps::uiText(eps::TextID::EXPORT_HANDLER_ERROR_NO_CHANNELS));
         }
         auto sourcesMsgs = admExportSources->generateExportErrorStrings();
         msgs.insert(msgs.end(), sourcesMsgs.begin(), sourcesMsgs.end());
@@ -68,7 +69,7 @@ std::vector<std::string> AdmExportHandler::generateExportWarningStrings()
     std::vector<std::string> msgs;
 
     if(earSceneMasterVstSources && earSceneMasterVstSources->validForExport() && admExportVstSources && admExportVstSources->validForExport()) {
-        msgs.push_back(std::string("Multiple Types of Export Source!"));
+        msgs.push_back(eps::uiText(eps::TextID::EXPORT_HANDLER_WARNING_MULTIPLE_SOURCE_TYPES));
     }
 
     if(admExportSources) {
