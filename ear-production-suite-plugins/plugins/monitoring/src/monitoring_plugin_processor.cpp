@@ -36,8 +36,8 @@ namespace {
                                              channels_4_9_0.begin() + 8);
     auto channels_9_10_3 = ear::getLayout("9+10+3").channels();
     // The last two are U+090 and U-090, which we take from 9_10_3 at 11/12
-    channels_2_7_0.push_back(channels_9_10_3.at(11));
     channels_2_7_0.push_back(channels_9_10_3.at(12));
+    channels_2_7_0.push_back(channels_9_10_3.at(13));
     return {"2+7+0", channels_2_7_0};
   } else {
     return ear::getLayout(layout);
