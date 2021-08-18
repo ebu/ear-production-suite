@@ -73,6 +73,7 @@ void DirectSpeakersMetadataSender::sendMetadata() {
         if (!ec) {
           std::lock_guard<std::mutex> lock(timeoutMutex_);
           lastSendTimestamp_ = std::chrono::system_clock::now();
+          data_.set_changed(false);
         } else {
           EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
         }
