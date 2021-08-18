@@ -60,6 +60,11 @@ class ItemView : public Component {
     repaint();
   }
 
+  void setMetadata(ear::plugin::proto::InputItemMetadata metadata) {
+    data_.metadata = metadata;
+    repaint();
+  }
+
   void setSelected(bool selected) {
     data_.selected = selected;
     repaint();
