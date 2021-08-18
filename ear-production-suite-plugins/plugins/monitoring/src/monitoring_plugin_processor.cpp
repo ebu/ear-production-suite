@@ -64,12 +64,13 @@ EarMonitoringAudioProcessor::_getBusProperties() {
 //==============================================================================
 EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
+  auto speakerLayout = layout();
   backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
-      nullptr, ear::getLayout(SPEAKER_LAYOUT), 64);
+      nullptr, speakerLayout, 64);
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), 512,
-                            ear::getLayout(SPEAKER_LAYOUT)};
+                            speakerLayout};
   configureProcessor(newConfig);
 }
 
