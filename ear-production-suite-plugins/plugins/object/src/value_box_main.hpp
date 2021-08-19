@@ -33,7 +33,7 @@ class ValueBoxMain : public Component {
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
     // routingComboBox_->setLookAndFeel(&routingLookAndFeel_);
-    routingComboBox_->setDefaultText("enter receiving Channel");
+    routingComboBox_->setDefaultText("Select Scene channel");
     for (int i = 1; i <= 64; ++i) {
       routingComboBox_->addTextEntry(String(i) + String::fromUTF8("–") +
                                      String(i));
