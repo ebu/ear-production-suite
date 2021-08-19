@@ -41,8 +41,8 @@ DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  setResizeLimits(0, 0, 726, 930);
-  setSize(726, 930);
+  setResizeLimits(0, 0, 750, 930);
+  setSize(750, 930);
 }
 
 DirectSpeakersAudioProcessorEditor::~DirectSpeakersAudioProcessorEditor() {}
@@ -51,5 +51,5 @@ void DirectSpeakersAudioProcessorEditor::paint(Graphics& g) {}
 
 void DirectSpeakersAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
-  content_->setBounds(0, 0, 726, 930);
+  content_->setBounds(0, 0, 750, 930);
 }
