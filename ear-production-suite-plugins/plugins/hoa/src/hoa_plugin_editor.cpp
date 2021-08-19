@@ -19,10 +19,10 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
 
 
-  //ME here we set what is in the main box, these are all grouped together in a value_box_main 
+  //ME here we set what is in the main box, these are all grouped together in a value_box_main
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
-  
+
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
@@ -43,7 +43,7 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
       content_->bottomLayerValueBox);*/
   p->getFrontendConnector()->setChannelGainsValueBox(
       content_->channelGainValueBox);
-  
+
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);
   viewport_->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId,
@@ -53,9 +53,9 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  setResizeLimits(0, 0, 726, 930);
-  setSize(726, 930);
-  
+  setResizeLimits(0, 0, 750, 930);
+  setSize(750, 930);
+
   //ME add
   /* auto elementRelationships =
       p->admCommonDefinitions.getElementRelationships();
@@ -80,5 +80,5 @@ void HoaAudioProcessorEditor::paint(Graphics& g) {}
 
 void HoaAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
-  content_->setBounds(0, 0, 726, 930);
+  content_->setBounds(0, 0, 750, 930);
 }
