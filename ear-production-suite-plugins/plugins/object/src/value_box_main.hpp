@@ -35,8 +35,7 @@ class ValueBoxMain : public Component {
     // routingComboBox_->setLookAndFeel(&routingLookAndFeel_);
     routingComboBox_->setDefaultText("Select Scene channel");
     for (int i = 1; i <= 64; ++i) {
-      routingComboBox_->addTextEntry(String(i) + String::fromUTF8("–") +
-                                     String(i));
+      routingComboBox_->addTextEntry(String(i));
     }
     addAndMakeVisible(routingComboBox_.get());
 

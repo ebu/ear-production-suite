@@ -138,8 +138,12 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
     routingComboBoxLocked->clearEntries();
     auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
     for (int i = 1; i + layoutSizeFixed <= 64; ++i) {
-      routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                          String(i + layoutSizeFixed));
+      if(layoutSize > 1) {
+        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
+                                            String(i + layoutSizeFixed));
+      } else {
+        routingComboBoxLocked->addTextEntry(String(i));
+      }
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }
