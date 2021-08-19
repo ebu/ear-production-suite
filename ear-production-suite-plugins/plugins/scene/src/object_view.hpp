@@ -70,7 +70,7 @@ class ObjectView : public ElementView,
 
     settingsButton_->setButtonText("Settings");
     settingsButton_->setClickingTogglesState(true);
-    settingsButton_->onStateChange = [this]() {
+    settingsButton_->onClick = [this]() {
       data_.object.set_show_settings(this->settingsButton_->getToggleState());
       onOffInteractionPanel_->setVisible(
           this->settingsButton_->getToggleState());
@@ -86,7 +86,7 @@ class ObjectView : public ElementView,
     addAndMakeVisible(settingsButton_.get());
 
     onOffInteractionPanel_->setHeading("On/Off Interaction");
-    onOffInteractionPanel_->onStateChange = [this]() {
+    onOffInteractionPanel_->onClick = [this]() {
       data_.object.mutable_interactive_on_off()->set_enabled(
           this->onOffInteractionPanel_->isExpanded());
       this->notifyDataChange();
@@ -97,7 +97,7 @@ class ObjectView : public ElementView,
     gainInteractionPanel_->setContentHeight(50);
     gainInteractionPanel_->setComponent(gainInteractionSettings_.get());
     gainInteractionPanel_->setHeading("Gain Interaction");
-    gainInteractionPanel_->onStateChange = [this]() {
+    gainInteractionPanel_->onClick = [this]() {
       data_.object.mutable_interactive_gain()->set_enabled(
           this->gainInteractionPanel_->isExpanded());
       this->notifyDataChange();
@@ -111,7 +111,7 @@ class ObjectView : public ElementView,
     positionInteractionPanel_->setContentHeight(90);
     positionInteractionPanel_->setComponent(positionInteractionSettings_.get());
     positionInteractionPanel_->setHeading("Position Interaction");
-    positionInteractionPanel_->onStateChange = [this]() {
+    positionInteractionPanel_->onClick = [this]() {
       data_.object.mutable_interactive_position()->set_enabled(
           this->positionInteractionPanel_->isExpanded());
       this->notifyDataChange();
@@ -149,7 +149,7 @@ class ObjectView : public ElementView,
     settingsButton_->setToggleState(data_.object.show_settings(),
                                     dontSendNotification);
     updateSettingsButtonColour();
-    
+
     onOffInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
     gainInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
     positionInteractionPanel_->setVisible(
@@ -349,12 +349,12 @@ class ObjectView : public ElementView,
       return;
     }
   }
-  
+
   void updateSettingsButtonColour() {
     const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
                         data_.object.mutable_interactive_on_off()->enabled() ||
                         data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteraction : EarColours::Area01dp;
-                                           
+
     settingsButton_->setColour(EarButton::backgroundColourId, col);
   }
 
