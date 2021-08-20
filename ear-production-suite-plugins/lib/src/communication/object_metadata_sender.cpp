@@ -66,13 +66,14 @@ void ObjectMetadataSender::sendMetadata() {
     return;
   }
   auto msg = getMessage();
+  data_.set_changed(false);
   socket_.asyncSend(
       msg, [this](std::error_code ec, const nng::Message& ignored) {
         if (!ec) {
           std::lock_guard<std::mutex> lock(timeoutMutex_);
           lastSendTimestamp_ = std::chrono::system_clock::now();
-          data_.set_changed(false);
         } else {
+          data_.set_changed(true);
           EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
         }
       });
