@@ -54,7 +54,9 @@ class ChannelGain : public Component {
     gainSlider_->setSkewFactorFromMidPoint(-20.f);
     gainSlider_->setEnabled(false);
     gainSlider_->setAlpha(Emphasis::disabled);
+#ifndef USE_NEW_DESIGN
     addAndMakeVisible(gainSlider_.get());
+#endif
   }
   ~ChannelGain() {}
 
@@ -62,11 +64,19 @@ class ChannelGain : public Component {
 
   void resized() override {
     auto area = getLocalBounds();
+#ifdef USE_NEW_DESIGN
+    area.removeFromTop(10);
+    auto meterHeight = area.getHeight() - 30;
+    levelMeter_->setBounds(
+        area.removeFromTop(meterHeight).withSizeKeepingCentre(13, meterHeight));
+    speakerLabel_->setBounds(area);
+#else
     area.removeFromTop(5);
     levelMeter_->setBounds(
         area.removeFromTop(120).withSizeKeepingCentre(13, 120));
     speakerLabel_->setBounds(area.removeFromTop(30));
     gainSlider_->setBounds(area);
+#endif
   }
 
   EarSlider* getGainSlider() { return gainSlider_.get(); }
