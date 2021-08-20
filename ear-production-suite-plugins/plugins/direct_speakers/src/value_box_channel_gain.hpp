@@ -109,6 +109,7 @@ class ValueBoxChannelGain : public Component {
     channelGainsBox7to12_->removeAllChannelGains();
     channelGainsBox13to18_->removeAllChannelGains();
     channelGainsBox19to24_->removeAllChannelGains();
+    channelGains_.clear();
 
     channels1to6Button_->setEnabled(false);
     channels1to6Button_->setAlpha(Emphasis::disabled);
