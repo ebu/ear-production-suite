@@ -18,6 +18,18 @@ class ChannelGainsBox : public Component {
   void paint(Graphics& g) override {
     auto area = getLocalBounds();
     if (channelGains_.empty()) {
+#ifdef USE_NEW_DESIGN
+      area.reduce(20.f, 30.f);
+
+      g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
+      g.setFont(EarFonts::Label);
+      g.drawText("Channel meters not available", area.removeFromTop(25.f),
+                 Justification::left);
+      g.setColour(EarColours::Text.withAlpha(Emphasis::high));
+      g.setFont(EarFonts::Heading);
+      g.drawText("Please select a speaker layout first",
+                 area.removeFromTop(25.f), Justification::left);
+#else
       g.fillAll(EarColours::Area01dp);
       float lineThickness = 1.f;
       g.setColour(EarColours::Error);
@@ -34,6 +46,7 @@ class ChannelGainsBox : public Component {
       g.setFont(EarFonts::Heading);
       g.drawText("Please select a speaker layout first",
                  area.removeFromTop(25.f), Justification::left);
+#endif
     }
   }
 
