@@ -42,8 +42,8 @@ class ChannelGainsBox : public Component {
   void updateChannelGainBounds() {
     auto area = getLocalBounds();
     for (auto channelGain : channelGains_) {
-      channelGain->setBounds(area.removeFromLeft(52));
-      area.removeFromLeft(5);
+      channelGain->setBounds(area.removeFromLeft(meterWidth));
+      area.removeFromLeft(meterSpacing);
     }
   }
 
@@ -62,6 +62,9 @@ class ChannelGainsBox : public Component {
 
  private:
   std::vector<ChannelGain*> channelGains_;
+
+  const int meterWidth{ 52 };
+  const int meterSpacing{ 5 };
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGainsBox)
 };
