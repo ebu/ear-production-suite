@@ -3,6 +3,16 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 
+namespace {
+  String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
+    String routingDescription = String(position);
+    if(layoutSizeFixed > 0) {
+      routingDescription += String::fromUTF8("-") + String(position + layoutSizeFixed);
+    }
+    return routingDescription;
+  }
+}
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -138,12 +148,7 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
     routingComboBoxLocked->clearEntries();
     auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
     for (int i = 1; i + layoutSizeFixed <= 64; ++i) {
-      if(layoutSize > 1) {
-        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                            String(i + layoutSizeFixed));
-      } else {
-        routingComboBoxLocked->addTextEntry(String(i));
-      }
+      routingComboBoxLocked->addTextEntry(routingLayoutDescriptionAt(i, layoutSizeFixed));
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }
