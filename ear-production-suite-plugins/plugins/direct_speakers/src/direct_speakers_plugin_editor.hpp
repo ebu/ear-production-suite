@@ -17,6 +17,9 @@ class DirectSpeakersAudioProcessorEditor : public AudioProcessorEditor {
  private:
   DirectSpeakersAudioProcessor* p_;
 
+  const int desiredWidth{ 750 };
+  const int desiredHeight{ 930 };
+
   std::unique_ptr<ear::plugin::ui::DirectSpeakersComponent> content_;
   std::unique_ptr<Viewport> viewport_;
 

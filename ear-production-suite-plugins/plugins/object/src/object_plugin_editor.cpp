@@ -50,10 +50,9 @@ ObjectAudioProcessorEditor::ObjectAudioProcessorEditor(ObjectsAudioProcessor* p)
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  // TODO - old size (with metadata box and divergence) setResizeLimits(0, 0, 726, 950);
-  setResizeLimits(0, 0, 726, 672);
-  // TODO - old size (with metadata box and divergence) setSize(726, 950);
-  setSize(726, 672);
+  setResizeLimits(0, 0, desiredWidth, desiredHeight);
+  // Note: old size (with metadata box and divergence) setSize(726, 950);
+  setSize(desiredWidth, desiredHeight);
 }
 
 ObjectAudioProcessorEditor::~ObjectAudioProcessorEditor() {}
