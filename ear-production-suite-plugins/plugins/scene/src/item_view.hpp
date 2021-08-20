@@ -60,7 +60,7 @@ class ItemView : public Component {
     repaint();
   }
 
-  void setMetadata(ear::plugin::proto::InputItemMetadata metadata) {
+  void setMetadata(ear::plugin::proto::InputItemMetadata const& metadata) {
     data_.metadata = metadata;
     repaint();
   }
