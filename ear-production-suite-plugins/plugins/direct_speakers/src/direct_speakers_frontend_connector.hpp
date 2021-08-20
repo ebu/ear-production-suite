@@ -76,13 +76,13 @@ class DirectSpeakersJuceFrontendConnector
   std::weak_ptr<Label> statusBarLabel_;
   std::string cachedStatusBarText_;
   std::weak_ptr<EarNameTextEditor> nameTextEditor_;
-  std::string cachedName_;
+  std::string cachedName_{};
   std::weak_ptr<EarComboBox> colourComboBox_;
-  Colour cachedColour_;
+  Colour cachedColour_{ juce::Colours::transparentBlack };
   std::weak_ptr<EarComboBox> routingComboBox_;
-  int cachedRouting_;
+  int cachedRouting_{ -1 };
   std::weak_ptr<EarComboBox> speakerSetupsComboBox_;
-  int cachedSpeakerSetupIndex_;
+  int cachedSpeakerSetupIndex_{ -1 };
   ear::plugin::SpeakerSetup cachedSpeakerSetup_;
 
   std::weak_ptr<ValueBoxSpeakerLayer> upperLayer_;
