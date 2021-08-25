@@ -39,6 +39,21 @@ add_subdirectory(submodules)
 
 set(EPS_SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shared)
 set(JUCE_SUPPORT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/shared/resources)
+set(EPS_VERSIONING_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shared/version)
+
+add_custom_target(ear-version-generator ALL
+	WORKING_DIRECTORY ${EPS_VERSIONING_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${EPS_VERSIONING_DIR}/gen_version_defines.cmake
+	)
+	
+add_library(ear-version STATIC
+	${EPS_VERSIONING_DIR}/eps_version.cpp
+	${EPS_VERSIONING_DIR}/eps_version_autogen_defines.h
+	${EPS_VERSIONING_DIR}/eps_version.h)
+add_dependencies(ear-version ear-version-generator)
+
+set_target_properties(ear-version PROPERTIES FOLDER versioning)
+set_target_properties(ear-version-generator PROPERTIES FOLDER versioning)
 
 add_subdirectory(ear-production-suite-plugins)
 add_subdirectory(reaper-adm-extension)
