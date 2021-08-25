@@ -32,6 +32,7 @@ set(HEADERS_DIRECT_SPEAKERS_INPUT
 	${EPS_SHARED_DIR}/components/overlay.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
 	${EPS_SHARED_DIR}/components/speaker_layer.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
