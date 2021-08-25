@@ -48,7 +48,6 @@ add_custom_target(ear-version-generator ALL
 	
 add_library(ear-version STATIC
 	${EPS_VERSIONING_DIR}/eps_version.cpp
-	${EPS_VERSIONING_DIR}/eps_version_autogen_defines.h
 	${EPS_VERSIONING_DIR}/eps_version.h)
 add_dependencies(ear-version ear-version-generator)
 
