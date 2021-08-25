@@ -19,6 +19,7 @@
 #include "value_box_metadata.hpp"
 #include "value_box_panning.hpp"
 #include "value_box_panning_view.hpp"
+#include <version/eps_version.h>
 
 #include <memory>
 
@@ -82,6 +83,13 @@ class ObjectsComponent : public Component,
     statusBarLabel->setFont(EarFonts::Measures);
     addAndMakeVisible(statusBarLabel.get());
 
+    versionLabel.setFont(EarFonts::Version);
+    versionLabel.setColour(juce::Label::textColourId, EarColours::Version);
+    versionLabel.setJustificationType(juce::Justification::right);
+    versionLabel.setText(juce::String("v") + epsCurrentVersion, juce::NotificationType::dontSendNotification);
+    versionLabel.setEditable(false);
+    addAndMakeVisible(versionLabel);
+
     panningViewValueBox->getPannerTopView()->setAzimuth(p->getAzimuth()->get(),
                                                         dontSendNotification);
     panningViewValueBox->getPannerSideView()->setElevation(
@@ -113,7 +121,9 @@ class ObjectsComponent : public Component,
     onBoardingOverlay->setBounds(area);
     area.reduce(5, 5);
     auto headingArea = area.removeFromTop(55);
-    statusBarLabel->setBounds(area.removeFromBottom(30));
+    auto bottomLabelsArea = area.removeFromBottom(30);
+    statusBarLabel->setBounds(bottomLabelsArea.removeFromLeft(bottomLabelsArea.getWidth() / 2));
+    versionLabel.setBounds(bottomLabelsArea);
     onBoardingButton->setBounds(
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
@@ -157,6 +167,7 @@ class ObjectsComponent : public Component,
   std::unique_ptr<ear::plugin::ui::ValueBoxExtent> extentValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxPanningView> panningViewValueBox;
   std::shared_ptr<Label> statusBarLabel;
+  Label versionLabel;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock;
   std::unique_ptr<PropertiesFile> propertiesFile;
