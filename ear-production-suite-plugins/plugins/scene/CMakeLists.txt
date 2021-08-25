@@ -54,6 +54,7 @@ set(HEADERS_SCENE
 	${EPS_SHARED_DIR}/components/overlay.hpp
 	${EPS_SHARED_DIR}/components/read_only_audio_parameter_int.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
