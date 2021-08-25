@@ -14,6 +14,7 @@ set(VST_SOURCES
 
 set(VST_HEADERS
 	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/roboto.hpp
