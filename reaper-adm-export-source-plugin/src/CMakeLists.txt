@@ -43,6 +43,7 @@ add_juce_vst3_plugin(adm_export_source SOURCES ${VST_SOURCES} ${VST_HEADERS}
 target_link_libraries(adm_export_source_VST3 PRIVATE
 	nng::nng
 	adm
+	ear-version
 )
 
 

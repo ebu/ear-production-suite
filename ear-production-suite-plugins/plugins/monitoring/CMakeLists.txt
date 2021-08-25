@@ -56,7 +56,7 @@ function(add_monitoring_plugin SPEAKER_LAYOUT SPEAKER_LAYOUT_NAME AUDIO_PACK_FOR
     SPEAKER_LAYOUT_NAME="${SPEAKER_LAYOUT_NAME}"
 	AUDIO_PACK_FORMAT_ID="${AUDIO_PACK_FORMAT_ID}"
     )
-  target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base)
+  target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base ear-version)
   install_juce_vst3_plugin(ear_monitoring_${SPEAKER_LAYOUT} "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endfunction()
 

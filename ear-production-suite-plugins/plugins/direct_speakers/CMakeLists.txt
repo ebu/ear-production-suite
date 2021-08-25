@@ -67,6 +67,6 @@ add_juce_vst3_plugin(direct_speakers
   DESCRIPTION "The metadata input plugin for channel-based audio"
   OUTPUT_NAME "EAR DirectSpeakers")
   
-target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base)
+target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base ear-version)
 
 install_juce_vst3_plugin(direct_speakers "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
