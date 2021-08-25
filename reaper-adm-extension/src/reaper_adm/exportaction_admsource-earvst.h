@@ -78,8 +78,16 @@ public:
     static std::vector<int> trackObjectVstIndexes(ReaperAPI const& api, MediaTrack *trk);
     static bool vstPosIsObjectVst(ReaperAPI const& api, MediaTrack *trk, int vstPos);
 
+    static const char* getHoaVstCompName();
+    static const std::string* getHoaVstNameStr();
+    static bool isHoaVstAvailable(ReaperAPI const& api, bool doRescan = true);
+    static int trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk);
+    static std::vector<int> trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk);
+    static bool vstPosIsHoaVst(ReaperAPI const& api, MediaTrack* trk, int vstPos);
+
     static bool isObjectPlugin(std::string vstNameStr);
     static bool isDirectSpeakersPlugin(std::string vstNameStr);
+    static bool isHoaPlugin(std::string vstNameStr);
     static bool isInputPlugin(char* vstName);
     static bool isInputPlugin(ReaperAPI const& api, MediaTrack *trk, int vstPos);
 
@@ -87,6 +95,7 @@ private:
     // TODO: Fix hard-coded values - pull from plugin suite
     std::unique_ptr<PluginParameter> paramTrackMapping{ createPluginParameter(0, { -1.0, 63.0 }) };
     std::unique_ptr<PluginParameter> paramSpeakerLayout{ createPluginParameter(1, { -1.0, 13.0 }) };
+    //std::unique_ptr<PluginParameter> paramPackFormat{ createPluginParameter(0, { 0, 0xFFFF}) };//ME add
 
     // Statics
 
@@ -99,6 +108,14 @@ private:
     static std::string objectVstCompName; // Name for comparison purposes using API funcs
     static size_t objectVstCompNameLen;
     static const char* objectVstCompNameCStr;
+
+    //ME add
+    static std::string hoaVstName; // Human-readable name
+    static std::string hoaVstCompName; // Name for comparison purposes using API funcs
+    static size_t hoaVstCompNameLen;
+    static const char* hoaVstCompNameCStr;
+    //ME end
+
 };
 
 class EarSceneMasterVst : public PluginInstance

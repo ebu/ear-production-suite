@@ -43,7 +43,7 @@ class ChannelGainsBox : public Component {
     auto area = getLocalBounds();
 
     //ME add
-    int levels(ceil(sqrt(channelGains_.size())));
+    /*int levels(ceil(sqrt(channelGains_.size())));
     double levelMeterSize(area.getHeight() /
                           static_cast<double>(levels));  // ME experiment
     // for (auto channelGain : channelGains_) {
@@ -56,13 +56,13 @@ class ChannelGainsBox : public Component {
               .withTrimmedTop((level - 1) * levelMeterSize)
               .withTrimmedBottom((levels - level) * levelMeterSize));
       area.removeFromLeft(6);  // NEEDS WORK
-    }
+    }*/
       //ME end
-    // area.removeFromBottom(350);
-    /*for (auto channelGain : channelGains_) {
+    area.removeFromBottom(350);
+    for (auto channelGain : channelGains_) {
       channelGain->setBounds(area.removeFromLeft(50));
       area.removeFromLeft(6);
-    }*/
+    }
   }
 
   void addChannelGain(ChannelGain* channelGain) {

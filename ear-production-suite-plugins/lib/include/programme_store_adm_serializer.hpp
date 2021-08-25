@@ -6,6 +6,7 @@
 #include <adm/elements_fwd.hpp>
 #include <bw64/bw64.hpp>
 #include <vector>
+#include <helper/common_definition_helper.h>
 
 namespace ear {
 namespace plugin {
@@ -41,6 +42,8 @@ class ProgrammeStoreAdmSerializer {
   std::map<std::string, std::shared_ptr<adm::AudioObject>> serializedObjects;
   void setInteractivity(adm::AudioObject& object, const proto::Object& object1);
   bool isSerializedWithDifferentObjectSettings(const proto::Object& object);
+
+  AdmCommonDefinitionHelper admCommonDefinitionHelper;
 };
 
 }  // namespace plugin

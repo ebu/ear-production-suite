@@ -5,10 +5,20 @@
 #include <adm/utilities/object_creation.hpp>
 #include <adm/common_definitions.hpp>
 #include <utility>
+#include <iomanip>
 
 using namespace ear::plugin;
 
 namespace {
+
+template <typename T>
+std::string int_to_hex(T i, size_t size) {
+  std::stringstream stream;
+  stream << std::setfill('0') << std::setw(size) << std::hex
+         << i;
+  return stream.str();
+}
+
 
 constexpr auto const ADM_DEFAULT_AZ = 0.0f;
 constexpr auto const ADM_DEFAULT_EL = 0.0f;
@@ -258,7 +268,8 @@ void ProgrammeStoreAdmSerializer::serializeElement(
   auto metaDataIt = items_.find(object.connection_id());
   if (metaDataIt != items_.end()) {
     if (metaDataIt->second.has_obj_metadata() ||
-        metaDataIt->second.has_ds_metadata()) {
+        metaDataIt->second.has_ds_metadata() || 
+        metaDataIt->second.has_hoa_metadata()) {//Me change
       createTopLevelObject(content, metaDataIt->second, object);
     }
   }
@@ -267,7 +278,7 @@ void ProgrammeStoreAdmSerializer::serializeElement(
 void ProgrammeStoreAdmSerializer::createTopLevelObject(
     adm::AudioContent& content, const proto::InputItemMetadata& metadata,
     const proto::Object& object) {
-  assert(metadata.has_obj_metadata() || metadata.has_ds_metadata());
+  assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() || metadata.has_hoa_metadata());//ME change
   const auto& connectionId = metadata.connection_id();
   if (isAlreadySerialized(object)) {
     // Already have serialized this object (in a different programme?)
@@ -302,6 +313,78 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
           adm::formatId(
               objectHolder.audioPackFormat->get<adm::AudioPackFormatId>())});
       serializedObjects[connectionId] = objectHolder.audioObject;
+
+    } else if (metadata.has_hoa_metadata()) {
+      //Me add
+
+      //get the pack format Id from the metadata that has passed through the system
+      //Then create the full pack format string (rather than just the last 4 digits)
+      //Once we have the full string, look up the pack format object using the common definitions info that has already been placed in the doc
+      int packFormatIdValue = metadata.hoa_metadata().packformatidvalue();//TO DO make sure this is an int in protobuff
+      int packFormatId = 0x00040000 | packFormatIdValue;
+      std::string packFormatIdStr =
+          std::string("AP_") + int_to_hex(packFormatId, 8);
+      auto packFormat =
+          doc->lookup(adm::parseAudioPackFormatId(packFormatIdStr));
+
+      //create audio object for each HOA plugin, referencing the pack format as required by ADM
+      auto hoaAudioObject = adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
+      hoaAudioObject->addReference(packFormat);
+
+      //link content to hoa object?
+      content.addReference(hoaAudioObject);
+      setInteractivity(*hoaAudioObject,object);
+
+      //use the common definitions helper to recursively find the channel formats for our pack format
+      auto channelFormats =
+          admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
+              ->relatedChannelFormats;
+      //when we create the audioTrackIUD we will need it to reference the track format.
+      //We don't have this info yet so will need to go through all track formats and find the one that references the correct channel format
+      //to begin with we take a list of allTrackFormats from the doc
+      auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
+
+      //for each channel format create a AudioTrackUid that references the pack format
+      //the audio object also needs to reference the track uid
+      for (int i(0); i < channelFormats.size(); i++) {
+        auto audioTrackUid = adm::AudioTrackUid::create();
+        hoaAudioObject->addReference(audioTrackUid);
+        audioTrackUid->setReference(packFormat);
+
+        //The channel format needs to be put into proper string format, this helper function does this
+        //Once we have the proper ID we can look up the channel format object from the doc
+        auto channelFormatId = adm::AudioChannelFormatId(
+            adm::TypeDefinition::HOA,
+            adm::AudioChannelFormatIdValue(channelFormats[i]->id));
+        auto channelFormat = doc->lookup(channelFormatId);
+
+        for (auto trackFormat : allTrackFormats) {
+          //For every possible track format in the list, check whether the channel format it references matches the actual channel format
+          //If it does then save that track format. It can now be references by audioTrackUid
+          auto streamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
+          if (streamFormat) {
+            auto channelFormatCheck =
+                streamFormat->getReference<adm::AudioChannelFormat>();
+            if (channelFormatCheck == channelFormat) {
+              audioTrackUid->setReference(trackFormat);
+
+              //For each channel add the audioTrackUid, trackFormatId and packFormatId to an audioId and add it to CHNA
+              //CHNA will keep track of which audio is needed on each track
+              auto audioTrackUidIdStr = formatId(audioTrackUid->get<adm::AudioTrackUidId>());
+              auto trackFormatIdStr =
+                  formatId(trackFormat->get<adm::AudioTrackFormatId>());
+
+              chna.addAudioId(bw64::AudioId{
+                  static_cast<uint16_t>(metadata.routing() + i + 1),
+                  audioTrackUidIdStr, trackFormatIdStr, packFormatIdStr});
+              break;
+            }
+          }
+        }
+      }
+      serializedObjects[connectionId] = hoaAudioObject;
+      //ME end
+
     } else if (metadata.has_ds_metadata()) {
       auto layoutIndex = metadata.ds_metadata().layout();
       if (layoutIndex >= 0) {

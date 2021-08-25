@@ -174,11 +174,26 @@ namespace {
         }
         return usedValues;
     }
+    std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {//ME add, unsure
+        std::vector<int> usedValues{};
+        
+        auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
+        auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
+        assert(trackMapping.has_value());
+        if (trackMapping.has_value() && *trackMapping >= 0) {
+            int trackWidth = plugin.getTrackInstance().getChannelCount();// This makes the assumption that we set the track width to the size of the essence!
+            for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
+                usedValues.push_back((*trackMapping) + channelCounter);
+            }
+        }
+        return usedValues;
+    }
 
 }
 
 const char* EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME = "EAR Object";
 const char* EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME = "EAR DirectSpeakers";
+const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";//ME add
 const char* EARPluginSuite::SCENEMASTER_PLUGIN_NAME = "EAR Scene";
 const char* EARPluginSuite::RENDERER_PLUGIN_NAME = "EAR Monitoring 0+2+0";
 const int EARPluginSuite::MAX_CHANNEL_COUNT = 64;
@@ -227,6 +242,7 @@ void EARPluginSuite::onCreateProject(const ProjectNode &, const ReaperAPI &api)
     std::vector<UniqueValueAssigner::SearchCandidate> trackMappingAssignerSearches;
     trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{OBJECT_METADATA_PLUGIN_NAME, determineUsedObjectTrackMappingValues});
     trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{DIRECTSPEAKERS_METADATA_PLUGIN_NAME, determineUsedDirectSpeakersTrackMappingValues});
+    trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{HOA_METADATA_PLUGIN_NAME, determineUsedHoaTrackMappingValues });//ME add
     trackMappingAssigner = std::make_unique<UniqueValueAssigner>(trackMappingAssignerSearches, 0, TRACK_MAPPING_MAX, api);
     checkForExistingTracks(api);
     setTrackInsertionIndexFromSelectedMedia(api);
@@ -374,7 +390,50 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
     }
 }
 
-void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI &api) {
+void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI &api) {//VERY UNCERTAIN ABOUT THIS
+    auto track = automationElement.getTrack();
+    auto plugin = track->getPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
+
+    if (!plugin) {// Not processed yet
+        auto channelName = automationElement.channel().name();
+        if (!channelName.empty()) {
+            track->setName(channelName);
+        }
+
+        auto plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
+        auto takeChannels = automationElement.takeChannels();
+        auto channelCount = static_cast<int>(takeChannels.size());
+
+        if (plugin) {
+            //for (auto& parameter : automatedHoaPluginParameters()) {
+             //   automationElement.apply(*parameter, *plugin);
+            //}//don't think HOA needs this?
+
+            for (auto& parameter : trackParameters()) {
+                automationElement.apply(*parameter, *track);
+            }
+
+            assert(trackMappingAssigner);
+            auto trackMapping = trackMappingAssigner->getNextAvailableValue();
+            if (trackMapping.has_value()) {
+                plugin->setParameter(*hoaTrackMappingParameter, hoaTrackMappingParameter->forwardMap(*trackMapping));
+                assert(sceneMasterTrack);
+                track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
+
+                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
+                int trackMappingOffset = 0;
+                for (auto& takeChannel : takeChannels) {
+                    auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+                    trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
+                    trackMappingOffset++;
+                }
+
+            }
+            else {
+                //TODO - need to tell user - no free channels
+            }
+        }
+    }
 }
 
 void EARPluginSuite::onCreateHoaTrack(const TrackElement &trackNode, const ReaperAPI &api){
@@ -389,6 +448,7 @@ bool EARPluginSuite::pluginSuiteUsable(const ReaperAPI &api)
         {
             OBJECT_METADATA_PLUGIN_NAME,
             DIRECTSPEAKERS_METADATA_PLUGIN_NAME,
+            HOA_METADATA_PLUGIN_NAME,//ME add
             SCENEMASTER_PLUGIN_NAME,
             RENDERER_PLUGIN_NAME
         },
