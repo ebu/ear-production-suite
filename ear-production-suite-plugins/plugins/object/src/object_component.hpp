@@ -19,8 +19,7 @@
 #include "value_box_metadata.hpp"
 #include "value_box_panning.hpp"
 #include "value_box_panning_view.hpp"
-#include <version/eps_version.h>
-
+#include "components/version_label.hpp"
 #include <memory>
 
 namespace ear {
@@ -83,11 +82,7 @@ class ObjectsComponent : public Component,
     statusBarLabel->setFont(EarFonts::Measures);
     addAndMakeVisible(statusBarLabel.get());
 
-    versionLabel.setFont(EarFonts::Version);
-    versionLabel.setColour(juce::Label::textColourId, EarColours::Version);
-    versionLabel.setJustificationType(juce::Justification::right);
-    versionLabel.setText(juce::String("v") + epsCurrentVersion, juce::NotificationType::dontSendNotification);
-    versionLabel.setEditable(false);
+    configureVersionLabel(versionLabel);
     addAndMakeVisible(versionLabel);
 
     panningViewValueBox->getPannerTopView()->setAzimuth(p->getAzimuth()->get(),

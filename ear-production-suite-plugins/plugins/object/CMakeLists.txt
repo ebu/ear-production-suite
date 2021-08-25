@@ -35,6 +35,7 @@ set(HEADERS_OBJECT_INPUT
 	${EPS_SHARED_DIR}/components/panner_side_view.hpp
 	${EPS_SHARED_DIR}/components/panner_top_view.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
