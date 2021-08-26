@@ -203,6 +203,7 @@ target_link_libraries(reaper_adm_dependencies
       WDL::swell
       Boost::filesystem
       nng::nng
+      ear-version
     )
 
 add_dependencies(reaper_adm_dependencies reaper_adm_object)

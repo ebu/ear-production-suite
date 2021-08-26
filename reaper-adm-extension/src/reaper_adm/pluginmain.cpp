@@ -12,6 +12,7 @@
 #include "exportaction.h"
 #include "pluginsuite.h"
 #include "pluginregistry.h"
+#include <version/eps_version.h>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -56,6 +57,7 @@ namespace {
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 0},
     {"&Insert", 3},
+    {"&Help", 9},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -64,6 +66,7 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 1},
     {"&Insert", 4},
+    {"&Help", 10},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -76,7 +79,14 @@ extern "C" {
     using namespace admplug;
     std::unique_ptr<ReaperHost> reaper;
 
-    auto nonBlockingMessage = [rec](const char* text) {
+    auto nonBlockingMessage = [rec](const char* errMsg) {
+        std::string text{ errMsg };
+        if(epsVersionInfoAvailable) {
+            text += "\n\nv";
+            text += epsCurrentVersion;
+        } else {
+            text += "\n\n[Version information unavailable!]";
+        }
 #ifdef WIN32
         // Windows version of Reaper locks up if you try show a message box during splash
         winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
@@ -150,10 +160,33 @@ extern "C" {
     }
 
     auto mediaContextMenu = reaper->getMenu(MenuID::MEDIA_ITEM_CONTEXT);
-  mediaContextMenu->insert(
+    mediaContextMenu->insert(
       std::move(admContextMenu),
       std::make_shared<AfterNamedItem>("Group", "common",
                                        defaultMenuPositions.at("Group"), *api));
+
+    // Help Menu
+
+    std::string actionName("EAR Production Suite information...");
+    std::string actionSID("ADM_SHOW_EPS_INFO");
+
+    auto infoAction = std::make_shared<SimpleAction> (
+      actionName.c_str(),
+      actionSID.c_str(),
+      [](admplug::ReaperAPI &api) {
+      api.ShowMessageBox(epsCurrentVersion, "EAR Production Suite", 0);
+    });
+
+    auto infoActionId = reaper->addAction(infoAction);
+    auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
+
+    auto admHelpMenuInserter = std::make_shared<StartOffset>(0);
+    auto reaperHelpMenu = reaperMainMenu->getMenuByText(
+      "&Help", "common", defaultMenuPositions.at("&Help"), *api);
+    assert(reaperHelpMenu);
+    reaperHelpMenu->insert(std::move(infoActionItem), admHelpMenuInserter);
+    reaperHelpMenu->init();
+
     // File menu
 
     auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM file");
