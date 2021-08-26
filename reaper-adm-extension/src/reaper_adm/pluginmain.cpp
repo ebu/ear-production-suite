@@ -91,7 +91,7 @@ extern "C" {
         // Windows version of Reaper locks up if you try show a message box during splash
         winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
 #else
-        MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
+        MessageBox(rec->hwnd_main, text.c_str(), "ADM Extension Error", MB_OK);
 #endif
     };
 
