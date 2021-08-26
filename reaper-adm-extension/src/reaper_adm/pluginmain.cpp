@@ -174,8 +174,22 @@ extern "C" {
       actionName.c_str(),
       actionSID.c_str(),
       [](admplug::ReaperAPI &api) {
-      api.ShowMessageBox(epsCurrentVersion, "EAR Production Suite", 0);
-    });
+        std::string title("EAR Production Suite");
+        if(epsVersionInfoAvailable) {
+            title += " v";
+            title += epsBaseVersion;
+        }
+        std::string msg;
+        if(epsVersionInfoAvailable) {
+            msg += "Build Version:\n      ";
+            msg += epsCurrentVersion;
+        } else {
+            msg += "(Version information unavailable)";
+        }
+         msg += "\n\nhttps://ear-production-suite.ebu.io/";
+        api.ShowMessageBox(msg.c_str(), title.c_str(), 0);
+      }
+    );
 
     auto infoActionId = reaper->addAction(infoAction);
     auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
