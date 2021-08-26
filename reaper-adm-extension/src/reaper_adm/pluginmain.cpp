@@ -82,16 +82,17 @@ extern "C" {
     auto nonBlockingMessage = [rec](const char* errMsg) {
         std::string text{ errMsg };
         if(epsVersionInfoAvailable) {
-            text += "\n\nv";
+            text += "\n\n[EAR Production Suite v";
             text += epsCurrentVersion;
+            text += "]";
         } else {
-            text += "\n\n[Version information unavailable!]";
+            text += "\n\n[EAR Production Suite version information unavailable!]";
         }
 #ifdef WIN32
         // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
+        winhelpers::NonBlockingMessageBox(text, "EAR Production Suite - Extension Error", MB_ICONEXCLAMATION);
 #else
-        MessageBox(rec->hwnd_main, text.c_str(), "ADM Extension Error", MB_OK);
+        MessageBox(rec->hwnd_main, text.c_str(), "EAR Production Suite - Extension Error", MB_OK);
 #endif
     };
 
