@@ -225,6 +225,12 @@ inline int getIndexForAlpha2(const std::string alpha2) {
   return -1;
 }
 
+inline int getIndexForAlphaN(const std::string alpha) {
+    if(alpha.length() == 2) return getIndexForAlpha2(alpha);
+    if(alpha.length() == 3) return getIndexForAlpha3(alpha);
+    return -1;
+}
+
 }  // namespace ui
 }  // namespace plugin
 }  // namespace ear
