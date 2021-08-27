@@ -3,6 +3,8 @@ add_custom_target(ear-version-generator ALL
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/gen_version_defines.cmake
 	)
 	
+include(${CMAKE_CURRENT_SOURCE_DIR}/gen_version_defines.cmake)
+	
 add_library(ear-version STATIC
 	eps_version.cpp
 	eps_version.h)
