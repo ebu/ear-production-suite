@@ -6,6 +6,11 @@
 #include "direct_speakers_plugin_processor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
+namespace{
+  const int desiredWidth{ 750 };
+  const int desiredHeight{ 930 };
+}
+
 using namespace ear::plugin::ui;
 
 DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(

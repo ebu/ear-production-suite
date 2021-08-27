@@ -18,9 +18,6 @@ class ObjectAudioProcessorEditor : public AudioProcessorEditor {
  private:
   ObjectsAudioProcessor* p_;
 
-  const int desiredWidth{ 726 };
-  const int desiredHeight{ 672 };
-
   std::unique_ptr<ear::plugin::ui::ObjectsComponent> content_;
   std::unique_ptr<Viewport> viewport_;
 

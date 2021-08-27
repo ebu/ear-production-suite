@@ -3,6 +3,11 @@
 #include "object_frontend_connector.hpp"
 #include "object_plugin_processor.hpp"
 
+namespace {
+  const int desiredWidth{ 726 };
+  const int desiredHeight{ 672 };
+}
+
 using namespace ear::plugin::ui;
 
 ObjectAudioProcessorEditor::ObjectAudioProcessorEditor(ObjectsAudioProcessor* p)
