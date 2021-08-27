@@ -11,8 +11,8 @@ inline void configureVersionLabel(juce::Label& versionLabel) {
     versionLabel.setColour(juce::Label::textColourId, ear::plugin::ui::EarColours::Version);
     versionLabel.setJustificationType(juce::Justification::right);
     versionLabel.setEditable(false);
-    if(epsVersionInfoAvailable) {
-        versionLabel.setText(juce::String("v") + epsCurrentVersion, juce::NotificationType::dontSendNotification);
+    if(eps::versionInfoAvailable()) {
+        versionLabel.setText(juce::String("v") + eps::currentVersion(), juce::NotificationType::dontSendNotification);
     } else {
         versionLabel.setText("(version information unavailable)", juce::NotificationType::dontSendNotification);
     }

@@ -1,6 +1,16 @@
 #include "eps_version.h"
 #include "eps_version_autogen_defines.h"
 
-const char epsCurrentVersion[] = EPS_VERSION_CURRENT;
-const char epsBaseVersion[] = EPS_VERSION_BASE;
-bool epsVersionInfoAvailable = EPS_VERSION_INFO_AVAILABLE;
+std::string const& eps::baseVersion() {
+    static std::string baseVersion(EPS_VERSION_BASE);
+    return baseVersion;
+}
+
+std::string const& eps::currentVersion() {
+    static std::string currentVersion(EPS_VERSION_CURRENT);
+    return currentVersion;
+}
+
+bool const eps::versionInfoAvailable() {
+    return EPS_VERSION_INFO_AVAILABLE;
+}

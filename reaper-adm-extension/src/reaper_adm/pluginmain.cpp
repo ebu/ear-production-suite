@@ -81,9 +81,9 @@ extern "C" {
 
     auto nonBlockingMessage = [rec](const char* errMsg) {
         std::string text{ errMsg };
-        if(epsVersionInfoAvailable) {
+        if(eps::versionInfoAvailable()) {
             text += "\n\n[EAR Production Suite v";
-            text += epsCurrentVersion;
+            text += eps::currentVersion();
             text += "]";
         } else {
             text += "\n\n[EAR Production Suite version information unavailable!]";
@@ -176,14 +176,14 @@ extern "C" {
       actionSID.c_str(),
       [](admplug::ReaperAPI &api) {
         std::string title("EAR Production Suite");
-        if(epsVersionInfoAvailable) {
+        if(eps::versionInfoAvailable()) {
             title += " v";
-            title += epsBaseVersion;
+            title += eps::baseVersion();
         }
         std::string msg;
-        if(epsVersionInfoAvailable) {
+        if(eps::versionInfoAvailable) {
             msg += "Build Version:\n      ";
-            msg += epsCurrentVersion;
+            msg += eps::currentVersion();
         } else {
             msg += "(Version information unavailable)";
         }
