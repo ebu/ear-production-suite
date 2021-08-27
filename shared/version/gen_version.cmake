@@ -18,8 +18,8 @@ endfunction()
 
 
 # note CMAKE_CURRENT_SOURCE_DIR is current working directory when run as a script!
-set(TEMPLATE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version_autogen_defines.h.in)
-set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version_autogen_defines.h)
+set(TEMPLATE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version.cpp.in)
+set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version.cpp)
 set(VERSION_INFO_AVAILABLE false)
 
 find_package(Git)

@@ -1,0 +1,15 @@
+#include "eps_version.h"
+
+std::string const& eps::baseVersion() {
+    static std::string baseVersion("@NUMERIC_VERSION@");
+    return baseVersion;
+}
+
+std::string const& eps::currentVersion() {
+    static std::string currentVersion("@DESCRIPTIVE_VERSION@");
+    return currentVersion;
+}
+
+bool const eps::versionInfoAvailable() {
+    return @VERSION_INFO_AVAILABLE@;
+}

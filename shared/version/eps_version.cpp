@@ -1,16 +1,15 @@
 #include "eps_version.h"
-#include "eps_version_autogen_defines.h"
 
 std::string const& eps::baseVersion() {
-    static std::string baseVersion(EPS_VERSION_BASE);
+    static std::string baseVersion("0.6.0");
     return baseVersion;
 }
 
 std::string const& eps::currentVersion() {
-    static std::string currentVersion(EPS_VERSION_CURRENT);
+    static std::string currentVersion("0.6.0.EPS-beta-99-g05c7-dirty");
     return currentVersion;
 }
 
 bool const eps::versionInfoAvailable() {
-    return EPS_VERSION_INFO_AVAILABLE;
+    return true;
 }
