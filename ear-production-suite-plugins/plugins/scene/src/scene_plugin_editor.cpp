@@ -30,7 +30,6 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
   header_->setText(" Scene");
-  header_->setText(epsCurrentVersion);
 
   onBoardingButton_->setButtonText("?");
   onBoardingButton_->setShape(EarButton::Shape::Circular);
