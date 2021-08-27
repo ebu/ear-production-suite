@@ -20,6 +20,7 @@ endfunction()
 # note CMAKE_CURRENT_SOURCE_DIR is current working directory when run as a script!
 set(TEMPLATE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version_autogen_defines.h.in)
 set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/eps_version_autogen_defines.h)
+set(VERSION_INFO_AVAILABLE false)
 
 find_package(Git)
 if(Git_FOUND)
@@ -35,7 +36,7 @@ if(Git_FOUND)
 
     set(DESCRIPTIVE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
     set(NUMERIC_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
-	set(EPS_VERSION_INFO_AVAILABLE True)
+	set(VERSION_INFO_AVAILABLE true)
 
     if(NOT VERSION_TWEAK STREQUAL _GIT_REVISION)
       # Tweak is present
