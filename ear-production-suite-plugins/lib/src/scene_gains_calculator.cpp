@@ -162,8 +162,10 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
           auto temp = item.hoa_metadata().packformatidvalue();
           pfData = commonDefinitionHelper.getPackFormatData(4, temp);
         }
-        auto cfData = pfData->relatedChannelFormats;
-        size = cfData.size();
+        if(pfData) {
+          auto cfData = pfData->relatedChannelFormats;
+          size = cfData.size();
+        }
       }
       Routing newRouting{item.routing(), size};
       auto it = routingCache_.find(item.connection_id());
