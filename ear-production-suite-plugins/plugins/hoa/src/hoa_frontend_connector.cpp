@@ -141,25 +141,31 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
                                    hoaType, dontSendNotification);
   }
   cachedHoaType_ = hoaType;//when editor is called this gets set to what it already is...
-  
+
+  auto hoaId = p_->getHoaType()->get();
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    auto hoaId = p_->getHoaType()->get();
     auto pfData = p_->admCommonDefinitions.getPackFormatData(4, hoaId);
+    size_t cfCount{ 0 };
 
     if (pfData) {
-      routingComboBoxLocked->clearEntries();
-      auto cfCount = pfData->relatedChannelFormats.size();
-      auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
-      for (int i = 1; i + cfCountFixed <= 64; ++i) {
-        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                            String(i + cfCountFixed));
-      }
-      routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
-    }
-    if (auto channelGainsLocked = channelGains_.lock()) {
-      channelGainsLocked->setHoaType(hoaId);
+      cfCount = pfData->relatedChannelFormats.size();
     }
 
+    routingComboBoxLocked->clearEntries();
+    auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
+    for (int i = 1; i + cfCountFixed <= 64; ++i) {
+      if(cfCount > 1) {
+        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
+                                            String(i + cfCountFixed));
+      } else {
+        routingComboBoxLocked->addTextEntry(String(i));
+      }
+    }
+    routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
+  }
+
+  if (auto channelGainsLocked = channelGains_.lock()) {
+    channelGainsLocked->setHoaType(hoaId);
   }
 }
 //end ME

@@ -37,9 +37,9 @@ class ValueBoxMain : public Component {
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
 
-    routingComboBox_->setDefaultText("Enter Routing");
+    routingComboBox_->setDefaultText("Select Scene channel range");
     addAndMakeVisible(routingComboBox_.get());
-    
+
     //ME added this. Up here in public decide what combo box defined in private actually looks like
     hoaTypeLabel_->setFont(EarFonts::Label);
     hoaTypeLabel_->setText("HOA type",
