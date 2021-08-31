@@ -47,6 +47,7 @@ namespace admplug {
         std::shared_ptr<PluginParameter> objectTrackMappingParameter;
         std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;
         std::shared_ptr<PluginParameter> hoaTrackMappingParameter;//ME add
+        std::shared_ptr<PluginParameter> hoaPackFormatIdParameter;//ME add UNSURE
         std::shared_ptr<PluginParameter> directSpeakersLayoutParameter;
         std::unique_ptr<UniqueValueAssigner> trackMappingAssigner;
 

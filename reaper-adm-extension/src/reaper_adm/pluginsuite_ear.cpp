@@ -22,6 +22,8 @@ using namespace admplug;
 #define TRACK_MAPPING_MAX 63
 #define SPEAKER_LAYOUT_MIN -1
 #define SPEAKER_LAYOUT_MAX 21
+#define PACK_FORMAT_MIN 0//ME ADD UNSURE
+#define PACK_FORMAT_MAX 64//ME ADD UNSURE
 
 namespace {
 
@@ -47,6 +49,12 @@ namespace {
         TRACK_MAPPING = 0,
         SPEAKER_LAYOUT,
         NUM_PARAMETERS
+    };
+
+    enum class EarHoaParameters {
+        TRACK_MAPPING = 0,
+        NUM_PARAMETERS,
+        PACK_FORMAT_ID
     };
 
     std::vector<std::unique_ptr<PluginParameter>> createAutomatedObjectPluginParameters()
@@ -180,6 +188,19 @@ namespace {
         auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
         auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
         assert(trackMapping.has_value());
+
+        auto packFormatIdParam = createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), { PACK_FORMAT_MIN, PACK_FORMAT_MAX });
+        auto packFormatId = plugin.getParameterWithConvertToInt(*(packFormatIdParam.get()));
+        assert(packFormatId.has_value());
+        int trackWidth;
+        if (packFormatId.has_value()) { 
+            trackWidth = pow(*packFormatId +1,2);
+        }
+        else { 
+            trackWidth = 0;
+        }
+        if (trackWidth <= 0) trackWidth = 1; // Track mapping is single channel by default.
+
         if (trackMapping.has_value() && *trackMapping >= 0) {
             int trackWidth = plugin.getTrackInstance().getChannelCount();// This makes the assumption that we set the track width to the size of the essence!
             for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
@@ -203,6 +224,10 @@ bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupport
 EARPluginSuite::EARPluginSuite() :
     objectTrackMappingParameter{ createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
     directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
+    hoaTrackMappingParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
+    //ME ADD UNSURE
+    hoaPackFormatIdParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), {PACK_FORMAT_MIN, PACK_FORMAT_MAX}) },
+    //ME END
     directSpeakersLayoutParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::SPEAKER_LAYOUT), {SPEAKER_LAYOUT_MIN, SPEAKER_LAYOUT_MAX}) }
 {
 }
@@ -389,50 +414,53 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
         }
     }
 }
-
+//ME add
 void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI &api) {//VERY UNCERTAIN ABOUT THIS
+    // Can only do this in onHoaAutomation because we need the packformat and a channelformats first blockformat
+    // NOTE: This will run for every leg, so don't duplicate effort!
     auto track = automationElement.getTrack();
-    auto plugin = track->getPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
+    auto plugin = track->getPlugin(HOA_METADATA_PLUGIN_NAME);
+    auto packFormat = automationElement.channel().packFormat();
+    auto packFormatId = std::stoi(adm::formatId(packFormat->get<adm::AudioPackFormatId>()).substr(7,4));//ME ADD UNSURE
+    assert(packFormat);
 
-    if (!plugin) {// Not processed yet
-        auto channelName = automationElement.channel().name();
-        if (!channelName.empty()) {
-            track->setName(channelName);
-        }
-
-        auto plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
+    if (!plugin) { // Not processed yet
+        //auto speakerLayout = getSpeakerLayoutIndexFromPackFormatId(adm::formatId(packFormat->get<adm::AudioPackFormatId>()));
+        /*if (!speakerLayout) {
+            auto cartLayout = getCartLayout(*packFormat);
+            if (cartLayout) {
+                speakerLayout = getSpeakerLayoutIndexFromPackFormatId(getMappedCommonPackId(*cartLayout));
+            }
+        }*/
+       // if (speakerLayout) { // We only support specific speaker layouts
+        plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
         auto takeChannels = automationElement.takeChannels();
-        auto channelCount = static_cast<int>(takeChannels.size());
+        auto channelCountTake = static_cast<int>(takeChannels.size());
+        auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
+        assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
+        auto channelCount = channelCountTake;
+        track->setChannelCount(channelCount);
+        plugin->setParameter(*hoaPackFormatIdParameter, hoaPackFormatIdParameter->forwardMap(packFormatId));//ME ADD UNSURE
 
-        if (plugin) {
-            //for (auto& parameter : automatedHoaPluginParameters()) {
-             //   automationElement.apply(*parameter, *plugin);
-            //}//don't think HOA needs this?
-
-            for (auto& parameter : trackParameters()) {
-                automationElement.apply(*parameter, *track);
-            }
-
-            assert(trackMappingAssigner);
-            auto trackMapping = trackMappingAssigner->getNextAvailableValue();
-            if (trackMapping.has_value()) {
-                plugin->setParameter(*hoaTrackMappingParameter, hoaTrackMappingParameter->forwardMap(*trackMapping));
-                assert(sceneMasterTrack);
-                track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
-
-                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
-                int trackMappingOffset = 0;
-                for (auto& takeChannel : takeChannels) {
-                    auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
-                    trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
-                    trackMappingOffset++;
-                }
-
-            }
-            else {
-                //TODO - need to tell user - no free channels
+        assert(trackMappingAssigner);
+        auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
+        if (trackMapping.has_value()) {
+            plugin->setParameter(*hoaTrackMappingParameter, hoaTrackMappingParameter->forwardMap(*trackMapping));
+            track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
+            
+            // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
+            int trackMappingOffset = 0;
+            for (auto& takeChannel : takeChannels) {
+                auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+                trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
+                trackMappingOffset++;
             }
         }
+        else {
+                //TODO - need to tell user - no free track mappings
+        }
+
+        //}
     }
 }
 
