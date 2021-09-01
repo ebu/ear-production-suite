@@ -1,6 +1,7 @@
 #include "exportaction_admsource-admvst.h"
 
 #include "pluginregistry.h"
+#include <version/eps_version.h>
 
 #include <adm/adm.hpp>
 #include <adm/utilities/id_assignment.hpp>
@@ -220,6 +221,9 @@ std::shared_ptr<bw64::AxmlChunk> AdmVstExportSources::getAxmlChunk()
 {
     std::stringstream xmlStream;
     adm::writeXml(xmlStream, admDocument);
+    xmlStream << "<!-- Produced using the EAR Production Suite (version ";
+    xmlStream << (eps::versionInfoAvailable()? eps::currentVersion() : "unknown");
+    xmlStream << "), from ADM Export Source plugins -->\n";
     return std::make_shared<bw64::AxmlChunk>(bw64::AxmlChunk(xmlStream.str()));
 }
 

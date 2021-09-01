@@ -2,6 +2,7 @@
 
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
+#include <version/eps_version.h>
 
 #include <adm/write.hpp>
 #include <adm/utilities/id_assignment.hpp>
@@ -255,6 +256,9 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
     // Create AXML Chunk
     std::stringstream xmlStream;
     adm::writeXml(xmlStream, admDocument);
+    xmlStream << "<!-- Produced using the EAR Production Suite (version ";
+    xmlStream << (eps::versionInfoAvailable()? eps::currentVersion() : "unknown");
+    xmlStream << "), from the EAR Scene plugin -->\n";
     axmlChunk = std::make_shared<bw64::AxmlChunk>(bw64::AxmlChunk(xmlStream.str()));
 
 }
