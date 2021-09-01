@@ -40,6 +40,7 @@ namespace admplug {
         static const char* RENDERER_PLUGIN_NAME;
 
         static int countChannelsInSpeakerLayout(int slIndex);
+        static int countChannelsInHoaPackFormat(int pfId);
 
     private:
         std::vector<std::unique_ptr<PluginParameter>> const & automatedObjectPluginParameters();//does HOA need this?

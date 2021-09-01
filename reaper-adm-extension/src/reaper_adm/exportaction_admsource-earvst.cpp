@@ -592,6 +592,7 @@ int EarInputVst::getWidth()
     if (isObjectPlugin(name)) { return 1; }
     else if (isDirectSpeakersPlugin(name)) {
         assert(paramSpeakerLayout);
+        //auto SL = *paramSpeakerLayout.get();
         auto speakerLayout = getParameterWithConvertToInt(*paramSpeakerLayout);
         assert(speakerLayout.has_value());
 
@@ -599,11 +600,11 @@ int EarInputVst::getWidth()
         return trackWidth;
     }
     else if (isHoaPlugin(name)) {
-        //int packFormatId = admExportVst->getAdmPackFormat();
-        //getParameterWithConvertToInt(*param);
-        //int trackWidth = getPackFormat(hoaIndex).size();
-        //return trackWidth;//TODO UPDATE
-        return 4;
+        std::optional<int> packFormatId = getParameterWithConvertToInt(*paramPackFormatId);
+        //HoaAudioProcessor::getHoaType()
+        assert(packFormatId.has_value());
+        int trackWidth = packFormatId.has_value() ? EARPluginSuite::countChannelsInHoaPackFormat(*packFormatId) : 0;
+        return trackWidth;
     }
     else { return 0; }
 

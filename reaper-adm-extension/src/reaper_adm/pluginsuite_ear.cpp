@@ -22,8 +22,8 @@ using namespace admplug;
 #define TRACK_MAPPING_MAX 63
 #define SPEAKER_LAYOUT_MIN -1
 #define SPEAKER_LAYOUT_MAX 21
-#define PACK_FORMAT_MIN 0//ME ADD UNSURE
-#define PACK_FORMAT_MAX 64//ME ADD UNSURE
+#define PACK_FORMAT_MIN 0x0//ME ADD UNSURE
+#define PACK_FORMAT_MAX 0xFFFF//ME ADD UNSURE
 
 namespace {
 
@@ -53,8 +53,8 @@ namespace {
 
     enum class EarHoaParameters {
         TRACK_MAPPING = 0,
-        NUM_PARAMETERS,
-        PACK_FORMAT_ID
+        PACK_FORMAT_ID,
+        NUM_PARAMETERS
     };
 
     std::vector<std::unique_ptr<PluginParameter>> createAutomatedObjectPluginParameters()
@@ -192,13 +192,7 @@ namespace {
         auto packFormatIdParam = createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), { PACK_FORMAT_MIN, PACK_FORMAT_MAX });
         auto packFormatId = plugin.getParameterWithConvertToInt(*(packFormatIdParam.get()));
         assert(packFormatId.has_value());
-        int trackWidth;
-        if (packFormatId.has_value()) { 
-            trackWidth = pow(*packFormatId +1,2);
-        }
-        else { 
-            trackWidth = 0;
-        }
+        int trackWidth = packFormatId.has_value() ? pow(*packFormatId +1,2) : 0;
         if (trackWidth <= 0) trackWidth = 1; // Track mapping is single channel by default.
 
         if (trackMapping.has_value() && *trackMapping >= 0) {
@@ -437,7 +431,7 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
         auto takeChannels = automationElement.takeChannels();
         auto channelCountTake = static_cast<int>(takeChannels.size());
         auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
-        assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
+        //assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
         auto channelCount = channelCountTake;
         track->setChannelCount(channelCount);
         plugin->setParameter(*hoaPackFormatIdParameter, hoaPackFormatIdParameter->forwardMap(packFormatId));//ME ADD UNSURE
@@ -496,7 +490,14 @@ int admplug::EARPluginSuite::countChannelsInSpeakerLayout(int slIndex)
     }
     return 0;
 }
-
+//ME add
+int admplug::EARPluginSuite::countChannelsInHoaPackFormat(int pfId)
+{
+    auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, pfId);
+    if (!pfData) return 0;
+    return pfData->relatedChannelFormats.size();
+}
+//ME add
 std::vector<std::unique_ptr<PluginParameter>> const& EARPluginSuite::automatedObjectPluginParameters()
 {
     auto static parameters = createAutomatedObjectPluginParameters();
