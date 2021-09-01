@@ -153,22 +153,25 @@ void ProgrammeStoreAdmPopulator::operator()(
 }
 
 void ProgrammeStoreAdmPopulator::operator()(
-    std::shared_ptr<const AudioObject> admObject) {
+  std::shared_ptr<const AudioObject> admObject) {
   currentObject = admObject;
   auto currentUids = admObject->getReferences<AudioTrackUid>();
   auto it =
-      std::find_first_of(trackMaps.begin(), trackMaps.end(),
-                         currentUids.begin(), currentUids.end(), idValueEquals);
-  if (it != trackMaps.end()) {
+    std::find_first_of(trackMaps.begin(), trackMaps.end(),
+                       currentUids.begin(), currentUids.end(), idValueEquals);
+  if(it != trackMaps.end()) {
     auto packs = admObject->getReferences<adm::AudioPackFormat>();
-    if (!packs.empty() && packs.front()->get<TypeDescriptor>() ==
-                              TypeDefinition::DIRECT_SPEAKERS) {
-      auto location = std::distance(trackMaps.begin(), it);
-      auto found = programmeElementTrackLookup.find(location);
-      if(found == programmeElementTrackLookup.end()) {
-        auto element = currentProgramme->add_element();
-        setInteractivity(element->mutable_object(), *admObject);
-        programmeElementTrackLookup[location] = element;
+    if(!packs.empty()) {
+      auto pfTd = packs.front()->get<TypeDescriptor>();
+      if(pfTd == TypeDefinition::DIRECT_SPEAKERS ||
+         pfTd == TypeDefinition::HOA) {
+        auto location = std::distance(trackMaps.begin(), it);
+        auto found = programmeElementTrackLookup.find(location);
+        if(found == programmeElementTrackLookup.end()) {
+          auto element = currentProgramme->add_element();
+          setInteractivity(element->mutable_object(), *admObject);
+          programmeElementTrackLookup[location] = element;
+        }
       }
     }
   }
