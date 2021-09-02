@@ -142,7 +142,11 @@ class ObjectView : public ElementView,
             String(SPEAKER_SETUPS.at(layoutIndex).commonName),
             dontSendNotification);
       }
-    } else {
+    } else if (data_.item.has_hoa_metadata()) {
+      metadataLabel_->setText("HOA",
+                              dontSendNotification);
+      data_.item.hoa_metadata().packformatidvalue();
+    }  else {
       metadataLabel_->setText("", dontSendNotification);
     }
 
