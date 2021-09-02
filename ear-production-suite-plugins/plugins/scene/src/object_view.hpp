@@ -13,7 +13,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "programme_store.pb.h"
-
+#include "../../ear-production-suite/shared/helper/common_definition_helper.h"
 #include <memory>
 
 namespace ear {
@@ -37,6 +37,7 @@ class ObjectView : public ElementView,
     DirectSpeakers,
     Other
   };
+
 
   explicit ObjectView(ObjectType type)
       : ElementView(),
@@ -143,7 +144,15 @@ class ObjectView : public ElementView,
             dontSendNotification);
       }
     } else if (data_.item.has_hoa_metadata()) {
-      metadataLabel_->setText("HOA",
+      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto pfData = commonDefinitionHelper->getPackFormatData(
+          4, data_.item.hoa_metadata().packformatidvalue());
+      int cfCount;
+      if (pfData) {
+        cfCount = pfData->relatedChannelFormats.size();
+      }
+      int order = std::sqrt(cfCount)-1;
+      metadataLabel_->setText("HOA order " + String(order),
                               dontSendNotification);
       data_.item.hoa_metadata().packformatidvalue();
     }  else {
