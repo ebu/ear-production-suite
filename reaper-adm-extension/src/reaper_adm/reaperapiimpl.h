@@ -46,6 +46,7 @@ public:
     void UpdateArrange() const override;
     void UpdateTimeline() const override;
     void Main_OnCommandEx(int command, int flag, ReaProject* proj) const override;
+    bool AddExtensionsMainMenu() const override;
     void SelectAllMediaItems(ReaProject* proj, bool selected) const override;
     void SetMediaItemSelected(MediaItem* item, bool selected) const override;
     double GetMediaSourceLength(PCM_source* source, bool* lengthIsQNOut) const override;

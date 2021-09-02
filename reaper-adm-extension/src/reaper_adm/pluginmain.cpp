@@ -58,6 +58,7 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 0},
     {"&Insert", 3},
     {"&Help", 9},
+    {"E&xtensions", 8},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -67,6 +68,7 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 1},
     {"&Insert", 4},
     {"&Help", 10},
+    {"E&xtensions", 9},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -166,9 +168,9 @@ extern "C" {
       std::make_shared<AfterNamedItem>("Group", "common",
                                        defaultMenuPositions.at("Group"), *api));
 
-    // Help Menu
+    // Extensions Menu
 
-    std::string actionName("EAR Production Suite information...");
+    std::string actionName("About EAR Production Suite");
     std::string actionSID("ADM_SHOW_EPS_INFO");
 
     auto infoAction = std::make_shared<SimpleAction> (
@@ -192,15 +194,23 @@ extern "C" {
       }
     );
 
-    auto infoActionId = reaper->addAction(infoAction);
-    auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
+    api->AddExtensionsMainMenu();
+    auto reaperExtMenu = reaperMainMenu->getMenuByText(
+        "E&xtensions", "common", -1 , *api);
 
-    auto admHelpMenuInserter = std::make_shared<StartOffset>(0);
-    auto reaperHelpMenu = reaperMainMenu->getMenuByText(
-      "&Help", "common", defaultMenuPositions.at("&Help"), *api);
-    assert(reaperHelpMenu);
-    reaperHelpMenu->insert(std::move(infoActionItem), admHelpMenuInserter);
-    reaperHelpMenu->init();
+    if(!reaperExtMenu) {
+        reaperExtMenu = reaperMainMenu->getMenuByText(
+            "&Help", "common", -1, *api);
+    }
+
+    if(reaperExtMenu) {
+        auto infoActionId = reaper->addAction(infoAction);
+        auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
+        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+
+        reaperExtMenu->insert(std::move(infoActionItem), admExtMenuInserter);
+        reaperExtMenu->init();
+    }
 
     // File menu
 

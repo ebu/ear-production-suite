@@ -267,7 +267,7 @@ std::shared_ptr<RawMenu> RawMenu::getMenuByText(std::string menuText,
 }
   }
   auto submenu = findHmenuOfItemWithText(hMenu, menuText);
-  if(submenu) {
+  if(submenu && fallbackPosition >= 0) {
     checkDefaultItemIndex(fallbackPosition, positionOfItemWithText(menuText));
   }
   if(!submenu) {
