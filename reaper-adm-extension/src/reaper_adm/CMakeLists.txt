@@ -228,7 +228,7 @@ add_custom_command(
     TARGET reaper_adm 
     PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory        
-        ${CMAKE_CURRENT_BINARY_DIR}/ear-production-combined.build
+        ${CMAKE_CURRENT_BINARY_DIR}/ear-production-suite.build
         ${CMAKE_CURRENT_BINARY_DIR}/reaper_adm.build
 )
 endif()
