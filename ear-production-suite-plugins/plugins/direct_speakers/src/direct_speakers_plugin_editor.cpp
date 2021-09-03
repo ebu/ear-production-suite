@@ -56,5 +56,5 @@ void DirectSpeakersAudioProcessorEditor::paint(Graphics& g) {}
 
 void DirectSpeakersAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
-  content_->setBounds(0, 0, 750, 930);
+  content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }

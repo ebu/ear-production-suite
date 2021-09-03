@@ -67,5 +67,5 @@ void ObjectAudioProcessorEditor::paint(Graphics& g) {}
 void ObjectAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
   // TODO - old size (with metadata box and divergence) content_->setBounds(0, 0, 726, 950);
-  content_->setBounds(0, 0, 726, 672);
+  content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }
