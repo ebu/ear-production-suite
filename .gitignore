@@ -12,3 +12,4 @@ docs/venv
 3rdparty
 ._*
 reaper-adm-extension/test/reaper_adm/data/UserPlugins/
+shared/version/eps_version.cpp

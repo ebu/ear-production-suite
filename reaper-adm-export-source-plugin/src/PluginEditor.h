@@ -104,6 +104,7 @@ private:
     Label channelFormatLabel;
     ear::plugin::ui::EarComboBox channelFormatSelector;
     Panel bgPanel;
+    Label versionLabel;
 
     const float labelWidth_ = 110.f;
     const float labelHeight_ = 20.f;

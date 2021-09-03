@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "components/version_label.hpp"
 
 #include <chrono>
 
@@ -12,7 +13,7 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (500, 330);
+    setSize (500, 360);
 
     addAndMakeVisible(bgPanel);
 
@@ -68,6 +69,9 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
     channelFormatSelector.onValueChange = [this](int){ comboBoxStateChanged(&channelFormatSelector);  };
     addAndMakeVisible(channelFormatSelector);
 
+    configureVersionLabel(versionLabel);
+    addAndMakeVisible(versionLabel);
+
     syncEditorToProcessor();
 }
 
@@ -93,6 +97,9 @@ void AdmStemPluginAudioProcessorEditor::resized()
 
     auto headingArea = area.removeFromTop(55);
     headingLabel.setBounds(headingArea);
+
+    auto bottomLabelsArea = area.removeFromBottom(30);
+    versionLabel.setBounds(bottomLabelsArea);
 
     bgPanel.setBounds(area.reduced(5, 5));
 

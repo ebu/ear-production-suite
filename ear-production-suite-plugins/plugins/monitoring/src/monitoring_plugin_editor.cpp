@@ -2,6 +2,7 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include "components/version_label.hpp"
 #include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "monitoring_plugin_processor.hpp"
@@ -56,6 +57,9 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
 
+  configureVersionLabel(versionLabel);
+  addAndMakeVisible(versionLabel);
+
   addAndMakeVisible(speakerMeterBoxTop_.get());
   addAndMakeVisible(speakerMeterBoxBottom_.get());
 
@@ -90,6 +94,8 @@ void EarMonitoringAudioProcessorEditor::resized() {
   header_->setBounds(headingArea);
 
   area.removeFromTop(10);
+  auto bottomLabelsArea = area.removeFromBottom(30);
+  versionLabel.setBounds(bottomLabelsArea);
 
   auto topArea = area.removeFromTop(290).reduced(5, 5);
   speakerMeterBoxTop_->setBounds(topArea);

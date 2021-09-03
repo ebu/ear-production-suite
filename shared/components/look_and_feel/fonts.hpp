@@ -19,6 +19,7 @@ static const Font Description =
     font::RobotoSingleton::instance().getLight(12.f);
 static const Font Units = font::RobotoSingleton::instance().getMedium(10.f);
 static const Font Measures = font::RobotoSingleton::instance().getLight(10.f);
+static const Font Version = font::RobotoSingleton::instance().getLight(10.f);
 
 // --
 static const Font MinMaxLabel =

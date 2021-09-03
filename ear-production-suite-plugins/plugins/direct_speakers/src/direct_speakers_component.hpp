@@ -12,7 +12,7 @@
 #include "value_box_main.hpp"
 #include "value_box_metadata.hpp"
 #include "value_box_speaker_layer.hpp"
-
+#include "components/version_label.hpp"
 #include <memory>
 
 namespace ear {
@@ -84,6 +84,9 @@ class DirectSpeakersComponent : public Component,
 
     statusBarLabel->setFont(EarFonts::Measures);
     addAndMakeVisible(statusBarLabel.get());
+
+    configureVersionLabel(versionLabel);
+    addAndMakeVisible(versionLabel);
   }
 
   ~DirectSpeakersComponent() {}
@@ -101,7 +104,9 @@ class DirectSpeakersComponent : public Component,
     onBoardingOverlay->setBounds(area);
     area.reduce(5, 5);
     auto headingArea = area.removeFromTop(55);
-    statusBarLabel->setBounds(area.removeFromBottom(30));
+    auto bottomLabelsArea = area.removeFromBottom(30);
+    statusBarLabel->setBounds(bottomLabelsArea.removeFromLeft(bottomLabelsArea.getWidth() / 2));
+    versionLabel.setBounds(bottomLabelsArea);
     onBoardingButton->setBounds(
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
@@ -140,6 +145,7 @@ class DirectSpeakersComponent : public Component,
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> middleLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
   std::shared_ptr<Label> statusBarLabel;
+  Label versionLabel;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock;
   std::unique_ptr<PropertiesFile> propertiesFile;

@@ -37,6 +37,7 @@ static const Colour Area24dp = Colour(255, 255, 255).withAlpha(0.16f);
 
 static const Colour Heading = Text.withAlpha(Emphasis::high);
 static const Colour Label = Text.withAlpha(Emphasis::high);
+static const Colour Version = Text.withAlpha(Emphasis::medium);
 static const Colour ComboBoxText = Text.withAlpha(Emphasis::high);
 static const Colour WindowBorder = Colour(58, 58, 58);
 static const Colour SliderTrack = Colour(165, 165, 165).withAlpha(0.16f);

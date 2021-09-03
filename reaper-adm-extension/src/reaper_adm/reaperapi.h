@@ -88,6 +88,7 @@ class ReaperAPI {
     virtual void UpdateArrange() const = 0;
     virtual void UpdateTimeline() const = 0;
     virtual void Main_OnCommandEx(int command, int flag, ReaProject* proj) const = 0;
+    virtual bool AddExtensionsMainMenu() const = 0;
     virtual void SelectAllMediaItems(ReaProject* proj, bool selected) const = 0;
     virtual void SetMediaItemSelected(MediaItem* item, bool selected) const = 0;
     virtual double GetMediaSourceLength(PCM_source* source, bool* lengthIsQNOut) const = 0;

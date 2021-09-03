@@ -177,6 +177,11 @@ void ReaperAPIImpl::Main_OnCommandEx(int command, int flag, ReaProject *proj) co
     ::Main_OnCommandEx(command, flag, proj);
 }
 
+bool ReaperAPIImpl::AddExtensionsMainMenu() const
+{
+    return ::AddExtensionsMainMenu();
+}
+
 void ReaperAPIImpl::SelectAllMediaItems(ReaProject *proj, bool selected) const
 {
     ::SelectAllMediaItems(proj, selected);

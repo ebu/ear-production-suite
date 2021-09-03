@@ -18,15 +18,15 @@ admplug::ReaperHost::ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_p
         // Extension Starting!!!
 
         if (plug_info->caller_version != REAPER_PLUGIN_VERSION) {
-            throw ReaperAPIException{ "Incompatible version of reaper plugin api" };
+            throw ReaperAPIException{ "Incompatible version of REAPER plugin API." };
         }
         if (!plug_info->GetFunc) {
-            throw ReaperAPIException{ "Host has not provided GetFunc pointer, unable to resolve API functions" };
+            throw ReaperAPIException{ "Host has not provided GetFunc pointer. Unable to resolve API functions." };
         }
         if (testAPI) {
             auto error_count = REAPERAPI_LoadAPI(plug_info->GetFunc);
             if (error_count > 1) {
-                throw FuncResolutionException{ error_count, " API functions not found. This could lead to issues when using the ADM extension. Please consider updating your REAPER version." };
+                throw FuncResolutionException{ error_count, " API functions not found.\nThis could lead to issues when using the EAR Prodution Suite extension.\n\nPlease consider updating your REAPER version." };
             }
         }
     }
