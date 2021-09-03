@@ -6,6 +6,11 @@
 #include "direct_speakers_plugin_processor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
+namespace{
+  const int desiredWidth{ 750 };
+  const int desiredHeight{ 930 };
+}
+
 using namespace ear::plugin::ui;
 
 DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(
@@ -41,8 +46,8 @@ DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  setResizeLimits(0, 0, 726, 930);
-  setSize(726, 930);
+  setResizeLimits(0, 0, desiredWidth, desiredHeight);
+  setSize(desiredWidth, desiredHeight);
 }
 
 DirectSpeakersAudioProcessorEditor::~DirectSpeakersAudioProcessorEditor() {}
@@ -51,5 +56,5 @@ void DirectSpeakersAudioProcessorEditor::paint(Graphics& g) {}
 
 void DirectSpeakersAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
-  content_->setBounds(0, 0, 726, 930);
+  content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }
