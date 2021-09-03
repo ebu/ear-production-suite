@@ -22,7 +22,7 @@ namespace admplug {
 
             static unsigned int GetFmt(const char **desc)
             {
-                if (desc) *desc = "ADM File";
+                if (desc) *desc = "ADM BW64 File";
                 return SINK_FOURCC;
             }
 

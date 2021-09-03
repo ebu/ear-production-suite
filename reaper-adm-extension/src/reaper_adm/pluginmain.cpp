@@ -214,12 +214,12 @@ extern "C" {
 
     // File menu
 
-    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM file");
+    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM BW64 file");
     auto admFileMenuUpdateCallback = [api](MenuItem& item) {};
     admFileMenu->updateCallback = admFileMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Create from ADM using ");
+        std::string actionName("Create using ");
         actionName += pluginSuite.first;
         std::string actionSID("ADM_CREATE_PROJECT_");
         actionSID += std::to_string(actionCounter++);
@@ -238,7 +238,7 @@ extern "C" {
                 auto filenameStr = std::string(filename);
                 filenameStr += "/.wav";
                 memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-                if(api.GetUserFileNameForRead(filename, "ADM File to Open", "wav")) {
+                if(api.GetUserFileNameForRead(filename, "ADM BW64 File to Open", "wav")) {
                     filenameStr = std::string(filename);
                     if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                         importer.import(filenameStr, api);
@@ -266,12 +266,12 @@ extern "C" {
 
     // Insert menu
 
-    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM file in to current project");
+    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM BW64 file in to current project");
     auto admInsertMenuUpdateCallback = [api](MenuItem& item) {};
     admInsertMenu->updateCallback = admInsertMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Import ADM file using ");
+        std::string actionName("Import using ");
         actionName += pluginSuite.first;
         std::string actionSID("ADM_IMPORT_");
         actionSID += std::to_string(actionCounter++);
@@ -287,7 +287,7 @@ extern "C" {
             auto filenameStr = std::string(filename);
             filenameStr += "/.wav";
             memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-            if (api.GetUserFileNameForRead(filename, "ADM File to Import", "wav")) {
+            if (api.GetUserFileNameForRead(filename, "ADM BW64 File to Import", "wav")) {
                 filenameStr = std::string(filename);
                 if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                     importer.import(filenameStr, api);
