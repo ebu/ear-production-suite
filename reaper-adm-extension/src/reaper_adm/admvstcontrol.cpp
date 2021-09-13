@@ -38,6 +38,8 @@ bool AdmVst::isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate)
     isCandidate &= !possibleCandidate->isPluginOffline();
     isCandidate &= (possibleCandidate->getSampleRate() > 0);
     isCandidate &= (possibleCandidate->getChannelCount() > 0);
+    isCandidate &= (possibleCandidate->getCommandSocketPort() > 0);
+    isCandidate &= (possibleCandidate->getSamplesSocketPort() > 0);
     return isCandidate;
 }
 

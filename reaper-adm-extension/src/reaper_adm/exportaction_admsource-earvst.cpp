@@ -25,9 +25,10 @@ EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources
             auto fxPosVec = EarSceneMasterVst::trackEarSceneMasterVstIndexes(api, trk);
             for(int fxPos : fxPosVec) {
                 auto earSceneMasterVst = std::make_shared<EarSceneMasterVst>(trk, fxPos, api);
-                earSceneMasterVst->getCommunicator(true)->updateInfo();
-                allEarSceneMasterVsts.push_back(earSceneMasterVst);
+                auto comms = earSceneMasterVst->getCommunicator(true);
+                if(comms) comms->updateInfo();
 
+                allEarSceneMasterVsts.push_back(earSceneMasterVst);
                 if(EarSceneMasterVst::isCandidateForExport(earSceneMasterVst)) {
                     if(!chosenCandidateForExport) {
                         chosenCandidateForExport = earSceneMasterVst;
@@ -37,6 +38,10 @@ EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources
                 }
             }
         }
+    }
+
+    if(!chosenCandidateForExport) {
+        errorStrings.push_back(std::string("No instance of EAR Scene found which is able to export!"));
     }
 }
 
@@ -639,6 +644,8 @@ bool EarSceneMasterVst::isCandidateForExport(std::shared_ptr<EarSceneMasterVst> 
     isCandidate &= !possibleCandidate->isBypassed();
     isCandidate &= !possibleCandidate->isPluginOffline();
     isCandidate &= (possibleCandidate->getSampleRate() > 0);
+    isCandidate &= (possibleCandidate->getCommandSocketPort() > 0);
+    isCandidate &= (possibleCandidate->getSamplesSocketPort() > 0);
     return isCandidate;
 }
 
@@ -677,6 +684,7 @@ bool EarSceneMasterVst::obtainCommunicator()
     if(isBypassed() || isPluginOffline()) return false; // Do not create if Offline - it isn't running and therefore won't connect!
     auto samplesPort = getSamplesSocketPort();
     auto commandPort = getCommandSocketPort();
+    if(commandPort == 0) return false; // If the vst failed to load, it can still appear in the proj as online and not bypassed - commandPort will be zero though.
     if(isCommunicatorPresent()) releaseCommunicator();
     communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
     return true;
