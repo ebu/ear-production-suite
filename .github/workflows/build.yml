@@ -118,6 +118,11 @@ jobs:
 
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
+        # Temporarily force SDK to 10.0.19041.0. 
+        # WindowsSDKVersion: 10.0.20348.0 does not compile with VSCMD_VER: 16.11.2
+        # See https://developercommunity.visualstudio.com/t/code-using-windows-10-sdk-100203480-cant-be-compil/1521695
+        with:
+          sdk: 10.0.19041.0
         if: matrix.config.os == 'windows-latest'
 
       - name: 'Configure with CMake, vcpkg and ccmake.'
