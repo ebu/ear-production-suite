@@ -1,4 +1,7 @@
 function(git_describe varname)
+  message(STATUS "GIT_EXECUTABLE: " ${GIT_EXECUTABLE})
+  message(STATUS "ARGN: " ${ARGN})
+  message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
   execute_process(COMMAND
   		"${GIT_EXECUTABLE}"
   		describe
@@ -9,7 +12,7 @@ function(git_describe varname)
   		ret
   		OUTPUT_VARIABLE
   		out
-  		ERROR_QUIET
+  		#ERROR_QUIET
   		OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(ret EQUAL 0)
 		set(${varname} ${out} PARENT_SCOPE)
