@@ -4,6 +4,12 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 
+namespace {
+  String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
+    return String(position) + String::fromUTF8("-") + String(position + layoutSizeFixed);
+  }
+}
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -154,12 +160,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
     routingComboBoxLocked->clearEntries();
     auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
     for (int i = 1; i + cfCountFixed <= 64; ++i) {
-      if(cfCount > 1) {
-        routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                            String(i + cfCountFixed));
-      } else {
-        routingComboBoxLocked->addTextEntry(String(i));
-      }
+      routingComboBoxLocked->addTextEntry(routingLayoutDescriptionAt(i, cfCountFixed));
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }

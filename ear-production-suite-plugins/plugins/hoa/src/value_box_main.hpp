@@ -60,7 +60,7 @@ class ValueBoxMain : public Component {
       }
     }
 
-    hoaTypeComboBox_->setDefaultText("Enter HOA Type");
+    hoaTypeComboBox_->setDefaultText("Select HOA Type");
     addAndMakeVisible(hoaTypeComboBox_.get());
 
     /* commonDefinitionComboBoxPopup_->setName("HOA type box popup");

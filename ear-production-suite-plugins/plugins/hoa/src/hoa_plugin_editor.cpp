@@ -7,6 +7,10 @@
 #include "hoa_plugin_processor.hpp"
 #include "hoa_frontend_connector.hpp"
 
+namespace{
+  const int desiredWidth{ 750 };
+  const int desiredHeight{ 930 };
+}
 
 using namespace ear::plugin::ui;
 
@@ -53,8 +57,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  setResizeLimits(0, 0, 750, 930);
-  setSize(750, 930);
+  setResizeLimits(0, 0, desiredWidth, desiredHeight);
+  setSize(desiredWidth, desiredHeight);
 
   //ME add
   /* auto elementRelationships =
@@ -80,5 +84,5 @@ void HoaAudioProcessorEditor::paint(Graphics& g) {}
 
 void HoaAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
-  content_->setBounds(0, 0, 750, 930);
+  content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }
