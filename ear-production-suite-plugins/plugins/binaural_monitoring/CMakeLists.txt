@@ -33,6 +33,7 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/components/level_meter_calculator.hpp
 	${EPS_SHARED_DIR}/components/onboarding.hpp
 	${EPS_SHARED_DIR}/components/orientation.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
 	
@@ -62,7 +63,7 @@ add_juce_vst3_plugin(
 	DESCRIPTION "The binaural monitoring plugin"
 	OUTPUT_NAME "EAR Binaural Monitoring")
 	
-target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base bear)
+target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base ear-version bear)
 add_dependencies(ear_binaural_monitoring_VST3 default_tensorfile)
 install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 

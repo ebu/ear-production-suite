@@ -2,6 +2,7 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include "components/version_label.hpp"
 #include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "binaural_monitoring_plugin_processor.hpp"
@@ -61,6 +62,9 @@ EarBinauralMonitoringAudioProcessorEditor::
     headphoneMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(headphoneMeters_.back().get());
   }
+
+  configureVersionLabel(versionLabel);
+  addAndMakeVisible(versionLabel);
 
   /* clang-format off */
   p->getFrontendConnector()->setOscPortControl(oscValueBox->getPortControl());
@@ -124,11 +128,13 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   header_->setBounds(headingArea);
 
   area.removeFromTop(10);  // Padding between header and content
-  // All content to go below and to be fitted within `area`
-  auto leftColumn = area.removeFromLeft(145);
-  auto rightColumn = area.withWidth(695);
 
-  auto meterArea = leftColumn.removeFromTop(350).reduced(5, 5);
+  auto body = area.removeFromTop(350);
+  // All content to go below and to be fitted within `area`
+  auto leftColumn = body.removeFromLeft(145);
+  auto rightColumn = body.withWidth(695);
+
+  auto meterArea = leftColumn.reduced(5, 5);
   headphoneMeterBox_->setBounds(meterArea);
   meterArea.removeFromTop(40);
   meterArea = meterArea.reduced(15, 15);
@@ -139,7 +145,10 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   }
 
   orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5));
-  oscValueBox->setBounds(rightColumn.removeFromTop(50).reduced(5, 5));
+  oscValueBox->setBounds(rightColumn.reduced(5, 5));
+
+  auto bottomLabelsArea = area.removeFromTop(30);
+  versionLabel.setBounds(bottomLabelsArea);
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::endButtonClicked(
