@@ -6,6 +6,7 @@
 #include "detail/constants.hpp"
 #include "scene_plugin_processor.hpp"
 #include "scene_frontend_connector.hpp"
+#include "components/version_label.hpp"
 
 #include <memory>
 #include <limits>
@@ -61,6 +62,9 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   addAndMakeVisible(autoModeOverlay_.get());
   addChildComponent(multipleScenePluginsOverlay_.get());
 
+  configureVersionLabel(versionLabel);
+  addAndMakeVisible(versionLabel);
+
   p_->getFrontendConnector()->setItemsContainer(itemsContainer_);
   p_->getFrontendConnector()->setProgrammesContainer(programmesContainer_);
   p_->getFrontendConnector()->setItemsOverlay(itemsOverlay_);
@@ -71,7 +75,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   setResizable(true, false);
   setResizeLimits(1100, 620, std::numeric_limits<int>::max(),
                   std::numeric_limits<int>::max());
-  setSize(1280, 850);
+  setSize(1280, 880);
 }
 
 SceneAudioProcessorEditor::~SceneAudioProcessorEditor() {}
@@ -92,6 +96,8 @@ void SceneAudioProcessorEditor::resized() {
       headingArea.removeFromRight(39).removeFromBottom(39));
   header_->setBounds(headingArea);
   area.removeFromTop(10);
+  auto bottomLabelsArea = area.removeFromBottom(30);
+  versionLabel.setBounds(bottomLabelsArea);
   programmesContainer_->setBounds(area);
 }
 

@@ -33,7 +33,7 @@ class ValueBoxMain : public Component {
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
 
-    routingComboBox_->setDefaultText("enter receiving Channel");
+    routingComboBox_->setDefaultText("Select Scene channel range");
     addAndMakeVisible(routingComboBox_.get());
 
     speakerSetupLabel_->setFont(EarFonts::Label);
@@ -42,7 +42,7 @@ class ValueBoxMain : public Component {
                                 juce::NotificationType::dontSendNotification);
     speakerSetupLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(speakerSetupLabel_.get());
-    speakerSetupsComboBox_->setDefaultText("select speaker layout");
+    speakerSetupsComboBox_->setDefaultText("Select speaker layout");
 
     for (auto const& setup : SPEAKER_SETUPS) {
       speakerSetupsComboBox_->addTextEntry(setup.displayName + " (" + setup.name + ")" + " - " + setup.specification);

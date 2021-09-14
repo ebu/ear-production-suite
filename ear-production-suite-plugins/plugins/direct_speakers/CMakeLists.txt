@@ -32,6 +32,7 @@ set(HEADERS_DIRECT_SPEAKERS_INPUT
 	${EPS_SHARED_DIR}/components/overlay.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
 	${EPS_SHARED_DIR}/components/speaker_layer.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
@@ -67,6 +68,6 @@ add_juce_vst3_plugin(direct_speakers
   DESCRIPTION "The metadata input plugin for channel-based audio"
   OUTPUT_NAME "EAR DirectSpeakers")
   
-target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base)
+target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base ear-version)
 
 install_juce_vst3_plugin(direct_speakers "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

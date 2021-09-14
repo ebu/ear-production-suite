@@ -22,6 +22,7 @@ set(HEADERS_MONITORING
 	${EPS_SHARED_DIR}/components/onboarding_slide.hpp
 	${EPS_SHARED_DIR}/components/overlay.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
@@ -56,7 +57,7 @@ function(add_monitoring_plugin SPEAKER_LAYOUT SPEAKER_LAYOUT_NAME AUDIO_PACK_FOR
     SPEAKER_LAYOUT_NAME="${SPEAKER_LAYOUT_NAME}"
 	AUDIO_PACK_FORMAT_ID="${AUDIO_PACK_FORMAT_ID}"
     )
-  target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base)
+  target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base ear-version)
   install_juce_vst3_plugin(ear_monitoring_${SPEAKER_LAYOUT} "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endfunction()
 
@@ -72,4 +73,5 @@ if(EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS)
   add_monitoring_plugin("9+10+3" "22.2" "AP_00010009" "A7")
   add_monitoring_plugin("0+7+0" "7.1" "AP_0001000f" "A8")
   add_monitoring_plugin("4+7+0" "7.1+4H" "AP_00010017" "A9")
+  add_monitoring_plugin("2+7+0" "7.1+2H" "AP_00010016" "AA")
 endif()

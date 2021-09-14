@@ -3,6 +3,11 @@
 #include "object_frontend_connector.hpp"
 #include "object_plugin_processor.hpp"
 
+namespace {
+  const int desiredWidth{ 726 };
+  const int desiredHeight{ 672 };
+}
+
 using namespace ear::plugin::ui;
 
 ObjectAudioProcessorEditor::ObjectAudioProcessorEditor(ObjectsAudioProcessor* p)
@@ -50,10 +55,9 @@ ObjectAudioProcessorEditor::ObjectAudioProcessorEditor(ObjectsAudioProcessor* p)
   addAndMakeVisible(viewport_.get());
 
   setResizable(true, false);
-  // TODO - old size (with metadata box and divergence) setResizeLimits(0, 0, 726, 950);
-  setResizeLimits(0, 0, 726, 672);
-  // TODO - old size (with metadata box and divergence) setSize(726, 950);
-  setSize(726, 672);
+  setResizeLimits(0, 0, desiredWidth, desiredHeight);
+  // Note: old size (with metadata box and divergence) setSize(726, 950);
+  setSize(desiredWidth, desiredHeight);
 }
 
 ObjectAudioProcessorEditor::~ObjectAudioProcessorEditor() {}
@@ -63,5 +67,5 @@ void ObjectAudioProcessorEditor::paint(Graphics& g) {}
 void ObjectAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
   // TODO - old size (with metadata box and divergence) content_->setBounds(0, 0, 726, 950);
-  content_->setBounds(0, 0, 726, 672);
+  content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }

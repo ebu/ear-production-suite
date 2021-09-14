@@ -41,6 +41,7 @@ class ChannelGainsBox : public Component {
 
   void updateChannelGainBounds() {
     auto area = getLocalBounds();
+    /* MF - Commented out during merge due to conflict. ME's metering experiments:
     //area.removeFromBottom(350);//ME add 
     int levels(ceil(sqrt(channelGains_.size())));
     double levelMeterSize(area.getHeight() / static_cast<double>(levels));  // ME experiment
@@ -54,6 +55,10 @@ class ChannelGainsBox : public Component {
               .withTrimmedTop((level-1) * levelMeterSize)
               .withTrimmedBottom((levels - level) * levelMeterSize));
       area.removeFromLeft(6);//NEEDS WORK
+	*/
+    for (auto channelGain : channelGains_) {
+      channelGain->setBounds(area.removeFromLeft(meterWidth));
+      area.removeFromLeft(meterSpacing);
     }
   }
 
@@ -72,6 +77,9 @@ class ChannelGainsBox : public Component {
 
  private:
   std::vector<ChannelGain*> channelGains_;
+
+  static const int meterWidth{ 52 };
+  static const int meterSpacing{ 5 };
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGainsBox)
 };

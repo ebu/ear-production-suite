@@ -177,11 +177,11 @@ void JuceSceneFrontendConnector::reloadItemListCache() {
             });
         if (it == container->directSpeakersItems.end()) {
           auto view = std::make_shared<ItemView>();
-          view->setData({item, false});
+          view->setMetadata(item);
           container->directSpeakersItems.push_back(view);
           container->directSpeakersList->addItem(view.get());
         } else {
-          (*it)->setData({item, false});
+          (*it)->setMetadata(item);
         }
       } else if (item.has_obj_metadata()) {
         auto it = std::find_if(
@@ -192,11 +192,11 @@ void JuceSceneFrontendConnector::reloadItemListCache() {
             });
         if (it == container->objectsItems.end()) {
           auto view = std::make_shared<ItemView>();
-          view->setData({item, false});
+          view->setMetadata(item);
           container->objectsItems.push_back(view);
           container->objectsList->addItem(view.get());
         } else {
-          (*it)->setData({item, false});
+          (*it)->setMetadata(item);
         }
       } else if (item.has_hoa_metadata()) {
         auto it = std::find_if(
@@ -316,10 +316,10 @@ void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
                              container->directSpeakersItems.end(),
                              [id](auto entry) { return id == entry->getId(); });
       if (it != container->directSpeakersItems.end()) {
-        (*it)->setData({item, false});
+        (*it)->setMetadata(item);
       } else {
         auto view = std::make_shared<ItemView>();
-        view->setData({item, false});
+        view->setMetadata(item);
         container->directSpeakersItems.push_back(view);
         container->directSpeakersList->addItem(view.get());
       }
@@ -328,10 +328,10 @@ void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
                              container->objectsItems.end(),
                              [id](auto entry) { return id == entry->getId(); });
       if (it != container->objectsItems.end()) {
-        (*it)->setData({item, false});
+        (*it)->setMetadata(item);
       } else {
         auto view = std::make_shared<ItemView>();
-        view->setData({item, false});
+        view->setMetadata(item);
         container->objectsItems.push_back(view);
         container->objectsList->addItem(view.get());
       }

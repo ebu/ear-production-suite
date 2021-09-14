@@ -12,6 +12,7 @@
 #include "exportaction.h"
 #include "pluginsuite.h"
 #include "pluginregistry.h"
+#include <version/eps_version.h>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -56,6 +57,8 @@ namespace {
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 0},
     {"&Insert", 3},
+    {"&Help", 9},
+    {"E&xtensions", 8},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -64,6 +67,8 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 1},
     {"&Insert", 4},
+    {"&Help", 10},
+    {"E&xtensions", 9},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -76,12 +81,20 @@ extern "C" {
     using namespace admplug;
     std::unique_ptr<ReaperHost> reaper;
 
-    auto nonBlockingMessage = [rec](const char* text) {
+    auto nonBlockingMessage = [rec](const char* errMsg) {
+        std::string text{ errMsg };
+        if(eps::versionInfoAvailable()) {
+            text += "\n\n[EAR Production Suite v";
+            text += eps::currentVersion();
+            text += "]";
+        } else {
+            text += "\n\n[EAR Production Suite version information unavailable!]";
+        }
 #ifdef WIN32
         // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(text, "ADM Extension Error", MB_ICONEXCLAMATION);
+        winhelpers::NonBlockingMessageBox(text, "EAR Production Suite - Extension Error", MB_ICONEXCLAMATION);
 #else
-        MessageBox(rec->hwnd_main, text, "ADM Extension Error", MB_OK);
+        MessageBox(rec->hwnd_main, text.c_str(), "EAR Production Suite - Extension Error", MB_OK);
 #endif
     };
 
@@ -150,18 +163,63 @@ extern "C" {
     }
 
     auto mediaContextMenu = reaper->getMenu(MenuID::MEDIA_ITEM_CONTEXT);
-  mediaContextMenu->insert(
+    mediaContextMenu->insert(
       std::move(admContextMenu),
       std::make_shared<AfterNamedItem>("Group", "common",
                                        defaultMenuPositions.at("Group"), *api));
+
+    // Extensions Menu
+
+    std::string actionName("About EAR Production Suite");
+    std::string actionSID("ADM_SHOW_EPS_INFO");
+
+    auto infoAction = std::make_shared<SimpleAction> (
+      actionName.c_str(),
+      actionSID.c_str(),
+      [](admplug::ReaperAPI &api) {
+        std::string title("EAR Production Suite");
+        if(eps::versionInfoAvailable()) {
+            title += " v";
+            title += eps::baseVersion();
+        }
+        std::string msg;
+        if(eps::versionInfoAvailable) {
+            msg += "Build Version:\n      ";
+            msg += eps::currentVersion();
+        } else {
+            msg += "(Version information unavailable)";
+        }
+         msg += "\n\nhttps://ear-production-suite.ebu.io/";
+        api.ShowMessageBox(msg.c_str(), title.c_str(), 0);
+      }
+    );
+
+    api->AddExtensionsMainMenu();
+    auto reaperExtMenu = reaperMainMenu->getMenuByText(
+        "E&xtensions", "common", -1 , *api);
+
+    if(!reaperExtMenu) {
+        reaperExtMenu = reaperMainMenu->getMenuByText(
+            "&Help", "common", -1, *api);
+    }
+
+    if(reaperExtMenu) {
+        auto infoActionId = reaper->addAction(infoAction);
+        auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
+        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+
+        reaperExtMenu->insert(std::move(infoActionItem), admExtMenuInserter);
+        reaperExtMenu->init();
+    }
+
     // File menu
 
-    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM file");
+    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM BW64 file");
     auto admFileMenuUpdateCallback = [api](MenuItem& item) {};
     admFileMenu->updateCallback = admFileMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Create from ADM using ");
+        std::string actionName("Create using ");
         actionName += pluginSuite.first;
         std::string actionSID("ADM_CREATE_PROJECT_");
         actionSID += std::to_string(actionCounter++);
@@ -180,7 +238,7 @@ extern "C" {
                 auto filenameStr = std::string(filename);
                 filenameStr += "/.wav";
                 memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-                if(api.GetUserFileNameForRead(filename, "ADM File to Open", "wav")) {
+                if(api.GetUserFileNameForRead(filename, "ADM BW64 File to Open", "wav")) {
                     filenameStr = std::string(filename);
                     if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                         importer.import(filenameStr, api);
@@ -208,12 +266,12 @@ extern "C" {
 
     // Insert menu
 
-    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM file in to current project");
+    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM BW64 file in to current project");
     auto admInsertMenuUpdateCallback = [api](MenuItem& item) {};
     admInsertMenu->updateCallback = admInsertMenuUpdateCallback;
 
     for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Import ADM file using ");
+        std::string actionName("Import using ");
         actionName += pluginSuite.first;
         std::string actionSID("ADM_IMPORT_");
         actionSID += std::to_string(actionCounter++);
@@ -229,7 +287,7 @@ extern "C" {
             auto filenameStr = std::string(filename);
             filenameStr += "/.wav";
             memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-            if (api.GetUserFileNameForRead(filename, "ADM File to Import", "wav")) {
+            if (api.GetUserFileNameForRead(filename, "ADM BW64 File to Import", "wav")) {
                 filenameStr = std::string(filename);
                 if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
                     importer.import(filenameStr, api);

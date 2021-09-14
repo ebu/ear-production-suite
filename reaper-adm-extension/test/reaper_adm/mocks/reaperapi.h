@@ -77,6 +77,8 @@ class MockReaperAPI : public ReaperAPI {
     void());
   MOCK_CONST_METHOD3(Main_OnCommandEx,
       void(int command, int flag, ReaProject* proj));
+  MOCK_CONST_METHOD0(AddExtensionsMainMenu,
+      bool());
   MOCK_CONST_METHOD2(SelectAllMediaItems,
       void(ReaProject* proj, bool selected));
   MOCK_CONST_METHOD2(SetMediaItemSelected,
