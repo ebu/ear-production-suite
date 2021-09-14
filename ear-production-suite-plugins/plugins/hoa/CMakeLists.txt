@@ -32,6 +32,7 @@ set(HEADERS_HOA_INPUT
 	${EPS_SHARED_DIR}/components/level_meter_calculator.hpp
 	${EPS_SHARED_DIR}/components/non_automatable_parameter.hpp
 	${EPS_SHARED_DIR}/components/onboarding.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
@@ -65,6 +66,6 @@ add_juce_vst3_plugin(hoa
   DESCRIPTION "The metadata input plugin for scene-based audio"
   OUTPUT_NAME "EAR HOA")
   
-target_link_libraries(hoa_VST3 PRIVATE ear-plugin-base)
+target_link_libraries(hoa_VST3 PRIVATE ear-plugin-base ear-version)
 
 install_juce_vst3_plugin(hoa "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

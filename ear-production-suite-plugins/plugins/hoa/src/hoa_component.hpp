@@ -16,6 +16,8 @@
 */
 #include "value_box_main.hpp"
 #include "value_box_channel_gain.hpp"
+#include "components/version_label.hpp"
+
 #include <memory>
 
 namespace ear {
@@ -86,6 +88,9 @@ class HoaComponent : public Component,
 
     statusBarLabel->setFont(EarFonts::Measures);
     addAndMakeVisible(statusBarLabel.get());
+
+    configureVersionLabel(versionLabel);
+    addAndMakeVisible(versionLabel);
   }
 
   ~HoaComponent() {}
@@ -105,7 +110,9 @@ class HoaComponent : public Component,
     onBoardingOverlay->setBounds(area);
     area.reduce(5, 5);
     auto headingArea = area.removeFromTop(55);
-    statusBarLabel->setBounds(area.removeFromBottom(30));
+    auto bottomLabelsArea = area.removeFromBottom(30);
+    statusBarLabel->setBounds(bottomLabelsArea.removeFromLeft(bottomLabelsArea.getWidth() / 2));
+    versionLabel.setBounds(bottomLabelsArea);
     onBoardingButton->setBounds(
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
@@ -116,10 +123,10 @@ class HoaComponent : public Component,
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
-    
+
     channelGainValueBox->setBounds(channelGainArea.reduced(5, 5));
     //channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
-    
+
     /* Old DS Code
     // This is where we position our panels
     // right column
@@ -138,7 +145,7 @@ class HoaComponent : public Component,
 
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
 
-  
+
   std::shared_ptr<ear::plugin::ui::ValueBoxChannelGain> channelGainValueBox;
   /* Old DS Code
   // TODO - We need to store smart-pointers to our new component panels here
@@ -147,6 +154,7 @@ class HoaComponent : public Component,
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
   */
   std::shared_ptr<Label> statusBarLabel;
+  Label versionLabel;
 
   std::unique_ptr<InterProcessLock> propertiesFileLock;
   std::unique_ptr<PropertiesFile> propertiesFile;
