@@ -13,7 +13,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "programme_store.pb.h"
-#include "../../ear-production-suite/shared/helper/common_definition_helper.h"
+#include "helper/common_definition_helper.h"
 #include <memory>
 
 namespace ear {
