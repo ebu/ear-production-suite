@@ -207,11 +207,11 @@ void JuceSceneFrontendConnector::reloadItemListCache() {
             });
         if (it == container->hoaItems.end()) {
           auto view = std::make_shared<ItemView>();
-          view->setData({item, false});
+          view->setMetadata(item);
           container->hoaItems.push_back(view);
           container->hoaList->addItem(view.get());
         } else {
-          (*it)->setData({item, false});
+          (*it)->setMetadata(item);
         }
       }
     }
@@ -338,10 +338,11 @@ void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
     } else if (item.has_hoa_metadata()) {
       auto it = std::find_if(container->hoaItems.begin(), container->hoaItems.end(),
                        [id](auto entry) { return id == entry->getId(); });
-      if (it != container->hoaItems.end()){(*it)->setData({item,false});
+      if (it != container->hoaItems.end()){
+        (*it)->setMetadata(item);
       } else {
         auto view = std::make_shared<ItemView>();
-        view->setData({item, false});
+        view->setMetadata(item);
         container->hoaItems.push_back(view);
         container->hoaList->addItem(view.get());
       }
