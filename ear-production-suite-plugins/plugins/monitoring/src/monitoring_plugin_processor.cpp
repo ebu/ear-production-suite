@@ -27,13 +27,35 @@ struct BufferTraits<juce::AudioBuffer<float>> {
 #include "monitoring_audio_processor.hpp"
 #include "monitoring_backend.hpp"
 
+namespace {
+  ear::Layout getLayoutImpl(std::string const& layout) {
+  if (layout == "2+7+0") {
+    auto channels_4_9_0 = ear::getLayout("4+9+0").channels();
+    // 2+7+0 has the same first 8 speakers as 4_9_0
+    std::vector<ear::Channel> channels_2_7_0(channels_4_9_0.begin(),
+                                             channels_4_9_0.begin() + 8);
+    auto channels_9_10_3 = ear::getLayout("9+10+3").channels();
+    // The last two are U+090 and U-090, which we take from 9_10_3 at 11/12
+    channels_2_7_0.push_back(channels_9_10_3.at(12));
+    channels_2_7_0.push_back(channels_9_10_3.at(13));
+    return {"2+7+0", channels_2_7_0};
+  } else {
+    return ear::getLayout(layout);
+  }
+}
+
+ear::Layout const& layout() {
+    static ear::Layout LAYOUT{getLayoutImpl(SPEAKER_LAYOUT)};
+    return LAYOUT;
+  }
+}
+
 juce::AudioProcessor::BusesProperties
 EarMonitoringAudioProcessor::_getBusProperties() {
-  auto layout = ear::getLayout(SPEAKER_LAYOUT);
-  channels_ = layout.channelNames().size();
+  channels_ = layout().channelNames().size();
   auto ret = BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true);
-  for (const std::string& name : layout.channelNames()) {
+  for (const std::string& name : layout().channelNames()) {
     ret = ret.withOutput(name, AudioChannelSet::mono(), true);
   }
   return ret;
@@ -42,12 +64,13 @@ EarMonitoringAudioProcessor::_getBusProperties() {
 //==============================================================================
 EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
+  auto speakerLayout = layout();
   backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
-      nullptr, ear::getLayout(SPEAKER_LAYOUT), 64);
+      nullptr, speakerLayout, 64);
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), 512,
-                            ear::getLayout(SPEAKER_LAYOUT)};
+                            speakerLayout};
   configureProcessor(newConfig);
 }
 
@@ -88,7 +111,7 @@ void EarMonitoringAudioProcessor::prepareToPlay(double sampleRate,
                                                 int samplesPerBlock) {
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), samplesPerBlock,
-                            ear::getLayout(SPEAKER_LAYOUT)};
+                            layout()};
   configureProcessor(newConfig);
   samplerate_ = sampleRate;
   levelMeter_->setup(newConfig.layout.channels().size(), sampleRate);
@@ -101,9 +124,8 @@ void EarMonitoringAudioProcessor::releaseResources() {
 
 bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  auto layout = ear::getLayout(SPEAKER_LAYOUT);
   if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(layout.channelNames().size()) &&
+          AudioChannelSet::discreteChannels(layout().channelNames().size()) &&
       layouts.getMainInputChannelSet() ==
           AudioChannelSet::discreteChannels(64)) {
     return true;
@@ -152,8 +174,6 @@ void EarMonitoringAudioProcessor::setStateInformation(const void* data,
   // block, whose contents will have been created by the getStateInformation()
   // call.
 }
-
-void EarMonitoringAudioProcessor::speakerSetupChanged(std::string layout) {}
 
 void EarMonitoringAudioProcessor::configureProcessor(
     const ProcessorConfig& config) {

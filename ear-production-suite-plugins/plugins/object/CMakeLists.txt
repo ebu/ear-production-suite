@@ -35,6 +35,7 @@ set(HEADERS_OBJECT_INPUT
 	${EPS_SHARED_DIR}/components/panner_side_view.hpp
 	${EPS_SHARED_DIR}/components/panner_top_view.hpp
 	${EPS_SHARED_DIR}/components/segment_progress_bar.hpp
+	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/fonts.hpp
@@ -72,5 +73,5 @@ add_juce_vst3_plugin(object
   OUTPUT_NAME "EAR Object")
   
 target_include_directories(object_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(object_VST3 PRIVATE ear-plugin-base)
+target_link_libraries(object_VST3 PRIVATE ear-plugin-base ear-version)
 install_juce_vst3_plugin(object "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

@@ -95,6 +95,16 @@
       }
     },
     {
+      "name": "minimal-build-base",
+      "hidden": true,
+      "cacheVariables": {
+        "EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS": {
+          "type": "BOOL",
+          "value": "false"
+        }
+      }
+    },
+    {
       "name": "vcpkg-windows-x64",
       "hidden": true,
       "inherits": ["vcpkg-base", "windows-base"],
@@ -157,7 +167,8 @@
       "inherits": [
         "vcpkg-windows-x64",
         "packaging-base",
-        "relwithdebinfo-base"
+        "relwithdebinfo-base",
+        "minimal-build-base"
       ]
     },
     {

@@ -167,23 +167,23 @@ class ObjectsJuceFrontendConnector
   MultiAsyncUpdater updater_;
 
   // Values
-  Colour cachedColour_;
-  int cachedRouting_;
-  std::string cachedName_;
-  float cachedGain_;
-  float cachedAzimuth_;
-  float cachedElevation_;
-  float cachedDistance_;
-  bool cachedLinkSize_;
-  float cachedSize_;
-  float cachedWidth_;
-  float cachedHeight_;
-  float cachedDepth_;
-  float cachedDiffuse_;
-  bool cachedDivergence_;
-  float cachedFactor_;
-  float cachedRange_;
-  std::string cachedStatusBarText_;
+  Colour cachedColour_{ juce::Colours::transparentBlack };
+  int cachedRouting_{ -1 };
+  std::string cachedName_{};
+  float cachedGain_{ 1.f };
+  float cachedAzimuth_{ 0.f };
+  float cachedElevation_{ 0.f };
+  float cachedDistance_{ 1.f };
+  bool cachedLinkSize_{ false };
+  float cachedSize_{ 1.f };
+  float cachedWidth_{ 1.f };
+  float cachedHeight_{ 1.f };
+  float cachedDepth_{ 1.f };
+  float cachedDiffuse_{ 0.f };
+  bool cachedDivergence_{ false };
+  float cachedFactor_{ 0.f };
+  float cachedRange_{ 0.f };
+  std::string cachedStatusBarText_{};
 };
 
 }  // namespace ui

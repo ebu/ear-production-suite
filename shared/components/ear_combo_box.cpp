@@ -159,8 +159,8 @@ void EarComboBoxPopup::addEntry(std::unique_ptr<EarComboBoxEntry> entry) {
 
 bool EarComboBoxPopup::selectEntry(int index) {
   if (index < entries_.size()) {
+    clearSelection();
     if (entries_.at(index)->isSelectable()) {
-      clearSelection();
       entries_.at(index)->setSelected(true);
       return true;
     }

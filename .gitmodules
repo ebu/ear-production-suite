@@ -7,7 +7,7 @@
 	url = https://github.com/ebu/libbw64.git
 [submodule "submodules/libear"]
 	path = submodules/libear
-	url = https://github.com/rsjtaylor/libear.git
+	url = https://github.com/ebu/libear.git
 [submodule "submodules/googletest"]
 	path = submodules/googletest
 	url = https://github.com/google/googletest.git

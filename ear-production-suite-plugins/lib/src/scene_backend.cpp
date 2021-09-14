@@ -50,8 +50,11 @@ void SceneBackend::triggerMetadataSend() {
         }
       });
   std::lock_guard<std::mutex> lock(storeMutex_);
-  for (auto item : itemStore_) {
-    item.second.set_changed(false);
+  for (auto& item : itemStore_) {
+    if(item.second.changed()) {
+      item.second.set_changed(false);
+      rebuildSceneStore_ = true;
+    }
   }
 }
 

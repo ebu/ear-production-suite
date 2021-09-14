@@ -43,6 +43,8 @@ class SceneAudioProcessorEditor
   std::unique_ptr<InterProcessLock> propertiesFileLock_;
   std::unique_ptr<PropertiesFile> propertiesFile_;
 
+  Label versionLabel;
+
   // --- Onboarding::Listener
   void endButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
   void moreButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
