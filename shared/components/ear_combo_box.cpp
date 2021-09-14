@@ -490,14 +490,10 @@ void EarComboBox::setDefaultText(const String& text) {
 String EarComboBox::getDefaultText() const { return defaultText_; }
 
 void EarComboBox::addEntry(std::unique_ptr<EarComboBoxEntry> entry) {
-  auto entry_temp = entry->getId();
-  auto entryname_temp = entry->getName();
   popup_->addEntry(std::move(entry));
 }
 
 void EarComboBox::addTextEntry(const String& text, int id) {
-  auto id_temp = id;
-  auto text_temp = text;
   addEntry(std::make_unique<EarComboBoxTextEntry>(text, id));
 }
 
