@@ -403,5 +403,25 @@ inline SpeakerSetup speakerSetupByPackFormatId(const std::string& packFormatId) 
   }
 }
 
+inline int getIndexFromLegacySpeakerSetupIndex(int legacyIndex) {
+  for(int i = 0; i < SPEAKER_SETUPS.size(); i++) {
+    if(SPEAKER_SETUPS[i].legacySpeakerSetupIndex.has_value()) {
+      if(SPEAKER_SETUPS[i].legacySpeakerSetupIndex.value() == legacyIndex) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+inline int getIndexFromPackFormatIdValue(int packFormatIdValue) {
+  for(int i = 0; i < SPEAKER_SETUPS.size(); i++) {
+    if(SPEAKER_SETUPS[i].packFormatIdValue == packFormatIdValue) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 }  // namespace plugin
 }  // namespace ear
