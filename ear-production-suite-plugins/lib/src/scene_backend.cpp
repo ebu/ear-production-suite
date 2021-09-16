@@ -165,9 +165,11 @@ void SceneBackend::updateSceneStore() {
 proto::Programme const* SceneBackend::getSelectedProgramme() {
   if (programmeStore_.has_selected_programme_index()) {
     auto index = programmeStore_.selected_programme_index();
-    assert(index < programmeStore_.programme_size());
-    auto& programme = programmeStore_.programme(index);
-    return &programme;
+    if(index >= 0) { // could be -1 if plugin just initialised
+      assert(index < programmeStore_.programme_size());
+      auto& programme = programmeStore_.programme(index);
+      return &programme;
+    }
   }
   return nullptr;
 }
