@@ -92,14 +92,16 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   oscEnable_->addListener(this);
   oscPort_->addListener(this);
 
+  std::lock_guard<std::mutex> lock(processorMutex_);
   processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
       64, 64, 64, 48000, 512,
-      bearDataFilePath);  // Used to verify if BEAR can be initialised
+      bearDataFilePath);  // Used to verify if BEAR can be initialised - can't get SR and block size in ctor. Made assumption - prepareToPlay will be called with correct values when required
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
 
 bool EarBinauralMonitoringAudioProcessor::rendererError() {
+  std::lock_guard<std::mutex> lock(processorMutex_);
   return (!processor_ || processor_->rendererError());
 }
 
@@ -121,6 +123,7 @@ void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(
 void EarBinauralMonitoringAudioProcessor::timerCallback()
 {
   stopTimer();
+  std::lock_guard<std::mutex> lock(processorMutex_);
   processor_->setIsPlaying(false);
 }
 
@@ -171,6 +174,13 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   blocksize_ = samplesPerBlock;
 
   levelMeter_->setup(2, sampleRate);
+
+  std::lock_guard<std::mutex> lock(processorMutex_);
+  if(!processor_ || !processor_->configMatches(sampleRate, samplesPerBlock)) {
+    processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+      64, 64, 64, sampleRate, samplesPerBlock,
+      bearDataFilePath);
+  }
 }
 
 void EarBinauralMonitoringAudioProcessor::releaseResources() {
@@ -195,6 +205,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   ScopedNoDenormals noDenormals;
 
   stopTimer();
+  std::lock_guard<std::mutex> lock(processorMutex_);
   processor_->setIsPlaying(true);
 
   if (bypass_->get()) return;

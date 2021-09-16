@@ -5,6 +5,7 @@
 #include <ear/ear.hpp>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 #include "components/level_meter_calculator.hpp"
 
@@ -96,6 +97,7 @@ class EarBinauralMonitoringAudioProcessor
       connector_;
 
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
+  std::mutex processorMutex_; // used to prevent access during (re)construction
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;
 
