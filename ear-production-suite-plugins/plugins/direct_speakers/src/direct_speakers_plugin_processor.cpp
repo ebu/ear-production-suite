@@ -112,7 +112,8 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
   connectionId_ = backend_->getConnectionId();
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
-  xml->setAttribute("speaker_setup_index", (int)*speakerSetupIndex_);
+  auto speakerSetup = speakerSetupByIndex(*speakerSetupIndex_);
+  xml->setAttribute("packformat_id_value", speakerSetup.packFormatIdValue);
   copyXmlToBinary(*xml, destData);
 }
 
@@ -128,8 +129,15 @@ void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
               .toStdString()};
       backend_->setConnectionId(connectionId_);
       *routing_ = xmlState->getIntAttribute("routing", -1);
-      *speakerSetupIndex_ =
-          xmlState->getIntAttribute("speaker_setup_index", -1);
+
+      int speakerSetupIndex = -1;
+      if(xmlState->hasAttribute("packformat_id_value")) {
+        speakerSetupIndex = getIndexFromPackFormatIdValue(xmlState->getIntAttribute("packformat_id_value", -1));
+      }
+      else if(xmlState->hasAttribute("speaker_setup_index")) {
+        speakerSetupIndex = getIndexFromLegacySpeakerSetupIndex(xmlState->getIntAttribute("speaker_setup_index", -1));
+      }
+      *speakerSetupIndex_ = speakerSetupIndex;
     }
 }
 
