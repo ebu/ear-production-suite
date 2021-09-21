@@ -148,9 +148,9 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
   }
   cachedHoaType_ = hoaType;//when editor is called this gets set to what it already is...
 
-  auto hoaId = p_->getHoaType()->get();
+  auto packFormatIdValue = p_->getPackFormatIdValue()->get();
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    auto pfData = p_->admCommonDefinitions.getPackFormatData(4, hoaId);
+    auto pfData = p_->admCommonDefinitions.getPackFormatData(4, packFormatIdValue);
     size_t cfCount{ 0 };
 
     if (pfData) {
@@ -166,7 +166,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
   }
 
   if (auto channelGainsLocked = channelGains_.lock()) {
-    channelGainsLocked->setHoaType(hoaId);
+    channelGainsLocked->setHoaType(packFormatIdValue);
   }
 }
 //end ME
@@ -251,9 +251,9 @@ void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this
       break;
       //ME add
     case 1:
-      notifyParameterChanged(ParameterId::HOA_TYPE, p_->getHoaType()->get());//(2.)
+      notifyParameterChanged(ParameterId::PACKFORMAT_ID_FORMAT, p_->getPackFormatIdValue()->get());//(2.)
       updater_.callOnMessageThread([this]() {
-        setHoaType(p_->getHoaType()->get());
+        setHoaType(p_->getPackFormatIdValue()->get());
       });  // 1st value is set based on display
       break;
       //ME end
@@ -307,7 +307,7 @@ void HoaJuceFrontendConnector::comboBoxChanged(
   //ME add, similar to DS
   if (!hoaTypeComboBox_.expired() &&
       comboBox == hoaTypeComboBox_.lock().get()) {
-    *(p_->getHoaType()) = comboBox->getSelectedId();
+    *(p_->getPackFormatIdValue()) = comboBox->getSelectedId();
   }//Me end
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {

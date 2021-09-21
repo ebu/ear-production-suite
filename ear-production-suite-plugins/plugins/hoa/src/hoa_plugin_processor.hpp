@@ -54,7 +54,7 @@ class HoaAudioProcessor : public AudioProcessor {
   AdmCommonDefinitionHelper admCommonDefinitions{};  // ME added
 
   AudioParameterInt* getRouting() { return routing_; }
-  AudioParameterInt* getHoaType() { return hoaTypeId_; }  // ME added, similar to DS
+  AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }  // ME added, similar to DS
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -76,7 +76,7 @@ class HoaAudioProcessor : public AudioProcessor {
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;
-  AudioParameterInt* hoaTypeId_;//ME add, similar to DS
+  AudioParameterInt* packFormatIdValue_;//ME add, similar to DS
   AudioParameterBool* bypass_;
   int numHoaTypes_;//ME added, not sure if good
 

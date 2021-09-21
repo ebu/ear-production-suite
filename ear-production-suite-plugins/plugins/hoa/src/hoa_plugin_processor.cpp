@@ -25,9 +25,9 @@ HoaAudioProcessor::HoaAudioProcessor()
       "routing", "Routing",
       -1, 63, -1));
   //ME add, similar to DS
-  addParameter(hoaTypeId_ =
+  addParameter(packFormatIdValue_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
-      "hoa_type", "HOA Type",
+      "packformat_id_value", "PackFormat ID Value",
       0, 0xFFFF, 0));
   //Me end
   /*DS code
@@ -54,7 +54,7 @@ HoaAudioProcessor::HoaAudioProcessor()
   //ME add similar to SD but don't fully get
 // Any NonAutomatedParameter will not set the plugin state as dirty when changed.
 // We used this hack to make sure the host (REAPER) knows something has changed (by "changing" a standard parameter to it's current value)
-  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(hoaTypeId_)
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(packFormatIdValue_)
       ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
@@ -64,7 +64,7 @@ HoaAudioProcessor::HoaAudioProcessor()
   backend_ = std::make_unique<HoaBackend>(connector_.get());//creates instance of backend, passing to it a pointer to front end connector
 
   connector_->parameterValueChanged(0, routing_->get());
-  connector_->parameterValueChanged(1, hoaTypeId_->get());//ME added, similar to DS (1.)
+  connector_->parameterValueChanged(1, packFormatIdValue_->get());//ME added, similar to DS (1.)
 
 }
 
@@ -142,7 +142,7 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
   connectionId_ = backend_->getConnectionId();
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
-  xml->setAttribute("hoa_type", (int)*hoaTypeId_);//ME added, similar to DS, not completely sure about
+  xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);//ME added, similar to DS, not completely sure about
 
   copyXmlToBinary(*xml, destData);
 }
@@ -160,7 +160,7 @@ void HoaAudioProcessor::setStateInformation(const void* data,
       backend_->setConnectionId(connectionId_);
       auto con_id = connectionId_;
       *routing_ = xmlState->getIntAttribute("routing", -1);
-      *hoaTypeId_ = xmlState->getIntAttribute("hoa_type", 0);//ME added, similar to DS but don't really know what this does
+      *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);//ME added, similar to DS but don't really know what this does
 
     }
 }

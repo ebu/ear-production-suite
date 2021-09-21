@@ -58,7 +58,7 @@ message ObjectsTypeMetadata {
 }
 
 message HoaTypeMetadata {
-  optional double packFormatIdValue = 1 [default = 1.0];
+  optional int32 packFormatIdValue = 1 [default = 0];
 }
 
 message BinauralTypeMetadata {}

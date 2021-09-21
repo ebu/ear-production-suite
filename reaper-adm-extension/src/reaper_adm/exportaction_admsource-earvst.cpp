@@ -610,7 +610,6 @@ int EarInputVst::getWidth()
     }
     else if (isHoaPlugin(name)) {
         std::optional<int> packFormatId = getParameterWithConvertToInt(*paramPackFormatId);
-        //HoaAudioProcessor::getHoaType()
         assert(packFormatId.has_value());
         int trackWidth = packFormatId.has_value() ? EARPluginSuite::countChannelsInHoaPackFormat(*packFormatId) : 0;
         return trackWidth;

@@ -91,10 +91,10 @@ void HoaBackend::onParameterChanged(
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
     // ME add
-  } else if (parameter == ParameterId::HOA_TYPE){
+  } else if (parameter == ParameterId::PACKFORMAT_ID_FORMAT){
     auto extractedValue = boost::get<int>(value);
-    EAR_LOGGER_DEBUG(logger_, "HOA_type -> {}", extractedValue);
-    metadataSender_.hoa_type(extractedValue);
+    EAR_LOGGER_DEBUG(logger_, "PackFormat ID Value -> {}", extractedValue);
+    metadataSender_.packFormatIdValue(extractedValue);
     //ME end
   /* Old DS Code
   // Any other params to be added here. We will want to add HOA type
