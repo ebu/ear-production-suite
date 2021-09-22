@@ -57,7 +57,8 @@ class BinauralMonitoringAudioProcessor {
   bool pushBearMetadata(size_t channelNum, ear::ObjectsTypeMetadata* metadata);
   bool pushBearMetadata(size_t channelNum,
                         ear::DirectSpeakersTypeMetadata* metadata);
-  bool pushBearMetadata(size_t channelNum, ear::HOATypeMetadata* metadata);
+  bool pushBearMetadata(size_t channelNum, ear::HOATypeMetadata* metadata,
+                        size_t arbitraryStreamIdentifier);
 
   std::size_t delayInSamples() const;
 

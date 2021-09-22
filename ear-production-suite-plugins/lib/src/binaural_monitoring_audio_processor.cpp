@@ -94,7 +94,7 @@ void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
                         bearObjectInputBuffers_RawPointers.data(),
                         dsChannelMappings.size(),
                         bearDirectSpeakersInputBuffers_RawPointers.data(),
-                        bearHoaInputBuffers_RawPointers.size(),
+                        hoaChannelMappings.size(),
                         bearHoaInputBuffers_RawPointers.data(),
                         bearOutputBuffers_RawPointers.data());
 
@@ -139,14 +139,23 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata( // for DS, this is done
                                                  bearMetadata);
 }
 
-bool BinauralMonitoringAudioProcessor::pushBearMetadata(
-    size_t channelNum, ear::HOATypeMetadata *metadata) {
+bool BinauralMonitoringAudioProcessor::pushBearMetadata( // for HOA, this is done per asset. Need to iterate round channels within this.
+    size_t channelNum, ear::HOATypeMetadata *metadata, size_t arbitraryStreamIdentifier) {
+
+  if(metadata->degrees.size() == 0) return false;
   bear::HOAInput bearMetadata;
+  bearMetadata.channels.reserve(metadata->degrees.size());
+
+  for (int i = 0; i < metadata->degrees.size(); i++) {
+    hoaChannelMappings.push_back(channelNum + i);
+    bearMetadata.channels.push_back(hoaChannelMappings.size() -1);
+  }
+
   bearMetadata.rtime = metadataRtime;
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
-  hoaChannelMappings.push_back(channelNum);
-  return bearRenderer->add_hoa_block(dsChannelMappings.size() - 1,
+
+  return bearRenderer->add_hoa_block(arbitraryStreamIdentifier,
                                      bearMetadata);
 }
 
