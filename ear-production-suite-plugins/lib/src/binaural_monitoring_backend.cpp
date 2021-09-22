@@ -208,8 +208,17 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
       totalObjChannels++;
     }
     if(item.has_hoa_metadata()) {
-      // TODO: Proto message currently incomplete for HOA
-      //totalHoaChannels += item.hoa_metadata().???();
+      auto hoaId = item.hoa_metadata().packformatidvalue();
+      {
+        std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
+        // TODO: May need to revisit later -
+        //       this is a high-frequency call but may be slow to to execute
+        auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
+        if(pfData) {
+          auto cfCount = pfData->relatedChannelFormats.size();
+          totalHoaChannels += cfCount;
+        }
+      }
     }
   }
 
@@ -225,8 +234,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
         item.connection_id() != "") {
 
-      // TODO: HOA can not be implemented at the moment due to incomplete protobuf
-
       if(item.has_hoa_metadata()) {
         if(item.changed()) {
           {
@@ -239,21 +246,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
           }
         }
         activeHoaIds.push_back(item.connection_id());
-        //totalHoaChannels += item.hoa_metadata().???(); // TODO: Proto message
-        //auto hoaId = getLatestHoaTypeMetadata(item.connection_id());
-        auto hoaId = item.hoa_metadata().packformatidvalue();
-        {
-          std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-          // TODO: May need to revisit later -
-          //       this is a high-frequency call but may be slow to to execute
-          auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
-          if(pfData) {
-            auto cfCount = pfData->relatedChannelFormats.size();
-            totalHoaChannels += cfCount;
-          }
-        }
-        //totalHoaChannels = 9;
-      //currently incomplete for HOA
       }
 
       if (item.has_ds_metadata()) {
@@ -273,6 +265,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         }
         activeDirectSpeakersIds.push_back(item.connection_id());
       }
+
       if (item.has_obj_metadata()) {// if object metadata has changed..
         if (item.changed()) {
           {
@@ -289,6 +282,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         }
         activeObjectIds.push_back(item.connection_id());
       }
+
     }
   }
 
