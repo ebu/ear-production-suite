@@ -128,13 +128,13 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(
                                          bearMetadata);
 }
 
-bool BinauralMonitoringAudioProcessor::pushBearMetadata(
+bool BinauralMonitoringAudioProcessor::pushBearMetadata( // for DS, this is done once per speaker/channel so no need to loop round
     size_t channelNum, ear::DirectSpeakersTypeMetadata *metadata) {
   bear::DirectSpeakersInput bearMetadata;
   bearMetadata.rtime = metadataRtime;
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
-  dsChannelMappings.push_back(channelNum);
+  dsChannelMappings.push_back(channelNum); // Here channelnum = starting channel + index
   return bearRenderer->add_direct_speakers_block(dsChannelMappings.size() - 1,
                                                  bearMetadata);
 }
