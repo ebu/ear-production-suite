@@ -38,14 +38,12 @@ namespace admplug {
         static const char* SCENEMASTER_PLUGIN_NAME;
         static const char* RENDERER_PLUGIN_NAME;
 
-        static int countChannelsInSpeakerLayout(int slIndex);
-
     private:
         std::vector<std::unique_ptr<PluginParameter>> const & automatedObjectPluginParameters();
         std::vector<std::unique_ptr<TrackParameter>> const & trackParameters();
         std::shared_ptr<PluginParameter> objectTrackMappingParameter;
         std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;
-        std::shared_ptr<PluginParameter> directSpeakersLayoutParameter;
+        std::shared_ptr<PluginParameter> directPackFormatIdValueParameter;
         std::unique_ptr<UniqueValueAssigner> trackMappingAssigner;
 
         std::unique_ptr<Track> createBusTrack(std::string pluginName, const ReaperAPI &api);

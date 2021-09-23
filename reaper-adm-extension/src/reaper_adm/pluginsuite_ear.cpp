@@ -15,13 +15,14 @@
 #include <adm/write.hpp>
 #include <adm/common_definitions.hpp>
 #include <bw64/bw64.hpp>
+#include <speaker_setups.hpp>
 
 using namespace admplug;
 
 #define TRACK_MAPPING_MIN -1
 #define TRACK_MAPPING_MAX 63
-#define SPEAKER_LAYOUT_MIN -1
-#define SPEAKER_LAYOUT_MAX 21
+#define PACKFORMAT_ID_VALUE_MIN 0x0
+#define PACKFORMAT_ID_VALUE_MAX 0xFFFF
 
 namespace {
 
@@ -45,7 +46,7 @@ namespace {
 
     enum class EarDirectSpeakersParameters {
         TRACK_MAPPING = 0,
-        SPEAKER_LAYOUT,
+        PACKFORMAT_ID_VALUE,
         NUM_PARAMETERS
     };
 
@@ -90,59 +91,6 @@ namespace {
         return parameters;
     }
 
-    std::vector<std::string> speakerLayoutIndexToPackFormatMapping {
-        "AP_00010001",// mono
-        "AP_00010002",// stereo
-        "AP_0001000a",// LCR
-        "AP_0001000b",// 0+4+0
-        "AP_0001000c",// 5.0
-        "AP_00010003",// 5.1
-        "AP_0001000d",// 0+6+0
-        "AP_0001000e",// 0+7+0 Front
-        "AP_0001000f",// 0+7+0 Back
-        "AP_00010004",//"2+5+0","5.1+2H" - 2 options, but this one has "U+030" + "U-030"
-        "AP_00010012",//0+7+0 side
-        "AP_00010013",//2+5+0
-        "AP_00010014",//2+7+0 screen
-        "AP_00010016",//2+7+0
-        "AP_00010005",//"4+5+0"
-        "AP_00010010",//"4+5+1"
-        "AP_00010007",//"3+7+0"
-        "AP_00010015",
-        "AP_00010017",
-        "AP_00010008",//"4+9+0"
-        "AP_00010009",//"9+10+3+
-        "AP_00010011" // 9+9+0
-    };
-
-    std::optional<std::string> getPackFormatIdFromSpeakerLayoutIndex(int layoutIndex)
-    {
-        if(layoutIndex >= 0 && layoutIndex < speakerLayoutIndexToPackFormatMapping.size()) {
-            return std::optional<std::string>(speakerLayoutIndexToPackFormatMapping[layoutIndex]);
-        }
-        return std::optional<std::string>();
-    }
-
-    std::optional<int> getSpeakerLayoutIndexFromPackFormatId(std::string packFormatId)
-    {
-        for(int index = 0; index < speakerLayoutIndexToPackFormatMapping.size(); index++) {
-            if(speakerLayoutIndexToPackFormatMapping[index] == packFormatId) {
-                return std::optional<int>(index);
-            }
-        }
-        return std::optional<int>();
-    }
-
-    int countChannelsInPackFormat(std::string pfIdStr) {
-        auto pfIdObj = adm::parseAudioPackFormatId(pfIdStr);
-        auto tdId = pfIdObj.get<adm::TypeDescriptor>().get();
-        auto pfId = pfIdObj.get<adm::AudioPackFormatIdValue>().get();
-
-        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(tdId, pfId);
-        if(!pfData) return 0;
-        return pfData->relatedChannelFormats.size();
-    }
-
     std::vector<int> determineUsedObjectTrackMappingValues(PluginInstance& plugin) {
         auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
         auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
@@ -160,18 +108,24 @@ namespace {
         auto trackMapping = plugin.getParameterWithConvertToInt(*(trackMappingParam.get()));
         assert(trackMapping.has_value());
 
-        auto speakerLayoutParam = createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::SPEAKER_LAYOUT), { SPEAKER_LAYOUT_MIN, SPEAKER_LAYOUT_MAX });
-        auto speakerLayout = plugin.getParameterWithConvertToInt(*(speakerLayoutParam.get()));
-        assert(speakerLayout.has_value());
-        int trackWidth = speakerLayout.has_value()? EARPluginSuite::countChannelsInSpeakerLayout(*speakerLayout) : 0;
-        if(trackWidth <= 0) trackWidth = 1; // Track mapping is single channel by default.
+        auto packFormatIdValueParam = createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::PACKFORMAT_ID_VALUE), { PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX });
+        auto packFormatIdValue = plugin.getParameterWithConvertToInt(*(packFormatIdValueParam.get()));
+        assert(packFormatIdValue.has_value());
+
+        int trackWidth = 1; // Track mapping is single channel by default.
+        if(packFormatIdValue.has_value()) {
+            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(packFormatIdValue.value());
+            if(speakerLayoutIndex >= 0) {
+                trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
+            }
+        }
 
         if(trackMapping.has_value() && *trackMapping >= 0) {
-        int trackWidth = plugin.getTrackInstance().getChannelCount();// This makes the assumption that we set the track width to the size of the essence!
             for(int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
                 usedValues.push_back((*trackMapping) + channelCounter);
             }
         }
+
         return usedValues;
     }
 
@@ -188,7 +142,7 @@ bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupport
 EARPluginSuite::EARPluginSuite() :
     objectTrackMappingParameter{ createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
     directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-    directSpeakersLayoutParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::SPEAKER_LAYOUT), {SPEAKER_LAYOUT_MIN, SPEAKER_LAYOUT_MAX}) }
+    directPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) }
 {
 }
 
@@ -333,14 +287,16 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
     assert(packFormat);
 
     if(!plugin){ // Not processed yet
-        auto speakerLayout = getSpeakerLayoutIndexFromPackFormatId(adm::formatId(packFormat->get<adm::AudioPackFormatId>()));
-        if(!speakerLayout) {
+        auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatId(adm::formatId(packFormat->get<adm::AudioPackFormatId>()));
+
+        if(speakerLayoutIndex < 0) {
             auto cartLayout = getCartLayout(*packFormat);
             if(cartLayout) {
-                speakerLayout = getSpeakerLayoutIndexFromPackFormatId(getMappedCommonPackId(*cartLayout));
+                speakerLayoutIndex = ear::plugin::getIndexFromPackFormatId(getMappedCommonPackId(*cartLayout));
             }
         }
-        if(speakerLayout) { // We only support specific speaker layouts
+
+        if(speakerLayoutIndex >= 0) {
             plugin = track->createPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
             auto takeChannels = automationElement.takeChannels();
             auto channelCountTake = static_cast<int>(takeChannels.size());
@@ -348,7 +304,8 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
             assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
             auto channelCount = channelCountTake;
             track->setChannelCount(channelCount);
-            plugin->setParameter(*directSpeakersLayoutParameter, directSpeakersLayoutParameter->forwardMap(*speakerLayout));
+            auto packFormatIdValue = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].packFormatIdValue;
+            plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(packFormatIdValue));
 
             assert(trackMappingAssigner);
             auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
@@ -359,7 +316,7 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
                 // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
                 int trackMappingOffset = 0;
                 for(auto &takeChannel : takeChannels) {
-                    auto trackUidVal = takeChannel.trackUid()? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+                    auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
                     trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
                     trackMappingOffset++;
                 }
@@ -367,7 +324,6 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
             } else {
                 //TODO - need to tell user - no free track mappings
             }
-
         } else {
             // TODO - warn user - can't support this directspeaker pack format
         }
@@ -398,15 +354,6 @@ bool EARPluginSuite::pluginSuiteUsable(const ReaperAPI &api)
 bool admplug::EARPluginSuite::representAdmStructureWithGroups(ReaperAPI const & api)
 {
     return false; // Scene master does this!
-}
-
-int admplug::EARPluginSuite::countChannelsInSpeakerLayout(int slIndex)
-{
-    auto pfId = getPackFormatIdFromSpeakerLayoutIndex(slIndex);
-    if(pfId.has_value()) {
-        return countChannelsInPackFormat(*pfId);
-    }
-    return 0;
 }
 
 std::vector<std::unique_ptr<PluginParameter>> const& EARPluginSuite::automatedObjectPluginParameters()

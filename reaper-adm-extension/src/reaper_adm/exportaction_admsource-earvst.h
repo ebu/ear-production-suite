@@ -86,7 +86,7 @@ public:
 private:
     // TODO: Fix hard-coded values - pull from plugin suite
     std::unique_ptr<PluginParameter> paramTrackMapping{ createPluginParameter(0, { -1.0, 63.0 }) };
-    std::unique_ptr<PluginParameter> paramSpeakerLayout{ createPluginParameter(1, { -1.0, 21.0 }) };
+    std::unique_ptr<PluginParameter> paramDirectSpeakersPackFormatIdValue{ createPluginParameter(1, { 0x0, 0xFFFF }) };
 
     // Statics
 
