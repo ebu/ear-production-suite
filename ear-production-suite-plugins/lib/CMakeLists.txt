@@ -91,12 +91,12 @@ set(EAR_BASE_HEADERS
 	include/proto_printers.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
-	include/speaker_setups.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
 	include/ui/scene_frontend_backend_connector.hpp
 	include/variable_block_adapter.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 
 set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
@@ -123,6 +123,7 @@ target_include_directories(ear-plugin-base PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>  # config.h / export.h
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # protobuf
+	${EPS_SHARED_DIR}
 )
 target_compile_features(ear-plugin-base PUBLIC cxx_std_14)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
