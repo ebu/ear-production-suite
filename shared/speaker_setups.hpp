@@ -423,5 +423,19 @@ inline int getIndexFromPackFormatIdValue(int packFormatIdValue) {
   return -1;
 }
 
+inline int getIndexFromPackFormatId(std::string packFormatId) {
+    for(int i = 0; i < SPEAKER_SETUPS.size(); i++) {
+        if(SPEAKER_SETUPS[i].packFormatId == packFormatId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+inline int getChannelCountFromSpeakerSetupIndex(int index) {
+    if(index < 0 || index >= SPEAKER_SETUPS.size()) return -1;
+    return SPEAKER_SETUPS[index].speakers.size();
+}
+
 }  // namespace plugin
 }  // namespace ear
