@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 
-#include "speaker_setups.hpp"
+#include <speaker_setups.hpp>
 
 #include "look_and_feel/colours.hpp"
 #include "look_and_feel/fonts.hpp"
