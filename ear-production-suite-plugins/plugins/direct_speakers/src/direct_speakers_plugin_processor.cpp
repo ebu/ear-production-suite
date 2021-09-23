@@ -20,19 +20,19 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
       -1, 63, -1));
-  addParameter(speakerSetupIndex_ =
+  addParameter(packFormatIdValue_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
-      "speaker_setup_index", "Speaker Setup Index",
-      -1, static_cast<int>(SPEAKER_SETUPS.size() - 1), -1));
-      
+      "packFormatIdValue", "PackFormat ID Value",
+      0x0, 0xFFFF, 0));
+
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
-  
+
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
-  
-  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(speakerSetupIndex_)->markPluginStateAsDirty = [this]() {
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(packFormatIdValue_)->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
@@ -40,7 +40,7 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
   backend_ = std::make_unique<DirectSpeakersBackend>(connector_.get());
 
   connector_->parameterValueChanged(0, routing_->get());
-  connector_->parameterValueChanged(1, speakerSetupIndex_->get());
+  connector_->parameterValueChanged(1, packFormatIdValue_->get());
 }
 
 DirectSpeakersAudioProcessor::~DirectSpeakersAudioProcessor() {}
@@ -112,14 +112,19 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
   connectionId_ = backend_->getConnectionId();
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
-  auto speakerSetup = speakerSetupByIndex(*speakerSetupIndex_);
-  xml->setAttribute("packformat_id_value", speakerSetup.packFormatIdValue);
+  xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);
   copyXmlToBinary(*xml, destData);
 }
 
 void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
                                                        int sizeInBytes) {
-  std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+  auto xml = getXmlFromBinary(data, sizeInBytes);
+  juce::MemoryOutputStream stream;
+
+  xml->writeToStream(stream, juce::String::empty);
+  auto str = stream.toString();
+
+  std::unique_ptr<XmlElement> xmlState(xml);
   if (xmlState.get() != nullptr)
     if (xmlState->hasTagName("DirectSpeakersPlugin")) {
       connectionId_ = communication::ConnectionId{
@@ -130,14 +135,19 @@ void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
       backend_->setConnectionId(connectionId_);
       *routing_ = xmlState->getIntAttribute("routing", -1);
 
-      int speakerSetupIndex = -1;
       if(xmlState->hasAttribute("packformat_id_value")) {
-        speakerSetupIndex = getIndexFromPackFormatIdValue(xmlState->getIntAttribute("packformat_id_value", -1));
+        *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
       }
       else if(xmlState->hasAttribute("speaker_setup_index")) {
-        speakerSetupIndex = getIndexFromLegacySpeakerSetupIndex(xmlState->getIntAttribute("speaker_setup_index", -1));
+        int legacySpeakerSetupIndex = xmlState->getIntAttribute("speaker_setup_index", -1);
+        int newSpeakerSetupIndex = getIndexFromLegacySpeakerSetupIndex(legacySpeakerSetupIndex);
+        if(newSpeakerSetupIndex >= 0) {
+          auto speakerSetup = speakerSetupByIndex(newSpeakerSetupIndex);
+          *packFormatIdValue_ = speakerSetup.packFormatIdValue;
+        } else {
+          *packFormatIdValue_ = 0;
+        }
       }
-      *speakerSetupIndex_ = speakerSetupIndex;
     }
 }
 
