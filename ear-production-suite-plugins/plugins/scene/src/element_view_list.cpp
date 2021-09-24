@@ -107,7 +107,7 @@ void ElementViewList::itemDropped(const SourceDetails& dragSourceDetails) {
           [element](auto candidate) { return candidate.get() == element; });
       size_t oldIndex = std::distance(parentContainer->elements.begin(), it);
       int newIndex = dropIndex_ > oldIndex ? dropIndex_ - 1 : dropIndex_;
-      parentContainer->moveElement(oldIndex, newIndex);
+      parentContainer->moveElementUiInteraction(oldIndex, newIndex);
     }
   }
   dropIndicator_->setVisible(false);
