@@ -119,12 +119,8 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
 void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
                                                        int sizeInBytes) {
   auto xml = getXmlFromBinary(data, sizeInBytes);
-  juce::MemoryOutputStream stream;
-
-  xml->writeToStream(stream, juce::String::empty);
-  auto str = stream.toString();
-
   std::unique_ptr<XmlElement> xmlState(xml);
+
   if (xmlState.get() != nullptr)
     if (xmlState->hasTagName("DirectSpeakersPlugin")) {
       connectionId_ = communication::ConnectionId{
