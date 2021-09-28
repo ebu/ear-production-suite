@@ -10,7 +10,7 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
                                            int inputChannelCount)
     : objectCalculator_{outputLayout}, directSpeakersCalculator_{outputLayout} {
   resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
-  allActiveIds.reserve(inputChannelCount);;
+  allActiveIds.reserve(inputChannelCount);
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {

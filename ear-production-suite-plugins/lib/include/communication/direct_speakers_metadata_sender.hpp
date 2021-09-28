@@ -38,9 +38,14 @@ class DirectSpeakersMetadataSender {
  private:
   void sendMetadata();
   void startTimer();
-  MessageBuffer getMessage();
+  MessageBuffer prepareMessage();
   void handleTimeout(std::error_code ec);
-
+  template<typename FunctionT>
+  void setData(FunctionT&& set) {
+    std::lock_guard<std::mutex> dataLock{dataMutex_};
+    data_.set_changed(true);
+    set(&data_);
+  }
   std::shared_ptr<spdlog::logger> logger_;
   nng::PushSocket socket_;
   nng::AsyncIO timer_;

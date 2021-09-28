@@ -39,15 +39,15 @@ void ObjectMetadataSender::connect(const std::string& endpoint,
   startTimer();
 }
 
-MessageBuffer ObjectMetadataSender::getMessage() {
+MessageBuffer ObjectMetadataSender::prepareMessage() {
   std::lock_guard<std::mutex> lock(dataMutex_);
   MessageBuffer buffer = allocBuffer(data_.ByteSizeLong());
   data_.SerializeToArray(buffer.data(), buffer.size());
+  data_.set_changed(false);
   return buffer;
 }
 
 void ObjectMetadataSender::disconnect() {
-  std::lock_guard<std::mutex> lock(dataMutex_);
   timer_.cancel();
   timer_.wait();
   socket_.asyncCancel();
@@ -65,15 +65,17 @@ void ObjectMetadataSender::sendMetadata() {
   if (!connectionId_.isValid()) {
     return;
   }
-  auto msg = getMessage();
-  data_.set_changed(false);
+  auto msg = prepareMessage();
   socket_.asyncSend(
       msg, [this](std::error_code ec, const nng::Message& ignored) {
         if (!ec) {
           std::lock_guard<std::mutex> lock(timeoutMutex_);
           lastSendTimestamp_ = std::chrono::system_clock::now();
         } else {
-          data_.set_changed(true);
+          {
+            std::lock_guard<std::mutex> dataLock(dataMutex_);
+            data_.set_changed(true);
+          }
           EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
         }
       });
@@ -107,63 +109,46 @@ void ObjectMetadataSender::handleTimeout(std::error_code ec) {
 }
 
 void ObjectMetadataSender::name(const std::string& value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_name(value);
+  setData([value](auto data) { data->set_name(value); });
 }
 void ObjectMetadataSender::colour(int value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_colour(value);
+  setData([value](auto data) { data->set_colour(value); });
 }
-
 void ObjectMetadataSender::routing(int32_t value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_changed(true);
-  data_.set_routing(value);
+  setData([value](auto data) { data->set_routing(value); });
 }
 void ObjectMetadataSender::gain(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_changed(true);
-  data_.mutable_obj_metadata()->set_gain(value);
+  setObjectData([value](auto data) { data->set_gain(value); });
 }
-
 void ObjectMetadataSender::azimuth(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_changed(true);
-  data_.mutable_obj_metadata()->mutable_position()->set_azimuth(value);
+  setObjectData(
+      [value](auto data) { data->mutable_position()->set_azimuth(value); });
 }
 void ObjectMetadataSender::elevation(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_changed(true);
-  data_.mutable_obj_metadata()->mutable_position()->set_elevation(value);
+  setObjectData(
+      [value](auto data) { data->mutable_position()->set_elevation(value); });
 }
 void ObjectMetadataSender::distance(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->mutable_position()->set_distance(value);
+  setObjectData(
+      [value](auto data) { data->mutable_position()->set_distance(value); });
 }
-
 void ObjectMetadataSender::width(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_width(value);
+  setObjectData([value](auto data) { data->set_width(value); });
 }
 void ObjectMetadataSender::height(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_height(value);
+  setObjectData([value](auto data) { data->set_height(value); });
 }
 void ObjectMetadataSender::depth(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_depth(value);
+  setObjectData([value](auto data) { data->set_depth(value); });
 }
 void ObjectMetadataSender::diffuse(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_diffuse(value);
+  setObjectData([value](auto data) { data->set_diffuse(value); });
 }
 void ObjectMetadataSender::factor(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_factor(value);
+  setObjectData([value](auto data) { data->set_factor(value); });
 }
 void ObjectMetadataSender::range(float value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.mutable_obj_metadata()->set_range(value);
+  setObjectData([value](auto data) { data->set_range(value); });
 }
 
 }  // namespace communication

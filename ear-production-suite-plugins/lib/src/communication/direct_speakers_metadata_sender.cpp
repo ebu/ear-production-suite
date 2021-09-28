@@ -41,15 +41,15 @@ void DirectSpeakersMetadataSender::connect(const std::string& endpoint,
   startTimer();
 }
 
-MessageBuffer DirectSpeakersMetadataSender::getMessage() {
+MessageBuffer DirectSpeakersMetadataSender::prepareMessage() {
   std::lock_guard<std::mutex> lock(dataMutex_);
   MessageBuffer buffer = allocBuffer(data_.ByteSizeLong());
   data_.SerializeToArray(buffer.data(), buffer.size());
+  data_.set_changed(false);
   return buffer;
 }
 
 void DirectSpeakersMetadataSender::disconnect() {
-  std::lock_guard<std::mutex> lock(dataMutex_);
   timer_.cancel();
   timer_.wait();
   socket_.asyncCancel();
@@ -67,15 +67,17 @@ void DirectSpeakersMetadataSender::sendMetadata() {
   if (!connectionId_.isValid()) {
     return;
   }
-  auto msg = getMessage();
-  data_.set_changed(false);
+  auto msg = prepareMessage();
   socket_.asyncSend(
       msg, [this](std::error_code ec, const nng::Message& ignored) {
         if (!ec) {
           std::lock_guard<std::mutex> lock(timeoutMutex_);
           lastSendTimestamp_ = std::chrono::system_clock::now();
         } else {
-          data_.set_changed(true);
+          {
+            std::lock_guard<std::mutex> dataLock(dataMutex_);
+            data_.set_changed(true);
+          }
           EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
         }
       });
@@ -109,22 +111,19 @@ void DirectSpeakersMetadataSender::handleTimeout(std::error_code ec) {
 }
 
 void DirectSpeakersMetadataSender::routing(int32_t value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_changed(true);
-  data_.set_routing(value);
+  setData([value](auto data) { data->set_routing(value); });
 }
 void DirectSpeakersMetadataSender::name(const std::string& value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_name(value);
+  setData([&value](auto data) { data->set_name(value); });
 }
 void DirectSpeakersMetadataSender::colour(int value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_colour(value);
+  setData([value](auto data) { data->set_colour(value); });
 }
 void DirectSpeakersMetadataSender::speakerSetupIndex(int value) {
-  std::lock_guard<std::mutex> lock(dataMutex_);
-  data_.set_allocated_ds_metadata(
-      proto::convertSpeakerSetupToEpsMetadata(value));
+  setData([value](auto data) {
+    data->set_allocated_ds_metadata(
+        proto::convertSpeakerSetupToEpsMetadata(value));
+  });
 }
 
 }  // namespace communication
