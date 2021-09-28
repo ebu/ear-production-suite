@@ -7,6 +7,7 @@
 #include <ear/ear.hpp>
 #include <Eigen/Eigen>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace ear {
@@ -50,6 +51,7 @@ class SceneGainsCalculator {
   ear::GainCalculatorObjects objectCalculator_;
   ear::GainCalculatorDirectSpeakers directSpeakersCalculator_;
   std::map<communication::ConnectionId, Routing> routingCache_;
+  std::vector<std::string> allActiveIds;
 };
 
 }  // namespace plugin
