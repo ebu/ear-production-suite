@@ -48,8 +48,22 @@ class ObjectMetadataSender {
  private:
   void sendMetadata();
   void startTimer();
-  MessageBuffer getMessage();
+  MessageBuffer prepareMessage();
   void handleTimeout(std::error_code ec);
+  template<typename FunctionT>
+  void setData(FunctionT&& set) {
+    // send as pointer so can't accidentally copy based on FunctionT
+    // and to match setObjectData
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    data_.set_changed(true);
+    set(&data_);
+  }
+  template<typename FunctionT>
+  void setObjectData(FunctionT&& set) {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    data_.set_changed(true);
+    set(data_.mutable_obj_metadata());
+  }
 
   std::shared_ptr<spdlog::logger> logger_;
   nng::PushSocket socket_;
