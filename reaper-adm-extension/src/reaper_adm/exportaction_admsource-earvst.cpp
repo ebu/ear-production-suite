@@ -607,7 +607,7 @@ int EarInputVst::getWidth()
 
     int trackWidth = 0;
     if(packFormatIdValue.has_value()) {
-        auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(packFormatIdValue.value());
+        auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
         if(speakerLayoutIndex >= 0) {
             trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
         }

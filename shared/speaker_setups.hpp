@@ -406,7 +406,7 @@ inline SpeakerSetup speakerSetupByPackFormatId(const std::string& packFormatId) 
 inline int getIndexFromLegacySpeakerSetupIndex(int legacyIndex) {
   for(int i = 0; i < SPEAKER_SETUPS.size(); i++) {
     if(SPEAKER_SETUPS[i].legacySpeakerSetupIndex.has_value()) {
-      if(SPEAKER_SETUPS[i].legacySpeakerSetupIndex.value() == legacyIndex) {
+      if(*SPEAKER_SETUPS[i].legacySpeakerSetupIndex == legacyIndex) {
         return i;
       }
     }
