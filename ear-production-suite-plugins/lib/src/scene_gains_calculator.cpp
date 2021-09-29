@@ -1,6 +1,7 @@
 #include "scene_gains_calculator.hpp"
 #include "ear/metadata.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
+#include <algorithm>
 
 namespace ear {
 namespace plugin {
@@ -9,6 +10,7 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
                                            int inputChannelCount)
     : objectCalculator_{outputLayout}, directSpeakersCalculator_{outputLayout} {
   resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
+  allActiveIds.reserve(inputChannelCount);;
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
@@ -30,8 +32,10 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
                 diffuse_[routing.track + i].end(), 0.0f);
     }
   }
+
   for (const auto& item : store.monitoring_items()) {
-    if (item.changed()) {
+    bool newItem = std::find(allActiveIds.begin(), allActiveIds.end(), item.connection_id()) == allActiveIds.end();
+    if (newItem || item.changed()) {
       if (item.has_ds_metadata()) {
         auto earMetadata =
             EpsToEarMetadataConverter::convert(item.ds_metadata());
@@ -64,6 +68,13 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
       }
     }
   }
+
+  // Used for setting the newItem flag next time around
+  allActiveIds.clear();
+  for(const auto& item : store.monitoring_items()) {
+    allActiveIds.push_back(item.connection_id());
+  }
+
   return true;
 }
 

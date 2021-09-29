@@ -138,31 +138,37 @@ void ObjectMetadataSender::elevation(float value) {
 }
 void ObjectMetadataSender::distance(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->mutable_position()->set_distance(value);
 }
-
 void ObjectMetadataSender::width(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_width(value);
 }
 void ObjectMetadataSender::height(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_height(value);
 }
 void ObjectMetadataSender::depth(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_depth(value);
 }
 void ObjectMetadataSender::diffuse(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_diffuse(value);
 }
 void ObjectMetadataSender::factor(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_factor(value);
 }
 void ObjectMetadataSender::range(float value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.mutable_obj_metadata()->set_range(value);
 }
 

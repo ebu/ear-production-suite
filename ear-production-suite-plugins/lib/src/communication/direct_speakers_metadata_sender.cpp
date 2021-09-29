@@ -123,6 +123,7 @@ void DirectSpeakersMetadataSender::colour(int value) {
 }
 void DirectSpeakersMetadataSender::speakerSetupIndex(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
+  data_.set_changed(true);
   data_.set_allocated_ds_metadata(
       proto::convertSpeakerSetupToEpsMetadata(value));
 }
