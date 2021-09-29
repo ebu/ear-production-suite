@@ -457,7 +457,8 @@ void JuceSceneFrontendConnector::removeFromObjectViews(
             return false;
           });
       if (it != container->elements.end()) {
-        container->removeElement(it->get());
+        auto index = std::distance(container->elements.begin(), it);
+        container->removeElement(index);
       }
     }
   }
