@@ -1,7 +1,3 @@
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(SOURCES_SCENE
   ${EPS_SHARED_DIR}/binary_data.cpp
   ${EPS_SHARED_DIR}/components/look_and_feel/name_text_editor.cpp
@@ -29,10 +25,10 @@ set(HEADERS_SCENE
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_populator.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_serializer.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/scene_backend.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/ui/scene_frontend_backend_connector.hpp
 
 	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 
 	${EPS_SHARED_DIR}/components/ear_bounds_constrainer.hpp
 	${EPS_SHARED_DIR}/components/ear_button.hpp

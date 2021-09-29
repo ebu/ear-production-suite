@@ -13,9 +13,9 @@ set(SOURCES_DIRECT_SPEAKERS_INPUT
 set(HEADERS_DIRECT_SPEAKERS_INPUT
 	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/direct_speakers_backend.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
 	
 	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 	
 	${EPS_SHARED_DIR}/components/ear_button.hpp
 	${EPS_SHARED_DIR}/components/ear_combo_box.hpp

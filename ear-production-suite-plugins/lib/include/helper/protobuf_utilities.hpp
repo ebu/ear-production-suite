@@ -2,7 +2,7 @@
 
 #include <map>
 #include "type_metadata.pb.h"
-#include "../speaker_setups.hpp"
+#include <speaker_setups.hpp>
 
 namespace ear {
 namespace plugin {

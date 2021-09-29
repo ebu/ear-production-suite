@@ -1,5 +1,5 @@
 #include "helper/protobuf_utilities.hpp"
-#include "speaker_setups.hpp"
+#include <speaker_setups.hpp>
 
 #include <algorithm>
 

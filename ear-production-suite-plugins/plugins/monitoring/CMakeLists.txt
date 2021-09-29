@@ -9,10 +9,10 @@ set(HEADERS_MONITORING
 	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/monitoring_audio_processor.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/monitoring_backend.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/variable_block_adapter.hpp
 
 	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 
 	${EPS_SHARED_DIR}/components/ear_button.hpp
 	${EPS_SHARED_DIR}/components/ear_header.hpp

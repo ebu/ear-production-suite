@@ -3,6 +3,8 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 
+#include "speaker_setups.hpp"
+
 namespace {
   String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
     String routingDescription = String(position);
@@ -202,10 +204,11 @@ void DirectSpeakersJuceFrontendConnector::parameterValueChanged(
       });
       break;
     case 1:
-      notifyParameterChanged(ParameterId::SPEAKER_SETUP_INDEX,
-                             p_->getSpeakerSetupIndex()->get());
+      notifyParameterChanged(ParameterId::PACKFORMAT_ID_VALUE,
+                             p_->getPackFormatIdValue()->get());
       updater_.callOnMessageThread([this]() {
-        setSpeakerSetup(p_->getSpeakerSetupIndex()->get());
+        auto speakerSetupIndex = getIndexFromPackFormatIdValue(p_->getPackFormatIdValue()->get());
+        setSpeakerSetup(speakerSetupIndex);
       });
       break;
   }
@@ -237,7 +240,7 @@ void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
   if (!speakerSetupsComboBox_.expired() &&
       comboBox == speakerSetupsComboBox_.lock().get()) {
-    *(p_->getSpeakerSetupIndex()) = comboBox->getSelectedEntryIndex();
+    *(p_->getPackFormatIdValue()) = speakerSetupByIndex(comboBox->getSelectedEntryIndex()).packFormatIdValue;
   }
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {

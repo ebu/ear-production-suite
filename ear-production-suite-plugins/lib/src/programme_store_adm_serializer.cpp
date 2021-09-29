@@ -1,5 +1,5 @@
 #include "programme_store_adm_serializer.hpp"
-#include "speaker_setups.hpp"
+#include <speaker_setups.hpp>
 #include <numeric>
 #include <adm/adm.hpp>
 #include <adm/utilities/object_creation.hpp>

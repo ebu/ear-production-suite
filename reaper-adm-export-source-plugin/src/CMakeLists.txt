@@ -1,7 +1,3 @@
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(VST_SOURCES
 	${EPS_SHARED_DIR}/binary_data.cpp
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
