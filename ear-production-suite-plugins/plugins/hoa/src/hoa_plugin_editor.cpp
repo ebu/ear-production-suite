@@ -82,7 +82,7 @@ HoaAudioProcessorEditor::~HoaAudioProcessorEditor() {}
 
 void HoaAudioProcessorEditor::paint(Graphics& g) {}
 
-void HoaAudioProcessorEditor::resized() {
+void HoaAudioProcessorEditor::resized() {//Choose size of wole UI pop up
   viewport_->setBounds(getLocalBounds());
   content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }

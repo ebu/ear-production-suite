@@ -63,7 +63,7 @@ class LevelMeter : public Component, private Timer {
     stopTimer();
   }
 
-  void paint(Graphics& g) override {
+  void paint(Graphics& g) override {//Here we actually draw the rectangle
     g.fillAll(findColour(backgroundColourId));
     g.setColour(findColour(outlineColorId));
     g.drawRect(getLocalBounds());
@@ -78,19 +78,29 @@ class LevelMeter : public Component, private Timer {
       float scalingFactor =
           std::pow(clamp<float>(values_.at(i), 0.f, 1.f), 0.3);
       if (orientation_ == Orientation::horizontal) {
-        g.fillRect(area.removeFromTop(channelHeight)
-                       .removeFromLeft(scalingFactor * area.getWidth()));
+          g.fillRect(area.removeFromTop(channelHeight).removeFromLeft(scalingFactor * area.getWidth()));
       } else {
-        g.fillRect(area.removeFromLeft(channelWidth)
-                       .removeFromBottom(scalingFactor * area.getHeight()));
+          g.fillRect(area.removeFromLeft(channelWidth/5)
+                  .removeFromBottom(scalingFactor * area.getHeight()));
       }
     }
 
     // draw outline
     g.setColour(findColour(outlineColorId));
-    g.drawRect(
-        getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f),
-        outlineWidth_);
+    //g.drawRect(
+      //  getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f),
+        //outlineWidth_);
+    
+    
+    
+    //g.drawVerticalLine(getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getX(), getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getTopLeft().getY(), getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getBottomLeft().getY());
+    //ME change but it doesn't work
+    /*for (int i = 0; i < channels_.size(); ++i) {
+        g.drawRect(
+            getLocalBounds().reduced(outlineWidth_ + i/ 2.f, outlineWidth_ / 2.f),
+            outlineWidth_*10);
+    }*/
+    //ME end
   }
 
   enum ColourIds {

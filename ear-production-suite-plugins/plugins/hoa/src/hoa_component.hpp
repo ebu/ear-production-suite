@@ -105,7 +105,7 @@ class HoaComponent : public Component,
     */
   }
 
-  void resized() override {
+  void resized() override {//Here we specify the big boxes on the UI
     auto area = getLocalBounds();
     onBoardingOverlay->setBounds(area);
     area.reduce(5, 5);
@@ -117,14 +117,14 @@ class HoaComponent : public Component,
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
 
-    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);
-    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
-    auto channelGainArea = area.withTrimmedTop(197);
+    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);//LHS column
+    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);//RHS column
+    auto channelGainArea = area.withTrimmedTop(197);//Additional box (atm channel gain)
 
     // left column
-    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
+    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));//main value box where the HOA type and routing is chosen
 
-    channelGainValueBox->setBounds(channelGainArea.reduced(5, 5));
+    channelGainValueBox->setBounds(channelGainArea.reduced(5, 5));//channelGain box where the channel gain is stored
     //channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
 
     /* Old DS Code

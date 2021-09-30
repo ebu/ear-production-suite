@@ -60,7 +60,7 @@ class ChannelGain : public Component {
 
   void paint(Graphics& g) override { g.fillAll(EarColours::Area01dp); }
 
-  void resized() override {
+  void resized() override {//Here we actually set the look of the level meter
     auto area = getLocalBounds();
     area.removeFromTop(5).removeFromBottom(100);//ME change
     levelMeter_->setBounds(

@@ -17,7 +17,7 @@ HoaAudioProcessor::HoaAudioProcessor()
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
                           true)),
       samplerate_(48000),
-      levelMeter_(std::make_shared<LevelMeterCalculator>(24, samplerate_)) {
+      levelMeter_(std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
 
   /* clang-format off */
   addParameter(routing_ =
@@ -106,7 +106,7 @@ void HoaAudioProcessor::prepareToPlay(double samplerate,
                                                  int samplesPerBlock) {
   if (samplerate_ != static_cast<int>(samplerate)) {
     samplerate_ = static_cast<int>(samplerate);
-    levelMeter_->setup(24, samplerate_);
+    levelMeter_->setup(49, samplerate_);
   }
 }
 

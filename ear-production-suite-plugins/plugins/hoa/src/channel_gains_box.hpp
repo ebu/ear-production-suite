@@ -39,26 +39,30 @@ class ChannelGainsBox : public Component {
 
   void resized() override { updateChannelGainBounds(); }
 
-  void updateChannelGainBounds() {
+  void updateChannelGainBounds() {//This seems to be where we place the channel gain boxes
     auto area = getLocalBounds();
 
     //ME add
-    /*int levels(ceil(sqrt(channelGains_.size())));
+    /*
+    int levels(ceil(sqrt(channelGains_.size())));
     double levelMeterSize(area.getHeight() /
                           static_cast<double>(levels));  // ME experiment
+    //double middleWidth = area.getWidth() / 2;
     // for (auto channelGain : channelGains_) {
+    
     for (int i(0); i < channelGains_.size(); i++) {  // ME experiment
       int level(ceil(sqrt(i + 1)));
       auto channelGain(channelGains_[i]);  // ME experiment
       channelGain->setBounds(
-          area.withLeft(50 * (i - pow(level - 1, 2)))
-              .withRight((50 * (i - pow(level - 1, 2))) + 50)
+          area.withLeft(50 * (i - pow(level - 1, 2)) )
+              .withRight((50 * (i - pow(level - 1, 2)))+ 50)
               .withTrimmedTop((level - 1) * levelMeterSize)
               .withTrimmedBottom((levels - level) * levelMeterSize));
       area.removeFromLeft(6);  // NEEDS WORK
-    }*/
-      //ME end
-    area.removeFromBottom(350);
+    }
+    */
+      //ME end - Remember to comment bit below out if using this
+     area.removeFromBottom(350);
     for (auto channelGain : channelGains_) {
       channelGain->setBounds(area.removeFromLeft(50));
       area.removeFromLeft(6);

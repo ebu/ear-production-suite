@@ -95,7 +95,7 @@ class ValueBoxMain : public Component {
 
   void paint(Graphics& g) override { g.fillAll(EarColours::Area04dp); }
 
-  void resized() override {
+  void resized() override {//Here we sort out the main value box (e.g. the one with HOA type and routing)
     auto area = getLocalBounds();
     area.reduce(10, 5);
     float comboBoxWidth = area.getWidth() - labelWidth_ - marginBig_;

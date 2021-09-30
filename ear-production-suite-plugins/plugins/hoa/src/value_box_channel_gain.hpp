@@ -119,7 +119,7 @@ class ValueBoxChannelGain : public Component {
     g.fillAll(EarColours::Area01dp);
   }
 
-  void resized() override {
+  void resized() override {//Here we sort out what is inside the channel gain box (e.g. all the different meters)
     auto area = getLocalBounds();
     area.reduce(10, 5);
     headingLabel_->setBounds(area.removeFromTop(30));
@@ -136,26 +136,14 @@ class ValueBoxChannelGain : public Component {
     channels37to48Button_->setBounds(
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
     channels49to60Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5)); /*
-    channels1to6Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels7to12Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels13to18Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels19to24Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));*/
+        channelsButtonArea.removeFromLeft(65).reduced(5, 5)); 
 
     //channelLinkButton_->setBounds(area.removeFromBottom(40));
-    channelGainsBox1to12_->setBounds(area.reduced(0, 10));
+    channelGainsBox1to12_->setBounds(area.reduced(0, 10));//I guess this is an imaginary box for each tab?
     channelGainsBox13to24_->setBounds(area.reduced(0, 10));
     channelGainsBox25to36_->setBounds(area.reduced(0, 10));
     channelGainsBox37to48_->setBounds(area.reduced(0, 10));
-    channelGainsBox49to60_->setBounds(area.reduced(0, 10)); /*
-    channelGainsBox1to6_->setBounds(area.reduced(0, 10));
-    channelGainsBox7to12_->setBounds(area.reduced(0, 10));
-    channelGainsBox13to18_->setBounds(area.reduced(0, 10));
-    channelGainsBox19to24_->setBounds(area.reduced(0, 10));*/
+    channelGainsBox49to60_->setBounds(area.reduced(0, 10)); 
   }
 
   void clearHoaSetup() {
@@ -163,11 +151,7 @@ class ValueBoxChannelGain : public Component {
     channelGainsBox13to24_->removeAllChannelGains();
     channelGainsBox25to36_->removeAllChannelGains();
     channelGainsBox37to48_->removeAllChannelGains();
-    channelGainsBox49to60_->removeAllChannelGains(); /*
-    channelGainsBox1to6_->removeAllChannelGains();
-    channelGainsBox7to12_->removeAllChannelGains();
-    channelGainsBox13to18_->removeAllChannelGains();
-    channelGainsBox19to24_->removeAllChannelGains();*/
+    channelGainsBox49to60_->removeAllChannelGains(); 
 
     channels1to12Button_->setEnabled(false);
     channels1to12Button_->setAlpha(Emphasis::disabled);
@@ -178,34 +162,18 @@ class ValueBoxChannelGain : public Component {
     channels37to48Button_->setEnabled(false);
     channels37to48Button_->setAlpha(Emphasis::disabled);
     channels49to60Button_->setEnabled(false);
-    channels49to60Button_->setAlpha(Emphasis::disabled); /*
-    channels1to6Button_->setEnabled(false);
-    channels1to6Button_->setAlpha(Emphasis::disabled);
-    channels7to12Button_->setEnabled(false);
-    channels7to12Button_->setAlpha(Emphasis::disabled);
-    channels13to18Button_->setEnabled(false);
-    channels13to18Button_->setAlpha(Emphasis::disabled);
-    channels19to24Button_->setEnabled(false);
-    channels19to24Button_->setAlpha(Emphasis::disabled);*/
+    channels49to60Button_->setAlpha(Emphasis::disabled); 
 
     channels1to12Button_->setToggleState(false, dontSendNotification);
     channels13to24Button_->setToggleState(false, dontSendNotification);
     channels25to36Button_->setToggleState(false, dontSendNotification);
     channels37to48Button_->setToggleState(false, dontSendNotification);
-    channels49to60Button_->setToggleState(false, dontSendNotification); /*
-    channels1to6Button_->setToggleState(false, dontSendNotification);
-    channels7to12Button_->setToggleState(false, dontSendNotification);
-    channels13to18Button_->setToggleState(false, dontSendNotification);
-    channels19to24Button_->setToggleState(false, dontSendNotification);*/
+    channels49to60Button_->setToggleState(false, dontSendNotification); 
     channelGainsBox1to12_->setVisible(true);
     channelGainsBox13to24_->setVisible(false);
     channelGainsBox25to36_->setVisible(false);
     channelGainsBox37to48_->setVisible(false);
-    channelGainsBox49to60_->setVisible(false); /*
-    channelGainsBox1to6_->setVisible(true);
-    channelGainsBox7to12_->setVisible(false);
-    channelGainsBox13to18_->setVisible(false);
-    channelGainsBox19to24_->setVisible(false);*/
+    channelGainsBox49to60_->setVisible(false); 
 
     //channelLinkButton_->setEnabled(false);
     //channelLinkButton_->setAlpha(Emphasis::disabled);
