@@ -5,6 +5,7 @@ install(FILES
         .)
 install(TARGETS
         project_upgrade
+        project_upgrade_gui
         DESTINATION
         tools)
 set(CPACK_GENERATOR "ZIP")

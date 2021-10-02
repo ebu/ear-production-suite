@@ -10,8 +10,32 @@ target_sources(project_upgrade
         PRIVATE
         main.cpp)
 set_target_properties(project_upgrade PROPERTIES FOLDER tools)		
-
 target_link_libraries(project_upgrade
+        PRIVATE
+        proj_upgrade)
+
+find_package(JUCE REQUIRED QUIET)
+add_executable(project_upgrade_gui WIN32 MACOSX_BUNDLE)
+target_sources(project_upgrade_gui
+        PRIVATE
+        gui_app/Main.cpp
+        gui_app/MainComponent.cpp
+        ${EPS_SHARED_DIR}/binary_data.cpp)
+if(APPLE)
+	set_target_properties(project_upgrade_gui PROPERTIES
+        OUTPUT_NAME "Project Upgrade Utility GUI"
+        XCODE_ATTRIBUTE_EXECUTABLE_NAME "Project Upgrade Utility"
+        MACOSX_BUNDLE TRUE)
+endif()
+if(WIN32)
+	set_target_properties(project_upgrade_gui PROPERTIES
+        OUTPUT_NAME "project_upgrade_utility_gui"
+        WIN32_EXECUTABLE TRUE)
+endif()
+set_target_properties(project_upgrade_gui PROPERTIES FOLDER tools)		
+target_link_libraries(project_upgrade_gui PRIVATE Juce::core ear-version)
+target_include_directories(project_upgrade_gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/gui_app ${EPS_SHARED_DIR})
+target_link_libraries(project_upgrade_gui
         PRIVATE
         proj_upgrade)
 

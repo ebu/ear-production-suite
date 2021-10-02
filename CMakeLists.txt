@@ -51,6 +51,7 @@ add_subdirectory(reaper-adm-extension)
 add_subdirectory(reaper-adm-export-source-plugin)
 add_subdirectory(tools)
 
+option(EPS_BUILD_PACKAGE "INSTALL supplementary files to form package" OFF)
 if(EPS_BUILD_PACKAGE)
     add_subdirectory(packaging)
 endif()
