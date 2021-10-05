@@ -1,7 +1,7 @@
 #include "monitoring_audio_processor.hpp"
 #include "eigen_catch2.hpp"
 #include "ear/bs2051.hpp"
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <ear/dsp/gain_interpolator.hpp>
 #include <ear/decorrelate.hpp>
 #include <Eigen/Core>

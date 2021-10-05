@@ -21,7 +21,7 @@ target_sources(testreaper_adm
 
 
 if(MSVC)
-target_compile_options(testreaper_adm 
+target_compile_options(testreaper_adm
   PRIVATE
     "/bigobj")
 endif()
@@ -31,14 +31,14 @@ find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 target_link_libraries(testreaper_adm
     PRIVATE
         reaper_adm_dependencies
-        Catch::catch2
+        EPS::Catch2WithMain
         Boost::filesystem)
 
 target_include_directories(testreaper_adm
   PRIVATE
     $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR})
-	
+
 set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
 
 add_custom_command(TARGET testreaper_adm POST_BUILD
@@ -48,7 +48,7 @@ add_test(
     NAME reaper_admtest
     COMMAND testreaper_adm
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-	
+
 
 add_executable(testacceptreaper_adm "")
 
@@ -60,7 +60,7 @@ target_sources(testacceptreaper_adm
 target_link_libraries(testacceptreaper_adm
     PRIVATE
         reaper_adm_dependencies
-        Catch::catch2
+        EPS::Catch2WithMain
         Boost::filesystem)
 
 if(MSVC)
@@ -73,7 +73,7 @@ target_include_directories(testacceptreaper_adm
   PRIVATE
     $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR})
-	
+
 set_property(TARGET testacceptreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
 
 add_test(

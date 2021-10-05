@@ -1,5 +1,3 @@
-include(${CMAKE_SOURCE_DIR}/submodules/catch2.cmake)
-
 include(plugin_test_tools.cmake)
 
 # --- unit tests ---
@@ -8,7 +6,7 @@ function(add_ear_test name)
   target_link_libraries(${name}
     PRIVATE
     ear-plugin-base
-    catch2
+    EPS::Catch2WithMain
   )
   target_include_directories(${name} PRIVATE
     ${PROJECT_SOURCE_DIR}/submodules

@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 #include <boost/optional.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 const Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]",
                                "[", "]");
@@ -19,7 +19,7 @@ struct StringMaker<Eigen::DenseBase<T>> {
 }  // namespace Catch
 
 template <typename T>
-class EigenIsApprox : public Catch::MatcherBase<T> {
+class EigenIsApprox : public Catch::Matchers::MatcherBase<T> {
   T value;
   boost::optional<typename T::Scalar> precision;
 

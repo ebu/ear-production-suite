@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <programme_store.pb.h>
 #include <scene_store.pb.h>
 #include <programme_store_adm_populator.hpp>

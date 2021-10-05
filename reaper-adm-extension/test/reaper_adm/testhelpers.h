@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <memory>
 #include <bw64/bw64.hpp>
 #include "channelindexer.h"
@@ -32,7 +32,7 @@ inline auto getIPMCBlockMatcherFn(std::size_t expectedSize, std::size_t expected
     return [expectedSize, expectedValue](admplug::IPCMBlock const& block){
         REQUIRE(block.data().size() == expectedSize);
         for(auto& sample : block.data()) {
-            REQUIRE(sample == Approx(expectedValue));
+            REQUIRE(sample == Catch::Approx(expectedValue));
         }
     };
 }
