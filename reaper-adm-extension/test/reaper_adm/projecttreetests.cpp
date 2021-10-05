@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <gmock/gmock.h>
 #include <adm/utilities/object_creation.hpp>
 #include <adm/document.hpp>

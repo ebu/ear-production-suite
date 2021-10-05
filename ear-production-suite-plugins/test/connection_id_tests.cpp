@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "communication/common_types.hpp"
 
 TEST_CASE("connection id") {

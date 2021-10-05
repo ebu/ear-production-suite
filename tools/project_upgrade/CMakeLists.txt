@@ -23,7 +23,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_project_upgrade
             PRIVATE
             proj_upgrade
-            Catch::catch2)
+            EPS::Catch2WithMain)
     set_target_properties(test_project_upgrade PROPERTIES FOLDER tools/tests)
     add_test(NAME test_project_upgrade
             COMMAND test_project_upgrade

@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "communication/commands.hpp"
 
 TEST_CASE("NewConnectionMessage encoding/decoding") {

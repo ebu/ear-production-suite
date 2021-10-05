@@ -3,7 +3,7 @@
 #include "helper/eps_to_ear_metadata_converter.hpp"
 #include "eigen_catch2.hpp"
 #include <ear/bs2051.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using namespace ear::plugin;
 

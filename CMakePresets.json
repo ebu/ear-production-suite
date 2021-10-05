@@ -54,12 +54,31 @@
       }
     },
     {
-      "name": "macos-base",
+      "name": "macos-base-x64",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_OSX_DEPLOYMENT_TARGET": {
           "type": "STRING",
           "value": "10.14"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macos-base-arm64",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_OSX_DEPLOYMENT_TARGET": {
+          "type": "STRING",
+          "value": "11.0"
+        },
+        "CMAKE_OSX_ARCHITECTURES": {
+          "type": "STRING",
+          "value": "arm64"
         }
       },
       "condition": {
@@ -120,12 +139,27 @@
       "hidden": true,
       "inherits": [
         "vcpkg-base",
-        "macos-base"
+        "macos-base-x64"
       ],
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": {
           "type": "STRING",
           "value": "x64-osx-10_14"
+        },
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
+      }
+    },
+    {
+      "name": "vcpkg-macos-arm64",
+      "hidden": true,
+      "inherits": [
+        "vcpkg-base",
+        "macos-base-arm64"
+      ],
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "arm64-osx"
         },
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
       }
@@ -147,6 +181,16 @@
       "inherits": [
         "ninja-base",
         "vcpkg-macos-x64",
+        "release-base"
+      ]
+    },
+    {
+      "name": "macos-default-arm64",
+      "displayName": "Default macOS Release build",
+      "description": "Release build for macOS using Ninja and vcpkg",
+      "inherits": [
+        "ninja-base",
+        "vcpkg-macos-arm64",
         "release-base"
       ]
     },
@@ -177,6 +221,16 @@
       "description": "Packaging build for macOS 10.14+ using Ninja generator",
       "inherits": [
         "vcpkg-macos-x64",
+        "packaging-base",
+        "release-base"
+      ]
+    },
+    {
+      "name": "macos-arm64-packaging-release",
+      "displayName": "macOS x64 packaging configuration",
+      "description": "Packaging build for macOS arm64 10.14+ using Ninja generator",
+      "inherits": [
+        "vcpkg-macos-arm64",
         "packaging-base",
         "release-base"
       ]
@@ -212,6 +266,11 @@
       "inherits": "macos"
     },
     {
+      "name": "macos-default-arm64",
+      "configurePreset": "macos-default-arm64",
+      "inherits": "macos"
+    },
+    {
       "name": "windows-packaging-release",
       "configurePreset": "windows-packaging-release",
       "inherits": "windows"
@@ -224,6 +283,11 @@
     {
       "name": "macos-packaging-release",
       "configurePreset": "macos-packaging-release",
+      "inherits": "macos"
+    },
+    {
+      "name": "macos-arm64-packaging-release",
+      "configurePreset": "macos-arm64-packaging-release",
       "inherits": "macos"
     }
   ],
@@ -260,6 +324,11 @@
     {
       "name": "macos-default",
       "configurePreset": "macos-default",
+      "inherits": ["macos", "test-config"]
+    },
+    {
+      "name": "macos-default-arm64",
+      "configurePreset": "macos-default-arm64",
       "inherits": ["macos", "test-config"]
     },
     {
