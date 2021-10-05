@@ -19,8 +19,11 @@ class ElementsContainer : public Component {
 
   void resized() override;
 
+  void removeElementUiInteraction(ElementView* element);
+  void moveElementUiInteraction(int oldIndex, int newIndex);
+
   void addElement(std::shared_ptr<ElementView> element);
-  void removeElement(ElementView* element);
+  void removeElement(int index);
   void moveElement(int oldIndex, int newIndex);
 
   class Listener {
