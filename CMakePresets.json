@@ -185,7 +185,7 @@
     },
 	{
       "name": "macos-xcode",
-      "displayName": "Xcode macOS Release build",
+      "displayName": "Xcode macOS build",
       "description": "Build for macOS using Xcode and vcpkg",
       "inherits": [
         "xcode-base",
@@ -194,7 +194,7 @@
     },
 	{
       "name": "macos-xcode-gcc",
-      "displayName": "Xcode + GCC macOS Release build",
+      "displayName": "Xcode + GCC macOS build",
       "description": "Build for macOS using Xcode with GCC and vcpkg (required for vcpkg when OS <10.15 due to unsupported AppleClang)",
       "inherits": [
         "xcode-base",
