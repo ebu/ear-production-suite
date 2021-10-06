@@ -12,6 +12,26 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Ninja"
     },
+	{
+      "name": "xcode-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Xcode"
+    },
+	{
+      "name": "gcc-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": {
+          "type": "STRING",
+          "value": "/usr/bin/gcc"
+        },
+        "CMAKE_C_COMPILER": {
+          "type": "STRING",
+          "value": "/usr/bin/gcc"
+        }
+      }
+    },
     {
       "name": "release-base",
       "hidden": true,
@@ -130,6 +150,19 @@
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
       }
     },
+	{
+      "name": "vcpkg-early-macos-x64",
+      "hidden": true,
+      "inherits": [
+        "vcpkg-base"
+      ],
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-osx"
+        }
+      }
+    },
     {
       "name": "windows-default",
       "displayName": "Default windows build",
@@ -148,6 +181,25 @@
         "ninja-base",
         "vcpkg-macos-x64",
         "release-base"
+      ]
+    },
+	{
+      "name": "macos-xcode",
+      "displayName": "Xcode macOS Release build",
+      "description": "Build for macOS using Xcode and vcpkg",
+      "inherits": [
+        "xcode-base",
+        "vcpkg-macos-x64"
+      ]
+    },
+	{
+      "name": "macos-xcode-gcc",
+      "displayName": "Xcode + GCC macOS Release build",
+      "description": "Build for macOS using Xcode with GCC and vcpkg (required for vcpkg when OS <10.15 due to unsupported AppleClang)",
+      "inherits": [
+        "xcode-base",
+        "gcc-base",
+        "vcpkg-early-macos-x64"
       ]
     },
     {
