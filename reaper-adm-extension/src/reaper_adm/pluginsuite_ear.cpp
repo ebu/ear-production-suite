@@ -114,7 +114,7 @@ namespace {
 
         int trackWidth = 1; // Track mapping is single channel by default.
         if(packFormatIdValue.has_value()) {
-            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(packFormatIdValue.value());
+            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
             if(speakerLayoutIndex >= 0) {
                 trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
             }

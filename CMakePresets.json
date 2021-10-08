@@ -59,7 +59,7 @@
       "cacheVariables": {
         "CMAKE_OSX_DEPLOYMENT_TARGET": {
           "type": "STRING",
-          "value": "10.14"
+          "value": "10.13"
         }
       },
       "condition": {
@@ -144,7 +144,7 @@
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": {
           "type": "STRING",
-          "value": "x64-osx-10_14"
+          "value": "x64-osx-10_13"
         },
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
       }
@@ -218,7 +218,7 @@
     {
       "name": "macos-packaging-release",
       "displayName": "macOS x64 packaging configuration",
-      "description": "Packaging build for macOS 10.14+ using Ninja generator",
+      "description": "Packaging build for macOS 10.13+ using Ninja generator",
       "inherits": [
         "vcpkg-macos-x64",
         "packaging-base",

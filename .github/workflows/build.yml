@@ -41,7 +41,7 @@ jobs:
             os: macos-latest
             package: true
             cmake_preset: "macos-packaging-release"
-            vcpkg_triplet: x64-osx-10_14
+            vcpkg_triplet: x64-osx-10_13
             test: true
           - name: "macOS Latest Clang arm64"
             os: macos-latest
