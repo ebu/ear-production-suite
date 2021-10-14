@@ -15,6 +15,9 @@ execute_process(COMMAND git apply ../0001-fix-objc_msgsend-for-M1-mac.patch
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/JUCE"
     ERROR_QUIET)
 
+# VST3
+add_subdirectory(VST3)
+
 # libear
 set(EAR_HIDE_INTERNAL_SYMBOLS OFF CACHE BOOL " " FORCE)
 set(EAR_UNIT_TESTS OFF CACHE BOOL " " FORCE)

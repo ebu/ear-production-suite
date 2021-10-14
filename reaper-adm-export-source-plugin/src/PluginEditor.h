@@ -1,7 +1,7 @@
 #pragma once
 
-#include "JuceHeader_Wrapper.h"
 #include "readerwriterqueue.h"
+#include "JuceHeader_Wrapper.h"
 #include "PluginProcessor.h"
 #include <adm/adm.hpp>
 

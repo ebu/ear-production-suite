@@ -20,7 +20,6 @@ if(JUCE_DISABLE_ASSERTIONS)
 endif()
 
 find_package(JUCE REQUIRED QUIET)
-find_package(VST3 REQUIRED QUIET)
 find_package(Boost 1.66 REQUIRED QUIET)
 find_package(nng REQUIRED QUIET)
 check_nng_pipe_callback_signature()
