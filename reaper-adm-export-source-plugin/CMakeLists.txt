@@ -1,3 +1,7 @@
+if(MSVC)
+    add_compile_options(/bigobj)
+endif()
+
 cmake_minimum_required(VERSION 3.8)
 
 project(adm-export-source-plugin VERSION ${EPS_VERSION_BASE}
@@ -7,6 +11,5 @@ project(adm-export-source-plugin VERSION ${EPS_VERSION_BASE}
 message(STATUS "Project adm-export-source-plugin version: " ${CMAKE_PROJECT_VERSION})
 
 find_package(JUCE REQUIRED QUIET)
-find_package(VST3 REQUIRED QUIET)
 
 add_subdirectory(src)

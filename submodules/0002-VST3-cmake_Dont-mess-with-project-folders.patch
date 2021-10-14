@@ -1,0 +1,27 @@
+From 1907af4da3237aae676f886db2f84170d533fee2 Mon Sep 17 00:00:00 2001
+From: Richard Bailey <rsjtaylor.github@gmail.com>
+Date: Fri, 11 Feb 2022 11:20:57 +0000
+Subject: [PATCH 2/2] Don't mess with project folders
+
+---
+ modules/SMTG_ConfigureCmakeGenerator.cmake | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules/SMTG_ConfigureCmakeGenerator.cmake b/modules/SMTG_ConfigureCmakeGenerator.cmake
+index 1674dff..616f37a 100644
+--- a/modules/SMTG_ConfigureCmakeGenerator.cmake
++++ b/modules/SMTG_ConfigureCmakeGenerator.cmake
+@@ -28,8 +28,8 @@ endmacro(smtg_specify_build_types)
+ #
+ # Put predefined targets like "ALL_BUILD" and "ZERO_CHECK" into a separate folder within the IDE.
+ macro(smtg_group_predefined_cmake_projects)
+-    set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Predefined)
+-    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
++#    set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Predefined)
++#    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ endmacro(smtg_group_predefined_cmake_projects)
+ 
+ # Configure CMake generator
+-- 
+2.34.1
+

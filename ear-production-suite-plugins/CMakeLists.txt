@@ -20,7 +20,6 @@ if(JUCE_DISABLE_ASSERTIONS)
 endif()
 
 find_package(JUCE REQUIRED QUIET)
-find_package(VST3 REQUIRED QUIET)
 find_package(Boost 1.66 REQUIRED QUIET)
 find_package(nng REQUIRED QUIET)
 check_nng_pipe_callback_signature()
@@ -35,6 +34,11 @@ find_package(spdlog REQUIRED QUIET)
 
 configure_file(${JUCE_SUPPORT_RESOURCES}/config.h.in ${PROJECT_BINARY_DIR}/ear-plugin-base/config.h)
 set(EPS_PLUGIN_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
+if(MSVC)
+  add_compile_options(/bigobj)
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(plugins)
 add_subdirectory(tools)
