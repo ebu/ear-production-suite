@@ -12,6 +12,7 @@ protobuf_generate_cpp(EAR_PROTO_SRC EAR_PROTO_HDR ${EAR_PROTO_INPUT})
 
 add_library(ear-plugin-base STATIC
   src/communication/commands.cpp
+  src/communication/metadata_sender.cpp
   src/communication/direct_speakers_metadata_sender.cpp
   src/communication/input_control_connection.cpp
   src/communication/monitoring_control_connection.cpp
@@ -43,6 +44,7 @@ add_library(ear-plugin-base STATIC
 set(EAR_BASE_HEADERS		
 	include/communication/commands.hpp
 	include/communication/common_types.hpp
+	include/communication/metadata_sender.hpp
 	include/communication/direct_speakers_metadata_sender.hpp
 	include/communication/input_control_connection.hpp
 	include/communication/message_buffer.hpp
@@ -125,7 +127,7 @@ target_include_directories(ear-plugin-base PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # protobuf
 	${EPS_SHARED_DIR}
 )
-target_compile_features(ear-plugin-base PUBLIC cxx_std_14)
+target_compile_features(ear-plugin-base PUBLIC cxx_std_17)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
 set_target_properties(ear-plugin-base PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_EXTENSIONS OFF)
 set_target_properties(ear-plugin-base PROPERTIES FOLDER ${IDE_FOLDER_PLUGINS})
