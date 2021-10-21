@@ -8,7 +8,7 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 #include "helper/multi_async_updater.h"
-#include "value_box_channel_gain.hpp"//probs needs adding to this target file path
+#include "value_box_order_display.hpp"//probs needs adding to this target file path
 /* Old DS Code
 // These are the definitions of the UI panels
 #include "value_box_speaker_layer.hpp"
@@ -35,7 +35,7 @@ class HoaJuceFrontendConnector
   HoaJuceFrontendConnector(HoaAudioProcessor* processor);
   ~HoaJuceFrontendConnector();
 
-  void setChannelGainsValueBox(std::shared_ptr<ValueBoxChannelGain> gains);
+  void setOrderDisplayValueBox(std::shared_ptr<ValueBoxOrderDisplay> gains);
 
   void parameterValueChanged(int parameterIndex, float newValue) override;
   void parameterGestureChanged(int parameterIndex,
@@ -126,7 +126,7 @@ class HoaJuceFrontendConnector
   std::weak_ptr<ValueBoxSpeakerLayer> upperLayer_;
   std::weak_ptr<ValueBoxSpeakerLayer> middleLayer_;
   std::weak_ptr<ValueBoxSpeakerLayer> bottomLayer_;*/
-  std::weak_ptr<ValueBoxChannelGain> channelGains_;
+  std::weak_ptr<ValueBoxOrderDisplay> orderDisplay_;
 
 };
 

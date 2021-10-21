@@ -15,7 +15,7 @@
 #include "value_box_speaker_layer.hpp"
 */
 #include "value_box_main.hpp"
-#include "value_box_channel_gain.hpp"
+#include "value_box_order_display.hpp"
 #include "components/version_label.hpp"
 
 #include <memory>
@@ -34,7 +34,7 @@ class HoaComponent : public Component,
         onBoardingOverlay(std::make_unique<Overlay>()),
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
-        channelGainValueBox(std::make_shared<ValueBoxChannelGain>(p->getLevelMeter())),
+        orderDisplayValueBox(std::make_shared<ValueBoxOrderDisplay>(p->getLevelMeter())),
         /* Old DS Code
             // We want to put our new component panels in here
         upperLayerValueBox(
@@ -74,7 +74,7 @@ class HoaComponent : public Component,
     addChildComponent(onBoardingOverlay.get());
 
     addAndMakeVisible(mainValueBox.get());
-    addAndMakeVisible(channelGainValueBox.get());
+    addAndMakeVisible(orderDisplayValueBox.get());
     /* Old DS code
     // Add components to the UI here
     upperLayerValueBox->setLayer(ear::plugin::Layer::upper);
@@ -119,12 +119,13 @@ class HoaComponent : public Component,
 
     auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);//LHS column
     auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);//RHS column
-    auto channelGainArea = area.withTrimmedTop(197);//Additional box (atm channel gain)
+    auto orderDisplayArea = area.withTrimmedTop(197);//Additional box (atm channel gain)
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));//main value box where the HOA type and routing is chosen
 
-    channelGainValueBox->setBounds(channelGainArea.reduced(5, 5));//channelGain box where the channel gain is stored
+    orderDisplayValueBox->setBounds(orderDisplayArea.reduced(
+        5, 5));  // channelGain box where the channel gain is stored
     //channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
 
     /* Old DS Code
@@ -146,7 +147,7 @@ class HoaComponent : public Component,
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
 
 
-  std::shared_ptr<ear::plugin::ui::ValueBoxChannelGain> channelGainValueBox;
+  std::shared_ptr<ear::plugin::ui::ValueBoxOrderDisplay> orderDisplayValueBox;
   /* Old DS Code
   // TODO - We need to store smart-pointers to our new component panels here
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> upperLayerValueBox;

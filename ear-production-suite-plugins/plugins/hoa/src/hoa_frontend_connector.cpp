@@ -165,7 +165,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }
 
-  if (auto channelGainsLocked = channelGains_.lock()) {
+  if (auto channelGainsLocked = orderDisplay_.lock()) {
     channelGainsLocked->setHoaType(packFormatIdValue);
   }
 }
@@ -232,10 +232,10 @@ void HoaJuceFrontendConnector::setBottomLayerValueBox(
   layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
   bottomLayer_ = layer;
 }*/
-void HoaJuceFrontendConnector::setChannelGainsValueBox(
-    std::shared_ptr<ValueBoxChannelGain> gains) {
-  gains->setHoaType(cachedHoaType_);
-  channelGains_ = gains;
+void HoaJuceFrontendConnector::setOrderDisplayValueBox(
+    std::shared_ptr<ValueBoxOrderDisplay> orderDisplay) {
+  orderDisplay->setHoaType(cachedHoaType_);
+  orderDisplay_ = orderDisplay;
 }
 
 

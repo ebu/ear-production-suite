@@ -45,8 +45,8 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
       content_->middleLayerValueBox);
   p->getFrontendConnector()->setBottomLayerValueBox(
       content_->bottomLayerValueBox);*/
-  p->getFrontendConnector()->setChannelGainsValueBox(
-      content_->channelGainValueBox);
+  p->getFrontendConnector()->setOrderDisplayValueBox(
+      content_->orderDisplayValueBox);
 
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);
