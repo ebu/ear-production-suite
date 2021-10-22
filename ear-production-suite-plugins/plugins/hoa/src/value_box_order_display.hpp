@@ -8,7 +8,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/slider.hpp"
-#include "channel_gains_box.hpp"
+#include "order_display_box.hpp"
 //#include "speaker_setups.hpp"
 
 namespace ear {
@@ -21,7 +21,7 @@ class ValueBoxOrderDisplay : public Component {
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter)
       : levelMeter_(levelMeter),
         headingLabel_(std::make_unique<Label>()),
-        orderDisplayBox_(std::make_unique<ChannelGainsBox>())  {//CHANGE
+        orderDisplayBox_(std::make_unique<OrderDisplayBox>()) {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("HOA Order Display",
@@ -51,7 +51,7 @@ class ValueBoxOrderDisplay : public Component {
   }
 
   void clearHoaSetup() {
-    orderDisplayBox_->removeAllChannelGains();
+    orderDisplayBox_->removeAllOrderBoxes();
     
     orderDisplayBox_->setVisible(true);
   }
@@ -68,33 +68,32 @@ class ValueBoxOrderDisplay : public Component {
     }
 
     for (int i = 0; i < cfCount; ++i) {
-      channelGains_.push_back(
+      orderBoxes_.push_back(
           std::make_unique<ChannelGain>(std::to_string(i+1)));
-      channelGains_.back()->getLevelMeter()->setMeter(levelMeter_, i);
+      orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
     }
-    orderDisplayBox_->addChannelGain(
-        channelGains_.back().get());  // Change to addOrderBox
+    orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
     
   }
 
  private:
   void linkChannels() {
 
-    for (const auto& channelGain : channelGains_) {
-      channelGain->getGainSlider()->getValueObject().referTo(
-          channelGains_.at(0)->getGainSlider()->getValueObject());
+    for (const auto& orderBox : orderBoxes_) {
+      orderBox->getGainSlider()->getValueObject().referTo(
+          orderBoxes_.at(0)->getGainSlider()->getValueObject());
     }
   }
 
   void unlinkChannels() {
 
     float lastValue = 0.f;
-    if (!channelGains_.empty()) {
-      lastValue = channelGains_.at(0)->getGainSlider()->getValue();
+    if (!orderBoxes_.empty()) {
+      lastValue = orderBoxes_.at(0)->getGainSlider()->getValue();
     }
-    for (const auto& channelGain : channelGains_) {
-      channelGain->getGainSlider()->getValueObject().referTo({});
-      channelGain->getGainSlider()->setValue(lastValue, dontSendNotification);
+    for (const auto& orderBox : orderBoxes_) {
+      orderBox->getGainSlider()->getValueObject().referTo({});
+      orderBox->getGainSlider()->setValue(lastValue, dontSendNotification);
     }
   }
 
@@ -103,8 +102,8 @@ class ValueBoxOrderDisplay : public Component {
   std::unique_ptr<Label> headingLabel_;
 
 
-  std::vector<std::unique_ptr<ear::plugin::ui::ChannelGain>> channelGains_;
-  std::unique_ptr<ear::plugin::ui::ChannelGainsBox> orderDisplayBox_;
+  std::vector<std::unique_ptr<ear::plugin::ui::ChannelGain>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
+  std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;
 
 
   const float labelWidth_ = 71.f;

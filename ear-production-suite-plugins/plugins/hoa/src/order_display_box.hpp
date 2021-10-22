@@ -10,14 +10,14 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class ChannelGainsBox : public Component {
+class OrderDisplayBox : public Component {
  public:
-  ChannelGainsBox() {}
-  ~ChannelGainsBox() {}
+  OrderDisplayBox() {}
+  ~OrderDisplayBox() {}
 
   void paint(Graphics& g) override {
     auto area = getLocalBounds();
-    if (channelGains_.empty()) {
+    if (orderBoxes_.empty()) {
       g.fillAll(EarColours::Area01dp);
       float lineThickness = 1.f;
       g.setColour(EarColours::Error);
@@ -28,7 +28,7 @@ class ChannelGainsBox : public Component {
 
       g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
       g.setFont(EarFonts::Label);
-      g.drawText("Channel gains not available", area.removeFromTop(25.f),
+      g.drawText("Order Boxes not available", area.removeFromTop(25.f),
                  Justification::left);
       g.setColour(EarColours::Text.withAlpha(Emphasis::high));
       g.setFont(EarFonts::Heading);
@@ -63,29 +63,29 @@ class ChannelGainsBox : public Component {
     */
       //ME end - Remember to comment bit below out if using this
      area.removeFromBottom(350);
-    for (auto channelGain : channelGains_) {
-      channelGain->setBounds(area.removeFromLeft(50));
+    for (auto orderBox : orderBoxes_) {
+       orderBox->setBounds(area.removeFromLeft(50));
       area.removeFromLeft(6);
     }
   }
 
-  void addChannelGain(ChannelGain* channelGain) {
-    channelGains_.push_back(channelGain);
-    addAndMakeVisible(channelGain);
+  void addOrderBox(ChannelGain* orderBox) {
+    orderBoxes_.push_back(orderBox);
+    addAndMakeVisible(orderBox);
     updateChannelGainBounds();
     repaint();
   }
 
-  void removeAllChannelGains() {
+  void removeAllOrderBoxes() {
     removeAllChildren();
-    channelGains_.clear();
+    orderBoxes_.clear();
     repaint();
   };
 
  private:
-  std::vector<ChannelGain*> channelGains_;
+  std::vector<ChannelGain*> orderBoxes_;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGainsBox)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OrderDisplayBox)
 };
 
 }  // namespace ui
