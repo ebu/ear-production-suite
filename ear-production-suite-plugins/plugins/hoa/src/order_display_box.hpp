@@ -4,7 +4,7 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "channel_gain.hpp"
+#include "order_box.hpp"
 
 namespace ear {
 namespace plugin {
@@ -37,9 +37,10 @@ class OrderDisplayBox : public Component {
     }
   }
 
-  void resized() override { updateChannelGainBounds(); }
+  void resized() override { updateOrderBoxBounds(); }
 
-  void updateChannelGainBounds() {//This seems to be where we place the channel gain boxes
+  void updateOrderBoxBounds() {  // This seems to be where we place the channel
+                                 // gain boxes
     auto area = getLocalBounds();
 
     //ME add
@@ -62,17 +63,17 @@ class OrderDisplayBox : public Component {
     }
     */
       //ME end - Remember to comment bit below out if using this
-     area.removeFromBottom(350);
+     //area.removeFromBottom(350);
     for (auto orderBox : orderBoxes_) {
-       orderBox->setBounds(area.removeFromLeft(50));
-      area.removeFromLeft(6);
+       orderBox->setBounds(area.removeFromTop(50));
+      area.removeFromTop(6);
     }
   }
 
-  void addOrderBox(ChannelGain* orderBox) {
+  void addOrderBox(OrderBox* orderBox) {
     orderBoxes_.push_back(orderBox);
     addAndMakeVisible(orderBox);
-    updateChannelGainBounds();
+    updateOrderBoxBounds();
     repaint();
   }
 
@@ -83,7 +84,7 @@ class OrderDisplayBox : public Component {
   };
 
  private:
-  std::vector<ChannelGain*> orderBoxes_;
+  std::vector<OrderBox*> orderBoxes_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OrderDisplayBox)
 };

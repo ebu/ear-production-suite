@@ -19,7 +19,7 @@ class ValueBoxOrderDisplay : public Component {
  public:
   ValueBoxOrderDisplay(
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter)
-      : levelMeter_(levelMeter),
+      : levelMeter_(levelMeter),//NOT sure about whether this needs to be kept
         headingLabel_(std::make_unique<Label>()),
         orderDisplayBox_(std::make_unique<OrderDisplayBox>()) {
     headingLabel_->setFont(EarFonts::Heading);
@@ -66,35 +66,32 @@ class ValueBoxOrderDisplay : public Component {
     if (pfData) {
       cfCount = static_cast<size_t>(pfData->relatedChannelFormats.size());
     }
+    size_t orderCount(ceil(sqrt(cfCount)));
 
-    for (int i = 0; i < cfCount; ++i) {
+    for (int i = 0; i < orderCount; ++i) {
+      std::string ordinal = [&](){
+        std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
+        return suffixes.at(std::min(i % 10,4));
+      }();
+
       orderBoxes_.push_back(
-          std::make_unique<ChannelGain>(std::to_string(i+1)));
-      orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
+          std::make_unique<OrderBox>(std::to_string(i)+ordinal,i));
+      orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
+      //orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
     }
-    orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
+    
     
   }
 
  private:
   void linkChannels() {
 
-    for (const auto& orderBox : orderBoxes_) {
-      orderBox->getGainSlider()->getValueObject().referTo(
-          orderBoxes_.at(0)->getGainSlider()->getValueObject());
-    }
   }
 
   void unlinkChannels() {
 
     float lastValue = 0.f;
-    if (!orderBoxes_.empty()) {
-      lastValue = orderBoxes_.at(0)->getGainSlider()->getValue();
-    }
-    for (const auto& orderBox : orderBoxes_) {
-      orderBox->getGainSlider()->getValueObject().referTo({});
-      orderBox->getGainSlider()->setValue(lastValue, dontSendNotification);
-    }
+
   }
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
@@ -102,7 +99,7 @@ class ValueBoxOrderDisplay : public Component {
   std::unique_ptr<Label> headingLabel_;
 
 
-  std::vector<std::unique_ptr<ear::plugin::ui::ChannelGain>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
+  std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
   std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;
 
 
