@@ -18,7 +18,7 @@ class OrderBox : public Component {
       : //levelMeter_(std::make_unique<LevelMeter>()),
         orderLabel_(std::make_unique<Label>()),
         levelDisplayBox_(std::make_unique<LevelDisplayBox>()),
-        order_(rowOrder) {
+        rowOrder_(rowOrder) {
     //levelMeter_->setOrientation(LevelMeter::vertical);
     //addAndMakeVisible(levelMeter_.get());
 
@@ -28,17 +28,7 @@ class OrderBox : public Component {
     orderLabel_->setJustificationType(Justification::centred);
     addAndMakeVisible(orderLabel_.get());
 
-    auto numChannelsOnRow = [](int value) { 
-      return value < 0 ? 0 : value * 2 + 1; 
-    };
-    auto numChannelsInOrder = [](int value) {
-      return pow(value + 1, 2);
-    };
-
-    for (int i(0); i < numChannelsOnRow(rowOrder); i++) {
-      PyramidBox pyramidBox = PyramidBox(std::to_string(i + 1 +  numChannelsInOrder(rowOrder - 1)));
-      pyramidBoxes_.push_back(&pyramidBox);
-    }
+    addPyramidBoxesToOrderBox();
   }
   ~OrderBox() {}
 
@@ -61,8 +51,8 @@ class OrderBox : public Component {
   void updatePyramidBoxBounds() {  // This seems to be where we place the
                                     // channel gain boxes
     auto area = getLocalBounds();
-    for (auto *pyramidBox : pyramidBoxes_) {
-      area.removeFromLeft(getLocalBounds().getWidth() / pyramidBoxes_.size());
+    for (auto pyramidBox : pyramidBoxes_) {
+      //area.removeFromLeft(getLocalBounds().getWidth() / pyramidBoxes_.size());
       pyramidBox->setBounds(area.removeFromLeft(50));
       area.removeFromLeft(6);
     }
@@ -70,11 +60,22 @@ class OrderBox : public Component {
 
   //LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
-  void addPyramidBox(PyramidBox* pyramidBox) {
-    pyramidBoxes_.push_back(pyramidBox);
-    addAndMakeVisible(pyramidBox);
-    updatePyramidBoxBounds();
-    repaint();
+  void addPyramidBoxesToOrderBox() {
+
+    auto numChannelsOnRow = [](int value) { return value < 0 ? 0 : value * 2 + 1;};
+    auto numChannelsInOrder = [](int value) { return pow(value + 1, 2); };
+
+    for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
+      PyramidBox pyramidBox =
+          PyramidBox(std::to_string(i + 1 + numChannelsInOrder(rowOrder_ - 1)));
+      pyramidBoxes_.push_back(&pyramidBox);
+      addAndMakeVisible(pyramidBox);
+    }
+
+    //pyramidBoxes_.push_back(pyramidBox);
+    
+    //updatePyramidBoxBounds();
+    //repaint();
   }
 
   void removeAllOrderBoxes() {
@@ -86,7 +87,7 @@ class OrderBox : public Component {
  private:
   //std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> orderLabel_;
-  int order_;
+  int rowOrder_;
   std::unique_ptr<LevelDisplayBox> levelDisplayBox_;
   std::vector<PyramidBox*> pyramidBoxes_;
 

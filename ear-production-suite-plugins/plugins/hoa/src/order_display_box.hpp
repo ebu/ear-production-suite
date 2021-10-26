@@ -74,6 +74,7 @@ class OrderDisplayBox : public Component {
     orderBoxes_.push_back(orderBox);
     addAndMakeVisible(orderBox);
     updateOrderBoxBounds();
+    //orderBox->addPyramidBoxesToOrderBox();
     repaint();
   }
 

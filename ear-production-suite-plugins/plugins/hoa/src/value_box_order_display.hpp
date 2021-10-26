@@ -52,7 +52,6 @@ class ValueBoxOrderDisplay : public Component {
 
   void clearHoaSetup() {
     orderDisplayBox_->removeAllOrderBoxes();
-    
     orderDisplayBox_->setVisible(true);
   }
 
