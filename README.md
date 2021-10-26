@@ -46,6 +46,9 @@ sudo xattr -rd com.apple.quarantine \
 ```
 Substituting paths as needed if you have not installed to the default locations.
 
+### Apple silicon support
+Although the project has been successfully cross-compiled from an intel based machine (via the `macos-default-arm64` preset), we do not currently have access to an Apple Silicon mac, so support is currently considered experimental. Please report any issues you encounter.
+
 ## Building from source
 
 ### Using vcpkg and cmake presets
@@ -71,8 +74,9 @@ brew install cmake ninja
 ```shell
 git clone --recursive https://github.com/ebu/ear-production-suite.git
 cd ear-production-suite
-cmake --preset macos-default         # configures project, downloads & builds dependencies
-cmake --build --preset macos-default # builds project
+./submodules/vcpkg/bootstrap-vcpkg.sh # ensures vcpkg is setup 
+cmake --preset macos-default          # configures project, downloads & builds dependencies
+cmake --build --preset macos-default  # builds project
 ```
 #### Installing
 ```shell
@@ -98,6 +102,7 @@ You'll need to install [CMake](https://www.cmake.org) and [Ninja](https://ninja-
 ```bash
 git clone --recursive https://github.com/ebu/ear-production-suite.git
 cd ear-production-suite
+.\submodules\vcpkg\bootstrap-vcpkg.bat # ensures vcpkg is setup
 cmake --preset windows-default         # configures project, downloads & builds dependencies
 cmake --build --preset windows-default # builds project
 ```
@@ -115,7 +120,7 @@ The location of the installed VST3 plugins will be
 The REAPER extension will be installed to the AppData directory for the current user (as specified by the `AppData` environment variable, which will normally resolve to the `Roaming` subdirectory.)
 The location of the installed REAPER extension will be
 ```shell
-<~\AppData\Roaming>\REAPER\UserPlugins\
+~\AppData\Roaming\REAPER\UserPlugins\
 ```
 
 ### Customising installation location

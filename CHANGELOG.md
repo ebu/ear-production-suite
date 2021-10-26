@@ -27,4 +27,5 @@ Version 0.7.0
 * Added support for ADM with two character language codes [#121](http://github.com/ebu/ear-production-suite/pull/121)
 * Fixed crash due to recursive mutex locking [#133](http://github.com/ebu/ear-production-suite/pull/133)
 * Fixed issue where scene would remove incorrect items [#87](http://github.com/ebu/ear-production-suite/pull/87)
+* Preliminary arm64 support for Apple Silicon [#137](http://github.com/ebu/ear-production-suite/pull/137)
 * Various CI improvements
