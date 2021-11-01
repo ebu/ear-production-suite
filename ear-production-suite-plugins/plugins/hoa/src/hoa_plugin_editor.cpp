@@ -8,7 +8,7 @@
 #include "hoa_frontend_connector.hpp"
 
 namespace{
-  const int desiredWidth{ 750 };
+  const int desiredWidth{ 1000 };
   const int desiredHeight{ 930 };
 }
 

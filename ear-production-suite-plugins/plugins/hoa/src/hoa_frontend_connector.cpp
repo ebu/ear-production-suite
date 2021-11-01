@@ -3,7 +3,7 @@
 // TODO - remove unrequired components once UI dev complete
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
-
+#include <numeric>
 namespace {
   String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
     return String(position) + String::fromUTF8("-") + String(position + layoutSizeFixed);
@@ -47,11 +47,9 @@ HoaJuceFrontendConnector::~HoaJuceFrontendConnector() {
   if (auto comboBox = routingComboBox_.lock()) {
     comboBox->removeListener(this);
   }
-  //ME add, similar to DS
   if (auto comboBox = hoaTypeComboBox_.lock()) {
     comboBox->removeListener(this);
   }
-  //Me end
 }
 
 void HoaJuceFrontendConnector::setStatusBarLabel(
@@ -100,21 +98,6 @@ void HoaJuceFrontendConnector::setColour(Colour colour) {
     colourComboBoxLocked->addColourEntry(colour);
     colourComboBoxLocked->selectEntry(0, dontSendNotification);
   }
-  /* Old DS Code
-  // When the track colour changes, we need to inform the component panels so they can change their highlight colours accordingly
-  if (auto upperLayerLocked = upperLayer_.lock()) {
-    upperLayerLocked->setHighlightColour(colour);
-    upperLayerLocked->repaint();
-  }
-  if (auto middleLayerLocked = middleLayer_.lock()) {
-    middleLayerLocked->setHighlightColour(colour);
-    middleLayerLocked->repaint();
-  }
-  if (auto bottomLayerLocked = bottomLayer_.lock()) {
-    bottomLayerLocked->setHighlightColour(colour);
-    bottomLayerLocked->repaint();
-  }
-  */
   cachedColour_ = colour;
 }
 
@@ -142,6 +125,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
                              // so the common box value is actual set and saved.
                              // This is called from the front end connector,
                              // parameter_changed method
+  //int channelCount;
   if (auto hoaTypeComboBoxLocked = hoaTypeComboBox_.lock()) {
                                hoaTypeComboBoxLocked->setSelectedId(
                                    hoaType, dontSendNotification);
@@ -155,6 +139,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
 
     if (pfData) {
       cfCount = pfData->relatedChannelFormats.size();
+      //channelCount = cfCount;
     }
 
     routingComboBoxLocked->clearEntries();
@@ -168,76 +153,23 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
   if (auto channelGainsLocked = orderDisplay_.lock()) {
     channelGainsLocked->setHoaType(packFormatIdValue);
   }
-}
-//end ME
 
-/* Old DS Code - see header for info
-// This code also sets the entries in the "Routing" combo-box based on the number of channels required.
-// We will need to do something similar when the user selects a HOA type
+  /*auto view = std::make_shared<LevelDisplayBox>();
+  view->addListener(this);
+  view->setData();
 
-void HoaJuceFrontendConnector::setSpeakerSetupsComboBox(
-    std::shared_ptr<EarComboBox> comboBox) {
-  comboBox->addListener(this);
-  speakerSetupsComboBox_ = comboBox;
-  setSpeakerSetup(cachedSpeakerSetupIndex_);
+  std::vector<int> routing(channelCount);
+  std::iota(routing.begin(), routing.end(), cachedRouting_);
+  view->getLevelMeter()->setMeter(p_->getLevelMeter(), routing);
+  displayOrderBox_->addAndMakeVisible(*view);*/
+    //addElement(view);
 }
 
-void HoaJuceFrontendConnector::setSpeakerSetup(
-    int speakerSetupIndex) {
-  cachedSpeakerSetupIndex_ = speakerSetupIndex;
-  if (auto speakerSetupsComboBoxLocked = speakerSetupsComboBox_.lock())
-    speakerSetupsComboBoxLocked->selectEntry(speakerSetupIndex,
-                                             dontSendNotification);
-  if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    int layoutSize =
-        speakerSetupByIndex(cachedSpeakerSetupIndex_).speakers.size();
-    routingComboBoxLocked->clearEntries();
-    auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
-    for (int i = 1; i + layoutSizeFixed <= 64; ++i) {
-      routingComboBoxLocked->addTextEntry(String(i) + String::fromUTF8("–") +
-                                          String(i + layoutSizeFixed));
-    }
-    routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
-  }
-  auto speakerSetup = speakerSetupByIndex(speakerSetupIndex);
-  if (auto upperLayerLocked = upperLayer_.lock()) {
-    upperLayerLocked->setSpeakerSetup(speakerSetup);
-  }
-  if (auto middleLayerLocked = middleLayer_.lock()) {
-    middleLayerLocked->setSpeakerSetup(speakerSetup);
-  }
-  if (auto bottomLayerLocked = bottomLayer_.lock()) {
-    bottomLayerLocked->setSpeakerSetup(speakerSetup);
-  }
-  if (auto channelGainsLocked = channelGains_.lock()) {
-    channelGainsLocked->setSpeakerSetup(speakerSetup);
-  }
-}
-
-void HoaJuceFrontendConnector::setUpperLayerValueBox(
-    std::shared_ptr<ValueBoxSpeakerLayer> layer) {
-  layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
-  upperLayer_ = layer;
-}
-void HoaJuceFrontendConnector::setMiddleLayerValueBox(
-    std::shared_ptr<ValueBoxSpeakerLayer> layer) {
-  layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
-  middleLayer_ = layer;
-}
-void HoaJuceFrontendConnector::setBottomLayerValueBox(
-    std::shared_ptr<ValueBoxSpeakerLayer> layer) {
-  layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
-  bottomLayer_ = layer;
-}*/
 void HoaJuceFrontendConnector::setOrderDisplayValueBox(
     std::shared_ptr<ValueBoxOrderDisplay> orderDisplay) {
   orderDisplay->setHoaType(cachedHoaType_);
   orderDisplay_ = orderDisplay;
 }
-
 
 void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this will be called from JUCE interface and then it notifies to implementation agnostic front end
     int parameterIndex, float newValue) {
@@ -249,24 +181,12 @@ void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this
         setRouting(p_->getRouting()->get());
       });
       break;
-      //ME add
     case 1:
       notifyParameterChanged(ParameterId::PACKFORMAT_ID_FORMAT, p_->getPackFormatIdValue()->get());//(2.)
       updater_.callOnMessageThread([this]() {
         setHoaType(p_->getPackFormatIdValue()->get());
       });  // 1st value is set based on display
       break;
-      //ME end
-    /* Old DS Code
-    // Other parameters should be added here
-    case 1:
-      notifyParameterChanged(ParameterId::SPEAKER_SETUP_INDEX,
-                             p_->getSpeakerSetupIndex()->get());
-      updater_.callOnMessageThread([this]() {
-        setSpeakerSetup(p_->getSpeakerSetupIndex()->get());
-      });
-      break;
-    */
   }
 }
 
@@ -288,27 +208,12 @@ void HoaJuceFrontendConnector::trackPropertiesChanged(
   });
 }
 
-/* Old DS Code
-// Listener code - see header for info
-void HoaJuceFrontendConnector::sliderValueChanged(Slider* slider) {}
-void HoaJuceFrontendConnector::sliderDragStarted(Slider* slider) {}
-void HoaJuceFrontendConnector::sliderDragEnded(Slider* slider) {}
-*/
-
 void HoaJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
-  /* Old DS Code
-  // Probably need similar when selecting HOOA type
-  if (!speakerSetupsComboBox_.expired() &&
-      comboBox == speakerSetupsComboBox_.lock().get()) {
-    *(p_->getSpeakerSetupIndex()) = comboBox->getSelectedEntryIndex();
-  }
-  */
-  //ME add, similar to DS
   if (!hoaTypeComboBox_.expired() &&
       comboBox == hoaTypeComboBox_.lock().get()) {
     *(p_->getPackFormatIdValue()) = comboBox->getSelectedId();
-  }//Me end
+  }
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {
     *(p_->getRouting()) = comboBox->getSelectedEntryIndex();

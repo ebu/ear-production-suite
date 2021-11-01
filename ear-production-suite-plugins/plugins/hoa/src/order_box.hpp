@@ -5,6 +5,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "level_display_box.hpp"
+//#include "components/level_meter.hpp"
 #include "pyramid_box.hpp"
 #include <math.h>
 
@@ -14,11 +15,12 @@ namespace ui {
 
 class OrderBox : public Component {
  public:
-  OrderBox(String name, int rowOrder)
+  OrderBox(String name, int rowOrder, int hoaOrder)
       : //levelMeter_(std::make_unique<LevelMeter>()),
         orderLabel_(std::make_unique<Label>()),
         levelDisplayBox_(std::make_unique<LevelDisplayBox>()),
-        rowOrder_(rowOrder) {
+        rowOrder_(rowOrder),
+        hoaOrder_(hoaOrder){
     //levelMeter_->setOrientation(LevelMeter::vertical);
     //addAndMakeVisible(levelMeter_.get());
 
@@ -37,24 +39,24 @@ class OrderBox : public Component {
 
   void resized() override {//Here we actually set the look of the level meter
     auto area = getLocalBounds();
-    area.removeFromTop(5).removeFromBottom(100);//ME change
-   // levelMeter_->setBounds(
-        //area.removeFromTop(120).withSizeKeepingCentre(13, 120));
+
     orderLabel_->setBounds(area.removeFromLeft(40));
-    levelDisplayBox_->setBounds(area.removeFromLeft(300));
+    levelDisplayBox_->setBounds(area.removeFromLeft(200));
 
-    
-    updatePyramidBoxBounds();
+    area.removeFromBottom(5);
+    area.removeFromTop(5);
+    auto areaWidth = area.getWidth();
 
-  }
+    int pyramidBoxWidth(40);
+    int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;
+    int partitionNumber = (numberOfBoxPartitions / 2) - rowOrder_;
 
-  void updatePyramidBoxBounds() {  // This seems to be where we place the
-                                    // channel gain boxes
-    auto area = getLocalBounds();
     for (auto pyramidBox : pyramidBoxes_) {
-      //area.removeFromLeft(getLocalBounds().getWidth() / pyramidBoxes_.size());
-      pyramidBox->setBounds(area.removeFromLeft(50));
-      area.removeFromLeft(6);
+      auto removeFromLeft =
+          (partitionNumber * areaWidth) / numberOfBoxPartitions;
+      auto pyramidBoxArea = area.withTrimmedLeft(removeFromLeft);
+      pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxWidth));
+      partitionNumber++;
     }
   }
 
@@ -65,11 +67,14 @@ class OrderBox : public Component {
     auto numChannelsOnRow = [](int value) { return value < 0 ? 0 : value * 2 + 1;};
     auto numChannelsInOrder = [](int value) { return pow(value + 1, 2); };
 
+    pyramidBoxes_.reserve(numChannelsOnRow(rowOrder_));
+
     for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
-      PyramidBox pyramidBox =
-          PyramidBox(std::to_string(i + 1 + numChannelsInOrder(rowOrder_ - 1)));
-      pyramidBoxes_.push_back(&pyramidBox);
-      addAndMakeVisible(pyramidBox);
+      std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
+          std::make_shared<PyramidBox>(
+              std::to_string(i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1))));
+      pyramidBoxes_.push_back(pyramidBox);
+      addAndMakeVisible(*pyramidBox);
     }
 
     //pyramidBoxes_.push_back(pyramidBox);
@@ -88,8 +93,9 @@ class OrderBox : public Component {
   //std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> orderLabel_;
   int rowOrder_;
+  int hoaOrder_;
   std::unique_ptr<LevelDisplayBox> levelDisplayBox_;
-  std::vector<PyramidBox*> pyramidBoxes_;
+  std::vector<std::shared_ptr<ear::plugin::ui::PyramidBox>> pyramidBoxes_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OrderBox)
 };

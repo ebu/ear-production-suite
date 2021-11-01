@@ -18,13 +18,13 @@ class ItemsContainer : public Component {
   ItemsContainer()
       : objectsList(std::make_unique<ItemViewList>()),
         directSpeakersList(std::make_unique<ItemViewList>()),
-        hoaList(std::make_unique<ItemViewList>()),//ME add
+        hoaList(std::make_unique<ItemViewList>()),
         objectsViewport_(std::make_unique<Viewport>()),
         directSpeakersViewport_(std::make_unique<Viewport>()),
-        hoaViewport_(std::make_unique<Viewport>()),//ME add
+        hoaViewport_(std::make_unique<Viewport>()),
         objectsLabel_(std::make_unique<Label>()),
         directSpeakersLabel_(std::make_unique<Label>()),
-        hoaLabel_(std::make_unique<Label>()),//ME add
+        hoaLabel_(std::make_unique<Label>()),
         addButton_(std::make_unique<EarButton>()) {
     objectsViewport_->setViewedComponent(objectsList.get(), false);
     objectsViewport_->setScrollBarsShown(true, false);

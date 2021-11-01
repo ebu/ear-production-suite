@@ -9,23 +9,18 @@
 #include "components/ear_name_text_editor.hpp"
 #include "helper/multi_async_updater.h"
 #include "value_box_order_display.hpp"//probs needs adding to this target file path
-/* Old DS Code
-// These are the definitions of the UI panels
-#include "value_box_speaker_layer.hpp"
-*/
+#include "level_display_box.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
+class LevelDisplayBox;
 
 class HoaJuceFrontendConnector
     : public ear::plugin::ui::HoaFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
-      /* Old DS Code
-      // Only need to inherit from this if we're using sliders for any sort of input
-      Slider::Listener,
-      */
-      ear::plugin::ui::EarComboBox::Listener {
+      ear::plugin::ui::EarComboBox::Listener/*,
+          ear::plugin::ui::LevelDisplayBox::Listener*/ {
  public:
   /**
    * Note: Make sure that all AudioProcessorParameters are already
@@ -41,59 +36,31 @@ class HoaJuceFrontendConnector
   void parameterGestureChanged(int parameterIndex,
                                bool gestureIsStarting) override{};
 
-  void trackPropertiesChanged(
-      const AudioProcessor::TrackProperties& properties);
+  void trackPropertiesChanged(const AudioProcessor::TrackProperties& properties);
 
   void setStatusBarLabel(std::shared_ptr<Label> label);
 
   void setColourComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> textEditor);
   void setRoutingComboBox(std::shared_ptr<EarComboBox> comboBox);
-  //ME adds bit for common definition
   void setHoaTypeComboBox(std::shared_ptr<EarComboBox> comboBox);
 
-  /* Old DS Code
-  // These setters allow other classes (I.e, the editor) to pass pointers to current UI controls
-  void setSpeakerSetupsComboBox(std::shared_ptr<EarComboBox> comboBox);
-  void setUpperLayerValueBox(std::shared_ptr<ValueBoxSpeakerLayer> layer);
-  void setMiddleLayerValueBox(std::shared_ptr<ValueBoxSpeakerLayer> layer);
-  void setBottomLayerValueBox(std::shared_ptr<ValueBoxSpeakerLayer> layer);
-  void setChannelGainsValueBox(std::shared_ptr<ValueBoxChannelGain> gains);
-  */
 
   void setName(const std::string& name);
   void setColour(Colour colour);
   void setRouting(int routing);
-  //ME add likewise for common definition
   void setHoaType(int hoaType);
 
-  /* Old DS Code
-  // These setters are used to set the state of controls
-  void setSpeakerSetup(int speakerSetupIndex);
-  */
 
  protected:
   // ear::plugin::ui::InputFrontendBackendConnector
   void doSetStatusBarText(const std::string& text) override;
 
-  /* Old DS Code
-  // These are "listeners" - methods which fire when a particular event occurs to a control
-
-  // Slider::Listener
-  void sliderValueChanged(Slider* slider) override;
-  void sliderDragStarted(Slider*) override;
-  void sliderDragEnded(Slider*) override;
-  */
   // EarComboBox::Listener
   void comboBoxChanged(
       ear::plugin::ui::EarComboBox* comboBoxThatHasChanged) override;
 
  private:
-
-  /* Old DS Code
-  // TODO - will probably need to mimic for HOA when the user changes the HOA type
-  void speakerSetupChanged(int index);
-  */
 
   HoaAudioProcessor* p_;
 
@@ -110,24 +77,11 @@ class HoaJuceFrontendConnector
   Colour cachedColour_;
   std::weak_ptr<EarComboBox> routingComboBox_;
   int cachedRouting_;
-  //ME define the box for common definitions, set as int for now
   std::weak_ptr<EarComboBox> hoaTypeComboBox_;
   int cachedHoaType_;
-  //ear::plugin::HoaBackend cachedCommonDefinition_;
-  /* Old DS Code
-  // For each parameter, we hold a pointer to the UI control which sets it, and cache the last known value
-  std::weak_ptr<EarComboBox> speakerSetupsComboBox_;
-  int cachedSpeakerSetupIndex_;
-  ear::plugin::SpeakerSetup cachedSpeakerSetup_;
-  */
 
-  /* Old DS Code
-  // Pointers to UI panels
-  std::weak_ptr<ValueBoxSpeakerLayer> upperLayer_;
-  std::weak_ptr<ValueBoxSpeakerLayer> middleLayer_;
-  std::weak_ptr<ValueBoxSpeakerLayer> bottomLayer_;*/
   std::weak_ptr<ValueBoxOrderDisplay> orderDisplay_;
-
+  //std::shared_ptr<LevelDisplayBox> displayOrderBox_;
 };
 
 }  // namespace ui

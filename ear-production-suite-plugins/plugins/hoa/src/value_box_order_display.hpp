@@ -73,8 +73,8 @@ class ValueBoxOrderDisplay : public Component {
         return suffixes.at(std::min(i % 10,4));
       }();
 
-      orderBoxes_.push_back(
-          std::make_unique<OrderBox>(std::to_string(i)+ordinal,i));
+      orderBoxes_.push_back(std::make_unique<OrderBox>(
+          std::to_string(i) + ordinal, i, orderCount-1));
       orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
       //orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
     }
@@ -96,7 +96,6 @@ class ValueBoxOrderDisplay : public Component {
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   std::unique_ptr<Label> headingLabel_;
-
 
   std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
   std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;

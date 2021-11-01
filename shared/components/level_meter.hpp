@@ -64,7 +64,8 @@ class LevelMeter : public Component, private Timer {
   }
 
   void paint(Graphics& g) override {//Here we actually draw the rectangle
-    g.fillAll(findColour(backgroundColourId));
+    //g.fillAll(findColour(backgroundColourId));
+    g.fillAll(findColour(outlineColorId));//added temp
     g.setColour(findColour(outlineColorId));
     g.drawRect(getLocalBounds());
 
