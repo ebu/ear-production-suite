@@ -34,7 +34,7 @@ class HoaComponent : public Component,
         onBoardingOverlay(std::make_unique<Overlay>()),
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
-        orderDisplayValueBox(std::make_shared<ValueBoxOrderDisplay>(p->getLevelMeter())),
+        orderDisplayValueBox(std::make_shared<ValueBoxOrderDisplay>(p, p->getLevelMeter())),
         /* Old DS Code
             // We want to put our new component panels in here
         upperLayerValueBox(

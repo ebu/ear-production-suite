@@ -5,7 +5,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "level_display_box.hpp"
-//#include "components/level_meter.hpp"
+#include "components/level_meter.hpp"
 #include "pyramid_box.hpp"
 #include <math.h>
 
@@ -15,14 +15,15 @@ namespace ui {
 
 class OrderBox : public Component {
  public:
-  OrderBox(String name, int rowOrder, int hoaOrder)
-      : //levelMeter_(std::make_unique<LevelMeter>()),
+  OrderBox(HoaAudioProcessor* p, String name, int rowOrder, int hoaOrder)
+      : levelMeter_(std::make_unique<LevelMeter>()),
         orderLabel_(std::make_unique<Label>()),
         levelDisplayBox_(std::make_unique<LevelDisplayBox>()),
         rowOrder_(rowOrder),
-        hoaOrder_(hoaOrder){
-    //levelMeter_->setOrientation(LevelMeter::vertical);
-    //addAndMakeVisible(levelMeter_.get());
+        hoaOrder_(hoaOrder),
+        p_(p)  {
+    levelMeter_->setOrientation(LevelMeter::horizontal);
+    addAndMakeVisible(levelMeter_.get());
 
     orderLabel_->setText(name, dontSendNotification);
     orderLabel_->setFont(EarFonts::Items);
@@ -41,7 +42,8 @@ class OrderBox : public Component {
     auto area = getLocalBounds();
 
     orderLabel_->setBounds(area.removeFromLeft(40));
-    levelDisplayBox_->setBounds(area.removeFromLeft(200));
+    //levelDisplayBox_->setBounds(area.removeFromLeft(200));
+    levelMeter_->setBounds(area.removeFromLeft(250));
 
     area.removeFromBottom(5);
     area.removeFromTop(5);
@@ -69,13 +71,20 @@ class OrderBox : public Component {
 
     pyramidBoxes_.reserve(numChannelsOnRow(rowOrder_));
 
+    std::vector<int> routing;
+    int routingFirstChannel(p_->getRouting()->get());
+
     for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
       std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
           std::make_shared<PyramidBox>(
               std::to_string(i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1))));
       pyramidBoxes_.push_back(pyramidBox);
       addAndMakeVisible(*pyramidBox);
+      int test = numChannelsInOrder(rowOrder_ - 1);
+      routing.push_back(routingFirstChannel + test + i + 1);
     }
+    
+    levelMeter_->setMeter(p_->getLevelMeter(), routing);
 
     //pyramidBoxes_.push_back(pyramidBox);
     
@@ -90,7 +99,8 @@ class OrderBox : public Component {
   };
 
  private:
-  //std::unique_ptr<LevelMeter> levelMeter_;
+  HoaAudioProcessor* p_;
+  std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> orderLabel_;
   int rowOrder_;
   int hoaOrder_;

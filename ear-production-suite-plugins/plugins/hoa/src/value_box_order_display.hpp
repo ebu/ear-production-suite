@@ -18,10 +18,12 @@ namespace ui {
 class ValueBoxOrderDisplay : public Component {
  public:
   ValueBoxOrderDisplay(
+      HoaAudioProcessor* p,
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter)
       : levelMeter_(levelMeter),//NOT sure about whether this needs to be kept
         headingLabel_(std::make_unique<Label>()),
-        orderDisplayBox_(std::make_unique<OrderDisplayBox>()) {
+        orderDisplayBox_(std::make_unique<OrderDisplayBox>(p)),
+        p_(p)  {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("HOA Order Display",
@@ -73,7 +75,7 @@ class ValueBoxOrderDisplay : public Component {
         return suffixes.at(std::min(i % 10,4));
       }();
 
-      orderBoxes_.push_back(std::make_unique<OrderBox>(
+      orderBoxes_.push_back(std::make_unique<OrderBox>(p_,
           std::to_string(i) + ordinal, i, orderCount-1));
       orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
       //orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
@@ -92,7 +94,7 @@ class ValueBoxOrderDisplay : public Component {
     float lastValue = 0.f;
 
   }
-
+  HoaAudioProcessor* p_;
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   std::unique_ptr<Label> headingLabel_;
