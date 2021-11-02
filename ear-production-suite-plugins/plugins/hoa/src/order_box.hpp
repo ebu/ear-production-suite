@@ -75,13 +75,17 @@ class OrderBox : public Component {
     int routingFirstChannel(p_->getRouting()->get());
 
     for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
+      int channelRouting(routingFirstChannel +
+                         numChannelsInOrder(rowOrder_ - 1) + i + 1);
+      routing.push_back(channelRouting);
+
       std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
           std::make_shared<PyramidBox>(
-              std::to_string(i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1))));
+              p_->getLevelMeter(),
+              i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1)),
+              channelRouting);
       pyramidBoxes_.push_back(pyramidBox);
       addAndMakeVisible(*pyramidBox);
-      int test = numChannelsInOrder(rowOrder_ - 1);
-      routing.push_back(routingFirstChannel + test + i + 1);
     }
     
     levelMeter_->setMeter(p_->getLevelMeter(), routing);
@@ -101,6 +105,7 @@ class OrderBox : public Component {
  private:
   HoaAudioProcessor* p_;
   std::unique_ptr<LevelMeter> levelMeter_;
+  std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
   std::unique_ptr<Label> orderLabel_;
   int rowOrder_;
   int hoaOrder_;

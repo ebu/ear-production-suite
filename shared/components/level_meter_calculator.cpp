@@ -40,6 +40,7 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
   lastLevel_.clear();
   lastLevel_.assign(channels_, 0.);
   setConstants();
+  //hasSignal_ = std::vector<bool>(channels_, false);//test
 }
 
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
@@ -48,9 +49,20 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
   for (std::size_t c = 0; c < channels_; ++c) {
     for (std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
       processSample(buffer.getSample(c, n), c);
+      
+      /*if (buffer.getSample(c, n) < 0.00005 || buffer.getSample(c, n) > -0.00005) {//test
+          hasSignal_[c] = false;//test
+      }//test
+      else { hasSignal_[c] = true; }*///test
+
     }
   }
 }
+/*
+bool LevelMeterCalculator::hasSignal(int channel) {//test
+    return hasSignal_[channel];//test
+}//test
+*/
 
 float LevelMeterCalculator::getLevel(std::size_t channel) {
   const std::lock_guard<std::mutex> lock(mutex_);

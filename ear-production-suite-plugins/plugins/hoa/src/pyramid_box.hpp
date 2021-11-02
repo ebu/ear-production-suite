@@ -9,19 +9,37 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class PyramidBox : public Component {
+class PyramidBox : public Component, private Timer {
  public:
-  PyramidBox(std::string name): channelLabel_(std::make_unique<Label>()) {
-    channelLabel_->setText(name, dontSendNotification);
+  PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
+      int channel,
+    int routing/*,
+      std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator*/)
+      : channelLabel_(std::make_unique<Label>()), levelMeterCalculator_(levelMeterCalculator), channel_(channel), routing_(routing)
+        /*levelMeterCalculator_(levelMeterCalculator),*/
+  {
+    channelLabel_->setText(std::to_string(channel), dontSendNotification);
     channelLabel_->setFont(EarFonts::Items);
     channelLabel_->setColour(Label::textColourId, EarColours::Label);
     channelLabel_->setJustificationType(Justification::centred);
     addAndMakeVisible(channelLabel_.get());
+
+    setBox();
   }
   ~PyramidBox() {}
 
-  void paint(Graphics& g) override { //g.fillAll(EarColours::Area01dp);
-    g.fillAll(EarColours::Primary);
+  void paint(Graphics& g) override { //g.fillAll(EarColours::Area01dp);    
+    //auto levelMeterCalculatorLocked_ = levelMeterCalculator_.lock();    
+    //if (levelMeterCalculatorLocked_->hasSignal(routing_)) {
+    if (value_ < 0.00005 && value_ > -0.00005) {
+      g.fillAll(EarColours::Transparent);
+      g.setColour(EarColours::Primary);
+      g.drawRect(getLocalBounds(), 1);
+    } else if (value_ < -1 || value_ > 1){
+      g.fillAll(EarColours::Error);
+    } else {
+      g.fillAll(EarColours::Primary);
+    }
   }
 
   void resized() override {//Here we actually set the look of the level meter
@@ -30,11 +48,29 @@ class PyramidBox : public Component {
     channelLabel_->setBounds(area);
   }
 
+  void setBox() {
+    value_ = 0.f;
+    if (!isTimerRunning()) startTimer(50);
+  }
+
+  void timerCallback() override {
+    if (auto meter = levelMeterCalculator_.lock()) {
+      //meter->decayIfNeeded(60);
+      value_ = meter->getLevel(routing_);
+      repaint();
+    }
+  }
+
   //LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
  private:
   //std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> channelLabel_;
+  std::weak_ptr<LevelMeterCalculator> levelMeterCalculator_;
+  //std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
+  int channel_;
+  int routing_;
+  float value_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PyramidBox)
 };

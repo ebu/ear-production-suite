@@ -28,6 +28,8 @@ class LevelMeterCalculator {
    */
   void process(const AudioBuffer<float>& buffer);
 
+  //bool hasSignal(int channel);//test
+
   /// process zeros if the last measurement is more than maxDuration (in
   /// milliseconds)
   void decayIfNeeded(int maxDuration);
@@ -49,6 +51,8 @@ class LevelMeterCalculator {
   float release_constant_;
   float attack_constant_;
   int64_t lastMeasurement_;
+
+  //std::vector<bool> hasSignal_;//test
 
   std::mutex mutex_;
 };
