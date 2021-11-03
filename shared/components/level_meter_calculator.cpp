@@ -39,6 +39,10 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
   samplerate_ = samplerate;
   lastLevel_.clear();
   lastLevel_.assign(channels_, 0.);
+  lastLevelHasSignal_.clear();
+  lastLevelHasSignal_.assign(channels_, 0.);
+  lastLevelHasClipped_.clear();
+  lastLevelHasClipped_.assign(channels_, 0.);
   setConstants();
   //hasSignal_ = std::vector<bool>(channels_, false);//test
 }
@@ -48,21 +52,29 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
   lastMeasurement_ = juce::Time::currentTimeMillis();
   for (std::size_t c = 0; c < channels_; ++c) {
     for (std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
-      processSample(buffer.getSample(c, n), c);
-      
-      /*if (buffer.getSample(c, n) < 0.00005 || buffer.getSample(c, n) > -0.00005) {//test
-          hasSignal_[c] = false;//test
-      }//test
-      else { hasSignal_[c] = true; }*///test
-
+        processSample(buffer.getSample(c, n), c);
     }
   }
 }
-/*
+
 bool LevelMeterCalculator::hasSignal(int channel) {//test
-    return hasSignal_[channel];//test
+    if (channel >= 0 && channel < lastLevelHasSignal_.size()) {
+        return lastLevelHasSignal_[channel];
+    }
+    else {
+        return false;
+    }
 }//test
-*/
+
+bool LevelMeterCalculator::hasClipped() {//test
+    bool hasClippedAtLeastOnce = (std::find(begin(lastLevelHasClipped_), end(lastLevelHasClipped_), true) != end(lastLevelHasClipped_));
+    if (hasClippedAtLeastOnce) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}//test
 
 float LevelMeterCalculator::getLevel(std::size_t channel) {
   const std::lock_guard<std::mutex> lock(mutex_);
@@ -75,13 +87,23 @@ float LevelMeterCalculator::getLevel(std::size_t channel) {
 
 void LevelMeterCalculator::processSample(float currentValue,
                                          std::size_t channel) {
-  currentValue = std::abs(currentValue);
-  if (currentValue > lastLevel_[channel]) {
+  auto currentValueAbs = std::abs(currentValue);
+  if (currentValueAbs > lastLevel_[channel]) {
     lastLevel_[channel] =
-        currentValue - attack_constant_ * (currentValue - lastLevel_[channel]);
+        currentValueAbs - attack_constant_ * (currentValueAbs - lastLevel_[channel]);
   } else {
     lastLevel_[channel] = lastLevel_[channel] * release_constant_;
   }
+
+  if (currentValue < 0.00005 && currentValue > -0.00005) {//test
+      lastLevelHasSignal_[channel] = false;//test
+  }//test
+  else { lastLevelHasSignal_[channel] = true; }//test
+
+  if (currentValue > 1 || currentValue < -1) {//test
+      lastLevelHasClipped_[channel] = true;//test
+  }//test
+  else { lastLevelHasClipped_[channel] = false; }//test
 }
 
 void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
