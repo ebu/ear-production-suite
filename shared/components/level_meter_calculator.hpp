@@ -42,6 +42,8 @@ class LevelMeterCalculator {
   std::size_t samplerate() const { return samplerate_; }
   std::size_t channels() const { return channels_; }
 
+  void resetClipping();
+
  private:
   void processSample(float currentValue, std::size_t channel);
 

@@ -103,7 +103,7 @@ void LevelMeterCalculator::processSample(float currentValue,
   if (currentValue > 1 || currentValue < -1) {//test
       lastLevelHasClipped_[channel] = true;//test
   }//test
-  else { lastLevelHasClipped_[channel] = false; }//test
+  //else { lastLevelHasClipped_[channel] = false; }//test
 }
 
 void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
@@ -124,6 +124,12 @@ void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
       }
     }
   }
+}
+
+void LevelMeterCalculator::resetClipping(){
+    for (std::size_t c = 0; c < channels_; ++c) {
+        lastLevelHasClipped_[c] = false;
+    }
 }
 
 void LevelMeterCalculator::setConstants() {

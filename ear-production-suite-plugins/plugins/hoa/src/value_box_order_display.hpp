@@ -23,6 +23,7 @@ class ValueBoxOrderDisplay : public Component {
       : levelMeter_(levelMeter),//NOT sure about whether this needs to be kept
         headingLabel_(std::make_unique<Label>()),
         orderDisplayBox_(std::make_unique<OrderDisplayBox>(p)),
+        resetClippingButton(std::make_unique<EarButton>()),
         p_(p)  {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
@@ -30,6 +31,16 @@ class ValueBoxOrderDisplay : public Component {
                            juce::NotificationType::dontSendNotification);
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
+
+    resetClippingButton->setButtonText("Reset Clipping Warnings");
+    resetClippingButton->setShape(EarButton::Shape::Rounded);
+    resetClippingButton->setFont(
+        font::RobotoSingleton::instance().getRegular(20.f));
+    resetClippingButton->onClick = [&]() {
+      auto levelMeterCalculatorLocked_ = levelMeter_.lock();
+      levelMeterCalculatorLocked_->resetClipping();
+    };
+    addAndMakeVisible(resetClippingButton.get());
 
     clearHoaSetup();
 
@@ -45,7 +56,13 @@ class ValueBoxOrderDisplay : public Component {
   void resized() override {//Here we sort out what is inside the channel gain box (e.g. all the different meters)
     auto area = getLocalBounds();
     area.reduce(10, 5);
-    headingLabel_->setBounds(area.removeFromTop(30));
+
+    auto headingArea = area.withHeight(30);
+    headingLabel_->setBounds(headingArea.withWidth(300));
+    resetClippingButton->setBounds(headingArea.withLeft(600));
+
+
+    area.removeFromTop(30);
     area.removeFromTop(2.f * marginBig_);
 
     orderDisplayBox_->setBounds(
@@ -101,7 +118,7 @@ class ValueBoxOrderDisplay : public Component {
 
   std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
   std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;
-
+  std::unique_ptr<ear::plugin::ui::EarButton> resetClippingButton;
 
   const float labelWidth_ = 71.f;
   const float labelPaddingBottom_ = 0.f;

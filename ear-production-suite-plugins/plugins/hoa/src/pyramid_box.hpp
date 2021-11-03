@@ -32,6 +32,7 @@ class PyramidBox : public Component, private Timer {
     auto levelMeterCalculatorLocked_ = levelMeterCalculator_.lock();    
     if (hasClipped_) {
       g.fillAll(EarColours::Error);
+      g.drawRect(getLocalBounds(), 1);
     } else if (!hasSignal_) {
     //if (value_ < 0.00005 && value_ > -0.00005) {
       g.fillAll(EarColours::Transparent);
@@ -39,6 +40,7 @@ class PyramidBox : public Component, private Timer {
       g.drawRect(getLocalBounds(), 1);
     } else {
       g.fillAll(EarColours::Primary);
+      g.drawRect(getLocalBounds(), 1);
     }
   }
 
