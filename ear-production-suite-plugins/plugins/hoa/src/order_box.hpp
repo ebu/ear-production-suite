@@ -2,7 +2,6 @@
 
 #include "JuceHeader.h"
 
-#include "level_display_box.hpp"
 #include "pyramid_box.hpp"
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
@@ -16,10 +15,7 @@ namespace ui {
 
 class OrderBox : public Component {
  public:
-  OrderBox(HoaAudioProcessor* p /*,
-           ValueBoxOrderDisplay* valueBoxOrderDisplay*/
-           ,
-           String name, int rowOrder, int hoaOrder);
+  OrderBox(HoaAudioProcessor* p, String name, int rowOrder, int hoaOrder);
   ~OrderBox();
 
   void paint(Graphics& g) override; 
@@ -38,7 +34,6 @@ class OrderBox : public Component {
   std::unique_ptr<Label> orderLabel_;
   int rowOrder_;
   int hoaOrder_;
-  std::unique_ptr<LevelDisplayBox> levelDisplayBox_;
   std::vector<std::shared_ptr<ear::plugin::ui::PyramidBox>> pyramidBoxes_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OrderBox)

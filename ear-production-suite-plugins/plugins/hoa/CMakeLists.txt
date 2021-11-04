@@ -14,7 +14,6 @@ set(SOURCES_HOA_INPUT
     src/hoa_plugin_editor.cpp
     src/hoa_plugin_processor.cpp
     src/order_box.cpp
-    src/hoa_plugin_processor.cpp
 )
 
 set(HEADERS_HOA_INPUT
@@ -47,14 +46,14 @@ set(HEADERS_HOA_INPUT
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h
 	${EPS_SHARED_DIR}/helper/properties_file.hpp
 	
-	src/channel_gain.hpp
-	src/channel_gains_box.hpp
 	src/hoa_component.hpp
 	src/hoa_frontend_connector.hpp
 	src/hoa_plugin_editor.hpp
 	src/hoa_plugin_processor.hpp
-	src/value_box_channel_gain.hpp
+        src/level_display_box.hpp
+	src/value_box_order_display.hpp
 	src/value_box_main.hpp
+        src/order_box.hpp
 )
 
 source_group("Header Files" FILES ${HEADERS_HOA_INPUT})
