@@ -12,7 +12,7 @@ namespace ui {
 
 class OrderDisplayBox : public Component {
  public:
-  OrderDisplayBox(HoaAudioProcessor* p) {}
+  OrderDisplayBox() {}
   ~OrderDisplayBox() {}
 
   void paint(Graphics& g) override {

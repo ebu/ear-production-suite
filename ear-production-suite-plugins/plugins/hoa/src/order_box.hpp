@@ -7,6 +7,7 @@
 #include "level_display_box.hpp"
 #include "components/level_meter.hpp"
 #include "pyramid_box.hpp"
+#include "value_box_order_display.hpp"
 #include <math.h>
 
 namespace ear {
@@ -15,13 +16,16 @@ namespace ui {
 
 class OrderBox : public Component {
  public:
-  OrderBox(HoaAudioProcessor* p, String name, int rowOrder, int hoaOrder)
+  OrderBox(HoaAudioProcessor* p /*,
+           ValueBoxOrderDisplay* valueBoxOrderDisplay*/,
+           String name, int rowOrder, int hoaOrder)
       : levelMeter_(std::make_unique<LevelMeter>()),
         orderLabel_(std::make_unique<Label>()),
         levelDisplayBox_(std::make_unique<LevelDisplayBox>()),
         rowOrder_(rowOrder),
         hoaOrder_(hoaOrder),
-        p_(p)  {
+        p_(p) /*,
+        valueBoxOrderDisplay_(valueBoxOrderDisplay)*/ {
     levelMeter_->setOrientation(LevelMeter::horizontal);
     addAndMakeVisible(levelMeter_.get());
 
@@ -104,6 +108,7 @@ class OrderBox : public Component {
 
  private:
   HoaAudioProcessor* p_;
+  ValueBoxOrderDisplay* valueBoxOrderDisplay_;
   std::unique_ptr<LevelMeter> levelMeter_;
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
   std::unique_ptr<Label> orderLabel_;

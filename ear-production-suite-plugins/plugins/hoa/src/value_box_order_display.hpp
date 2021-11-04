@@ -22,7 +22,7 @@ class ValueBoxOrderDisplay : public Component {
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter)
       : levelMeter_(levelMeter),//NOT sure about whether this needs to be kept
         headingLabel_(std::make_unique<Label>()),
-        orderDisplayBox_(std::make_unique<OrderDisplayBox>(p)),
+        orderDisplayBox_(std::make_unique<OrderDisplayBox>()),
         resetClippingButton(std::make_unique<EarButton>()),
         p_(p)  {
     headingLabel_->setFont(EarFonts::Heading);
@@ -35,7 +35,7 @@ class ValueBoxOrderDisplay : public Component {
     resetClippingButton->setButtonText("Reset Clipping Warnings");
     resetClippingButton->setShape(EarButton::Shape::Rounded);
     resetClippingButton->setFont(
-        font::RobotoSingleton::instance().getRegular(20.f));
+        font::RobotoSingleton::instance().getRegular(15.f));
     resetClippingButton->onClick = [&]() {
       auto levelMeterCalculatorLocked_ = levelMeter_.lock();
       levelMeterCalculatorLocked_->resetClipping();
@@ -91,13 +91,11 @@ class ValueBoxOrderDisplay : public Component {
         std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
         return suffixes.at(std::min(i % 10,4));
       }();
-
-      orderBoxes_.push_back(std::make_unique<OrderBox>(p_,
+      orderBoxes_.push_back(std::make_unique<OrderBox>(p_,//this,
           std::to_string(i) + ordinal, i, orderCount-1));
       orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
       //orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
     }
-    
     
   }
 
