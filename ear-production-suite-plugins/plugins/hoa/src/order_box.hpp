@@ -2,12 +2,10 @@
 
 #include "JuceHeader.h"
 
+#include "hoa_plugin_processor.hpp"
 #include "pyramid_box.hpp"
 #include "components/level_meter.hpp"
-#include "components/look_and_feel/colours.hpp"
-#include "components/look_and_feel/fonts.hpp"
-//#include "value_box_order_display.hpp"
-#include <math.h>
+
 
 namespace ear {
 namespace plugin {

@@ -50,10 +50,11 @@ set(HEADERS_HOA_INPUT
 	src/hoa_frontend_connector.hpp
 	src/hoa_plugin_editor.hpp
 	src/hoa_plugin_processor.hpp
-        src/level_display_box.hpp
 	src/value_box_order_display.hpp
+	src/order_box.hpp
+	src/order_display_box.hpp
+	src/pyramid_box.hpp
 	src/value_box_main.hpp
-        src/order_box.hpp
 )
 
 source_group("Header Files" FILES ${HEADERS_HOA_INPUT})

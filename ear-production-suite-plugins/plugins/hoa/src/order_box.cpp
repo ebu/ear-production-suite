@@ -1,7 +1,6 @@
 #include "order_box.hpp"
 
 #include "pyramid_box.hpp"
-#include "hoa_plugin_processor.hpp"
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
@@ -29,9 +28,9 @@ using namespace ear::plugin::ui;
             addPyramidBoxesToOrderBox();
         }
         OrderBox::~OrderBox() {}
-        void OrderBox::paint(Graphics& g) override { g.fillAll(EarColours::Area01dp); }
+        void OrderBox::paint(Graphics& g) { g.fillAll(EarColours::Area01dp); }
 
-        void OrderBox::resized()  override {  // Here we actually set the look of the level meter
+        void OrderBox::resized()  {  // Here we actually set the look of the level meter
             auto area = getLocalBounds();
 
             orderLabel_->setBounds(area.removeFromLeft(40));
