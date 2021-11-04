@@ -49,6 +49,8 @@ class LevelMeter : public Component, private Timer {
     }
   }
 
+  std::vector<float> getValues() { return values_; }
+
   void timerCallback() override {
     if (auto meter = calculator_.lock()) {
       meter->decayIfNeeded(60);

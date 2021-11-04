@@ -13,6 +13,8 @@ set(SOURCES_HOA_INPUT
     src/hoa_frontend_connector.cpp
     src/hoa_plugin_editor.cpp
     src/hoa_plugin_processor.cpp
+    src/order_box.cpp
+    src/hoa_plugin_processor.cpp
 )
 
 set(HEADERS_HOA_INPUT
