@@ -1,36 +1,51 @@
 #include "order_box.hpp"
 
 #include "pyramid_box.hpp"
-#include "components/level_meter_calculator.hpp"
+//#include "value_box_order_display.hpp"
 #include "hoa_plugin_processor.hpp"
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-
+#include <numeric>
 
 using namespace ear::plugin::ui;
 
-        OrderBox::OrderBox(HoaAudioProcessor* p ,
-            String name, int rowOrder, int hoaOrder)
-            : levelMeter_(std::make_unique<LevelMeter>()),
-            orderLabel_(std::make_unique<Label>()),
-            rowOrder_(rowOrder),
-            hoaOrder_(hoaOrder),
-            p_(p) /*,
-            valueBoxOrderDisplay_(valueBoxOrderDisplay)*/ {
-            levelMeter_->setOrientation(LevelMeter::horizontal);
-            addAndMakeVisible(levelMeter_.get());
+float average(std::vector<float> const& v) {
+  if (v.empty()) {
+    return 0;
+  }
 
-            orderLabel_->setText(name, dontSendNotification);
-            orderLabel_->setFont(EarFonts::Items);
-            orderLabel_->setColour(Label::textColourId, EarColours::Label);
-            orderLabel_->setJustificationType(Justification::centred);
-            addAndMakeVisible(orderLabel_.get());
+  auto const count = static_cast<float>(v.size());
+  return std::reduce(v.begin(), v.end()) / count;
+}
 
-            addPyramidBoxesToOrderBox();
-        }
-        OrderBox::~OrderBox() {}
-        void OrderBox::paint(Graphics& g) { g.fillAll(EarColours::Area01dp); }
+OrderBox::OrderBox(HoaAudioProcessor* p , String name, int rowOrder, int hoaOrder)
+  : levelMeter_(std::make_unique<LevelMeter>()),
+  orderLabel_(std::make_unique<Label>()),
+  rowOrder_(rowOrder),
+  hoaOrder_(hoaOrder),
+  p_(p) /*,valueBoxOrderDisplay_(valueBoxOrderDisplay)*/ {
+  levelMeter_->setOrientation(LevelMeter::horizontal);
+  addAndMakeVisible(levelMeter_.get());
+  
+  orderLabel_->setText(name, dontSendNotification);
+  orderLabel_->setFont(EarFonts::Items);
+  orderLabel_->setColour(Label::textColourId, EarColours::Label);
+  orderLabel_->setJustificationType(Justification::centred);
+  addAndMakeVisible(orderLabel_.get());
+
+  addPyramidBoxesToOrderBox();
+}
+OrderBox::~OrderBox() {}
+void OrderBox::paint(Graphics& g) { 
+
+  int averageLevel = static_cast<int>(average(levelMeter_->getValues()));
+
+  g.fillAll(EarColours::Area01dp);
+  g.setColour(EarColours::Primary);
+  g.fillRect(averageLevel + levelMeter_->getX(), getLocalBounds().getY(), 5,
+                     getLocalBounds().getHeight());
+}
 
         void OrderBox::resized()  {  // Here we actually set the look of the level meter
             auto area = getLocalBounds();

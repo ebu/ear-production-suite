@@ -4,6 +4,7 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include "components/level_meter_calculator.hpp"
 
 namespace ear {
 namespace plugin {

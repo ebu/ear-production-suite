@@ -91,7 +91,9 @@ class ValueBoxOrderDisplay : public Component {
         std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
         return suffixes.at(std::min(i % 10,4));
       }();
-      orderBoxes_.push_back(std::make_unique<OrderBox>(p_,//this,
+      //auto vbod = this;
+      orderBoxes_.push_back(std::make_unique<OrderBox>(
+          p_, //vbod,
           std::to_string(i) + ordinal, i, orderCount-1));
       orderDisplayBox_->addOrderBox(orderBoxes_.back().get()); 
       //orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
