@@ -49,7 +49,7 @@ class LevelMeter : public Component, private Timer {
     }
   }
 
-  std::vector<float> getValues() { return values_; }
+  std::vector<float> getValues() { return values_; }//ME temporary add
 
   void timerCallback() override {
     if (auto meter = calculator_.lock()) {
@@ -88,22 +88,7 @@ class LevelMeter : public Component, private Timer {
       }
     }
 
-    // draw outline
     g.setColour(findColour(outlineColorId));
-    //g.drawRect(
-      //  getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f),
-        //outlineWidth_);
-    
-    
-    
-    //g.drawVerticalLine(getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getX(), getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getTopLeft().getY(), getLocalBounds().reduced(outlineWidth_ / 2.f, outlineWidth_ / 2.f).getBottomLeft().getY());
-    //ME change but it doesn't work
-    /*for (int i = 0; i < channels_.size(); ++i) {
-        g.drawRect(
-            getLocalBounds().reduced(outlineWidth_ + i/ 2.f, outlineWidth_ / 2.f),
-            outlineWidth_*10);
-    }*/
-    //ME end
   }
 
   enum ColourIds {

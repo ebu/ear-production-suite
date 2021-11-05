@@ -1,15 +1,11 @@
 #include "hoa_plugin_processor.hpp"
-/* Old DS Code
-#include "speaker_setups.hpp"
-// TODO - we probably need something like this for different flavours of HOA
-*/
+
 #include "components/non_automatable_parameter.hpp"
 #include "hoa_plugin_editor.hpp"
 #include "hoa_frontend_connector.hpp"
 
 using namespace ear::plugin;
 
-// TODO - update bus properties to max channel count for max HOA order
 HoaAudioProcessor::HoaAudioProcessor()
     : AudioProcessor(
           BusesProperties()
@@ -24,18 +20,11 @@ HoaAudioProcessor::HoaAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
       -1, 63, -1));
-  //ME add, similar to DS
   addParameter(packFormatIdValue_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packformat_id_value", "PackFormat ID Value",
       0, 0xFFFF, 0));
-  //Me end
-  /*DS code
-    addParameter(speakerSetupIndex_ =
-    new ui::NonAutomatedParameter<AudioParameterInt>(
-      "speaker_setup_index", "Speaker Setup Index",
-      -1, static_cast<int>(SPEAKER_SETUPS.size() - 1), -1));
-  */
+
 
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
@@ -44,28 +33,18 @@ HoaAudioProcessor::HoaAudioProcessor()
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-  /* Old DS Code
-  // Any NonAutomatedParameter will not set the plugin state as dirty when changed.
-  // We used this hack to make sure the host (REAPER) knows something has changed (by "changing" a standard parameter to it's current value)
-  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(speakerSetupIndex_)->markPluginStateAsDirty = [this]() {
-    bypass_->setValueNotifyingHost(bypass_->get());
-  };
-  */
-  //ME add similar to SD but don't fully get
 // Any NonAutomatedParameter will not set the plugin state as dirty when changed.
 // We used this hack to make sure the host (REAPER) knows something has changed (by "changing" a standard parameter to it's current value)
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(packFormatIdValue_)
       ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
-//ME end
 
   connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);//creates instance of front end connector
   backend_ = std::make_unique<HoaBackend>(connector_.get());//creates instance of backend, passing to it a pointer to front end connector
 
   connector_->parameterValueChanged(0, routing_->get());
-  connector_->parameterValueChanged(1, packFormatIdValue_->get());//ME added, similar to DS (1.)
-
+  connector_->parameterValueChanged(1, packFormatIdValue_->get());
 }
 
 HoaAudioProcessor::~HoaAudioProcessor() {}
@@ -91,10 +70,10 @@ int HoaAudioProcessor::getNumPrograms() {
 int HoaAudioProcessor::getCurrentProgram() { return 0; }
 void HoaAudioProcessor::setCurrentProgram(int index) {}
 
-//ME add not sure if good
+
 void HoaAudioProcessor::setNumHoaTypes(int &numHoaTypes) {
-  numHoaTypes_ = numHoaTypes;//THIS LINE CAUSING PROBLEMS
-}//Me end
+  numHoaTypes_ = numHoaTypes;
+}
 
 const String HoaAudioProcessor::getProgramName(int index) {
   return {};
@@ -133,7 +112,7 @@ MidiBuffer& midiMessages) {
 
 bool HoaAudioProcessor::hasEditor() const { return true; }
 
-AudioProcessorEditor* HoaAudioProcessor::createEditor() {//(1..)
+AudioProcessorEditor* HoaAudioProcessor::createEditor() {
   return new HoaAudioProcessorEditor(this);
 }
 
@@ -142,7 +121,7 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
   connectionId_ = backend_->getConnectionId();
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
-  xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);//ME added, similar to DS, not completely sure about
+  xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);
 
   copyXmlToBinary(*xml, destData);
 }
@@ -160,7 +139,7 @@ void HoaAudioProcessor::setStateInformation(const void* data,
       backend_->setConnectionId(connectionId_);
       auto con_id = connectionId_;
       *routing_ = xmlState->getIntAttribute("routing", -1);
-      *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);//ME added, similar to DS but don't really know what this does
+      *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
 
     }
 }

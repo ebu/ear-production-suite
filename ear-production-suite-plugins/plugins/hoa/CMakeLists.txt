@@ -14,6 +14,9 @@ set(SOURCES_HOA_INPUT
     src/hoa_plugin_editor.cpp
     src/hoa_plugin_processor.cpp
     src/order_box.cpp
+    src/order_display_box.cpp
+    src/value_box_order_display.cpp
+    src/pyramid_box.cpp
 )
 
 set(HEADERS_HOA_INPUT

@@ -39,8 +39,11 @@ class LevelMeterCalculator {
   /// Get current level for a channel
   float getLevel(std::size_t channel);
 
+  float getLevelAverage(std::vector<size_t> channels);//ME temporary add
+
   std::size_t samplerate() const { return samplerate_; }
   std::size_t channels() const { return channels_; }
+
 
   void resetClipping();
 

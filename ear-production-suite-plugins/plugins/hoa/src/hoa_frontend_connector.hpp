@@ -9,7 +9,6 @@
 #include "components/ear_name_text_editor.hpp"
 #include "helper/multi_async_updater.h"
 #include "value_box_order_display.hpp"//probs needs adding to this target file path
-#include "level_display_box.hpp"
 
 namespace ear {
 namespace plugin {

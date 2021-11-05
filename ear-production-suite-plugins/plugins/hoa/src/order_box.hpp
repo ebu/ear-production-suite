@@ -2,18 +2,30 @@
 
 #include "JuceHeader.h"
 
-#include "hoa_plugin_processor.hpp"
-#include "pyramid_box.hpp"
-#include "components/level_meter.hpp"
+//#include "hoa_plugin_processor.hpp"
+//#include "pyramid_box.hpp"
+//#include "components/level_meter.hpp"
 
+class HoaAudioProcessor;
 
 namespace ear {
 namespace plugin {
+
+class LevelMeterCalculator;
+
 namespace ui {
+
+class PyramidBox;
+class LevelMeter;
+class ValueBoxOrderDisplay;
 
 class OrderBox : public Component {
  public:
-  OrderBox(HoaAudioProcessor* p, String name, int rowOrder, int hoaOrder);
+  OrderBox(HoaAudioProcessor* p,
+           ValueBoxOrderDisplay* valueBoxOrderDisplay,
+           String name,
+           int rowOrder,
+           int hoaOrder);
   ~OrderBox();
 
   void paint(Graphics& g) override; 
@@ -24,16 +36,13 @@ class OrderBox : public Component {
 
   void removeAllOrderBoxes();
 
-  enum ColourIds {
-    backgroundColourId = 0x00020001,
-    outlineColorId = 0x00020002,
-    highlightColourId = 0x00020003,
-    clippedColourId = 0x00020004
-  };
+  //bool clippingIsOccuringOnRow();
+
+  //void timerCallback() override;
 
  private:
   HoaAudioProcessor* p_;
-  //ValueBoxOrderDisplay* valueBoxOrderDisplay_;
+  ValueBoxOrderDisplay* valueBoxOrderDisplay_;
   std::unique_ptr<LevelMeter> levelMeter_;
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
   std::unique_ptr<Label> orderLabel_;

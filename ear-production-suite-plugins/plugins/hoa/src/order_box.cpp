@@ -1,16 +1,17 @@
 #include "order_box.hpp"
 
 #include "pyramid_box.hpp"
-//#include "value_box_order_display.hpp"
+#include "value_box_order_display.hpp"
 #include "hoa_plugin_processor.hpp"
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include <numeric>
+#include "value_box_order_display.hpp"
 
 using namespace ear::plugin::ui;
 
-float average(std::vector<float> const& v) {
+float average(std::vector<float> const& v) {// ME temporary add
   if (v.empty()) {
     return 0;
   }
@@ -19,12 +20,16 @@ float average(std::vector<float> const& v) {
   return std::reduce(v.begin(), v.end()) / count;
 }
 
-OrderBox::OrderBox(HoaAudioProcessor* p , String name, int rowOrder, int hoaOrder)
+OrderBox::OrderBox(HoaAudioProcessor* p,
+                   ValueBoxOrderDisplay* valueBoxOrderDisplay,
+                   String name,
+                   int rowOrder, int hoaOrder)
   : levelMeter_(std::make_unique<LevelMeter>()),
   orderLabel_(std::make_unique<Label>()),
   rowOrder_(rowOrder),
   hoaOrder_(hoaOrder),
-  p_(p) /*,valueBoxOrderDisplay_(valueBoxOrderDisplay)*/ {
+  p_(p) ,
+  valueBoxOrderDisplay_(valueBoxOrderDisplay) {
   levelMeter_->setOrientation(LevelMeter::horizontal);
   addAndMakeVisible(levelMeter_.get());
   
@@ -43,11 +48,12 @@ void OrderBox::paint(Graphics& g) {
 
   g.fillAll(EarColours::Area01dp);
   g.setColour(EarColours::Primary);
+  // ME temporary add
   g.fillRect(averageLevel + levelMeter_->getX(), getLocalBounds().getY(), 5,
                      getLocalBounds().getHeight());
 }
 
-        void OrderBox::resized()  {  // Here we actually set the look of the level meter
+void OrderBox::resized()  {  // Here we actually set the look of the level meter
             auto area = getLocalBounds();
 
             orderLabel_->setBounds(area.removeFromLeft(40));
@@ -69,11 +75,11 @@ void OrderBox::paint(Graphics& g) {
                 pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxWidth));
                 partitionNumber++;
             }
-        }
+}
 
         //LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
-        void OrderBox::addPyramidBoxesToOrderBox() {
+void OrderBox::addPyramidBoxesToOrderBox() {
 
             auto numChannelsOnRow = [](int value) { return value < 0 ? 0 : value * 2 + 1; };
             auto numChannelsInOrder = [](int value) { return pow(value + 1, 2); };
@@ -91,6 +97,7 @@ void OrderBox::paint(Graphics& g) {
                 std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
                     std::make_shared<PyramidBox>(
                         p_->getLevelMeter(),
+                        valueBoxOrderDisplay_,
                         i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1)),
                         channelRouting);
                 pyramidBoxes_.push_back(pyramidBox);
@@ -103,10 +110,28 @@ void OrderBox::paint(Graphics& g) {
 
             //updatePyramidBoxBounds();
             //repaint();
-        }
+}
 
-        void OrderBox::removeAllOrderBoxes() {
+void OrderBox::removeAllOrderBoxes() {
             removeAllChildren();
             pyramidBoxes_.clear();
             repaint();
-        };
+}
+/*bool OrderBox::clippingIsOccuringOnRow() {   
+  for (std::shared_ptr<PyramidBox> pyramidBox : pyramidBoxes_) {
+    if (pyramidBox->getHasClipped()) {
+      return true;
+    }
+  }
+  return false;
+};*/
+
+/*void OrderBox::timerCallback() {
+  if (auto meter = levelMeterCalculator_.lock()) {
+    meter->decayIfNeeded(60);
+    for (int i = 0; i < channels_.size(); ++i) {
+      values_.at(i) = meter->getLevel(channels_.at(i));
+    }
+    repaint();
+  }
+}*/
