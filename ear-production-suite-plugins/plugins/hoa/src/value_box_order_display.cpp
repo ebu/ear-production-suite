@@ -59,7 +59,7 @@ void ValueBoxOrderDisplay::resized() {  // Here we sort out what is inside the c
 
     auto headingArea = area.withHeight(30);
     headingLabel_->setBounds(headingArea.withWidth(300));
-    resetClippingButton_->setBounds(headingArea.withLeft(600));
+    resetClippingButton_->setBounds(headingArea.withLeft(650));
 
     area.removeFromTop(30);
     area.removeFromTop(2.f * marginBig_);

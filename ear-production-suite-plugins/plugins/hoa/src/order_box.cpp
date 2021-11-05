@@ -6,19 +6,10 @@
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include <numeric>
 #include "value_box_order_display.hpp"
 
 using namespace ear::plugin::ui;
 
-float average(std::vector<float> const& v) {// ME temporary add
-  if (v.empty()) {
-    return 0;
-  }
-
-  auto const count = static_cast<float>(v.size());
-  return std::reduce(v.begin(), v.end()) / count;
-}
 
 OrderBox::OrderBox(HoaAudioProcessor* p,
                    ValueBoxOrderDisplay* valueBoxOrderDisplay,
@@ -31,6 +22,7 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
   p_(p) ,
   valueBoxOrderDisplay_(valueBoxOrderDisplay) {
   levelMeter_->setOrientation(LevelMeter::horizontal);
+  levelMeter_->enableAverage(true);
   addAndMakeVisible(levelMeter_.get());
   
   orderLabel_->setText(name, dontSendNotification);
@@ -44,13 +36,13 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
 OrderBox::~OrderBox() {}
 void OrderBox::paint(Graphics& g) { 
 
-  int averageLevel = static_cast<int>(average(levelMeter_->getValues()));
+  //int averageLevel = static_cast<int>(average(levelMeter_->getValues()));
 
   g.fillAll(EarColours::Area01dp);
-  g.setColour(EarColours::Primary);
+  //g.setColour(EarColours::Primary);
   // ME temporary add
-  g.fillRect(averageLevel + levelMeter_->getX(), getLocalBounds().getY(), 5,
-                     getLocalBounds().getHeight());
+  //g.fillRect(averageLevel + levelMeter_->getX(), getLocalBounds().getY(), 5,
+  //                   getLocalBounds().getHeight());
 }
 
 void OrderBox::resized()  {  // Here we actually set the look of the level meter

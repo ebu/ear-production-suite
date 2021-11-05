@@ -4,6 +4,7 @@
 
 #include "level_meter_calculator.hpp"
 #include "look_and_feel/colours.hpp"
+#include <numeric>
 
 template <typename T>
 T clamp(const T& n, const T& lower, const T& upper) {
@@ -16,12 +17,14 @@ namespace ui {
 
 class LevelMeter : public Component, private Timer {
  public:
-  LevelMeter() {
+  LevelMeter(): averageEnabled_(false) {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(outlineColorId, EarColours::Area06dp);
     setColour(highlightColourId, EarColours::Text.withAlpha(Emphasis::high));
     setColour(clippedColourId,
               EarColours::PrimaryHighlight.withAlpha(Emphasis::high));
+
+    //averageEnabled_ = false;
   }
 
   enum Orientation { horizontal, vertical };
@@ -89,6 +92,22 @@ class LevelMeter : public Component, private Timer {
     }
 
     g.setColour(findColour(outlineColorId));
+
+    if (averageEnabled_) {
+        auto count = static_cast<float>(values_.size());
+        float average = std::reduce(values_.begin(), values_.end()) / count;
+        float scalingFactorAverage = std::pow(clamp<float>(average, 0.f, 1.f), 0.3);
+        int averageLevel = static_cast<int>(scalingFactorAverage * area.getWidth());
+        g.setColour(EarColours::Primary);
+        g.setOpacity(1);
+        g.fillRect(averageLevel,0, 5,
+            getLocalBounds().getHeight());
+    }
+  }
+  
+  void enableAverage(bool averageEnabled) {
+      averageEnabled_ = averageEnabled;
+      repaint();
   }
 
   enum ColourIds {
@@ -105,6 +124,7 @@ class LevelMeter : public Component, private Timer {
   Orientation orientation_ = Orientation::horizontal;
   float outlineWidth_ = 1.f;
   std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator_;
+  bool averageEnabled_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
 };  // namespace ui
