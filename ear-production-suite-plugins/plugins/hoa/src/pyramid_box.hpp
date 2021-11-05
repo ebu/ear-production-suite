@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JuceHeader.h"
-//#include "value_box_order_display.hpp"
 
 namespace ear {
 namespace plugin {
@@ -16,8 +15,7 @@ class PyramidBox : public Component, private Timer {
  public:
   PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,ValueBoxOrderDisplay* valueBoxOrderDisplay,
       int channel,
-    int routing/*,
-      std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator*/);
+    int routing);
   ~PyramidBox();
 
   void paint(Graphics& g) override;
@@ -29,13 +27,10 @@ class PyramidBox : public Component, private Timer {
   void timerCallback() override;
 
   bool getHasClipped();
-  //LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
  private:
-  //std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> channelLabel_;
   std::weak_ptr<LevelMeterCalculator> levelMeterCalculator_;
-  //std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
   int channel_;
   int routing_;
   float level_;

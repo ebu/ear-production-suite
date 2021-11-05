@@ -2,10 +2,6 @@
 
 #include "JuceHeader.h"
 
-//#include "components/look_and_feel/colours.hpp"
-//#include "components/look_and_feel/fonts.hpp"
-//#include "order_box.hpp"
-
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -26,8 +22,6 @@ class OrderDisplayBox : public Component {
   void addOrderBox(OrderBox* orderBox);
 
   void removeAllOrderBoxes();
-
-  //bool clippingIsOccuring();
 
  private:
   std::vector<OrderBox*> orderBoxes_;

@@ -44,9 +44,6 @@ ValueBoxOrderDisplay::ValueBoxOrderDisplay(
     addAndMakeVisible(orderDisplayBox_.get());
     addChildComponent(resetClippingButton_.get());
 
-   /*if (orderDisplayBox_->clippingIsOccuring()) {
-      addAndMakeVisible(resetClippingButton_.get());
-    }*/
 }
 
 ValueBoxOrderDisplay::~ValueBoxOrderDisplay() {}
@@ -92,12 +89,10 @@ void ValueBoxOrderDisplay::setHoaType(int hoaId) {
         std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
         return suffixes.at(std::min(i % 10, 4));
       }();
-      // auto vbod = this;
       orderBoxes_.push_back(std::make_unique<OrderBox>(
           p_, this,
           std::to_string(i) + ordinal, i, orderCount - 1));
       orderDisplayBox_->addOrderBox(orderBoxes_.back().get());
-      // orderBoxes_.back()->getLevelMeter()->setMeter(levelMeter_, i);
     }
 }
 std::shared_ptr<EarButton> ValueBoxOrderDisplay::getResetClippingButton() {

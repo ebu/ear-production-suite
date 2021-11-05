@@ -2,10 +2,6 @@
 
 #include "JuceHeader.h"
 
-//#include "hoa_plugin_processor.hpp"
-//#include "pyramid_box.hpp"
-//#include "components/level_meter.hpp"
-
 class HoaAudioProcessor;
 
 namespace ear {
@@ -35,10 +31,6 @@ class OrderBox : public Component {
   void addPyramidBoxesToOrderBox();
 
   void removeAllOrderBoxes();
-
-  //bool clippingIsOccuringOnRow();
-
-  //void timerCallback() override;
 
  private:
   HoaAudioProcessor* p_;

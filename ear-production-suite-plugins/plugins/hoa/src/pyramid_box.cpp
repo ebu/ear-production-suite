@@ -58,7 +58,6 @@ void PyramidBox::paint(Graphics& g) {
 
 void PyramidBox::resized() {  // Here we actually set the look of the level meter
     auto area = getLocalBounds();
-    // area.removeFromTop(5).removeFromBottom(100);//ME change
     channelLabel_->setBounds(area);
   }
 
@@ -80,7 +79,6 @@ void PyramidBox::timerCallback() {
 }
 
 bool PyramidBox::getHasClipped() { return hasClipped_; }
-  // LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
 
 }  // namespace ui

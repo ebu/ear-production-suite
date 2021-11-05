@@ -57,7 +57,6 @@ void OrderBox::resized()  {  // Here we actually set the look of the level meter
             auto area = getLocalBounds();
 
             orderLabel_->setBounds(area.removeFromLeft(40));
-            //levelDisplayBox_->setBounds(area.removeFromLeft(200));
             levelMeter_->setBounds(area.removeFromLeft(250));
 
             area.removeFromBottom(5);
@@ -77,7 +76,6 @@ void OrderBox::resized()  {  // Here we actually set the look of the level meter
             }
 }
 
-        //LevelMeter* getLevelMeter() { return levelMeter_.get(); }
 
 void OrderBox::addPyramidBoxesToOrderBox() {
 
@@ -106,10 +104,6 @@ void OrderBox::addPyramidBoxesToOrderBox() {
 
             levelMeter_->setMeter(p_->getLevelMeter(), routing);
 
-            //pyramidBoxes_.push_back(pyramidBox);
-
-            //updatePyramidBoxBounds();
-            //repaint();
 }
 
 void OrderBox::removeAllOrderBoxes() {
@@ -117,21 +111,3 @@ void OrderBox::removeAllOrderBoxes() {
             pyramidBoxes_.clear();
             repaint();
 }
-/*bool OrderBox::clippingIsOccuringOnRow() {   
-  for (std::shared_ptr<PyramidBox> pyramidBox : pyramidBoxes_) {
-    if (pyramidBox->getHasClipped()) {
-      return true;
-    }
-  }
-  return false;
-};*/
-
-/*void OrderBox::timerCallback() {
-  if (auto meter = levelMeterCalculator_.lock()) {
-    meter->decayIfNeeded(60);
-    for (int i = 0; i < channels_.size(); ++i) {
-      values_.at(i) = meter->getLevel(channels_.at(i));
-    }
-    repaint();
-  }
-}*/
