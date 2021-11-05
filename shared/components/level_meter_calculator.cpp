@@ -5,14 +5,6 @@
 namespace ear {
 namespace plugin {
 
-    float average(std::vector<float> const& v) {//ME temporary add
-        if (v.empty()) {
-            return 0;
-        }
-
-        auto const count = static_cast<float>(v.size());
-        return std::reduce(v.begin(), v.end()) / count;
-    }
 
 // precalculated attack and release constants
 static float ATTACK_8000 = 0.8982300758361816;
@@ -52,7 +44,7 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
   lastLevelHasSignal_.clear();
   lastLevelHasSignal_.assign(channels_, 0.);
   lastLevelHasClipped_.clear();
-  lastLevelHasClipped_.assign(channels_, 0.);
+  lastLevelHasClipped_.assign(channels_, 0);
   setConstants();
   //hasSignal_ = std::vector<bool>(channels_, false);//test
 }
@@ -76,9 +68,21 @@ bool LevelMeterCalculator::hasSignal(int channel) {//test
     }
 }//test
 
-bool LevelMeterCalculator::hasClipped() {//test
-    bool hasClippedAtLeastOnce = (std::find(begin(lastLevelHasClipped_), end(lastLevelHasClipped_), true) != end(lastLevelHasClipped_));
-    if (hasClippedAtLeastOnce) {
+bool LevelMeterCalculator::thisTrackHasClipped() {//test
+    //bool hasClippedAtLeastOnce = (std::find(begin(lastLevelHasClipped_), end(lastLevelHasClipped_), true) != end(lastLevelHasClipped_));
+    //if (hasClippedAtLeastOnce) {
+    for (size_t i(0); i < channels_; i++) {
+        if (lastLevelHasClipped_[i]) {
+            return true;
+        }
+    }
+    return false;
+}//test
+
+bool LevelMeterCalculator::thisChannelHasClipped(int channel) {//test
+    //bool hasClippedAtLeastOnce = (std::find(begin(lastLevelHasClipped_), end(lastLevelHasClipped_), true) != end(lastLevelHasClipped_));
+    //if (hasClippedAtLeastOnce) {
+    if (lastLevelHasClipped_[channel]) {
         return true;
     }
     else {
@@ -93,17 +97,6 @@ float LevelMeterCalculator::getLevel(std::size_t channel) {
   } else {
     return 0.f;
   }
-}
-
-float LevelMeterCalculator::getLevelAverage(std::vector<size_t> channels) {//ME temporary add
-    const std::lock_guard<std::mutex> lock(mutex_);
-    std::vector<float> levels;
-
-    for (size_t channel : channels) {
-        levels.push_back(getLevel(channel));
-    }
-    int averageLevel = static_cast<int>(average(levels));
-    return averageLevel;
 }
 
 void LevelMeterCalculator::processSample(float currentValue,
@@ -121,10 +114,10 @@ void LevelMeterCalculator::processSample(float currentValue,
   }//test
   else { lastLevelHasSignal_[channel] = true; }//test
 
-  if (currentValue > 1 || currentValue < -1) {//test
+  if (currentValue > 1 || currentValue < -1 || lastLevelHasClipped_[channel]==true) {//test
       lastLevelHasClipped_[channel] = true;//test
   }//test
-  //else { lastLevelHasClipped_[channel] = false; }//test
+  else { lastLevelHasClipped_[channel] = false; }//test
 }
 
 void LevelMeterCalculator::decayIfNeeded(int maxDuration) {

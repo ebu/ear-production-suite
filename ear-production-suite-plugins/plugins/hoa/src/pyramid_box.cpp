@@ -33,27 +33,30 @@ PyramidBox::~PyramidBox() {}
 
 void PyramidBox::paint(Graphics& g) {
     auto levelMeterCalculatorLocked_ = levelMeterCalculator_.lock();
-    if (hasClipped_) {
+    if (channelHasClipped_) {
       g.fillAll(EarColours::Error);
       g.drawRect(getLocalBounds(), 1);
-      if (!valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
-        valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(true);
-      }
     } else if (!hasSignal_) {
       g.fillAll(EarColours::Transparent);
       g.setColour(EarColours::Primary);
       g.drawRect(getLocalBounds(), 1);
-      if (valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
-        valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(false);
-      }
     } else {
       g.fillAll(EarColours::Primary);
       g.drawRect(getLocalBounds(), 1);
+    }
+
+    if (trackHasClipped_) {
+      if (!valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
+        valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(true);
+      }
+    } else {
       if (valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
         valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(
             false);
       }
     }
+
+
 }
 
 void PyramidBox::resized() {  // Here we actually set the look of the level meter
@@ -64,21 +67,25 @@ void PyramidBox::resized() {  // Here we actually set the look of the level mete
 void PyramidBox::setBox() {
     level_ = 0.f;
     hasSignal_ = false;
-    hasClipped_ = false;
+    trackHasClipped_ = false;
+    channelHasClipped_ = false;
     if (!isTimerRunning()) startTimer(50);
   }
 
 void PyramidBox::timerCallback() {
     if (auto meter = levelMeterCalculator_.lock()) {
       meter->decayIfNeeded(60);
-      level_ = meter->getLevel(routing_);
-      hasSignal_ = meter->hasSignal(routing_);
-      hasClipped_ = meter->hasClipped();
+      level_ = meter->getLevel(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      hasSignal_ = meter->hasSignal(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      trackHasClipped_ = meter->thisTrackHasClipped();//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      channelHasClipped_ = meter->thisChannelHasClipped(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
       repaint();
     }
 }
 
-bool PyramidBox::getHasClipped() { return hasClipped_; }
+//bool PyramidBox::getTrackHasClipped() { return trackHasClipped_; }
+
+//bool PyramidBox::getChannelHasClipped() { return channelHasClipped_; }
 
 
 }  // namespace ui

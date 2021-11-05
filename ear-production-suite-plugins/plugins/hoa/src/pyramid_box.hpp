@@ -26,7 +26,9 @@ class PyramidBox : public Component, private Timer {
 
   void timerCallback() override;
 
-  bool getHasClipped();
+  //bool getTrackHasClipped();
+
+  //bool getChannelHasClipped();
 
  private:
   std::unique_ptr<Label> channelLabel_;
@@ -35,7 +37,8 @@ class PyramidBox : public Component, private Timer {
   int routing_;
   float level_;
   bool hasSignal_;
-  bool hasClipped_;
+  bool channelHasClipped_;
+  bool trackHasClipped_;
   ValueBoxOrderDisplay* valueBoxOrderDisplay_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PyramidBox)
