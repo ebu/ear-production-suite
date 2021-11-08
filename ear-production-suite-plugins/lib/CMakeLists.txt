@@ -31,6 +31,7 @@ add_library(ear-plugin-base STATIC
   src/nng-cpp/error_handling.cpp
   src/object_backend.cpp
   src/programme_types.cpp
+  src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
   src/programme_store_adm_populator.cpp
@@ -91,6 +92,7 @@ set(EAR_BASE_HEADERS
 	include/programme_store_adm_serializer.hpp
 	include/programme_types.hpp
 	include/proto_printers.hpp
+	include/routing_overlap.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp

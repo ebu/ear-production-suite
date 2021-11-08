@@ -5,6 +5,7 @@
 #include <functional>
 #include <google/protobuf/util/message_differencer.h>
 #include <cassert>
+#include "routing_overlap.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -61,7 +62,7 @@ void SceneBackend::triggerMetadataSend() {
 void SceneBackend::setup() {
   try {
     connectionManager_.setEventHandler(
-        std ::bind(&SceneBackend::onConnectionEvent, this, _1, _2));
+        std::bind(&SceneBackend::onConnectionEvent, this, _1, _2));
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_, "Scene Master: Failed to set event handler: {}",
                      e.what());
@@ -151,6 +152,12 @@ void SceneBackend::updateSceneStore() {
       addElementToSceneStore(element);
     }
   }
+
+  auto overlaps = getOverlapIds(sceneStore_);
+  if(overlappingIds_ != overlaps) {
+    flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
+  }
+  overlappingIds_ = overlaps;
 
   previousScene_.clear();
   for (auto const& item : sceneStore_.items()) {
