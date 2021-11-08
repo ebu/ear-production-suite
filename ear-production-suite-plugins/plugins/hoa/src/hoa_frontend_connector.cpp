@@ -1,9 +1,8 @@
 #include "hoa_frontend_connector.hpp"
 
-// TODO - remove unrequired components once UI dev complete
-#include "components/ear_combo_box.hpp"
+#include "value_box_order_display.hpp"
 #include "components/ear_name_text_editor.hpp"
-#include <numeric>
+
 namespace {
   String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
     return String(position) + String::fromUTF8("-") + String(position + layoutSizeFixed);
@@ -114,23 +113,20 @@ void HoaJuceFrontendConnector::setRouting(int routing) {
   }
   cachedRouting_ = routing;
 }
-//ME new added methods for adding common definition. this is where we actually set what we hve defined in value_boxmain.hpp and editor
-void HoaJuceFrontendConnector::setHoaTypeComboBox(//alt_2nd when the user chooses what they want it will be set here. this is just the box so what is displayed. This is called from the editor.
+
+void HoaJuceFrontendConnector::setHoaTypeComboBox(
     std::shared_ptr<EarComboBox> comboBox) {
-  comboBox->addListener(this);//what does this line do?
-  hoaTypeComboBox_ = comboBox;  // set the box value of the class here
-  setHoaType(cachedHoaType_);  // set the actual value not just the box to the cached value using function below
+  comboBox->addListener(this);
+  hoaTypeComboBox_ = comboBox;
+  setHoaType(cachedHoaType_);
 }
-void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value from the display is cached,
-                             // so the common box value is actual set and saved.
-                             // This is called from the front end connector,
-                             // parameter_changed method
-  //int channelCount;
+
+void HoaJuceFrontendConnector::setHoaType(int hoaType) {
   if (auto hoaTypeComboBoxLocked = hoaTypeComboBox_.lock()) {
                                hoaTypeComboBoxLocked->setSelectedId(
                                    hoaType, dontSendNotification);
   }
-  cachedHoaType_ = hoaType;//when editor is called this gets set to what it already is...
+  cachedHoaType_ = hoaType;
 
   auto packFormatIdValue = p_->getPackFormatIdValue()->get();
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
@@ -139,7 +135,6 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
 
     if (pfData) {
       cfCount = pfData->relatedChannelFormats.size();
-      //channelCount = cfCount;
     }
 
     routingComboBoxLocked->clearEntries();
@@ -153,16 +148,6 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {  // 2nd here the value 
   if (auto channelGainsLocked = orderDisplay_.lock()) {
     channelGainsLocked->setHoaType(packFormatIdValue);
   }
-
-  /*auto view = std::make_shared<LevelDisplayBox>();
-  view->addListener(this);
-  view->setData();
-
-  std::vector<int> routing(channelCount);
-  std::iota(routing.begin(), routing.end(), cachedRouting_);
-  view->getLevelMeter()->setMeter(p_->getLevelMeter(), routing);
-  displayOrderBox_->addAndMakeVisible(*view);*/
-    //addElement(view);
 }
 
 void HoaJuceFrontendConnector::setOrderDisplayValueBox(
@@ -171,7 +156,7 @@ void HoaJuceFrontendConnector::setOrderDisplayValueBox(
   orderDisplay_ = orderDisplay;
 }
 
-void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this will be called from JUCE interface and then it notifies to implementation agnostic front end
+void HoaJuceFrontendConnector::parameterValueChanged(
     int parameterIndex, float newValue) {
   using ParameterId = ui::HoaFrontendBackendConnector::ParameterId;
   switch (parameterIndex) {
@@ -185,7 +170,7 @@ void HoaJuceFrontendConnector::parameterValueChanged(//this happens 1st. So this
       notifyParameterChanged(ParameterId::PACKFORMAT_ID_FORMAT, p_->getPackFormatIdValue()->get());//(2.)
       updater_.callOnMessageThread([this]() {
         setHoaType(p_->getPackFormatIdValue()->get());
-      });  // 1st value is set based on display
+      });
       break;
   }
 }
