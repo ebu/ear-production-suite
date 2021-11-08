@@ -822,8 +822,15 @@ void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
     }
     if (item.has_hoa_metadata()) {
       objectType = ObjectView::ObjectType::HOA;
-      auto hoaOrder = item.hoa_metadata().packformatidvalue();
-      if (hoaOrder >= 0) {
+      auto packFormatId= item.hoa_metadata().packformatidvalue();
+      if (packFormatId >= 0) {
+        auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+        auto elementRelationships = commonDefinitionHelper->getElementRelationships();
+        auto pfData = commonDefinitionHelper->getPackFormatData(4, packFormatId);
+        size_t cfCount(0);
+        if (pfData) {
+          numberOfChannels = static_cast<size_t>(pfData->relatedChannelFormats.size());
+        }
       }
     }
 
