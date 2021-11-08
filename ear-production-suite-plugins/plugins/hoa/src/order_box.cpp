@@ -8,8 +8,16 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "value_box_order_display.hpp"
 
-using namespace ear::plugin::ui;
+namespace {
+int numChannelsUpToOrder(int order) {
+  return pow(order + 1, 2);
+}
+int numChannelsOnlyInOrder(int order) {
+  return order < 0 ? 0 : order * 2 + 1;
+}
+}
 
+using namespace ear::plugin::ui;
 
 OrderBox::OrderBox(HoaAudioProcessor* p,
                    ValueBoxOrderDisplay* valueBoxOrderDisplay,
@@ -70,16 +78,16 @@ void OrderBox::resized()  {  // Here we actually set the look of the level meter
 
 
 void OrderBox::addPyramidBoxesToOrderBox() {
+            auto startChannel = numChannelsUpToOrder(rowOrder_ - 1);
+            auto numChannels = numChannelsOnlyInOrder(rowOrder_);
 
-            auto numChannelsOnRow = [](int value) { return value < 0 ? 0 : value * 2 + 1; };
-            auto numChannelsInOrder = [](int value) { return pow(value + 1, 2); };
-
-            pyramidBoxes_.reserve(numChannelsOnRow(rowOrder_));
+            pyramidBoxes_.clear();
+            pyramidBoxes_.reserve(numChannels);
 
             std::vector<int> channels;
 
-            for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
-                int channel(numChannelsInOrder(rowOrder_ - 1) + i);
+            for (int i(0); i < numChannels; i++) {
+                int channel(startChannel + i);
                 channels.push_back(channel);
 
                 std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
@@ -92,7 +100,6 @@ void OrderBox::addPyramidBoxesToOrderBox() {
             }
 
             levelMeter_->setMeter(p_->getLevelMeter(), channels);
-
 }
 
 void OrderBox::removeAllOrderBoxes() {
