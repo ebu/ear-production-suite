@@ -3,18 +3,16 @@
 #include "JuceHeader.h"
 
 #include "hoa_backend.hpp"
-
-#include "components/level_meter_calculator.hpp"
 #include "helper/common_definition_helper.h"
-
-#include <memory>
 
 namespace ear {
 namespace plugin {
 namespace ui {
 class HoaJuceFrontendConnector;
+
 }
 class HoaBackend;
+class LevelMeterCalculator;
 }  // namespace plugin
 }  // namespace ear
 
@@ -51,41 +49,36 @@ class HoaAudioProcessor : public AudioProcessor {
 
   void updateTrackProperties(const TrackProperties& properties) override;
 
-  AdmCommonDefinitionHelper admCommonDefinitions{};  // ME added
+  AdmCommonDefinitionHelper admCommonDefinitions{};
 
   AudioParameterInt* getRouting() { return routing_; }
-  AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }  // ME added, similar to DS
+  AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
   }
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
-    return levelMeter_;
+    return levelMeterCalculator_;
   };
 
   ear::plugin::ui::HoaJuceFrontendConnector* getFrontendConnector() {
     return connector_.get();
   }
-  //ME add not sure if good
-  void setNumHoaTypes(int &numHoaTypes);
-  //ME end
-
 
  private:
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;
-  AudioParameterInt* packFormatIdValue_;//ME add, similar to DS
+  AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
-  int numHoaTypes_;//ME added, not sure if good
 
   std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector>
       connector_;
   std::unique_ptr<ear::plugin::HoaBackend> backend_;
 
   int samplerate_;
-  std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
+  std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HoaAudioProcessor)
 };

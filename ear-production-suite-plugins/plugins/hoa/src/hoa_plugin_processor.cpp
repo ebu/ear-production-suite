@@ -3,6 +3,7 @@
 #include "components/non_automatable_parameter.hpp"
 #include "hoa_plugin_editor.hpp"
 #include "hoa_frontend_connector.hpp"
+#include "components/level_meter_calculator.hpp"
 
 using namespace ear::plugin;
 
@@ -13,7 +14,7 @@ HoaAudioProcessor::HoaAudioProcessor()
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
                           true)),
       samplerate_(48000),
-      levelMeter_(std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
+      levelMeterCalculator_(std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
 
   /* clang-format off */
   addParameter(routing_ =
@@ -24,8 +25,6 @@ HoaAudioProcessor::HoaAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packformat_id_value", "PackFormat ID Value",
       0, 0xFFFF, 0));
-
-
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
 
@@ -40,8 +39,8 @@ HoaAudioProcessor::HoaAudioProcessor()
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-  connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);//creates instance of front end connector
-  backend_ = std::make_unique<HoaBackend>(connector_.get());//creates instance of backend, passing to it a pointer to front end connector
+  connector_ = std::make_unique<ui::HoaJuceFrontendConnector>(this);
+  backend_ = std::make_unique<HoaBackend>(connector_.get());
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, packFormatIdValue_->get());
@@ -70,11 +69,6 @@ int HoaAudioProcessor::getNumPrograms() {
 int HoaAudioProcessor::getCurrentProgram() { return 0; }
 void HoaAudioProcessor::setCurrentProgram(int index) {}
 
-
-void HoaAudioProcessor::setNumHoaTypes(int &numHoaTypes) {
-  numHoaTypes_ = numHoaTypes;
-}
-
 const String HoaAudioProcessor::getProgramName(int index) {
   return {};
 }
@@ -85,7 +79,7 @@ void HoaAudioProcessor::prepareToPlay(double samplerate,
                                                  int samplesPerBlock) {
   if (samplerate_ != static_cast<int>(samplerate)) {
     samplerate_ = static_cast<int>(samplerate);
-    levelMeter_->setup(49, samplerate_);
+    levelMeterCalculator_->setup(49, samplerate_);
   }
 }
 
@@ -105,7 +99,7 @@ bool HoaAudioProcessor::isBusesLayoutSupported(
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 MidiBuffer& midiMessages) {
   if(! bypass_->get()) {
-    levelMeter_->process(buffer);
+    levelMeterCalculator_->process(buffer);
     backend_->triggerMetadataSend();
   }
 }

@@ -1,10 +1,8 @@
 #include "hoa_plugin_editor.hpp"
 
-// TODO - remove unrequired components once UI dev complete
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/shadows.hpp"
-#include "hoa_plugin_processor.hpp"
 #include "hoa_frontend_connector.hpp"
 
 namespace{
@@ -14,37 +12,21 @@ namespace{
 
 using namespace ear::plugin::ui;
 
-HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
+HoaAudioProcessorEditor::HoaAudioProcessorEditor(
     HoaAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
       content_(std::make_unique<HoaComponent>(p)),
       viewport_(std::make_unique<Viewport>()) {
   p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
-
-
-  //ME here we set what is in the main box, these are all grouped together in a value_box_main
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
-
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
       content_->mainValueBox->getRoutingComboBox());
-  //ME add: add likewise option for chooosing common definition
-  p->getFrontendConnector()->setHoaTypeComboBox(  // here we are setting the HOA combo box to the cached value
-      content_->mainValueBox->getHoaTypeComboBox());  // arguments is pointer to a combo box
-  /* Old DS Code
-  // TODO - we only need to connect to UI components present in HOA plugin.
-  Rewrite this.
-  p->getFrontendConnector()->setSpeakerSetupsComboBox(
-      content_->mainValueBox->getSpeakerSetupsComboBox());
-  p->getFrontendConnector()->setUpperLayerValueBox(
-      content_->upperLayerValueBox);
-  p->getFrontendConnector()->setMiddleLayerValueBox(
-      content_->middleLayerValueBox);
-  p->getFrontendConnector()->setBottomLayerValueBox(
-      content_->bottomLayerValueBox);*/
+  p->getFrontendConnector()->setHoaTypeComboBox(
+      content_->mainValueBox->getHoaTypeComboBox());
   p->getFrontendConnector()->setOrderDisplayValueBox(
       content_->orderDisplayValueBox);
 
@@ -59,30 +41,13 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(//this is the constructor, 2..
   setResizable(true, false);
   setResizeLimits(0, 0, desiredWidth, desiredHeight);
   setSize(desiredWidth, desiredHeight);
-
-  //ME add
-  /* auto elementRelationships =
-      p->admCommonDefinitions.getElementRelationships();
-  for (auto const& [id, tdData] : elementRelationships) {
-    if (id == 4) {
-      auto packData = tdData->relatedPackFormats;
-      for (auto const& pfData : packData) {
-        content_->mainValueBox->getHoaTypeComboBox()->addTextEntry(
-            pfData->niceName, pfData->id);
-      }
-    }
-  }*/
- // content_->mainValueBox->getHoaTypeComboBox()->setDefaultText("Enter HOA Type");
-  //addAndMakeVisible(content_->mainValueBox->getHoaTypeComboBox().get());
-  //ME emd
 }
-
 
 HoaAudioProcessorEditor::~HoaAudioProcessorEditor() {}
 
 void HoaAudioProcessorEditor::paint(Graphics& g) {}
 
-void HoaAudioProcessorEditor::resized() {//Choose size of wole UI pop up
+void HoaAudioProcessorEditor::resized() {
   viewport_->setBounds(getLocalBounds());
   content_->setBounds(0, 0, desiredWidth, desiredHeight);
 }

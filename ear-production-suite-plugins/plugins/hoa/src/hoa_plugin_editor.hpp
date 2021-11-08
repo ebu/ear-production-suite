@@ -1,9 +1,7 @@
 #pragma once
 
-#include "hoa_plugin_processor.hpp"
-
 #include "JuceHeader.h"
-
+#include "hoa_plugin_processor.hpp"
 #include "hoa_component.hpp"
 
 class HoaAudioProcessorEditor : public AudioProcessorEditor {
@@ -11,7 +9,6 @@ class HoaAudioProcessorEditor : public AudioProcessorEditor {
   HoaAudioProcessorEditor(HoaAudioProcessor*);
   ~HoaAudioProcessorEditor();
 
-  //auto getElementRelationships();//ME added, needs to be deleted
   void paint(Graphics&) override;
   void resized() override;
   
