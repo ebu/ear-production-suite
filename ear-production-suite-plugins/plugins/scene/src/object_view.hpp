@@ -35,6 +35,7 @@ class ObjectView : public ElementView,
   // one case right now so would be massive overkill
   enum class ObjectType {
     DirectSpeakers,
+    HOA,
     Other
   };
 

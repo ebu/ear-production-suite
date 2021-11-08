@@ -14,8 +14,7 @@ class ValueBoxOrderDisplay;
 class PyramidBox : public Component, private Timer {
  public:
   PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,ValueBoxOrderDisplay* valueBoxOrderDisplay,
-      int channel,
-    int routing);
+      int channel);
   ~PyramidBox();
 
   void paint(Graphics& g) override;
@@ -34,7 +33,6 @@ class PyramidBox : public Component, private Timer {
   std::unique_ptr<Label> channelLabel_;
   std::weak_ptr<LevelMeterCalculator> levelMeterCalculator_;
   int channel_;
-  int routing_;
   float level_;
   bool hasSignal_;
   bool channelHasClipped_;

@@ -820,6 +820,13 @@ void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
         numberOfChannels = SPEAKER_SETUPS.at(layoutIndex).speakers.size();
       }
     }
+    if (item.has_hoa_metadata()) {
+      objectType = ObjectView::ObjectType::HOA;
+      auto hoaOrder = item.hoa_metadata().packformatidvalue();
+      if (hoaOrder >= 0) {
+      }
+    }
+
     auto view = std::make_shared<ObjectView>(objectType);
     view->addListener(this);
     view->setData({item, object});

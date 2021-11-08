@@ -79,14 +79,13 @@ void OrderBox::addPyramidBoxesToOrderBox() {
             std::vector<int> channels;
 
             for (int i(0); i < numChannelsOnRow(rowOrder_); i++) {
-                int channel(numChannelsInOrder(rowOrder_ - 1) + i + 1);
+                int channel(numChannelsInOrder(rowOrder_ - 1) + i);
                 channels.push_back(channel);
 
                 std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
                     std::make_shared<PyramidBox>(
                         p_->getLevelMeter(),
                         valueBoxOrderDisplay_,
-                        i + 1 + static_cast<int>(numChannelsInOrder(rowOrder_ - 1)),
                         channel);
                 pyramidBoxes_.push_back(pyramidBox);
                 addAndMakeVisible(*pyramidBox);

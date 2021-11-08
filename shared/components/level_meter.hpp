@@ -86,7 +86,7 @@ class LevelMeter : public Component, private Timer {
       if (orientation_ == Orientation::horizontal) {
           g.fillRect(area.removeFromTop(channelHeight).removeFromLeft(scalingFactor * area.getWidth()));
       } else {
-          g.fillRect(area.removeFromLeft(channelWidth/5)
+          g.fillRect(area.removeFromLeft(channelWidth)
                   .removeFromBottom(scalingFactor * area.getHeight()));
       }
     }

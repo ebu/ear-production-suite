@@ -16,12 +16,10 @@ namespace ui {
 
 
 PyramidBox::PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
-    ValueBoxOrderDisplay* valueBoxOrderDisplay,
-      int channel,
-    int routing)
-      : channelLabel_(std::make_unique<Label>()), levelMeterCalculator_(levelMeterCalculator), valueBoxOrderDisplay_(valueBoxOrderDisplay), channel_(channel), routing_(routing)
+    ValueBoxOrderDisplay* valueBoxOrderDisplay, int channel)
+  : channelLabel_(std::make_unique<Label>()), levelMeterCalculator_(levelMeterCalculator), valueBoxOrderDisplay_(valueBoxOrderDisplay), channel_(channel)
   {
-    channelLabel_->setText(std::to_string(channel), dontSendNotification);
+    channelLabel_->setText(std::to_string(channel+1), dontSendNotification);
     channelLabel_->setFont(EarFonts::Items);
     channelLabel_->setColour(Label::textColourId, EarColours::Label);
     channelLabel_->setJustificationType(Justification::centred);
@@ -75,10 +73,12 @@ void PyramidBox::setBox() {
 void PyramidBox::timerCallback() {
     if (auto meter = levelMeterCalculator_.lock()) {
       meter->decayIfNeeded(60);
-      level_ = meter->getLevel(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
-      hasSignal_ = meter->hasSignal(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      level_ = meter->getLevel(channel_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      hasSignal_ =
+          meter->hasSignal(channel_);  // IS THIS RIGHT OR SHOULD IT BE CHANNELS
       trackHasClipped_ = meter->thisTrackHasClipped();//IS THIS RIGHT OR SHOULD IT BE CHANNELS
-      channelHasClipped_ = meter->thisChannelHasClipped(routing_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      channelHasClipped_ = meter->thisChannelHasClipped(
+          channel_);  // IS THIS RIGHT OR SHOULD IT BE CHANNELS
       repaint();
     }
 }
