@@ -183,7 +183,7 @@ extern "C" {
             title += eps::baseVersion();
         }
         std::string msg;
-        if(eps::versionInfoAvailable) {
+        if(eps::versionInfoAvailable()) {
             msg += "Build Version:\n      ";
             msg += eps::currentVersion();
         } else {
