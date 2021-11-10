@@ -32,13 +32,8 @@ class ValueBoxChannelGain : public Component {
         channelLinkButton_(std::make_unique<EarButton>()) {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
-#ifdef USE_NEW_DESIGN
     headingLabel_->setText("Channel Meters",
                            juce::NotificationType::dontSendNotification);
-#else
-    headingLabel_->setText("Channel Gain",
-                           juce::NotificationType::dontSendNotification);
-#endif
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
 
@@ -76,10 +71,6 @@ class ValueBoxChannelGain : public Component {
     channelLinkButton_->onClick = [this] { this->toggleChannelLink(); };
     channelLinkButton_->setEnabled(false);
     channelLinkButton_->setAlpha(Emphasis::disabled);
-
-#ifndef USE_NEW_DESIGN
-    addAndMakeVisible(channelLinkButton_.get());
-#endif
   }
 
   ~ValueBoxChannelGain() {}
@@ -91,7 +82,6 @@ class ValueBoxChannelGain : public Component {
     area.reduce(10, 5);
     headingLabel_->setBounds(area.removeFromTop(30));
 
-#ifdef USE_NEW_DESIGN
     area.removeFromTop(marginBig_);
 
     channelGainsBox1to6_->setVisible(true);
@@ -116,27 +106,6 @@ class ValueBoxChannelGain : public Component {
       gainsBoxArea = area;
       channelGainsBox19to24_->setBounds(gainsBoxArea.reduced(0, 5));
     }
-
-#else
-    area.removeFromTop(2.f * marginBig_);
-    auto channelsButtonArea =
-        area.removeFromTop(40).withSizeKeepingCentre(260, 40);
-    channels1to6Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels7to12Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels13to18Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-    channels19to24Button_->setBounds(
-        channelsButtonArea.removeFromLeft(65).reduced(5, 5));
-
-    channelLinkButton_->setBounds(area.removeFromBottom(40));
-    channelGainsBox1to6_->setBounds(area.reduced(0, 10));
-    channelGainsBox7to12_->setBounds(area.reduced(0, 10));
-    channelGainsBox13to18_->setBounds(area.reduced(0, 10));
-    channelGainsBox19to24_->setBounds(area.reduced(0, 10));
-
-#endif
   }
 
   void clearSpeakerSetup() {
@@ -203,46 +172,10 @@ class ValueBoxChannelGain : public Component {
     // channelLinkButton_->setEnabled(true);
     // channelLinkButton_->setAlpha(Emphasis::full);
     linkChannels();
-
-#ifdef USE_NEW_DESIGN
     resized();
-#else
-    selectChannelGainsTab(0);
-#endif
   }
 
   void selectChannelGainsTab(int tabIndex) {
-#ifndef USE_NEW_DESIGN
-    channels1to6Button_->setToggleState(false, dontSendNotification);
-    channels7to12Button_->setToggleState(false, dontSendNotification);
-    channels13to18Button_->setToggleState(false, dontSendNotification);
-    channels19to24Button_->setToggleState(false, dontSendNotification);
-    channelGainsBox1to6_->setVisible(false);
-    channelGainsBox7to12_->setVisible(false);
-    channelGainsBox13to18_->setVisible(false);
-    channelGainsBox19to24_->setVisible(false);
-
-    switch (tabIndex) {
-      case 0:
-        channels1to6Button_->setToggleState(true, dontSendNotification);
-        channelGainsBox1to6_->setVisible(true);
-        break;
-      case 1:
-        channels7to12Button_->setToggleState(true, dontSendNotification);
-        channelGainsBox7to12_->setVisible(true);
-        break;
-      case 2:
-        channels13to18Button_->setToggleState(true, dontSendNotification);
-        channelGainsBox13to18_->setVisible(true);
-        break;
-      case 3:
-        channels19to24Button_->setToggleState(true, dontSendNotification);
-        channelGainsBox19to24_->setVisible(true);
-        break;
-      default:
-        break;
-    }
-#endif
   }
 
   void toggleChannelLink() {
