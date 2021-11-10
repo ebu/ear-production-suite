@@ -30,7 +30,7 @@ class DirectSpeakersComponent : public Component,
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
         metadataValueBox(std::make_unique<ValueBoxMetadata>()),
-        channelGainValueBox(
+        channelMetersBox(
             std::make_shared<ChannelMeterLayout>(p->getLevelMeter())),
         upperLayerValueBox(
             std::make_shared<ValueBoxSpeakerLayer>("Upper Layer")),
@@ -69,7 +69,7 @@ class DirectSpeakersComponent : public Component,
 
     //addAndMakeVisible(metadataValueBox.get());
     addAndMakeVisible(mainValueBox.get());
-    addAndMakeVisible(channelGainValueBox.get());
+    addAndMakeVisible(channelMetersBox.get());
 
     metadataValueBox->setEnabled(false);
     metadataValueBox->setAlpha(0.38f);
@@ -95,8 +95,7 @@ class DirectSpeakersComponent : public Component,
     g.fillAll(EarColours::Background);
     Shadows::elevation04dp.drawForRectangle(g, mainValueBox->getBounds());
     //Shadows::elevation04dp.drawForRectangle(g, metadataValueBox->getBounds());
-    Shadows::elevation01dp.drawForRectangle(g,
-                                            channelGainValueBox->getBounds());
+    Shadows::elevation01dp.drawForRectangle(g, channelMetersBox->getBounds());
   }
 
   void resized() override {
@@ -116,7 +115,7 @@ class DirectSpeakersComponent : public Component,
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
-    channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
+    channelMetersBox->setBounds(leftColumn.reduced(5, 5));
 
     // right column
     /* TODO - old positions before removing metadata
@@ -140,7 +139,7 @@ class DirectSpeakersComponent : public Component,
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent;
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxMetadata> metadataValueBox;
-  std::shared_ptr<ear::plugin::ui::ChannelMeterLayout> channelGainValueBox;
+  std::shared_ptr<ear::plugin::ui::ChannelMeterLayout> channelMetersBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> upperLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> middleLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
