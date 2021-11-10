@@ -9,9 +9,9 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class ChannelGain : public Component {
+class SpeakerLevel : public Component {
  public:
-  ChannelGain(String name)
+  SpeakerLevel(String name)
       : levelMeter_(std::make_unique<LevelMeter>()),
         speakerLabel_(std::make_unique<Label>()) {
     levelMeter_->setOrientation(LevelMeter::vertical);
@@ -24,7 +24,7 @@ class ChannelGain : public Component {
     addAndMakeVisible(speakerLabel_.get());
 
   }
-  ~ChannelGain() {}
+  ~SpeakerLevel() {}
 
   void paint(Graphics& g) override { g.fillAll(EarColours::Area01dp); }
 
@@ -44,7 +44,7 @@ class ChannelGain : public Component {
   std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> speakerLabel_;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGain)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpeakerLevel)
 };
 
 }  // namespace ui

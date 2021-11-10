@@ -4,20 +4,20 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "channel_gain.hpp"
+#include "speaker_level.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
 
-class ChannelGainsBox : public Component {
+class SpeakerMetersBox : public Component {
  public:
-  ChannelGainsBox() {}
-  ~ChannelGainsBox() {}
+  SpeakerMetersBox() {}
+  ~SpeakerMetersBox() {}
 
   void paint(Graphics& g) override {
     auto area = getLocalBounds();
-    if (channelGains_.empty()) {
+    if (speakerLevels_.empty()) {
       area.reduce(20.f, 30.f);
 
       g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
@@ -31,36 +31,36 @@ class ChannelGainsBox : public Component {
     }
   }
 
-  void resized() override { updateChannelGainBounds(); }
+  void resized() override { updateLevelMeterBounds(); }
 
-  void updateChannelGainBounds() {
+  void updateLevelMeterBounds() {
     auto area = getLocalBounds();
-    for (auto channelGain : channelGains_) {
-      channelGain->setBounds(area.removeFromLeft(meterWidth));
+    for (auto levelMeter : speakerLevels_) {
+      levelMeter->setBounds(area.removeFromLeft(meterWidth));
       area.removeFromLeft(meterSpacing);
     }
   }
 
-  void addChannelGain(ChannelGain* channelGain) {
-    channelGains_.push_back(channelGain);
-    addAndMakeVisible(channelGain);
-    updateChannelGainBounds();
+  void addLevelMeter(SpeakerLevel* levelMeter) {
+    speakerLevels_.push_back(levelMeter);
+    addAndMakeVisible(levelMeter);
+    updateLevelMeterBounds();
     repaint();
   }
 
-  void removeAllChannelGains() {
+  void removeAllLevelMeters() {
     removeAllChildren();
-    channelGains_.clear();
+    speakerLevels_.clear();
     repaint();
   };
 
  private:
-  std::vector<ChannelGain*> channelGains_;
+  std::vector<SpeakerLevel*> speakerLevels_;
 
   static const int meterWidth{ 52 };
   static const int meterSpacing{ 5 };
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGainsBox)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpeakerMetersBox)
 };
 
 }  // namespace ui

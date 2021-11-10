@@ -7,7 +7,7 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 #include "helper/multi_async_updater.h"
-#include "value_box_channel_gain.hpp"
+#include "channel_meter_layout.hpp"
 #include "value_box_speaker_layer.hpp"
 
 namespace ear {
@@ -49,7 +49,7 @@ class DirectSpeakersJuceFrontendConnector
 
   void setRouting(int routing);
   void setSpeakerSetup(int speakerSetupIndex);
-  void setChannelGainsValueBox(std::shared_ptr<ValueBoxChannelGain> gains);
+  void setChannelGainsValueBox(std::shared_ptr<ChannelMeterLayout> gains);
 
  protected:
   // ear::plugin::ui::InputFrontendBackendConnector
@@ -88,7 +88,7 @@ class DirectSpeakersJuceFrontendConnector
   std::weak_ptr<ValueBoxSpeakerLayer> upperLayer_;
   std::weak_ptr<ValueBoxSpeakerLayer> middleLayer_;
   std::weak_ptr<ValueBoxSpeakerLayer> bottomLayer_;
-  std::weak_ptr<ValueBoxChannelGain> channelGains_;
+  std::weak_ptr<ChannelMeterLayout> channelGains_;
 };
 
 }  // namespace ui
