@@ -8,7 +8,7 @@
 #include "helper/properties_file.hpp"
 #include "components/ear_header.hpp"
 #include "detail/constants.hpp"
-#include "value_box_channel_gain.hpp"
+#include "channel_meter_layout.hpp"
 #include "value_box_main.hpp"
 #include "value_box_metadata.hpp"
 #include "value_box_speaker_layer.hpp"
@@ -31,7 +31,7 @@ class DirectSpeakersComponent : public Component,
         mainValueBox(std::make_unique<ValueBoxMain>()),
         metadataValueBox(std::make_unique<ValueBoxMetadata>()),
         channelGainValueBox(
-            std::make_shared<ValueBoxChannelGain>(p->getLevelMeter())),
+            std::make_shared<ChannelMeterLayout>(p->getLevelMeter())),
         upperLayerValueBox(
             std::make_shared<ValueBoxSpeakerLayer>("Upper Layer")),
         middleLayerValueBox(
@@ -140,7 +140,7 @@ class DirectSpeakersComponent : public Component,
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent;
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxMetadata> metadataValueBox;
-  std::shared_ptr<ear::plugin::ui::ValueBoxChannelGain> channelGainValueBox;
+  std::shared_ptr<ear::plugin::ui::ChannelMeterLayout> channelGainValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> upperLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> middleLayerValueBox;
   std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
