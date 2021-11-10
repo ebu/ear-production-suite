@@ -35,7 +35,7 @@ DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(
   p->getFrontendConnector()->setBottomLayerValueBox(
       content_->bottomLayerValueBox);
   p->getFrontendConnector()->setChannelGainsValueBox(
-      content_->channelGainValueBox);
+      content_->channelMetersBox);
 
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);

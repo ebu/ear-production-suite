@@ -8,7 +8,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/slider.hpp"
-#include "channel_gains_box.hpp"
+#include "speaker_meters_box.hpp"
 #include "speaker_setups.hpp"
 
 namespace ear {
@@ -59,19 +59,19 @@ class ChannelMeterLayout : public Component {
     if(speakerLevels_.size() > 12) meterRows = 3;
     if(speakerLevels_.size() > 18) meterRows = 4;
 
-    auto gainsBoxHeight = area.getHeight() / meterRows;
+    auto metersBoxHeight = area.getHeight() / meterRows;
 
-    auto gainsBoxArea = area.removeFromTop(gainsBoxHeight);
-    channelMeterBox1to6_->setBounds(gainsBoxArea.reduced(0, 5));
-    gainsBoxArea = area.removeFromTop(gainsBoxHeight);
-    channelMeterBox7to12_->setBounds(gainsBoxArea.reduced(0, 5));
+    auto metersBoxArea = area.removeFromTop(metersBoxHeight);
+    channelMeterBox1to6_->setBounds(metersBoxArea.reduced(0, 5));
+    metersBoxArea = area.removeFromTop(metersBoxHeight);
+    channelMeterBox7to12_->setBounds(metersBoxArea.reduced(0, 5));
     if(meterRows >= 3) {
-      gainsBoxArea = area.removeFromTop(gainsBoxHeight);
-      channelMeterBox13to18_->setBounds(gainsBoxArea.reduced(0, 5));
+      metersBoxArea = area.removeFromTop(metersBoxHeight);
+      channelMeterBox13to18_->setBounds(metersBoxArea.reduced(0, 5));
     }
     if(meterRows >= 4) {
-      gainsBoxArea = area;
-      channelMeterBox19to24_->setBounds(gainsBoxArea.reduced(0, 5));
+      metersBoxArea = area;
+      channelMeterBox19to24_->setBounds(metersBoxArea.reduced(0, 5));
     }
   }
 
