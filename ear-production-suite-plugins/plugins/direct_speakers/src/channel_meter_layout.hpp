@@ -24,8 +24,7 @@ class ChannelMeterLayout : public Component {
         channelMeterBox1to6_(std::make_unique<SpeakerMetersBox>()),
         channelMeterBox7to12_(std::make_unique<SpeakerMetersBox>()),
         channelMeterBox13to18_(std::make_unique<SpeakerMetersBox>()),
-        channelMeterBox19to24_(std::make_unique<SpeakerMetersBox>()),
-        channelLinkButton_(std::make_unique<EarButton>()) {
+        channelMeterBox19to24_(std::make_unique<SpeakerMetersBox>()) {
     headingLabel_->setFont(EarFonts::Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Channel Meters",
@@ -35,18 +34,10 @@ class ChannelMeterLayout : public Component {
 
     clearSpeakerSetup();
 
-
     addAndMakeVisible(channelMeterBox1to6_.get());
     addChildComponent(channelMeterBox7to12_.get());
     addChildComponent(channelMeterBox13to18_.get());
     addChildComponent(channelMeterBox19to24_.get());
-
-    channelLinkButton_->setButtonText("Channel Link");
-    channelLinkButton_->setShape(EarButton::Shape::Toggle);
-    channelLinkButton_->setClickingTogglesState(true);
-    channelLinkButton_->onClick = [this] { this->toggleChannelLink(); };
-    channelLinkButton_->setEnabled(false);
-    channelLinkButton_->setAlpha(Emphasis::disabled);
   }
 
   ~ChannelMeterLayout() {}
@@ -95,9 +86,6 @@ class ChannelMeterLayout : public Component {
     channelMeterBox7to12_->setVisible(false);
     channelMeterBox13to18_->setVisible(false);
     channelMeterBox19to24_->setVisible(false);
-
-    channelLinkButton_->setEnabled(false);
-    channelLinkButton_->setAlpha(Emphasis::disabled);
   }
 
   void setSpeakerSetup(SpeakerSetup speakerSetup) {
@@ -117,27 +105,10 @@ class ChannelMeterLayout : public Component {
       }
     }
 
-    linkChannels();
     resized();
   }
 
-  void toggleChannelLink() {
-    if (channelLinkButton_->getToggleState()) {
-      linkChannels();
-    } else {
-      unlinkChannels();
-    }
-  }
-
  private:
-  void linkChannels() {
-    channelLinkButton_->setToggleState(true, dontSendNotification);
-  }
-
-  void unlinkChannels() {
-    channelLinkButton_->setToggleState(false, dontSendNotification);
-  }
-
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   std::unique_ptr<Label> headingLabel_;
@@ -147,8 +118,6 @@ class ChannelMeterLayout : public Component {
   std::unique_ptr<ear::plugin::ui::SpeakerMetersBox> channelMeterBox7to12_;
   std::unique_ptr<ear::plugin::ui::SpeakerMetersBox> channelMeterBox13to18_;
   std::unique_ptr<ear::plugin::ui::SpeakerMetersBox> channelMeterBox19to24_;
-
-  std::unique_ptr<ear::plugin::ui::EarButton> channelLinkButton_;
 
   const float labelWidth_ = 71.f;
   const float marginSmall_ = 5.f;
