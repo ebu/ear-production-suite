@@ -1,10 +1,8 @@
 
 #include "level_meter_calculator.hpp"
-#include <numeric>
 
 namespace ear {
 namespace plugin {
-
 
 // precalculated attack and release constants
 static float ATTACK_8000 = 0.8982300758361816;
