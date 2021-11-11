@@ -6,7 +6,6 @@
 #include "components/level_meter.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "value_box_order_display.hpp"
 
 namespace {
 int numChannelsUpToOrder(int order) {
@@ -43,17 +42,10 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
 }
 OrderBox::~OrderBox() {}
 void OrderBox::paint(Graphics& g) { 
-
-  //int averageLevel = static_cast<int>(average(levelMeter_->getValues()));
-
   g.fillAll(EarColours::Area01dp);
-  //g.setColour(EarColours::Primary);
-  // ME temporary add
-  //g.fillRect(averageLevel + levelMeter_->getX(), getLocalBounds().getY(), 5,
-  //                   getLocalBounds().getHeight());
 }
 
-void OrderBox::resized()  {  // Here we actually set the look of the level meter
+void OrderBox::resized()  {
             auto area = getLocalBounds();
 
             orderLabel_->setBounds(area.removeFromLeft(40));
@@ -75,7 +67,6 @@ void OrderBox::resized()  {  // Here we actually set the look of the level meter
                 partitionNumber++;
             }
 }
-
 
 void OrderBox::addPyramidBoxesToOrderBox() {
             auto startChannel = numChannelsUpToOrder(rowOrder_ - 1);
@@ -100,10 +91,4 @@ void OrderBox::addPyramidBoxesToOrderBox() {
             }
 
             levelMeter_->setMeter(p_->getLevelMeter(), channels);
-}
-
-void OrderBox::removeAllOrderBoxes() {
-            removeAllChildren();
-            pyramidBoxes_.clear();
-            repaint();
 }

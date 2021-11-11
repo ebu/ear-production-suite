@@ -4,6 +4,7 @@
 namespace ear {
 namespace plugin {
 
+
 // precalculated attack and release constants
 static float ATTACK_8000 = 0.8982300758361816;
 static float RELEASE_8000 = 0.9994245171546936;

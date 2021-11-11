@@ -30,13 +30,10 @@ class OrderBox : public Component {
 
   void addPyramidBoxesToOrderBox();
 
-  void removeAllOrderBoxes();
-
  private:
   HoaAudioProcessor* p_;
   ValueBoxOrderDisplay* valueBoxOrderDisplay_;
   std::unique_ptr<LevelMeter> levelMeter_;
-  std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
   std::unique_ptr<Label> orderLabel_;
   int rowOrder_;
   int hoaOrder_;

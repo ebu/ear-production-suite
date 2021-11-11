@@ -4,7 +4,6 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "order_box.hpp"
 
-
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -29,18 +28,15 @@ void OrderDisplayBox::paint(Graphics& g) {
                  Justification::left);
       g.setColour(EarColours::Text.withAlpha(Emphasis::high));
       g.setFont(EarFonts::Heading);
-      g.drawText("Please select a speaker layout first",
+      g.drawText("Please select a Higher Order Ambisonics type first",
                  area.removeFromTop(25.f), Justification::left);
     }
 }
 
 void OrderDisplayBox::resized() { updateOrderBoxBounds(); }
 
-void OrderDisplayBox::updateOrderBoxBounds() {  // This seems to be where we
-                                                // place the channel
-                                 // gain boxes
+void OrderDisplayBox::updateOrderBoxBounds() {
     auto area = getLocalBounds();
-
 
     for (auto orderBox : orderBoxes_) {
       orderBox->setBounds(area.removeFromTop(50));
@@ -60,7 +56,6 @@ void OrderDisplayBox::updateOrderBoxBounds() {  // This seems to be where we
     orderBoxes_.clear();
     repaint();
  }
-
 
 }  // namespace ui
 }  // namespace plugin
