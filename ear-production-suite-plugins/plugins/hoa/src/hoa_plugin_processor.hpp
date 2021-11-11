@@ -54,9 +54,7 @@ class HoaAudioProcessor : public AudioProcessor {
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
 
-  AudioProcessorParameter* getBypassParameter() {
-    return bypass_;
-  }
+  AudioProcessorParameter* getBypassParameter() { return bypass_; }
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeterCalculator_;
@@ -73,8 +71,7 @@ class HoaAudioProcessor : public AudioProcessor {
   AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
 
-  std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector>
-      connector_;
+  std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::HoaBackend> backend_;
 
   int samplerate_;

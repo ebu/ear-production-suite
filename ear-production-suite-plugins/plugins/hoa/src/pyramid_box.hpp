@@ -13,8 +13,8 @@ class ValueBoxOrderDisplay;
 
 class PyramidBox : public Component, private Timer {
  public:
-  PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,ValueBoxOrderDisplay* valueBoxOrderDisplay,
-      int channel);
+  PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
+             ValueBoxOrderDisplay* valueBoxOrderDisplay, int channel);
   ~PyramidBox();
 
   void paint(Graphics& g) override;

@@ -12,8 +12,7 @@ namespace plugin {
 
 class HoaBackend {
  public:
-  EAR_PLUGIN_BASE_EXPORT HoaBackend(
-      ui::HoaFrontendBackendConnector* connector);
+  EAR_PLUGIN_BASE_EXPORT HoaBackend(ui::HoaFrontendBackendConnector* connector);
   EAR_PLUGIN_BASE_EXPORT ~HoaBackend();
   HoaBackend(const HoaBackend&) = delete;
   HoaBackend& operator=(const HoaBackend&) = delete;

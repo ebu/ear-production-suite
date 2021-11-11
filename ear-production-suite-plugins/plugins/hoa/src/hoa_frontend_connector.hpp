@@ -18,7 +18,7 @@ class ValueBoxOrderDisplay;
 class HoaJuceFrontendConnector
     : public ear::plugin::ui::HoaFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
-      ear::plugin::ui::EarComboBox::Listener{
+      ear::plugin::ui::EarComboBox::Listener {
  public:
   /**
    * Note: Make sure that all AudioProcessorParameters are already
@@ -31,7 +31,8 @@ class HoaJuceFrontendConnector
   void parameterValueChanged(int parameterIndex, float newValue) override;
   void parameterGestureChanged(int parameterIndex,
                                bool gestureIsStarting) override{};
-  void trackPropertiesChanged(const AudioProcessor::TrackProperties& properties);
+  void trackPropertiesChanged(
+      const AudioProcessor::TrackProperties& properties);
 
   void setStatusBarLabel(std::shared_ptr<Label> label);
   void setColourComboBox(std::shared_ptr<EarComboBox> comboBox);
@@ -46,14 +47,12 @@ class HoaJuceFrontendConnector
   void setHoaType(int hoaType);
 
  protected:
-
   void doSetStatusBarText(const std::string& text) override;
 
   void comboBoxChanged(
       ear::plugin::ui::EarComboBox* comboBoxThatHasChanged) override;
 
  private:
-
   HoaAudioProcessor* p_;
 
   MultiAsyncUpdater updater_;

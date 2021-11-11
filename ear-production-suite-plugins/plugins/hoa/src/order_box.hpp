@@ -17,14 +17,11 @@ class ValueBoxOrderDisplay;
 
 class OrderBox : public Component {
  public:
-  OrderBox(HoaAudioProcessor* p,
-           ValueBoxOrderDisplay* valueBoxOrderDisplay,
-           String name,
-           int rowOrder,
-           int hoaOrder);
+  OrderBox(HoaAudioProcessor* p, ValueBoxOrderDisplay* valueBoxOrderDisplay,
+           String name, int rowOrder, int hoaOrder);
   ~OrderBox();
 
-  void paint(Graphics& g) override; 
+  void paint(Graphics& g) override;
 
   void resized() override;
 

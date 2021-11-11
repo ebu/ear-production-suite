@@ -11,7 +11,7 @@ class HoaAudioProcessorEditor : public AudioProcessorEditor {
 
   void paint(Graphics&) override;
   void resized() override;
-  
+
  private:
   HoaAudioProcessor* p_;
 
