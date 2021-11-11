@@ -39,14 +39,12 @@ class ItemsContainer : public Component {
         ScrollBar::thumbColourId, EarColours::Area04dp);
     addAndMakeVisible(directSpeakersViewport_.get());
 
-    //ME add
     hoaViewport_->setViewedComponent(hoaList.get(),
                                                 false);
     hoaViewport_->setScrollBarsShown(true, false);
     hoaViewport_->getVerticalScrollBar().setColour(
         ScrollBar::thumbColourId, EarColours::Area04dp);
     addAndMakeVisible(hoaViewport_.get());
-    //ME end
 
     objectsLabel_->setText("Objects", dontSendNotification);
     objectsLabel_->setFont(EarFonts::Label);
@@ -60,14 +58,14 @@ class ItemsContainer : public Component {
                                     EarColours::Area04dp);
     directSpeakersLabel_->setColour(Label::textColourId, EarColours::Heading);
     addAndMakeVisible(directSpeakersLabel_.get());
-    // ME add
+
     hoaLabel_->setText("Higher Order Ambisonics", dontSendNotification);
     hoaLabel_->setFont(EarFonts::Label);
     hoaLabel_->setColour(Label::backgroundColourId,
                                     EarColours::Area04dp);
     hoaLabel_->setColour(Label::textColourId, EarColours::Heading);
     addAndMakeVisible(hoaLabel_.get());
-    // ME end
+
     addButton_->setButtonText("Add");
     addButton_->onClick = [&]() {
       std::vector<communication::ConnectionId> ids;
@@ -81,11 +79,11 @@ class ItemsContainer : public Component {
           ids.push_back(item->getId());
         }
       }
-      for (auto item : this->hoaItems) {//ME add
+      for (auto item : this->hoaItems) {
         if (item->isEnabled() && item->isSelected()) {
           ids.push_back(item->getId());
         }
-      }//ME end
+      }
       Component::BailOutChecker checker(this);
       listeners_.callChecked(
           checker, [this, ids](Listener& l) { l.addItemsClicked(this, ids); });
@@ -105,13 +103,10 @@ class ItemsContainer : public Component {
     g.setColour(EarColours::Area01dp);
     g.fillRect(buttonArea);
 
-    //auto objectsArea = area.removeFromLeft(getWidth() / 2);
-    //auto directSpeakersArea = area;
-    //auto hoaArea = area;//ME add
     auto objectsArea = area.removeFromLeft(getWidth() / 3);
     auto remainingArea = area.removeFromRight(getWidth() * 2 / 3);
     auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 3);
-    auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);  // ME add
+    auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);
 
     g.setColour(EarColours::WindowBorder);
     g.fillRect(objectsArea.removeFromRight(2));
@@ -130,9 +125,7 @@ class ItemsContainer : public Component {
     auto objectsArea = area.removeFromLeft(getWidth() / 3);
     auto remainingArea = area.removeFromRight(getWidth()*2 / 3);
     auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 3);
-    auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);  // ME add
-    //objectsArea.removeFromRight(2);
-    //directSpeakersArea.removeFromLeft(2);
+    auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);
 
     objectsLabel_->setBounds(objectsArea.removeFromTop(30));
     objectsViewport_->setBounds(objectsArea.reduced(2, 2));
@@ -169,10 +162,10 @@ class ItemsContainer : public Component {
  private:
   std::unique_ptr<Viewport> objectsViewport_;
   std::unique_ptr<Viewport> directSpeakersViewport_;
-  std::unique_ptr<Viewport> hoaViewport_;//ME add
+  std::unique_ptr<Viewport> hoaViewport_;
   std::unique_ptr<Label> objectsLabel_;
   std::unique_ptr<Label> directSpeakersLabel_;
-  std::unique_ptr<Label> hoaLabel_;//ME add
+  std::unique_ptr<Label> hoaLabel_;
   std::unique_ptr<EarButton> addButton_;
 
   ListenerList<Listener> listeners_;

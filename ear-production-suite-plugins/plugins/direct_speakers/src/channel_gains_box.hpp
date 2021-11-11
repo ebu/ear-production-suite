@@ -41,21 +41,6 @@ class ChannelGainsBox : public Component {
 
   void updateChannelGainBounds() {
     auto area = getLocalBounds();
-    /* MF - Commented out during merge due to conflict. ME's metering experiments:
-    //area.removeFromBottom(350);//ME add 
-    int levels(ceil(sqrt(channelGains_.size())));
-    double levelMeterSize(area.getHeight() / static_cast<double>(levels));  // ME experiment
-    //for (auto channelGain : channelGains_) {
-    for (int i(0); i < channelGains_.size(); i++) {//ME experiment
-      int level(ceil(sqrt(i+1)));
-      auto channelGain(channelGains_[i]);//ME experiment
-      channelGain->setBounds(
-          area.withLeft(50 * (i - pow(level - 1, 2)))
-              .withRight((50 * (i - pow(level - 1, 2))) + 50)
-              .withTrimmedTop((level-1) * levelMeterSize)
-              .withTrimmedBottom((levels - level) * levelMeterSize));
-      area.removeFromLeft(6);//NEEDS WORK
-	*/
     for (auto channelGain : channelGains_) {
       channelGain->setBounds(area.removeFromLeft(meterWidth));
       area.removeFromLeft(meterSpacing);

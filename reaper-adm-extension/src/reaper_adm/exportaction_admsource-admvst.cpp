@@ -31,16 +31,16 @@ AdmVstExportSources::AdmVstExportSources(ReaperAPI const & api) : IExportSources
     admProgramme->addReference(admContent);
 
     MediaTrack *trk;
-    int numTracks = api.CountTracks(nullptr);//ME already at this stage we are miscounting I think? Or maybe no... what is this? ITs 4
+    int numTracks = api.CountTracks(nullptr);
 
     for(int trackNum = 0; trackNum < numTracks; trackNum++) {
 
         trk = api.GetTrack(nullptr, trackNum);
         if(trk) {
 
-            auto fxPosVec = AdmVst::trackAdmVstIndexes(api, trk);//ME this is zero length for some reason
+            auto fxPosVec = AdmVst::trackAdmVstIndexes(api, trk);
             for(int fxPos : fxPosVec) {
-                auto admExportVst = std::make_shared<AdmVst>(trk, fxPos, api);//never gets in here?
+                auto admExportVst = std::make_shared<AdmVst>(trk, fxPos, api);
                 allAdmVsts.push_back(admExportVst);
 
                 if(AdmVst::isCandidateForExport(admExportVst)) {

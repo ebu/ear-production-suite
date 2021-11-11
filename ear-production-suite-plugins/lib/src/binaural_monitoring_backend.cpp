@@ -125,8 +125,6 @@ std::optional<BinauralMonitoringBackend::HoaEarMetadataAndRouting>
 
 BinauralMonitoringBackend::getLatestHoaTypeMetadata(ConnId id) {
   std::lock_guard<std::mutex> lockA(latestHoaTypeMetadataMutex_);
-  // TODO: Unsupported at the moment - needs EpsToEarMetadataConverter for HOA
-  //ME ADDED THIS BUT ITS JUST A COPY OF DS AND NEEDS FIXING/CHECKING/REWORKING - ALSO NEED TO ACTUALLY UNDERSTAND THIS
   auto earMD = getValuePointerFromMap<ConnId, HoaEarMetadataAndRouting>(
       latestHoaTypeMetadata, id);
   if (earMD) {
@@ -161,13 +159,13 @@ BinauralMonitoringBackend::getLatestHoaTypeMetadata(ConnId id) {
 }
 
 std::optional<BinauralMonitoringBackend::ObjectsEarMetadataAndRouting>
-BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id) {//here we set new EAR metadata based on EPX metadata
+BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id) {
   std::lock_guard<std::mutex> lockA(latestObjectsTypeMetadataMutex_);
 
   auto earMD = getValuePointerFromMap<ConnId, ObjectsEarMetadataAndRouting>(
       latestObjectsTypeMetadata, id);
-  if (earMD) {//see if we already have some EAR formatted metadata for this object
-    return std::optional<ObjectsEarMetadataAndRouting>(*earMD);//if so return that
+  if (earMD) {
+    return std::optional<ObjectsEarMetadataAndRouting>(*earMD);
   }
 
   std::lock_guard<std::mutex> lockB(latestMonitoringItemMetadataMutex_);
@@ -176,11 +174,11 @@ BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id) {//here we se
       getValuePointerFromMap<ConnId,
                              ear::plugin::proto::MonitoringItemMetadata>(
           latestMonitoringItemMetadata, id);
-  if (!epsMD || !epsMD->has_obj_metadata()) {//..if not EAR formatted metadata available, see if there is EPS metadata
-    return std::optional<ObjectsEarMetadataAndRouting>();//if not return empty optional
+  if (!epsMD || !epsMD->has_obj_metadata()) {
+    return std::optional<ObjectsEarMetadataAndRouting>();
   }
 
-  setInMap<ConnId, ObjectsEarMetadataAndRouting>(//but if there is then convert EPS formatted metadata to EAR format and store in cache
+  setInMap<ConnId, ObjectsEarMetadataAndRouting>(
       latestObjectsTypeMetadata, id,
       ObjectsEarMetadataAndRouting{
           epsMD->has_routing() ? epsMD->routing() : -1,
@@ -224,10 +222,10 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   std::lock_guard<std::mutex> lockDsIds(activeDirectSpeakersIdsMutex_);
   std::lock_guard<std::mutex> lockObjIds(activeObjectIdsMutex_);
-  std::lock_guard<std::mutex> lockHoaIds(activeHoaIdsMutex_);//ME add
+  std::lock_guard<std::mutex> lockHoaIds(activeHoaIdsMutex_);
   activeDirectSpeakersIds.clear();
   activeObjectIds.clear();
-  activeHoaIds.clear();//ME add
+  activeHoaIds.clear();
 
   for (const auto& item : store.monitoring_items()) {
     if (item.has_connection_id() &&
@@ -266,18 +264,18 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         activeDirectSpeakersIds.push_back(item.connection_id());
       }
 
-      if (item.has_obj_metadata()) {// if object metadata has changed..
+      if (item.has_obj_metadata()) {
         if (item.changed()) {
           {
             std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
             removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
-                latestObjectsTypeMetadata, item.connection_id());//..then clear metadata in both cache maps for that plugin (note EAR format)..
+                latestObjectsTypeMetadata, item.connection_id());
           }
           {
             std::lock_guard<std::mutex> lock(
                 latestMonitoringItemMetadataMutex_);
             setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
-                latestMonitoringItemMetadata, item.connection_id(), item);//..then overwrite with monitoring data( e.g.EPS format)
+                latestMonitoringItemMetadata, item.connection_id(), item);
           }
         }
         activeObjectIds.push_back(item.connection_id());

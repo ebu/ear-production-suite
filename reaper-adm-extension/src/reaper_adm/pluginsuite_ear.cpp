@@ -22,8 +22,8 @@ using namespace admplug;
 #define TRACK_MAPPING_MAX 63
 #define SPEAKER_LAYOUT_MIN -1
 #define SPEAKER_LAYOUT_MAX 21
-#define PACK_FORMAT_MIN 0x0//ME ADD UNSURE
-#define PACK_FORMAT_MAX 0xFFFF//ME ADD UNSURE
+#define PACK_FORMAT_MIN 0x0
+#define PACK_FORMAT_MAX 0xFFFF
 
 namespace {
 
@@ -182,7 +182,7 @@ namespace {
         }
         return usedValues;
     }
-    std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {//ME add, unsure
+    std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
         std::vector<int> usedValues{};
         
         auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
@@ -193,10 +193,10 @@ namespace {
         auto packFormatId = plugin.getParameterWithConvertToInt(*(packFormatIdParam.get()));
         assert(packFormatId.has_value());
         int trackWidth = packFormatId.has_value() ? pow(*packFormatId +1,2) : 0;
-        if (trackWidth <= 0) trackWidth = 1; // Track mapping is single channel by default.
+        if (trackWidth <= 0) trackWidth = 1;
 
         if (trackMapping.has_value() && *trackMapping >= 0) {
-            int trackWidth = plugin.getTrackInstance().getChannelCount();// This makes the assumption that we set the track width to the size of the essence!
+            int trackWidth = plugin.getTrackInstance().getChannelCount();
             for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
                 usedValues.push_back((*trackMapping) + channelCounter);
             }
@@ -208,7 +208,7 @@ namespace {
 
 const char* EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME = "EAR Object";
 const char* EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME = "EAR DirectSpeakers";
-const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";//ME add
+const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";
 const char* EARPluginSuite::SCENEMASTER_PLUGIN_NAME = "EAR Scene";
 const char* EARPluginSuite::RENDERER_PLUGIN_NAME = "EAR Monitoring 0+2+0";
 const int EARPluginSuite::MAX_CHANNEL_COUNT = 64;
@@ -219,9 +219,7 @@ EARPluginSuite::EARPluginSuite() :
     objectTrackMappingParameter{ createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
     directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
     hoaTrackMappingParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-    //ME ADD UNSURE
     hoaPackFormatIdParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), {PACK_FORMAT_MIN, PACK_FORMAT_MAX}) },
-    //ME END
     directSpeakersLayoutParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::SPEAKER_LAYOUT), {SPEAKER_LAYOUT_MIN, SPEAKER_LAYOUT_MAX}) }
 {
 }
@@ -408,33 +406,23 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
         }
     }
 }
-//ME add
-void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI &api) {//VERY UNCERTAIN ABOUT THIS
+void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI &api) {
     // Can only do this in onHoaAutomation because we need the packformat and a channelformats first blockformat
     // NOTE: This will run for every leg, so don't duplicate effort!
     auto track = automationElement.getTrack();
     auto plugin = track->getPlugin(HOA_METADATA_PLUGIN_NAME);
     auto packFormat = automationElement.channel().packFormat();
-    auto packFormatId = std::stoi(adm::formatId(packFormat->get<adm::AudioPackFormatId>()).substr(7,4));//ME ADD UNSURE
+    auto packFormatId = std::stoi(adm::formatId(packFormat->get<adm::AudioPackFormatId>()).substr(7,4));
     assert(packFormat);
 
-    if (!plugin) { // Not processed yet
-        //auto speakerLayout = getSpeakerLayoutIndexFromPackFormatId(adm::formatId(packFormat->get<adm::AudioPackFormatId>()));
-        /*if (!speakerLayout) {
-            auto cartLayout = getCartLayout(*packFormat);
-            if (cartLayout) {
-                speakerLayout = getSpeakerLayoutIndexFromPackFormatId(getMappedCommonPackId(*cartLayout));
-            }
-        }*/
-       // if (speakerLayout) { // We only support specific speaker layouts
+    if (!plugin) {
         plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
         auto takeChannels = automationElement.takeChannels();
         auto channelCountTake = static_cast<int>(takeChannels.size());
         auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
-        //assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
         auto channelCount = channelCountTake;
         track->setChannelCount(channelCount);
-        plugin->setParameter(*hoaPackFormatIdParameter, hoaPackFormatIdParameter->forwardMap(packFormatId));//ME ADD UNSURE
+        plugin->setParameter(*hoaPackFormatIdParameter, hoaPackFormatIdParameter->forwardMap(packFormatId));
 
         assert(trackMappingAssigner);
         auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
@@ -453,8 +441,6 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
         else {
                 //TODO - need to tell user - no free track mappings
         }
-
-        //}
     }
 }
 
@@ -470,7 +456,7 @@ bool EARPluginSuite::pluginSuiteUsable(const ReaperAPI &api)
         {
             OBJECT_METADATA_PLUGIN_NAME,
             DIRECTSPEAKERS_METADATA_PLUGIN_NAME,
-            HOA_METADATA_PLUGIN_NAME,//ME add
+            HOA_METADATA_PLUGIN_NAME,
             SCENEMASTER_PLUGIN_NAME,
             RENDERER_PLUGIN_NAME
         },
@@ -490,14 +476,12 @@ int admplug::EARPluginSuite::countChannelsInSpeakerLayout(int slIndex)
     }
     return 0;
 }
-//ME add
 int admplug::EARPluginSuite::countChannelsInHoaPackFormat(int pfId)
 {
     auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, pfId);
     if (!pfData) return 0;
     return pfData->relatedChannelFormats.size();
 }
-//ME add
 std::vector<std::unique_ptr<PluginParameter>> const& EARPluginSuite::automatedObjectPluginParameters()
 {
     auto static parameters = createAutomatedObjectPluginParameters();

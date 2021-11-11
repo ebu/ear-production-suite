@@ -35,7 +35,7 @@ namespace admplug {
 
         static const char* OBJECT_METADATA_PLUGIN_NAME;
         static const char* DIRECTSPEAKERS_METADATA_PLUGIN_NAME;
-        static const char* HOA_METADATA_PLUGIN_NAME;//ME add
+        static const char* HOA_METADATA_PLUGIN_NAME;
         static const char* SCENEMASTER_PLUGIN_NAME;
         static const char* RENDERER_PLUGIN_NAME;
 
@@ -43,12 +43,12 @@ namespace admplug {
         static int countChannelsInHoaPackFormat(int pfId);
 
     private:
-        std::vector<std::unique_ptr<PluginParameter>> const & automatedObjectPluginParameters();//does HOA need this?
+        std::vector<std::unique_ptr<PluginParameter>> const & automatedObjectPluginParameters();
         std::vector<std::unique_ptr<TrackParameter>> const & trackParameters();
         std::shared_ptr<PluginParameter> objectTrackMappingParameter;
         std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;
-        std::shared_ptr<PluginParameter> hoaTrackMappingParameter;//ME add
-        std::shared_ptr<PluginParameter> hoaPackFormatIdParameter;//ME add UNSURE
+        std::shared_ptr<PluginParameter> hoaTrackMappingParameter;
+        std::shared_ptr<PluginParameter> hoaPackFormatIdParameter;
         std::shared_ptr<PluginParameter> directSpeakersLayoutParameter;
         std::unique_ptr<UniqueValueAssigner> trackMappingAssigner;
 
@@ -60,7 +60,7 @@ namespace admplug {
         void setTrackInsertionIndexFromSelectedMedia(const ReaperAPI &api);
 
         std::string originalAdmDocument;
-        std::vector<uint32_t> trackMappingToAtu; // Index = trackMapping Parameter, value = AudioTrackUid
+        std::vector<uint32_t> trackMappingToAtu;
         bool sceneMasterAlreadyExisted{ false };
 
         static const int MAX_CHANNEL_COUNT;

@@ -128,19 +128,19 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(
                                          bearMetadata);
 }
 
-bool BinauralMonitoringAudioProcessor::pushBearMetadata( // for DS, this is done once per speaker/channel so no need to loop round
+bool BinauralMonitoringAudioProcessor::pushBearMetadata(
     size_t channelNum, ear::DirectSpeakersTypeMetadata *metadata) {
   bear::DirectSpeakersInput bearMetadata;
   bearMetadata.rtime = metadataRtime;
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
-  dsChannelMappings.push_back(channelNum); // Here channelnum = starting channel + index
+  dsChannelMappings.push_back(channelNum);
 
   return bearRenderer->add_direct_speakers_block(dsChannelMappings.size() - 1,
                                                  bearMetadata);
 }
 
-bool BinauralMonitoringAudioProcessor::pushBearMetadata( // for HOA, this is done per asset. Need to iterate round channels within this.
+bool BinauralMonitoringAudioProcessor::pushBearMetadata(
     size_t channelNum, ear::HOATypeMetadata *metadata, size_t arbitraryStreamIdentifier) {
 
   if(metadata->degrees.size() == 0) return false;

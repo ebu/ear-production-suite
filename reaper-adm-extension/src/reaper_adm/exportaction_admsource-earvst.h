@@ -95,7 +95,7 @@ private:
     // TODO: Fix hard-coded values - pull from plugin suite
     std::unique_ptr<PluginParameter> paramTrackMapping{ createPluginParameter(0, { -1.0, 63.0 }) };
     std::unique_ptr<PluginParameter> paramSpeakerLayout{ createPluginParameter(1, { -1.0, 21.0 }) };
-    std::unique_ptr<PluginParameter> paramPackFormatId{ createPluginParameter(0x1, { 0x0, 0xFFFF}) };//ME add
+    std::unique_ptr<PluginParameter> paramPackFormatId{ createPluginParameter(0x1, { 0x0, 0xFFFF}) };
 
     // Statics
 
@@ -109,13 +109,10 @@ private:
     static size_t objectVstCompNameLen;
     static const char* objectVstCompNameCStr;
 
-    //ME add
     static std::string hoaVstName; // Human-readable name
     static std::string hoaVstCompName; // Name for comparison purposes using API funcs
     static size_t hoaVstCompNameLen;
     static const char* hoaVstCompNameCStr;
-    //ME end
-
 };
 
 class EarSceneMasterVst : public PluginInstance

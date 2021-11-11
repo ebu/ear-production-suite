@@ -49,9 +49,6 @@ struct EpsToEarMetadataConverter {
   }
   static ear::HOATypeMetadata convert(
       const proto::HoaTypeMetadata &epsMetadata, AdmCommonDefinitionHelper &commonDefinitionHelper) {
-   // auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
-    //auto elementRelationships =
-    //    commonDefinitionHelper.getElementRelationships();
     auto pfData = commonDefinitionHelper.getPackFormatData(
         4, epsMetadata.packformatidvalue());
 
@@ -78,26 +75,6 @@ struct EpsToEarMetadataConverter {
 
     return earMetadata;
   }
-  /*
-  //ME ADDED THIS IN THE IMAGE OF OBJECT RATHER THAN DS. NOT SURE IF THIS IS RIGHT, MAY NEED REWORKING
-  static ear::HoaTypeMetadata convert(//FIRST NEED TO ADD SUPPORT FOR HOATYPE METADATA, POTENTIALLY IN METADATA.HPP?
-      const proto::ObjectsTypeMetadata &epsMetadata) {
-    ear::HoaTypeMetadata earMetadata;
-    //earMetadata.gain = epsMetadata.gain();
-   // earMetadata.position = ear::PolarPosition(
-    //    epsMetadata.position().azimuth(), epsMetadata.position().elevation(),
-    //    epsMetadata.position().distance());
-   // earMetadata.width = epsMetadata.width();
-    //earMetadata.height = epsMetadata.height();
-    //earMetadata.depth = epsMetadata.depth();
-   // earMetadata.diffuse = epsMetadata.diffuse();
-    //// XXX: uncomment to enable divergence
-    //// earMetadata.objectDivergence =
-    ////     PolarObjectDivergence{epsMetadata.factor(), epsMetadata.range()};
-    return earMetadata;
-    //ME END
-    */
-
 };
 
 }  // namespace plugin
