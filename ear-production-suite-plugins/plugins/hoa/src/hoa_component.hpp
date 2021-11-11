@@ -2,23 +2,14 @@
 
 #include "JuceHeader.h"
 
-// TODO - remove unrequired components once UI dev complete
-#include "components/ear_combo_box.hpp"
 #include "components/onboarding.hpp"
 #include "components/overlay.hpp"
 #include "helper/properties_file.hpp"
 #include "components/ear_header.hpp"
 #include "detail/constants.hpp"
-/* Old DS code
-// These were the individual UI control panels in the DS UI
-// We need a similar structure for HOA plugin
-#include "value_box_speaker_layer.hpp"
-*/
 #include "value_box_main.hpp"
 #include "value_box_order_display.hpp"
 #include "components/version_label.hpp"
-
-#include <memory>
 
 namespace ear {
 namespace plugin {
@@ -35,15 +26,6 @@ class HoaComponent : public Component,
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
         orderDisplayValueBox(std::make_shared<ValueBoxOrderDisplay>(p, p->getLevelMeter())),
-        /* Old DS Code
-            // We want to put our new component panels in here
-        upperLayerValueBox(
-            std::make_shared<ValueBoxSpeakerLayer>("Upper Layer")),
-        middleLayerValueBox(
-            std::make_shared<ValueBoxSpeakerLayer>("Middle Layer")),
-        bottomLayerValueBox(
-            std::make_shared<ValueBoxSpeakerLayer>("Bottom Layer")),
-        */
         statusBarLabel(std::make_shared<Label>()),
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
@@ -75,16 +57,6 @@ class HoaComponent : public Component,
 
     addAndMakeVisible(mainValueBox.get());
     addAndMakeVisible(orderDisplayValueBox.get());
-    /* Old DS code
-    // Add components to the UI here
-    upperLayerValueBox->setLayer(ear::plugin::Layer::upper);
-    middleLayerValueBox->setLayer(ear::plugin::Layer::middle);
-    bottomLayerValueBox->setLayer(ear::plugin::Layer::bottom);
-
-    addAndMakeVisible(upperLayerValueBox.get());
-    addAndMakeVisible(middleLayerValueBox.get());
-    addAndMakeVisible(bottomLayerValueBox.get());
-    */
 
     statusBarLabel->setFont(EarFonts::Measures);
     addAndMakeVisible(statusBarLabel.get());
@@ -95,17 +67,12 @@ class HoaComponent : public Component,
 
   ~HoaComponent() {}
 
-  void paint(Graphics& g) override {//here we specify area fr the whole box
+  void paint(Graphics& g) override {
     g.fillAll(EarColours::Background);
     Shadows::elevation04dp.drawForRectangle(g, mainValueBox->getBounds());
-    /* Old DS code
-    // Add elevated shadowing for important panels here
-    Shadows::elevation01dp.drawForRectangle(g,
-                                            channelGainValueBox->getBounds());
-    */
   }
 
-  void resized() override {//Here we specify the big boxes on the UI
+  void resized() override {
     auto area = getLocalBounds();
     onBoardingOverlay->setBounds(area);
     area.reduce(5, 5);
@@ -117,26 +84,15 @@ class HoaComponent : public Component,
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
 
-    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);//LHS column
-    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);//RHS column
-    auto orderDisplayArea = area.withTrimmedTop(197);//Additional box (atm channel gain)
+    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);
+    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
+    auto orderDisplayArea = area.withTrimmedTop(197);
 
-    // left column
-    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));//main value box where the HOA type and routing is chosen
+    
+    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
 
     orderDisplayValueBox->setBounds(orderDisplayArea.reduced(
-        5, 5));  // channelGain box where the channel gain is stored
-    //channelGainValueBox->setBounds(leftColumn.reduced(5, 5));
-
-    /* Old DS Code
-    // This is where we position our panels
-    // right column
-    upperLayerValueBox->setBounds(rightColumn.removeFromTop(278).reduced(5, 5));
-    middleLayerValueBox->setBounds(
-        rightColumn.removeFromTop(279).reduced(5, 5));
-    bottomLayerValueBox->setBounds(
-        rightColumn.removeFromTop(278).reduced(5, 5));
-    */
+        5, 5));
   }
 
   std::unique_ptr<EarHeader> header;
@@ -148,12 +104,6 @@ class HoaComponent : public Component,
 
 
   std::shared_ptr<ear::plugin::ui::ValueBoxOrderDisplay> orderDisplayValueBox;
-  /* Old DS Code
-  // TODO - We need to store smart-pointers to our new component panels here
-  std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> upperLayerValueBox;
-  std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> middleLayerValueBox;
-  std::shared_ptr<ear::plugin::ui::ValueBoxSpeakerLayer> bottomLayerValueBox;
-  */
   std::shared_ptr<Label> statusBarLabel;
   Label versionLabel;
 

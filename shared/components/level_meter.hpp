@@ -23,8 +23,6 @@ class LevelMeter : public Component, private Timer {
     setColour(highlightColourId, EarColours::Text.withAlpha(Emphasis::high));
     setColour(clippedColourId,
               EarColours::PrimaryHighlight.withAlpha(Emphasis::high));
-
-    //averageEnabled_ = false;
   }
 
   enum Orientation { horizontal, vertical };
@@ -52,8 +50,6 @@ class LevelMeter : public Component, private Timer {
     }
   }
 
-  std::vector<float> getValues() { return values_; }//ME temporary add
-
   void timerCallback() override {
     if (auto meter = calculator_.lock()) {
       meter->decayIfNeeded(60);
@@ -68,9 +64,8 @@ class LevelMeter : public Component, private Timer {
     stopTimer();
   }
 
-  void paint(Graphics& g) override {//Here we actually draw the rectangle
-    //g.fillAll(findColour(backgroundColourId));
-    g.fillAll(findColour(outlineColorId));//added temp
+  void paint(Graphics& g) override {
+    g.fillAll(findColour(outlineColorId));
     g.setColour(findColour(outlineColorId));
     g.drawRect(getLocalBounds());
 
@@ -94,13 +89,13 @@ class LevelMeter : public Component, private Timer {
     g.setColour(findColour(outlineColorId));
 
     if (averageEnabled_) {
-        auto count = static_cast<float>(values_.size());
-        float average = std::reduce(values_.begin(), values_.end()) / count;
-        float scalingFactorAverage = std::pow(clamp<float>(average, 0.f, 1.f), 0.3);
-        int averageLevel = static_cast<int>(scalingFactorAverage * area.getWidth());
+        auto channelsInMeter = static_cast<float>(values_.size());
+        float averageValue = std::reduce(values_.begin(), values_.end()) / channelsInMeter;
+        float scalingFactorFromAverage = std::pow(clamp<float>(averageValue, 0.f, 1.f), 0.3);
+        int averageLevelScaled = static_cast<int>(scalingFactorFromAverage * area.getWidth());
         g.setColour(EarColours::Primary);
         g.setOpacity(1);
-        g.fillRect(averageLevel,0, 5,
+        g.fillRect(averageLevelScaled,0, 5,
             getLocalBounds().getHeight());
     }
   }
@@ -127,7 +122,7 @@ class LevelMeter : public Component, private Timer {
   bool averageEnabled_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
-};  // namespace ui
+};
 
 }  // namespace ui
 }  // namespace plugin

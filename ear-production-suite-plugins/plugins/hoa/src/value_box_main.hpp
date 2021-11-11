@@ -10,22 +10,17 @@
 namespace ear {
 namespace plugin {
 namespace ui {
-  //here we are setting up the main box
 class ValueBoxMain : public Component {
  public:
   ValueBoxMain()
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
-    //ME add in common definition version, similar to DS
-        hoaTypeLabel_(std::make_unique<Label>()),//unique pointer
-        hoaTypeComboBox_(std::make_shared<EarComboBox>()),//shared pointer
-        //below is just an experiment, ME
-        //commonDefinitionComboBoxPopup_(
-          //  std::make_shared<EarComboBoxPopup>(commonDefinitionComboBox_.get())),
+        hoaTypeLabel_(std::make_unique<Label>()),
+        hoaTypeComboBox_(std::make_shared<EarComboBox>()),
         routingLabel_(std::make_unique<Label>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     name_->setLabelText("Name");
-    name_->setText("HOA_1");//not sure what this does
+    name_->setText("HOA_1");
     name_->setEnabled(false);
     name_->setAlpha(0.38f);
     addAndMakeVisible(name_.get());
@@ -40,7 +35,6 @@ class ValueBoxMain : public Component {
     routingComboBox_->setDefaultText("Select Scene channel range");
     addAndMakeVisible(routingComboBox_.get());
 
-    //ME added this. Up here in public decide what combo box defined in private actually looks like
     hoaTypeLabel_->setFont(EarFonts::Label);
     hoaTypeLabel_->setText("HOA type",
                            juce::NotificationType::dontSendNotification);
@@ -49,34 +43,19 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(hoaTypeLabel_.get());
 
     auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
-    auto elementRelationships = commonDefinitionHelper->getElementRelationships();
+    auto elementRelationships =
+        commonDefinitionHelper->getElementRelationships();
     for (auto const& [id, tdData] : elementRelationships) {
       if (id == 4) {
         auto packData = tdData->relatedPackFormats;
         for (auto const& pfData : packData) {
-          hoaTypeComboBox_->addTextEntry(
-              pfData->niceName, pfData->id);
+          hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->id);
         }
       }
     }
 
     hoaTypeComboBox_->setDefaultText("Select HOA Type");
     addAndMakeVisible(hoaTypeComboBox_.get());
-
-    /* commonDefinitionComboBoxPopup_->setName("HOA type box popup");
-    commonDefinitionComboBoxPopup_->show();
-    commonDefinitionComboBoxPopup_->setVisible(true);
-    addAndMakeVisible(commonDefinitionComboBoxPopup_.get());*///this was just an experiment
-    /*
-    //ME exoeriementing
-    /auto elementRelationships =p->admCommonDefinitions.getElementRelationships();
-    for (auto const& [id, tdData] : elementRelationships) {
-      commonDefinitionComboBox_->addTextEntry(tdData->name, id);
-    }
-    //ME end
-    */
-
-
 
     for (auto colour : EarColours::Items) {
       colourComboBox_->addColourEntry(colour);
@@ -85,17 +64,13 @@ class ValueBoxMain : public Component {
     colourComboBox_->setAlpha(0.38f);
     addAndMakeVisible(colourComboBox_.get());
 
-    //commonDefinitionComboBox_->onValueChange = [this](int) {
-      //comboBoxStateChanged(&packFormatSelector);
-    //};
-
   }
 
   ~ValueBoxMain() {}
 
   void paint(Graphics& g) override { g.fillAll(EarColours::Area04dp); }
 
-  void resized() override {//Here we sort out the main value box (e.g. the one with HOA type and routing)
+  void resized() override {
     auto area = getLocalBounds();
     area.reduce(10, 5);
     float comboBoxWidth = area.getWidth() - labelWidth_ - marginBig_;
@@ -111,7 +86,6 @@ class ValueBoxMain : public Component {
 
     area.removeFromTop(15.f);
 
-    //ME add for HOA
     auto hoaTypeArea = area.removeFromTop(rowHeight_);
     auto hoaTypeLabelArea = hoaTypeArea.withWidth(labelWidth_);
     auto hoaTypeComboBoxArea =
@@ -119,18 +93,6 @@ class ValueBoxMain : public Component {
             .reduced(0, marginSmall_);
     hoaTypeLabel_->setBounds(hoaTypeLabelArea);
     hoaTypeComboBox_->setBounds(hoaTypeComboBoxArea);
-    //end ME
-
-    /* Old DS Code
-    // Need a similar thing for HOA type
-    auto speakerSetupArea = area.removeFromTop(rowHeight_);
-    auto speakerSetupLabelArea = speakerSetupArea.withWidth(labelWidth_);
-    auto speakerSetupComboBoxArea =
-        speakerSetupArea.withTrimmedLeft(labelWidth_ + marginBig_)
-            .reduced(0, marginSmall_);
-    speakerSetupLabel_->setBounds(speakerSetupLabelArea);
-    speakerSetupsComboBox_->setBounds(speakerSetupComboBoxArea);
-    */
 
     auto routingArea = area.removeFromTop(rowHeight_);
     auto routingLabelArea = routingArea.withWidth(labelWidth_);
@@ -144,16 +106,8 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarNameTextEditor> getNameTextEditor() { return name_; }
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
-  //ME add likewise for common definition of HOA
-  std::shared_ptr<EarComboBox> getHoaTypeComboBox() {
-    return hoaTypeComboBox_;
-  }
-  /* Old DS Code
-  // Need similar for HOA type
-  std::shared_ptr<EarComboBox> getSpeakerSetupsComboBox() {
-    return speakerSetupsComboBox_;
-  }
-  */
+  std::shared_ptr<EarComboBox> getHoaTypeComboBox() { return hoaTypeComboBox_; }
+
 
  private:
   const float labelWidth_ = 110.f;
@@ -163,17 +117,10 @@ class ValueBoxMain : public Component {
 
   std::shared_ptr<EarComboBox> colourComboBox_;
   std::shared_ptr<EarNameTextEditor> name_;
-  //ME add similar for commonDefinition. Define variables down here in the private section. Define what we want and group it together in this box. in FEconnector we actually set it
+
   std::unique_ptr<Label> hoaTypeLabel_;
   std::shared_ptr<EarComboBox> hoaTypeComboBox_;
-  //std::shared_ptr<EarComboBoxPopup> commonDefinitionComboBoxPopup_;//this was just an experiment
-  //ME end
 
-  /* Old DS Code
-  // Need a similar selector for HOA type
-  std::unique_ptr<Label> speakerSetupLabel_;
-  std::shared_ptr<EarComboBox> speakerSetupsComboBox_;
-  */
   std::unique_ptr<Label> routingLabel_;
   std::shared_ptr<EarComboBox> routingComboBox_;
 
