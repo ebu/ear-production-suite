@@ -63,7 +63,6 @@ class ValueBoxMain : public Component {
     colourComboBox_->setEnabled(false);
     colourComboBox_->setAlpha(0.38f);
     addAndMakeVisible(colourComboBox_.get());
-
   }
 
   ~ValueBoxMain() {}
@@ -107,7 +106,6 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
   std::shared_ptr<EarComboBox> getHoaTypeComboBox() { return hoaTypeComboBox_; }
-
 
  private:
   const float labelWidth_ = 110.f;

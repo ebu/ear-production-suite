@@ -16,7 +16,7 @@ namespace plugin {
 namespace ui {
 
 class HoaComponent : public Component,
-                                private ear::plugin::ui::Onboarding::Listener {
+                     private ear::plugin::ui::Onboarding::Listener {
  public:
   HoaComponent(HoaAudioProcessor* p)
       : p_(p),
@@ -25,7 +25,8 @@ class HoaComponent : public Component,
         onBoardingOverlay(std::make_unique<Overlay>()),
         onBoardingContent(std::make_unique<Onboarding>()),
         mainValueBox(std::make_unique<ValueBoxMain>()),
-        orderDisplayValueBox(std::make_shared<ValueBoxOrderDisplay>(p, p->getLevelMeter())),
+        orderDisplayValueBox(
+            std::make_shared<ValueBoxOrderDisplay>(p, p->getLevelMeter())),
         statusBarLabel(std::make_shared<Label>()),
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
@@ -78,7 +79,8 @@ class HoaComponent : public Component,
     area.reduce(5, 5);
     auto headingArea = area.removeFromTop(55);
     auto bottomLabelsArea = area.removeFromBottom(30);
-    statusBarLabel->setBounds(bottomLabelsArea.removeFromLeft(bottomLabelsArea.getWidth() / 2));
+    statusBarLabel->setBounds(
+        bottomLabelsArea.removeFromLeft(bottomLabelsArea.getWidth() / 2));
     versionLabel.setBounds(bottomLabelsArea);
     onBoardingButton->setBounds(
         headingArea.removeFromRight(39).removeFromBottom(39));
@@ -88,11 +90,9 @@ class HoaComponent : public Component,
     auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
     auto orderDisplayArea = area.withTrimmedTop(197);
 
-    
     mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
 
-    orderDisplayValueBox->setBounds(orderDisplayArea.reduced(
-        5, 5));
+    orderDisplayValueBox->setBounds(orderDisplayArea.reduced(5, 5));
   }
 
   std::unique_ptr<EarHeader> header;
@@ -101,7 +101,6 @@ class HoaComponent : public Component,
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent;
 
   std::unique_ptr<ear::plugin::ui::ValueBoxMain> mainValueBox;
-
 
   std::shared_ptr<ear::plugin::ui::ValueBoxOrderDisplay> orderDisplayValueBox;
   std::shared_ptr<Label> statusBarLabel;
