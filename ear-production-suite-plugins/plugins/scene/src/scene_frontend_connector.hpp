@@ -144,7 +144,7 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
 
   bool updateAndCheckPendingStore(const communication::ConnectionId& id,
                                   const proto::InputItemMetadata& item) const;
-};  // namespace ui
+};
 
 }  // namespace ui
 }  // namespace plugin
