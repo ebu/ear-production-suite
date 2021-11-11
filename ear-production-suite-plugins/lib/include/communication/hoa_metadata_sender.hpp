@@ -31,10 +31,6 @@ class HoaMetadataSender {
   void name(const std::string& value);
   void colour(int value);
   void packFormatIdValue(int value);
-  /* Old DS Code
-  // Will want something similar for HOA type
-  void speakerSetupIndex(int value);
-  */
 
   ConnectionId getConnectionId() { return connectionId_; }
 

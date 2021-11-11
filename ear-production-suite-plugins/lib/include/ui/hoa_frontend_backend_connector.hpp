@@ -32,11 +32,7 @@ class EAR_PLUGIN_BASE_EXPORT HoaFrontendBackendConnector {
     ROUTING,
     NAME,
     COLOUR,
-    PACKFORMAT_ID_FORMAT  // ME added this
-    /* Old DS Code
-    // Other params to be added here. Will need one for HOA type
-    SPEAKER_SETUP_INDEX,
-    */
+    PACKFORMAT_ID_FORMAT
   };
 
   using ParameterChangedCallback =
