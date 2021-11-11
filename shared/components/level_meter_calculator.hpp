@@ -2,8 +2,6 @@
 
 #include "JuceHeader.h"
 
-#include <cmath>
-#include <cstddef>
 #include <mutex>
 #include <vector>
 
@@ -40,10 +38,8 @@ class LevelMeterCalculator {
   /// Get current level for a channel
   float getLevel(std::size_t channel);
 
-
   std::size_t samplerate() const { return samplerate_; }
   std::size_t channels() const { return channels_; }
-
 
   void resetClipping();
 
@@ -59,8 +55,8 @@ class LevelMeterCalculator {
   float attack_constant_;
   int64_t lastMeasurement_;
 
-  std::vector<bool> lastLevelHasSignal_;//test
-  std::vector<bool> lastLevelHasClipped_;//test
+  std::vector<bool> lastLevelHasSignal_;
+  std::vector<bool> lastLevelHasClipped_;
 
   std::mutex mutex_;
 };
