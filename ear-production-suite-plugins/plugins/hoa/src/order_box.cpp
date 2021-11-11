@@ -8,30 +8,25 @@
 #include "components/look_and_feel/fonts.hpp"
 
 namespace {
-int numChannelsUpToOrder(int order) {
-  return pow(order + 1, 2);
-}
-int numChannelsOnlyInOrder(int order) {
-  return order < 0 ? 0 : order * 2 + 1;
-}
-}
+int numChannelsUpToOrder(int order) { return pow(order + 1, 2); }
+int numChannelsOnlyInOrder(int order) { return order < 0 ? 0 : order * 2 + 1; }
+}  // namespace
 
 using namespace ear::plugin::ui;
 
 OrderBox::OrderBox(HoaAudioProcessor* p,
-                   ValueBoxOrderDisplay* valueBoxOrderDisplay,
-                   String name,
+                   ValueBoxOrderDisplay* valueBoxOrderDisplay, String name,
                    int rowOrder, int hoaOrder)
-  : levelMeter_(std::make_unique<LevelMeter>()),
-  orderLabel_(std::make_unique<Label>()),
-  rowOrder_(rowOrder),
-  hoaOrder_(hoaOrder),
-  p_(p) ,
-  valueBoxOrderDisplay_(valueBoxOrderDisplay) {
+    : levelMeter_(std::make_unique<LevelMeter>()),
+      orderLabel_(std::make_unique<Label>()),
+      rowOrder_(rowOrder),
+      hoaOrder_(hoaOrder),
+      p_(p),
+      valueBoxOrderDisplay_(valueBoxOrderDisplay) {
   levelMeter_->setOrientation(LevelMeter::horizontal);
   levelMeter_->enableAverage(true);
   addAndMakeVisible(levelMeter_.get());
-  
+
   orderLabel_->setText(name, dontSendNotification);
   orderLabel_->setFont(EarFonts::Items);
   orderLabel_->setColour(Label::textColourId, EarColours::Label);
@@ -41,54 +36,49 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
   addPyramidBoxesToOrderBox();
 }
 OrderBox::~OrderBox() {}
-void OrderBox::paint(Graphics& g) { 
-  g.fillAll(EarColours::Area01dp);
-}
+void OrderBox::paint(Graphics& g) { g.fillAll(EarColours::Area01dp); }
 
-void OrderBox::resized()  {
-            auto area = getLocalBounds();
+void OrderBox::resized() {
+  auto area = getLocalBounds();
 
-            orderLabel_->setBounds(area.removeFromLeft(40));
-            levelMeter_->setBounds(area.removeFromLeft(250));
+  orderLabel_->setBounds(area.removeFromLeft(40));
+  levelMeter_->setBounds(area.removeFromLeft(250));
 
-            area.removeFromBottom(5);
-            area.removeFromTop(5);
-            auto areaWidth = area.getWidth();
+  area.removeFromBottom(5);
+  area.removeFromTop(5);
+  auto areaWidth = area.getWidth();
 
-            int pyramidBoxWidth(40);
-            int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;
-            int partitionNumber = (numberOfBoxPartitions / 2) - rowOrder_;
+  int pyramidBoxWidth(40);
+  int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;
+  int partitionNumber = (numberOfBoxPartitions / 2) - rowOrder_;
 
-            for (auto pyramidBox : pyramidBoxes_) {
-                auto removeFromLeft =
-                    (partitionNumber * areaWidth) / numberOfBoxPartitions;
-                auto pyramidBoxArea = area.withTrimmedLeft(removeFromLeft);
-                pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxWidth));
-                partitionNumber++;
-            }
+  for (auto pyramidBox : pyramidBoxes_) {
+    auto removeFromLeft = (partitionNumber * areaWidth) / numberOfBoxPartitions;
+    auto pyramidBoxArea = area.withTrimmedLeft(removeFromLeft);
+    pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxWidth));
+    partitionNumber++;
+  }
 }
 
 void OrderBox::addPyramidBoxesToOrderBox() {
-            auto startChannel = numChannelsUpToOrder(rowOrder_ - 1);
-            auto numChannels = numChannelsOnlyInOrder(rowOrder_);
+  auto startChannel = numChannelsUpToOrder(rowOrder_ - 1);
+  auto numChannels = numChannelsOnlyInOrder(rowOrder_);
 
-            pyramidBoxes_.clear();
-            pyramidBoxes_.reserve(numChannels);
+  pyramidBoxes_.clear();
+  pyramidBoxes_.reserve(numChannels);
 
-            std::vector<int> channels;
+  std::vector<int> channels;
 
-            for (int i(0); i < numChannels; i++) {
-                int channel(startChannel + i);
-                channels.push_back(channel);
+  for (int i(0); i < numChannels; i++) {
+    int channel(startChannel + i);
+    channels.push_back(channel);
 
-                std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
-                    std::make_shared<PyramidBox>(
-                        p_->getLevelMeter(),
-                        valueBoxOrderDisplay_,
-                        channel);
-                pyramidBoxes_.push_back(pyramidBox);
-                addAndMakeVisible(*pyramidBox);
-            }
+    std::shared_ptr<ear::plugin::ui::PyramidBox> pyramidBox =
+        std::make_shared<PyramidBox>(p_->getLevelMeter(), valueBoxOrderDisplay_,
+                                     channel);
+    pyramidBoxes_.push_back(pyramidBox);
+    addAndMakeVisible(*pyramidBox);
+  }
 
-            levelMeter_->setMeter(p_->getLevelMeter(), channels);
+  levelMeter_->setMeter(p_->getLevelMeter(), channels);
 }

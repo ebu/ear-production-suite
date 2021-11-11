@@ -5,15 +5,14 @@
 #include "components/look_and_feel/shadows.hpp"
 #include "hoa_frontend_connector.hpp"
 
-namespace{
-  const int desiredWidth{ 1000 };
-  const int desiredHeight{ 930 };
-}
+namespace {
+const int desiredWidth{1000};
+const int desiredHeight{930};
+}  // namespace
 
 using namespace ear::plugin::ui;
 
-HoaAudioProcessorEditor::HoaAudioProcessorEditor(
-    HoaAudioProcessor* p)
+HoaAudioProcessorEditor::HoaAudioProcessorEditor(HoaAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
       content_(std::make_unique<HoaComponent>(p)),

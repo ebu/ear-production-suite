@@ -14,8 +14,8 @@ HoaAudioProcessor::HoaAudioProcessor()
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
                           true)),
       samplerate_(48000),
-      levelMeterCalculator_(std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
-
+      levelMeterCalculator_(
+          std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
   /* clang-format off */
   addParameter(routing_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
@@ -28,12 +28,14 @@ HoaAudioProcessor::HoaAudioProcessor()
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   /* clang-format on */
 
-  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
+  static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)
+      ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-// Any NonAutomatedParameter will not set the plugin state as dirty when changed.
-// We used this hack to make sure the host (REAPER) knows something has changed (by "changing" a standard parameter to it's current value)
+  // Any NonAutomatedParameter will not set the plugin state as dirty when
+  // changed. We used this hack to make sure the host (REAPER) knows something
+  // has changed (by "changing" a standard parameter to it's current value)
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(packFormatIdValue_)
       ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
@@ -48,17 +50,13 @@ HoaAudioProcessor::HoaAudioProcessor()
 
 HoaAudioProcessor::~HoaAudioProcessor() {}
 
-const String HoaAudioProcessor::getName() const {
-  return JucePlugin_Name;
-}
+const String HoaAudioProcessor::getName() const { return JucePlugin_Name; }
 
 bool HoaAudioProcessor::acceptsMidi() const { return false; }
 bool HoaAudioProcessor::producesMidi() const { return false; }
 bool HoaAudioProcessor::isMidiEffect() const { return false; }
 
-double HoaAudioProcessor::getTailLengthSeconds() const {
-  return 0.0;
-}
+double HoaAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
 int HoaAudioProcessor::getNumPrograms() {
   return 1;  // NB: some hosts don't cope very well if you tell them there are 0
@@ -69,14 +67,10 @@ int HoaAudioProcessor::getNumPrograms() {
 int HoaAudioProcessor::getCurrentProgram() { return 0; }
 void HoaAudioProcessor::setCurrentProgram(int index) {}
 
-const String HoaAudioProcessor::getProgramName(int index) {
-  return {};
-}
-void HoaAudioProcessor::changeProgramName(int index,
-                                                     const String& newName) {}
+const String HoaAudioProcessor::getProgramName(int index) { return {}; }
+void HoaAudioProcessor::changeProgramName(int index, const String& newName) {}
 
-void HoaAudioProcessor::prepareToPlay(double samplerate,
-                                                 int samplesPerBlock) {
+void HoaAudioProcessor::prepareToPlay(double samplerate, int samplesPerBlock) {
   if (samplerate_ != static_cast<int>(samplerate)) {
     samplerate_ = static_cast<int>(samplerate);
     levelMeterCalculator_->setup(49, samplerate_);
@@ -97,8 +91,8 @@ bool HoaAudioProcessor::isBusesLayoutSupported(
 }
 
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
-MidiBuffer& midiMessages) {
-  if(! bypass_->get()) {
+                                     MidiBuffer& midiMessages) {
+  if (!bypass_->get()) {
     levelMeterCalculator_->process(buffer);
     backend_->triggerMetadataSend();
   }
@@ -120,8 +114,7 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
   copyXmlToBinary(*xml, destData);
 }
 
-void HoaAudioProcessor::setStateInformation(const void* data,
-                                                       int sizeInBytes) {
+void HoaAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
   std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
   if (xmlState.get() != nullptr)
     if (xmlState->hasTagName("HoaPlugin")) {
@@ -134,7 +127,6 @@ void HoaAudioProcessor::setStateInformation(const void* data,
       auto con_id = connectionId_;
       *routing_ = xmlState->getIntAttribute("routing", -1);
       *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
-
     }
 }
 
