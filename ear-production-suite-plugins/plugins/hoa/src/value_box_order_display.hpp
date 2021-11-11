@@ -34,15 +34,12 @@ class ValueBoxOrderDisplay : public Component {
   std::shared_ptr<ear::plugin::ui::EarButton> getResetClippingButton();
 
  private:
-  void linkChannels();
-
-  void unlinkChannels();
   HoaAudioProcessor* p_;
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
 
   std::unique_ptr<Label> headingLabel_;
 
-  std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;//DO WE WANT THIS HERE OF IN ORDER DISPLAY BOX, SURELY NOT BOTH?
+  std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;
   std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;
   std::shared_ptr<ear::plugin::ui::EarButton> resetClippingButton_;
 

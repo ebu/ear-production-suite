@@ -2,8 +2,6 @@
 
 #include "pyramid_box.hpp"
 
-#include "JuceHeader.h"
-
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/level_meter_calculator.hpp"
@@ -13,7 +11,6 @@
 namespace ear {
 namespace plugin {
 namespace ui {
-
 
 PyramidBox::PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
     ValueBoxOrderDisplay* valueBoxOrderDisplay, int channel)
@@ -53,11 +50,9 @@ void PyramidBox::paint(Graphics& g) {
             false);
       }
     }
-
-
 }
 
-void PyramidBox::resized() {  // Here we actually set the look of the level meter
+void PyramidBox::resized() {
     auto area = getLocalBounds();
     channelLabel_->setBounds(area);
   }
@@ -73,20 +68,15 @@ void PyramidBox::setBox() {
 void PyramidBox::timerCallback() {
     if (auto meter = levelMeterCalculator_.lock()) {
       meter->decayIfNeeded(60);
-      level_ = meter->getLevel(channel_);//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+      level_ = meter->getLevel(channel_);
       hasSignal_ =
-          meter->hasSignal(channel_);  // IS THIS RIGHT OR SHOULD IT BE CHANNELS
-      trackHasClipped_ = meter->thisTrackHasClipped();//IS THIS RIGHT OR SHOULD IT BE CHANNELS
+          meter->hasSignal(channel_);
+      trackHasClipped_ = meter->thisTrackHasClipped();
       channelHasClipped_ = meter->thisChannelHasClipped(
-          channel_);  // IS THIS RIGHT OR SHOULD IT BE CHANNELS
+          channel_);
       repaint();
     }
 }
-
-//bool PyramidBox::getTrackHasClipped() { return trackHasClipped_; }
-
-//bool PyramidBox::getChannelHasClipped() { return channelHasClipped_; }
-
 
 }  // namespace ui
 }  // namespace plugin

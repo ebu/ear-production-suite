@@ -25,10 +25,6 @@ class PyramidBox : public Component, private Timer {
 
   void timerCallback() override;
 
-  //bool getTrackHasClipped();
-
-  //bool getChannelHasClipped();
-
  private:
   std::unique_ptr<Label> channelLabel_;
   std::weak_ptr<LevelMeterCalculator> levelMeterCalculator_;

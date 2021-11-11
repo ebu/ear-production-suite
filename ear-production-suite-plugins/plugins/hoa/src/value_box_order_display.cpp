@@ -1,12 +1,9 @@
 #include "value_box_order_display.hpp"
 
-#include "components/ear_slider.hpp"
-#include "components/level_meter.hpp"
 #include "components/level_meter_calculator.hpp"
 #include "components/ear_button.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "components/look_and_feel/slider.hpp"
 #include "order_display_box.hpp"
 #include "order_box.hpp"
 #include "helper/common_definition_helper.h"
@@ -18,7 +15,7 @@ namespace ui {
 ValueBoxOrderDisplay::ValueBoxOrderDisplay(
       HoaAudioProcessor* p,
       std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator)
-      : levelMeterCalculator_(levelMeterCalculator),  // NOT sure about whether this needs to be kept
+      : levelMeterCalculator_(levelMeterCalculator),
         headingLabel_(std::make_unique<Label>()),
         orderDisplayBox_(std::make_unique<OrderDisplayBox>()),
         resetClippingButton_(std::make_shared<EarButton>()),
@@ -52,8 +49,7 @@ void ValueBoxOrderDisplay::paint(Graphics& g) {
   g.fillAll(EarColours::Area01dp);
 }
 
-void ValueBoxOrderDisplay::resized() {  // Here we sort out what is inside the channel gain
-                             // box (e.g. all the different meters)
+void ValueBoxOrderDisplay::resized() {
     auto area = getLocalBounds();
     area.reduce(10, 5);
 
@@ -98,11 +94,6 @@ void ValueBoxOrderDisplay::setHoaType(int hoaId) {
 std::shared_ptr<EarButton> ValueBoxOrderDisplay::getResetClippingButton() {
   return resetClippingButton_;
 }
-void ValueBoxOrderDisplay::linkChannels() {}
-
-void ValueBoxOrderDisplay::unlinkChannels() { float lastValue = 0.f; }
-
-
 
 }  // namespace ui
 }  // namespace plugin
