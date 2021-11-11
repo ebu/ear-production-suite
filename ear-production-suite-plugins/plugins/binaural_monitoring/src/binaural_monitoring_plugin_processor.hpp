@@ -23,7 +23,8 @@ class BinauralMonitoringAudioProcessor;
 }  // namespace ear
 
 class EarBinauralMonitoringAudioProcessor
-    : private AudioProcessorParameter::Listener, Timer,
+    : private AudioProcessorParameter::Listener,
+      Timer,
       public AudioProcessor {
  public:
   EarBinauralMonitoringAudioProcessor();
@@ -97,7 +98,7 @@ class EarBinauralMonitoringAudioProcessor
       connector_;
 
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
-  std::mutex processorMutex_; // used to prevent access during (re)construction
+  std::mutex processorMutex_;  // used to prevent access during (re)construction
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;
 

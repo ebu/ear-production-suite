@@ -26,7 +26,8 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   activeObjectIds.reserve(inputChannelCount);
   activeHoaIds.reserve(inputChannelCount);
 
-  commonDefinitionHelper.getElementRelationships();  // Save doing it later in time-critical calls
+  commonDefinitionHelper
+      .getElementRelationships();  // Save doing it later in time-critical calls
 
   controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
@@ -36,7 +37,6 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   controlConnection_.start(detail::SCENE_MASTER_CONTROL_ENDPOINT);
 
   listenerOrientation = std::make_shared<ListenerOrientation>();
-
 }
 
 BinauralMonitoringBackend::~BinauralMonitoringBackend() {
@@ -198,21 +198,21 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   size_t totalObjChannels = 0;
   size_t totalHoaChannels = 0;
 
-  for(const auto& item : store.all_available_items()) {
-    if(item.has_ds_metadata()) {
+  for (const auto& item : store.all_available_items()) {
+    if (item.has_ds_metadata()) {
       totalDsChannels += item.ds_metadata().speakers_size();
     }
-    if(item.has_obj_metadata()) {
+    if (item.has_obj_metadata()) {
       totalObjChannels++;
     }
-    if(item.has_hoa_metadata()) {
+    if (item.has_hoa_metadata()) {
       auto hoaId = item.hoa_metadata().packformatidvalue();
       {
         std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
         // TODO: May need to revisit later -
         //       this is a high-frequency call but may be slow to to execute
         auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
-        if(pfData) {
+        if (pfData) {
           auto cfCount = pfData->relatedChannelFormats.size();
           totalHoaChannels += cfCount;
         }
@@ -231,16 +231,18 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
     if (item.has_connection_id() &&
         item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
         item.connection_id() != "") {
-
-      if(item.has_hoa_metadata()) {
-        if(item.changed()) {
+      if (item.has_hoa_metadata()) {
+        if (item.changed()) {
           {
             std::lock_guard<std::mutex> lock(latestHoaTypeMetadataMutex_);
-            removeFromMap<ConnId,HoaEarMetadataAndRouting>(latestHoaTypeMetadata, item.connection_id());
+            removeFromMap<ConnId, HoaEarMetadataAndRouting>(
+                latestHoaTypeMetadata, item.connection_id());
           }
           {
-            std::lock_guard<std::mutex>lock(latestMonitoringItemMetadataMutex_);
-            setInMap<ConnId,ear::plugin::proto::MonitoringItemMetadata>( latestMonitoringItemMetadata,item.connection_id(), item);
+            std::lock_guard<std::mutex> lock(
+                latestMonitoringItemMetadataMutex_);
+            setInMap<ConnId, ear::plugin::proto::MonitoringItemMetadata>(
+                latestMonitoringItemMetadata, item.connection_id(), item);
           }
         }
         activeHoaIds.push_back(item.connection_id());
@@ -280,7 +282,6 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         }
         activeObjectIds.push_back(item.connection_id());
       }
-
     }
   }
 

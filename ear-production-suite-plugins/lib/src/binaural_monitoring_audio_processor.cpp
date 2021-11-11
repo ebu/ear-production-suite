@@ -8,9 +8,9 @@ namespace ear {
 namespace plugin {
 
 BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
-    std::size_t maxObjChannels, std::size_t maxDsChannels, std::size_t maxHoaChannels,
-    std::size_t sampleRate, std::size_t blockSize, std::string dataFilePath) {
-
+    std::size_t maxObjChannels, std::size_t maxDsChannels,
+    std::size_t maxHoaChannels, std::size_t sampleRate, std::size_t blockSize,
+    std::string dataFilePath) {
   isPlaying = false;
   framesProcessed = 0;
   metadataRtime = bear::Time{framesProcessed, sampleRate};
@@ -40,7 +40,9 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
   bearListener.set_position_cart(std::array<double, 3>{0.0, 0.0, 0.0});
 
   try {
-    bearRenderer = std::make_shared<bear::DynamicRenderer>(blockSize, std::max(std::max(maxObjChannels, maxDsChannels), maxHoaChannels));
+    bearRenderer = std::make_shared<bear::DynamicRenderer>(
+        blockSize,
+        std::max(std::max(maxObjChannels, maxDsChannels), maxHoaChannels));
     try {
       bearRenderer->set_listener(bearListener);
     } catch (std::exception &e) {
@@ -55,7 +57,7 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
 
 void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
                                                  size_t maxChannels) {
-  if(!bearRenderer) return;
+  if (!bearRenderer) return;
   auto test = listenerQuatsDirty;
   if (listenerQuatsDirty) {
     std::lock_guard<std::mutex> lock(bearListenerMutex_);
@@ -65,21 +67,24 @@ void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
   }
 
   // Set buffer pointers
-  for (size_t tdChannel = 0; tdChannel < objChannelMappings.size(); tdChannel++) {
+  for (size_t tdChannel = 0; tdChannel < objChannelMappings.size();
+       tdChannel++) {
     if (objChannelMappings[tdChannel] < maxChannels) {
       bearObjectInputBuffers_RawPointers[tdChannel] =
           channelPointers[objChannelMappings[tdChannel]];
     }
   }
 
-  for (size_t tdChannel = 0; tdChannel < dsChannelMappings.size(); tdChannel++) {
+  for (size_t tdChannel = 0; tdChannel < dsChannelMappings.size();
+       tdChannel++) {
     if (dsChannelMappings[tdChannel] < maxChannels) {
       bearDirectSpeakersInputBuffers_RawPointers[tdChannel] =
           channelPointers[dsChannelMappings[tdChannel]];
     }
   }
 
-  for (size_t tdChannel = 0; tdChannel < hoaChannelMappings.size(); tdChannel++) {
+  for (size_t tdChannel = 0; tdChannel < hoaChannelMappings.size();
+       tdChannel++) {
     if (hoaChannelMappings[tdChannel] < maxChannels) {
       bearHoaInputBuffers_RawPointers[tdChannel] =
           channelPointers[hoaChannelMappings[tdChannel]];
@@ -90,13 +95,12 @@ void BinauralMonitoringAudioProcessor::doProcess(float **channelPointers,
   bearOutputBuffers_RawPointers[1] = channelPointers[1];
 
   // Process
-  bearRenderer->process(objChannelMappings.size(),
-                        bearObjectInputBuffers_RawPointers.data(),
-                        dsChannelMappings.size(),
-                        bearDirectSpeakersInputBuffers_RawPointers.data(),
-                        hoaChannelMappings.size(),
-                        bearHoaInputBuffers_RawPointers.data(),
-                        bearOutputBuffers_RawPointers.data());
+  bearRenderer->process(
+      objChannelMappings.size(), bearObjectInputBuffers_RawPointers.data(),
+      dsChannelMappings.size(),
+      bearDirectSpeakersInputBuffers_RawPointers.data(),
+      hoaChannelMappings.size(), bearHoaInputBuffers_RawPointers.data(),
+      bearOutputBuffers_RawPointers.data());
 
   // Prepare for next block
   framesProcessed += bearConfig.get_period_size();
@@ -141,23 +145,22 @@ bool BinauralMonitoringAudioProcessor::pushBearMetadata(
 }
 
 bool BinauralMonitoringAudioProcessor::pushBearMetadata(
-    size_t channelNum, ear::HOATypeMetadata *metadata, size_t arbitraryStreamIdentifier) {
-
-  if(metadata->degrees.size() == 0) return false;
+    size_t channelNum, ear::HOATypeMetadata *metadata,
+    size_t arbitraryStreamIdentifier) {
+  if (metadata->degrees.size() == 0) return false;
   bear::HOAInput bearMetadata;
   bearMetadata.channels.reserve(metadata->degrees.size());
 
   for (int i = 0; i < metadata->degrees.size(); i++) {
     hoaChannelMappings.push_back(channelNum + i);
-    bearMetadata.channels.push_back(hoaChannelMappings.size() -1);
+    bearMetadata.channels.push_back(hoaChannelMappings.size() - 1);
   }
 
   bearMetadata.rtime = metadataRtime;
   bearMetadata.duration = metadataDuration;
   bearMetadata.type_metadata = *metadata;
 
-  return bearRenderer->add_hoa_block(arbitraryStreamIdentifier,
-                                     bearMetadata);
+  return bearRenderer->add_hoa_block(arbitraryStreamIdentifier, bearMetadata);
 }
 
 std::size_t BinauralMonitoringAudioProcessor::delayInSamples() const {
@@ -194,13 +197,13 @@ void BinauralMonitoringAudioProcessor::setListenerOrientation(float quatW,
   }
 }
 
-bool BinauralMonitoringAudioProcessor::updateChannelCounts(std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels)
-{
-  if(!bearRenderer) return false;
+bool BinauralMonitoringAudioProcessor::updateChannelCounts(
+    std::size_t objChannels, std::size_t dsChannels, std::size_t hoaChannels) {
+  if (!bearRenderer) return false;
 
-  if(bearConfig.get_num_objects_channels() == objChannels &&
-     bearConfig.get_num_direct_speakers_channels() == dsChannels &&
-     bearConfig.get_num_hoa_channels() == hoaChannels) {
+  if (bearConfig.get_num_objects_channels() == objChannels &&
+      bearConfig.get_num_direct_speakers_channels() == dsChannels &&
+      bearConfig.get_num_hoa_channels() == hoaChannels) {
     return true;
   }
 
@@ -208,15 +211,14 @@ bool BinauralMonitoringAudioProcessor::updateChannelCounts(std::size_t objChanne
   bearConfig.set_num_direct_speakers_channels(dsChannels);
   bearConfig.set_num_hoa_channels(hoaChannels);
 
-  if(isPlaying) {
+  if (isPlaying) {
     // Do dynamic update
     bearRenderer->set_config(bearConfig);
-    return true; // TODO - this is a total assumption!
+    return true;  // TODO - this is a total assumption!
 
   } else {
     // Do immediate update
     bearRenderer->set_config_blocking(bearConfig);
-
   }
 }
 

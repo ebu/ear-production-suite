@@ -77,11 +77,11 @@ class BinauralMonitoringAudioProcessor {
  private:
   void doProcess(float** channelPointers, size_t maxChannels);
 
-  uint64_t framesProcessed{ 0 };
-  bool isPlaying{ false };
+  uint64_t framesProcessed{0};
+  bool isPlaying{false};
 
   bear::Config bearConfig;
-  std::shared_ptr<bear::DynamicRenderer> bearRenderer; // TODO - why shared?
+  std::shared_ptr<bear::DynamicRenderer> bearRenderer;  // TODO - why shared?
   std::mutex bearListenerMutex_;
   bear::Listener bearListener;
 

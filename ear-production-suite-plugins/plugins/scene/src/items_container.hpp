@@ -39,11 +39,10 @@ class ItemsContainer : public Component {
         ScrollBar::thumbColourId, EarColours::Area04dp);
     addAndMakeVisible(directSpeakersViewport_.get());
 
-    hoaViewport_->setViewedComponent(hoaList.get(),
-                                                false);
+    hoaViewport_->setViewedComponent(hoaList.get(), false);
     hoaViewport_->setScrollBarsShown(true, false);
-    hoaViewport_->getVerticalScrollBar().setColour(
-        ScrollBar::thumbColourId, EarColours::Area04dp);
+    hoaViewport_->getVerticalScrollBar().setColour(ScrollBar::thumbColourId,
+                                                   EarColours::Area04dp);
     addAndMakeVisible(hoaViewport_.get());
 
     objectsLabel_->setText("Objects", dontSendNotification);
@@ -61,8 +60,7 @@ class ItemsContainer : public Component {
 
     hoaLabel_->setText("Higher Order Ambisonics", dontSendNotification);
     hoaLabel_->setFont(EarFonts::Label);
-    hoaLabel_->setColour(Label::backgroundColourId,
-                                    EarColours::Area04dp);
+    hoaLabel_->setColour(Label::backgroundColourId, EarColours::Area04dp);
     hoaLabel_->setColour(Label::textColourId, EarColours::Heading);
     addAndMakeVisible(hoaLabel_.get());
 
@@ -111,9 +109,9 @@ class ItemsContainer : public Component {
     g.setColour(EarColours::WindowBorder);
     g.fillRect(objectsArea.removeFromRight(2));
     g.fillRect(objectsArea.removeFromLeft(2));
-    //g.setColour(EarColours::WindowBorder);
+    // g.setColour(EarColours::WindowBorder);
     g.fillRect(directSpeakersArea.removeFromLeft(2));
-   // g.setColour(EarColours::WindowBorder);
+    // g.setColour(EarColours::WindowBorder);
     g.fillRect(hoaArea.removeFromLeft(2));
   }
 
@@ -123,7 +121,7 @@ class ItemsContainer : public Component {
     addButton_->setBounds(buttonArea.reduced(10, 10).removeFromLeft(80));
 
     auto objectsArea = area.removeFromLeft(getWidth() / 3);
-    auto remainingArea = area.removeFromRight(getWidth()*2 / 3);
+    auto remainingArea = area.removeFromRight(getWidth() * 2 / 3);
     auto directSpeakersArea = remainingArea.removeFromLeft(getWidth() / 3);
     auto hoaArea = remainingArea.removeFromRight(getWidth() / 3);
 

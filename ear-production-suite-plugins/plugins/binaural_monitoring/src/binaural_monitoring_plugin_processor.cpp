@@ -95,7 +95,10 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   std::lock_guard<std::mutex> lock(processorMutex_);
   processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
       64, 64, 64, 48000, 512,
-      bearDataFilePath);  // Used to verify if BEAR can be initialised - can't get SR and block size in ctor. Made assumption - prepareToPlay will be called with correct values when required
+      bearDataFilePath);  // Used to verify if BEAR can be initialised - can't
+                          // get SR and block size in ctor. Made assumption -
+                          // prepareToPlay will be called with correct values
+                          // when required
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
@@ -120,8 +123,7 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
 void EarBinauralMonitoringAudioProcessor::parameterGestureChanged(
     int parameterIndex, bool gestureIsStarting) {}
 
-void EarBinauralMonitoringAudioProcessor::timerCallback()
-{
+void EarBinauralMonitoringAudioProcessor::timerCallback() {
   stopTimer();
   std::lock_guard<std::mutex> lock(processorMutex_);
   processor_->setIsPlaying(false);
@@ -176,10 +178,10 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   levelMeter_->setup(2, sampleRate);
 
   std::lock_guard<std::mutex> lock(processorMutex_);
-  if(!processor_ || !processor_->configMatches(sampleRate, samplesPerBlock)) {
-    processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-      64, 64, 64, sampleRate, samplesPerBlock,
-      bearDataFilePath);
+  if (!processor_ || !processor_->configMatches(sampleRate, samplesPerBlock)) {
+    processor_ =
+        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+            64, 64, 64, sampleRate, samplesPerBlock, bearDataFilePath);
   }
 }
 
@@ -244,8 +246,10 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
     if (md.has_value() && md->startingChannel >= 0) {
       for (int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(md->startingChannel + index,
-                                     &(md->earMetadata[index]));//earMetadata is a vector for DS but not for obj or HOA
+        processor_->pushBearMetadata(
+            md->startingChannel + index,
+            &(md->earMetadata[index]));  // earMetadata is a vector for DS but
+                                         // not for obj or HOA
       }
     }
   }

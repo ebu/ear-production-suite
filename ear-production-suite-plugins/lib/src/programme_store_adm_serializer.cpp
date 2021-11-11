@@ -14,15 +14,13 @@ namespace {
 template <typename T>
 std::string int_to_hex(T i, size_t size) {
   std::stringstream stream;
-  stream << std::setfill('0') << std::setw(size) << std::hex
-         << i;
+  stream << std::setfill('0') << std::setw(size) << std::hex << i;
   return stream.str();
 }
 
-
 constexpr auto const ADM_DEFAULT_AZ = 0.0f;
 constexpr auto const ADM_DEFAULT_EL = 0.0f;
-//constexpr auto const ADM_DEFAULT_D = 0.f;
+// constexpr auto const ADM_DEFAULT_D = 0.f;
 constexpr auto const ADM_DEFAULT_GAIN = 1.0f;
 
 template <typename Param>
@@ -61,24 +59,24 @@ float maxElevation(proto::PositionInteractive const& position) {
 float maxElevation(adm::PositionInteractionRange const& position) {
   return getValueOr<adm::ElevationInteractionMax>(position, ADM_DEFAULT_EL);
 }
-//float minDistance(proto::PositionInteractive const& position) {
+// float minDistance(proto::PositionInteractive const& position) {
 //  return position.min_r();
 //}
-//float minDistance(adm::PositionInteractionRange const& position) {
+// float minDistance(adm::PositionInteractionRange const& position) {
 //  return getValueOr<adm::DistanceInteractionMin>(position, ADM_DEFAULT_D);
 //}
-//float maxDistance(proto::PositionInteractive const& position) {
+// float maxDistance(proto::PositionInteractive const& position) {
 //  return position.max_r();
 //}
-//float maxDistance(adm::PositionInteractionRange const& position) {
+// float maxDistance(adm::PositionInteractionRange const& position) {
 //  return getValueOr<adm::DistanceInteractionMax>(position, ADM_DEFAULT_D);
 //}
 bool operator==(adm::PositionInteractionRange const& lhs,
                 proto::PositionInteractive const& rhs) {
   return approxEqual(maxElevation(lhs), maxElevation(rhs)) &&
          approxEqual(minElevation(lhs), minElevation(rhs)) &&
-//         approxEqual(maxDistance(lhs), maxDistance(rhs)) &&
-//         approxEqual(minDistance(lhs), minDistance(rhs)) &&
+         //         approxEqual(maxDistance(lhs), maxDistance(rhs)) &&
+         //         approxEqual(minDistance(lhs), minDistance(rhs)) &&
          approxEqual(maxAzimuth(lhs), maxAzimuth(rhs)) &&
          approxEqual(minAzimuth(lhs), minAzimuth(rhs));
 }
@@ -268,7 +266,7 @@ void ProgrammeStoreAdmSerializer::serializeElement(
   auto metaDataIt = items_.find(object.connection_id());
   if (metaDataIt != items_.end()) {
     if (metaDataIt->second.has_obj_metadata() ||
-        metaDataIt->second.has_ds_metadata() || 
+        metaDataIt->second.has_ds_metadata() ||
         metaDataIt->second.has_hoa_metadata()) {
       createTopLevelObject(content, metaDataIt->second, object);
     }
@@ -278,7 +276,8 @@ void ProgrammeStoreAdmSerializer::serializeElement(
 void ProgrammeStoreAdmSerializer::createTopLevelObject(
     adm::AudioContent& content, const proto::InputItemMetadata& metadata,
     const proto::Object& object) {
-  assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() || metadata.has_hoa_metadata());
+  assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() ||
+         metadata.has_hoa_metadata());
   const auto& connectionId = metadata.connection_id();
   if (isAlreadySerialized(object)) {
     // Already have serialized this object (in a different programme?)
@@ -315,8 +314,9 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       serializedObjects[connectionId] = objectHolder.audioObject;
 
     } else if (metadata.has_hoa_metadata()) {
-      //get the pack format Id from the metadata and from that create the full pack format string
-      //This can be used to look up channel information using the common definitions helper
+      // get the pack format Id from the metadata and from that create the full
+      // pack format string This can be used to look up channel information using
+      // the common definitions helper
       int packFormatIdValue = metadata.hoa_metadata().packformatidvalue();
       int packFormatId = 0x00040000 | packFormatIdValue;
       std::string packFormatIdStr =
@@ -324,46 +324,53 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       auto packFormat =
           doc->lookup(adm::parseAudioPackFormatId(packFormatIdStr));
 
-      auto hoaAudioObject = adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
+      auto hoaAudioObject =
+          adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
       hoaAudioObject->addReference(packFormat);
 
       content.addReference(hoaAudioObject);
-      setInteractivity(*hoaAudioObject,object);
+      setInteractivity(*hoaAudioObject, object);
 
       auto channelFormats =
           admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
               ->relatedChannelFormats;
-      //The AudioTrackIUD needs to reference the track format
-      //To get the correct track format we go through all track formats and find the one that references the correct channel format
+      // The AudioTrackIUD needs to reference the track format
+      // To get the correct track format we go through all track formats and
+      // find the one that references the correct channel format
       auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
 
-      //For each channel format create a AudioTrackUid that references the pack format
-      //The audio object also needs to reference the track uid
+      // For each channel format create a AudioTrackUid that references the pack
+      // format The audio object also needs to reference the track uid
       for (int i(0); i < channelFormats.size(); i++) {
         auto audioTrackUid = adm::AudioTrackUid::create();
         hoaAudioObject->addReference(audioTrackUid);
         audioTrackUid->setReference(packFormat);
 
-        //The channel format is converted into string format
-        //From the ID we can look up the channel format object from the doc
+        // The channel format is converted into string format
+        // From the ID we can look up the channel format object from the doc
         auto channelFormatId = adm::AudioChannelFormatId(
             adm::TypeDefinition::HOA,
             adm::AudioChannelFormatIdValue(channelFormats[i]->id));
         auto channelFormat = doc->lookup(channelFormatId);
 
         for (auto trackFormat : allTrackFormats) {
-          //For every possible track format in the list, check whether the channel format it references matches the actual channel format
-          //If it does then save that track format. It can now be references by audioTrackUid
-          auto streamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
+          // For every possible track format in the list, check whether the
+          // channel format it references matches the actual channel format If it
+          // does then save that track format. It can now be references by
+          // audioTrackUid
+          auto streamFormat =
+              trackFormat->getReference<adm::AudioStreamFormat>();
           if (streamFormat) {
             auto channelFormatCheck =
                 streamFormat->getReference<adm::AudioChannelFormat>();
             if (channelFormatCheck == channelFormat) {
               audioTrackUid->setReference(trackFormat);
 
-              //For each channel add the audioTrackUid, trackFormatId and packFormatId to an audioId and add it to CHNA
-              //CHNA will keep track of which audio is needed on each track
-              auto audioTrackUidIdStr = formatId(audioTrackUid->get<adm::AudioTrackUidId>());
+              // For each channel add the audioTrackUid, trackFormatId and
+              // packFormatId to an audioId and add it to CHNA CHNA will keep
+              // track of which audio is needed on each track
+              auto audioTrackUidIdStr =
+                  formatId(audioTrackUid->get<adm::AudioTrackUidId>());
               auto trackFormatIdStr =
                   formatId(trackFormat->get<adm::AudioTrackFormatId>());
 
@@ -431,8 +438,8 @@ void ProgrammeStoreAdmSerializer::setInteractivity(
       auto positionRange = adm::PositionInteractionRange{
           adm::AzimuthInteractionMin{interactivePosition.min_az()},
           adm::AzimuthInteractionMax{interactivePosition.max_az()},
-//          adm::DistanceInteractionMin{interactivePosition.min_r()},
-//          adm::DistanceInteractionMax{interactivePosition.max_r()},
+          //          adm::DistanceInteractionMin{interactivePosition.min_r()},
+          //          adm::DistanceInteractionMax{interactivePosition.max_r()},
           adm::ElevationInteractionMin{interactivePosition.min_el()},
           adm::ElevationInteractionMax{interactivePosition.max_el()}};
       interaction.set(positionRange);

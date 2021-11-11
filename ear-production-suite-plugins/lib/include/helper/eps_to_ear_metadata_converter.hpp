@@ -48,25 +48,28 @@ struct EpsToEarMetadataConverter {
     return earMetadata;
   }
   static ear::HOATypeMetadata convert(
-      const proto::HoaTypeMetadata &epsMetadata, AdmCommonDefinitionHelper &commonDefinitionHelper) {
+      const proto::HoaTypeMetadata &epsMetadata,
+      AdmCommonDefinitionHelper &commonDefinitionHelper) {
     auto pfData = commonDefinitionHelper.getPackFormatData(
         4, epsMetadata.packformatidvalue());
 
     ear::HOATypeMetadata earMetadata;
 
-    if(pfData) {
+    if (pfData) {
       auto cfData = pfData->relatedChannelFormats;
       earMetadata.degrees.resize(cfData.size());
       earMetadata.orders.resize(cfData.size());
 
-      for(int channelNum = 0; channelNum < cfData.size(); channelNum++) {
-        auto bfData = cfData[channelNum]->channelFormat->getElements<adm::AudioBlockFormatHoa>();
+      for (int channelNum = 0; channelNum < cfData.size(); channelNum++) {
+        auto bfData =
+            cfData[channelNum]
+                ->channelFormat->getElements<adm::AudioBlockFormatHoa>();
         int order = bfData[0].get<adm::Order>().get();
         int degree = bfData[0].get<adm::Degree>().get();
         earMetadata.degrees[channelNum] = degree;
         earMetadata.orders[channelNum] = order;
 
-        if(channelNum == 0) {
+        if (channelNum == 0) {
           std::string normalisation = bfData[0].get<adm::Normalization>().get();
           earMetadata.normalization = normalisation;
         }

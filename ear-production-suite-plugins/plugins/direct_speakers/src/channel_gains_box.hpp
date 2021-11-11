@@ -63,8 +63,8 @@ class ChannelGainsBox : public Component {
  private:
   std::vector<ChannelGain*> channelGains_;
 
-  static const int meterWidth{ 52 };
-  static const int meterSpacing{ 5 };
+  static const int meterWidth{52};
+  static const int meterSpacing{5};
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChannelGainsBox)
 };
