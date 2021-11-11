@@ -12,7 +12,7 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
       directSpeakersCalculator_{outputLayout},
       hoaCalculator_{outputLayout} {
   resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
-  commonDefinitionHelper.getElementRelationships();  // ME add
+  commonDefinitionHelper.getElementRelationships();
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
@@ -66,7 +66,7 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
           }
         }
         if (item.has_hoa_metadata()) {
-          // ME ADD
+
           ear::HOATypeMetadata earMetadata;
           {
             std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
@@ -84,9 +84,7 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
             direct_[routing + i] = hoaGains[i];
           }
 
-          // auto routing = static_cast<std::size_t>(item.routing());
 
-          // ME END
         }
         if (item.has_bin_metadata()) {
           throw std::runtime_error(
@@ -155,7 +153,7 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
       if (item.has_ds_metadata()) {
         size = item.ds_metadata().speakers().size();
       }
-      if (item.has_hoa_metadata()) {//ME add
+      if (item.has_hoa_metadata()) {
         std::shared_ptr<AdmCommonDefinitionHelper::PackFormatData> pfData;
         {
           std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
