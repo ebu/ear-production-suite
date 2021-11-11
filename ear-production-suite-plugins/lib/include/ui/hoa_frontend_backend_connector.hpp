@@ -28,12 +28,7 @@ class EAR_PLUGIN_BASE_EXPORT HoaFrontendBackendConnector {
  public:
   using ParameterValue = boost::variant<float, bool, int, uint32_t,
                                         boost::optional<float>, std::string>;
-  enum class ParameterId {
-    ROUTING,
-    NAME,
-    COLOUR,
-    PACKFORMAT_ID_FORMAT
-  };
+  enum class ParameterId { ROUTING, NAME, COLOUR, PACKFORMAT_ID_FORMAT };
 
   using ParameterChangedCallback =
       std::function<void(ParameterId, ParameterValue)>;
