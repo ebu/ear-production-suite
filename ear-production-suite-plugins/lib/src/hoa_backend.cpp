@@ -10,11 +10,9 @@ using std::placeholders::_2;
 namespace ear {
 namespace plugin {
 
-HoaBackend::HoaBackend(
-    ui::HoaFrontendBackendConnector* connector)
+HoaBackend::HoaBackend(ui::HoaFrontendBackendConnector* connector)
     : connector_(connector), controlConnection_() {
-  logger_ =
-      createLogger(fmt::format("HOA Input@{}", (const void*)this));
+  logger_ = createLogger(fmt::format("HOA Input@{}", (const void*)this));
 
 #ifndef NDEBUG
   logger_->set_level(spdlog::level::trace);
@@ -52,13 +50,10 @@ void HoaBackend::setConnectionId(communication::ConnectionId id) {
   controlConnection_.setConnectionId(id);
 }
 
-void HoaBackend::triggerMetadataSend() {
-  metadataSender_.triggerSend();
-}
+void HoaBackend::triggerMetadataSend() { metadataSender_.triggerSend(); }
 
-void HoaBackend::onConnection(
-    communication::ConnectionId connectionId,
-    const std::string& streamEndpoint) {
+void HoaBackend::onConnection(communication::ConnectionId connectionId,
+                              const std::string& streamEndpoint) {
   std::lock_guard<std::mutex> lock(mutex_);
   if (connector_) {
     connector_->setStatusBarText("Ready: Connected to Scene");
@@ -76,7 +71,7 @@ void HoaBackend::onConnectionLost() {
 
 void HoaBackend::onParameterChanged(
     ui::HoaFrontendBackendConnector::ParameterId parameter,
-    ui::HoaFrontendBackendConnector::ParameterValue value) {//(4.)
+    ui::HoaFrontendBackendConnector::ParameterValue value) {  //(4.)
   using ParameterId = ui::HoaFrontendBackendConnector::ParameterId;
   if (parameter == ParameterId::ROUTING) {
     auto extractedValue = boost::get<int>(value);
@@ -91,18 +86,18 @@ void HoaBackend::onParameterChanged(
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
     // ME add
-  } else if (parameter == ParameterId::PACKFORMAT_ID_FORMAT){
+  } else if (parameter == ParameterId::PACKFORMAT_ID_FORMAT) {
     auto extractedValue = boost::get<int>(value);
     EAR_LOGGER_DEBUG(logger_, "PackFormat ID Value -> {}", extractedValue);
     metadataSender_.packFormatIdValue(extractedValue);
-    //ME end
-  /* Old DS Code
-  // Any other params to be added here. We will want to add HOA type
-  } else if (parameter == ParameterId::SPEAKER_SETUP_INDEX) {
-    auto extractedValue = boost::get<int>(value);
-    EAR_LOGGER_DEBUG(logger_, "Speaker Setup Index -> {}", extractedValue);
-    metadataSender_.speakerSetupIndex(extractedValue);
-  */
+    // ME end
+    /* Old DS Code
+    // Any other params to be added here. We will want to add HOA type
+    } else if (parameter == ParameterId::SPEAKER_SETUP_INDEX) {
+      auto extractedValue = boost::get<int>(value);
+      EAR_LOGGER_DEBUG(logger_, "Speaker Setup Index -> {}", extractedValue);
+      metadataSender_.speakerSetupIndex(extractedValue);
+    */
   }
 }
 

@@ -8,12 +8,12 @@ namespace plugin {
 
 namespace communication {
 
-HoaMetadataSender::HoaMetadataSender(
-    std::shared_ptr<spdlog::logger> logger)
+HoaMetadataSender::HoaMetadataSender(std::shared_ptr<spdlog::logger> logger)
     : logger_(logger), maxSendInterval_(100ms) {
   lastSendTimestamp_ = std::chrono::system_clock::now();
-  // TODO - this is what defines the plugin as DirectSpeakers. We need to implement a set_allocated_hoa_metadata method and a proto::HoaTypeMetadata
-  //data_.set_allocated_ds_metadata(new proto::DirectSpeakersTypeMetadata{});
+  // TODO - this is what defines the plugin as DirectSpeakers. We need to
+  // implement a set_allocated_hoa_metadata method and a proto::HoaTypeMetadata
+  // data_.set_allocated_ds_metadata(new proto::DirectSpeakersTypeMetadata{});
   data_.set_allocated_hoa_metadata(new proto::HoaTypeMetadata{});
 }
 
@@ -22,13 +22,11 @@ HoaMetadataSender::~HoaMetadataSender() {
   timer_.wait();
 }
 
-void HoaMetadataSender::logger(
-    std::shared_ptr<spdlog::logger> logger) {
+void HoaMetadataSender::logger(std::shared_ptr<spdlog::logger> logger) {
   logger_ = logger;
 }
 
-void HoaMetadataSender::connect(const std::string& endpoint,
-                                           ConnectionId id) {
+void HoaMetadataSender::connect(const std::string& endpoint, ConnectionId id) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   connectionId_ = id;
   data_.set_connection_id(connectionId_.string());
@@ -86,7 +84,7 @@ void HoaMetadataSender::sendMetadata() {
 void HoaMetadataSender::startTimer() {
   if (maxSendInterval_ > 0ms) {
     bool expected{false};
-    if(timerRunning.compare_exchange_strong(expected, true)) {
+    if (timerRunning.compare_exchange_strong(expected, true)) {
       timer_.sleep(maxSendInterval_,
                    std::bind(&HoaMetadataSender::handleTimeout, this,
                              nng::placeholders::ErrorCode));
@@ -123,7 +121,7 @@ void HoaMetadataSender::colour(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
   data_.set_colour(value);
 }
-//ME add
+// ME add
 
 void HoaMetadataSender::packFormatIdValue(int value) {
   std::lock_guard<std::mutex> lock(dataMutex_);
@@ -132,7 +130,7 @@ void HoaMetadataSender::packFormatIdValue(int value) {
   data_.set_changed(true);
   data_.set_allocated_hoa_metadata(hoa_metadata);
 }
-//ME end
+// ME end
 
 /*
  Old DS Code
@@ -142,7 +140,6 @@ void HoaMetadataSender::speakerSetupIndex(int value) {
   data_.set_allocated_ds_metadata(
       proto::convertSpeakerSetupToEpsMetadata(value));
 }*/
-
 
 }  // namespace communication
 }  // namespace plugin

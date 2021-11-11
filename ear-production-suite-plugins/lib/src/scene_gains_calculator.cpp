@@ -19,7 +19,6 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
   // Called by NNG callback on thread with small stack.
   // Launch task in another thread to overcome stack limitation.
   auto future = std::async(std::launch::async, [this, store]() {
-
     for (auto id : removedIds(store)) {
       auto routing = routingCache_[id];
       for (int i = 0; i < routing.size; ++i) {
@@ -66,7 +65,6 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
           }
         }
         if (item.has_hoa_metadata()) {
-
           ear::HOATypeMetadata earMetadata;
           {
             std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
@@ -83,8 +81,6 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
           for (int i(0); i < earMetadata.degrees.size(); i++) {
             direct_[routing + i] = hoaGains[i];
           }
-
-
         }
         if (item.has_bin_metadata()) {
           throw std::runtime_error(
@@ -134,7 +130,8 @@ std::vector<communication::ConnectionId> SceneGainsCalculator::removedIds(
   for (auto& entry : routingCache_) {
     auto id = entry.first;
     auto it = std::find_if(
-        store.monitoring_items().begin(), store.monitoring_items().end(), [id](auto& item) {
+        store.monitoring_items().begin(), store.monitoring_items().end(),
+        [id](auto& item) {
           return communication::ConnectionId{item.connection_id()} == id;
         });
     if (it == store.monitoring_items().end()) {
@@ -160,7 +157,7 @@ std::vector<Routing> SceneGainsCalculator::updateRoutingCache(
           auto temp = item.hoa_metadata().packformatidvalue();
           pfData = commonDefinitionHelper.getPackFormatData(4, temp);
         }
-        if(pfData) {
+        if (pfData) {
           auto cfData = pfData->relatedChannelFormats;
           size = cfData.size();
         }

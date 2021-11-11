@@ -13,7 +13,7 @@ void HoaFrontendBackendConnector::onParameterChanged(
   paramCallback_ = callback;
 }
 
-void HoaFrontendBackendConnector::notifyParameterChanged(//(3.)
+void HoaFrontendBackendConnector::notifyParameterChanged(  //(3.)
     ParameterId parameterID, const ParameterValue& newValue) {
   if (paramCallback_) {
     paramCallback_(parameterID, newValue);

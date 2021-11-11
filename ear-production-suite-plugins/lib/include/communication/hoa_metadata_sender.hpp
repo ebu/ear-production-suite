@@ -17,8 +17,7 @@ namespace communication {
 
 class HoaMetadataSender {
  public:
-  HoaMetadataSender(
-      std::shared_ptr<spdlog::logger> logger = nullptr);
+  HoaMetadataSender(std::shared_ptr<spdlog::logger> logger = nullptr);
   ~HoaMetadataSender();
 
   void logger(std::shared_ptr<spdlog::logger> logger);

@@ -51,7 +51,7 @@ void SceneBackend::triggerMetadataSend() {
       });
   std::lock_guard<std::mutex> lock(storeMutex_);
   for (auto& item : itemStore_) {
-    if(item.second.changed()) {
+    if (item.second.changed()) {
       item.second.set_changed(false);
       rebuildSceneStore_ = true;
     }
@@ -142,7 +142,6 @@ inline ItemStore::const_iterator findObject(proto::Object const& object,
 }
 
 void SceneBackend::updateSceneStore() {
-
   sceneStore_.clear_monitoring_items();
   if (auto programme = getSelectedProgramme()) {
     for (auto& element : programme->element()) {
@@ -155,7 +154,9 @@ void SceneBackend::updateSceneStore() {
   sceneStore_.clear_all_available_items();
   addAvailableInputItemsToSceneStore();
 
-  // TODO - MF: Not sure what this is for... does it need to track available intput items too? Needs investigating (is it used to determine if scenestore needs update? if so available input items SHOULD be tracked)
+  // TODO - MF: Not sure what this is for... does it need to track available
+  // intput items too? Needs investigating (is it used to determine if
+  // scenestore needs update? if so available input items SHOULD be tracked)
   previousScene_.clear();
   for (auto const& item : sceneStore_.monitoring_items()) {
     previousScene_.emplace(item.connection_id());
@@ -165,7 +166,7 @@ void SceneBackend::updateSceneStore() {
 proto::Programme const* SceneBackend::getSelectedProgramme() {
   if (programmeStore_.has_selected_programme_index()) {
     auto index = programmeStore_.selected_programme_index();
-    if(index >= 0) { // could be -1 if plugin just initialised
+    if (index >= 0) {  // could be -1 if plugin just initialised
       assert(index < programmeStore_.programme_size());
       auto& programme = programmeStore_.programme(index);
       return &programme;
@@ -230,10 +231,8 @@ void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
   }
 }
 
-void SceneBackend::addAvailableInputItemsToSceneStore()
-{
-  for (auto const& itemPair : itemStore_)
-  {
+void SceneBackend::addAvailableInputItemsToSceneStore() {
+  for (auto const& itemPair : itemStore_) {
     auto& itemStoreInputItem = itemPair.second;
     auto sceneStoreInputItem = sceneStore_.add_all_available_items();
     sceneStoreInputItem->CopyFrom(itemStoreInputItem);
@@ -275,11 +274,12 @@ void SceneBackend::onConnectionEvent(
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
   {
-    std::lock_guard<std::mutex> lock{ storeMutex_ };
+    std::lock_guard<std::mutex> lock{storeMutex_};
     programmeStore_ = store;
     rebuildSceneStore_ = true;
   }
-  triggerMetadataSend(); // Allows monitoring plugins to know that renderer channel counts likely need to update.
+  triggerMetadataSend();  // Allows monitoring plugins to know that renderer
+                          // channel counts likely need to update.
 }
 
 std::pair<ItemStore, proto::ProgrammeStore> SceneBackend::stores() {
