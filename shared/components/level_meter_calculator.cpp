@@ -56,7 +56,7 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
 		for (std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
 			auto sample(buffer.getSample(c, n));
 			processSample(sample, c);
-			if (sample < 0.00005 && sample > -0.00005) { hasSignal = true; }
+			if (sample > 0.00005 || sample < -0.00005) { hasSignal = true; }
 			if (sample > 1 || sample < -1 || lastLevelHasClipped_[c] == true) { hasClipped = true; }
 		}
 		lastLevelHasSignal_[c] = hasSignal;
