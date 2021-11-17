@@ -74,6 +74,7 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
 }
 
 bool LevelMeterCalculator::hasSignal(int channel) {
+    std::lock_guard<std::mutex> lock(mutex_);
 	if (channel >= 0 && channel < lastLevelHasSignal_.size()) {
 		return lastLevelHasSignal_[channel];
 	}
@@ -83,6 +84,7 @@ bool LevelMeterCalculator::hasSignal(int channel) {
 }
 
 bool LevelMeterCalculator::thisTrackHasClipped() {
+    std::lock_guard<std::mutex> lock(mutex_);
 	for (size_t i(0); i < channels_; i++) {
 		if (lastLevelHasClipped_[i]) {
 			return true;
@@ -92,6 +94,7 @@ bool LevelMeterCalculator::thisTrackHasClipped() {
 }
 
 bool LevelMeterCalculator::thisChannelHasClipped(int channel) {
+    std::lock_guard<std::mutex> lock(mutex_);
 	if (lastLevelHasClipped_[channel]) {
 		return true;
 	}
@@ -145,6 +148,7 @@ void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
 }
 
 void LevelMeterCalculator::resetClipping() {
+    std::lock_guard<std::mutex> lock(mutex_);
 	for (std::size_t c = 0; c < channels_; ++c) {
 		lastLevelHasClipped_[c] = false;
 	}
