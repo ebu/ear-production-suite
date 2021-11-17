@@ -68,7 +68,7 @@ void PyramidBox::setBox() {
 
 void PyramidBox::timerCallback() {
   if (auto meter = levelMeterCalculator_.lock()) {
-    meter->decayIfNeeded(60);
+    meter->decayIfNeeded();
     level_ = meter->getLevel(channel_);
     hasSignal_ = meter->hasSignal(channel_);
     trackHasClipped_ = meter->thisTrackHasClipped();

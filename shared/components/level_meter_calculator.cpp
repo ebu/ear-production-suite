@@ -54,6 +54,10 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
 	std::lock_guard<std::mutex> lock(mutex_);
 	lastMeasurement_ = juce::Time::currentTimeMillis();
+    if(blocksize_ != buffer.getNumSamples()) {
+        blocksize_ = buffer.getNumSamples();
+        blockPeriodLimitMs_ = ((static_cast<float>(blocksize_) / static_cast<float>(samplerate_)) * 1000.f) * 2.f; // double expected
+    }
     for (std::size_t c = 0; c < channels_; ++c) {
 		bool hasSignal(false);
 		bool hasClipped(false);
@@ -125,26 +129,25 @@ void LevelMeterCalculator::processSample(float currentValue,
 	}
 }
 
-void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
+void LevelMeterCalculator::decayIfNeeded() {
 	std::lock_guard<std::mutex> lock(mutex_);
 	juce::int64 time = juce::Time::currentTimeMillis();
 	auto duration = time - lastMeasurement_;
-	if (duration < maxDuration) {
-		return;
-	}
-	lastMeasurement_ = time;
-	if (duration > MAX_DECAY_TIME_MS) {
-		lastLevel_.assign(channels_, 0.f);
-		lastLevelHasSignal_.assign(channels_,false);
-	}
-	else {
-		std::size_t nSamples = static_cast<std::size_t>(duration / 1000.f * samplerate_);
-		for (std::size_t c = 0; c < channels_; ++c) {
-			for (std::size_t n = 0; n < nSamples; ++n) {
-				processSample(0.f, c);
-			}
-		}
-	}
+    if(duration >= blockPeriodLimitMs_) {
+        // If here, we've not received any audio in expected period
+        lastMeasurement_ = time;
+        lastLevelHasSignal_.assign(channels_, false);
+        if(duration > MAX_DECAY_TIME_MS) {
+            lastLevel_.assign(channels_, 0.f);
+        } else {
+            std::size_t nSamples = static_cast<std::size_t>(duration / 1000.f * samplerate_);
+            for(std::size_t c = 0; c < channels_; ++c) {
+                for(std::size_t n = 0; n < nSamples; ++n) {
+                    processSample(0.f, c);
+                }
+            }
+        }
+    }
 }
 
 void LevelMeterCalculator::resetClipping() {

@@ -31,9 +31,8 @@ public:
 	bool thisChannelHasClipped(int channel);
 	//test
 
-	/// process zeros if the last measurement is more than maxDuration (in
-	/// milliseconds)
-	void decayIfNeeded(int maxDuration);
+	/// process zeros if the last measurement is more than blockPeriodLimitMs_
+	void decayIfNeeded();
 
 	/// Get current level for a channel
 	float getLevel(std::size_t channel);
@@ -48,12 +47,14 @@ private:
 
 	void setConstants();
 	void calcConstants();
-	std::size_t channels_;
-	std::size_t samplerate_;
+    std::size_t channels_{ 0 };
+    std::size_t samplerate_{ 0 };
+    std::size_t blocksize_{ 0 };
 	std::vector<float> lastLevel_;
 	float release_constant_;
 	float attack_constant_;
 	int64_t lastMeasurement_;
+    int blockPeriodLimitMs_{ 60 };
 
 	std::vector<bool> lastLevelHasSignal_;
 	std::vector<bool> lastLevelHasClipped_;

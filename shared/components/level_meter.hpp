@@ -52,7 +52,7 @@ public:
 
 	void timerCallback() override {
 		if (auto meter = calculator_.lock()) {
-			meter->decayIfNeeded(60);
+			meter->decayIfNeeded();
 			for (int i = 0; i < channels_.size(); ++i) {
 				values_.at(i) = meter->getLevel(channels_.at(i));
 			}
