@@ -26,7 +26,11 @@ static float ATTACK_384000 = 0.9979321956634521;
 static float RELEASE_384000 = 0.9999880194664001;
 
 // time to decay from 1.0 to 0.0001
-static juce::int64 MAX_DECAY_TIME_MS = 2000;
+static int64_t MAX_DECAY_TIME_MS = 2000;
+
+// signal state thresholds
+static float SIGNAL_PRESENCE_THRESHOLD = 0.00005;
+static float SIGNAL_CLIPPED_THRESHOLD = 1.0;
 
 LevelMeterCalculator::LevelMeterCalculator(std::size_t channels,
 	std::size_t samplerate)
@@ -50,14 +54,19 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
 	std::lock_guard<std::mutex> lock(mutex_);
 	lastMeasurement_ = juce::Time::currentTimeMillis();
-                                                  	for (std::size_t c = 0; c < channels_; ++c) {
+    for (std::size_t c = 0; c < channels_; ++c) {
 		bool hasSignal(false);
 		bool hasClipped(false);
 		for (std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
 			auto sample(buffer.getSample(c, n));
+            auto absSample = std::abs(sample);
 			processSample(sample, c);
-			if (sample > 0.00005 || sample < -0.00005) { hasSignal = true; }
-			if (sample > 1 || sample < -1 || lastLevelHasClipped_[c] == true) { hasClipped = true; }
+			if (absSample > SIGNAL_PRESENCE_THRESHOLD) {
+                hasSignal = true;
+            }
+			if (absSample > SIGNAL_CLIPPED_THRESHOLD || lastLevelHasClipped_[c] == true) {
+                hasClipped = true;
+            }
 		}
 		lastLevelHasSignal_[c] = hasSignal;
 		lastLevelHasClipped_[c] = hasClipped;
