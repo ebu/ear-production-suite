@@ -63,12 +63,12 @@ void PyramidBox::setBox() {
   hasSignal_ = false;
   trackHasClipped_ = false;
   channelHasClipped_ = false;
-  if (!isTimerRunning()) startTimer(500);
+  if (!isTimerRunning()) startTimer(50);
 }
 
 void PyramidBox::timerCallback() {
   if (auto meter = levelMeterCalculator_.lock()) {
-    meter->decayIfNeeded(600);
+    meter->decayIfNeeded(60);
     level_ = meter->getLevel(channel_);
     hasSignal_ = meter->hasSignal(channel_);
     trackHasClipped_ = meter->thisTrackHasClipped();
