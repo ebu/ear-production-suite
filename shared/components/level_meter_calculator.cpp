@@ -41,16 +41,16 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
 	lastLevel_.clear();
 	lastLevel_.assign(channels_, 0.);
 	lastLevelHasSignal_.clear();
-	lastLevelHasSignal_.assign(channels_, 0.);
+	lastLevelHasSignal_.assign(channels_, false);
 	lastLevelHasClipped_.clear();
-	lastLevelHasClipped_.assign(channels_, 0);
+	lastLevelHasClipped_.assign(channels_, false);
 	setConstants();
 }
 
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
 	std::lock_guard<std::mutex> lock(mutex_);
 	lastMeasurement_ = juce::Time::currentTimeMillis();
-	for (std::size_t c = 0; c < channels_; ++c) {
+                                                  	for (std::size_t c = 0; c < channels_; ++c) {
 		bool hasSignal(false);
 		bool hasClipped(false);
 		for (std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
@@ -123,6 +123,7 @@ void LevelMeterCalculator::decayIfNeeded(int maxDuration) {
 	lastMeasurement_ = time;
 	if (duration > MAX_DECAY_TIME_MS) {
 		lastLevel_.assign(channels_, 0.f);
+		lastLevelHasSignal_.assign(channels_,false);
 	}
 	else {
 		std::size_t nSamples = static_cast<std::size_t>(duration / 1000.f * samplerate_);
