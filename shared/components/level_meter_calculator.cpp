@@ -32,6 +32,13 @@ static int64_t MAX_DECAY_TIME_MS = 2000;
 static float SIGNAL_PRESENCE_THRESHOLD = 0.00005;
 static float SIGNAL_CLIPPED_THRESHOLD = 1.0;
 
+// expected block period multiplier
+/// This sets the limit for determining no more blocks of audio are being received.
+/// It is usually much more than the block period as the blocks are not sent
+///  at perfect intervals, and particularly anticipative processing can mean
+///  there are actually surges of blocks of audio followed by large gaps.
+static float BLOCK_PERIOD_MULTIPLIER = 2.0;
+
 LevelMeterCalculator::LevelMeterCalculator(std::size_t channels,
                                            std::size_t samplerate)
     : lastMeasurement_(juce::Time::currentTimeMillis()) {
@@ -56,7 +63,7 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
     lastMeasurement_ = juce::Time::currentTimeMillis();
     if(blocksize_ != buffer.getNumSamples()) {
         blocksize_ = buffer.getNumSamples();
-        blockPeriodLimitMs_ = ((static_cast<float>(blocksize_) / static_cast<float>(samplerate_)) * 1000.f) * 2.f; // double expected
+        blockPeriodLimitMs_ = ((static_cast<float>(blocksize_) / static_cast<float>(samplerate_)) * 1000.f) * BLOCK_PERIOD_MULTIPLIER;
     }
     for(std::size_t c = 0; c < channels_; ++c) {
         bool hasSignal(false);
