@@ -56,8 +56,7 @@ class ChannelGain : public Component {
     area.removeFromTop(5).removeFromBottom(100);
     levelMeter_->setBounds(
         area.removeFromTop(220).withSizeKeepingCentre(13, 220));
-    speakerLabel_->setBounds(
-        area.removeFromTop(30));
+    speakerLabel_->setBounds(area.removeFromTop(30));
   }
 
   EarSlider* getGainSlider() { return gainSlider_.get(); }
