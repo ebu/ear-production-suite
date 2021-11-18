@@ -391,24 +391,24 @@ inline SpeakerSetup speakerSetupByIndex(int index) {
   }
 }
 
-inline SpeakerSetup speakerSetupByPackFormatId(const std::string& packFormatId) {
-  auto it = std::find_if(
-    SPEAKER_SETUPS.begin(), SPEAKER_SETUPS.end(),
-    [packFormatId](auto speakerSetup) { return speakerSetup.packFormatId == packFormatId; });
+inline SpeakerSetup
+speakerSetupByPackFormatId(const std::string &packFormatId) {
+  auto it = std::find_if(SPEAKER_SETUPS.begin(), SPEAKER_SETUPS.end(),
+                         [&packFormatId](auto const &speakerSetup) {
+                           return speakerSetup.packFormatId == packFormatId;
+                         });
   if (it != SPEAKER_SETUPS.end()) {
     return *it;
-  }
-  else {
+  } else {
     return SpeakerSetup{};
   }
 }
 
 inline int getIndexFromLegacySpeakerSetupIndex(int legacyIndex) {
-  for(int i = 0; i < SPEAKER_SETUPS.size(); i++) {
-    if(SPEAKER_SETUPS[i].legacySpeakerSetupIndex.has_value()) {
-      if(*SPEAKER_SETUPS[i].legacySpeakerSetupIndex == legacyIndex) {
-        return i;
-      }
+  for(std::size_t i = 0; i != SPEAKER_SETUPS.size(); ++i) {
+    auto candidateIndex = SPEAKER_SETUPS[i].legacySpeakerSetupIndex;
+    if(candidateIndex && *candidateIndex == legacyIndex) {
+      return static_cast<int>(i);
     }
   }
   return -1;

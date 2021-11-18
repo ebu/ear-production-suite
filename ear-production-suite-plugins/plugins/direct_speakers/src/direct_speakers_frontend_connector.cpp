@@ -188,7 +188,7 @@ void DirectSpeakersJuceFrontendConnector::setBottomLayerValueBox(
   bottomLayer_ = layer;
 }
 void DirectSpeakersJuceFrontendConnector::setChannelGainsValueBox(
-    std::shared_ptr<ValueBoxChannelGain> gains) {
+    std::shared_ptr<ChannelMeterLayout> gains) {
   gains->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
   channelGains_ = gains;
 }

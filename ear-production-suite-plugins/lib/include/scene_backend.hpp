@@ -84,6 +84,7 @@ class SceneBackend {
   nng::PubSocket metadataSender_;
   std::mutex storeMutex_;
   std::set<communication::ConnectionId> previousScene_;
+  std::set<std::string> overlappingIds_;
 };
 
 }  // namespace plugin

@@ -49,12 +49,12 @@ set(HEADERS_DIRECT_SPEAKERS_INPUT
     src/direct_speakers_plugin_editor.hpp
     src/direct_speakers_plugin_processor.hpp
     src/direct_speakers_component.hpp
-	src/channel_gains_box.hpp
-	src/channel_gain.hpp
-	src/value_box_main.hpp
-	src/value_box_metadata.hpp
-	src/value_box_channel_gain.hpp
-	src/value_box_speaker_layer.hpp
+		src/speaker_meters_box.hpp
+		src/speaker_level.hpp
+    src/value_box_main.hpp
+    src/value_box_metadata.hpp
+		src/channel_meter_layout.hpp
+    src/value_box_speaker_layer.hpp
 )
 
 source_group("Header Files" FILES ${HEADERS_DIRECT_SPEAKERS_INPUT})

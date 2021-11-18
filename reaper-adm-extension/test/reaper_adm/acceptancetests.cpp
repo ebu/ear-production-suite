@@ -1,5 +1,5 @@
 #include <gmock/gmock.h>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "reaperapi.h"
 #include "tempdir.h"
 #include "mocks/reaperapi.h"

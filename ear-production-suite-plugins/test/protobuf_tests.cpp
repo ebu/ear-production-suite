@@ -1,6 +1,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/optional/optional_io.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <map>
 #include <numeric>
 #include <string>

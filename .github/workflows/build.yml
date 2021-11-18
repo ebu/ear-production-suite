@@ -30,16 +30,25 @@ jobs:
             package: true
             cmake_preset: "windows-packaging-release"
             vcpkg_triplet: x64-windows-static
+            test: true
           - name: "Windows Latest MSVC RelWithDebInfo"
             os: windows-latest
             package: true
             cmake_preset: "windows-packaging-relwithdebinfo"
             vcpkg_triplet: x64-windows-static
-          - name: "macOS Latest Clang"
+            test: true
+          - name: "macOS Latest Clang x64"
             os: macos-latest
             package: true
             cmake_preset: "macos-packaging-release"
-            vcpkg_triplet: x64-osx-10_14
+            vcpkg_triplet: x64-osx-10_13
+            test: true
+          - name: "macOS Latest Clang arm64"
+            os: macos-latest
+            package: true
+            cmake_preset: "macos-arm64-packaging-release"
+            vcpkg_triplet: arm64-osx
+            test: false
     steps:
       - name: 'Checkout repo recursively.'
         uses: actions/checkout@v2
@@ -109,10 +118,9 @@ jobs:
           RUNNER_WORKSPACE: ${{ runner.workspace }}
         shell: cmake -P {0}
         run: |
-          string(SUBSTRING $ENV{GITHUB_SHA} 0 8 SHORT_SHA)
           string(REPLACE " " "_" NAME_NO_SPACES "${{ matrix.config.name }}")
           file(TO_CMAKE_PATH "$ENV{RUNNER_WORKSPACE}" RUNNER_WORKSPACE)
-          set(INSTALL_DIR "${NAME_NO_SPACES}_${SHORT_SHA}")
+          set(INSTALL_DIR "${NAME_NO_SPACES}")
           file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
           message("::set-output name=install_prefix::${PREFIX}")
           message("::set-output name=install_dir::${INSTALL_DIR}")
@@ -141,6 +149,7 @@ jobs:
         run: ccache -s
 
       - name: 'Run tests.'
+        if: ${{ matrix.config.test }}
         run: ctest --preset '${{ matrix.config.cmake_preset }}'
 
       - name: 'Install to output dir.'
@@ -149,9 +158,76 @@ jobs:
           cmake -E make_directory "${{ steps.cmake_install_prefix.outputs.install_prefix }}"
           cmake --build --preset ${{ matrix.config.cmake_preset }} --target install
 
-      - name: 'Upload output dir as build artifact.'
-        if: ${{ matrix.config.package }}
+      - name: 'macOS: Tar output dir.'
+        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+        run: tar -cvf ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar -C ${{ steps.cmake_install_prefix.outputs.install_prefix }} .
+                  
+      - name: 'macOS: Upload Tar as build artifact.'
+        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
+          path: ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar 
+          
+      - name: 'Windows: Upload output dir as build artifact.'
+        if: ${{ matrix.config.package && matrix.config.os == 'windows-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
+
+  mac_universal_bin:
+    name: mac_universal_bin
+    runs-on: macos-latest
+    needs: build
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_x64'
+          path: 'macOS_Latest_Clang_x64'
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_arm64'
+          path: 'macOS_Latest_Clang_arm64'
+
+      - name: 'build ub'
+        run: |
+          intel_dir="macOS_Latest_Clang_x64"
+          arm_dir="macOS_Latest_Clang_arm64"
+          ub_dir="macOS_Latest_Clang_universal"
+          
+          cp -r $intel_dir $ub_dir
+          
+          function make_ub() {
+            intel_bin="$1"
+            arm_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$arm_dir:")
+            ub_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$ub_dir:")
+            
+            if [ ! -f "$arm_bin" ]; then
+              echo "$arm_bin not found"
+              exit 1
+            fi
+            
+            lipo "$intel_bin" "$arm_bin" -create -output "$ub_bin"
+          }
+          
+          LIBS=`find $intel_dir -name '*.dylib'`
+          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*'`
+          
+          IFS=$'\n'
+          for lib in $LIBS; do
+            echo "Making UB Library from: $lib"
+            make_ub "$lib"
+          done
+          
+          for plugin in $PLUGINS; do
+            echo "Making UB Plugin from: $plugin"
+            make_ub "$plugin"
+          done
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_universal'
+          path: 'macOS_Latest_Clang_universal'

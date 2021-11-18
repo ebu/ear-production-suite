@@ -9,7 +9,6 @@ function(git_describe varname)
   		ret
   		OUTPUT_VARIABLE
   		out
-  		#ERROR_QUIET
   		OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(ret EQUAL 0)
     set(${varname} ${out} PARENT_SCOPE)

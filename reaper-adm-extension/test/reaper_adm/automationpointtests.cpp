@@ -19,7 +19,7 @@ bool operator==(AutomationPoint const& lhs, AutomationPoint const& rhs) {
 }
 }
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <gmock/gmock.h>
 using namespace admplug;
 

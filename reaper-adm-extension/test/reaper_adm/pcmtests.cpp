@@ -1,6 +1,6 @@
 #include <array>
 #include <vector>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <gmock/gmock.h>
 #include <bw64/bw64.hpp>
 #include <adm/document.hpp>
@@ -34,6 +34,7 @@ using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::AnyNumber;
 using ::testing::StrEq;
+using Catch::Approx;
 
 namespace {
 std::vector<ADMChannel> getTestChannels(int count) {
