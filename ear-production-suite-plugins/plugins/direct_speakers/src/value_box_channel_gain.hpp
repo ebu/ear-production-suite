@@ -98,6 +98,7 @@ class ValueBoxChannelGain : public Component {
         channelsButtonArea.removeFromLeft(65).reduced(5, 5));
 
     channelLinkButton_->setBounds(area.removeFromBottom(40));
+    area.removeFromBottom(185);
     channelGainsBox1to6_->setBounds(area.reduced(0, 10));
     channelGainsBox7to12_->setBounds(area.reduced(0, 10));
     channelGainsBox13to18_->setBounds(area.reduced(0, 10));
