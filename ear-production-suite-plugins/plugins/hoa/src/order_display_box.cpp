@@ -4,6 +4,15 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "order_box.hpp"
 
+namespace {
+
+std::string getOrdinal(int num) {
+  const std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
+  return suffixes.at(std::min(num, 4));
+}
+
+}  // namespace
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -37,15 +46,21 @@ void OrderDisplayBox::resized() { updateOrderBoxBounds(); }
 void OrderDisplayBox::updateOrderBoxBounds() {
   auto area = getLocalBounds();
 
-  for (auto orderBox : orderBoxes_) {
+  for (auto& orderBox : orderBoxes_) {
     orderBox->setBounds(area.removeFromTop(50));
     area.removeFromTop(6);
   }
 }
 
-void OrderDisplayBox::addOrderBox(OrderBox* orderBox) {
-  orderBoxes_.push_back(orderBox);
-  addAndMakeVisible(orderBox);
+void OrderDisplayBox::addOrderBoxes(HoaAudioProcessor* p,
+                                    ValueBoxOrderDisplay* valueBoxOrderDisplay,
+                                    int orderCount) {
+  for (int i = 0; i < orderCount; ++i) {
+    orderBoxes_.push_back(std::make_unique<OrderBox>(
+        p, valueBoxOrderDisplay, std::to_string(i) + getOrdinal(i), i,
+        orderCount - 1));
+    addAndMakeVisible(*orderBoxes_.back());
+  }
   updateOrderBoxBounds();
   repaint();
 }

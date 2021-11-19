@@ -38,8 +38,6 @@ class ValueBoxOrderDisplay : public Component {
   std::weak_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
 
   std::unique_ptr<Label> headingLabel_;
-
-  std::vector<std::unique_ptr<ear::plugin::ui::OrderBox>> orderBoxes_;
   std::unique_ptr<ear::plugin::ui::OrderDisplayBox> orderDisplayBox_;
   std::shared_ptr<ear::plugin::ui::EarButton> resetClippingButton_;
 

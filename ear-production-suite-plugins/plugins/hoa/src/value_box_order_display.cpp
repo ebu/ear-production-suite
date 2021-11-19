@@ -83,15 +83,7 @@ void ValueBoxOrderDisplay::setHoaType(int hoaId) {
   }
   size_t orderCount(ceil(sqrt(cfCount)));
 
-  for (int i = 0; i < orderCount; ++i) {
-    std::string ordinal = [&]() {
-      std::vector<std::string> suffixes = {"th", "st", "nd", "rd", "th"};
-      return suffixes.at(std::min(i % 10, 4));
-    }();
-    orderBoxes_.push_back(std::make_unique<OrderBox>(
-        p_, this, std::to_string(i) + ordinal, i, orderCount - 1));
-    orderDisplayBox_->addOrderBox(orderBoxes_.back().get());
-  }
+  orderDisplayBox_->addOrderBoxes(p_, this, orderCount);
 }
 
 std::shared_ptr<EarButton> ValueBoxOrderDisplay::getResetClippingButton() {
