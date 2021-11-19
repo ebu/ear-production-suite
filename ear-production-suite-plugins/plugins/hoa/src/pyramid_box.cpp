@@ -42,13 +42,9 @@ void PyramidBox::paint(Graphics& g) {
     g.drawRect(getLocalBounds(), 1);
   }
 
-  if (trackHasClipped_) {
-    if (!valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
-      valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(true);
-    }
-  } else {
-    if (valueBoxOrderDisplay_->getResetClippingButton()->isVisible()) {
-      valueBoxOrderDisplay_->getResetClippingButton().get()->setVisible(false);
+  if(valueBoxOrderDisplay_){
+    if(auto resetClippingButton = valueBoxOrderDisplay_->getResetClippingButton()) {
+      resetClippingButton->setVisible(trackHasClipped_);
     }
   }
 }
