@@ -18,6 +18,9 @@ PyramidBox::PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
       levelMeterCalculator_(levelMeterCalculator),
       valueBoxOrderDisplay_(valueBoxOrderDisplay),
       channel_(channel) {
+
+  channelLabel_->setName("Label (PyramidBox::channelLabel_)");
+
   channelLabel_->setText(std::to_string(channel + 1), dontSendNotification);
   channelLabel_->setFont(EarFonts::Items);
   channelLabel_->setColour(Label::textColourId, EarColours::Label);

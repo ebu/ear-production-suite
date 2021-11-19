@@ -29,6 +29,9 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(HoaAudioProcessor* p)
   p->getFrontendConnector()->setOrderDisplayValueBox(
       content_->orderDisplayValueBox);
 
+  content_->setName("HoaComponent (HoaAudioProcessorEditor::content_)");
+  viewport_->setName("Viewport (HoaAudioProcessorEditor::viewport_)");
+
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);
   viewport_->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId,

@@ -23,6 +23,10 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
       hoaOrder_(hoaOrder),
       p_(p),
       valueBoxOrderDisplay_(valueBoxOrderDisplay) {
+
+  levelMeter_->setName("LevelMeter (OrderBox::levelMeter_)");
+  orderLabel_->setName("Label (OrderBox::orderLabel_)");
+
   levelMeter_->setOrientation(LevelMeter::horizontal);
   levelMeter_->enableAverage(true);
   addAndMakeVisible(levelMeter_.get());

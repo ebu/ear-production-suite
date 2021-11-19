@@ -19,6 +19,14 @@ class ValueBoxMain : public Component {
         hoaTypeComboBox_(std::make_shared<EarComboBox>()),
         routingLabel_(std::make_unique<Label>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
+
+    colourComboBox_->setName("EarComboBox (ValueBoxMain::colourComboBox_)");
+    name_->setName("EarNameTextEditor (ValueBoxMain::name_)");
+    hoaTypeLabel_->setName("Label (ValueBoxMain::hoaTypeLabel_)");
+    hoaTypeComboBox_->setName("EarComboBox (ValueBoxMain::hoaTypeComboBox_)");
+    routingLabel_->setName("Label (ValueBoxMain::routingLabel_)");
+    routingComboBox_->setName("EarComboBox (ValueBoxMain::routingComboBox_)");
+
     name_->setLabelText("Name");
     name_->setText("HOA_1");
     name_->setEnabled(false);

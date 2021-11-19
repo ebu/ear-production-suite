@@ -20,6 +20,11 @@ ValueBoxOrderDisplay::ValueBoxOrderDisplay(
       orderDisplayBox_(std::make_unique<OrderDisplayBox>()),
       resetClippingButton_(std::make_shared<EarButton>()),
       p_(p) {
+
+  headingLabel_->setName("Label (ValueBoxOrderDisplay::headingLabel_)");
+  orderDisplayBox_->setName("OrderDisplayBox (ValueBoxOrderDisplay::orderDisplayBox_)");
+  resetClippingButton_->setName("EarButton (ValueBoxOrderDisplay::resetClippingButton_)");
+
   headingLabel_->setFont(EarFonts::Heading);
   headingLabel_->setColour(Label::textColourId, EarColours::Heading);
   headingLabel_->setText("HOA Order Display",
@@ -88,6 +93,7 @@ void ValueBoxOrderDisplay::setHoaType(int hoaId) {
     orderDisplayBox_->addOrderBox(orderBoxes_.back().get());
   }
 }
+
 std::shared_ptr<EarButton> ValueBoxOrderDisplay::getResetClippingButton() {
   return resetClippingButton_;
 }

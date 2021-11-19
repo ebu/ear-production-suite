@@ -31,6 +31,15 @@ class HoaComponent : public Component,
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
         propertiesFile(getPropertiesFile(propertiesFileLock.get())) {
+
+    header->setName("EarHeader (HoaComponent::header)");
+    onBoardingButton->setName("EarButton (HoaComponent::onBoardingButton)");
+    onBoardingOverlay->setName("Overlay (HoaComponent::onBoardingOverlay)");
+    onBoardingContent->setName("Onboarding (HoaComponent::onBoardingContent)");
+    mainValueBox->setName("ValueBoxMain (HoaComponent::mainValueBox)");
+    orderDisplayValueBox->setName("ValueBoxOrderDisplay (HoaComponent::orderDisplayValueBox)");
+    statusBarLabel->setName("Label (HoaComponent::statusBarLabel)");
+
     header->setText(" HOA");
 
     onBoardingButton->setButtonText("?");
