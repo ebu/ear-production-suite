@@ -32,8 +32,6 @@ void OrderDisplayBox::paint(Graphics& g) {
 
     g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
     g.setFont(EarFonts::Label);
-    g.drawText("Order Boxes not available", area.removeFromTop(25.f),
-               Justification::left);
     g.setColour(EarColours::Text.withAlpha(Emphasis::high));
     g.setFont(EarFonts::Heading);
     g.drawText("Please select a Higher Order Ambisonics type first",
