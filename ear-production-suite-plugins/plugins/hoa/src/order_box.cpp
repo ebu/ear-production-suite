@@ -68,6 +68,11 @@ void OrderBox::addPyramidBoxesToOrderBox() {
   auto startChannel = numChannelsUpToOrder(rowOrder_ - 1);
   auto numChannels = numChannelsOnlyInOrder(rowOrder_);
 
+  // Child comp removal probably happens anyway, but to be sure...
+  for(auto& pyramidBox : pyramidBoxes_) {
+    removeChildComponent(pyramidBox.get());
+  }
+
   pyramidBoxes_.clear();
   pyramidBoxes_.reserve(numChannels);
 
