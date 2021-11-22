@@ -16,6 +16,12 @@ template<typename T>
 double toSeconds(T property) {
     return property.get().count() / 1000000000.0;
 }
+
+template<typename Tag>
+double toSeconds(adm::detail::NamedType<adm::Time, Tag> const& time) {
+  return time.get().asNanoseconds().count() / 1000000000.0;
+}
+
 }
 
 MediaTakeElement::MediaTakeElement(std::shared_ptr<const adm::AudioObject> obj,
@@ -51,7 +57,7 @@ void MediaTakeElement::nameTakeFromElementName(admplug::ReaperAPI const & api) {
 }
 
 void MediaTakeElement::setMediaItemPosition(ReaperAPI const& api) {
-    auto const start = adm::getPropertyOr(object, adm::Start{nanoseconds::zero()});
+    auto const start = adm::getPropertyOr(object, adm::Start{adm::Time(nanoseconds::zero())});
     position = getOriginalMediaItemStartOffset(api) + toSeconds(start);
     api.SetMediaItemInfo_Value(mediaItem, "D_POSITION", position);
 }

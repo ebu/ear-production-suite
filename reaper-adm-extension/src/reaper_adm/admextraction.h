@@ -68,7 +68,7 @@ using ns = std::chrono::nanoseconds;
 template<typename TimedParameterT, typename BlockT>
 ns getValueOrZero(BlockT block) {
     if(block.template has<TimedParameterT>()) {
-        return block.template get<TimedParameterT>().get();
+        return block.template get<TimedParameterT>().get().asNanoseconds();
     }
     return ns::zero();
 }
