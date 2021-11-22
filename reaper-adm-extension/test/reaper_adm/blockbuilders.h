@@ -82,7 +82,17 @@ namespace admplug::testing {
            }
            return val;
        }
-       std::vector<adm::AudioBlockFormatObjects> blocks;
+       template<typename T, typename U>
+       adm::Time getValOrDefaultTime(U parent) {
+         if(parent.template has<T>()) {
+           return parent.template get<T>().get();
+         }
+         return T(std::chrono::nanoseconds::zero()).get();
+       }
+
+
+
+     std::vector<adm::AudioBlockFormatObjects> blocks;
 
    };
 }
