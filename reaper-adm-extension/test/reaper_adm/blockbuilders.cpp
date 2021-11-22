@@ -86,7 +86,7 @@ admplug::testing::SphericalCoordBlock admplug::testing::SphericalCoordBlock::wit
 admplug::testing::SphericalCoordBlock admplug::testing::SphericalCoordBlock::withGain(double linearGain)
 {
     SphericalCoordBlock builder{*this};
-    builder.block.set(adm::Gain{static_cast<float>(linearGain)});
+    builder.block.set(adm::Gain{adm::Gain::fromLinear(linearGain)});
     return builder;
 }
 
@@ -126,10 +126,10 @@ admplug::testing::ObjectTypeBlockRange admplug::testing::ObjectTypeBlockRange::f
         return with(block);
     } else {
         auto previousBlock = blocks.at(blocks.size() - 1);
-        auto nextStart = getValOrDefault<adm::Rtime>(previousBlock) + getValOrDefault<adm::Duration>(previousBlock);
+        auto nextStart = getValOrDefaultTime<adm::Rtime>(previousBlock).asNanoseconds() + getValOrDefaultTime<adm::Duration>(previousBlock).asNanoseconds();
         adm::AudioBlockFormatObjects nextBlock{block};
-        nextBlock.set(adm::Rtime{nextStart});
-        auto duration = getValOrDefault<adm::Duration>(nextBlock);
+        nextBlock.set(adm::Rtime{adm::Time(nextStart)});
+        auto duration = getValOrDefaultTime<adm::Duration>(nextBlock);
         nextBlock.set(adm::Duration{duration});
         builder.blocks.push_back(nextBlock);
     }
