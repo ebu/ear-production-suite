@@ -14,7 +14,6 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
       hoaCalculator_{outputLayout} {
   resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
   commonDefinitionHelper_.getElementRelationships();
-  allActiveIds_.reserve(inputChannelCount);
 }
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
@@ -133,6 +132,7 @@ void SceneGainsCalculator::clear() {
   for (auto& gainVec : diffuse_) {
     std::fill(gainVec.begin(), gainVec.end(), 0.0f);
   }
+  allActiveIds_.clear();
 }
 
 std::vector<communication::ConnectionId> SceneGainsCalculator::removedIds(
@@ -200,6 +200,7 @@ void SceneGainsCalculator::resize(ear::Layout& outputLayout,
   for (auto& gainVec : diffuse_) {
     gainVec.resize(outputChannelCount, 0.0f);
   }
+  allActiveIds_.reserve(inputChannelCount);
 }
 
 }  // namespace plugin
