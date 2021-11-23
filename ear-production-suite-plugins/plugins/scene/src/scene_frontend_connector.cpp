@@ -495,7 +495,8 @@ void JuceSceneFrontendConnector::removeFromObjectViews(
             return false;
           });
       if (it != container->elements.end()) {
-        container->removeElement(it->get());
+        auto index = std::distance(container->elements.begin(), it);
+        container->removeElement(index);
       }
     }
   }
@@ -519,7 +520,7 @@ void JuceSceneFrontendConnector::addProgrammeView(
     auto view = std::make_shared<ProgrammeView>();
     view->getNameTextEditor()->setText(programme.name(), false);
     view->getLanguageComboBox()->selectEntry(
-        getIndexForAlpha3(programme.language()), dontSendNotification);
+      getIndexForAlphaN(programme.language()), dontSendNotification);
     view->addListener(this);
     view->getElementsContainer()->addListener(this);
     view->getElementOverview()->setProgramme(programme, itemStore_);

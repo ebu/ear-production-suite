@@ -3,6 +3,7 @@
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
 #include <version/eps_version.h>
+#include <speaker_setups.hpp>
 
 #include <adm/write.hpp>
 #include <adm/utilities/id_assignment.hpp>
@@ -180,7 +181,7 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
         auto duration = toNs(api.GetProjectLength(nullptr));
 
         if(std::stof(api.GetAppVersion()) >= 6.01f)
-        { 
+        {
             // Check if Tail option in rendering dialog is activated and add length to duration if so
             bool tailFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_TAILFLAG", 0., false)) & 0x2;
             bool boundsFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_BOUNDSFLAG", 0., false)) == 1;
@@ -210,8 +211,8 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 auto admParameter = (AdmParameter)admParameterIndex;
                 auto param = pluginSuite->getParameterFor(admParameter);
                 auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
-                
-                if (getEnvelopeBypassed(env, api)) { 
+
+                if (getEnvelopeBypassed(env, api)) {
                     // We have an envelope, but it is bypassed
                     auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
                     auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
@@ -598,24 +599,38 @@ int EarInputVst::getTrackMapping()
 
 int EarInputVst::getWidth()
 {
-    if (isObjectPlugin(name)) { return 1; }
-    else if (isDirectSpeakersPlugin(name)) {
+    if (isObjectPlugin(name)) { 
+        return 1; 
+    }
+    
+    if (isDirectSpeakersPlugin(name)) {
         assert(paramSpeakerLayout);
         //auto SL = *paramSpeakerLayout.get();
         auto speakerLayout = getParameterWithConvertToInt(*paramSpeakerLayout);
         assert(speakerLayout.has_value());
+        assert(paramDirectSpeakersPackFormatIdValue);
+        auto packFormatIdValue = getParameterWithConvertToInt(*paramDirectSpeakersPackFormatIdValue);
+        assert(packFormatIdValue.has_value());
 
-        int trackWidth = speakerLayout.has_value() ? EARPluginSuite::countChannelsInSpeakerLayout(*speakerLayout) : 0;
-        return trackWidth;
+        int trackWidth = 0;
+        if(packFormatIdValue.has_value()) {
+            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
+            if(speakerLayoutIndex >= 0) {
+                trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
+            }
+        }
+
+        return  trackWidth;
     }
-    else if (isHoaPlugin(name)) {
-        std::optional<int> packFormatId = getParameterWithConvertToInt(*paramPackFormatId);
+
+    if (isHoaPlugin(name)) {
+        std::optional<int> packFormatId = getParameterWithConvertToInt(*paramHoaPackFormatIdValue);
         assert(packFormatId.has_value());
         int trackWidth = packFormatId.has_value() ? EARPluginSuite::countChannelsInHoaPackFormat(*packFormatId) : 0;
         return trackWidth;
     }
-    else { return 0; }
-
+    
+    return 0;
 }
 
 // EarSceneMasterVst

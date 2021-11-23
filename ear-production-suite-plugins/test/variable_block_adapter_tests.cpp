@@ -1,5 +1,5 @@
 #define EIGEN_RUNTIME_NO_MALLOC
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "variable_block_adapter.hpp"
 #include <vector>
 #include <list>

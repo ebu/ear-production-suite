@@ -1,11 +1,12 @@
 #include <chrono>
 #include <gmock/gmock.h>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <parameter.h>
 #include <automationpoint.h>
 
 using namespace admplug;
+using Catch::Approx;
 
 namespace {
 AutomationPoint createPoint(double value) {

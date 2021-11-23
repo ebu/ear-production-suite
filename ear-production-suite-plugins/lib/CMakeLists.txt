@@ -12,6 +12,7 @@ protobuf_generate_cpp(EAR_PROTO_SRC EAR_PROTO_HDR ${EAR_PROTO_INPUT})
 
 add_library(ear-plugin-base STATIC
   src/communication/commands.cpp
+  src/communication/metadata_sender.cpp
   src/communication/direct_speakers_metadata_sender.cpp
   src/communication/hoa_metadata_sender.cpp
   src/communication/input_control_connection.cpp
@@ -35,6 +36,7 @@ add_library(ear-plugin-base STATIC
   src/nng-cpp/error_handling.cpp
   src/object_backend.cpp
   src/programme_types.cpp
+  src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
   src/programme_store_adm_populator.cpp
@@ -53,6 +55,7 @@ set(EAR_BASE_HEADERS
 	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
 	include/communication/common_types.hpp
+	include/communication/metadata_sender.hpp
 	include/communication/direct_speakers_metadata_sender.hpp
 	include/communication/input_control_connection.hpp
 	include/communication/message_buffer.hpp
@@ -101,15 +104,16 @@ set(EAR_BASE_HEADERS
 	include/programme_store_adm_serializer.hpp
 	include/programme_types.hpp
 	include/proto_printers.hpp
+	include/routing_overlap.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
-	include/speaker_setups.hpp
 	include/ui/binaural_monitoring_frontend_backend_connector.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
 	include/ui/scene_frontend_backend_connector.hpp
 	include/variable_block_adapter.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 
 set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
@@ -138,7 +142,7 @@ target_include_directories(ear-plugin-base PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # protobuf
 	${EPS_SHARED_DIR}
 )
-target_compile_features(ear-plugin-base PUBLIC cxx_std_14)
+target_compile_features(ear-plugin-base PUBLIC cxx_std_17)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
 set_target_properties(ear-plugin-base PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_EXTENSIONS OFF)
 set_target_properties(ear-plugin-base PROPERTIES FOLDER ${IDE_FOLDER_PLUGINS})

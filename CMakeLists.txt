@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(EPS_VERSION_BASE 0.6.0) # This is used as fallback if getting from git fails. Must be only numeric.
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
@@ -12,6 +16,7 @@ endif()
 set(EPS_VERSION_BASE ${GIT_VERSION_BASE})
 
 project(ear-production-suite VERSION ${EPS_VERSION_BASE} LANGUAGES CXX)
+
 message(STATUS "\n-----------------------------------------------------------------------------------")
 message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE})
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
@@ -50,6 +55,7 @@ add_subdirectory(reaper-adm-extension)
 add_subdirectory(reaper-adm-export-source-plugin)
 add_subdirectory(tools)
 
+option(EPS_BUILD_PACKAGE "INSTALL supplementary files to form package" OFF)
 if(EPS_BUILD_PACKAGE)
     add_subdirectory(packaging)
 endif()

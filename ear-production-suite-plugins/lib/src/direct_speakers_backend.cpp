@@ -4,6 +4,8 @@
 #include "ui/direct_speakers_frontend_backend_connector.hpp"
 #include "detail/constants.hpp"
 
+#include "speaker_setups.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -90,10 +92,10 @@ void DirectSpeakersBackend::onParameterChanged(
     auto extractedValue = boost::get<unsigned int>(value);
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
-  } else if (parameter == ParameterId::SPEAKER_SETUP_INDEX) {
+  } else if (parameter == ParameterId::PACKFORMAT_ID_VALUE) {
     auto extractedValue = boost::get<int>(value);
-    EAR_LOGGER_DEBUG(logger_, "Speaker Setup Index -> {}", extractedValue);
-    metadataSender_.speakerSetupIndex(extractedValue);
+    EAR_LOGGER_DEBUG(logger_, "PackFormat ID Value -> {}", extractedValue);
+    metadataSender_.speakerSetupIndex(getIndexFromPackFormatIdValue(extractedValue));
   }
 }
 

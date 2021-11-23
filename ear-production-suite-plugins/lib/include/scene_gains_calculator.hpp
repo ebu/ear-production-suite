@@ -7,6 +7,7 @@
 #include <ear/ear.hpp>
 #include <Eigen/Eigen>
 #include <map>
+#include <string>
 #include <vector>
 #include "helper/common_definition_helper.h"
 
@@ -54,6 +55,7 @@ class SceneGainsCalculator {
   std::map<communication::ConnectionId, Routing> routingCache_;
   std::mutex commonDefinitionHelperMutex_;
   AdmCommonDefinitionHelper commonDefinitionHelper{};
+  std::vector<std::string> allActiveIds;
 };
 
 }  // namespace plugin

@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "communication/scene_connection_registry.hpp"
 #include "communication/scene_connection_manager.hpp"
 #include <tuple>

@@ -13,9 +13,9 @@ set(SOURCES_DIRECT_SPEAKERS_INPUT
 set(HEADERS_DIRECT_SPEAKERS_INPUT
 	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/direct_speakers_backend.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/speaker_setups.hpp
 	
 	${EPS_SHARED_DIR}/binary_data.hpp
+	${EPS_SHARED_DIR}/speaker_setups.hpp
 	
 	${EPS_SHARED_DIR}/components/ear_button.hpp
 	${EPS_SHARED_DIR}/components/ear_combo_box.hpp
@@ -49,12 +49,12 @@ set(HEADERS_DIRECT_SPEAKERS_INPUT
     src/direct_speakers_plugin_editor.hpp
     src/direct_speakers_plugin_processor.hpp
     src/direct_speakers_component.hpp
-	src/channel_gains_box.hpp
-	src/channel_gain.hpp
-	src/value_box_main.hpp
-	src/value_box_metadata.hpp
-	src/value_box_channel_gain.hpp
-	src/value_box_speaker_layer.hpp
+		src/speaker_meters_box.hpp
+		src/speaker_level.hpp
+    src/value_box_main.hpp
+    src/value_box_metadata.hpp
+		src/channel_meter_layout.hpp
+    src/value_box_speaker_layer.hpp
 )
 
 source_group("Header Files" FILES ${HEADERS_DIRECT_SPEAKERS_INPUT})
@@ -69,5 +69,6 @@ add_juce_vst3_plugin(direct_speakers
   OUTPUT_NAME "EAR DirectSpeakers")
   
 target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base ear-version)
+target_compile_definitions(direct_speakers_VST3 PRIVATE USE_NEW_DESIGN)
 
 install_juce_vst3_plugin(direct_speakers "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

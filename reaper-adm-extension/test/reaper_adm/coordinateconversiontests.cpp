@@ -1,10 +1,12 @@
 #include <coordinate_conversion/coord_conv.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <array>
 #include <string>
 #include <random>
 #include <fstream>
 #include <sstream>
+
+using Catch::Approx;
 
 namespace {
     adm::CartesianPosition makeCart(double x, double y, double z) {
@@ -52,8 +54,8 @@ namespace {
         ss << "input : (" << inW << ", " << inH << ", " << inD << ")\n";
         ss << "output : (" << outW << ", " << outH << ", " << outD << ")\n";
         ss << "expected : (" << expectW << ", " << expectH << ", " << expectD << ")\n";
-        INFO(ss.str())
-        using Catch::WithinAbs;
+        INFO(ss.str());
+        using Catch::Matchers::WithinAbs;
         CHECK(outW.get() == Approx(expectW.get()).margin(eps));
         CHECK(outH.get() == Approx(expectH.get()).margin(eps));
         CHECK(outD.get() == Approx(expectD.get()).margin(eps));
@@ -74,9 +76,9 @@ namespace {
         ss << "input (polar)   : (" << inAz << ", " << inEl << ", " << inD << ")\n";
         ss << "output (cart)   : (" << outX << ", " << outY << ", " << outZ << ")\n";
         ss << "expected (cart) : (" << expectX << ", " << expectY << ", " << expectZ << ")\n";
-        INFO(ss.str())
+        INFO(ss.str());
 
-        using Catch::WithinAbs;
+        using Catch::Matchers::WithinAbs;
         CHECK(outX.get() == Approx(expectX.get()).margin(eps));
         CHECK(outY.get() == Approx(expectY.get()).margin(eps));
         CHECK(outZ.get() == Approx(expectZ.get()).margin(eps));
@@ -103,9 +105,9 @@ namespace {
         ss << "input (cartPos) (cartExtent)     : (" << inX << ", " << inY << ", " << inZ << ")\n";
         ss << "output (polarPos) (polarExtent)   : (" << outEl << ", " << outAz << ", " << outD << ")\n";
         ss << "expected (polarPos) : (" << expectEl << ", " << expectAz << ", " << expectD << ")\n";
-        INFO(ss.str())
+        INFO(ss.str());
 
-        using Catch::WithinAbs;
+        using Catch::Matchers::WithinAbs;
         CHECK(outAz.get() == Approx(expectAz.get()).margin(eps));
         CHECK(outEl.get() == Approx(expectEl.get()).margin(eps));
         CHECK(outD.get() == Approx(expectD.get()).margin(eps));

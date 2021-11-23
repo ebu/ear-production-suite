@@ -50,8 +50,8 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
   void updateTrackProperties(const TrackProperties& properties) override;
 
   AudioParameterInt* getRouting() { return routing_; }
-  AudioParameterInt* getSpeakerSetupIndex() { return speakerSetupIndex_; }
-  
+  AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
+
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
   }
@@ -68,7 +68,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;
-  AudioParameterInt* speakerSetupIndex_;
+  AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
 
   std::unique_ptr<ear::plugin::ui::DirectSpeakersJuceFrontendConnector>

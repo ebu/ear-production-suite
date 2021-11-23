@@ -32,7 +32,7 @@ class EAR_PLUGIN_BASE_EXPORT DirectSpeakersFrontendBackendConnector {
     ROUTING,
     NAME,
     COLOUR,
-    SPEAKER_SETUP_INDEX,
+    PACKFORMAT_ID_VALUE,
   };
 
   using ParameterChangedCallback =

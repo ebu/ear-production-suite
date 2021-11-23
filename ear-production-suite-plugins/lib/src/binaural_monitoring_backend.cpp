@@ -3,6 +3,7 @@
 #include "detail/constants.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
 #include <functional>
+#include <algorithm>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -29,6 +30,8 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   commonDefinitionHelper
       .getElementRelationships();  // Save doing it later in time-critical calls
 
+  allActiveIds.reserve(inputChannelCount);
+
   controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&BinauralMonitoringBackend::onConnection, this, _1, _2));
@@ -54,7 +57,7 @@ BinauralMonitoringBackend::~BinauralMonitoringBackend() {
   controlConnection_.onConnectionEstablished(nullptr);
 }
 
-std::vector<std::string>
+std::vector<ConnId>
 BinauralMonitoringBackend::getActiveDirectSpeakersIds() {
   std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
   return activeDirectSpeakersIds;
@@ -75,7 +78,7 @@ size_t BinauralMonitoringBackend::getTotalHoaChannels() {
   return hoaChannelCount;
 }
 
-std::vector<std::string> BinauralMonitoringBackend::getActiveObjectIds() {
+std::vector<ConnId> BinauralMonitoringBackend::getActiveObjectIds() {
   std::lock_guard<std::mutex> lock(activeObjectIdsMutex_);
   return activeObjectIds;
 }
@@ -231,8 +234,10 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
     if (item.has_connection_id() &&
         item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
         item.connection_id() != "") {
+      bool newItem = std::find(allActiveIds.begin(), allActiveIds.end(), item.connection_id()) == allActiveIds.end();
+      // clang-format off
       if (item.has_hoa_metadata()) {
-        if (item.changed()) {
+        if(newItem || item.changed()) {
           {
             std::lock_guard<std::mutex> lock(latestHoaTypeMetadataMutex_);
             removeFromMap<ConnId, HoaEarMetadataAndRouting>(
@@ -249,7 +254,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
       }
 
       if (item.has_ds_metadata()) {
-        if (item.changed()) {
+        if (newItem || item.changed()) {
           {
             std::lock_guard<std::mutex> lock(
                 latestDirectSpeakersTypeMetadataMutex_);
@@ -267,7 +272,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
       }
 
       if (item.has_obj_metadata()) {
-        if (item.changed()) {
+        if (newItem || item.changed()) {
           {
             std::lock_guard<std::mutex> lock(latestObjectsTypeMetadataMutex_);
             removeFromMap<ConnId, ObjectsEarMetadataAndRouting>(
@@ -283,6 +288,11 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
         activeObjectIds.push_back(item.connection_id());
       }
     }
+  }
+
+  allActiveIds.clear();
+  for(const auto& item : store.monitoring_items()) {
+    allActiveIds.push_back(item.connection_id());
   }
 
   objectChannelCount = totalObjChannels;

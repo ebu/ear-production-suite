@@ -116,6 +116,8 @@ class BinauralMonitoringBackend {
   std::vector<ConnId> activeHoaIds;
   size_t hoaChannelCount{0};
 
+  std::vector<ConnId> allActiveIds;
+
   std::mutex latestDirectSpeakersTypeMetadataMutex_;
   std::map<ConnId, DirectSpeakersEarMetadataAndRouting>
       latestDirectSpeakersTypeMetadata;

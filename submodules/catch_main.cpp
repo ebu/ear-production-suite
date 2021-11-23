@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_RUNNER
-#include "catch.hpp"
+#include <catch2/catch_session.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <gmock/gmock.h>
 
 namespace {
