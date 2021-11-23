@@ -44,7 +44,6 @@ class SceneGainsCalculator {
   // _previous_ routing values
   std::vector<Routing> updateRoutingCache(const proto::SceneStore &store);
 
-  int currentIndex_;
   void resize(ear::Layout &ouputLayout, std::size_t inputChannelCount);
   void clear();
   std::vector<std::vector<float>> direct_;
