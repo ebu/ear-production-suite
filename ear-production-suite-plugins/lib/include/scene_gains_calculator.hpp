@@ -54,8 +54,8 @@ class SceneGainsCalculator {
   ear::GainCalculatorHOA hoaCalculator_;
   std::map<communication::ConnectionId, Routing> routingCache_;
   std::mutex commonDefinitionHelperMutex_;
-  AdmCommonDefinitionHelper commonDefinitionHelper{};
-  std::vector<std::string> allActiveIds;
+  AdmCommonDefinitionHelper commonDefinitionHelper_{};
+  std::vector<std::string> allActiveIds_;
 };
 
 }  // namespace plugin
