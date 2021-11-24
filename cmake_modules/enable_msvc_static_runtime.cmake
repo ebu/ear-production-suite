@@ -34,6 +34,8 @@ if(MSVC)
 			$<$<CONFIG:>:/MT>
 			$<$<CONFIG:Debug>:/MTd>
 			$<$<CONFIG:Release>:/MT>
+			$<$<CONFIG:RelWithDebInfo>:/MT>
+			$<$<CONFIG:MinSizeRel>:/MT>
 		)
     endif()
 endif()
