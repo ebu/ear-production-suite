@@ -599,37 +599,38 @@ int EarInputVst::getTrackMapping()
 
 int EarInputVst::getWidth()
 {
-    if (isObjectPlugin(name)) { 
-        return 1; 
+    if (isObjectPlugin(name)) {
+        return 1;
     }
-    
+
     if (isDirectSpeakersPlugin(name)) {
-        assert(paramSpeakerLayout);
-        //auto SL = *paramSpeakerLayout.get();
-        auto speakerLayout = getParameterWithConvertToInt(*paramSpeakerLayout);
-        assert(speakerLayout.has_value());
         assert(paramDirectSpeakersPackFormatIdValue);
         auto packFormatIdValue = getParameterWithConvertToInt(*paramDirectSpeakersPackFormatIdValue);
         assert(packFormatIdValue.has_value());
 
-        int trackWidth = 0;
         if(packFormatIdValue.has_value()) {
             auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
             if(speakerLayoutIndex >= 0) {
-                trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
+                return ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
             }
         }
-
-        return  trackWidth;
+        return  0;
     }
 
     if (isHoaPlugin(name)) {
-        std::optional<int> packFormatId = getParameterWithConvertToInt(*paramHoaPackFormatIdValue);
-        assert(packFormatId.has_value());
-        int trackWidth = packFormatId.has_value() ? EARPluginSuite::countChannelsInHoaPackFormat(*packFormatId) : 0;
-        return trackWidth;
+        assert(paramHoaPackFormatIdValue);
+        auto packFormatIdValue = getParameterWithConvertToInt(*paramHoaPackFormatIdValue);
+        assert(packFormatIdValue.has_value());
+
+        if(packFormatIdValue.has_value()) {
+            auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatIdValue);
+            if(pfData) {
+                return pfData->relatedChannelFormats.size();
+            }
+        }
+        return 0;
     }
-    
+
     return 0;
 }
 

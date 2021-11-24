@@ -52,7 +52,7 @@ enum class EarDirectSpeakersParameters {
 
 enum class EarHoaParameters {
     TRACK_MAPPING = 0,
-    PACK_FORMAT_ID,
+    PACKFORMAT_ID_VALUE,
     NUM_PARAMETERS
 };
 
@@ -96,7 +96,7 @@ std::vector<std::unique_ptr<TrackParameter>> createTrackParameters() {
     std::vector<std::unique_ptr<TrackParameter>> parameters;
     return parameters;
 }
-    
+
 std::vector<int> determineUsedObjectTrackMappingValues(PluginInstance& plugin) {
 	auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
 	auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
@@ -142,7 +142,7 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
 	assert(trackMapping.has_value());
 
-	auto packFormatIdParam = createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), { PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX });
+	auto packFormatIdParam = createPluginParameter(static_cast<int>(EarHoaParameters::PACKFORMAT_ID_VALUE), { PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX });
 	auto packFormatId = plugin.getParameterWithConvertToInt(*(packFormatIdParam.get()));
 	assert(packFormatId.has_value());
 	int trackWidth = packFormatId.has_value() ? pow(*packFormatId + 1, 2) : 0;
@@ -173,7 +173,7 @@ EARPluginSuite::EARPluginSuite() :
     directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
     directPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) },
 	hoaTrackMappingParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-	hoaPackFormatIdParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACK_FORMAT_ID), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) }
+    hoaPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) }
 {
 }
 
@@ -380,7 +380,7 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 		auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
 		auto channelCount = channelCountTake;
 		track->setChannelCount(channelCount);
-		plugin->setParameter(*hoaPackFormatIdParameter, hoaPackFormatIdParameter->forwardMap(packFormatId));
+		plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
 
 		assert(trackMappingAssigner);
 		auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
