@@ -23,7 +23,6 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
       hoaOrder_(hoaOrder),
       p_(p),
       valueBoxOrderDisplay_(valueBoxOrderDisplay) {
-
   levelMeter_->setName("LevelMeter (OrderBox::levelMeter_)");
   orderLabel_->setName("Label (OrderBox::orderLabel_)");
 
@@ -46,10 +45,12 @@ void OrderBox::resized() {
   auto area = getLocalBounds();
 
   orderLabel_->setBounds(area.removeFromLeft(40));
-  levelMeter_->setBounds(area.removeFromLeft(250));
 
   area.removeFromBottom(5);
   area.removeFromTop(5);
+
+  levelMeter_->setBounds(area.removeFromLeft(250));
+
   auto areaWidth = area.getWidth();
 
   int pyramidBoxWidth(40);
@@ -69,7 +70,7 @@ void OrderBox::addPyramidBoxesToOrderBox() {
   auto numChannels = numChannelsOnlyInOrder(rowOrder_);
 
   // Child comp removal probably happens anyway, but to be sure...
-  for(auto& pyramidBox : pyramidBoxes_) {
+  for (auto& pyramidBox : pyramidBoxes_) {
     removeChildComponent(pyramidBox.get());
   }
 
