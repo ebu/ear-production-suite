@@ -34,15 +34,16 @@ PyramidBox::~PyramidBox() {}
 void PyramidBox::paint(Graphics& g) {
   auto levelMeterCalculatorLocked_ = levelMeterCalculator_.lock();
   if (channelHasClipped_) {
-    g.fillAll(EarColours::Error);
-    g.drawRect(getLocalBounds(), 1);
+    g.setColour(EarColours::Error);
+    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
   } else if (!hasSignal_) {
-    g.fillAll(EarColours::Transparent);
+    g.setColour(EarColours::Transparent);
+    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
     g.setColour(EarColours::Primary);
-    g.drawRect(getLocalBounds(), 1);
+    g.drawRoundedRectangle(0, 0, getWidth(), getHeight(), 4, 1);
   } else {
-    g.fillAll(EarColours::Primary);
-    g.drawRect(getLocalBounds(), 1);
+    g.setColour(EarColours::Primary);
+    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
   }
 
   if(valueBoxOrderDisplay_){
