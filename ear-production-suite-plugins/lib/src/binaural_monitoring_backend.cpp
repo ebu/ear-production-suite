@@ -57,8 +57,7 @@ BinauralMonitoringBackend::~BinauralMonitoringBackend() {
   controlConnection_.onConnectionEstablished(nullptr);
 }
 
-std::vector<ConnId>
-BinauralMonitoringBackend::getActiveDirectSpeakersIds() {
+std::vector<ConnId> BinauralMonitoringBackend::getActiveDirectSpeakersIds() {
   std::lock_guard<std::mutex> lock(activeDirectSpeakersIdsMutex_);
   return activeDirectSpeakersIds;
 }
@@ -234,7 +233,8 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
     if (item.has_connection_id() &&
         item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
         item.connection_id() != "") {
-      bool newItem = std::find(allActiveIds.begin(), allActiveIds.end(), item.connection_id()) == allActiveIds.end();
+      bool newItem = std::find(allActiveIds.begin(), allActiveIds.end(),
+                               item.connection_id()) == allActiveIds.end();
       // clang-format off
       if (item.has_hoa_metadata()) {
         if(newItem || item.changed()) {
