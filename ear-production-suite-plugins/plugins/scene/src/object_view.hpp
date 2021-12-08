@@ -33,12 +33,7 @@ class ObjectView : public ElementView,
   // revisit this and consider splitting it into type
   // specific subclasses. Just disables one panel in
   // one case right now so would be massive overkill
-  enum class ObjectType {
-    DirectSpeakers,
-    HOA,
-    Other
-  };
-
+  enum class ObjectType { DirectSpeakers, HOA, Other };
 
   explicit ObjectView(ObjectType type)
       : ElementView(),
@@ -78,7 +73,7 @@ class ObjectView : public ElementView,
           this->settingsButton_->getToggleState());
       gainInteractionPanel_->setVisible(
           this->settingsButton_->getToggleState());
-      if(objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ != ObjectType::DirectSpeakers) {
         positionInteractionPanel_->setVisible(
             this->settingsButton_->getToggleState());
       }
@@ -152,11 +147,11 @@ class ObjectView : public ElementView,
       if (pfData) {
         cfCount = pfData->relatedChannelFormats.size();
       }
-      int order = std::sqrt(cfCount)-1;
+      int order = std::sqrt(cfCount) - 1;
       metadataLabel_->setText("HOA order " + String(order),
                               dontSendNotification);
       data_.item.hoa_metadata().packformatidvalue();
-    }  else {
+    } else {
       metadataLabel_->setText("", dontSendNotification);
     }
 
@@ -367,7 +362,9 @@ class ObjectView : public ElementView,
   void updateSettingsButtonColour() {
     const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
                         data_.object.mutable_interactive_on_off()->enabled() ||
-                        data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteraction : EarColours::Area01dp;
+                        data_.object.mutable_interactive_position()->enabled())
+                           ? EarColours::SettingsButtonInteraction
+                           : EarColours::Area01dp;
 
     settingsButton_->setColour(EarButton::backgroundColourId, col);
   }
@@ -384,7 +381,7 @@ class ObjectView : public ElementView,
       } else {
         desiredHeight_ += marginMini_;
       }
-      if(objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ != ObjectType::DirectSpeakers) {
         desiredHeight_ += positionInteractionPanel_->getDesiredHeight();
         if (positionInteractionPanel_->isExpanded()) {
           desiredHeight_ += marginBig_;

@@ -18,9 +18,7 @@ PyramidBox::PyramidBox(std::weak_ptr<LevelMeterCalculator> levelMeterCalculator,
       levelMeterCalculator_(levelMeterCalculator),
       valueBoxOrderDisplay_(valueBoxOrderDisplay),
       channel_(channel) {
-
   channelLabel_->setName("Label (PyramidBox::channelLabel_)");
-
   channelLabel_->setText(std::to_string(channel + 1), dontSendNotification);
   channelLabel_->setFont(EarFonts::Items);
   channelLabel_->setColour(Label::textColourId, EarColours::Label);
@@ -46,8 +44,9 @@ void PyramidBox::paint(Graphics& g) {
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
   }
 
-  if(valueBoxOrderDisplay_){
-    if(auto resetClippingButton = valueBoxOrderDisplay_->getResetClippingButton()) {
+  if (valueBoxOrderDisplay_) {
+    if (auto resetClippingButton =
+            valueBoxOrderDisplay_->getResetClippingButton()) {
       resetClippingButton->setVisible(trackHasClipped_);
     }
   }

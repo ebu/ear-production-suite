@@ -22,7 +22,9 @@ class OrderDisplayBox : public Component {
 
   void updateOrderBoxBounds();
 
-  void addOrderBoxes(HoaAudioProcessor* p, ValueBoxOrderDisplay* valueBoxOrderDisplay, int orderCount);
+  void addOrderBoxes(HoaAudioProcessor* p,
+                     ValueBoxOrderDisplay* valueBoxOrderDisplay,
+                     int orderCount);
 
   void removeAllOrderBoxes();
 

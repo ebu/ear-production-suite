@@ -520,7 +520,7 @@ void JuceSceneFrontendConnector::addProgrammeView(
     auto view = std::make_shared<ProgrammeView>();
     view->getNameTextEditor()->setText(programme.name(), false);
     view->getLanguageComboBox()->selectEntry(
-      getIndexForAlphaN(programme.language()), dontSendNotification);
+        getIndexForAlphaN(programme.language()), dontSendNotification);
     view->addListener(this);
     view->getElementsContainer()->addListener(this);
     view->getElementOverview()->setProgramme(programme, itemStore_);

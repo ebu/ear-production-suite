@@ -40,7 +40,8 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
     }
 
     for (const auto& item : store.monitoring_items()) {
-      bool newItem = std::find(allActiveIds_.begin(), allActiveIds_.end(), item.connection_id()) == allActiveIds_.end();
+      bool newItem = std::find(allActiveIds_.begin(), allActiveIds_.end(),
+                               item.connection_id()) == allActiveIds_.end();
       if (newItem || item.changed()) {
         if (item.has_ds_metadata()) {
           auto earMetadata =
@@ -93,10 +94,9 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
 
     // Used for setting the newItem flag next time around
     allActiveIds_.clear();
-    for(const auto& item : store.monitoring_items()) {
+    for (const auto& item : store.monitoring_items()) {
       allActiveIds_.push_back(item.connection_id());
     }
-
   });
 
   future.get();

@@ -156,7 +156,7 @@ void SceneBackend::updateSceneStore() {
   addAvailableInputItemsToSceneStore();
 
   auto overlaps = getOverlapIds(sceneStore_);
-  if(overlappingIds_ != overlaps) {
+  if (overlappingIds_ != overlaps) {
     flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
   }
   overlappingIds_ = overlaps;
