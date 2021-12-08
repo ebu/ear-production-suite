@@ -6,8 +6,8 @@
 #include "hoa_frontend_connector.hpp"
 
 namespace {
-const int desiredWidth{1000};
-const int desiredHeight{930};
+const int desiredWidth{800};
+const int desiredHeight{650};
 }  // namespace
 
 using namespace ear::plugin::ui;

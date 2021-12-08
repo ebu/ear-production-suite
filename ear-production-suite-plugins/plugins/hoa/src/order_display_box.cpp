@@ -45,7 +45,7 @@ void OrderDisplayBox::updateOrderBoxBounds() {
   auto area = getLocalBounds();
 
   for (auto& orderBox : orderBoxes_) {
-    orderBox->setBounds(area.removeFromTop(50));
+    orderBox->setBounds(area.removeFromTop(35));
     area.removeFromTop(6);
   }
 }

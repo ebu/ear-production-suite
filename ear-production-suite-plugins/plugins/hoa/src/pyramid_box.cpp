@@ -40,7 +40,7 @@ void PyramidBox::paint(Graphics& g) {
     g.setColour(EarColours::Transparent);
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
     g.setColour(EarColours::Primary);
-    g.drawRoundedRectangle(0, 0, getWidth(), getHeight(), 4, 1);
+    g.drawRoundedRectangle(0, 0, getWidth(), getHeight(), 4, 2);
   } else {
     g.setColour(EarColours::Primary);
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);

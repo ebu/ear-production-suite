@@ -46,21 +46,20 @@ void OrderBox::resized() {
 
   orderLabel_->setBounds(area.removeFromLeft(40));
 
-  area.removeFromBottom(5);
-  area.removeFromTop(5);
+  area.reduce(5, 5);
 
   levelMeter_->setBounds(area.removeFromLeft(250));
 
   auto areaWidth = area.getWidth();
 
-  int pyramidBoxWidth(40);
+  int pyramidBoxEdgeSize(area.getHeight());
   int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;
   int partitionNumber = (numberOfBoxPartitions / 2) - rowOrder_;
 
   for (auto pyramidBox : pyramidBoxes_) {
     auto removeFromLeft = (partitionNumber * areaWidth) / numberOfBoxPartitions;
     auto pyramidBoxArea = area.withTrimmedLeft(removeFromLeft);
-    pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxWidth));
+    pyramidBox->setBounds(pyramidBoxArea.removeFromLeft(pyramidBoxEdgeSize));
     partitionNumber++;
   }
 }
