@@ -20,10 +20,11 @@ ValueBoxOrderDisplay::ValueBoxOrderDisplay(
       orderDisplayBox_(std::make_unique<OrderDisplayBox>()),
       resetClippingButton_(std::make_shared<EarButton>()),
       p_(p) {
-
   headingLabel_->setName("Label (ValueBoxOrderDisplay::headingLabel_)");
-  orderDisplayBox_->setName("OrderDisplayBox (ValueBoxOrderDisplay::orderDisplayBox_)");
-  resetClippingButton_->setName("EarButton (ValueBoxOrderDisplay::resetClippingButton_)");
+  orderDisplayBox_->setName(
+      "OrderDisplayBox (ValueBoxOrderDisplay::orderDisplayBox_)");
+  resetClippingButton_->setName(
+      "EarButton (ValueBoxOrderDisplay::resetClippingButton_)");
 
   headingLabel_->setFont(EarFonts::Heading);
   headingLabel_->setColour(Label::textColourId, EarColours::Heading);
@@ -55,16 +56,15 @@ void ValueBoxOrderDisplay::paint(Graphics& g) {
 
 void ValueBoxOrderDisplay::resized() {
   auto area = getLocalBounds();
-  area.reduce(10, 5);
+  area.reduce(marginBig_, marginSmall_);
 
-  auto headingArea = area.withHeight(30);
+  auto headingArea = area.removeFromTop(30);
   headingLabel_->setBounds(headingArea.withWidth(300));
+  headingArea.removeFromTop(marginSmall_);
   resetClippingButton_->setBounds(headingArea.withLeft(650));
 
-  area.removeFromTop(30);
-  area.removeFromTop(2.f * marginBig_);
-
-  orderDisplayBox_->setBounds(area.reduced(0, 10));
+  area.removeFromTop(marginBig_);
+  orderDisplayBox_->setBounds(area.reduced(0, 0));
 }
 
 void ValueBoxOrderDisplay::clearHoaSetup() {
