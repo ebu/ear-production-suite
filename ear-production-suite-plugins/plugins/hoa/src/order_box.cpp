@@ -53,7 +53,8 @@ void OrderBox::resized() {
   auto areaWidth = area.getWidth();
 
   int pyramidBoxEdgeSize(area.getHeight());
-  int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;
+  int numberOfBoxPartitions = 14;
+  // int numberOfBoxPartitions = (hoaOrder_ * 2) + 2;//this row makes the gaps between the pyramid boxes vary
   int partitionNumber = (numberOfBoxPartitions / 2) - rowOrder_;
 
   for (auto pyramidBox : pyramidBoxes_) {
