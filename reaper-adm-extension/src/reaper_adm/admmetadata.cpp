@@ -43,7 +43,7 @@ void setUidReference(adm::Document& doc,
 
 void setUidReferenceUsingIdStr(adm::Document& doc,
                             adm::AudioTrackUid& uid,
-                            std::string& elementIdStr) {
+                            std::string const& elementIdStr) {
     if(elementIdStr.rfind("AT_", 0) == 0) {
         auto trackFormatId = adm::parseAudioTrackFormatId(elementIdStr);
         setUidReference(doc, uid, trackFormatId);
