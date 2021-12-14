@@ -1,7 +1,7 @@
 [submodule "submodules/libadm"]
 	path = submodules/libadm
 	url = https://github.com/ebu/libadm.git
-	branch = eps
+	branch = eps_2076-2
 [submodule "submodules/libbw64"]
 	path = submodules/libbw64
 	url = https://github.com/ebu/libbw64.git
