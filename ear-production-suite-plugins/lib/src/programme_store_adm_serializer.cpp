@@ -78,11 +78,15 @@ bool operator==(proto::PositionInteractive const& lhs,
 }
 float minGain(proto::GainInteractive const& gain) { return gain.min(); }
 float minGain(adm::GainInteractionRange const& gain) {
-
+  return static_cast<float>(
+      getValueOr<adm::GainInteractionMin>(gain,
+                                          adm::Gain::fromLinear(ADM_DEFAULT_GAIN)).asLinear());
 }
 float maxGain(proto::GainInteractive const& gain) { return gain.max(); }
 float maxGain(adm::GainInteractionRange const& gain) {
-  return getValueOr<adm::GainInteractionMax>(gain, adm::Gain::fromLinear(ADM_DEFAULT_GAIN)).asLinear();
+  return static_cast<float>(
+      getValueOr<adm::GainInteractionMax>(gain,
+                                          adm::Gain::fromLinear(ADM_DEFAULT_GAIN)).asLinear());
 }
 bool operator==(adm::GainInteractionRange const& lhs,
                 proto::GainInteractive const& rhs) {
