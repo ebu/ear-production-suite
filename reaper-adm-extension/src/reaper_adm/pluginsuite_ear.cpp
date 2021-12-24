@@ -378,12 +378,17 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 
 	if (!plugin) {
 		plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
-		auto takeChannels = automationElement.takeChannels();
-		auto channelCountTake = static_cast<int>(takeChannels.size());
-		auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
-		auto channelCount = channelCountTake;
+
+        auto channelCount = 1;
+        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, packFormatId);
+        if(pfData) {
+            channelCount = pfData->relatedChannelFormats.size();
+        }
+
 		track->setChannelCount(channelCount);
-		plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
+        plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
+
+		auto takeChannels = automationElement.takeChannels();
 
 		assert(trackMappingAssigner);
 		auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
