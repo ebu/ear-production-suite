@@ -58,12 +58,13 @@ void ValueBoxOrderDisplay::resized() {
   auto area = getLocalBounds();
   area.reduce(marginBig_, 0);
 
-  auto headingArea = area.removeFromTop(30);
+  auto headingArea = area.removeFromTop(30 + marginSmall_);
   headingLabel_->setBounds(headingArea.withWidth(300));
   headingArea.removeFromTop(marginBig_);
   resetClippingButton_->setBounds(headingArea.withLeft(500));
 
-  area.removeFromTop(marginBig_);
+  area.removeFromTop(marginBig_ + marginSmall_);
+  area.removeFromBottom(marginBig_);
   orderDisplayBox_->setBounds(area.reduced(0, 0));
 }
 
