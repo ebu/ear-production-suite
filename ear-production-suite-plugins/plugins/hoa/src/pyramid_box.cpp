@@ -35,10 +35,9 @@ void PyramidBox::paint(Graphics& g) {
     g.setColour(EarColours::Error);
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
   } else if (!hasSignal_) {
-    g.setColour(EarColours::Transparent);
-    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
+    const float lineSize = 1.f;
     g.setColour(EarColours::Primary);
-    g.drawRoundedRectangle(0, 0, getWidth(), getHeight(), 4, 2);
+    g.drawRoundedRectangle((lineSize / 2.f), (lineSize / 2.f), getWidth() - lineSize, getHeight() - lineSize, 4, lineSize);
   } else {
     g.setColour(EarColours::Primary);
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);
