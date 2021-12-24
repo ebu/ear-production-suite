@@ -16,6 +16,7 @@
 #include <adm/common_definitions.hpp>
 #include <bw64/bw64.hpp>
 #include <speaker_setups.hpp>
+#include <helper/common_definition_helper.h>
 
 using namespace admplug;
 
@@ -145,15 +146,17 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	auto packFormatIdParam = createPluginParameter(static_cast<int>(EarHoaParameters::PACKFORMAT_ID_VALUE), { PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX });
 	auto packFormatId = plugin.getParameterWithConvertToInt(*(packFormatIdParam.get()));
 	assert(packFormatId.has_value());
-	int trackWidth = packFormatId.has_value() ? pow(*packFormatId + 1, 2) : 0;
-	if (trackWidth <= 0) trackWidth = 1;
 
-	if (trackMapping.has_value() && *trackMapping >= 0) {
-		int trackWidth = plugin.getTrackInstance().getChannelCount();
-		for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
-			usedValues.push_back((*trackMapping) + channelCounter);
-		}
+	if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
+        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatId);
+        if(pfData) {
+            int trackWidth = pfData->relatedChannelFormats.size();
+		    for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
+			    usedValues.push_back((*trackMapping) + channelCounter);
+		    }
+        }
 	}
+
 	return usedValues;
 }
 
@@ -212,7 +215,7 @@ void EARPluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI & api)
 	std::vector<UniqueValueAssigner::SearchCandidate> trackMappingAssignerSearches;
 	trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{ OBJECT_METADATA_PLUGIN_NAME, determineUsedObjectTrackMappingValues });
 	trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{ DIRECTSPEAKERS_METADATA_PLUGIN_NAME, determineUsedDirectSpeakersTrackMappingValues });
-	trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{ HOA_METADATA_PLUGIN_NAME, determineUsedHoaTrackMappingValues });//ME add
+	trackMappingAssignerSearches.push_back(UniqueValueAssigner::SearchCandidate{ HOA_METADATA_PLUGIN_NAME, determineUsedHoaTrackMappingValues });
 	trackMappingAssigner = std::make_unique<UniqueValueAssigner>(trackMappingAssignerSearches, 0, TRACK_MAPPING_MAX, api);
 	checkForExistingTracks(api);
 	setTrackInsertionIndexFromSelectedMedia(api);
