@@ -77,17 +77,23 @@ void WrappingEnvelope::createPoints(double pointsOffset)
 }
 
 void WrappingEnvelope::addDiscontinuityPoints(AutomationPoint const& point) {
-  auto& points = automationEnvelope.getPoints();
-    auto value = point.value();
-    auto startTime = point.time();
-    auto duration = point.duration();
-    auto effectiveTime = startTime + duration;
+    auto& points = automationEnvelope.getPoints();
 
     auto& previousPoint = points.back();
     auto previousValue = previousPoint.value();
     auto previousStartTime = previousPoint.time();
     auto previousDuration = previousPoint.duration();
     auto previousEffectiveTime = previousStartTime + previousDuration;
+
+    auto value = point.value();
+    auto startTime = point.time();
+    auto duration = point.duration();
+    auto effectiveTime = startTime + duration;
+    // Fix for floating-point precision errors in calculating effective time by adding start and duration.
+    if(startTime < previousEffectiveTime) {
+        startTime = previousEffectiveTime;
+        duration = effectiveTime - startTime;
+    }
 
     auto distance = fabs(value - previousValue);
 
@@ -116,7 +122,7 @@ void WrappingEnvelope::addDiscontinuityPoints(AutomationPoint const& point) {
         if(previousEffectiveTime != startTime || previousValue != 0.0) {
             automationEnvelope.addPoint(AutomationPoint{ startTime, wrapDuration, 0.0 });
         }
-        if(effectiveTime != wrapTime || value != 1.0) {
+        if(effectiveTime > wrapTime || value != 1.0) {
             automationEnvelope.addPoint(AutomationPoint{ wrapTime, 0.0, 1.0 });
         }
       }
