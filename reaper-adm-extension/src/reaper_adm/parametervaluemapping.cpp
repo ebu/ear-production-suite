@@ -12,12 +12,12 @@ AutomationPoint admplug::ParameterValueMapping::operator()(AutomationPoint point
 
 AutomationPoint admplug::ParameterValueMapping::forwardMap(AutomationPoint point) const
 {
-    return AutomationPoint(point.time(), point.duration(), forwardMap(point.value()));
+    return AutomationPoint(point.timeNs(), point.durationNs(), forwardMap(point.value()));
 }
 
 AutomationPoint admplug::ParameterValueMapping::reverseMap(AutomationPoint point) const
 {
-    return AutomationPoint(point.time(), point.duration(), reverseMap(point.value()));
+    return AutomationPoint(point.timeNs(), point.durationNs(), reverseMap(point.value()));
 }
 
 

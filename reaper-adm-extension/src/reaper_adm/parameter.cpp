@@ -26,12 +26,12 @@ std::optional<double> admplug::getAdmParameterDefault(AdmParameter admParameter)
 
 AutomationPoint admplug::Parameter::forwardMap(AutomationPoint point) const
 {
-    return AutomationPoint(point.time(), point.duration(), forwardMap(point.value()));
+    return AutomationPoint(point.timeNs(), point.durationNs(), forwardMap(point.value()));
 }
 
 AutomationPoint admplug::Parameter::reverseMap(AutomationPoint point) const
 {
-    return AutomationPoint(point.time(), point.duration(), reverseMap(point.value()));
+    return AutomationPoint(point.timeNs(), point.durationNs(), reverseMap(point.value()));
 }
 
 std::unique_ptr<AutomationEnvelope> PluginParameter::getEnvelope(const Plugin &plugin) const

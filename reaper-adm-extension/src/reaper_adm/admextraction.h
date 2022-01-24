@@ -8,8 +8,8 @@
 
 namespace {
     bool pointsTimeSorter(admplug::AutomationPoint &pointA, admplug::AutomationPoint &pointB) {
-        if(pointA.time() == pointB.time()) return pointA.duration() < pointB.duration();
-        return pointA.time() < pointB.time();
+        if(pointA.timeNs() == pointB.timeNs()) return pointA.durationNs() < pointB.durationNs();
+        return pointA.timeNs() < pointB.timeNs();
     }
 }
 
@@ -262,6 +262,7 @@ std::optional<AutomationPoint> getSphericalPoint(Parameter const& param, adm::Au
 }
 
 std::vector<AutomationPoint> simplify(std::vector<AutomationPoint> const& points);
+void fixEffectiveTimeOverlaps(std::vector<AutomationPoint> &points);
 
 template<typename ParameterT, typename AutomatableT>
 void applyAutomation(std::vector<AutomationPoint> points,
@@ -276,6 +277,7 @@ void applyAutomation(std::vector<AutomationPoint> points,
 
         // This assumes the points are ordered by time!
         std::sort(points.begin(), points.end(), pointsTimeSorter);
+        fixEffectiveTimeOverlaps(points);
         points = simplify(points);
 
         if(points.size() == 1) { // May have reduced to 1 during removal
