@@ -115,7 +115,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
       </div>
   </details>
   <details>
-    <summary>Why are the plug-ins do not loading on MacOS Catalina or above?</summary>
+    <summary>Why are the plug-ins not loading on MacOS Catalina or above?</summary>
       <div class="text_section">
         <p>The MacOS security gatekeeper service may block the plug-ins from loading.
         You can validate the files after install by entering the following command in Terminal:</p>
