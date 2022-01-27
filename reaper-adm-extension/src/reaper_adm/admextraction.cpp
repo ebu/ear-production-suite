@@ -86,3 +86,14 @@ std::vector<admplug::AutomationPoint> admplug::detail::simplify(const std::vecto
     }
     return filtered;
 }
+
+void admplug::detail::fixEffectiveTimeOverlaps(std::vector<AutomationPoint> &points)
+{
+    // This function assumes points are already sorted by start time
+    // Effective time overlap can occur when a blocks rtime + duration exceeds the start time of the next block
+    for(size_t i = 0; i < (points.size() - 1); i++) {
+        if(points[i].effectiveTimeNs() > points[i + 1].timeNs()) {
+            points[i].setDurationFromEffectiveTimeNs(points[i + 1].timeNs());
+        }
+    }
+}
