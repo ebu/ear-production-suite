@@ -105,6 +105,19 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
 </div>
 
 <div markdown="1" class="text_section">
+## Discussion Community
+  <details>
+    <summary>Show installation instructions</summary>
+      <div class="text_section">
+        A discussion community for users of the EAR Production Suite is available on the <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite">BBC's MakerBox platform.</a>
+      </div>
+      <div class="button-grid">
+        <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite"><button class="c-btn">Join in the discussion!</button></a>
+      </div>
+  </details>
+</div>
+
+<div markdown="1" class="text_section">
 ## Frequently Asked Questions (FAQ)
   <details>
     <summary>Will my exported ADM BW64 files work with other tools, such as the Dolby Atmos Production Suite?</summary>
