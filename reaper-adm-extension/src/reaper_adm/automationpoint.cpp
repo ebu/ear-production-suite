@@ -9,23 +9,55 @@ AutomationPoint::AutomationPoint(double val) : AutomationPoint{ns::zero(), ns::z
 }
 
 AutomationPoint::AutomationPoint(std::chrono::nanoseconds timeNs, std::chrono::nanoseconds duration, double val) :
-    pointTime{timeNs.count() / 1000000000.0},
-    pointDuration{duration.count() / 1000000000.0},
-    pointValue{val} {
+    pointTime{timeNs},
+    pointDuration{duration},
+    pointValue{val}
+{
 }
 
-AutomationPoint::AutomationPoint(double timeSeconds, double duration, double val) : pointTime{timeSeconds}, pointDuration{duration}, pointValue{val}
+void AutomationPoint::setTimeNs(ns time)
 {
+    pointTime = time;
+}
+
+void AutomationPoint::setDurationNs(ns duration)
+{
+    pointDuration = duration;
+}
+
+void AutomationPoint::setDurationFromEffectiveTimeNs(ns effectiveTime)
+{
+    pointDuration = effectiveTime - pointTime;
 }
 
 double AutomationPoint::time() const
 {
-    return pointTime;
+    return pointTime.count() / 1000000000.0;
 }
 
 double AutomationPoint::duration() const
 {
+    return pointDuration.count() / 1000000000.0;
+}
+
+double AutomationPoint::effectiveTime() const
+{
+    return effectiveTimeNs().count()  / 1000000000.0;
+}
+
+ns AutomationPoint::timeNs() const
+{
+    return pointTime;
+}
+
+ns AutomationPoint::durationNs() const
+{
     return pointDuration;
+}
+
+ns AutomationPoint::effectiveTimeNs() const
+{
+    return pointTime + pointDuration;
 }
 
 double AutomationPoint::value() const

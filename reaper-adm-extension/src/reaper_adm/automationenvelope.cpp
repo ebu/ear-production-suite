@@ -2,6 +2,14 @@
 #include <memory>
 #include "automationenvelope.h"
 
+namespace {
+std::chrono::nanoseconds nsMultiply(std::chrono::nanoseconds const &ns, double const multiplier) {
+    double asDouble = (double)ns.count() * multiplier;
+    long long asLongLong = asDouble + 0.5; // correct rounding
+    return std::chrono::nanoseconds(asLongLong);
+}
+}
+
 using namespace admplug;
 
 DefinedStartEnvelope::DefinedStartEnvelope(TrackEnvelope *trackEnvelope, ReaperAPI const& api) : trackEnvelope{trackEnvelope}, api{api}
@@ -11,8 +19,8 @@ DefinedStartEnvelope::DefinedStartEnvelope(TrackEnvelope *trackEnvelope, ReaperA
 
 void DefinedStartEnvelope::addPoint(AutomationPoint point)
 {
-    if(points.empty() && point.duration() > 0) {
-        points.emplace_back(point.time(), 0, point.value());
+    if(points.empty() && point.durationNs() > std::chrono::nanoseconds::zero()) {
+        points.emplace_back(point.timeNs(), std::chrono::nanoseconds::zero(), point.value());
     }
     points.push_back(point);
 }
@@ -29,7 +37,7 @@ void DefinedStartEnvelope::createPoints(double pointsOffset)
     bool sortPoints{false};
 
     for(auto& point : points) {
-        pointOnTimeline = point.time() + point.duration() + pointsOffset;
+        pointOnTimeline = point.effectiveTime() + pointsOffset;
         if (earliestPointOnTimeline < 0.0 || pointOnTimeline < earliestPointOnTimeline) {
             earliestPointOnTimeline = pointOnTimeline;
         }
@@ -76,48 +84,37 @@ void WrappingEnvelope::createPoints(double pointsOffset)
     automationEnvelope.createPoints(pointsOffset);
 }
 
-void WrappingEnvelope::addDiscontinuityPoints(AutomationPoint const& point) {
-  auto& points = automationEnvelope.getPoints();
-    auto value = point.value();
-    auto startTime = point.time();
-    auto duration = point.duration();
-    auto effectiveTime = startTime + duration;
+void WrappingEnvelope::addDiscontinuityPoints(AutomationPoint const& currentPoint) {
+    auto& previousPoint = automationEnvelope.getPoints().back();
+    auto distance = fabs(currentPoint.value() - previousPoint.value());
 
-    auto& previousPoint = points.back();
-    auto previousValue = previousPoint.value();
-    auto previousStartTime = previousPoint.time();
-    auto previousDuration = previousPoint.duration();
-    auto previousEffectiveTime = previousStartTime + previousDuration;
-
-    auto distance = fabs(value - previousValue);
-
-    if(isTopToBottomWrap(value, previousValue)) {
-      double wrappedDistance = calcWrappedDistance(value, previousValue);
+    if(isTopToBottomWrap(currentPoint.value(), previousPoint.value())) {
+      double wrappedDistance = calcWrappedDistance(currentPoint.value(), previousPoint.value());
 
       if(wrappedDistance < distance) {
-        double wrapDurationProportion = (wrappedDistance == 0.0)? 0.0 : ((1.0 - previousValue) / wrappedDistance);
-        auto wrapDuration = wrapDurationProportion * duration;
-        auto wrapTime = startTime + wrapDuration;
-        if(previousEffectiveTime != startTime || previousValue != 1.0) {
-            automationEnvelope.addPoint(AutomationPoint{ startTime, wrapDuration, 1.0 });
+        double wrapDurationProportion = (wrappedDistance == 0.0)? 0.0 : ((1.0 - previousPoint.value()) / wrappedDistance);
+        std::chrono::nanoseconds wrapDuration{nsMultiply(currentPoint.durationNs(), wrapDurationProportion)};
+        std::chrono::nanoseconds wrapTime{ currentPoint.timeNs() + wrapDuration };
+        if(previousPoint.effectiveTimeNs() != currentPoint.timeNs() || previousPoint.value() != 1.0) {
+            automationEnvelope.addPoint(AutomationPoint{ currentPoint.timeNs(), wrapDuration, 1.0 });
         }
-        if(effectiveTime != wrapTime || value != 0.0) {
-            automationEnvelope.addPoint(AutomationPoint{ wrapTime, 0.0, 0.0 });
+        if(currentPoint.effectiveTimeNs() != wrapTime || currentPoint.value() != 0.0) {
+            automationEnvelope.addPoint(AutomationPoint{ wrapTime, std::chrono::nanoseconds::zero(), 0.0 });
         }
       }
     }
 
-    if(isBottomToTopWrap(value, previousValue)) {
-      auto wrappedDistance = calcWrappedDistance(previousValue, value);
+    if(isBottomToTopWrap(currentPoint.value(), previousPoint.value())) {
+      auto wrappedDistance = calcWrappedDistance(previousPoint.value(), currentPoint.value());
       if(wrappedDistance < distance) {
-        double wrapDurationProportion = (wrappedDistance == 0.0)? 0.0 : (previousValue / wrappedDistance);
-        auto wrapDuration = wrapDurationProportion * duration;
-        auto wrapTime = startTime + wrapDuration;
-        if(previousEffectiveTime != startTime || previousValue != 0.0) {
-            automationEnvelope.addPoint(AutomationPoint{ startTime, wrapDuration, 0.0 });
+        double wrapDurationProportion = (wrappedDistance == 0.0)? 0.0 : (previousPoint.value() / wrappedDistance);
+        std::chrono::nanoseconds wrapDuration{nsMultiply(currentPoint.durationNs(), wrapDurationProportion)};
+        std::chrono::nanoseconds wrapTime{ currentPoint.timeNs() + wrapDuration };
+        if(previousPoint.effectiveTimeNs() != currentPoint.timeNs() || previousPoint.value() != 0.0) {
+            automationEnvelope.addPoint(AutomationPoint{ currentPoint.timeNs(), wrapDuration, 0.0 });
         }
-        if(effectiveTime != wrapTime || value != 1.0) {
-            automationEnvelope.addPoint(AutomationPoint{ wrapTime, 0.0, 1.0 });
+        if(currentPoint.effectiveTimeNs() > wrapTime || currentPoint.value() != 1.0) {
+            automationEnvelope.addPoint(AutomationPoint{ wrapTime, std::chrono::nanoseconds::zero(), 1.0 });
         }
       }
     }

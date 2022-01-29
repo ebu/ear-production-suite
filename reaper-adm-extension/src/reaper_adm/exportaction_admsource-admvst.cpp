@@ -577,11 +577,11 @@ void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor,
     auto duration = toNs(api.GetProjectLength(nullptr));
 
     if(audioObject->has<adm::Start>()) {
-        start = audioObject->get<adm::Start>().get();
+        start = audioObject->get<adm::Start>().get().asNanoseconds();
         duration -= start;
     }
     if(audioObject->has<adm::Duration>()) {
-        duration = audioObject->get<adm::Duration>().get();
+        duration = audioObject->get<adm::Duration>().get().asNanoseconds();
     }
 
     auto cumulatedPointData = CumulatedPointData(start, start + duration);

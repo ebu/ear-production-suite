@@ -9,13 +9,24 @@ class AutomationPoint
 public:
     explicit AutomationPoint(double val);
     AutomationPoint(std::chrono::nanoseconds timeNs, std::chrono::nanoseconds duration, double val);
-    AutomationPoint(double timeSeconds, double duration, double val);
+
+    void setTimeNs(std::chrono::nanoseconds time);
+    void setDurationNs(std::chrono::nanoseconds duration);
+    void setDurationFromEffectiveTimeNs(std::chrono::nanoseconds effectiveTime);
+
     double time() const;
     double duration() const;
+    double effectiveTime() const;
+
+    std::chrono::nanoseconds timeNs() const;
+    std::chrono::nanoseconds durationNs() const;
+    std::chrono::nanoseconds effectiveTimeNs() const;
+
     double value() const;
+
 private:
-    double pointTime;
-    double pointDuration;
+    std::chrono::nanoseconds pointTime;
+    std::chrono::nanoseconds pointDuration;
     double pointValue;
 };
 

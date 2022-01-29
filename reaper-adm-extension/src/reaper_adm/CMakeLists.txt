@@ -144,7 +144,7 @@ set(EXTENSION_HEADERS
 	track.h
 	win_mem_debug.h
 	win_nonblock_msg.h
-	coordinate_conversion/coord_conv.cpp
+	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
 	progress/importlistener.h
 	progress/importprogress.h
