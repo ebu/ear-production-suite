@@ -42,7 +42,7 @@ target_include_directories(testreaper_adm
     $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR})
 
-set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
+set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../../reaper-adm-extension/test/reaper_adm/")
 
 add_custom_command(TARGET testreaper_adm POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${REAPER_ADM_EXTENSION_SRC_DIR}/ADMPresets ${CMAKE_CURRENT_SOURCE_DIR}/data/UserPlugins/ADMPresets)
@@ -79,7 +79,7 @@ target_include_directories(testacceptreaper_adm
     $<TARGET_PROPERTY:Reaper_adm::reaper_adm,INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR})
 
-set_property(TARGET testacceptreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../test/reaper_adm/")
+set_property(TARGET testacceptreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../../reaper-adm-extension/test/reaper_adm/")
 
 add_test(
     NAME reaper_adm_acceptance_test

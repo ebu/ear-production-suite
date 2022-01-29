@@ -527,7 +527,7 @@ std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> Cumula
                 for(auto const&[admParameter, values] : *getParameterMapAtTime(*timeIt)) {
                     switch(admParameter) {
                         case AdmParameter::OBJECT_GAIN:
-                            block->set((adm::Gain)(processBack ? values.back() : values.front()));
+                            block->set(adm::Gain::fromLinear(processBack ? values.back() : values.front()));
                             break;
                         case AdmParameter::OBJECT_HEIGHT:
                             block->set((adm::Height)(processBack ? values.back() : values.front()));

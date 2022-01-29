@@ -86,11 +86,15 @@ bool operator==(proto::PositionInteractive const& lhs,
 }
 float minGain(proto::GainInteractive const& gain) { return gain.min(); }
 float minGain(adm::GainInteractionRange const& gain) {
-  return getValueOr<adm::GainInteractionMin>(gain, ADM_DEFAULT_GAIN);
+  return static_cast<float>(
+      getValueOr<adm::GainInteractionMin>(gain,
+                                          adm::Gain::fromLinear(ADM_DEFAULT_GAIN)).asLinear());
 }
 float maxGain(proto::GainInteractive const& gain) { return gain.max(); }
 float maxGain(adm::GainInteractionRange const& gain) {
-  return getValueOr<adm::GainInteractionMax>(gain, ADM_DEFAULT_GAIN);
+  return static_cast<float>(
+      getValueOr<adm::GainInteractionMax>(gain,
+                                          adm::Gain::fromLinear(ADM_DEFAULT_GAIN)).asLinear());
 }
 bool operator==(adm::GainInteractionRange const& lhs,
                 proto::GainInteractive const& rhs) {
@@ -428,8 +432,8 @@ void ProgrammeStoreAdmSerializer::setInteractivity(
       interaction.set(adm::GainInteract{true});
       auto const& interactiveGain = object.interactive_gain();
       auto gainRange = adm::GainInteractionRange{
-          adm::GainInteractionMin{interactiveGain.min()},
-          adm::GainInteractionMax{interactiveGain.max()}};
+          adm::GainInteractionMin{adm::Gain::fromLinear(interactiveGain.min())},
+          adm::GainInteractionMax{adm::Gain::fromLinear(interactiveGain.max())}};
       interaction.set(gainRange);
     }
     if (interactive.positionEnabled) {

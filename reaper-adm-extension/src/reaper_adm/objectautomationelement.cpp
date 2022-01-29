@@ -120,9 +120,9 @@ namespace {
                                                          std::chrono::nanoseconds interpolationLength) {
         auto rTime = block.get<adm::Rtime>().get();
         if(rTime != 0ns) {
-            block.set(adm::Rtime(rTime + interpolationLength));
+            block.set(adm::Rtime(rTime.asNanoseconds() + interpolationLength));
             auto duration = block.get<adm::Duration>().get();
-            block.set(adm::Duration{duration - interpolationLength});
+            block.set(adm::Duration{duration.asNanoseconds() - interpolationLength});
         }
         return block;
     }

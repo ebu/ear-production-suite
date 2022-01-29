@@ -581,57 +581,55 @@ bool AdmVstExporter::checkPluginPositions(std::shared_ptr<admplug::PluginSuite> 
 
 void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api)
 {
-	auto start = std::chrono::nanoseconds::zero();
-	auto duration = toNs(api.GetProjectLength(nullptr));
+    auto start = std::chrono::nanoseconds::zero();
+    auto duration = toNs(api.GetProjectLength(nullptr));
 
-	if (audioObject->has<adm::Start>()) {
-		start = audioObject->get<adm::Start>().get();
-		duration -= start;
-	}
-	if (audioObject->has<adm::Duration>()) {
-		duration = audioObject->get<adm::Duration>().get();
-	}
+    if(audioObject->has<adm::Start>()) {
+        start = audioObject->get<adm::Start>().get().asNanoseconds();
+        duration -= start;
+    }
+    if(audioObject->has<adm::Duration>()) {
+        duration = audioObject->get<adm::Duration>().get().asNanoseconds();
+    }
 
-	auto cumulatedPointData = CumulatedPointData(start, start + duration);
+    auto cumulatedPointData = CumulatedPointData(start, start + duration);
 
-	if (pluginSuite && pluginInst) {
-		// Get all values for all parameters, whether automated or not.
-		for (int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
-			auto admParameter = (AdmParameter)admParameterIndex;
-			auto param = pluginSuite->getParameterFor(admParameter);
-			auto env = getEnvelopeFor(pluginSuite, pluginInst, admParameter, api);
+    if(pluginSuite && pluginInst) {
+        // Get all values for all parameters, whether automated or not.
+        for(int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
+            auto admParameter = (AdmParameter)admParameterIndex;
+            auto param = pluginSuite->getParameterFor(admParameter);
+            auto env = getEnvelopeFor(pluginSuite, pluginInst, admParameter, api);
 
-			if (param && env) {
-				// We have an envelope for this ADM parameter
-				auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
-				admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
+            if(param && env) {
+                // We have an envelope for this ADM parameter
+                auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
+                admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
 
-			}
-			else if (auto val = getValueFor(pluginSuite, pluginInst, admParameter, api)) {
-				// We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
-				// NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
-				auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-				admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
-			}
-		}
-	}
+            } else if(auto val = getValueFor(pluginSuite, pluginInst, admParameter, api)) {
+                // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
+                // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
+                auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
+                admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
+            }
+        }
+    }
 
-	if (typeDescriptor == adm::TypeDefinition::OBJECTS) {
-		addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst, api), subgraph);
-	}
-	else if (typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
-		// TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-	}
-	else if (typeDescriptor == adm::TypeDefinition::HOA) {
-		// TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-	}
-	else if (typeDescriptor == adm::TypeDefinition::BINAURAL) {
-		// TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-	}
-	else if (typeDescriptor == adm::TypeDefinition::MATRIX) {
-		// TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-	}
-
+    if(typeDescriptor == adm::TypeDefinition::OBJECTS) {
+        addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst, api), subgraph);
+    }
+    else if(typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
+        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
+    }
+    else if(typeDescriptor == adm::TypeDefinition::HOA) {
+        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
+    }
+    else if(typeDescriptor == adm::TypeDefinition::BINAURAL) {
+        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
+    }
+    else if(typeDescriptor == adm::TypeDefinition::MATRIX) {
+        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
+    }
 }
 
 template<typename AudioBlockFormatType>

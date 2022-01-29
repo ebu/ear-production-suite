@@ -66,12 +66,12 @@ void setGainInteraction(proto::Object* object,
     if (admInteraction.has<GainInteractionRange>()) {
       auto gainRange = admInteraction.get<GainInteractionRange>();
       if (gainRange.has<GainInteractionMin>()) {
-        interactiveGain->set_min(gainRange.get<GainInteractionMin>().get());
+        interactiveGain->set_min(gainRange.get<GainInteractionMin>().get().asLinear());
       } else {
         interactiveGain->set_min(ADM_DEFAULT_GAIN);
       }
       if (gainRange.has<GainInteractionMax>()) {
-        interactiveGain->set_max(gainRange.get<GainInteractionMax>().get());
+        interactiveGain->set_max(gainRange.get<GainInteractionMax>().get().asLinear());
       } else {
         interactiveGain->set_max(ADM_DEFAULT_GAIN);
       }
