@@ -90,6 +90,26 @@ Have a look at this video where these points are explained:
 
 [![Watch the video](https://irt-a.akamaihd.net/EAR-Production-Suite/Intro_image.png)](https://irt-a.akamaihd.net/EAR-Production-Suite/Intro_Beta-release.mp4)
 
+## Use of Binaural Monitoring plug-in
+
+The Binaural Monitoring plug-in can be used in exactly the same way as the existing Monitoring plug-ins for loudspeakers; simply place the Binaural Monitoring plug-in on a new 64-channel track and route all 64 channels of the Scene plug-in track to it.
+
+The Binaural Monitoring plug-in supports 3DoF (three degrees-of-freedom). That is, the plug-in will respond to listener orientation changes. The plug-in provides Yaw, Pitch and Roll controls to define head orientation. These can be driven automatically using head-trackers which generate OSC. It is compatible with OSC message formats used by other third-party spatial audio plug-ins, including SPARTA/COMPASS, IEM, 3D Tune-In Toolkit, Ambix plug-ins, AudioLab SALTE, and Mach1 Monitor. Therefore, any head-tracker which is compatible with any of those plug-ins should also be compatible with the EAR Production Suite Binaural Monitoring plug-in. Below is a complete list of OSC paths observed. Note that you will need to ensure the Binaural Monitoring plug-in is listening for messages on the correct port using the control within the user interface, and enabled using the switch control.
+
+- **/yaw *y*, /pitch *p*, /roll *r*** - Euler in Degrees, as used by SPARTA/COMPASS 
+- **/ypr *y p r*** - Euler in Degrees, as used by SPARTA/COMPASS 
+- **/hedrot/yaw *y*, /hedrot/pitch *p*, /hedrot/roll *r*** - Euler in Degrees, as used by HedRot
+- **/rotation *p y r*** - Euler in Degrees, as used by Matthias Kronlachner's Ambix plug-ins
+- **/rendering/htrpy *r p y*** - Euler in Degrees, as used by AudioLab SALTE
+- **/orientation *y p r*** - Euler in Degrees, as used by Mach1 Monitor
+- **/3DTI-OSC/receiver/pry *p r y*** - Euler in Radians, as used by 3D Tune-In Toolkit
+- **/quaternion *w y z x*** - Quaternions, as used by SPARTA/COMPASS
+- **/SceneRotator/quaternions *w x y z*** - Quaternions, as used by IEM
+- **/quaternions *w y z x*** - Quaternions, as used by Unity
+- **/head_pose** *a b c d* ***p y r*** - Euler in Degrees, as used by Matthias Kronlachner's Ambix plug-ins (note that the first 4 parameters are ignored in this case.)
+
+The [nvsonic Head Tracker](https://github.com/trsonic/nvsonic-head-tracker) provides a cheap, compatible and tested head-tracker which can output all of the above formats, and can therefore drive the Binaural Monitoring plug-in. 
+
 ## Survey
 We would highly appreciate if you could fill in [this survey](https://docs.google.com/forms/d/e/1FAIpQLSfosvonWSOUt_-Q30MJtcGERs2XVqS2EaKauOzGsc3B4oWKIA/viewform). It takes only a few minutes and will help us to create a better tool based on your feedback.
 
