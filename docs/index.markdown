@@ -140,6 +140,17 @@ A discussion community for users of the EPS is available on the <a href="https:/
         If you have not installed the plug-ins to the default locations, then please change the above file paths accordingly.</p>
       </div>
   </details>
+  <details>
+    <summary>Which head-trackers are compatible with the Binaural Monitoring plug-in?</summary>
+      <div class="text_section">
+        <p>The Binaural Monitoring plug-in accepts listener orientation data over OSC and responds to messages used by several other popular spatial audio plug-in suites. 
+		Therefore, if you have a head-tracker which functions with SPARTA/COMPASS, IEM, ambiX, HedRot, AudioLab SALTE, Mach1, or the 3D Tune-In Toolkit, then it should also function with the EPS Binaural Monitoring plug-in.
+		</p>
+		<p>Simply ensure that the "Enable OSC" toggle is on, and that the port number is configured to match that of your head-tracker.</p>
+        <p>If you would like to construct your own low-cost head-tracker for use with the Binaural Monitoring plug-in, consider the <a href="https://github.com/trsonic/nvsonic-head-tracker">nvsonic Head-Tracker</a> for a compatible solution. It should operate with the Binaural Monitoring plug-in using any of the presets for the third-party spatial audio plug-ins listed above.
+		</p>
+      </div>
+  </details>
 </div>
 
 <div markdown="1" class="text_section">
