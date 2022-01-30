@@ -4,111 +4,129 @@
 
 .t-dark {
 
-  .c-navigation,
-  .c-header {
-    background: $c__dark-blue;
-  }
-
-  .c-article {
-    color: $c__white;
-    background-color: $c__dark-background;
-  }
-
-  .text_section{
-    background-color: $c__dark-background-light;
-    padding: 4rem;
-    margin-top: 2rem;
-    color: $c__white;
-  }
-
-  .features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    column-gap: 2rem;
-    row-gap: 2rem;
-  }
-
-  .feature {
-    margin-top: 0;
-    text-align: center;
-    font-weight: 500;
-  }
-
-  .feature img {
-    padding: 4rem;
-    padding-bottom: 3rem;
-  }
-
-  .github-corner {
-    fill:#fff;
-    color:$c__dark-blue;
-    position: absolute;
-    border: 0;
-    right: 0;
-    @media screen and (min-width: 601px) {
-      top: 0rem;
-      height: 12rem;
-      margin-right: 0rem;
+    .c-navigation,
+    .c-header {
+        background: $c__dark-blue;
     }
-    @media screen and (max-width: 601px) {
-      top: 0rem;
-      margin-right: -1rem;
-      height: 6rem;
+
+    .c-article {
+        color: $c__white;
+        background-color: $c__dark-background;
     }
-  }
 
-  .button-grid {
-    margin-top: 2rem;
-    margin-left: 6rem;
-    margin-right: 6rem;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    display: grid;
-    column-gap: 30rem;
-    row-gap: 2rem;
-  }
+    .text_section {
+        background-color: $c__dark-background-light;
+        padding: 4rem;
+        margin-top: 2rem;
+        color: $c__white;
+    }
 
-  .button-grid > * {
-    display: grid;
-  }
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        column-gap: 2rem;
+        row-gap: 2rem;
+    }
 
-  .c-article__main a:not(.github-corner) {
-    color: $c__dark-blue-variant;
-    font-weight: 700;
-    text-decoration: none;
-  }
+    .feature {
+        margin-top: 0;
+        text-align: center;
+        font-weight: 500;
+    }
 
-  .c-footer {
-    background-color: $c__dark-background;
-    color: $c__white;
-    padding-top: 2rem;
-    margin-top: -1.9rem;
-    height: 100px;
-  }
+    .feature img {
+        padding: 4rem;
+        padding-bottom: 3rem;
+    }
 
-  .c-footer a {
-    color: $c__dark-blue-variant;
-  }
+    .github-corner {
+        fill: #fff;
+        color: $c__dark-blue;
+        position: absolute;
+        border: 0;
+        right: 0;
 
-  h2 {
-    margin-bottom: 2rem;
-    font-weight: 500;
-  }
-  .yt-iframe {
-     position: relative;
-     padding-bottom: 56.25%;
-     padding-top: 0;
-     height: 0;
-     overflow: hidden;
-  }
+        @media screen and (min-width: 601px) {
+            top: 0rem;
+            height: 12rem;
+            margin-right: 0rem;
+        }
 
-  .yt-iframe iframe,
-  .yt-iframe object,
-  .yt-iframe embed {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-}
+        @media screen and (max-width: 601px) {
+            top: 0rem;
+            margin-right: -1rem;
+            height: 6rem;
+        }
+    }
 
+    .button-grid {
+        margin-top: 2rem;
+        margin-left: 6rem;
+        margin-right: 6rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 360px));
+        display: grid;
+        column-gap: 2rem;
+        row-gap: 2rem;
+        justify-content: center;
+    }
+
+    .button-grid > * {
+        display: grid;
+    }
+
+    .button-grid-wide {
+        margin-top: 2rem;
+        margin-left: 2rem;
+        margin-right: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 500px));
+        display: grid;
+        column-gap: 2rem;
+        row-gap: 2rem;
+        justify-content: center;
+    }
+
+    .button-grid-wide > * {
+        display: grid;
+    }
+
+    .c-article__main a:not(.github-corner) {
+        color: $c__dark-blue-variant;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .c-footer {
+        background-color: $c__dark-background;
+        color: $c__white;
+        padding-top: 2rem;
+        margin-top: -1.9rem;
+        height: 100px;
+    }
+
+    .c-footer a {
+        color: $c__dark-blue-variant;
+    }
+
+    h2 {
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+
+    .yt-iframe {
+        position: relative;
+        padding-bottom: 56.25%;
+        padding-top: 0;
+        height: 0;
+        overflow: hidden;
+    }
+
+    .yt-iframe iframe,
+    .yt-iframe object,
+    .yt-iframe embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 }
