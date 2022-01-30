@@ -78,9 +78,6 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
   <details>
     <summary>Show installation instructions</summary>
-      <div class="text_section">
-        <i><b>Please Note:</b><br /> The EPS is currently incompatible with Language Packs. REAPER may fail to load when using the EPS with a language pack installed. Support will be provided in a future release.</i>
-      </div>
       <ol>
         <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
         <li>Copy / install the <b>VST plugins</b> into your common VST folder.
