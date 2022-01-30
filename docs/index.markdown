@@ -130,12 +130,15 @@ A discussion community for users of the EPS is available on the <a href="https:/
       <div class="text_section">
         <p>The Binaural Monitoring plug-in accepts listener orientation data over OSC and responds to messages used by several other popular spatial audio plug-in suites. 
 		Therefore, if you have a head-tracker which functions with SPARTA/COMPASS, IEM, ambiX, HedRot, AudioLab SALTE, Mach1, or the 3D Tune-In Toolkit, then it should also function with the EPS Binaural Monitoring plug-in.
+		Simply ensure that the "Enable OSC" toggle is on, and that the port number is configured to match that of your head-tracker.
 		</p>
-		<p>Simply ensure that the "Enable OSC" toggle is on, and that the port number is configured to match that of your head-tracker.</p>
-        <p>If you would like to construct your own low-cost head-tracker for use with the Binaural Monitoring plug-in, consider the <a href="https://github.com/trsonic/nvsonic-head-tracker">nvsonic Head-Tracker</a> for a compatible solution. It should operate with the Binaural Monitoring plug-in using any of the presets for the third-party spatial audio plug-ins listed above.
+        <p style="margin-top: 20px">If you would like to construct your own low-cost head-tracker for use with the Binaural Monitoring plug-in, consider the <a href="https://github.com/trsonic/nvsonic-head-tracker">nvsonic Head-Tracker</a> for a compatible solution. It should operate with the Binaural Monitoring plug-in using any of the presets for the third-party spatial audio plug-ins listed above.
+		</p>
+		<p style="margin-top: 20px">We are keen to gather feedback on head-tracker compatibility, whether good or bad. Head over to the <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite">discussion community on BBC MakerBox</a> and let us know of your experience.
 		</p>
       </div>
   </details>
+  
 </div>
 
 <div markdown="1" class="text_section">
