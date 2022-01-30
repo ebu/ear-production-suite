@@ -126,21 +126,6 @@ A discussion community for users of the EPS is available on the <a href="https:/
       </div>
   </details>
   <details>
-    <summary>Why are the plug-ins not loading on MacOS Catalina or above?</summary>
-      <div class="text_section">
-        <p>The MacOS security gatekeeper service may block the plug-ins from loading.
-        You can validate the files after install by entering the following command in Terminal:</p>
-        <code>
-          sudo xattr -rd com.apple.quarantine \<br/>
-            &nbsp;&nbsp;~/Library/Application\ Support/REAPER/UserPlugins/reaper_adm.dylib \<br/>
-            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ADM\ Export\ Source.vst3 \<br/>
-            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ear-production-suite/
-        </code>
-        <p>On reloading your digital audio workstation or re-scanning for the plug-ins, you should now be able to load them.
-        If you have not installed the plug-ins to the default locations, then please change the above file paths accordingly.</p>
-      </div>
-  </details>
-  <details>
     <summary>Which head-trackers are compatible with the Binaural Monitoring plug-in?</summary>
       <div class="text_section">
         <p>The Binaural Monitoring plug-in accepts listener orientation data over OSC and responds to messages used by several other popular spatial audio plug-in suites. 
