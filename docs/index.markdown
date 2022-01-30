@@ -89,7 +89,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
         </li>
         <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
         <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
-          <br>- Windows: C:\Program Files\REAPER (x64)\Plugins
+          <br>- Windows: C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
           <br>- macOS: ~/Library/Application Support/REAPER/UserPlugins
         </li>
         <li>Restart REAPER</li>
