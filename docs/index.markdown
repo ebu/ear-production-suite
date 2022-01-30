@@ -99,8 +99,11 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
   </details>
 
   <div class="button-grid">
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-macOS.v0.6.0.zip"><button class="c-btn">Download macOS</button></a>
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-Windows.v0.6.0.zip"><button class="c-btn">Download Windows</button></a>
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-Windows.v0.6.0.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
+  </div>
+  <div class="button-grid">
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-macOS.v0.6.0.zip"><button class="c-btn">📦 Download macOS (Intel x64)</button></a>
+	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-macOS.v0.6.0.zip"><button class="c-btn">📦 Download macOS (M1 ARM)</button></a>
   </div>
 </div>
 
