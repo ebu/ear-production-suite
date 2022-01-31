@@ -82,13 +82,16 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EA
       <ol>
         <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
         <li>Copy / install the <b>VST plugins</b> into your common VST folder.
-          <br>- Windows: C:\Program Files\Common Files\VST3
-          <br>- macOS: ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>macOS:</b> ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>Windows:</b> C:\Program&nbsp;Files\Common&nbsp;Files\VST3
         </li>
         <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
         <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
-          <br>- Windows: C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
-          <br>- macOS: ~/Library/Application Support/REAPER/UserPlugins
+          <br>- <b>macOS:</b> ~/Library/Application Support/REAPER/UserPlugins
+          <br>- <b>Windows:</b> C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
+		  <div style="margin-left: 2em; margin-right: 4em;">
+		  <i>Note: If you have a previous version of the REAPER Extension installed to C:\Program&nbsp;Files\REAPER&nbsp;(x64)\Plugins\reaper_adm.dll, then this should be deleted on installation of the latest version.</i>
+		  </div>
         </li>
         <li>Restart REAPER</li>
         <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be neccesary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
