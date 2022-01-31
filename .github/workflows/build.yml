@@ -191,6 +191,17 @@ jobs:
         with:
           name: 'macOS_Latest_Clang_arm64'
           path: 'macOS_Latest_Clang_arm64'
+        
+      - name: 'un-tar x64'
+        run: tar -xf macOS_Latest_Clang_x64.tar && rm macOS_Latest_Clang_x64.tar
+        working-directory: macOS_Latest_Clang_x64
+        
+      - name: 'un-tar arm64'
+        run: tar -xf macOS_Latest_Clang_arm64.tar && rm macOS_Latest_Clang_arm64.tar
+        working-directory: macOS_Latest_Clang_arm64
+        
+      - name: 'dir listing'
+        run: ls -R
 
       - name: 'build ub'
         run: |
@@ -226,8 +237,14 @@ jobs:
             echo "Making UB Plugin from: $plugin"
             make_ub "$plugin"
           done
+          
+      - name: 'dir listing'
+        run: ls -R
+          
+      - name: 'tar ub'
+        run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
 
       - uses: actions/upload-artifact@v2
         with:
           name: 'macOS_Latest_Clang_universal'
-          path: 'macOS_Latest_Clang_universal'
+          path: 'macOS_Latest_Clang_universal.tar'
