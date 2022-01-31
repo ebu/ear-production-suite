@@ -159,7 +159,7 @@
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": {
           "type": "STRING",
-          "value": "arm64-osx"
+          "value": "arm64-osx-11_0"
         },
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
       }
