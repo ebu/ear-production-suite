@@ -47,7 +47,7 @@ jobs:
             os: macos-latest
             package: true
             cmake_preset: "macos-arm64-packaging-release"
-            vcpkg_triplet: arm64-osx
+            vcpkg_triplet: arm64-osx-11_0
             test: false
     steps:
       - name: 'Checkout repo recursively.'
