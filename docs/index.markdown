@@ -75,7 +75,8 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 
 <div markdown="1" class="text_section">
 ## Installation
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
+The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/main/LICENSE.TXT">GPL v3.0 license</a>.
+<br /><br />
   <details>
     <summary>Show installation instructions</summary>
       <ol>
