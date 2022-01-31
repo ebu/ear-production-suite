@@ -1,5 +1,6 @@
 message(STATUS "Processing submodules...")
 
+## Disable testing and reduce noise when building submodules
 set(isTesting ${BUILD_TESTING})
 set(LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
 set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
@@ -86,13 +87,21 @@ if(NOT visr_POPULATED)
     add_subdirectory(${visr_SOURCE_DIR} ${visr_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
 endif()
 
+# Only add targets optimised with specific instruction sets where they exist
+# e.g. don't try and link to SSE optimised build on arm64
+set(base_efl_target efl_${VISR_TARGET_TYPE})
+foreach(instruction_set IN ITEMS "" _AVX _FMA _SSE)
+  set(current_target ${base_efl_target}${instruction_set})
+  if(TARGET ${current_target})
+    list(APPEND efl_targets ${current_target})
+  endif()
+endforeach()
+message("Using the following efl targets:\n${efl_targets}\n")
+
 set(VISR_TARGET_NAMES
     apputilities_${VISR_TARGET_TYPE}
     audiointerfaces_${VISR_TARGET_TYPE}
-    efl_${VISR_TARGET_TYPE}
-    efl_${VISR_TARGET_TYPE}_AVX
-    efl_${VISR_TARGET_TYPE}_FMA
-    efl_${VISR_TARGET_TYPE}_SSE
+    ${efl_targets}
     objectmodel_${VISR_TARGET_TYPE}
     panning_${VISR_TARGET_TYPE}
     panningdsp_${VISR_TARGET_TYPE}
