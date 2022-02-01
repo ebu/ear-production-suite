@@ -2,8 +2,6 @@
 #include <functional>
 #include <iostream>
 
-#define DEFAULT_TENSORFILE_NAME "default.tf"
-
 namespace ear {
 namespace plugin {
 

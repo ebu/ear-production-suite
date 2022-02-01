@@ -64,15 +64,22 @@ add_juce_vst3_plugin(
 	OUTPUT_NAME "EAR Binaural Monitoring")
 	
 target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base ear-version bear)
-add_dependencies(ear_binaural_monitoring_VST3 default_tensorfile)
 install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 
-ExternalProject_Get_Property(default_tensorfile DOWNLOADED_FILE)
+set(TENSORFILE_TARGET tensorfile_default_small)
+
+ExternalProject_Get_Property(${TENSORFILE_TARGET} DOWNLOADED_FILE)
+set(TENSORFILE_FULLPATH ${DOWNLOADED_FILE})
+get_filename_component(TENSORFILE_FILENAME ${TENSORFILE_FULLPATH} NAME)
+add_dependencies(ear_binaural_monitoring_VST3 ${TENSORFILE_TARGET})
+target_compile_definitions(ear_binaural_monitoring_VST3 PRIVATE BEAR_DATA_FILE="${TENSORFILE_FILENAME}")
+
 add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${DOWNLOADED_FILE} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/default.tf"
+    COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/${TENSORFILE_FILENAME}"
 )
+
 if(APPLE)
-    install(FILES ${DOWNLOADED_FILE} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/MacOS")
+    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/MacOS")
 else()
-	install(FILES ${DOWNLOADED_FILE} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endif()

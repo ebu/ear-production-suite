@@ -77,7 +77,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   auto vstPath = juce::File::getSpecialLocation(
       juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
-  vstPath = vstPath.getChildFile("default.tf");
+  vstPath = vstPath.getChildFile(BEAR_DATA_FILE);
   bearDataFilePath = vstPath.getFullPathName().toStdString();
 
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {

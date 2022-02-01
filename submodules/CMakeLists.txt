@@ -113,11 +113,12 @@ set_target_properties(ffts_static kissfft_static PROPERTIES FOLDER submodules/VI
 
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Python" FORCE)
 set(BEAR_UNIT_TESTS OFF CACHE BOOL "bear unit tests" FORCE)
-set(BEAR_DOWNLOAD_DATA ON CACHE BOOL "bear data files" FORCE)
+set(BEAR_DOWNLOAD_DATA_DEFAULT OFF CACHE BOOL "bear data files" FORCE)
+set(BEAR_DOWNLOAD_DATA_DEFAULT_SMALL ON CACHE BOOL "bear data files" FORCE)
 set(BEAR_VISR_LIB_TYPE "${VISR_TARGET_TYPE}" CACHE STRING "bear visr lib type" FORCE)
-add_subdirectory(rd-audio-bear/visr_bear)
+add_subdirectory(bear/visr_bear)
 set_target_properties(bear PROPERTIES FOLDER submodules/bear)
-set_target_properties(ear libear_resource_embedder PROPERTIES FOLDER submodules/libear)
+set_target_properties(ear PROPERTIES FOLDER submodules/libear)
 add_dependencies(bear ${VISR_TARGET_NAMES})
 
 
