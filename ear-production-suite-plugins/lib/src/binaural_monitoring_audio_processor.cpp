@@ -33,7 +33,7 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
   bearConfig.set_num_direct_speakers_channels(0);
   bearConfig.set_num_hoa_channels(0);
   bearConfig.set_data_path(dataFilePath);
-  bearConfig.set_fft_implementation("default");
+  bearConfig.set_fft_implementation("ffts");
 
   bearListener.set_position_cart(std::array<double, 3>{0.0, 0.0, 0.0});
 
