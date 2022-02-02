@@ -54,7 +54,7 @@ jobs:
         env:
             GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
         run: |
-            mkdir ~/.ssh
+            mkdir -p ~/.ssh
             echo "${{ secrets.VISR_DEPLOY }}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
     
