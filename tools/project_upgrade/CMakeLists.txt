@@ -19,6 +19,7 @@ find_package(JUCE REQUIRED QUIET)
 set(MACOSX_BUNDLE_BUNDLE_NAME "EPS Project Upgrade Utility")
 set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
 set(MACOSX_BUNDLE_GUI_IDENTIFIER "ch.ebu.reaper_project_upgrade_gui")
+set(MACOSX_BUNDLE_COPYRIGHT "(C) 2019-2022 BBC, (C) 2020-2021 EBU, (C) 2019-2021 IRT")
 add_executable(project_upgrade_gui WIN32 MACOSX_BUNDLE)
 target_sources(project_upgrade_gui
         PRIVATE
