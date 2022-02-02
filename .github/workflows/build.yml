@@ -58,20 +58,16 @@ jobs:
             # echo "${{ secrets.VISR_DEPLOY }}" > ~/.ssh/id_rsa
             # chmod 600 ~/.ssh/id_rsa
             
-      - name: 'Apply keys'
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.VISR_DEPLOY }}"
-            
-      - name: 'Checkout repo recursively.'
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      - name: 'Checkout repo'
         uses: actions/checkout@v2
+        
+      - name: 'Apply keys'
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          submodules: recursive
-          fetch-depth: 0
+          ssh-private-key: ${{ secrets.VISR_DEPLOY }}
+          
+      - name: 'Checkout submodules'
+        run: git submodule update --init --recursive --recommend-shallow --single-branch --depth 1
 
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
