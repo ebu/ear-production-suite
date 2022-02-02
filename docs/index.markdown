@@ -140,6 +140,20 @@ A discussion community for users of the EPS is available on the <a href="https:/
 		</p>
       </div>
   </details>
+  <details>
+    <summary>Projects created with very old versions of the EPS no longer load correctly. How do I fix this?</summary>
+      <div class="text_section">
+        <p>This occurs because it has been necessary to change the ID's of the plug-ins. 
+		We have developed utilities to automatically convert your old REAPER projects to ensure they work correctly with the new plug-ins.
+		There is both a command line utility and a GUI application included in the `tools` directory of the download package.
+		<ul>
+			<li>To use the GUI application, simply launch it and drag-and-drop your RPP files on to it.</li>
+			<li>To use the command line utility, pass a path to an input RPP file and a path to an output RPP file as arguments.</li>
+		</ul>
+		If you are unsure whether it is necessary to upgrade your projects, it is usually quite apparent when you attempt to open the project in REAPER since it will appear that the plug-ins are not found even though they are installed and usable from within REAPER. In any case, it is perfectly OK to pass projects through the upgrade utilities regardless of whether they need it or not.
+		</p>
+      </div>
+  </details>
   
 </div>
 
