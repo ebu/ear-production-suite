@@ -9,7 +9,7 @@ Please download the files from there. The EAR Production Suite (EPS) download bu
 - REAPER session template
 
 ## Release notes
-Please not that the EPS currently outputs ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
+Please note that the EPS currently outputs ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
 While the EPS can import files that have been authored using the [Dolby Atmos ADM](https://professionalsupport.dolby.com/s/article/Dolby-Atmos-ADM-Profile-specification?language=en_US) profile, coordinates and directspeakers pack formats are converted on import and exported files will no longer conform to this profile.
 
 To fix a problem using the plugins with some hosts, the ID for all plugins changed with the 0.7.0 release.
@@ -95,6 +95,8 @@ Have a look at this [video](https://youtu.be/u7P5mEFY76k) where these points are
 - [Tutorial 5](https://youtu.be/u7P5mEFY76k?t=1418): Using Non-Object Audio with the ADM Export Source Plugin
 
 [Watch the video](https://irt-a.akamaihd.net/EAR-Production-Suite/Intro_Beta-release.mp4)
+
+Please note: The tutorial video advises to install the REAPER extension to the REAPER directory of `Program Files` on Windows. Although this will be functional, it is now advised to install to your user directory instead. Please see the [installation](#installation) instructions in this file.
 
 ## What's still missing
 You are testing a beta version of the EAR Production Suite and some features are still under development or missing in this version:
