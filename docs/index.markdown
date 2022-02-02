@@ -41,6 +41,9 @@ The EAR Production Suite is a joint [open-source development](https://github.com
   <div class="yt-iframe">
     <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
+  <i><b>Please note:</b> The tutorial video advises to install the REAPER extension to the REAPER directory of `Program Files` on Windows. 
+  Although this will be functional, it is now advised to install to your user directory instead.<br />
+  Please refer to the <a href="#installation">installation instructions</a> below.</i>
 </div>
 
 <div markdown="1" class="text_section">
@@ -79,6 +82,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EA
 <br /><br />
   <details>
     <summary>Show installation instructions</summary>
+	  <a name="installation"></a> 
       <ol>
         <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
         <li>Copy / install the <b>VST plugins</b> into your common VST folder.
