@@ -50,14 +50,7 @@ jobs:
             vcpkg_triplet: arm64-osx
             test: false
     steps:
-      # - name: 'Apply keys'
-        # env:
-            # GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
-        # run: |
-            # mkdir -p ~/.ssh
-            # echo "${{ secrets.VISR_DEPLOY }}" > ~/.ssh/id_rsa
-            # chmod 600 ~/.ssh/id_rsa
-            
+           
       - name: 'Checkout repo'
         uses: actions/checkout@v2
         
