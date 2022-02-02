@@ -15,6 +15,10 @@ target_link_libraries(project_upgrade
         proj_upgrade)
 
 find_package(JUCE REQUIRED QUIET)
+
+set(MACOSX_BUNDLE_BUNDLE_NAME "EPS Project Upgrade Utility")
+set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
+set(MACOSX_BUNDLE_GUI_IDENTIFIER "ch.ebu.reaper_project_upgrade_gui")
 add_executable(project_upgrade_gui WIN32 MACOSX_BUNDLE)
 target_sources(project_upgrade_gui
         PRIVATE
