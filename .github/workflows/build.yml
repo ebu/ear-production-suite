@@ -31,18 +31,18 @@ jobs:
             cmake_preset: "windows-packaging-release"
             vcpkg_triplet: x64-windows-static
             test: true
-          # - name: "Windows Latest MSVC RelWithDebInfo"
-            # os: windows-latest
-            # package: true
-            # cmake_preset: "windows-packaging-relwithdebinfo"
-            # vcpkg_triplet: x64-windows-static
-            # test: true
-          # - name: "macOS Latest Clang x64"
-            # os: macos-latest
-            # package: true
-            # cmake_preset: "macos-packaging-release"
-            # vcpkg_triplet: x64-osx-10_13
-            # test: true
+          - name: "Windows Latest MSVC RelWithDebInfo"
+            os: windows-latest
+            package: true
+            cmake_preset: "windows-packaging-relwithdebinfo"
+            vcpkg_triplet: x64-windows-static
+            test: true
+          - name: "macOS Latest Clang x64"
+            os: macos-latest
+            package: true
+            cmake_preset: "macos-packaging-release"
+            vcpkg_triplet: x64-osx-10_13
+            test: true
           # - name: "macOS Latest Clang arm64"
             # os: macos-latest
             # package: true
