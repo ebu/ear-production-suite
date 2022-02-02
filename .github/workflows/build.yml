@@ -50,15 +50,24 @@ jobs:
             vcpkg_triplet: arm64-osx
             test: false
     steps:
+      # - name: 'Apply keys'
+        # env:
+            # GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+        # run: |
+            # mkdir -p ~/.ssh
+            # echo "${{ secrets.VISR_DEPLOY }}" > ~/.ssh/id_rsa
+            # chmod 600 ~/.ssh/id_rsa
+            
       - name: 'Apply keys'
         env:
-            GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-            mkdir -p ~/.ssh
-            echo "${{ secrets.VISR_DEPLOY }}" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-    
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.VISR_DEPLOY }}"
+            
       - name: 'Checkout repo recursively.'
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         uses: actions/checkout@v2
         with:
           submodules: recursive
