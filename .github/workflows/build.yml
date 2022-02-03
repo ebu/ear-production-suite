@@ -50,17 +50,11 @@ jobs:
             vcpkg_triplet: arm64-osx
             test: false
     steps:
-           
-      - name: 'Checkout repo'
+      - name: 'Checkout repo recursively.'
         uses: actions/checkout@v2
-        
-      - name: 'Apply keys'
-        uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.VISR_DEPLOY }}
-          
-      - name: 'Checkout submodules'
-        run: git submodule update --init --recursive --recommend-shallow --single-branch --depth 1
+          submodules: recursive
+          fetch-depth: 0
 
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
