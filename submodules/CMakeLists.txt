@@ -74,6 +74,7 @@ set(BUILD_STANDALONE_APPLICATIONS OFF CACHE BOOL "applications" FORCE)
 
 set(VISR_TARGET_TYPE static_pic)
 
+include(FetchContent)
 FetchContent_Declare(
     visr
     URL https://github.com/ebu/bear/releases/download/v0.0.1-pre/visr-0.13.0-pre-5e13f020.zip
