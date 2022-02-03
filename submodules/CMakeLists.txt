@@ -80,7 +80,6 @@ FetchContent_Declare(
     URL https://github.com/ebu/bear/releases/download/v0.0.1-pre/visr-0.13.0-pre-5e13f020.zip
     URL_HASH SHA256=9ff85e35da728226c56e6487e3f5beb99b9617cf58d4543a456674a79c2895cb
 )
-FetchContent_MakeAvailable(visr)
 FetchContent_GetProperties(visr)
 if(NOT visr_POPULATED)
     FetchContent_Populate(visr)
