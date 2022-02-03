@@ -74,7 +74,17 @@ set(BUILD_STANDALONE_APPLICATIONS OFF CACHE BOOL "applications" FORCE)
 
 set(VISR_TARGET_TYPE static_pic)
 
-add_subdirectory(rd-audio-visr EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+FetchContent_Declare(
+    visr
+    URL https://github.com/ebu/bear/releases/download/v0.0.1-pre/visr-0.13.0-pre-5e13f020.zip
+    URL_HASH SHA256=9ff85e35da728226c56e6487e3f5beb99b9617cf58d4543a456674a79c2895cb
+)
+FetchContent_MakeAvailable(visr)
+FetchContent_GetProperties(visr)
+if(NOT visr_POPULATED)
+    FetchContent_Populate(visr)
+    add_subdirectory(${visr_SOURCE_DIR} ${visr_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+endif()
 
 set(VISR_TARGET_NAMES
     apputilities_${VISR_TARGET_TYPE}
