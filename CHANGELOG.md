@@ -1,5 +1,6 @@
 Version 0.7.0
 
+* Added Binaural Monitoring and HOA Input plugins [#156](http://github.com/ebu/ear-production-suite/pull/156)
 * Improved default install target locations [#4](http://github.com/ebu/ear-production-suite/pull/4) [#79](http://github.com/ebu/ear-production-suite/pull/79) [#95](http://github.com/ebu/ear-production-suite/issues/95)
 * Fixed bug that made adding items after moving a programme fail. [#5](http://github.com/ebu/ear-production-suite/pull/5)
 * Added unique plugin uids and FX category for better DAW compatibility [#10](http://github.com/ebu/ear-production-suite/pull/10)
@@ -20,12 +21,15 @@ Version 0.7.0
 * Added support for more speaker layouts in DirectSpeaker plugin [#89](http://github.com/ebu/ear-production-suite/pull/89) [#90](http://github.com/ebu/ear-production-suite/pull/90) [#109](http://github.com/ebu/ear-production-suite/pull/109) [#112](http://github.com/ebu/ear-production-suite/pull/112) [#127](http://github.com/ebu/ear-production-suite/pull/127)
 * Fixed crash when using ADM extension with a REAPER language pack [#91](http://github.com/ebu/ear-production-suite/pull/91)
 * Added 2+7+0 monitoring plugin [#108](http://github.com/ebu/ear-production-suite/pull/108)
-* Removed redundant metadata updates [#111](http://github.com/ebu/ear-production-suite/pull/111) [#113](http://github.com/ebu/ear-production-suite/pull/113) [#135](http://github.com/ebu/ear-production-suite/pull/135)
+* Removed redundant metadata updates [#111](http://github.com/ebu/ear-production-suite/pull/111) [#113](http://github.com/ebu/ear-production-suite/pull/113) [#135](http://github.com/ebu/ear-production-suite/pull/135) [#142](http://github.com/ebu/ear-production-suite/pull/142) [#145](http://github.com/ebu/ear-production-suite/pull/145)
 * Fixed memory leak when changing speaker layout [#116](http://github.com/ebu/ear-production-suite/pull/116)
 * Fixed combo box initialisation issues [#118](http://github.com/ebu/ear-production-suite/pull/118)
 * Version information now show in plugins and extension [#120](http://github.com/ebu/ear-production-suite/pull/120)
 * Added support for ADM with two character language codes [#121](http://github.com/ebu/ear-production-suite/pull/121)
 * Fixed crash due to recursive mutex locking [#133](http://github.com/ebu/ear-production-suite/pull/133)
 * Fixed issue where scene would remove incorrect items [#87](http://github.com/ebu/ear-production-suite/pull/87)
-* Preliminary arm64 support for Apple Silicon [#137](http://github.com/ebu/ear-production-suite/pull/137)
+* Preliminary arm64 support for Apple Silicon [#137](http://github.com/ebu/ear-production-suite/pull/137) [#148](http://github.com/ebu/ear-production-suite/pull/148)
+* Use patched BW64 library [#149](http://github.com/ebu/ear-production-suite/pull/149)
+* Support ITU-R BS.2076-2 structures and time formats [#151](http://github.com/ebu/ear-production-suite/pull/151)
+* Fix automation points ordering issue on import [#153](http://github.com/ebu/ear-production-suite/pull/153)
 * Various CI improvements
