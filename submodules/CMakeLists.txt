@@ -84,7 +84,13 @@ FetchContent_Declare(
 FetchContent_GetProperties(visr)
 if(NOT visr_POPULATED)
     FetchContent_Populate(visr)
-    add_subdirectory(${visr_SOURCE_DIR} ${visr_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+    # VISR ffts M1 fix
+    if(APPLE)
+        execute_process(COMMAND patch -p1 INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-build-on-apple-m1.patch
+                WORKING_DIRECTORY "${visr_SOURCE_DIR}"
+                )
+        add_subdirectory(${visr_SOURCE_DIR} ${visr_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+    endif()
 endif()
 
 # Only add targets optimised with specific instruction sets where they exist
