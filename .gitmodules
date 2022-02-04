@@ -5,9 +5,10 @@
 [submodule "submodules/libbw64"]
 	path = submodules/libbw64
 	url = https://github.com/ebu/libbw64.git
-[submodule "submodules/libear"]
-	path = submodules/libear
-	url = https://github.com/ebu/libear.git
+# Not required - BEAR will pull a version in
+# [submodule "submodules/libear"]
+# 	path = submodules/libear
+# 	url = https://github.com/ebu/libear.git
 [submodule "submodules/googletest"]
 	path = submodules/googletest
 	url = https://github.com/google/googletest.git
