@@ -79,7 +79,7 @@ add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
 )
 
 if(APPLE)
-    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/MacOS")
+    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
 else()
 	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endif()
