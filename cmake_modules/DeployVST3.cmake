@@ -15,7 +15,6 @@
 # NOTE: the normal cmake BundleUtilities won't do the trick here, as they refuse to work on non ".app" bundles
 # without an executable in it (i.e. doesn't work with out .vst3 bundles containing plugins)
 #
-include(BundleUtilities)
 
 set(DeployVST3_cmake_dir "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -51,6 +50,7 @@ endfunction()
 
 function(fixup_vst3_plugin_bundle bundle dirs)
 
+  include(BundleUtilities)
 
   if(APPLE)
     get_bundle_main_executable("${bundle}" relative_bundle_executable)

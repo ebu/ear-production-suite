@@ -1,10 +1,14 @@
 message(STATUS "Processing submodules...")
 
+## Disable testing and reduce noise when building submodules
+option(QUIET_SUBMODULES "Limit submodule output to errors" ON)
 set(isTesting ${BUILD_TESTING})
 set(LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
-set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
 set(DEPRECATION_WARN ${CMAKE_WARN_DEPRECATED})
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Enable cmake deprecation warnings")
+if(QUIET_SUBMODULES)
+  set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
+  set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Enable cmake deprecation warnings")
+endif()
 
 # JUCE
 execute_process(COMMAND git apply ../0001-fix-objc_msgsend-for-M1-mac.patch
@@ -59,6 +63,10 @@ endif()
 
 ### VISR
 
+message(STATUS CMAKE_SYSTEM_PROCESSOR " - " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS CMAKE_SYSTEM_NAME " - " ${CMAKE_SYSTEM_NAME})
+message(STATUS CMAKE_CROSSCOMPILING " - " ${CMAKE_CROSSCOMPILING})
+
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Python" FORCE)
 set(BUILD_AUDIOINTERFACES_JACK OFF CACHE BOOL "Jack" FORCE)
 set(BUILD_AUDIOINTERFACES_PORTAUDIO OFF CACHE BOOL "PortAudio" FORCE)
@@ -74,15 +82,46 @@ set(BUILD_STANDALONE_APPLICATIONS OFF CACHE BOOL "applications" FORCE)
 
 set(VISR_TARGET_TYPE static_pic)
 
-add_subdirectory(rd-audio-visr EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+include(FetchContent)
+FetchContent_Declare(
+    visr
+    URL https://github.com/ebu/bear/releases/download/v0.0.1-pre/visr-0.13.0-pre-5e13f020.zip
+    URL_HASH SHA256=9ff85e35da728226c56e6487e3f5beb99b9617cf58d4543a456674a79c2895cb
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/visr"
+)
+FetchContent_GetProperties(visr)
+if(NOT visr_POPULATED)
+    FetchContent_Populate(visr)
+
+    # VISR ffts M1 fix
+    if(APPLE)
+        execute_process(COMMAND patch -p1 INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-build-on-apple-m1.patch
+                WORKING_DIRECTORY "${visr_SOURCE_DIR}"
+                )
+    endif()
+endif()
+
+message(STATUS visr_POPULATED " - " ${visr_POPULATED})
+message(STATUS visr_SOURCE_DIR " - " ${visr_SOURCE_DIR})
+message(STATUS visr_BINARY_DIR " - " ${visr_BINARY_DIR})
+
+add_subdirectory(${visr_SOURCE_DIR} ${visr_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents VISRs default install behaviour
+
+# Only add targets optimised with specific instruction sets where they exist
+# e.g. don't try and link to SSE optimised build on arm64
+set(base_efl_target efl_${VISR_TARGET_TYPE})
+foreach(instruction_set IN ITEMS "" _AVX _FMA _SSE)
+  set(current_target ${base_efl_target}${instruction_set})
+  if(TARGET ${current_target})
+    list(APPEND efl_targets ${current_target})
+  endif()
+endforeach()
+message(STATUS "Using the following efl targets:\n${efl_targets}\n")
 
 set(VISR_TARGET_NAMES
     apputilities_${VISR_TARGET_TYPE}
     audiointerfaces_${VISR_TARGET_TYPE}
-    efl_${VISR_TARGET_TYPE}
-    efl_${VISR_TARGET_TYPE}_AVX
-    efl_${VISR_TARGET_TYPE}_FMA
-    efl_${VISR_TARGET_TYPE}_SSE
+    ${efl_targets}
     objectmodel_${VISR_TARGET_TYPE}
     panning_${VISR_TARGET_TYPE}
     panningdsp_${VISR_TARGET_TYPE}

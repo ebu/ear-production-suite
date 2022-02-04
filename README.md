@@ -46,9 +46,6 @@ sudo xattr -rd com.apple.quarantine \
 ```
 Substituting paths as needed if you have not installed to the default locations.
 
-### Apple silicon support
-Although the project has been successfully cross-compiled from an intel based machine (via the `macos-default-arm64` preset), we do not currently have access to an Apple Silicon mac, so support is currently considered experimental. Please report any issues you encounter.
-
 ## Building from source
 
 ### Using vcpkg and cmake presets
@@ -68,9 +65,9 @@ The easiest way to set up a suitable environment is to follow the [homebrew](htt
 brew update
 brew install cmake ninja
 ```
+The following instructions are for an **x64 (Intel processor)** build. For **ARM64 (Apple Silicon)**, use the `macos-default-arm64` preset in place of `macos-default`.
 
 #### Building
-
 ```shell
 git clone --recursive https://github.com/ebu/ear-production-suite.git
 cd ear-production-suite
@@ -78,6 +75,7 @@ cd ear-production-suite
 cmake --preset macos-default          # configures project, downloads & builds dependencies
 cmake --build --preset macos-default  # builds project
 ```
+
 #### Installing
 ```shell
 cmake --build --preset macos-default --target install

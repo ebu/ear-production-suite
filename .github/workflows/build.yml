@@ -47,7 +47,7 @@ jobs:
             os: macos-latest
             package: true
             cmake_preset: "macos-arm64-packaging-release"
-            vcpkg_triplet: arm64-osx
+            vcpkg_triplet: arm64-osx-11_0
             test: false
     steps:
       - name: 'Checkout repo recursively.'
@@ -70,7 +70,7 @@ jobs:
         with:
           path: ${{ env.VCPKG_CACHE_LOCATION }}
           key: |
-            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}-${{ matrix.config.vcpkg_triplet }}-invalidate
+            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}--${{ matrix.config.vcpkg_triplet }}-invalidate
 
       - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
@@ -130,7 +130,7 @@ jobs:
         if: matrix.config.os == 'windows-latest'
 
       - name: 'Configure with CMake, vcpkg and ccmake.'
-        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}"
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
         env:
           # See https://vcpkg.io/en/docs/users/binarycaching.html for syntax of this variable. We want to clear out
           # the default locations and both restore from and save to our custom .vcpkg directory.
@@ -191,6 +191,17 @@ jobs:
         with:
           name: 'macOS_Latest_Clang_arm64'
           path: 'macOS_Latest_Clang_arm64'
+        
+      - name: 'un-tar x64'
+        run: tar -xf macOS_Latest_Clang_x64.tar && rm macOS_Latest_Clang_x64.tar
+        working-directory: macOS_Latest_Clang_x64
+        
+      - name: 'un-tar arm64'
+        run: tar -xf macOS_Latest_Clang_arm64.tar && rm macOS_Latest_Clang_arm64.tar
+        working-directory: macOS_Latest_Clang_arm64
+        
+      - name: 'dir listing'
+        run: ls -R
 
       - name: 'build ub'
         run: |
@@ -214,7 +225,8 @@ jobs:
           }
           
           LIBS=`find $intel_dir -name '*.dylib'`
-          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*'`
+          # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
+          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
           
           IFS=$'\n'
           for lib in $LIBS; do
@@ -226,8 +238,14 @@ jobs:
             echo "Making UB Plugin from: $plugin"
             make_ub "$plugin"
           done
+          
+      - name: 'dir listing'
+        run: ls -R
+          
+      - name: 'tar ub'
+        run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
 
       - uses: actions/upload-artifact@v2
         with:
           name: 'macOS_Latest_Clang_universal'
-          path: 'macOS_Latest_Clang_universal'
+          path: 'macOS_Latest_Clang_universal.tar'

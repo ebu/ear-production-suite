@@ -9,7 +9,9 @@ docs/venv
 /CMakeSettings.json_
 .ccls-cache
 .idea
+.dir-locals.el
 3rdparty
 ._*
 reaper-adm-extension/test/reaper_adm/data/UserPlugins/
 shared/version/eps_version.cpp
+submodules/visr

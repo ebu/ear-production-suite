@@ -21,7 +21,9 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
     set(PLUGIN_OUTPUT_NAME "${PLUGIN_NAME}")
   endif()
 
-  set(PRODUCT_BUNDLE_IDENTIFIER "ear.${PLUGIN_NAME}")
+  string(REGEX REPLACE "[^0-9A-Za-z\\-\\.]" "-" PLUGIN_BUNDLE_ID ${PLUGIN_NAME})
+
+  set(PRODUCT_BUNDLE_IDENTIFIER "ch.ebu.ear.${PLUGIN_BUNDLE_ID}")
   set(_SUPPORT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}_resources/)
   configure_file(${JUCE_SUPPORT_RESOURCES}/juce/AppConfig.h.in ${_SUPPORT_PATH}/AppConfig.h)
   configure_file(${JUCE_SUPPORT_RESOURCES}/juce/JuceHeader.h.in ${_SUPPORT_PATH}/JuceHeader.h)
