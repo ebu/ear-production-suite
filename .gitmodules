@@ -26,10 +26,6 @@
 [submodule "submodules/vcpkg"]
 	path = submodules/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "submodules/rd-audio-visr"]
-	path = submodules/rd-audio-visr
-	url = git@github.com:bbc/rd-audio-visr.git
-	branch = tomn-component-based-exporting-merge
 [submodule "submodules/Catch2"]
 	path = submodules/Catch2
 	url = https://github.com/catchorg/Catch2.git

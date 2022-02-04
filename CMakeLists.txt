@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -21,10 +21,6 @@ message(STATUS "\n--------------------------------------------------------------
 message(STATUS "   EAR Production Suite Base Version:      " ${EPS_VERSION_BASE})
 message(STATUS "   EAR Production Suite Current Version:   " ${EPS_VERSION_CURRENT})
 message(STATUS "-----------------------------------------------------------------------------------\n")
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FeatureSummary)
 

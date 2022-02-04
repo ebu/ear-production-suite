@@ -1,0 +1,109 @@
+diff --git a/3rd/CMakeLists.txt b/3rd/CMakeLists.txt
+index 224be634..40f49649 100644
+--- a/3rd/CMakeLists.txt
++++ b/3rd/CMakeLists.txt
+@@ -12,7 +12,9 @@ set( GENERATE_POSITION_INDEPENDENT_CODE ON CACHE BOOL
+ set( ENABLE_AVX OFF CACHE BOOL "Disable AVX code generation for ffts." )
+ if( VISR_SYSTEM_PROCESSOR STREQUAL 'armv7l' )
+   set( ENABLE_NEON ON CACHE BOOL "FFTS: Enable double-precision arithmethic." FORCE )
+-endif( VISR_SYSTEM_PROCESSOR STREQUAL 'armv7l' )
++else()
++  set(ENABLE_NEON OFF CACHE BOOL "FFTS: Enable double-precision arithmethic." FORCE)
++endif()
+ set( ENABLE_DOUBLE ON CACHE BOOL "FFTS: Enable double-precision arithmethic." FORCE )
+ # It is not clear whether and where the shared variant will be used,
+ # but certainly only if VISR shared libraries are also built.
+diff --git a/3rd/ffts/CMakeLists.txt b/3rd/ffts/CMakeLists.txt
+index 30851101..bb984409 100644
+--- a/3rd/ffts/CMakeLists.txt
++++ b/3rd/ffts/CMakeLists.txt
+@@ -161,7 +161,7 @@ if(NOT CMAKE_CROSSCOMPILING)
+     # Determinate ARM architecture
+ 
+     # Try to execute quietly without messages
+-    set(CMAKE_REQUIRED_QUIET 1)
++    set(CMAKE_REQUIRED_QUIET 0)
+ 
+     # The test for ARM architecture
+     set(TEST_SOURCE_CODE "int main() { return 0; }")
+@@ -181,8 +181,16 @@ if(NOT CMAKE_CROSSCOMPILING)
+         check_c_source_runs("${TEST_SOURCE_CODE}" GCC_MARCH_ARMV6_FLAG_SUPPORTED)
+ 
+         if(NOT GCC_MARCH_ARMV6_FLAG_SUPPORTED)
+-          message(WARNING "FFTS failed to determinate ARM architecture")
+-          set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS_SAVE})
++          set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE} -mcpu=apple-m1")
++          check_c_source_runs("${TEST_SOURCE_CODE}" GCC_MCPU_APPLE_M1_FLAG_SUPPORTED)
++          if(NOT GCC_MCPU_APPLE_M1_FLAG_SUPPORTED)
++            message(WARNING "FFTS failed to determinate ARM architecture")
++            set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS_SAVE})
++          else()
++            message("FFTS is build using 'mcpu=apple-m1'")
++            set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mcpu=apple-m1")
++            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=apple-m1")
++          endif()
+         else()
+           message("FFTS is build using 'march=armv6'")
+           set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -march=armv6")
+@@ -237,7 +245,9 @@ if(NOT CMAKE_CROSSCOMPILING)
+       message("FFTS is using 'neon' FPU and 'hard' float ABI")
+       set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mfpu=neon -mfloat-abi=hard")
+       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon -mfloat-abi=hard")
+-      set(ENABLE_NEON ON)
++      if(NOT GCC_MCPU_APPLE_M1_FLAG_SUPPORTED)
++        set(ENABLE_NEON ON)
++      endif()
+     endif(NOT NEON_HARDFP_SUPPORTED)
+ 
+     # Fallback using VFP if NEON is not supported
+diff --git a/3rd/ffts/src/ffts_real.c b/3rd/ffts/src/ffts_real.c
+index e0f0e1f2..28f530c8 100644
+--- a/3rd/ffts/src/ffts_real.c
++++ b/3rd/ffts/src/ffts_real.c
+@@ -58,6 +58,10 @@ static const FFTS_ALIGN(16) unsigned int sign_mask_odd[4] = {
+ };
+ #endif
+ 
++#if defined( __ARM_NEON__ ) && !defined( __arm64__ )
++  #define USE_NEON
++#endif
++
+ static void
+ ffts_free_1d_real(ffts_plan_t *p)
+ {
+@@ -80,7 +84,7 @@ ffts_free_1d_real(ffts_plan_t *p)
+     free(p);
+ }
+ 
+-#ifdef __ARM_NEON__
++#ifdef USE_NEON
+ static void
+ ffts_execute_1d_real_neon(ffts_plan_t *p, const void *input, void *output)
+ {
+@@ -417,7 +421,7 @@ ffts_execute_1d_real(ffts_plan_t *p, const void *input, void *output)
+     out[N + 1] = 0.0f;
+ }
+ 
+-#ifdef __ARM_NEON__
++#ifdef USE_NEON
+ static void
+ ffts_execute_1d_real_inv_neon(ffts_plan_t *p, const void *input, void *output)
+ {
+@@ -738,7 +742,7 @@ ffts_execute_1d_real_inv(ffts_plan_t *p, const void *input, void *output)
+ FFTS_API ffts_plan_t*
+ ffts_init_1d_real(size_t N, int sign)
+ {
+-#ifndef __ARM_NEON__
++#ifndef USE_NEON
+     int cpu_flags = ffts_cpu_detect(NULL);
+ #endif
+     ffts_plan_t *p;
+@@ -749,7 +753,7 @@ ffts_init_1d_real(size_t N, int sign)
+         return NULL;
+     }
+ 
+-#ifdef __ARM_NEON__
++#ifdef USE_NEON
+     p->transform = (sign < 0) ? &ffts_execute_1d_real_neon : &ffts_execute_1d_real_inv;
+ #else
+ #ifdef HAVE_SSE3

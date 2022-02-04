@@ -70,7 +70,7 @@ jobs:
         with:
           path: ${{ env.VCPKG_CACHE_LOCATION }}
           key: |
-            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}-${{ matrix.config.vcpkg_triplet }}-invalidate
+            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}--${{ matrix.config.vcpkg_triplet }}-invalidate
 
       - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
@@ -225,7 +225,8 @@ jobs:
           }
           
           LIBS=`find $intel_dir -name '*.dylib'`
-          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*'`
+          # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
+          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
           
           IFS=$'\n'
           for lib in $LIBS; do
