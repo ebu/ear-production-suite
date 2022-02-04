@@ -1,4 +1,7 @@
 add_executable(testreaper_adm "")
+
+add_dependencies(testreaper_adm reaper_adm reaper_adm_dependencies)
+
 target_sources(testreaper_adm
     PRIVATE
        blockbuilders.cpp
@@ -51,6 +54,8 @@ add_test(
 
 
 add_executable(testacceptreaper_adm "")
+
+add_dependencies(testacceptreaper_adm reaper_adm reaper_adm_dependencies)
 
 target_sources(testacceptreaper_adm
     PRIVATE

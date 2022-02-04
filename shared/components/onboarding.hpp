@@ -202,7 +202,6 @@ class Onboarding : public Component {
   int getNumberOfTabs() { return tabs_.size(); }
 
   void paint(Graphics& g) override {
-    // background
     g.fillAll(findColour(backgroundColourId));
     for (std::size_t i = 0; i < tabs_.size(); ++i) {
       tabs_[i]->setVisible(i == index_);

@@ -68,6 +68,7 @@ class SceneBackend {
   void addToggleToSceneStore(const proto::ProgrammeElement &element);
   void addElementToSceneStore(const proto::ProgrammeElement &element);
   void addToSceneStore(proto::InputItemMetadata const &);
+  void addAvailableInputItemsToSceneStore();
 
   void onProgrammeStoreChanged(proto::ProgrammeStore store);
 

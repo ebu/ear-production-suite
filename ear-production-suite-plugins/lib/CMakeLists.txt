@@ -14,6 +14,7 @@ add_library(ear-plugin-base STATIC
   src/communication/commands.cpp
   src/communication/metadata_sender.cpp
   src/communication/direct_speakers_metadata_sender.cpp
+  src/communication/hoa_metadata_sender.cpp
   src/communication/input_control_connection.cpp
   src/communication/monitoring_control_connection.cpp
   src/communication/monitoring_metadata_receiver.cpp
@@ -23,8 +24,12 @@ add_library(ear-plugin-base STATIC
   src/communication/scene_connection_registry.cpp
   src/communication/scene_metadata_receiver.cpp
   src/direct_speakers_backend.cpp
+  src/hoa_backend.cpp
   src/helper/protobuf_utilities.cpp
   src/log.cpp
+  src/binaural_monitoring_audio_processor.cpp
+  src/binaural_monitoring_backend.cpp
+  src/listener_orientation.cpp
   src/monitoring_audio_processor.cpp
   src/monitoring_backend.cpp
   src/multichannel_convolver.cpp
@@ -37,12 +42,17 @@ add_library(ear-plugin-base STATIC
   src/programme_store_adm_populator.cpp
   src/programme_store_adm_serializer.cpp
   src/ui/direct_speakers_frontend_backend_connector.cpp
+  src/ui/hoa_frontend_backend_connector.cpp
   src/ui/object_frontend_backend_connector.cpp
   src/ui/scene_frontend_backend_connector.cpp
+  src/ui/binaural_monitoring_frontend_backend_connector.cpp
+  ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
   ${EAR_PROTO_SRC}
         include/proto_printers.hpp src/proto_printers.cpp)
 		
 set(EAR_BASE_HEADERS		
+	include/binaural_monitoring_audio_processor.hpp
+	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
 	include/communication/common_types.hpp
 	include/communication/metadata_sender.hpp
@@ -62,9 +72,11 @@ set(EAR_BASE_HEADERS
 	include/detail/spdl_nng_sink.hpp
 	include/direct_speakers_backend.hpp
 	include/helper/eps_to_ear_metadata_converter.hpp
+	include/helper/move.hpp
 	include/helper/protobuf_utilities.hpp
 	include/item_store.hpp
 	include/log.hpp
+	include/listener_orientation.hpp
 	include/monitoring_audio_processor.hpp
 	include/monitoring_backend.hpp
 	include/multichannel_convolver.hpp
@@ -95,6 +107,7 @@ set(EAR_BASE_HEADERS
 	include/routing_overlap.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
+	include/ui/binaural_monitoring_frontend_backend_connector.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
@@ -107,9 +120,9 @@ set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
 source_group("Header Files" FILES ${EAR_BASE_HEADERS})
 target_sources(ear-plugin-base PRIVATE ${EAR_PROTO_INPUT} ${EAR_BASE_HEADERS})
 
-
 target_link_libraries(ear-plugin-base PUBLIC
   ear
+  bear
   Boost::boost
   protobuf::libprotobuf
   nng::nng

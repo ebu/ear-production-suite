@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "helper/common_definition_helper.h"
 
 namespace ear {
 namespace plugin {
@@ -43,15 +44,17 @@ class SceneGainsCalculator {
   // _previous_ routing values
   std::vector<Routing> updateRoutingCache(const proto::SceneStore &store);
 
-  int currentIndex_;
   void resize(ear::Layout &ouputLayout, std::size_t inputChannelCount);
   void clear();
   std::vector<std::vector<float>> direct_;
   std::vector<std::vector<float>> diffuse_;
   ear::GainCalculatorObjects objectCalculator_;
   ear::GainCalculatorDirectSpeakers directSpeakersCalculator_;
+  ear::GainCalculatorHOA hoaCalculator_;
   std::map<communication::ConnectionId, Routing> routingCache_;
-  std::vector<std::string> allActiveIds;
+  std::mutex commonDefinitionHelperMutex_;
+  AdmCommonDefinitionHelper commonDefinitionHelper_{};
+  std::vector<std::string> allActiveIds_;
 };
 
 }  // namespace plugin

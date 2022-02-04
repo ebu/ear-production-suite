@@ -61,7 +61,7 @@ TEST_CASE("scene gain calculation (Objects)") {
   }
 
   SECTION("new item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -79,14 +79,14 @@ TEST_CASE("scene gain calculation (Objects)") {
   }
 
   SECTION("remove item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
     item1->set_allocated_obj_metadata(obj1);
 
     calculator.update(store);
-    store.clear_items();
+    store.clear_monitoring_items();
     calculator.update(store);
 
     auto diffuseGains = calculator.diffuseGains();
@@ -96,7 +96,7 @@ TEST_CASE("scene gain calculation (Objects)") {
   }
 
   SECTION("change item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -118,7 +118,7 @@ TEST_CASE("scene gain calculation (Objects)") {
   }
 
   SECTION("change routing") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -140,7 +140,7 @@ TEST_CASE("scene gain calculation (Objects)") {
   }
 
   SECTION("negative routing") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(-1);
     item1->set_changed(true);
@@ -161,7 +161,7 @@ TEST_CASE("scene gain calculation (Objects)") {
     // would be an unexpected input under normal runtime conditions, we can use
     // it to see if the gain values are really not re-calculated
 
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -231,7 +231,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   }
 
   SECTION("new item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -246,14 +246,14 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   }
 
   SECTION("remove item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
     item1->set_allocated_ds_metadata(obj1);
 
     calculator.update(store);
-    store.clear_items();
+    store.clear_monitoring_items();
     calculator.update(store);
 
     auto directGains = calculator.directGains();
@@ -261,7 +261,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   }
 
   SECTION("change item") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);
@@ -282,7 +282,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   }
 
   // SECTION("change routing") {
-  //   auto item1 = store.add_items();
+  //   auto item1 = store.add_monitoring_items();
   //   item1->set_connection_id(communication::ConnectionId::generate().string());
   //   item1->set_routing(1);
   //   item1->set_changed(true);
@@ -302,7 +302,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   // }
 
   SECTION("negative routing") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(-1);
     item1->set_changed(true);
@@ -315,7 +315,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   }
 
   SECTION("out of bounds routing") {
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(62);
     item1->set_changed(true);
@@ -334,7 +334,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
     // would be an unexpected input under normal runtime conditions, we can use
     // it to see if the gain values are really not re-calculated
 
-    auto item1 = store.add_items();
+    auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
     item1->set_routing(1);
     item1->set_changed(true);

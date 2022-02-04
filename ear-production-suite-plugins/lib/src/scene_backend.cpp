@@ -52,7 +52,7 @@ void SceneBackend::triggerMetadataSend() {
       });
   std::lock_guard<std::mutex> lock(storeMutex_);
   for (auto& item : itemStore_) {
-    if(item.second.changed()) {
+    if (item.second.changed()) {
       item.second.set_changed(false);
       rebuildSceneStore_ = true;
     }
@@ -143,8 +143,7 @@ inline ItemStore::const_iterator findObject(proto::Object const& object,
 }
 
 void SceneBackend::updateSceneStore() {
-  sceneStore_.clear_items();
-
+  sceneStore_.clear_monitoring_items();
   if (auto programme = getSelectedProgramme()) {
     for (auto& element : programme->element()) {
       addGroupToSceneStore(element);
@@ -153,14 +152,17 @@ void SceneBackend::updateSceneStore() {
     }
   }
 
+  sceneStore_.clear_all_available_items();
+  addAvailableInputItemsToSceneStore();
+
   auto overlaps = getOverlapIds(sceneStore_);
-  if(overlappingIds_ != overlaps) {
+  if (overlappingIds_ != overlaps) {
     flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
   }
   overlappingIds_ = overlaps;
 
   previousScene_.clear();
-  for (auto const& item : sceneStore_.items()) {
+  for (auto const& item : sceneStore_.monitoring_items()) {
     previousScene_.emplace(item.connection_id());
   }
 }
@@ -168,9 +170,11 @@ void SceneBackend::updateSceneStore() {
 proto::Programme const* SceneBackend::getSelectedProgramme() {
   if (programmeStore_.has_selected_programme_index()) {
     auto index = programmeStore_.selected_programme_index();
-    assert(index < programmeStore_.programme_size());
-    auto& programme = programmeStore_.programme(index);
-    return &programme;
+    if (index >= 0) {  // could be -1 if plugin just initialised
+      assert(index < programmeStore_.programme_size());
+      auto& programme = programmeStore_.programme(index);
+      return &programme;
+    }
   }
   return nullptr;
 }
@@ -207,7 +211,7 @@ void SceneBackend::addElementToSceneStore(
 }
 
 void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
-  auto monitoringItem = sceneStore_.add_items();
+  auto monitoringItem = sceneStore_.add_monitoring_items();
   monitoringItem->set_connection_id(inputItem.connection_id());
   monitoringItem->set_routing(inputItem.routing());
   auto newItem =
@@ -228,6 +232,14 @@ void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
   } else if (inputItem.has_bin_metadata()) {
     monitoringItem->set_allocated_bin_metadata(
         new proto::BinauralTypeMetadata{inputItem.bin_metadata()});
+  }
+}
+
+void SceneBackend::addAvailableInputItemsToSceneStore() {
+  for (auto const& itemPair : itemStore_) {
+    auto& itemStoreInputItem = itemPair.second;
+    auto sceneStoreInputItem = sceneStore_.add_all_available_items();
+    sceneStoreInputItem->CopyFrom(itemStoreInputItem);
   }
 }
 
@@ -257,6 +269,7 @@ void SceneBackend::onConnectionEvent(
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
+    triggerMetadataSend();
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Monitoring {} disconnected", id.string());
@@ -264,9 +277,13 @@ void SceneBackend::onConnectionEvent(
 }
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
-  std::lock_guard<std::mutex> lock{storeMutex_};
-  programmeStore_ = store;
-  rebuildSceneStore_ = true;
+  {
+    std::lock_guard<std::mutex> lock{storeMutex_};
+    programmeStore_ = store;
+    rebuildSceneStore_ = true;
+  }
+  triggerMetadataSend();  // Allows monitoring plugins to know that renderer
+                          // channel counts likely need to update.
 }
 
 std::pair<ItemStore, proto::ProgrammeStore> SceneBackend::stores() {

@@ -555,12 +555,13 @@ bool EarInputVst::isDirectSpeakersPlugin(std::string vstNameStr)
 bool EarInputVst::isInputPlugin(char * vstName)
 {
     auto vstNameStr = std::string(vstName);
-    return isObjectPlugin(vstNameStr) || isDirectSpeakersPlugin(vstNameStr);
+    return isObjectPlugin(vstNameStr) || isDirectSpeakersPlugin(vstNameStr) || isHoaPlugin(vstNameStr);
 }
 
 bool EarInputVst::isInputPlugin(ReaperAPI const& api, MediaTrack *trk, int vstPos) {
     if(vstPosIsObjectVst(api, trk, vstPos)) return true;
     if(vstPosIsDirectSpeakersVst(api, trk, vstPos)) return true;
+    if (vstPosIsHoaVst(api, trk, vstPos)) return true;
     return false;
 }
 
@@ -598,22 +599,39 @@ int EarInputVst::getTrackMapping()
 
 int EarInputVst::getWidth()
 {
-    if(isObjectPlugin(name)) return 1;
-    if(!isDirectSpeakersPlugin(name)) return 0;
-
-    assert(paramDirectSpeakersPackFormatIdValue);
-    auto packFormatIdValue = getParameterWithConvertToInt(*paramDirectSpeakersPackFormatIdValue);
-    assert(packFormatIdValue.has_value());
-
-    int trackWidth = 0;
-    if(packFormatIdValue.has_value()) {
-        auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
-        if(speakerLayoutIndex >= 0) {
-            trackWidth = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
-        }
+    if (isObjectPlugin(name)) {
+        return 1;
     }
 
-    return  trackWidth;
+    if (isDirectSpeakersPlugin(name)) {
+        assert(paramDirectSpeakersPackFormatIdValue);
+        auto packFormatIdValue = getParameterWithConvertToInt(*paramDirectSpeakersPackFormatIdValue);
+        assert(packFormatIdValue.has_value());
+
+        if(packFormatIdValue.has_value()) {
+            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
+            if(speakerLayoutIndex >= 0) {
+                return ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
+            }
+        }
+        return  0;
+    }
+
+    if (isHoaPlugin(name)) {
+        assert(paramHoaPackFormatIdValue);
+        auto packFormatIdValue = getParameterWithConvertToInt(*paramHoaPackFormatIdValue);
+        assert(packFormatIdValue.has_value());
+
+        if(packFormatIdValue.has_value()) {
+            auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatIdValue);
+            if(pfData) {
+                return pfData->relatedChannelFormats.size();
+            }
+        }
+        return 0;
+    }
+
+    return 0;
 }
 
 // EarSceneMasterVst
@@ -877,3 +895,65 @@ void EarVstCommunicator::admAndMappingExchange()
     admStr = admStrRecv;
 }
 
+//HOA functions
+
+std::string EarInputVst::hoaVstName = admplug::EARPluginSuite::HOA_METADATA_PLUGIN_NAME;
+std::string EarInputVst::hoaVstCompName = "";
+size_t EarInputVst::hoaVstCompNameLen = 0;
+const char* EarInputVst::hoaVstCompNameCStr = nullptr;
+
+const char* EarInputVst::getHoaVstCompName() {
+    if (hoaVstCompNameCStr == nullptr) {
+        hoaVstCompName = "VST3: ";
+        hoaVstCompName.append(hoaVstName);
+        hoaVstCompName.append(" (");
+        hoaVstCompNameLen = hoaVstCompName.length();
+        hoaVstCompNameCStr = hoaVstCompName.c_str();
+    }
+    return hoaVstCompNameCStr;
+}
+
+const std::string* EarInputVst::getHoaVstNameStr()
+{
+    return &hoaVstName;
+}
+
+bool EarInputVst::isHoaVstAvailable(ReaperAPI const& api, bool doRescan)
+{
+    return PluginRegistry::getInstance()->checkPluginAvailable(hoaVstName, api, doRescan);
+}
+
+int EarInputVst::trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk)
+{
+    return api.TrackFX_AddByName(trk, hoaVstName.c_str(), false, TrackFXAddMode::QueryPresence);
+}
+
+std::vector<int> EarInputVst::trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk)
+{
+    int totalVsts = api.TrackFX_GetCount(trk);
+    std::vector<int> vstPos;
+
+    for (int i = 0; i < totalVsts; i++) {
+        if (vstPosIsHoaVst(api, trk, i)) vstPos.push_back(i);
+    }
+
+    return vstPos;
+}
+
+bool EarInputVst::vstPosIsHoaVst(ReaperAPI const& api, MediaTrack* trk, int vstPos)
+{
+    getHoaVstCompName(); // Need to generate it to get length
+    char name[100];
+    if (!api.TrackFX_GetFXName(trk, vstPos, name, (int)hoaVstCompNameLen + 1)) return false;
+    return (strcmp(name, getHoaVstCompName()) == 0);
+}
+
+bool EarInputVst::isHoaPlugin(std::string vstNameStr)
+{
+    // Name only
+    if (vstNameStr == hoaVstName) return true;
+    // Comparison name (includes VST3: and ends with company name and channel count)
+    getHoaVstCompName(); // need to ensure generated
+    if (strncmp(vstNameStr.c_str(), getHoaVstCompName(), hoaVstCompNameLen) == 0) return true;
+    return false;
+}

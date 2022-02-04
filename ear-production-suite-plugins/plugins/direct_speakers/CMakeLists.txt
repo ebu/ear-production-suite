@@ -69,5 +69,6 @@ add_juce_vst3_plugin(direct_speakers
   OUTPUT_NAME "EAR DirectSpeakers")
   
 target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base ear-version)
+target_compile_definitions(direct_speakers_VST3 PRIVATE USE_NEW_DESIGN)
 
 install_juce_vst3_plugin(direct_speakers "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")

@@ -46,6 +46,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include <juce_events/juce_events.h>
 #include <juce_graphics/juce_graphics.h>
+#include <juce_osc/juce_osc.h>
 
 EAR_DIAGNOSTIC_PUSH
 EAR_IGNORE_DEPRECATED

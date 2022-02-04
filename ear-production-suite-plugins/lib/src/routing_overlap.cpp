@@ -65,7 +65,7 @@ std::vector<Overlap> getOverlaps(
 std::unordered_map<std::string, Routing> getRoutings(
     proto::SceneStore const& store) {
   std::unordered_map<std::string, Routing> routings;
-  auto const& items = store.items();
+  auto const& items = store.monitoring_items();
   for (auto const& item : items) {
     auto routeWidth =
         item.has_ds_metadata() ? item.ds_metadata().speakers().size() : 1;
@@ -85,7 +85,7 @@ class ItemCache {
  public:
   explicit ItemCache(proto::SceneStore& store) : store{store} {}
   proto::MonitoringItemMetadata* get(std::string const& connectionId) {
-    auto items = store.mutable_items();
+    auto items = store.mutable_monitoring_items();
     if (auto it = cache.find(connectionId); it == cache.end()) {
       cache[connectionId] =
           &(*std::find_if(items->begin(), items->end(),
@@ -143,7 +143,7 @@ void flagChangedOverlaps(const std::set<std::string>& previousOverlaps,
   for (auto const& overlap : previousOverlaps) {
     auto [it, success] = allOverlaps.insert(overlap);
     if (success) {
-      auto items = store.mutable_items();
+      auto items = store.mutable_monitoring_items();
       auto const& id = *it;
       auto itemIt =
           std::find_if(items->begin(), items->end(),

@@ -13,7 +13,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "programme_store.pb.h"
-
+#include "helper/common_definition_helper.h"
 #include <memory>
 
 namespace ear {
@@ -33,10 +33,7 @@ class ObjectView : public ElementView,
   // revisit this and consider splitting it into type
   // specific subclasses. Just disables one panel in
   // one case right now so would be massive overkill
-  enum class ObjectType {
-    DirectSpeakers,
-    Other
-  };
+  enum class ObjectType { DirectSpeakers, HOA, Other };
 
   explicit ObjectView(ObjectType type)
       : ElementView(),
@@ -76,7 +73,7 @@ class ObjectView : public ElementView,
           this->settingsButton_->getToggleState());
       gainInteractionPanel_->setVisible(
           this->settingsButton_->getToggleState());
-      if(objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ != ObjectType::DirectSpeakers) {
         positionInteractionPanel_->setVisible(
             this->settingsButton_->getToggleState());
       }
@@ -142,6 +139,18 @@ class ObjectView : public ElementView,
             String(SPEAKER_SETUPS.at(layoutIndex).commonName),
             dontSendNotification);
       }
+    } else if (data_.item.has_hoa_metadata()) {
+      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto pfData = commonDefinitionHelper->getPackFormatData(
+          4, data_.item.hoa_metadata().packformatidvalue());
+      int cfCount;
+      if (pfData) {
+        cfCount = pfData->relatedChannelFormats.size();
+      }
+      int order = std::sqrt(cfCount) - 1;
+      metadataLabel_->setText("HOA order " + String(order),
+                              dontSendNotification);
+      data_.item.hoa_metadata().packformatidvalue();
     } else {
       metadataLabel_->setText("", dontSendNotification);
     }
@@ -353,7 +362,9 @@ class ObjectView : public ElementView,
   void updateSettingsButtonColour() {
     const Colour col = (data_.object.mutable_interactive_gain()->enabled() ||
                         data_.object.mutable_interactive_on_off()->enabled() ||
-                        data_.object.mutable_interactive_position()->enabled()) ? EarColours::SettingsButtonInteraction : EarColours::Area01dp;
+                        data_.object.mutable_interactive_position()->enabled())
+                           ? EarColours::SettingsButtonInteraction
+                           : EarColours::Area01dp;
 
     settingsButton_->setColour(EarButton::backgroundColourId, col);
   }
@@ -370,7 +381,7 @@ class ObjectView : public ElementView,
       } else {
         desiredHeight_ += marginMini_;
       }
-      if(objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ != ObjectType::DirectSpeakers) {
         desiredHeight_ += positionInteractionPanel_->getDesiredHeight();
         if (positionInteractionPanel_->isExpanded()) {
           desiredHeight_ += marginBig_;

@@ -60,6 +60,14 @@
         "CMAKE_OSX_DEPLOYMENT_TARGET": {
           "type": "STRING",
           "value": "10.13"
+        },
+        "CMAKE_SYSTEM_PROCESSOR": {
+          "type": "STRING",
+          "value": "x86_64"
+        },
+        "CMAKE_SYSTEM_NAME": {
+          "type": "STRING",
+          "value": "Darwin"
         }
       },
       "condition": {
@@ -79,6 +87,14 @@
         "CMAKE_OSX_ARCHITECTURES": {
           "type": "STRING",
           "value": "arm64"
+        },
+        "CMAKE_SYSTEM_PROCESSOR": {
+          "type": "STRING",
+          "value": "arm64"
+        },
+        "CMAKE_SYSTEM_NAME": {
+          "type": "STRING",
+          "value": "Darwin"
         }
       },
       "condition": {
@@ -93,6 +109,12 @@
       "environment": {
         "CXX": "cl.exe",
         "CC": "cl.exe"
+      },
+      "cacheVariables": {
+        "CMAKE_SYSTEM_PROCESSOR": {
+          "type": "STRING",
+          "value": "x86_64"
+        }
       },
       "condition": {
         "type": "equals",

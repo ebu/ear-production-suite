@@ -214,7 +214,7 @@ void SceneAudioProcessor::sendAdmMetadata() {
   std::vector<uint32_t> channelMapping(64u, 0u);
 
   for (auto& id : chna.audioIds()) {
-    if(id.trackIndex() > 0){
+    if (id.trackIndex() > 0) {
       assert(id.uid().size() == 12);
       auto idNumString = id.uid().substr(4, 8);
       auto idNum = static_cast<uint32_t>(std::stoul(idNumString, nullptr, 16));
