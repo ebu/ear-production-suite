@@ -20,6 +20,8 @@
 [submodule "submodules/JUCE"]
 	path = submodules/JUCE
 	url = https://github.com/WeAreROLI/JUCE.git
+	# This gets patched - ignore those changes
+	ignore = dirty
 [submodule "submodules/readerwriterqueue"]
 	path = submodules/readerwriterqueue
 	url = https://github.com/cameron314/readerwriterqueue
