@@ -143,14 +143,15 @@ class ObjectView : public ElementView,
       auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(
           4, data_.item.hoa_metadata().packformatidvalue());
-      int cfCount;
       if (pfData) {
-        cfCount = pfData->relatedChannelFormats.size();
+        int cfCount = pfData->relatedChannelFormats.size();
+        int order = std::sqrt(cfCount) - 1;
+        metadataLabel_->setText("HOA order " + String(order),
+                                dontSendNotification);
+      } else {
+        metadataLabel_->setText("HOA",
+                                dontSendNotification);
       }
-      int order = std::sqrt(cfCount) - 1;
-      metadataLabel_->setText("HOA order " + String(order),
-                              dontSendNotification);
-      data_.item.hoa_metadata().packformatidvalue();
     } else {
       metadataLabel_->setText("", dontSendNotification);
     }
