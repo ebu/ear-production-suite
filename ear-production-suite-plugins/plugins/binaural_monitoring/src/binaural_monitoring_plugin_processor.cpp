@@ -77,7 +77,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   auto vstPath = juce::File::getSpecialLocation(
       juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
-#ifdef(__APPLE__)
+#ifdef __APPLE__
   vstPath = vstPath.getParentDirectory();
   vstPath = vstPath.getChildFile("Resources");
 #endif
