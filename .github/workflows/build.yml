@@ -128,7 +128,10 @@ jobs:
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
         if: matrix.config.os == 'windows-latest'
-
+        
+      - name: 'Git Status'
+        run: git status
+        
       - name: 'Configure with CMake, vcpkg and ccmake.'
         run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
         env:
@@ -137,6 +140,9 @@ jobs:
           VCPKG_BINARY_SOURCES: 'clear;files,${{ env.VCPKG_CACHE_LOCATION }},readwrite'
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
           CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
+
+      - name: 'Git Status'
+        run: git status
 
         # This is for the windows relwithdebinfo build as otherwise we run out of disk space
       - name: 'Clean up vcpkg temporary files.'
