@@ -74,12 +74,14 @@ get_filename_component(TENSORFILE_FILENAME ${TENSORFILE_FULLPATH} NAME)
 add_dependencies(ear_binaural_monitoring_VST3 ${TENSORFILE_TARGET})
 target_compile_definitions(ear_binaural_monitoring_VST3 PRIVATE BEAR_DATA_FILE="${TENSORFILE_FILENAME}")
 
-add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/${TENSORFILE_FILENAME}"
-)
-
 if(APPLE)
+	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/../Resources/${TENSORFILE_FILENAME}"
+	)
     install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
 else()
+	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/${TENSORFILE_FILENAME}"
+	)
 	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
 endif()
