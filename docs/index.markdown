@@ -41,6 +41,9 @@ The EAR Production Suite is a joint [open-source development](https://github.com
   <div class="yt-iframe">
     <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
+  <i><b>Please note:</b> The tutorial video advises to install the REAPER extension to the REAPER directory of `Program Files` on Windows. 
+  Although this will be functional, it is now advised to install to your user directory instead.<br />
+  Please refer to the <a href="#installation">installation instructions</a> below.</i>
 </div>
 
 <div markdown="1" class="text_section">
@@ -74,33 +77,46 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 </div>
 
 <div markdown="1" class="text_section">
-## Installation
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
+## Download and Install
+Download the latest EAR Production Suite release (v0.7.0 Beta):
+  <div class="button-grid">
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
+	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
+  </div>
+<br />
+<p>
+The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release.
+</p>
+<br />
   <details>
     <summary>Show installation instructions</summary>
-      <div class="text_section">
-        <i><b>Please Note:</b><br /> The EPS is currently incompatible with Language Packs. REAPER may fail to load when using the EPS with a language pack installed. Support will be provided in a future release.</i>
-      </div>
+	  <a name="installation"></a> 
       <ol>
         <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
         <li>Copy / install the <b>VST plugins</b> into your common VST folder.
-          <br>- Windows: C:\Program Files\Common Files\VST3
-          <br>- macOS: ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>macOS:</b> ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>Windows:</b> C:\Program&nbsp;Files\Common&nbsp;Files\VST3
         </li>
         <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
         <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
-          <br>- Windows: C:\Program Files\REAPER (x64)\Plugins
-          <br>- macOS: ~/Library/Application Support/REAPER/UserPlugins
+          <br>- <b>macOS:</b> ~/Library/Application Support/REAPER/UserPlugins
+          <br>- <b>Windows:</b> C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
+		  <div style="margin-left: 2em; margin-right: 4em;">
+		  <i>Note: If you have a previous version of the REAPER Extension installed to C:\Program&nbsp;Files\REAPER&nbsp;(x64)\Plugins\reaper_adm.dll, then this should be deleted on installation of the latest version.</i>
+		  </div>
         </li>
         <li>Restart REAPER</li>
         <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be neccesary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
         </li>
       </ol>
   </details>
+</div>
 
-  <div class="button-grid">
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-macOS.v0.6.0.zip"><button class="c-btn">Download macOS</button></a>
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.6.0-EPS-beta/EPS-Windows.v0.6.0.zip"><button class="c-btn">Download Windows</button></a>
+<div markdown="1" class="text_section">
+## Discussion Community
+A discussion community for users of the EPS is available on the <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite">BBC's MakerBox platform.</a>
+  <div class="button-grid-wide">
+    <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite"><button class="c-btn">Join in the discussion! 💬</button></a>
   </div>
 </div>
 
@@ -115,20 +131,34 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows)
       </div>
   </details>
   <details>
-    <summary>Why are the plug-ins not loading on MacOS Catalina or above?</summary>
+    <summary>Which head-trackers are compatible with the Binaural Monitoring plug-in?</summary>
       <div class="text_section">
-        <p>The MacOS security gatekeeper service may block the plug-ins from loading.
-        You can validate the files after install by entering the following command in Terminal:</p>
-        <code>
-          sudo xattr -rd com.apple.quarantine \<br/>
-            &nbsp;&nbsp;~/Library/Application\ Support/REAPER/UserPlugins/reaper_adm.dylib \<br/>
-            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ADM\ Export\ Source.vst3 \<br/>
-            &nbsp;&nbsp;~/Library/Audio/Plug-Ins/VST3/ear-production-suite/
-        </code>
-        <p>On reloading your digital audio workstation or re-scanning for the plug-ins, you should now be able to load them.
-        If you have not installed the plug-ins to the default locations, then please change the above file paths accordingly.</p>
+        <p>The Binaural Monitoring plug-in accepts listener orientation data over OSC and responds to messages used by several other popular spatial audio plug-in suites. 
+		Therefore, if you have a head-tracker which functions with SPARTA/COMPASS, IEM, ambiX, HedRot, AudioLab SALTE, Mach1, or the 3D Tune-In Toolkit, then it should also function with the EPS Binaural Monitoring plug-in.
+		Simply ensure that the "Enable OSC" toggle is on, and that the port number is configured to match that of your head-tracker.
+		Note that the plug-in can not use the port if another plug-in is already using it, so please ensure no other plug-ins are present which use the same port.
+		</p>
+        <p style="margin-top: 20px">If you would like to construct your own low-cost head-tracker for use with the Binaural Monitoring plug-in, consider the <a href="https://github.com/trsonic/nvsonic-head-tracker">nvsonic Head-Tracker</a> for a compatible solution. It should operate with the Binaural Monitoring plug-in using any of the presets for the third-party spatial audio plug-ins listed above.
+		</p>
+		<p style="margin-top: 20px">We are keen to gather feedback on head-tracker compatibility, whether good or bad. Head over to the <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite">discussion community on BBC MakerBox</a> and let us know of your experience.
+		</p>
       </div>
   </details>
+  <details>
+    <summary>Projects created with very old versions of the EPS no longer load correctly. How do I fix this?</summary>
+      <div class="text_section">
+        <p>This occurs because it has been necessary to change the ID's of the plug-ins. 
+		We have developed utilities to automatically convert your old REAPER projects to ensure they work correctly with the new plug-ins.
+		There is both a command line utility and a GUI application included in the `tools` directory of the download package.
+		<ul>
+			<li>To use the GUI application, simply launch it and drag-and-drop your RPP files on to it.</li>
+			<li>To use the command line utility, pass a path to an input RPP file and a path to an output RPP file as arguments.</li>
+		</ul>
+		If you are unsure whether it is necessary to upgrade your projects, it is usually quite apparent when you attempt to open the project in REAPER since it will appear that the plug-ins are not found even though they are installed and usable from within REAPER. In any case, it is perfectly OK to pass projects through the upgrade utilities regardless of whether they need it or not.
+		</p>
+      </div>
+  </details>
+  
 </div>
 
 <div markdown="1" class="text_section">
