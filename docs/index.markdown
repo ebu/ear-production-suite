@@ -78,14 +78,14 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 
 <div markdown="1" class="text_section">
 ## Download and Install
-Download the latest EAR Production Suite release (v0.7.0):
+Download the latest EAR Production Suite release (v0.7.0 Beta):
   <div class="button-grid">
-    <a href="###########################!!!TODO!!!############################"><button class="c-btn">📦 Download Windows (x64)</button></a>
-	<a href="TO###########################!!!TODO!!!############################DO"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
+	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
   </div>
 <br />
 <p>
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/main/LICENSE.TXT">GPL v3.0 license</a>. View the <a href="###########################!!!TODO!!!############################">Change Log</a> for this release.
+The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release.
 </p>
 <br />
   <details>
