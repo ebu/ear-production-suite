@@ -568,6 +568,10 @@ void JuceSceneFrontendConnector::removeProgramme(int index) {
   std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
   auto programme = p_->getProgrammeStore()->mutable_programme();
   programme->erase(programme->begin() + index);
+  auto selected_index = p_->getProgrammeStore()->selected_programme_index();
+  if(selected_index >= programme->size()) {
+    p_->getProgrammeStore()->set_selected_programme_index(std::max<int>(programme->size() - 1, 0));
+  }
   notifyProgrammeStoreChanged(p_->getProgrammeStoreCopy());
 }
 
