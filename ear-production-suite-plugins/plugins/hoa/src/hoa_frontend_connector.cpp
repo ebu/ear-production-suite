@@ -195,7 +195,11 @@ void HoaJuceFrontendConnector::trackPropertiesChanged(
 void HoaJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
   if (!hoaTypeComboBox_.expired() &&
       comboBox == hoaTypeComboBox_.lock().get()) {
-    *(p_->getPackFormatIdValue()) = comboBox->getSelectedId();
+    if(comboBox->hasSelection()) {
+      *(p_->getPackFormatIdValue()) = comboBox->getSelectedId();
+    } else {
+      *(p_->getPackFormatIdValue()) = 0;
+    }
   }
   if (!routingComboBox_.expired() &&
       comboBox == routingComboBox_.lock().get()) {
