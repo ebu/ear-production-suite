@@ -3,11 +3,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(EPS_VERSION_BASE 0.7.0) # This is used as fallback if getting from git fails. Must be only numeric.
-# NOTE: There are several other places where version numbers are hard-coded.
+set(EPS_VERSION_BASE 0.7.1) # This is used as fallback if getting from git fails. Must be only numeric.
+# NOTE: also update hard-coded version number in
 # - vcpkg.json
-# - packaging/README.md.in
-# - tools/project_upgrade/upgrade.cpp
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 include(get_git_version)
