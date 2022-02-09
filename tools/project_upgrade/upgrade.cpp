@@ -35,7 +35,7 @@ std::optional<std::string> upgrade::PluginCode::replace(const std::string &input
 
 int upgrade::upgrade_project(int argc, char **argv) {
   if(argc != 3) {
-    std::cout << "project_upgrade: upgrade reaper projects from 0.6.0 EPS format to 0.7.0 format\n"
+    std::cout << "project_upgrade: Upgrade reaper projects from the format used in version 0.6.0 of the EPS, to that used in 0.7.0 and later\n"
                  "Usage: project_upgrade input_project.RPP output_project.RPP\n";
     return 1;
   }
