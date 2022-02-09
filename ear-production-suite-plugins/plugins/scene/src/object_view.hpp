@@ -33,7 +33,7 @@ class ObjectView : public ElementView,
   // revisit this and consider splitting it into type
   // specific subclasses. Just disables one panel in
   // one case right now so would be massive overkill
-  enum class ObjectType { DirectSpeakers, HOA, Other };
+  enum class ObjectType { Object, DirectSpeakers, HOA, Other };
 
   explicit ObjectView(ObjectType type)
       : ElementView(),
@@ -73,7 +73,7 @@ class ObjectView : public ElementView,
           this->settingsButton_->getToggleState());
       gainInteractionPanel_->setVisible(
           this->settingsButton_->getToggleState());
-      if (objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ == ObjectType::Object) {
         positionInteractionPanel_->setVisible(
             this->settingsButton_->getToggleState());
       }
@@ -382,7 +382,7 @@ class ObjectView : public ElementView,
       } else {
         desiredHeight_ += marginMini_;
       }
-      if (objectType_ != ObjectType::DirectSpeakers) {
+      if (objectType_ == ObjectType::Object) {
         desiredHeight_ += positionInteractionPanel_->getDesiredHeight();
         if (positionInteractionPanel_->isExpanded()) {
           desiredHeight_ += marginBig_;

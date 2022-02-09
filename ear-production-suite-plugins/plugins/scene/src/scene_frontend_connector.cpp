@@ -818,6 +818,9 @@ void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
     auto item = itemStore_[id];
     String speakerSetup;
     int numberOfChannels = 1;
+    if (item.has_obj_metadata()) {
+      objectType = ObjectView::ObjectType::Object;
+    }
     if (item.has_ds_metadata()) {
       objectType = ObjectView::ObjectType::DirectSpeakers;
       auto layoutIndex = item.ds_metadata().layout();
