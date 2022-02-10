@@ -112,7 +112,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EA
   </details>
 </div>
 
-<div markdown="1" class="text_section">
+<div markdown="1" class="text_section" style="display: none;">
 ## Discussion Community
 A discussion community for users of the EPS is available on the <a href="https://www.bbc.co.uk/makerbox/tools/ear-production-suite">BBC's MakerBox platform.</a>
   <div class="button-grid-wide">
