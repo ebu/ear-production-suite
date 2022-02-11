@@ -1,3 +1,10 @@
+Version 0.7.1 
+
+* Updated JUCE framework to 6.1.5 [#171](https://github.com/ebu/ear-production-suite/pull/171), fixes arm64/macos crash on unhandled keydown events [#174](https://github.com/ebu/ear-production-suite/issues/174)
+* Disabled interaction panel for non-object types in Scene [#173](https://github.com/ebu/ear-production-suite/pull/173)
+* Prevent potential out-of-bounds array access on removal of right-most programme in scene [#175](https://github.com/ebu/ear-production-suite/pull/175)
+* Fix crash when pressing backspace on HOA combobox [#172](https://github.com/ebu/ear-production-suite/pull/172)
+
 Version 0.7.0
 
 * Added Binaural Monitoring and HOA Input plugins [#156](http://github.com/ebu/ear-production-suite/pull/156)
