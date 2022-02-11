@@ -18,7 +18,7 @@ function(check_commit_timestamp_not_after SOURCE_FILE DEST_FILE)
 endfunction()
 
 check_commit_timestamp_not_after(LICENSE.md LICENSE.pdf)
-check_commit_timestamp_not_after(${CMAKE_PROJECT_DIR}/CHANGELOG.md README.pdf)
+check_commit_timestamp_not_after(${PROJECT_SOURCE_DIR}/CHANGELOG.md README.pdf)
 check_commit_timestamp_not_after(README.md.in README.pdf)
 
 add_custom_target(generate-package-docs
