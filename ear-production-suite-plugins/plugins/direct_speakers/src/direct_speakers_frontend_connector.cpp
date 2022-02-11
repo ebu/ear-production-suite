@@ -2,6 +2,7 @@
 
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
+#include "detail/weak_ptr_helpers.hpp"
 
 #include "speaker_setups.hpp"
 
@@ -238,13 +239,11 @@ void DirectSpeakersJuceFrontendConnector::sliderDragEnded(Slider* slider) {}
 
 void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
-  if (!speakerSetupsComboBox_.expired() &&
-      comboBox == speakerSetupsComboBox_.lock().get()) {
-    *(p_->getPackFormatIdValue()) = speakerSetupByIndex(comboBox->getSelectedEntryIndex()).packFormatIdValue;
+  if (auto speakerSetupsComboBox = detail::lockIfSame(speakerSetupsComboBox_, comboBox)) {
+    *(p_->getPackFormatIdValue()) = speakerSetupByIndex(speakerSetupsComboBox->getSelectedEntryIndex()).packFormatIdValue;
   }
-  if (!routingComboBox_.expired() &&
-      comboBox == routingComboBox_.lock().get()) {
-    *(p_->getRouting()) = comboBox->getSelectedEntryIndex();
+  if (auto routingComboBox = detail::lockIfSame(routingComboBox_, comboBox)) {
+    *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
   }
 }
 

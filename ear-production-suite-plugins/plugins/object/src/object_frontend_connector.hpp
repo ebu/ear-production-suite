@@ -4,6 +4,7 @@
 #include "JuceHeader.h"
 
 #include "components/ear_button.hpp"
+#include "components/ear_slider.hpp"
 #include "components/ear_combo_box.hpp"
 #include "components/panner_top_view.hpp"
 #include "components/panner_side_view.hpp"
@@ -17,10 +18,9 @@ namespace ui {
 
 class EarComboBox;
 class EarNameTextEditor;
-class EarSlider;
-class EarInvertedSlider;
 class PannerTopView;
 class PannerSideView;
+class EarInvertedSlider;
 
 class ObjectsJuceFrontendConnector
     : public ear::plugin::ui::ObjectsFrontendBackendConnector,
@@ -127,6 +127,8 @@ class ObjectsJuceFrontendConnector
   void buttonClicked(Button*) override;
 
  private:
+
+  void dispatchSliderAction(Slider*, SliderAction action);
   ObjectsAudioProcessor* p_;
   std::map<int, RangedAudioParameter*> parameters_;
 

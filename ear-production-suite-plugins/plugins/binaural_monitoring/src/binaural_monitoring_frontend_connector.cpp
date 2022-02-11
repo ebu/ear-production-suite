@@ -2,10 +2,13 @@
 
 #include "components/ear_slider.hpp"
 #include "components/ear_inverted_slider.hpp"
+#include "detail/weak_ptr_helpers.hpp"
+
 
 namespace ear {
 namespace plugin {
 namespace ui {
+using detail::lockIfSame;
 
 BinauralMonitoringJuceFrontendConnector::
     BinauralMonitoringJuceFrontendConnector(
@@ -226,14 +229,14 @@ void BinauralMonitoringJuceFrontendConnector::orientationValueChanged(
   if (listenerOrientation) {
     auto euler = listenerOrientation->getEuler();
 
-    if (!yawControl_.expired() && view == yawControl_.lock().get()) {
-      euler.y = view->getValue();
+    if (auto yawControl = lockIfSame(yawControl_, view)) {
+      euler.y = yawControl->getValue();
 
-    } else if (!pitchControl_.expired() && view == pitchControl_.lock().get()) {
-      euler.p = view->getValue();
+    } else if (auto pitchControl = lockIfSame(pitchControl_, view)) {
+      euler.p = pitchControl->getValue();
 
-    } else if (!rollControl_.expired() && view == rollControl_.lock().get()) {
-      euler.r = view->getValue();
+    } else if (auto rollControl = lockIfSame(rollControl_, view)) {
+      euler.r = rollControl->getValue();
     }
 
     listenerOrientation->setEuler(euler);
@@ -242,55 +245,55 @@ void BinauralMonitoringJuceFrontendConnector::orientationValueChanged(
 
 void BinauralMonitoringJuceFrontendConnector::orientationDragStarted(
     ear::plugin::ui::OrientationView* view) {
-  if (!yawControl_.expired() && view == yawControl_.lock().get()) {
+  if (auto yawControl = lockIfSame(yawControl_, view)) {
     p_->getYaw()->beginChangeGesture();
 
-  } else if (!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+  } else if (auto pitchControl = lockIfSame(pitchControl_, view)) {
     p_->getPitch()->beginChangeGesture();
 
-  } else if (!rollControl_.expired() && view == rollControl_.lock().get()) {
+  } else if (auto rollControl = lockIfSame(rollControl_, view)) {
     p_->getRoll()->beginChangeGesture();
   }
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationDragEnded(
     ear::plugin::ui::OrientationView* view) {
-  if (!yawControl_.expired() && view == yawControl_.lock().get()) {
+  if (auto yawControl = lockIfSame(yawControl_, view)) {
     p_->getYaw()->endChangeGesture();
 
-  } else if (!pitchControl_.expired() && view == pitchControl_.lock().get()) {
+  } else if (auto pitchControl = lockIfSame(pitchControl_, view)) {
     p_->getPitch()->endChangeGesture();
 
-  } else if (!rollControl_.expired() && view == rollControl_.lock().get()) {
+  } else if (auto rollControl = lockIfSame(rollControl_, view)) {
     p_->getRoll()->endChangeGesture();
   }
 }
 
 void BinauralMonitoringJuceFrontendConnector::buttonClicked(Button* button) {
-  if (!oscEnableButton_.expired() && button == oscEnableButton_.lock().get()) {
+  if (auto oscButton = lockIfSame(oscEnableButton_, button)) {
     // note: getToggleState still has the old value when this is called
     //       due to setClickingTogglesState on the button being false
-    bool newState = !button->getToggleState();
+    bool newState = !oscButton->getToggleState();
     *(p_->getOscEnable()) = newState;
   }
 }
 
 void BinauralMonitoringJuceFrontendConnector::sliderValueChanged(
     Slider* slider) {
-  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
-    *(p_->getOscPort()) = slider->getValue();
+  if (auto oscPortControl = lockIfSame(oscPortControl_, slider)) {
+    *(p_->getOscPort()) = oscPortControl->getValue();
   }
 }
 
 void BinauralMonitoringJuceFrontendConnector::sliderDragStarted(
     Slider* slider) {
-  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
+  if (auto oscPortControl = lockIfSame(oscPortControl_, slider)) {
     p_->getOscPort()->beginChangeGesture();
   }
 }
 
 void BinauralMonitoringJuceFrontendConnector::sliderDragEnded(Slider* slider) {
-  if (!oscPortControl_.expired() && slider == oscPortControl_.lock().get()) {
+  if (auto oscPortControl = lockIfSame(oscPortControl_, slider)) {
     p_->getOscPort()->endChangeGesture();
   }
 }
