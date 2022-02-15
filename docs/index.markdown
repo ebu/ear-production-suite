@@ -78,14 +78,14 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 
 <div markdown="1" class="text_section">
 ## Download and Install
-Download the latest EAR Production Suite release (v0.7.0 Beta):
+Download the latest EAR Production Suite release (v0.7.1 Beta):
   <div class="button-grid">
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
-	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.0-EPS-beta/EPS_0_7_0_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.1-EPS-beta/EPS_0_7_1_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
+	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.1-EPS-beta/EPS_0_7_1_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
   </div>
 <br />
 <p>
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release.
+The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.1-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.1-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release.
 </p>
 <br />
   <details>
@@ -106,7 +106,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EA
 		  </div>
         </li>
         <li>Restart REAPER</li>
-        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be neccesary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
+        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
         </li>
       </ol>
   </details>
