@@ -1,0 +1,152 @@
+From 65d23d1e9113f5088721b1259c4649aa84f981d4 Mon Sep 17 00:00:00 2001
+From: Richard Bailey <rsjtaylor.github@gmail.com>
+Date: Fri, 11 Feb 2022 11:20:15 +0000
+Subject: [PATCH 1/2] Add RelWithDebInfo and MinSizeRel configs
+
+---
+ modules/SMTG_AddSMTGLibrary.cmake          | 14 +++++++++-----
+ modules/SMTG_AddVST3Library.cmake          |  2 +-
+ modules/SMTG_ConfigureCmakeGenerator.cmake |  2 +-
+ modules/SMTG_PlatformToolset.cmake         | 17 +++++++++--------
+ modules/SMTG_UniversalBinary.cmake         |  2 +-
+ 5 files changed, 21 insertions(+), 16 deletions(-)
+
+diff --git a/modules/SMTG_AddSMTGLibrary.cmake b/modules/SMTG_AddSMTGLibrary.cmake
+index 2cbf062..32e2911 100644
+--- a/modules/SMTG_AddSMTGLibrary.cmake
++++ b/modules/SMTG_AddSMTGLibrary.cmake
+@@ -107,6 +107,8 @@ function(smtg_create_link_to_plugin target)
+         file(TO_NATIVE_PATH "${TARGET_DESTINATION}/${PLUGIN_PACKAGE_NAME}" SRC_NATIVE_PATH)
+         file(TO_NATIVE_PATH "${PLUGIN_BINARY_DIR}/Debug/${PLUGIN_PACKAGE_NAME}" TARGET_DESTINATION_DEBUG)
+         file(TO_NATIVE_PATH "${PLUGIN_BINARY_DIR}/Release/${PLUGIN_PACKAGE_NAME}" TARGET_DESTINATION_RELEASE)
++        file(TO_NATIVE_PATH "${PLUGIN_BINARY_DIR}/RelWithDebInfo/${PLUGIN_PACKAGE_NAME}" TARGET_DESTINATION_RELWITHDEBINFO)
++        file(TO_NATIVE_PATH "${PLUGIN_BINARY_DIR}/MinSizeRel/${PLUGIN_PACKAGE_NAME}" TARGET_DESTINATION_MINSIZEREL)
+ 
+         add_custom_command(
+             TARGET ${target} POST_BUILD
+@@ -117,6 +119,8 @@ function(smtg_create_link_to_plugin target)
+                 ${SRC_NATIVE_PATH}
+                 "$<$<CONFIG:Debug>:${TARGET_DESTINATION_DEBUG}>"
+                 "$<$<CONFIG:Release>:${TARGET_DESTINATION_RELEASE}>"
++                "$<$<CONFIG:RelWithDebInfo>:${TARGET_DESTINATION_RELWITHDEBINFO}>"
++                "$<$<CONFIG:MinSizeRel:${TARGET_DESTINATION_MINSIZEREL}>"
+             COMMAND echo [SMTG] Finished.
+         )
+     else()
+@@ -273,8 +277,8 @@ function(smtg_make_plugin_package target pkg_name extension)
+                     XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE           YES
+                     XCODE_ATTRIBUTE_WRAPPER_EXTENSION               ${PLUGIN_EXTENSION}
+                     XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS  YES
+-                    XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT        $<$<CONFIG:Debug>:dwarf>$<$<CONFIG:Release>:dwarf-with-dsym>
+-                    XCODE_ATTRIBUTE_DEPLOYMENT_POSTPROCESSING		$<$<CONFIG:Debug>:NO>$<$<CONFIG:Release>:YES>
++                    XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT        $<$<CONFIG:Debug>:dwarf>$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:dwarf-with-dsym>
++                    XCODE_ATTRIBUTE_DEPLOYMENT_POSTPROCESSING		$<$<CONFIG:Debug>:NO>$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:YES>
+             )
+             if(SMTG_CUSTOM_BINARY_LOCATION)
+               set_target_properties(${target}
+@@ -284,7 +288,7 @@ function(smtg_make_plugin_package target pkg_name extension)
+             else()
+               set_target_properties(${target}
+                 PROPERTIES 
+-                    SMTG_PLUGIN_PACKAGE_PATH    ${PLUGIN_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${PLUGIN_PACKAGE_NAME}
++                    SMTG_PLUGIN_PACKAGE_PATH    ${PLUGIN_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:MinSizeRel>:MinSizeRel>/${PLUGIN_PACKAGE_NAME}
+               )
+             endif(SMTG_CUSTOM_BINARY_LOCATION)
+         else()
+@@ -307,7 +311,7 @@ function(smtg_make_plugin_package target pkg_name extension)
+         if(SMTG_CUSTOM_BINARY_LOCATION)
+             set(PLUGIN_PACKAGE_PATH ${PLUGIN_BINARY_DIR}/${PLUGIN_PACKAGE_NAME})
+         else()
+-            set(PLUGIN_PACKAGE_PATH ${PLUGIN_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${PLUGIN_PACKAGE_NAME})
++            set(PLUGIN_PACKAGE_PATH ${PLUGIN_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:MinSizeRel>:MinSizeRel>/${PLUGIN_PACKAGE_NAME})
+         endif(SMTG_CUSTOM_BINARY_LOCATION)
+         set_target_properties(${target}
+             PROPERTIES 
+@@ -375,7 +379,7 @@ function(smtg_make_plugin_package target pkg_name extension)
+             target_compile_options(${target} 
+                 PRIVATE 
+                     /wd4221
+-                    $<$<CONFIG:RELEASE>:/Zi>
++                    $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/Zi>
+             )
+             set_property(TARGET ${target} 
+                 APPEND PROPERTY 
+diff --git a/modules/SMTG_AddVST3Library.cmake b/modules/SMTG_AddVST3Library.cmake
+index b22ac36..4d1a2bc 100644
+--- a/modules/SMTG_AddVST3Library.cmake
++++ b/modules/SMTG_AddVST3Library.cmake
+@@ -42,7 +42,7 @@ function(smtg_run_vst_validator target)
+                 COMMAND 
+                     $<TARGET_FILE:validator> 
+                     $<$<CONFIG:Debug>:${PLUGIN_PACKAGE_PATH}>
+-                    $<$<CONFIG:Release>:${PLUGIN_PACKAGE_PATH}> 
++                    $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:${PLUGIN_PACKAGE_PATH}>
+                     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+             )
+         endif(SMTG_WIN)
+diff --git a/modules/SMTG_ConfigureCmakeGenerator.cmake b/modules/SMTG_ConfigureCmakeGenerator.cmake
+index a990ff7..1674dff 100644
+--- a/modules/SMTG_ConfigureCmakeGenerator.cmake
++++ b/modules/SMTG_ConfigureCmakeGenerator.cmake
+@@ -18,7 +18,7 @@ endmacro(smtg_specify_output_directories)
+ #
+ # Specifies what build types (configurations) will be available.
+ macro(smtg_specify_build_types)
+-    set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
++    set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo;MinSizeRel")
+ 
+     # This variable is only meaningful to single-configuration generators (such as make and Ninja).
+     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type")
+diff --git a/modules/SMTG_PlatformToolset.cmake b/modules/SMTG_PlatformToolset.cmake
+index 9bed3d5..b55ea62 100644
+--- a/modules/SMTG_PlatformToolset.cmake
++++ b/modules/SMTG_PlatformToolset.cmake
+@@ -73,12 +73,13 @@ macro(smtg_setup_platform_toolset)
+         else()
+             add_definitions(-D_UNICODE)
+             add_compile_options(/fp:fast)                   # Floating Point Model
+-            add_compile_options($<$<CONFIG:Release>:/Oi>)   # Enable Intrinsic Functions (Yes)
+-            add_compile_options($<$<CONFIG:Release>:/Ot>)   # Favor Size Or Speed (Favor fast code)
+-            add_compile_options($<$<CONFIG:Release>:/GF>)   # Enable String Pooling
+-            add_compile_options($<$<CONFIG:Release>:/EHa>)  # Enable C++ Exceptions
+-            add_compile_options($<$<CONFIG:Release>:/Oy>)   # Omit Frame Pointers
+-            #add_compile_options($<$<CONFIG:Release>:/Ox>)  # Optimization (/O2: Maximise Speed /0x: Full Optimization)
++            add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/Oi>)   # Enable Intrinsic Functions (Yes)
++            add_compile_options($<$<CONFIG:Release,RelWithDebInfo>:/Ot>)   # Favor Size Or Speed (Favor fast code)
++            add_compile_options($<$<CONFIG:MinSizeRel>:/Os>)   # Favor Size Or Speed (Favor compact code)
++            add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/GF>)   # Enable String Pooling
++            add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/EHa>)  # Enable C++ Exceptions
++            add_compile_options($<$<CONFIG:Release,MinSizeRel>:/Oy>)   # Omit Frame Pointers
++            #add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/Ox>)  # Optimization (/O2: Maximise Speed /0x: Full Optimization)
+             add_compile_options(/MP)                        # Multi-processor Compilation
+             add_compile_options(/wd6031)                    # Return value ignored
+             add_compile_options(/wd6308)                    # Realloc may return null pointer
+@@ -108,10 +109,10 @@ macro(smtg_setup_platform_toolset)
+             endif()
+             if(SMTG_USE_STATIC_CRT)
+                 add_compile_options($<$<CONFIG:Debug>:/MTd>)    # Runtime Library: /MTd = MultiThreaded Debug Runtime
+-                add_compile_options($<$<CONFIG:Release>:/MT>)   # Runtime Library: /MT  = MultiThreaded Runtime
++                add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/MT>)   # Runtime Library: /MT  = MultiThreaded Runtime
+             else()
+                 add_compile_options($<$<CONFIG:Debug>:/MDd>)    # Runtime Library: /MDd = MultiThreadedDLL Debug Runtime
+-                add_compile_options($<$<CONFIG:Release>:/MD>)   # Runtime Library: /MD  = MultiThreadedDLL Runtime
++                add_compile_options($<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/MD>)   # Runtime Library: /MD  = MultiThreadedDLL Runtime
+             endif(SMTG_USE_STATIC_CRT)
+         endif(MINGW)
+     endif(UNIX)
+diff --git a/modules/SMTG_UniversalBinary.cmake b/modules/SMTG_UniversalBinary.cmake
+index 938124e..c3a498e 100644
+--- a/modules/SMTG_UniversalBinary.cmake
++++ b/modules/SMTG_UniversalBinary.cmake
+@@ -31,7 +31,7 @@ function(smtg_setup_universal_binary target)
+             endif()
+             set_target_properties(${target}
+                 PROPERTIES
+-                    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH        "$<$<CONFIG:Debug>:YES>$<$<CONFIG:Release>:NO>"
++                    XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH        "$<$<CONFIG:Debug>:YES>$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NO>"
+             )
+         endif(SMTG_BUILD_UNIVERSAL_BINARY)
+     endif(SMTG_MAC)
+-- 
+2.34.1
+

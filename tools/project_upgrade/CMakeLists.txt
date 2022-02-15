@@ -1,3 +1,7 @@
+if(MSVC)
+    add_compile_options(/bigobj)
+endif()
+
 add_library(proj_upgrade)
 target_sources(proj_upgrade
         PRIVATE

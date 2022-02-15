@@ -118,8 +118,7 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
 
 void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
                                                        int sizeInBytes) {
-  auto xml = getXmlFromBinary(data, sizeInBytes);
-  std::unique_ptr<XmlElement> xmlState(xml);
+  std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
   if (xmlState.get() != nullptr)
     if (xmlState->hasTagName("DirectSpeakersPlugin")) {

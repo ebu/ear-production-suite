@@ -17,6 +17,7 @@
 // [BEGIN_USER_CODE_SECTION]
 
 // (You can add your own code in this section, and the Projucer will not overwrite it)
+#define JUCE_MODAL_LOOPS_PERMITTED 1
 
 // [END_USER_CODE_SECTION]
 
@@ -47,7 +48,7 @@
 
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
-#define JUCE_PROJUCER_VERSION 0x50405
+//#define JUCE_PROJUCER_VERSION 0x50405
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          1

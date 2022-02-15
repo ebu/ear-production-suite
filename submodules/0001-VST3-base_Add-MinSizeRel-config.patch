@@ -1,0 +1,35 @@
+From 8404e348ffdca8f60b1be577d2d1d7ecfb31b73e Mon Sep 17 00:00:00 2001
+From: Matt Firth <matt.firth@bbc.co.uk>
+Date: Thu, 10 Feb 2022 16:19:57 +0000
+Subject: [PATCH] Add MinSizeRel config
+
+---
+ CMakeLists.txt | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 00f46f6..4aa276c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,8 +82,7 @@ target_include_directories(base
+ target_compile_options(base 
+     PUBLIC
+         "$<$<CONFIG:Debug>:-DDEVELOPMENT=1>"
+-        "$<$<CONFIG:Release>:-DRELEASE=1>"
+-        "$<$<CONFIG:RelWithDebInfo>:-DRELEASE=1>"
++        "$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-DRELEASE=1>"
+ )
+ 
+ target_compile_features(base
+@@ -110,7 +109,6 @@ if(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
+     target_compile_options(base_ios 
+         PUBLIC
+             "$<$<CONFIG:Debug>:-DDEVELOPMENT=1>"
+-            "$<$<CONFIG:Release>:-DRELEASE=1>"
+-            "$<$<CONFIG:RelWithDebInfo>:-DRELEASE=1>"
++            "$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-DRELEASE=1>"
+     )
+ endif(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
+-- 
+2.28.0.windows.1
+

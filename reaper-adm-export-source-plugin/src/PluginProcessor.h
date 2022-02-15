@@ -10,9 +10,9 @@
 
 #pragma once
 
+#include "helper/nng_wrappers.h"
 #include "JuceHeader_Wrapper.h"
 #include "helper/common_definition_helper.h"
-#include "helper/nng_wrappers.h"
 #include "PluginProcessorUtils.h"
 #include <functional>
 #include <memory>

@@ -18,6 +18,8 @@
 [submodule "submodules/VST3"]
 	path = submodules/VST3
 	url = https://github.com/steinbergmedia/vst3sdk
+	# This gets patched - ignore those changes
+	ignore = dirty
 [submodule "submodules/JUCE"]
 	path = submodules/JUCE
 	url = https://github.com/WeAreROLI/JUCE.git

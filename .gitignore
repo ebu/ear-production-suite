@@ -15,3 +15,4 @@ docs/venv
 reaper-adm-extension/test/reaper_adm/data/UserPlugins/
 shared/version/eps_version.cpp
 submodules/visr
+submodules/VST3
