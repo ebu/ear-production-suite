@@ -1,5 +1,10 @@
 #include "orientation_osc.hpp"
 
+#define OSC_READY_MSG "OSC Ready."
+#define OSC_CLOSED_MSG "OSC Closed."
+#define OSC_ERROR_MSG "OSC Connection Error - Ensure port is not occupied by another plug-in or application."
+#define OSC_RECEIVING_MSG "OSC Receiving..."
+
 namespace ear {
 namespace plugin {
 
@@ -29,7 +34,7 @@ void ListenerOrientationOscReceiver::disconnect() {
   stopTimer(timerIdPersistentListen);
   osc.disconnect();
   isListening = false;
-  updateStatusText(std::string("OSC Closed."));
+  updateStatusText(std::string(OSC_CLOSED_MSG));
   if(onInputTypeChange) onInputTypeChange(InputType::None);
 }
 
@@ -47,7 +52,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
   stopTimer(timerIdPersistentListen);
 
   stopTimer(timerIdStatusTextReset);
-  updateStatusText(std::string("OSC Receiving..."));
+  updateStatusText(std::string(OSC_RECEIVING_MSG));
   startTimer(timerIdStatusTextReset, 500);
 
   auto add = message.getAddressPattern();
@@ -203,7 +208,7 @@ void ListenerOrientationOscReceiver::timerCallback(int timerId) {
   if (timerId == timerIdStatusTextReset) {
     // "Receiving..." timer done
     stopTimer(timerIdStatusTextReset);
-    updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
+    updateStatusText(std::string(isListening ? OSC_READY_MSG : OSC_CLOSED_MSG));
     if(onInputTypeChange) onInputTypeChange(InputType::None);
   } else if (timerId == timerIdPersistentListen) {
     // If this timer is running, we should be listening
@@ -229,7 +234,7 @@ void ListenerOrientationOscReceiver::updateStatusText() {
 
 void ListenerOrientationOscReceiver::updateStatusTextForListenAttempt() {
   updateStatusText(
-      std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
+      std::string(isListening ? OSC_READY_MSG : OSC_ERROR_MSG));
 }
 
 void ListenerOrientationOscReceiver::handleReceiveEuler()
