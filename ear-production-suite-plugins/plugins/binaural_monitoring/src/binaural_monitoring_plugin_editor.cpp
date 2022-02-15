@@ -1,4 +1,5 @@
 #include "binaural_monitoring_plugin_editor.hpp"
+#include "orientation_osc.hpp"
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
@@ -10,6 +11,7 @@
 
 #include <string>
 
+using namespace ear::plugin;
 using namespace ear::plugin::ui;
 
 EarBinauralMonitoringAudioProcessorEditor::
@@ -67,11 +69,18 @@ EarBinauralMonitoringAudioProcessorEditor::
   addAndMakeVisible(versionLabel);
 
   /* clang-format off */
-  p->getFrontendConnector()->setOscPortControl(oscValueBox->getPortControl());
-  p->getFrontendConnector()->setOscEnableButton(oscValueBox->getEnableButton());
   p->getFrontendConnector()->setYawView(orientationValueBox->getYawControl());
   p->getFrontendConnector()->setPitchView(orientationValueBox->getPitchControl());
   p->getFrontendConnector()->setRollView(orientationValueBox->getRollControl());
+  p->getFrontendConnector()->setOscPortControl(oscValueBox->getPortControl());
+  p->getFrontendConnector()->setOscEnableButton(oscValueBox->getEnableButton());
+  p->getFrontendConnector()->setOscInvertYawButton(oscValueBox->getInvertYawButton());
+  p->getFrontendConnector()->setOscInvertPitchButton(oscValueBox->getInvertPitchButton());
+  p->getFrontendConnector()->setOscInvertRollButton(oscValueBox->getInvertRollButton());
+  p->getFrontendConnector()->setOscInvertQuatWButton(oscValueBox->getInvertQuatWButton());
+  p->getFrontendConnector()->setOscInvertQuatXButton(oscValueBox->getInvertQuatXButton());
+  p->getFrontendConnector()->setOscInvertQuatYButton(oscValueBox->getInvertQuatYButton());
+  p->getFrontendConnector()->setOscInvertQuatZButton(oscValueBox->getInvertQuatZButton());
   /* clang-format on */
 
   addAndMakeVisible(orientationValueBox.get());
@@ -94,6 +103,10 @@ EarBinauralMonitoringAudioProcessorEditor::
   // setSize(850, 425); // Min size for UI controls
   setSize(850, 600);
 
+  p_->oscReceiver.onInputTypeChange = [this](ListenerOrientationOscReceiver::InputType inputType) {
+    oscValueBox->setInputTypeHighlight(inputType);
+  };
+
   p_->oscReceiver.onStatusChange = [this](std::string status) {
     oscValueBox->getStatusLabel()->setText(
         status, juce::NotificationType::dontSendNotification);
@@ -106,6 +119,7 @@ EarBinauralMonitoringAudioProcessorEditor::
 EarBinauralMonitoringAudioProcessorEditor::
     ~EarBinauralMonitoringAudioProcessorEditor() {
   p_->oscReceiver.onStatusChange = nullptr;
+  p_->oscReceiver.onInputTypeChange = nullptr;
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
@@ -129,7 +143,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
 
   area.removeFromTop(10);  // Padding between header and content
 
-  auto body = area.removeFromTop(350);
+  auto body = area.removeFromTop(390);
   // All content to go below and to be fitted within `area`
   auto leftColumn = body.removeFromLeft(145);
   auto rightColumn = body.withWidth(695);

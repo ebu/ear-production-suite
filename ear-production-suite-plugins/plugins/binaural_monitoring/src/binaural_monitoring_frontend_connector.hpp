@@ -44,6 +44,13 @@ class BinauralMonitoringJuceFrontendConnector
   // OSC Controls
   void setOscEnableButton(std::shared_ptr<EarButton> button);
   void setOscPortControl(std::shared_ptr<EarSlider> slider);
+  void setOscInvertYawButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertPitchButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertRollButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertQuatWButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertQuatXButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertQuatYButton(std::shared_ptr<ToggleButton> button);
+  void setOscInvertQuatZButton(std::shared_ptr<ToggleButton> button);
 
   // Listener Orientation Object
   void setListenerOrientationInstance(std::shared_ptr<ListenerOrientation> lo);
@@ -57,6 +64,13 @@ class BinauralMonitoringJuceFrontendConnector
 
   void setOscEnable(bool enable);
   void setOscPort(int port);
+  void setOscInvertYaw(bool invert);
+  void setOscInvertPitch(bool invert);
+  void setOscInvertRoll(bool invert);
+  void setOscInvertQuatW(bool invert);
+  void setOscInvertQuatX(bool invert);
+  void setOscInvertQuatY(bool invert);
+  void setOscInvertQuatZ(bool invert);
 
  protected:
   // Orientation::Listener
@@ -90,10 +104,25 @@ class BinauralMonitoringJuceFrontendConnector
   // OSC Controls
   std::weak_ptr<EarButton> oscEnableButton_;
   std::weak_ptr<EarSlider> oscPortControl_;
+  std::weak_ptr<ToggleButton> oscInvertYawButton_;
+  std::weak_ptr<ToggleButton> oscInvertPitchButton_;
+  std::weak_ptr<ToggleButton> oscInvertRollButton_;
+  std::weak_ptr<ToggleButton> oscInvertQuatWButton_;
+  std::weak_ptr<ToggleButton> oscInvertQuatXButton_;
+  std::weak_ptr<ToggleButton> oscInvertQuatYButton_;
+  std::weak_ptr<ToggleButton> oscInvertQuatZButton_;
 
   // Values
   bool cachedOscEnable_;
   int cachedOscPort_;
+  bool cachedOscInvertYaw_;
+  bool cachedOscInvertPitch_;
+  bool cachedOscInvertRoll_;
+  bool cachedOscInvertQuatW_;
+  bool cachedOscInvertQuatX_;
+  bool cachedOscInvertQuatY_;
+  bool cachedOscInvertQuatZ_;
+
   /// Listener Orientation Object
   std::shared_ptr<ListenerOrientation> listenerOrientation;
 

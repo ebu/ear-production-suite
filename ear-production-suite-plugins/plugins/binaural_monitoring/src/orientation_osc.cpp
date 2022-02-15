@@ -10,7 +10,7 @@ ListenerOrientationOscReceiver::ListenerOrientationOscReceiver() {
 }
 
 ListenerOrientationOscReceiver::~ListenerOrientationOscReceiver() {
-  osc.disconnect();
+  disconnect();
   osc.removeListener(this);
 }
 
@@ -30,6 +30,14 @@ void ListenerOrientationOscReceiver::disconnect() {
   osc.disconnect();
   isListening = false;
   updateStatusText(std::string("OSC Closed."));
+  if(onInputTypeChange) onInputTypeChange(InputType::None);
+}
+
+void ListenerOrientationOscReceiver::setInverts(bool y, bool p, bool r, bool qW, bool qX, bool qY, bool qZ)
+{
+  invert = {y, p, r, qW, qX, qY, qZ};
+  if(lastReceivedType == InputType::Euler) doEulerCallback();
+  if(lastReceivedType == InputType::Quaternion) doQuaternionCallback();
 }
 
 void ListenerOrientationOscReceiver::oscMessageReceived(
@@ -61,19 +69,19 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       //   but it expects normalised values - will not implement.
       oscEulerInput.y = -vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
     } else if (add.matches("/pitch")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead,
       //   but it expects normalised values - will not implement.
       oscEulerInput.p = -vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
     } else if (add.matches("/roll")) {
       // Messages understood by SPARTA/COMPASS. Path also used by AmbiHead,
       //   but it expects normalised values - will not implement.
       oscEulerInput.r = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
     } else if (add.matches("/hedrot/yaw")) {
 
       /* NOTE:
@@ -84,17 +92,17 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       // Messages sent by Hedrot
       oscEulerInput.y = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
     } else if (add.matches("/hedrot/pitch")) {
       // Messages sent by Hedrot
       oscEulerInput.p = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
     } else if (add.matches("/hedrot/roll")) {
       // Messages sent by Hedrot
       oscEulerInput.r = vals[0];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else {
       return;
@@ -107,7 +115,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.y = -vals[1];
       oscEulerInput.r = -vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else if (add.matches("/rendering/htrpy")) {
       // Messages understood by AudioLab SALTE
@@ -115,7 +123,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.p = vals[1];
       oscEulerInput.y = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::RPY;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else if (add.matches("/ypr")) {
       // Messages understood by SPARTA/COMPASS
@@ -123,7 +131,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.p = -vals[1];
       oscEulerInput.r = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else if (add.matches("/orientation")) {
       // Messages understood by Mach1 monitor.
@@ -132,7 +140,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.p = vals[1];
       oscEulerInput.r = vals[2];
       oscEulerInput.order = ListenerOrientation::EulerOrder::YPR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else if (add.matches("/3DTI-OSC/receiver/pry")) {
       // Messages understood by 3D Tune-In Toolkit
@@ -140,7 +148,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.r = vals[1] * oneRadInDegs;
       oscEulerInput.y = vals[2] * oneRadInDegs;
       oscEulerInput.order = ListenerOrientation::EulerOrder::PRY;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else {
       return;
@@ -149,36 +157,27 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
   } else if (vals.size() == 4) {
     if (add.matches("/quaternion")) {
       // Messages understood by Ambix
-      if (onReceiveQuaternion) {
-        ListenerOrientation::Quaternion quat;
-        quat.w = vals[0];
-        quat.x = -vals[1];
-        quat.y = vals[2];
-        quat.z = vals[3];
-        onReceiveQuaternion(quat);
-      }
+      oscQuatInput.w = vals[0];
+      oscQuatInput.x = -vals[1];
+      oscQuatInput.y = vals[2];
+      oscQuatInput.z = vals[3];
+      handleReceiveQuaternion();
 
     } else if (add.matches("/SceneRotator/quaternions")) {
       // Messages understood by IEM
-      if (onReceiveQuaternion) {
-        ListenerOrientation::Quaternion quat;
-        quat.w = vals[0];
-        quat.x = -vals[1];
-        quat.y = vals[2];
-        quat.z = vals[3];
-        onReceiveQuaternion(quat);
-      }
+      oscQuatInput.w = vals[0];
+      oscQuatInput.x = -vals[1];
+      oscQuatInput.y = vals[2];
+      oscQuatInput.z = vals[3];
+      handleReceiveQuaternion();
 
     } else if (add.matches("/quaternions")) {
       // Messages understood by Unity plugin
-      if (onReceiveQuaternion) {
-        ListenerOrientation::Quaternion quat;
-        quat.w = vals[0];
-        quat.y = -vals[1];
-        quat.z = vals[2];
-        quat.x = -vals[3];
-        onReceiveQuaternion(quat);
-      }
+      oscQuatInput.w = vals[0];
+      oscQuatInput.y = -vals[1];
+      oscQuatInput.z = vals[2];
+      oscQuatInput.x = -vals[3];
+      handleReceiveQuaternion();
 
     } else {
       return;
@@ -191,7 +190,7 @@ void ListenerOrientationOscReceiver::oscMessageReceived(
       oscEulerInput.y = -vals[5];
       oscEulerInput.r = -vals[6];
       oscEulerInput.order = ListenerOrientation::EulerOrder::PYR;
-      if (onReceiveEuler) onReceiveEuler(oscEulerInput);
+      handleReceiveEuler();
 
     } else {
       return;
@@ -205,6 +204,7 @@ void ListenerOrientationOscReceiver::timerCallback(int timerId) {
     // "Receiving..." timer done
     stopTimer(timerIdStatusTextReset);
     updateStatusText(std::string(isListening ? "OSC Ready." : "OSC Closed."));
+    if(onInputTypeChange) onInputTypeChange(InputType::None);
   } else if (timerId == timerIdPersistentListen) {
     // If this timer is running, we should be listening
     isListening = osc.connect(oscPort);
@@ -230,6 +230,43 @@ void ListenerOrientationOscReceiver::updateStatusText() {
 void ListenerOrientationOscReceiver::updateStatusTextForListenAttempt() {
   updateStatusText(
       std::string(isListening ? "OSC Ready." : "OSC Connection Error."));
+}
+
+void ListenerOrientationOscReceiver::handleReceiveEuler()
+{
+  lastReceivedType = InputType::Euler;
+  if(onInputTypeChange) onInputTypeChange(lastReceivedType);
+  doEulerCallback();
+}
+
+void ListenerOrientationOscReceiver::doEulerCallback()
+{
+  if(onReceiveEuler) {
+    auto modVals = oscEulerInput;
+    if(invert.yaw) modVals.y = -modVals.y;
+    if(invert.pitch) modVals.p = -modVals.p;
+    if(invert.roll) modVals.r = -modVals.r;
+    onReceiveEuler(modVals);
+  }
+}
+
+void ListenerOrientationOscReceiver::handleReceiveQuaternion()
+{
+  lastReceivedType = InputType::Quaternion;
+  if(onInputTypeChange) onInputTypeChange(lastReceivedType);
+  doQuaternionCallback();
+}
+
+void ListenerOrientationOscReceiver::doQuaternionCallback()
+{
+  if(onReceiveQuaternion) {
+    auto modVals = oscQuatInput;
+    if(invert.quatW) modVals.w = -modVals.w;
+    if(invert.quatX) modVals.x = -modVals.x;
+    if(invert.quatY) modVals.y = -modVals.y;
+    if(invert.quatZ) modVals.z = -modVals.z;
+    onReceiveQuaternion(modVals);
+  }
 }
 
 }  // namespace plugin

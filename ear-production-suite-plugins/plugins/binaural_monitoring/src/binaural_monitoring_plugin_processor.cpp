@@ -50,6 +50,13 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   addParameter(roll_ = new AudioParameterFloat("roll", "Roll", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(oscEnable_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscEnable", "Enable OSC", false));
   addParameter(oscPort_ = new ui::NonAutomatedParameter<AudioParameterInt>("oscPort", "OSC Port", 1, 65535, 8000));
+  addParameter(oscInvertYaw_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertYaw", "Invert OSC Yaw Values", false));
+  addParameter(oscInvertPitch_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertPitch", "Invert OSC Pitch Values", false));
+  addParameter(oscInvertRoll_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertRoll", "Invert OSC Roll Values", false));
+  addParameter(oscInvertQuatW_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertQuatW", "Invert OSC Quaternion W Values", false));
+  addParameter(oscInvertQuatX_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertQuatX", "Invert OSC Quaternion X Values", false));
+  addParameter(oscInvertQuatY_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertQuatY", "Invert OSC Quaternion Y Values", false));
+  addParameter(oscInvertQuatZ_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertQuatZ", "Invert OSC Quaternion Z Values", false));
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscEnable_)
@@ -59,6 +66,41 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(oscPort_)
       ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertYaw_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertPitch_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertRoll_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertQuatW_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertQuatX_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertQuatY_)
+    ->markPluginStateAsDirty = [this]() {
+    bypass_->setValueNotifyingHost(bypass_->get());
+  };
+
+  static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscInvertQuatZ_)
+    ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
@@ -73,6 +115,13 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(3, roll_->get());
   connector_->parameterValueChanged(4, oscEnable_->get());
   connector_->parameterValueChanged(5, oscPort_->get());
+  connector_->parameterValueChanged(6, oscInvertYaw_->get());
+  connector_->parameterValueChanged(7, oscInvertPitch_->get());
+  connector_->parameterValueChanged(8, oscInvertRoll_->get());
+  connector_->parameterValueChanged(9, oscInvertQuatW_->get());
+  connector_->parameterValueChanged(10, oscInvertQuatX_->get());
+  connector_->parameterValueChanged(11, oscInvertQuatY_->get());
+  connector_->parameterValueChanged(12, oscInvertQuatZ_->get());
 
   auto vstPath = juce::File::getSpecialLocation(
       juce::File::SpecialLocationType::currentExecutableFile);
@@ -95,6 +144,13 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   oscEnable_->addListener(this);
   oscPort_->addListener(this);
+  oscInvertYaw_->addListener(this);
+  oscInvertPitch_->addListener(this);
+  oscInvertRoll_->addListener(this);
+  oscInvertQuatW_->addListener(this);
+  oscInvertQuatX_->addListener(this);
+  oscInvertQuatY_->addListener(this);
+  oscInvertQuatZ_->addListener(this);
 
   std::lock_guard<std::mutex> lock(processorMutex_);
   processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
@@ -121,6 +177,17 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
     } else {
       oscReceiver.disconnect();
     }
+  }
+  if (parameterIndex >= 6 && parameterIndex <= 12) {
+    oscReceiver.setInverts(
+      oscInvertYaw_->get(),
+      oscInvertPitch_->get(),
+      oscInvertRoll_->get(),
+      oscInvertQuatW_->get(),
+      oscInvertQuatX_->get(),
+      oscInvertQuatY_->get(),
+      oscInvertQuatZ_->get()
+      );
   }
 }
 
@@ -305,7 +372,15 @@ void EarBinauralMonitoringAudioProcessor::getStateInformation(
 
   std::unique_ptr<XmlElement> xml(new XmlElement("BinauralMonitoringPlugin"));
   xml->setAttribute("oscEnable", (bool)*oscEnable_);
+  // TODO: Really, the OSC settings should be user-data, not project-data
   xml->setAttribute("oscPort", (int)*oscPort_);
+  xml->setAttribute("oscInvertYaw", (bool)*oscInvertYaw_);
+  xml->setAttribute("oscInvertPitch", (bool)*oscInvertPitch_);
+  xml->setAttribute("oscInvertRoll", (bool)*oscInvertRoll_);
+  xml->setAttribute("oscInvertQuatW", (bool)*oscInvertQuatW_);
+  xml->setAttribute("oscInvertQuatX", (bool)*oscInvertQuatX_);
+  xml->setAttribute("oscInvertQuatY", (bool)*oscInvertQuatY_);
+  xml->setAttribute("oscInvertQuatZ", (bool)*oscInvertQuatZ_);
   copyXmlToBinary(*xml, destData);
 }
 
@@ -325,6 +400,27 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
       }
       if (xmlState->hasAttribute("oscPort")) {
         *oscPort_ = xmlState->getIntAttribute("oscPort", 8000);
+      }
+      if (xmlState->hasAttribute("oscInvertYaw")) {
+        *oscInvertYaw_ = xmlState->getBoolAttribute("oscInvertYaw", false);
+      }
+      if (xmlState->hasAttribute("oscInvertPitch")) {
+        *oscInvertPitch_ = xmlState->getBoolAttribute("oscInvertPitch", false);
+      }
+      if (xmlState->hasAttribute("oscInvertRoll")) {
+        *oscInvertRoll_ = xmlState->getBoolAttribute("oscInvertRoll", false);
+      }
+      if (xmlState->hasAttribute("oscInvertQuatW")) {
+        *oscInvertQuatW_ = xmlState->getBoolAttribute("oscInvertQuatW", false);
+      }
+      if (xmlState->hasAttribute("oscInvertQuatX")) {
+        *oscInvertQuatX_ = xmlState->getBoolAttribute("oscInvertQuatX", false);
+      }
+      if (xmlState->hasAttribute("oscInvertQuatY")) {
+        *oscInvertQuatY_ = xmlState->getBoolAttribute("oscInvertQuatY", false);
+      }
+      if (xmlState->hasAttribute("oscInvertQuatZ")) {
+        *oscInvertQuatZ_ = xmlState->getBoolAttribute("oscInvertQuatZ", false);
       }
     }
   }

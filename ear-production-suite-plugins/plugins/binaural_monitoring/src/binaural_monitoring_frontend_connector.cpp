@@ -52,6 +52,27 @@ BinauralMonitoringJuceFrontendConnector::
   if (auto oscControl = oscPortControl_.lock()) {
     oscControl->removeListener(this);
   }
+  if (auto oscControl = oscInvertYawButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertPitchButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertRollButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertQuatWButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertQuatXButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertQuatYButton_.lock()) {
+    oscControl->removeListener(this);
+  }
+  if (auto oscControl = oscInvertQuatZButton_.lock()) {
+    oscControl->removeListener(this);
+  }
 
   if (listenerOrientation) {
     listenerOrientation->removeListener(this);
@@ -102,6 +123,55 @@ void BinauralMonitoringJuceFrontendConnector::setOscPortControl(
   setOscPort(cachedOscPort_);
 }
 
+void BinauralMonitoringJuceFrontendConnector::setOscInvertYawButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertYawButton_ = button;
+  setOscInvertYaw(cachedOscInvertYaw_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertPitchButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertPitchButton_ = button;
+  setOscInvertPitch(cachedOscInvertPitch_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertRollButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertRollButton_ = button;
+  setOscInvertRoll(cachedOscInvertRoll_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatWButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertQuatWButton_ = button;
+  setOscInvertQuatW(cachedOscInvertQuatW_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatXButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertQuatXButton_ = button;
+  setOscInvertQuatX(cachedOscInvertQuatX_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatYButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertQuatYButton_ = button;
+  setOscInvertQuatY(cachedOscInvertQuatY_);
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZButton(
+  std::shared_ptr<ToggleButton> button) {
+  button->addListener(this);
+  oscInvertQuatZButton_ = button;
+  setOscInvertQuatZ(cachedOscInvertQuatZ_);
+}
+
 void BinauralMonitoringJuceFrontendConnector::setListenerOrientationInstance(
     std::shared_ptr<ListenerOrientation> lo) {
   listenerOrientation = lo;
@@ -137,6 +207,7 @@ void BinauralMonitoringJuceFrontendConnector::setEuler(
   if (listenerOrientation) {
     listenerOrientation->setEuler(euler);
   }
+
 }
 
 void BinauralMonitoringJuceFrontendConnector::setQuaternion(
@@ -158,6 +229,55 @@ void BinauralMonitoringJuceFrontendConnector::setOscPort(int port) {
     oscPortLabelLocked->setValue(port, dontSendNotification);
   }
   cachedOscPort_ = port;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertYaw(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertYawButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertYaw_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertPitch(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertPitchButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertPitch_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertRoll(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertRollButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertRoll_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatW(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertQuatWButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertQuatW_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatX(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertQuatXButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertQuatX_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatY(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertQuatYButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertQuatY_ = invert;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZ(bool invert) {
+  if (auto oscInvertButtonLocked = oscInvertQuatZButton_.lock()) {
+    oscInvertButtonLocked->setToggleState(invert, dontSendNotification);
+  }
+  cachedOscInvertQuatZ_ = invert;
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
@@ -220,6 +340,56 @@ void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(
       notifyParameterChanged(ParameterId::OSC_PORT, p_->getOscPort()->get());
       setOscPort(p_->getOscPort()->get());
     });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_YAW) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_YAW,
+                             p_->getOscInvertYaw()->get());
+      setOscInvertYaw(p_->getOscInvertYaw()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_PITCH) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_PITCH,
+                             p_->getOscInvertPitch()->get());
+      setOscInvertPitch(p_->getOscInvertPitch()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_ROLL) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_ROLL,
+                             p_->getOscInvertRoll()->get());
+      setOscInvertRoll(p_->getOscInvertRoll()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_QUAT_W) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_QUAT_W,
+                             p_->getOscInvertQuatW()->get());
+      setOscInvertQuatW(p_->getOscInvertQuatW()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_QUAT_X) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_QUAT_X,
+                             p_->getOscInvertQuatX()->get());
+      setOscInvertQuatX(p_->getOscInvertQuatX()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_QUAT_Y) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_QUAT_Y,
+                             p_->getOscInvertQuatY()->get());
+      setOscInvertQuatY(p_->getOscInvertQuatY()->get());
+    });
+
+  } else if (parameterIndex == (int)ParameterId::OSC_INVERT_QUAT_Z) {
+    updater_.callOnMessageThread([this, parameterIndex, newValue]() {
+      notifyParameterChanged(ParameterId::OSC_INVERT_QUAT_Z,
+                             p_->getOscInvertQuatZ()->get());
+      setOscInvertQuatZ(p_->getOscInvertQuatZ()->get());
+    });
+
   }
 }
 
@@ -270,11 +440,39 @@ void BinauralMonitoringJuceFrontendConnector::orientationDragEnded(
 }
 
 void BinauralMonitoringJuceFrontendConnector::buttonClicked(Button* button) {
+  // note: getToggleState still has the old value for toggle types when this is called
+  //       due to setClickingTogglesState on the button intentionally being false
   if (auto oscButton = lockIfSame(oscEnableButton_, button)) {
-    // note: getToggleState still has the old value when this is called
-    //       due to setClickingTogglesState on the button being false
     bool newState = !oscButton->getToggleState();
     *(p_->getOscEnable()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertYawButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertYaw()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertPitchButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertPitch()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertRollButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertRoll()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertQuatWButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertQuatW()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertQuatXButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertQuatX()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertQuatYButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertQuatY()) = newState;
+  }
+  if (auto oscButton = lockIfSame(oscInvertQuatZButton_, button)) {
+    bool newState = !oscButton->getToggleState();
+    *(p_->getOscInvertQuatZ()) = newState;
   }
 }
 
