@@ -63,7 +63,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
-  // TODO: Fix for OSX
   configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory().getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
   restoredFromConfigFile = readConfigFile();
