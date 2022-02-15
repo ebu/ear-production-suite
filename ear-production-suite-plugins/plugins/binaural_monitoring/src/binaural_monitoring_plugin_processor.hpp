@@ -121,6 +121,11 @@ class EarBinauralMonitoringAudioProcessor
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
+  bool readConfigFile();
+  bool writeConfigFile();
+  bool restoredFromConfigFile{ false };
+  PropertiesFile::Options configFileOptions;
+
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)
 };
