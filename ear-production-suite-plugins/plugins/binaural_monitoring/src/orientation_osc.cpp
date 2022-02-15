@@ -24,9 +24,10 @@ void ListenerOrientationOscReceiver::listenForConnections(uint16_t port) {
   oscPort = port;
   isListening = osc.connect(oscPort);
   updateStatusTextForListenAttempt();
-  // osc.connect always returns true, even if it failed to bind.
-  // instead, we constantly try closing and rebinding if we've not received a message yet.
-  startTimer(timerIdPersistentListen, 1000);
+  if(!isListening) {
+    // To auto-reconnect on connection errors, we constantly try rebinding.
+    startTimer(timerIdPersistentListen, 1000);
+  }
 }
 
 void ListenerOrientationOscReceiver::disconnect() {
@@ -214,6 +215,9 @@ void ListenerOrientationOscReceiver::timerCallback(int timerId) {
     // If this timer is running, we should be listening
     isListening = osc.connect(oscPort);
     updateStatusTextForListenAttempt();
+    if(isListening) {
+      stopTimer(timerIdPersistentListen);
+    }
   }
 }
 
