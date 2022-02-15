@@ -123,7 +123,8 @@ class EarBinauralMonitoringAudioProcessor
 
   bool readConfigFile();
   bool writeConfigFile();
-  bool restoredFromConfigFile{ false };
+  enum ConfigRestoreState { NOT_RESTORED, IN_PROGRESS, RESTORED };
+  ConfigRestoreState configRestoreState{ NOT_RESTORED };
   PropertiesFile::Options configFileOptions;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(

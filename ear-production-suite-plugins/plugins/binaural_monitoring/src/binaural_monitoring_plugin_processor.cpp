@@ -61,12 +61,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   addParameter(oscInvertQuatZ_ = new ui::NonAutomatedParameter<AudioParameterBool>("oscInvertQuatZ", "Invert OSC Quaternion Z Values", false));
   /* clang-format on */
 
-  configFileOptions.applicationName = ProjectInfo::projectName;
-  configFileOptions.filenameSuffix = ".settings";
-  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory().getFullPathName();
-  configFileOptions.storageFormat = PropertiesFile::storeAsXML;
-  restoredFromConfigFile = readConfigFile();
-
   static_cast<ui::NonAutomatedParameter<AudioParameterBool>*>(oscEnable_)
       ->markPluginStateAsDirty = [this]() {
     bypass_->setValueNotifyingHost(bypass_->get());
@@ -167,6 +161,12 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
                           // get SR and block size in ctor. Made assumption -
                           // prepareToPlay will be called with correct values
                           // when required
+
+  configFileOptions.applicationName = ProjectInfo::projectName;
+  configFileOptions.filenameSuffix = ".settings";
+  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory().getFullPathName();
+  configFileOptions.storageFormat = PropertiesFile::storeAsXML;
+  readConfigFile();
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
@@ -223,6 +223,7 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
 
 bool EarBinauralMonitoringAudioProcessor::readConfigFile()
 {
+  configRestoreState = ConfigRestoreState::IN_PROGRESS;
   PropertiesFile props(configFileOptions);
   // reload() check alone isn't sufficient - returns true if file didn't exist
   if(props.reload() && props.containsKey("oscEnable")) {
@@ -235,13 +236,16 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile()
     *oscInvertQuatX_ = props.getBoolValue("oscInvertQuatX", false);
     *oscInvertQuatY_ = props.getBoolValue("oscInvertQuatY", false);
     *oscInvertQuatZ_ = props.getBoolValue("oscInvertQuatZ", false);
+    configRestoreState = ConfigRestoreState::RESTORED;
     return true;
   }
+  configRestoreState = ConfigRestoreState::NOT_RESTORED;
   return false;
 }
 
 bool EarBinauralMonitoringAudioProcessor::writeConfigFile()
 {
+  if(configRestoreState == ConfigRestoreState::IN_PROGRESS) return false;
   PropertiesFile props(configFileOptions);
   props.setValue("oscEnable", (bool)*oscEnable_);
   props.setValue("oscPort", (int)*oscPort_);
@@ -440,7 +444,7 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
   if (xmlState.get() != nullptr) {
     if (xmlState->hasTagName("BinauralMonitoringPlugin")) {
       // OSC should only restore from project data if wasn't restored from global settings (config file)
-      if(!restoredFromConfigFile) {
+      if(configRestoreState == ConfigRestoreState::NOT_RESTORED) {
         if(xmlState->hasAttribute("oscEnable")) {
           *oscEnable_ = xmlState->getBoolAttribute("oscEnable", false);
         }
