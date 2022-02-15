@@ -730,10 +730,11 @@ void JuceSceneFrontendConnector::removeTabClicked(
         p_->getProgrammeStoreMutex());
     progCount = p_->getProgrammeStore()->programme_size();
   }
-  if (progCount == 1) {
-    NativeMessageBox::showMessageBoxAsync(MessageBoxIconType::NoIcon,
-        String("Cannot delete last programme"),
-        "The Scene must always have at least one programme.", nullptr);
+  if (auto programmesContainer = programmesContainer_.lock(); programmesContainer && progCount == 1) {
+    NativeMessageBox::showMessageBox(MessageBoxIconType::NoIcon,
+                                     String("Cannot delete last programme"),
+                                     "The Scene must always have at least one programme.",
+                                     programmesContainer.get());
     return;
   }
   String programmeName;
@@ -745,11 +746,16 @@ void JuceSceneFrontendConnector::removeTabClicked(
   auto text = String("Do you really want to delete \"");
   text += String(programmeName);
   text += String("\"?");
-  if (NativeMessageBox::showOkCancelBox(MessageBoxIconType::NoIcon,
-                                   String("Delete Programme?"), text,
-                                   nullptr, nullptr)) {
-    removeProgramme(index);
-    removeProgrammeView(index);
+  if( auto programmesContainer = programmesContainer_.lock()) {
+    if (NativeMessageBox::showOkCancelBox(
+          MessageBoxIconType::NoIcon,
+          String("Delete Programme?"),
+          text,
+          programmesContainer.get(),
+          nullptr)) {
+      removeProgramme(index);
+      removeProgrammeView(index);
+    }
   }
 }
 

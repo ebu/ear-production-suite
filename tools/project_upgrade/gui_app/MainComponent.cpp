@@ -189,7 +189,7 @@ void MainComponent::filesDropped(const StringArray & files, int x, int y)
     processing = false;
     repaint();
 
-    NativeMessageBox::showMessageBoxAsync(
+    NativeMessageBox::showMessageBox(
         stats.failure > 0? AlertWindow::AlertIconType::WarningIcon : AlertWindow::AlertIconType::InfoIcon,
         "Project Upgrade Results", msg, this);
 }
