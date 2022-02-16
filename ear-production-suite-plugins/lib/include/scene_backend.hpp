@@ -51,13 +51,13 @@ class SceneBackend {
   SceneBackend(SceneBackend &&) = delete;
   SceneBackend &operator=(SceneBackend &&) = delete;
   SceneBackend &operator=(const SceneBackend &) = delete;
-  void triggerMetadataSend();
+  void triggerMetadataSend(bool forExporting = false);
   void setup();
 
   std::pair<ItemStore, proto::ProgrammeStore> stores();
 
  private:
-  communication::MessageBuffer getMessage();
+  communication::MessageBuffer getMessage(bool forExporting = false);
   void onConnectionEvent(communication::SceneConnectionManager::Event,
                          communication::ConnectionId id);
   void initializeProgrammeStore();
