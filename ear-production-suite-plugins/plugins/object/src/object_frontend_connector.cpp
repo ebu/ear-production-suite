@@ -694,10 +694,10 @@ void ObjectsJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
 }
 
 void ObjectsJuceFrontendConnector::buttonClicked(Button* button) {
-  if (auto divergenceButton = lockIfSame(std::weak_ptr<Button>(divergenceButton_), button)) {
+  if (auto divergenceButton = lockIfSame(divergenceButton_, button)) {
     // note: getToggleState still has the old value when this is called
     *(p_->getDivergence()) = !button->getToggleState();
-  } else if (auto linkSizeButton = lockIfSame(std::weak_ptr<Button>(linkSizeButton_), button)) {
+  } else if (auto linkSizeButton = lockIfSame(linkSizeButton_, button)) {
     *(p_->getLinkSize()) = !button->getToggleState();
   }
 }
