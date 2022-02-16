@@ -125,11 +125,15 @@ bool SceneAudioProcessor::isBusesLayoutSupported(
 
 void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                        MidiBuffer& midiMessages) {
-  backend_->triggerMetadataSend();
   doSampleRateChecks();
-  levelMeter_->process(buffer);
 
-  if (sendSamplesToExtension) {
+  if(!sendSamplesToExtension) {
+    backend_->triggerMetadataSend();
+    levelMeter_->process(buffer);
+
+  } else {
+    backend_->triggerMetadataSend(true);
+
     size_t sampleSize = sizeof(float);
     uint8_t numChannels = 64;
     size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize;

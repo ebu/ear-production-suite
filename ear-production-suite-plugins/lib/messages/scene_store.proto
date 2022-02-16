@@ -8,4 +8,5 @@ import "input_item_metadata.proto";
 message SceneStore {
   repeated MonitoringItemMetadata monitoring_items = 1;
   repeated InputItemMetadata all_available_items = 2;
+  optional bool is_exporting = 3 [default = false];
 }

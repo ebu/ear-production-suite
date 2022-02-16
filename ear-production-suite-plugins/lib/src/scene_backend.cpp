@@ -28,20 +28,26 @@ SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend)
 
 SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
 
-communication::MessageBuffer SceneBackend::getMessage() {
+communication::MessageBuffer SceneBackend::getMessage(bool forExporting) {
   std::lock_guard<std::mutex> lock(storeMutex_);
   if (rebuildSceneStore_) {
     rebuildSceneStore_ = false;
     updateSceneStore();
   }
+  sceneStore_.set_is_exporting(forExporting);
   communication::MessageBuffer buffer =
       communication::allocBuffer(sceneStore_.ByteSizeLong());
   sceneStore_.SerializeToArray(buffer.data(), buffer.size());
   return buffer;
 }
 
-void SceneBackend::triggerMetadataSend() {
-  auto message = getMessage();
+void SceneBackend::triggerMetadataSend(bool forExporting) {
+  if(forExporting && sceneStore_.is_exporting()) {
+    // Have already informed - no need to repeat
+    return;
+  }
+
+  auto message = getMessage(forExporting);
   metadataSender_.asyncWait();
   metadataSender_.asyncSend(
       message, [this](std::error_code ec, const nng::Message&) {
