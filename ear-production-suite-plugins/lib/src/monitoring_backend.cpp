@@ -48,8 +48,10 @@ MonitoringBackend::~MonitoringBackend() {
 }
 
 void MonitoringBackend::onSceneReceived(proto::SceneStore store) {
+  isExporting_ = store.has_is_exporting() && store.is_exporting();
   updateActiveGains(std::move(store));
 }
+
 GainHolder MonitoringBackend::currentGains() {
   std::lock_guard<std::mutex> lock(gainsMutex_);
   return gains_;
