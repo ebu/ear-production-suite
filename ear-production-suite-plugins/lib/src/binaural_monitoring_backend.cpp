@@ -207,6 +207,8 @@ BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id) {
 }
 
 void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
+  isExporting_ = store.has_is_exporting() && store.is_exporting();
+
   size_t totalDsChannels = 0;
   size_t totalObjChannels = 0;
   size_t totalHoaChannels = 0;

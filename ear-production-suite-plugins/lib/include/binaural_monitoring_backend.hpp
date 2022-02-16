@@ -96,6 +96,8 @@ class BinauralMonitoringBackend {
 
   std::shared_ptr<ear::plugin::ListenerOrientation> listenerOrientation;
 
+  bool isExporting() { return isExporting_; }
+
  private:
   void onSceneReceived(proto::SceneStore store);
   void onConnection(communication::ConnectionId connectionId,
@@ -133,6 +135,8 @@ class BinauralMonitoringBackend {
 
   std::mutex commonDefinitionHelperMutex_;
   AdmCommonDefinitionHelper commonDefinitionHelper{};
+
+  bool isExporting_{ false };
 };
 
 }  // namespace plugin

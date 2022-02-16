@@ -330,10 +330,29 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   ScopedNoDenormals noDenormals;
 
   stopTimer();
+
+  if(bypass_->get() || backend_->isExporting()) {
+    if(getTotalNumOutputChannels() > 0 && getTotalNumInputChannels() > 0) {
+      // Sum all in to first channel
+      for(int srcChn = 1; srcChn < buffer.getNumChannels(); srcChn++) {
+        buffer.addFrom(0, 0, buffer.getReadPointer(srcChn), buffer.getNumSamples());
+      }
+      // Copy to/zero others
+      for(int destChn = 1; destChn < buffer.getNumChannels(); destChn++) {
+        if(destChn < getTotalNumOutputChannels()) {
+          buffer.copyFrom(destChn, 0, buffer.getReadPointer(0), buffer.getNumSamples());
+        } else {
+          for(int sampleNum = 0; sampleNum < buffer.getNumSamples(); sampleNum++) {
+            buffer.setSample(destChn, sampleNum, 0.f);
+          }
+        }
+      }
+    }
+    return;
+  }
+
   std::lock_guard<std::mutex> lock(processorMutex_);
   processor_->setIsPlaying(true);
-
-  if (bypass_->get()) return;
 
   auto objIds = backend_->getActiveObjectIds();
   auto dsIds = backend_->getActiveDirectSpeakersIds();
