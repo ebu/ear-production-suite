@@ -10,8 +10,12 @@ using std::placeholders::_2;
 
 namespace {
   template<typename T>
-  bool vectorContains(std::vector<T> &v, T k) {
+  bool vectorContains(std::vector<T> const& v, T k) {
     return std::find(v.begin(), v.end(), k) != v.end();
+  }
+
+  bool isValidId(std::string const& id) {
+    return !(id.empty() || id == "00000000-0000-0000-0000-000000000000");
   }
 }
 
@@ -212,8 +216,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   for (const auto& item : store.all_available_items()) {
     if(item.has_connection_id() &&
-       item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
-       item.connection_id() != "") {
+       isValidId(item.connection_id())) {
       availableItemIds.push_back(item.connection_id());
     }
     if (item.has_ds_metadata()) {
@@ -246,8 +249,7 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
 
   for (const auto& item : store.monitoring_items()) {
     if (item.has_connection_id() &&
-        item.connection_id() != "00000000-0000-0000-0000-000000000000" &&
-        item.connection_id() != "" &&
+        isValidId(item.connection_id()) &&
         vectorContains(availableItemIds, item.connection_id())) {
 
       bool newItem = !vectorContains(allActiveIds, item.connection_id());
