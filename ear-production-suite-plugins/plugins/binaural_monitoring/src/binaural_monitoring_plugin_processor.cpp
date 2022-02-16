@@ -190,7 +190,7 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
       }
     } else {
       // Invert control
-      oscReceiver.setInverts(
+      oscReceiver.setInverts({
         oscInvertYaw_->get(),
         oscInvertPitch_->get(),
         oscInvertRoll_->get(),
@@ -198,7 +198,7 @@ void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
         oscInvertQuatX_->get(),
         oscInvertQuatY_->get(),
         oscInvertQuatZ_->get()
-      );
+      });
     }
     writeConfigFile();
   }

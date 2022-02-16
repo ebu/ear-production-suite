@@ -39,9 +39,9 @@ void ListenerOrientationOscReceiver::disconnect() {
   if(onInputTypeChange) onInputTypeChange(InputType::None);
 }
 
-void ListenerOrientationOscReceiver::setInverts(bool y, bool p, bool r, bool qW, bool qX, bool qY, bool qZ)
+void ListenerOrientationOscReceiver::setInverts(Inversions newInverts)
 {
-  invert = {y, p, r, qW, qX, qY, qZ};
+  invert = newInverts;
   if(lastReceivedType == InputType::Euler) doEulerCallback();
   if(lastReceivedType == InputType::Quaternion) doQuaternionCallback();
 }
