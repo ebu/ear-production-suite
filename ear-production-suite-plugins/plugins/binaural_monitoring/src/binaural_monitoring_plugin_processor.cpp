@@ -4,6 +4,7 @@
 #include "binaural_monitoring_frontend_connector.hpp"
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
+#include <version/eps_version.h>
 
 #define DEFAULT_OSC_PORT 8000
 
@@ -164,7 +165,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
-  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory().getFullPathName();
+  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getChildFile("ear-production-suite").getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
   readConfigFile();
 }
@@ -226,7 +227,7 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile()
   configRestoreState = ConfigRestoreState::IN_PROGRESS;
   PropertiesFile props(configFileOptions);
   // reload() check alone isn't sufficient - returns true if file didn't exist
-  if(props.reload() && props.containsKey("oscEnable")) {
+  if(props.reload() && props.getAllProperties().size() > 0) {
     *oscEnable_ = props.getBoolValue("oscEnable", false);
     *oscPort_ = props.getIntValue("oscPort", DEFAULT_OSC_PORT);
     *oscInvertYaw_ = props.getBoolValue("oscInvertYaw", false);
@@ -247,6 +248,7 @@ bool EarBinauralMonitoringAudioProcessor::writeConfigFile()
 {
   if(configRestoreState == ConfigRestoreState::IN_PROGRESS) return false;
   PropertiesFile props(configFileOptions);
+  props.setValue("epsVersion", juce::String(eps::baseVersion()));
   props.setValue("oscEnable", (bool)*oscEnable_);
   props.setValue("oscPort", (int)*oscPort_);
   props.setValue("oscInvertYaw", (bool)*oscInvertYaw_);
@@ -422,7 +424,6 @@ void EarBinauralMonitoringAudioProcessor::getStateInformation(
 
   std::unique_ptr<XmlElement> xml(new XmlElement("BinauralMonitoringPlugin"));
   xml->setAttribute("oscEnable", (bool)*oscEnable_);
-  // TODO: Really, the OSC settings should be user-data, not project-data
   xml->setAttribute("oscPort", (int)*oscPort_);
   xml->setAttribute("oscInvertYaw", (bool)*oscInvertYaw_);
   xml->setAttribute("oscInvertPitch", (bool)*oscInvertPitch_);
