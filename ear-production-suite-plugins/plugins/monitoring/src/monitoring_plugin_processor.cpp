@@ -137,6 +137,27 @@ bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
 void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                MidiBuffer&) {
   ScopedNoDenormals noDenormals;
+
+  if(backend_->isExporting()) {
+    if(getTotalNumOutputChannels() > 0 && getTotalNumInputChannels() > 0) {
+      // Sum all in to first channel
+      for(int srcChn = 1; srcChn < buffer.getNumChannels(); srcChn++) {
+        buffer.addFrom(0, 0, buffer.getReadPointer(srcChn), buffer.getNumSamples());
+      }
+      // Copy to/zero others
+      for(int destChn = 1; destChn < buffer.getNumChannels(); destChn++) {
+        if(destChn < getTotalNumOutputChannels()) {
+          buffer.copyFrom(destChn, 0, buffer.getReadPointer(0), buffer.getNumSamples());
+        } else {
+          for(int sampleNum = 0; sampleNum < buffer.getNumSamples(); sampleNum++) {
+            buffer.setSample(destChn, sampleNum, 0.f);
+          }
+        }
+      }
+    }
+    return;
+  }
+
   auto gains = backend_->currentGains();
 
   // Make sure to reset the state if your inner loop is processing

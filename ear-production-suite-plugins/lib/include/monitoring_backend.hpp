@@ -32,6 +32,8 @@ class MonitoringBackend {
 
   GainHolder currentGains();
 
+  bool isExporting() { return isExporting_; }
+
  private:
   void onSceneReceived(proto::SceneStore store);
   void onConnection(communication::ConnectionId connectionId,
@@ -48,6 +50,7 @@ class MonitoringBackend {
   std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
   communication::MonitoringControlConnection controlConnection_;
 
+  bool isExporting_{ false };
 };
 
 }  // namespace plugin
