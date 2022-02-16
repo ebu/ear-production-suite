@@ -48,6 +48,11 @@ class EarSlider : public Slider {
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarSlider)
 };
 
+enum class SliderAction {
+  UPDATE,
+  DRAG_START,
+  DRAG_END
+};
 }  // namespace ui
 }  // namespace plugin
 }  // namespace ear

@@ -2,6 +2,7 @@
 
 #include "value_box_order_display.hpp"
 #include "components/ear_name_text_editor.hpp"
+#include "detail/weak_ptr_helpers.hpp"
 
 namespace {
 String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
@@ -13,6 +14,8 @@ String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
 namespace ear {
 namespace plugin {
 namespace ui {
+
+using detail::lockIfSame;
 
 inline bool clipToBool(float value) { return value < 0.5 ? false : true; }
 
@@ -193,17 +196,15 @@ void HoaJuceFrontendConnector::trackPropertiesChanged(
 }
 
 void HoaJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
-  if (!hoaTypeComboBox_.expired() &&
-      comboBox == hoaTypeComboBox_.lock().get()) {
-    if(comboBox->hasSelection()) {
-      *(p_->getPackFormatIdValue()) = comboBox->getSelectedId();
+  if(auto hoaTypeComboBox = lockIfSame(hoaTypeComboBox_, comboBox)) {
+    if(hoaTypeComboBox->hasSelection()) {
+      *(p_->getPackFormatIdValue()) = hoaTypeComboBox->getSelectedId();
     } else {
       *(p_->getPackFormatIdValue()) = 0;
     }
   }
-  if (!routingComboBox_.expired() &&
-      comboBox == routingComboBox_.lock().get()) {
-    *(p_->getRouting()) = comboBox->getSelectedEntryIndex();
+  if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
+    *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
   }
 }
 

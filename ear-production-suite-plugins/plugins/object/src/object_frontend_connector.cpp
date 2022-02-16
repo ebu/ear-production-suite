@@ -2,14 +2,17 @@
 
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
-#include "components/ear_slider.hpp"
 #include "components/ear_inverted_slider.hpp"
 #include "components/panner_top_view.hpp"
 #include "components/panner_side_view.hpp"
 
+#include "detail/weak_ptr_helpers.hpp"
+
 namespace ear {
 namespace plugin {
 namespace ui {
+
+using detail::lockIfSame;
 
 inline bool clipToBool(float value) { return value < 0.5 ? false : true; }
 
@@ -557,105 +560,91 @@ void ObjectsJuceFrontendConnector::trackPropertiesChanged(
   });
 }
 
-void ObjectsJuceFrontendConnector::sliderValueChanged(Slider* slider) {
-  if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
-    *(p_->getGain()) = slider->getValue();
-  } else if (!azimuthSlider_.expired() &&
-             slider == azimuthSlider_.lock().get()) {
-    *(p_->getAzimuth()) = slider->getValue();
-  } else if (!elevationSlider_.expired() &&
-             slider == elevationSlider_.lock().get()) {
-    *(p_->getElevation()) = slider->getValue();
-  } else if (!distanceSlider_.expired() &&
-             slider == distanceSlider_.lock().get()) {
-    *(p_->getDistance()) = slider->getValue();
-  } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
-    auto value = static_cast<float>(slider->getValue());
-    *(p_->getSize()) = value;
-    *(p_->getWidth()) = value;
-    *(p_->getHeight()) = value;
-    *(p_->getDepth()) = value;
-  } else if (!widthSlider_.expired() && slider == widthSlider_.lock().get()) {
-    *(p_->getWidth()) = slider->getValue();
-  } else if (!heightSlider_.expired() && slider == heightSlider_.lock().get()) {
-    *(p_->getHeight()) = slider->getValue();
-  } else if (!depthSlider_.expired() && slider == depthSlider_.lock().get()) {
-    *(p_->getDepth()) = slider->getValue();
-  } else if (!diffuseSlider_.expired() &&
-             slider == diffuseSlider_.lock().get()) {
-    *(p_->getDiffuse()) = slider->getValue();
-  } else if (!factorSlider_.expired() && slider == factorSlider_.lock().get()) {
-    *(p_->getFactor()) = slider->getValue();
-  } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
-    *(p_->getRange()) = slider->getValue();
+namespace {
+void performSliderAction(AudioParameterFloat* p,
+              std::shared_ptr<Slider> const& slider,
+              SliderAction action) {
+  switch(action) {
+    case SliderAction::UPDATE: {
+      *p = static_cast<float>(slider->getValue());
+      break;
+    }
+    case SliderAction::DRAG_START: {
+      p->beginChangeGesture();
+      break;
+    }
+    case SliderAction::DRAG_END: {
+      p->endChangeGesture();
+      break;
+    }
+    }
   }
+}
+
+void ObjectsJuceFrontendConnector::sliderValueChanged(Slider* slider) {
+  dispatchSliderAction(slider, SliderAction::UPDATE);
 }
 
 void ObjectsJuceFrontendConnector::sliderDragStarted(Slider* slider) {
-  if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
-    p_->getGain()->beginChangeGesture();
-  } else if (!azimuthSlider_.expired() &&
-             slider == azimuthSlider_.lock().get()) {
-    p_->getAzimuth()->beginChangeGesture();
-  } else if (!elevationSlider_.expired() &&
-             slider == elevationSlider_.lock().get()) {
-    p_->getElevation()->beginChangeGesture();
-  } else if (!distanceSlider_.expired() &&
-             slider == distanceSlider_.lock().get()) {
-    p_->getDistance()->beginChangeGesture();
-  } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
-    p_->getSize()->beginChangeGesture();
-    p_->getWidth()->beginChangeGesture();
-    p_->getHeight()->beginChangeGesture();
-    p_->getDepth()->beginChangeGesture();
-  } else if (!widthSlider_.expired() && slider == widthSlider_.lock().get()) {
-    p_->getWidth()->beginChangeGesture();
-  } else if (!heightSlider_.expired() && slider == heightSlider_.lock().get()) {
-    p_->getHeight()->beginChangeGesture();
-  } else if (!diffuseSlider_.expired() &&
-             slider == diffuseSlider_.lock().get()) {
-    p_->getDiffuse()->beginChangeGesture();
-  } else if (!factorSlider_.expired() && slider == factorSlider_.lock().get()) {
-    p_->getFactor()->beginChangeGesture();
-  } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
-    p_->getRange()->beginChangeGesture();
-  }
+  dispatchSliderAction(slider, SliderAction::DRAG_START);
 }
 
 void ObjectsJuceFrontendConnector::sliderDragEnded(Slider* slider) {
-  if (!gainSlider_.expired() && slider == gainSlider_.lock().get()) {
-    p_->getGain()->endChangeGesture();
-  } else if (!azimuthSlider_.expired() &&
-             slider == azimuthSlider_.lock().get()) {
-    p_->getAzimuth()->endChangeGesture();
-  } else if (!elevationSlider_.expired() &&
-             slider == elevationSlider_.lock().get()) {
-    p_->getElevation()->endChangeGesture();
-  } else if (!distanceSlider_.expired() &&
-             slider == distanceSlider_.lock().get()) {
-    p_->getDistance()->endChangeGesture();
-  } else if (!sizeSlider_.expired() && slider == sizeSlider_.lock().get()) {
-    p_->getSize()->endChangeGesture();
-    p_->getWidth()->endChangeGesture();
-    p_->getHeight()->endChangeGesture();
-    p_->getDepth()->endChangeGesture();
-  } else if (!widthSlider_.expired() && slider == widthSlider_.lock().get()) {
-    p_->getWidth()->endChangeGesture();
-  } else if (!heightSlider_.expired() && slider == heightSlider_.lock().get()) {
-    p_->getHeight()->endChangeGesture();
-  } else if (!diffuseSlider_.expired() &&
-             slider == diffuseSlider_.lock().get()) {
-    p_->getDiffuse()->endChangeGesture();
-  } else if (!factorSlider_.expired() && slider == factorSlider_.lock().get()) {
-    p_->getFactor()->endChangeGesture();
-  } else if (!rangeSlider_.expired() && slider == rangeSlider_.lock().get()) {
-    p_->getRange()->endChangeGesture();
+  dispatchSliderAction(slider, SliderAction::DRAG_END);
+}
+
+void ObjectsJuceFrontendConnector::dispatchSliderAction(Slider* slider, SliderAction action) {
+  if(auto gainSlider = lockIfSame(gainSlider_, slider)) {
+    performSliderAction(p_->getGain(), gainSlider, action);
+    return;
+  }
+  if(auto azimuthSlider = lockIfSame(azimuthSlider_, slider)) {
+    performSliderAction(p_->getAzimuth(), azimuthSlider, action);
+    return;
+  }
+  if(auto elevationSlider = lockIfSame(elevationSlider_, slider)) {
+    performSliderAction(p_->getElevation(), elevationSlider, action);
+    return;
+  }
+  if(auto distanceSlider = lockIfSame(distanceSlider_, slider)) {
+    performSliderAction(p_->getDistance(), distanceSlider, action);
+    return;
+  }
+  if(auto sizeSlider = lockIfSame(sizeSlider_, slider)) {
+    performSliderAction(p_->getHeight(), sizeSlider, action);
+    performSliderAction(p_->getWidth(), sizeSlider, action);
+    performSliderAction(p_->getDepth(), sizeSlider, action);
+    return;
+  }
+  if(auto heightSlider = lockIfSame(heightSlider_, slider)) {
+    performSliderAction(p_->getHeight(), heightSlider, action);
+    return;
+  }
+  if(auto widthSlider = lockIfSame(widthSlider_, slider)) {
+    performSliderAction(p_->getWidth(), widthSlider, action);
+    return;
+  }
+  if(auto depthSlider = lockIfSame(depthSlider_, slider)) {
+    performSliderAction(p_->getDepth(), depthSlider, action);
+    return;
+  }
+  if(auto diffuseSlider = lockIfSame(diffuseSlider_, slider)) {
+    performSliderAction(p_->getDiffuse(), diffuseSlider, action);
+    return;
+  }
+  if(auto factorSlider = lockIfSame(factorSlider_, slider)) {
+    performSliderAction(p_->getFactor(), factorSlider, action);
+    return;
+  }
+  if(auto rangeSlider = lockIfSame(rangeSlider_, slider)) {
+    performSliderAction(p_->getRange(), rangeSlider, action);
+    return;
   }
 }
 
 void ObjectsJuceFrontendConnector::pannerValueChanged(
     ear::plugin::ui::PannerTopView* panner) {
-  if (!pannerTopView_.expired() && panner == pannerTopView_.lock().get()) {
+  if (auto pannerTopView = lockIfSame(pannerTopView_, panner)) {
     *(p_->getAzimuth()) = panner->getAzimuth();
     *(p_->getDistance()) = panner->getDistance();
   }
@@ -663,7 +652,7 @@ void ObjectsJuceFrontendConnector::pannerValueChanged(
 
 void ObjectsJuceFrontendConnector::pannerDragStarted(
     ear::plugin::ui::PannerTopView* panner) {
-  if (!pannerTopView_.expired() && panner == pannerTopView_.lock().get()) {
+  if (auto pannerTopView = lockIfSame(pannerTopView_, panner)) {
     p_->getAzimuth()->beginChangeGesture();
     p_->getDistance()->beginChangeGesture();
   }
@@ -671,7 +660,7 @@ void ObjectsJuceFrontendConnector::pannerDragStarted(
 
 void ObjectsJuceFrontendConnector::pannerDragEnded(
     ear::plugin::ui::PannerTopView* panner) {
-  if (!pannerTopView_.expired() && panner == pannerTopView_.lock().get()) {
+  if (auto pannerTopView = lockIfSame(pannerTopView_, panner)) {
     p_->getAzimuth()->endChangeGesture();
     p_->getDistance()->endChangeGesture();
   }
@@ -679,39 +668,36 @@ void ObjectsJuceFrontendConnector::pannerDragEnded(
 
 void ObjectsJuceFrontendConnector::pannerValueChanged(
     ear::plugin::ui::PannerSideView* panner) {
-  if (!pannerSideView_.expired() && panner == pannerSideView_.lock().get()) {
+  if (auto pannerSideView = lockIfSame(pannerSideView_, panner)) {
     *(p_->getElevation()) = panner->getElevation();
   }
 }
 
 void ObjectsJuceFrontendConnector::pannerDragStarted(
     ear::plugin::ui::PannerSideView* panner) {
-  if (!pannerSideView_.expired() && panner == pannerSideView_.lock().get()) {
+  if (auto pannerSideView = lockIfSame(pannerSideView_, panner)) {
     p_->getElevation()->beginChangeGesture();
   }
 }
 
 void ObjectsJuceFrontendConnector::pannerDragEnded(
     ear::plugin::ui::PannerSideView* panner) {
-  if (!pannerSideView_.expired() && panner == pannerSideView_.lock().get()) {
+  if (auto pannerSideView = lockIfSame(pannerSideView_, panner)) {
     p_->getElevation()->endChangeGesture();
   }
 }
 
 void ObjectsJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
-  if (!routingComboBox_.expired() &&
-      comboBox == routingComboBox_.lock().get()) {
+  if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
     *(p_->getRouting()) = comboBox->getSelectedEntryIndex();
   }
 }
 
 void ObjectsJuceFrontendConnector::buttonClicked(Button* button) {
-  if (!divergenceButton_.expired() &&
-      button == divergenceButton_.lock().get()) {
+  if (auto divergenceButton = lockIfSame(divergenceButton_, button)) {
     // note: getToggleState still has the old value when this is called
     *(p_->getDivergence()) = !button->getToggleState();
-  } else if (!linkSizeButton_.expired() &&
-             button == linkSizeButton_.lock().get()) {
+  } else if (auto linkSizeButton = lockIfSame(linkSizeButton_, button)) {
     *(p_->getLinkSize()) = !button->getToggleState();
   }
 }
