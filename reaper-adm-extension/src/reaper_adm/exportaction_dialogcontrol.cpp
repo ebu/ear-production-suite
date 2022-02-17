@@ -151,6 +151,17 @@ LRESULT RenderDialogControl::RenderDialogState::selectInComboBox(HWND hwnd, std:
 
 void RenderDialogControl::RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
 {
+    // Our dialog displayed - reset all vars (might not be the first time around)
+    boundsControlHwnd.reset();
+    sourceControlHwnd.reset();
+    presetsControlHwnd.reset();
+    sampleRateControlHwnd.reset();
+    channelsControlHwnd.reset();
+    sampleRateControlSetError = false;
+    channelsControlSetError = false;
+    sampleRateLastOption.clear();
+    channelsLastOption.clear();
+
     startedPrepareDialogControls = true; // Prevents paint message relauching this
     EnableWindow(GetDlgItem(hwndDlg, IDC_BUTTON_REFRESH), false);
     SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), LPCSTR("\r\nValidating Project Structure...\r\n\r\nPlease Wait..."));
