@@ -162,6 +162,24 @@ using ResponsePayloadVariant =
                    CloseConnectionResponse, ConnectionDetailsResponse,
                    MonitoringConnectionDetailsResponse>;
 
+class ResponsePayloadPrinter : public boost::static_visitor<void> {
+ public:
+  void operator()(GenericResponse const& response) const {
+    std::cout << "GenericResponse" << std::endl;
+  }
+  void operator()(NewConnectionResponse const& response) const {
+    std::cout << "NewConnectionResponse" << std::endl;
+  }
+  void operator()(CloseConnectionResponse const& response) const {
+    std::cout << "CloseConnectionResponse" << std::endl;
+  }
+  void operator()(ConnectionDetailsResponse const& response) const {
+    std::cout << "ConnectionDetailsResponse" << std::endl;
+  }
+  void operator()(MonitoringConnectionDetailsResponse const& response) const {
+    std::cout << "MonitoringConnectionDetailsResponse" << std::endl;
+  }
+};
 /**
  * @brief Wraps the response send to a client
  *

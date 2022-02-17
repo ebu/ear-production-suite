@@ -76,8 +76,14 @@ void InputControlConnection::handshake() {
                          resp.errorDescription());
         return;
       }
-      auto payload = resp.payloadAs<ConnectionDetailsResponse>();
-      auto streamEndpoint = payload.metadataEndpoint();
+      auto payloadVariant = resp.payload();
+      auto payload = boost::get<ConnectionDetailsResponse>(&payloadVariant);
+      if(!payload) {
+        ResponsePayloadPrinter printer;
+        boost::apply_visitor(printer, payloadVariant);
+        throw std::runtime_error("bad connection response");
+      }
+      auto streamEndpoint = payload->metadataEndpoint();
       EAR_LOGGER_DEBUG(logger_,
                        "Received {} as target endpoint for metadata streaming",
                        streamEndpoint);
