@@ -1,0 +1,27 @@
+From 92991c9f44c82d3e1b2d0c54aa10e6ca3246c66f Mon Sep 17 00:00:00 2001
+From: Matt Firth <matt.firth@bbc.co.uk>
+Date: Tue, 15 Feb 2022 12:38:32 +0000
+Subject: [PATCH 1/1] Allow Windows to detect UDP port open fail
+
+---
+ modules/juce_core/network/juce_Socket.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules/juce_core/network/juce_Socket.cpp b/modules/juce_core/network/juce_Socket.cpp
+index 4a23600cc..5ee4f6fba 100644
+--- a/modules/juce_core/network/juce_Socket.cpp
++++ b/modules/juce_core/network/juce_Socket.cpp
+@@ -637,7 +637,9 @@ DatagramSocket::DatagramSocket (bool canBroadcast)
+     if (handle >= 0)
+     {
+         SocketHelpers::resetSocketOptions ((SocketHandle) handle.load(), true, canBroadcast);
+-        SocketHelpers::makeReusable (handle);
++#if ! JUCE_WINDOWS // on windows, adding this option produces behaviour different to posix
++        SocketHelpers::makeReusable (handle);
++#endif
+     }
+ }
+ 
+-- 
+2.28.0.windows.1
+

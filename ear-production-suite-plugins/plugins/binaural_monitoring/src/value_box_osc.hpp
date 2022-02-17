@@ -1,5 +1,7 @@
 #pragma once
 
+#include "orientation_osc.hpp"
+
 #include "JuceHeader.h"
 
 #include "components/look_and_feel/colours.hpp"
@@ -54,8 +56,64 @@ namespace ui {
 
 class ValueBoxOsc : public Component {
 public:
+
+  void setInputTypeHighlight(ListenerOrientationOscReceiver::InputType inputType, bool forceUpdate = false) {
+    const auto activeText = EarColours::Label.withAlpha(0.5f);
+    const auto inactiveText = EarColours::Label.withAlpha(0.25f);
+    const auto activeTick = EarColours::PrimaryVariant;
+    const auto inactiveTick = EarColours::Primary;
+
+    if(inputType == lastInputTypeGuiUpdate && !forceUpdate) return;
+
+    if(inputType == ListenerOrientationOscReceiver::InputType::Euler) {
+      invY_->setColour(ToggleButton::textColourId, activeText);
+      invY_->setColour(ToggleButton::tickColourId, activeTick);
+      invP_->setColour(ToggleButton::textColourId, activeText);
+      invP_->setColour(ToggleButton::tickColourId, activeTick);
+      invR_->setColour(ToggleButton::textColourId, activeText);
+      invR_->setColour(ToggleButton::tickColourId, activeTick);
+    } else {
+      invY_->setColour(ToggleButton::textColourId, inactiveText);
+      invY_->setColour(ToggleButton::tickColourId, inactiveTick);
+      invP_->setColour(ToggleButton::textColourId, inactiveText);
+      invP_->setColour(ToggleButton::tickColourId, inactiveTick);
+      invR_->setColour(ToggleButton::textColourId, inactiveText);
+      invR_->setColour(ToggleButton::tickColourId, inactiveTick);
+    }
+
+    if(inputType == ListenerOrientationOscReceiver::InputType::Quaternion) {
+      invQW_->setColour(ToggleButton::textColourId, activeText);
+      invQW_->setColour(ToggleButton::tickColourId, activeTick);
+      invQX_->setColour(ToggleButton::textColourId, activeText);
+      invQX_->setColour(ToggleButton::tickColourId, activeTick);
+      invQY_->setColour(ToggleButton::textColourId, activeText);
+      invQY_->setColour(ToggleButton::tickColourId, activeTick);
+      invQZ_->setColour(ToggleButton::textColourId, activeText);
+      invQZ_->setColour(ToggleButton::tickColourId, activeTick);
+    } else {
+      invQW_->setColour(ToggleButton::textColourId, inactiveText);
+      invQW_->setColour(ToggleButton::tickColourId, inactiveTick);
+      invQX_->setColour(ToggleButton::textColourId, inactiveText);
+      invQX_->setColour(ToggleButton::tickColourId, inactiveTick);
+      invQY_->setColour(ToggleButton::textColourId, inactiveText);
+      invQY_->setColour(ToggleButton::tickColourId, inactiveTick);
+      invQZ_->setColour(ToggleButton::textColourId, inactiveText);
+      invQZ_->setColour(ToggleButton::tickColourId, inactiveTick);
+    }
+
+    lastInputTypeGuiUpdate = inputType;
+  }
+
    ValueBoxOsc() :
         enableButton_(std::make_shared<EarButton>()),
+        invertLabel_(std::make_unique<Label>()),
+        invY_(std::make_shared<ToggleButton>()),
+        invP_(std::make_shared<ToggleButton>()),
+        invR_(std::make_shared<ToggleButton>()),
+        invQW_(std::make_shared<ToggleButton>()),
+        invQX_(std::make_shared<ToggleButton>()),
+        invQY_(std::make_shared<ToggleButton>()),
+        invQZ_(std::make_shared<ToggleButton>()),
         portLabel_(std::make_unique<Label>()),
         portControl_(std::make_shared<EarSlider>()),
         statusLabel_(std::make_shared<Label>()) {
@@ -93,6 +151,46 @@ public:
     statusLabel_->setText("Initialising...", juce::NotificationType::dontSendNotification);
     statusLabel_->setJustificationType(Justification::left);
     addAndMakeVisible(statusLabel_.get());
+
+    invertLabel_->setFont(EarFonts::Label);
+    invertLabel_->setColour(Label::textColourId, EarColours::Label);
+    invertLabel_->setText("Inversion", juce::NotificationType::dontSendNotification);
+    invertLabel_->setJustificationType(Justification::left);
+    addAndMakeVisible(invertLabel_.get());
+
+    setInputTypeHighlight(ListenerOrientationOscReceiver::InputType::None, true);
+
+    // Note: MUST setClickingTogglesState(false) on ToggleButtons;
+    /// It is true by default and State is handled completely by
+    ///  BinauralMonitoringJuceFrontendConnector
+
+    invY_->setButtonText("Yaw");
+    invY_->setClickingTogglesState(false);
+    addAndMakeVisible(invY_.get());
+
+    invP_->setButtonText("Pitch");
+    invP_->setClickingTogglesState(false);
+    addAndMakeVisible(invP_.get());
+
+    invR_->setButtonText("Roll");
+    invR_->setClickingTogglesState(false);
+    addAndMakeVisible(invR_.get());
+
+    invQW_->setButtonText("Quat W");
+    invQW_->setClickingTogglesState(false);
+    addAndMakeVisible(invQW_.get());
+
+    invQX_->setButtonText("Quat X");
+    invQX_->setClickingTogglesState(false);
+    addAndMakeVisible(invQX_.get());
+
+    invQY_->setButtonText("Quat Y");
+    invQY_->setClickingTogglesState(false);
+    addAndMakeVisible(invQY_.get());
+
+    invQZ_->setButtonText("Quat Z");
+    invQZ_->setClickingTogglesState(false);
+    addAndMakeVisible(invQZ_.get());
   }
 
   ~ValueBoxOsc() {}
@@ -108,26 +206,56 @@ public:
 
   void resized() override {
     auto area = getLocalBounds();
-    float yReduction = ((float)area.getHeight() - narrowRowHeight_) / 2.f;
+    float yReduction = ((float)area.getHeight() - (narrowRowHeight_ * 2.f)) / 4.f;
     area.reduce(marginSmall_, yReduction);
-
     area.removeFromLeft(marginBig_);
+
+    auto bottomRow = area.removeFromBottom(area.getHeight() - narrowRowHeight_ - marginSmall_);
+    area = area.removeFromTop(narrowRowHeight_);
+
     enableButton_->setBounds(area.removeFromLeft(140));
     portLabel_->setBounds(area.removeFromLeft(35));
     portControl_->setBounds(area.removeFromLeft(50));
     area.removeFromLeft(marginBig_ + marginBig_);
     statusLabel_->setBounds(area);
+
+    bottomRow.removeFromLeft(marginBig_ * 2);
+    invertLabel_->setBounds(bottomRow.removeFromLeft(80));
+
+    int squash = (bottomRow.getHeight() - 16) / 2;
+    bottomRow.removeFromTop(squash);
+    bottomRow.removeFromBottom(squash);
+    invY_->setBounds(bottomRow.removeFromLeft(60));
+    invP_->setBounds(bottomRow.removeFromLeft(60));
+    invR_->setBounds(bottomRow.removeFromLeft(60));
+    invQW_->setBounds(bottomRow.removeFromLeft(75));
+    invQX_->setBounds(bottomRow.removeFromLeft(75));
+    invQY_->setBounds(bottomRow.removeFromLeft(75));
+    invQZ_->setBounds(bottomRow.removeFromLeft(75));
+
   }
 
   std::shared_ptr<ear::plugin::ui::EarButton> getEnableButton() { return enableButton_; }
   std::shared_ptr<EarSlider> getPortControl() { return portControl_; }
   std::shared_ptr<Label> getStatusLabel() { return statusLabel_; }
+  std::shared_ptr<ToggleButton> getInvertYawButton() { return invY_; }
+  std::shared_ptr<ToggleButton> getInvertPitchButton() { return invP_; }
+  std::shared_ptr<ToggleButton> getInvertRollButton() { return invR_; }
+  std::shared_ptr<ToggleButton> getInvertQuatWButton() { return invQW_; }
+  std::shared_ptr<ToggleButton> getInvertQuatXButton() { return invQX_; }
+  std::shared_ptr<ToggleButton> getInvertQuatYButton() { return invQY_; }
+  std::shared_ptr<ToggleButton> getInvertQuatZButton() { return invQZ_; }
 
 private:
   std::unique_ptr<Label> portLabel_;
   std::shared_ptr<ear::plugin::ui::EarButton> enableButton_;
   std::shared_ptr<EarSlider> portControl_;
   std::shared_ptr<Label> statusLabel_;
+  std::unique_ptr<Label> invertLabel_;
+  std::shared_ptr<ToggleButton> invY_, invP_, invR_, invQW_, invQX_, invQY_, invQZ_;
+
+  ListenerOrientationOscReceiver::InputType lastInputTypeGuiUpdate;
+
   TooltipWindow tooltipWindow{ this };
   TooltipLookAndFeel tooltipLookAndFeel;
 

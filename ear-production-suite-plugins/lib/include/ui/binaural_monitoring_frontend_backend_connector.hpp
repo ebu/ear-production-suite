@@ -33,6 +33,13 @@ class EAR_PLUGIN_BASE_EXPORT BinauralMonitoringFrontendBackendConnector {
     ROLL,
     OSC_ENABLE,
     OSC_PORT,
+    OSC_INVERT_YAW,
+    OSC_INVERT_PITCH,
+    OSC_INVERT_ROLL,
+    OSC_INVERT_QUAT_W,
+    OSC_INVERT_QUAT_X,
+    OSC_INVERT_QUAT_Y,
+    OSC_INVERT_QUAT_Z,
   };
 
   using ParameterChangedCallback =

@@ -70,6 +70,13 @@ class EarBinauralMonitoringAudioProcessor
   AudioParameterFloat* getRoll() { return roll_; }
   AudioParameterBool* getOscEnable() { return oscEnable_; }
   AudioParameterInt* getOscPort() { return oscPort_; }
+  AudioParameterBool* getOscInvertYaw() { return oscInvertYaw_; }
+  AudioParameterBool* getOscInvertPitch() { return oscInvertPitch_; }
+  AudioParameterBool* getOscInvertRoll() { return oscInvertRoll_; }
+  AudioParameterBool* getOscInvertQuatW() { return oscInvertQuatW_; }
+  AudioParameterBool* getOscInvertQuatX() { return oscInvertQuatX_; }
+  AudioParameterBool* getOscInvertQuatY() { return oscInvertQuatY_; }
+  AudioParameterBool* getOscInvertQuatZ() { return oscInvertQuatZ_; }
 
   ear::plugin::ui::BinauralMonitoringJuceFrontendConnector*
   getFrontendConnector() {
@@ -93,6 +100,13 @@ class EarBinauralMonitoringAudioProcessor
   AudioParameterFloat* roll_;
   AudioParameterBool* oscEnable_;
   AudioParameterInt* oscPort_;
+  AudioParameterBool* oscInvertYaw_;
+  AudioParameterBool* oscInvertPitch_;
+  AudioParameterBool* oscInvertRoll_;
+  AudioParameterBool* oscInvertQuatW_;
+  AudioParameterBool* oscInvertQuatX_;
+  AudioParameterBool* oscInvertQuatY_;
+  AudioParameterBool* oscInvertQuatZ_;
 
   std::unique_ptr<ear::plugin::ui::BinauralMonitoringJuceFrontendConnector>
       connector_;
@@ -106,6 +120,12 @@ class EarBinauralMonitoringAudioProcessor
   int blocksize_;
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
+
+  bool readConfigFile();
+  bool writeConfigFile();
+  enum ConfigRestoreState { NOT_RESTORED, IN_PROGRESS, RESTORED };
+  ConfigRestoreState configRestoreState{ NOT_RESTORED };
+  PropertiesFile::Options configFileOptions;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(
       EarBinauralMonitoringAudioProcessor)
