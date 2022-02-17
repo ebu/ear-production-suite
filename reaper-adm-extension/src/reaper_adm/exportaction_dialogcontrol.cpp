@@ -238,7 +238,7 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2
             }
         }
 
-        if (getControlType(hwnd) == COMBOBOX) {
+        if (controlType == COMBOBOX) {
             // See if this is the 'Bounds' dropdown by setting it to the option we want - if successful, it was, and so disable it
             if (selectInComboBox(hwnd, REQUIRED_BOUNDS_COMBO_OPTION) != CB_ERR){
                 boundsControlHwnd = hwnd;
