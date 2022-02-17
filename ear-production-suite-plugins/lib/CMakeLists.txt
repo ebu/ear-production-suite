@@ -23,6 +23,7 @@ add_library(ear-plugin-base STATIC
   src/communication/scene_connection_manager.cpp
   src/communication/scene_connection_registry.cpp
   src/communication/scene_metadata_receiver.cpp
+  src/communication/input_handshake.cpp
   src/direct_speakers_backend.cpp
   src/hoa_backend.cpp
   src/helper/protobuf_utilities.cpp

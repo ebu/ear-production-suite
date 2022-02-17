@@ -2,6 +2,8 @@
 #include "nng-cpp/nng.hpp"
 #include "log.hpp"
 #include "communication/common_types.hpp"
+#include "communication/input_handshake.hpp"
+#include "commands.hpp"
 #include "ui/item_colour.hpp"
 #include <functional>
 
@@ -48,7 +50,7 @@ class InputControlConnection {
 
   // Note: this will disconnect if connected and manually restarting will be
   // necessary
-  void setConnectionId(ConnectionId id);
+  void setConnectionId(ConnectionId id, bool skipReset = false);
   ConnectionId getConnectionId() { return connectionId_; }
 
   void logger(std::shared_ptr<spdlog::logger> logger);
@@ -56,9 +58,17 @@ class InputControlConnection {
   void onConnectionEstablished(ConnectionEstablishedHandler callback);
   void onConnectionLost(ConnectionLostHandler callback);
 
-  bool isConnected() { return connected_; }
+  bool isConnected() const { return connected_; }
+
+  void send(MessageBuffer& buffer);
+  Response receive();
+
+  void setState(std::unique_ptr<HandshakeState> state);
+  void setConnected(std::string const& metadataEndpoint);
 
  private:
+  std::mutex handshakeMutex_;
+  std::unique_ptr<HandshakeState> handshakeState_;
   struct CachedItemProperties {
     std::string name;
     ui::ItemColour colour;
@@ -74,6 +84,7 @@ class InputControlConnection {
   ConnectionEstablishedHandler connectedCallback_;
   ConnectionLostHandler disconnectedCallback_;
   nng::ReqSocket socket_;
+
 };
 }  // namespace communication
 }  // namespace plugin
