@@ -13,9 +13,8 @@
 #define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
 #define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
-
-#define TAKEOVER_TEXT_FOR_CHANNEL_COUNT "Auto" // What we will display for "Channels" when our PCM Sink is selected
-#define FALLBACK_VALUE_FOR_CHANNEL_COUNT "Stereo" // Value once we restore state, if we didn't know what it was before
+#define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
+#define REQUIRED_CHANNEL_COUNT_COMBO_OPTION "Mono"
 
 #define TIMER_ID 1
 
@@ -56,6 +55,7 @@ RenderDialogControl::RenderDialogState::ControlType RenderDialogControl::RenderD
     char szClassName[9];
     GetClassName(hwnd, szClassName, 9);
     if(strcmp(szClassName, "Edit") == 0) return TEXT;
+    if(strcmp(szClassName, "Static") == 0) return TEXT;
     if(strcmp(szClassName, "Button") == 0) return BUTTON;
 
     if(strcmp(szClassName, "ComboBox") == 0) {
@@ -157,6 +157,7 @@ void RenderDialogControl::RenderDialogState::startPreparingRenderControls(HWND h
     presetsControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
+    channelsLabelHwnd.reset();
     sampleRateControlSetError = false;
     channelsControlSetError = false;
     sampleRateLastOption.clear();
@@ -207,6 +208,14 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2
             }
         }
 
+        if (controlType == TEXT) {
+            if (winStr == EXPECTED_CHANNEL_COUNT_LABEL_TEXT){
+                // This is the label for the channel count combobox - hide it
+                channelsLabelHwnd = hwnd;
+                ShowWindow(hwnd, SW_HIDE);
+            }
+        }
+
         if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
             // NOTE: Sample Rate and Channels controls are;
             //       EDITABLECOMBO in REAPER <=6.11
@@ -232,9 +241,9 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2
                 if(channelsLastOption.length() == 0 && currentOption.length() > 0){
                     channelsLastOption = currentOption;
                 }
-                channelsControlSetError |= (SetWindowText(editControl, TAKEOVER_TEXT_FOR_CHANNEL_COUNT) == 0);
-                EnableWindow(editControl, false);
+                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
                 UpdateWindow(editControl);
+                ShowWindow(hwnd, SW_HIDE);
             }
         }
 
@@ -369,6 +378,7 @@ WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, 
             presetsControlHwnd.has_value() &&
             sampleRateControlHwnd.has_value() &&
             channelsControlHwnd.has_value() &&
+            channelsLabelHwnd.has_value() &&
             !sampleRateControlSetError && !channelsControlSetError;
         if(!allControlsSuccessful) {
             infoPaneText = "WARNING: Unable to takeover all render controls. REAPER version may be unsupported and render may fail.\r\n\r\n" + infoPaneText;
@@ -434,12 +444,14 @@ WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, 
         if(channelsControlHwnd) {
             auto editControl = getComboBoxEdit(*channelsControlHwnd);
             if(channelsLastOption.length() > 0){
-                std::string opt = channelsLastOption == TAKEOVER_TEXT_FOR_CHANNEL_COUNT ? FALLBACK_VALUE_FOR_CHANNEL_COUNT : channelsLastOption;
-                selectInComboBox(*channelsControlHwnd, opt);
-                SetWindowText(editControl, opt.c_str());
+                selectInComboBox(*channelsControlHwnd, channelsLastOption);
+                SetWindowText(editControl, channelsLastOption.c_str());
             }
-            EnableWindow(editControl, true);
             UpdateWindow(editControl);
+            ShowWindow(*channelsControlHwnd, SW_SHOW);
+        }
+        if(channelsLabelHwnd) {
+            ShowWindow(*channelsLabelHwnd, SW_SHOW);
         }
 
         return 0;

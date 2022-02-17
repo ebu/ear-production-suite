@@ -49,7 +49,7 @@ private:
 
         enum ControlType{
             UNKNOWN,
-            TEXT, //Note: On OSX this can be editable text or a label. On windows, it is editable text.
+            TEXT, //Note: On OSX this can be editable text or a label. Mirrored this behaviour for Windows.
             BUTTON, //Note: On OSX this includes radios and checkboxes.
             COMBOBOX,
             EDITABLECOMBO
@@ -69,6 +69,7 @@ private:
         std::optional<HWND> presetsControlHwnd{};
         std::optional<HWND> sampleRateControlHwnd{};
         std::optional<HWND> channelsControlHwnd{};
+        std::optional<HWND> channelsLabelHwnd{};
         bool sampleRateControlSetError{false};
         bool channelsControlSetError{false};
 
