@@ -17,7 +17,7 @@ class EarNameTextEditor : public TextEditor {
     setLookAndFeel(&earNameTextEditorLookAndFeel_);
     setFont(EarFonts::Items);
     setMultiLine(false);
-    setJustification(Justification::left);
+    setJustification(Justification::topLeft);
     setBorder(BorderSize<int>(0, textIndent, 0, textIndent));
   }
 
@@ -26,7 +26,8 @@ class EarNameTextEditor : public TextEditor {
   }
 
   void resized() {
-    // NOTE: for some weired reason this has to be called exactly here!!!
+    // Has to be called exactly here since we don't have a component size
+    //  until just before this method is first called
     setIndents(0.f, (getHeight() - yTopIndent - getFont().getHeight()) / 2 +
                         yTopIndent);
     TextEditor::resized();
