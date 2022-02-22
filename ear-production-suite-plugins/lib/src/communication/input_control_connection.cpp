@@ -10,15 +10,11 @@ using namespace std::chrono_literals;
 namespace ear {
 namespace plugin {
 namespace communication {
-InputControlConnection::InputControlConnection() : connected_(false) {
-  socket_.setOpt(nng::options::RecvTimeout, 1000ms);
-  socket_.setOpt(nng::options::SendTimeout, 100ms);
-  socket_.setOpt(nng::options::ReconnectMinTime, 250ms);
-  socket_.setOpt(nng::options::ReconnectMaxTime, 0ms);
-  socket_.onPipeEvent(nng::PipeEvent::postAdd,
-                      std::bind(&InputControlConnection::connected, this));
-  socket_.onPipeEvent(nng::PipeEvent::postRemove,
-                      std::bind(&InputControlConnection::disconnected, this));
+InputControlConnection::InputControlConnection() :
+    socket_{ [this]{connected();},
+             [this]{disconnected();}
+    },
+    connected_(false) {
 }
 
 InputControlConnection::~InputControlConnection() { disconnect(); }
@@ -40,20 +36,10 @@ void InputControlConnection::handshake() {
     {
       EAR_LOGGER_TRACE(logger_, "Requesting connection ID ({})",
                        connectionId_.string());
-      NewConnectionMessage request{ConnectionType::METADATA_INPUT,
-                                   connectionId_};
-      auto sendBuffer = serialize(request);
-      socket_.send(sendBuffer);
-      auto buffer = socket_.read();
-
-      auto resp = parseResponse(buffer);
-      if (!resp.success()) {
-        EAR_LOGGER_ERROR(logger_, "Failed to start new control connection: {}",
-                         resp.errorDescription());
-        return;
-      }
-      auto payload = resp.payloadAs<NewConnectionResponse>();
-
+      socket_.send( NewConnectionMessage {ConnectionType::METADATA_INPUT,
+                                       connectionId_});
+      auto reply = socket_.receive();
+      auto payload = reply.payloadAs<NewConnectionResponse>();
       if (!payload.connectionId().isValid()) {
         EAR_LOGGER_ERROR(logger_,
                          "Failed to start new control connection: invalid "
@@ -66,17 +52,14 @@ void InputControlConnection::handshake() {
     }
     {
       EAR_LOGGER_TRACE(logger_, "Sending object connection details");
-      ObjectDetailsMessage request{connectionId_};
-      auto sendBuffer = serialize(request);
-      socket_.send(sendBuffer);
-      auto buffer = socket_.read();
-      auto resp = parseResponse(buffer);
-      if (!resp.success()) {
+      socket_.send(ObjectDetailsMessage{connectionId_});
+      auto reply = socket_.receive();
+      if (!reply.success()) {
         EAR_LOGGER_ERROR(logger_, "Failed to start new control connection: {}",
-                         resp.errorDescription());
+                         reply.errorDescription());
         return;
       }
-      auto payload = resp.payloadAs<ConnectionDetailsResponse>();
+      auto payload = reply.payloadAs<ConnectionDetailsResponse>();
       auto streamEndpoint = payload.metadataEndpoint();
       EAR_LOGGER_DEBUG(logger_,
                        "Received {} as target endpoint for metadata streaming",
@@ -94,8 +77,7 @@ void InputControlConnection::handshake() {
 
 void InputControlConnection::start(const std::string& endpoint) {
   EAR_LOGGER_INFO(logger_, "Connecting to {}", endpoint);
-
-  socket_.dial(endpoint.c_str(), nng::Flags::nonblock);
+  socket_.open(endpoint);
 }
 
 void InputControlConnection::stop() { disconnect(); }
@@ -117,13 +99,12 @@ void InputControlConnection::disconnect() {
   if (connected_) {
     CloseConnectionMessage request{connectionId_};
     auto sendBuffer = serialize(request);
-    socket_.send(sendBuffer);
+    socket_.send(CloseConnectionMessage{connectionId_});
     connected_ = false;
-    auto buffer = socket_.read();
-    auto resp = parseResponse(buffer);
-    if (!resp.success()) {
+    auto reply = socket_.receive();
+    if (!reply.success()) {
       EAR_LOGGER_ERROR(logger_, "Failed to start close control connection: {}",
-                       resp.errorDescription());
+                       reply.errorDescription());
       return;
     } else {
       disconnected();
