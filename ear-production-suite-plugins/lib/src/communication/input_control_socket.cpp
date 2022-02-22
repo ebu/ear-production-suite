@@ -26,30 +26,22 @@ void InputControlSocket::open(const std::string& endpoint) {
   socket_.dial(endpoint.c_str(), nng::Flags::nonblock);
 }
 
-void InputControlSocket::send(const NewConnectionMessage& message) {
-  auto buffer = serialize(message);
-  send(buffer);
+void InputControlSocket::requestNewConnection(const ConnectionId& id) {
+  auto message = NewConnectionMessage{ConnectionType::METADATA_INPUT, id};
+  send(message);
 }
 
-void InputControlSocket::send(const ObjectDetailsMessage& message) {
-  auto buffer = serialize(message);
-  send(buffer);
+void InputControlSocket::requestObjectDetails(const ConnectionId& id) {
+  auto message = ObjectDetailsMessage{id};
+  send(message);
 }
 
-void InputControlSocket::send(const CloseConnectionMessage& message) {
-  auto buffer = serialize(message);
-  send(buffer);
+void InputControlSocket::requestCloseConnection(const ConnectionId& id) {
+  auto message = CloseConnectionMessage{id};
+  send(message);
 }
 
 Response InputControlSocket::receive() {
   auto response = parseResponse(socket_.read());
   return response;
 }
-
-void InputControlSocket::send(const MessageBuffer& buffer) {
-  // Note, return code ignored for send as we're not blocking
-  // and only handled code is NNG_EAGAIN, which is only produced for
-  // non-blocking sends.
-  socket_.send(buffer);
-}
-

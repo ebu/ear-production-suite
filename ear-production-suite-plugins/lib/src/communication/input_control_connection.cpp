@@ -36,8 +36,7 @@ void InputControlConnection::handshake() {
     {
       EAR_LOGGER_TRACE(logger_, "Requesting connection ID ({})",
                        connectionId_.string());
-      socket_.send( NewConnectionMessage {ConnectionType::METADATA_INPUT,
-                                       connectionId_});
+      socket_.requestNewConnection(connectionId_);
       auto reply = socket_.receive();
       auto payload = reply.payloadAs<NewConnectionResponse>();
       if (!payload.connectionId().isValid()) {
@@ -52,7 +51,7 @@ void InputControlConnection::handshake() {
     }
     {
       EAR_LOGGER_TRACE(logger_, "Sending object connection details");
-      socket_.send(ObjectDetailsMessage{connectionId_});
+      socket_.requestObjectDetails(connectionId_);
       auto reply = socket_.receive();
       if (!reply.success()) {
         EAR_LOGGER_ERROR(logger_, "Failed to start new control connection: {}",
@@ -97,9 +96,7 @@ void InputControlConnection::disconnected() {
 
 void InputControlConnection::disconnect() {
   if (connected_) {
-    CloseConnectionMessage request{connectionId_};
-    auto sendBuffer = serialize(request);
-    socket_.send(CloseConnectionMessage{connectionId_});
+    socket_.requestCloseConnection(connectionId_);
     connected_ = false;
     auto reply = socket_.receive();
     if (!reply.success()) {
