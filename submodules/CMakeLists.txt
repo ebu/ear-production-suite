@@ -180,7 +180,9 @@ set_target_properties(bear PROPERTIES FOLDER submodules/bear)
 set_target_properties(ear PROPERTIES FOLDER submodules/libear)
 add_dependencies(bear ${VISR_TARGET_NAMES})
 
-
+### Boost.ext.SML
+add_library(sml INTERFACE)
+target_include_directories(sml INTERFACE sml/include)
 
 set(BUILD_TESTING ${isTesting})
 set(CMAKE_MESSAGE_LOG_LEVEL ${LOG_LEVEL})
