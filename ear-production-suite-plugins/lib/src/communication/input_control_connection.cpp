@@ -12,26 +12,37 @@ namespace plugin {
 namespace communication {
 InputControlConnection::InputControlConnection() :
     socket_{ [this]{connected();},
-             [this]{disconnected();}
+             [this]{
+               std::lock_guard<std::mutex> lock(stateMutex_);
+               disconnected();}
     },
     connected_(false) {
 }
 
-InputControlConnection::~InputControlConnection() { disconnect(); }
+InputControlConnection::~InputControlConnection() {
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  disconnect();
+}
 
 void InputControlConnection::logger(std::shared_ptr<spdlog::logger> logger) {
   logger_ = logger;
 }
 
 void InputControlConnection::setConnectionId(ConnectionId id) {
-  if (isConnected()) {
-    disconnect();
-  }
-  connectionId_ = id;
-  handshake();
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  disconnect();
+  handshake(id);
 }
 
-void InputControlConnection::handshake() {
+ConnectionId InputControlConnection::getConnectionId() const {
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  return connectionId_;
+}
+
+void InputControlConnection::handshake(ConnectionId const& id) {
+  if(id.isValid()) {
+    connectionId_ = id;
+  }
   try {
     {
       EAR_LOGGER_TRACE(logger_, "Requesting connection ID ({})",
@@ -79,11 +90,10 @@ void InputControlConnection::start(const std::string& endpoint) {
   socket_.open(endpoint);
 }
 
-void InputControlConnection::stop() { disconnect(); }
-
 void InputControlConnection::connected() {
+  std::lock_guard<std::mutex> lock(stateMutex_);
   EAR_LOGGER_DEBUG(logger_, "Now connected to scene master");
-  handshake();
+  handshake(connectionId_);
 }
 
 void InputControlConnection::disconnected() {

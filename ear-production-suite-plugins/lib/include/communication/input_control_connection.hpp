@@ -5,6 +5,7 @@
 #include "communication/input_control_socket.hpp"
 #include "ui/item_colour.hpp"
 #include <functional>
+#include <mutex>
 
 namespace ear {
 namespace plugin {
@@ -45,19 +46,16 @@ class InputControlConnection {
   EAR_PLUGIN_BASE_EXPORT ~InputControlConnection();
 
   void start(const std::string& endpoint);
-  void stop();
 
   // Note: this will disconnect if connected and manually restarting will be
   // necessary
   void setConnectionId(ConnectionId id);
-  ConnectionId getConnectionId() { return connectionId_; }
+  ConnectionId getConnectionId() const;
 
   void logger(std::shared_ptr<spdlog::logger> logger);
 
   void onConnectionEstablished(ConnectionEstablishedHandler callback);
   void onConnectionLost(ConnectionLostHandler callback);
-
-  bool isConnected() { return connected_; }
 
  private:
   struct CachedItemProperties {
@@ -66,8 +64,9 @@ class InputControlConnection {
   };
   void connected();
   void disconnected();
-  void handshake();
+  void handshake(ConnectionId const& id);
   void disconnect();
+  mutable std::mutex stateMutex_;
   std::shared_ptr<spdlog::logger> logger_;
   InputControlSocket socket_;
   ConnectionId connectionId_;
