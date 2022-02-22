@@ -2,6 +2,7 @@
 #include "nng-cpp/nng.hpp"
 #include "log.hpp"
 #include "communication/common_types.hpp"
+#include "communication/input_control_socket.hpp"
 #include "ui/item_colour.hpp"
 #include <functional>
 
@@ -68,12 +69,12 @@ class InputControlConnection {
   void handshake();
   void disconnect();
   std::shared_ptr<spdlog::logger> logger_;
+  InputControlSocket socket_;
   ConnectionId connectionId_;
   bool connected_;
   CachedItemProperties cachedItemProperties_;
   ConnectionEstablishedHandler connectedCallback_;
   ConnectionLostHandler disconnectedCallback_;
-  nng::ReqSocket socket_;
 };
 }  // namespace communication
 }  // namespace plugin

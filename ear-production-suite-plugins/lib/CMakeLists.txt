@@ -16,6 +16,7 @@ add_library(ear-plugin-base STATIC
   src/communication/direct_speakers_metadata_sender.cpp
   src/communication/hoa_metadata_sender.cpp
   src/communication/input_control_connection.cpp
+  src/communication/input_control_socket.cpp
   src/communication/monitoring_control_connection.cpp
   src/communication/monitoring_metadata_receiver.cpp
   src/communication/object_metadata_sender.cpp
@@ -60,6 +61,7 @@ set(EAR_BASE_HEADERS
 	include/communication/direct_speakers_metadata_sender.hpp
 	include/communication/hoa_metadata_sender.hpp
 	include/communication/input_control_connection.hpp
+	include/communication/input_control_socket.hpp
 	include/communication/message_buffer.hpp
 	include/communication/monitoring_control_connection.hpp
 	include/communication/monitoring_metadata_receiver.hpp
