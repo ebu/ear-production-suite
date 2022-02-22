@@ -32,7 +32,7 @@ class ConnectionId {
   ConnectionId(ConnectionId&&) = default;
   ConnectionId& operator=(ConnectionId&&) = default;
 
-  bool isValid() { return !(id_.is_nil()); }
+  bool isValid() const { return !(id_.is_nil()); }
 
   boost::uuids::uuid getUuid() const { return id_; }
 
