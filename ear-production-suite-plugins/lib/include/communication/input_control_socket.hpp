@@ -15,15 +15,20 @@ EAR_PLUGIN_BASE_EXPORT class InputControlSocket {
               std::function<void()> const& disconnectedCallback);
 
   void open(std::string const& endpoint);
-  void send(NewConnectionMessage const& message);
-  void send(ObjectDetailsMessage const& message);
-  void send(CloseConnectionMessage const& message);
+  void requestNewConnection(ConnectionId const& id);
+  void requestCloseConnection(ConnectionId const& id);
+  void requestObjectDetails(ConnectionId const& id);
 
   [[nodiscard]]
   Response receive();
 
  private:
-  void send(MessageBuffer const& buffer);
+  template<typename MessageT>
+  void send(MessageT const& message) {
+    auto buffer = serialize(message);
+    socket_.send(buffer);
+  }
+
   nng::ReqSocket socket_;
 };
 }
