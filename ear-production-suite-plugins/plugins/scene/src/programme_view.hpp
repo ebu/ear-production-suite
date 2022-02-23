@@ -20,14 +20,14 @@ namespace ui {
 
 class ProgrammeView : public Component {
  public:
-  ProgrammeView()
+  explicit ProgrammeView(SceneFrontendBackendConnector* connector)
       : nameTextEditor_(std::make_shared<EarNameTextEditor>()),
         langLabel_(std::make_unique<Label>()),
         langComboBox_(std::make_shared<EarComboBox>()),
         addItemButton_(std::make_unique<EarButton>()),
         addGroupButton_(std::make_unique<EarButton>()),
         addToggleButton_(std::make_unique<EarButton>()),
-        elementOverview_(std::make_unique<ElementOverview>()),
+        elementOverview_(std::make_unique<ElementOverview>(connector)),
         elementsContainer_(std::make_shared<ElementsContainer>()) {
     nameTextEditor_->setLabelText("Name");
     nameTextEditor_->setFont(EarFonts::Label);

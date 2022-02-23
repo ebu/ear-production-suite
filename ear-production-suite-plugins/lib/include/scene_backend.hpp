@@ -54,7 +54,7 @@ class SceneBackend {
   void triggerMetadataSend(bool forExporting = false);
   void setup();
 
-  std::pair<ItemStore, proto::ProgrammeStore> stores();
+  std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> stores();
 
  private:
   communication::MessageBuffer getMessage(bool forExporting = false);
@@ -82,7 +82,6 @@ class SceneBackend {
   bool rebuildSceneStore_;
   proto::ProgrammeStore programmeStore_;
   nng::PubSocket metadataSender_;
-  std::mutex storeMutex_;
   std::set<communication::ConnectionId> previousScene_;
   std::set<std::string> overlappingIds_;
 };

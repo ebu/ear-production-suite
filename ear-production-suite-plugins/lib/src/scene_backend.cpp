@@ -28,8 +28,7 @@ SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend)
 
 SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
 
-communication::MessageBuffer SceneBackend::getMessage(bool forExporting) {
-  std::lock_guard<std::mutex> lock(storeMutex_);
+communication::MessageBuffer SceneBackend::getMessage() {
   if (rebuildSceneStore_) {
     rebuildSceneStore_ = false;
     updateSceneStore();
@@ -56,13 +55,7 @@ void SceneBackend::triggerMetadataSend(bool forExporting) {
                           ec.message());
         }
       });
-  std::lock_guard<std::mutex> lock(storeMutex_);
-  for (auto& item : itemStore_) {
-    if (item.second.changed()) {
-      item.second.set_changed(false);
-      rebuildSceneStore_ = true;
-    }
-  }
+  rebuildSceneStore_ = rebuildSceneStore_ || itemStore_.clearChanged();
 }
 
 void SceneBackend::setup() {
@@ -100,27 +93,19 @@ void SceneBackend::setup() {
     frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
   }
 
+  using google::protobuf::util::MessageDifferencer;
   try {
     metadataReceiver_.run(
         detail::SCENE_MASTER_METADATA_ENDPOINT,
         [this](communication::ConnectionId id, proto::InputItemMetadata item) {
           EAR_LOGGER_DEBUG(this->logger_,
                            "Received metadata from connection {}", id.string());
-          std::lock_guard<std::mutex> lock(storeMutex_);
-          if (itemStore_.find(id) != itemStore_.end()) {
-            // UPDATE ITEM
-            if (!google::protobuf::util::MessageDifferencer::
-                    ApproximatelyEquivalent(itemStore_.at(id), item)) {
-              itemStore_[id] = item;
+          auto previous = itemStore_.setItem(id, item);
+          // UPDATE ITEM
+          if(!previous || !MessageDifferencer::ApproximatelyEquivalent(*previous, item)) {
               frontendConnector_->updateItem(id, item);
               rebuildSceneStore_ = true;
             }
-          } else {
-            // NEW ITEM
-            itemStore_[id] = item;
-            frontendConnector_->updateItem(id, item);
-            rebuildSceneStore_ = true;
-          }
         });
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_,
@@ -140,12 +125,6 @@ void SceneBackend::setup() {
         logger_, "Scene Master: Failed to start metadata sender: {}", e.what());
     frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
   }
-}
-
-inline ItemStore::const_iterator findObject(proto::Object const& object,
-                                            ItemStore const& itemStore) {
-  auto id = communication::ConnectionId{object.connection_id()};
-  return itemStore.find(id);
 }
 
 void SceneBackend::updateSceneStore() {
@@ -209,9 +188,9 @@ void SceneBackend::addToggleToSceneStore(
 void SceneBackend::addElementToSceneStore(
     proto::ProgrammeElement const& element) {
   if (element.has_object()) {
-    auto position = findObject(element.object(), itemStore_);
-    if (position != itemStore_.end()) {
-      addToSceneStore(position->second);
+    if(auto item =
+            itemStore_.maybeGet(element.object().connection_id()); item) {
+      addToSceneStore(*item);
     }
   }
 }
@@ -242,7 +221,8 @@ void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
 }
 
 void SceneBackend::addAvailableInputItemsToSceneStore() {
-  for (auto const& itemPair : itemStore_) {
+  auto items = itemStore_.allItems();
+  for (auto const& itemPair : items) {
     auto& itemStoreInputItem = itemPair.second;
     auto sceneStoreInputItem = sceneStore_.add_all_available_items();
     sceneStoreInputItem->CopyFrom(itemStoreInputItem);
@@ -255,20 +235,13 @@ void SceneBackend::onConnectionEvent(
   if (event == communication::SceneConnectionManager::Event::INPUT_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new input connection {}", id.string());
     auto& info = connectionManager_.connectionInfo(id);
-    {
-      std::lock_guard<std::mutex> lock(storeMutex_);
-      itemStore_[id] = proto::InputItemMetadata{};
-    }
+    itemStore_.addItem(id);
     frontendConnector_->addItem(id);
   } else if (event ==
              communication::SceneConnectionManager::Event::INPUT_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Input {} disconnected", id.string());
     {
-      std::lock_guard<std::mutex> lock(storeMutex_);
-      auto it = itemStore_.find(id);
-      if (it != itemStore_.end()) {
-        itemStore_.erase(it);
-      }
+      itemStore_.removeItem(id);
       rebuildSceneStore_ = true;
     }
     frontendConnector_->removeItem(id);
@@ -283,18 +256,14 @@ void SceneBackend::onConnectionEvent(
 }
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
-  {
-    std::lock_guard<std::mutex> lock{storeMutex_};
-    programmeStore_ = store;
-    rebuildSceneStore_ = true;
-  }
+  programmeStore_ = store;
+  rebuildSceneStore_ = true;
   triggerMetadataSend();  // Allows monitoring plugins to know that renderer
                           // channel counts likely need to update.
 }
 
-std::pair<ItemStore, proto::ProgrammeStore> SceneBackend::stores() {
-  std::lock_guard<std::mutex> lock{storeMutex_};
-  return {itemStore_, programmeStore_};
+std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> SceneBackend::stores() {
+  return {itemStore_.allItems(), programmeStore_};
 }
 
 }  // namespace plugin
