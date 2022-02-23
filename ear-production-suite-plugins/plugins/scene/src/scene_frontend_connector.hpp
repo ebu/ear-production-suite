@@ -61,6 +61,7 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
   void removeFromObjectViews(communication::ConnectionId id);
   void removeFromItemView(communication::ConnectionId id);
   void doSetMultipleScenePluginsOverlayVisible(const bool& visible) override;
+  ItemStore& doGetItemStore() override;
 
  private:
   // --- Restore Editor

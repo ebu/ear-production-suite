@@ -8,17 +8,20 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "item_store.hpp"
 #include "programme_store.pb.h"
+#include "ui/scene_frontend_backend_connector.hpp"
 
 #include <memory>
 
 namespace ear {
 namespace plugin {
 namespace ui {
+class SceneFrontendBackendConnector;
 
 class ElementOverview : public Component, private Timer {
  public:
-  ElementOverview()
-      : rotateLeftButton_(std::make_unique<EarButton>()),
+  explicit ElementOverview(SceneFrontendBackendConnector* connector)
+      : connector_{connector},
+        rotateLeftButton_(std::make_unique<EarButton>()),
         rotateRightButton_(std::make_unique<EarButton>()),
         currentViewingAngle_(180.f),
         endViewingAngle_(180.f) {
@@ -68,11 +71,12 @@ class ElementOverview : public Component, private Timer {
       g.drawImageAt(cachedBackground_, 0, 0);
     }
     {  // draw elements
+      auto items = connector_->itemStore().allItems();
       for (auto element : programme_.element()) {
         if (element.has_object()) {
           communication::ConnectionId id(element.object().connection_id());
-          if (itemStore_.find(id) != itemStore_.end()) {
-            auto item = itemStore_.at(id);
+          if (items.find(id) != items.end()) {
+            auto item = items.at(id);
             auto colour = Colour(item.colour());
             if (item.has_ds_metadata()) {
               for (auto speaker : item.ds_metadata().speakers()) {
@@ -158,9 +162,8 @@ class ElementOverview : public Component, private Timer {
     g.fillEllipse(circleArea);
   }
 
-  void setProgramme(proto::Programme programme, ItemStore itemStore) {
+  void setProgramme(proto::Programme programme) {
     programme_ = programme;
-    itemStore_ = itemStore;
     repaint();
   }
 
@@ -271,8 +274,8 @@ class ElementOverview : public Component, private Timer {
   }
 
  private:
+  SceneFrontendBackendConnector* connector_;
   proto::Programme programme_;
-  ItemStore itemStore_;
 
   std::unique_ptr<EarButton> rotateLeftButton_;
   std::unique_ptr<EarButton> rotateRightButton_;
