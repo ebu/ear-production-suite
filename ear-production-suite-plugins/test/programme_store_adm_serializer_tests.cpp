@@ -219,14 +219,13 @@ InputItemMetadata simpleDsItem(ConnectionId const& id,
   return simpleItem(id, name, routing).withDsLayout(layout);
 }
 
-
 }
 
 TEST_CASE("Programme parser tests") {
   ItemStore itemStore;
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
-  itemStore[connectionId] = item;
+  itemStore.setItem(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
                                                   .withName("TestProg")
@@ -235,7 +234,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Single Programme, Single object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore);
+    auto result = serializer.serialize(programmeStore, itemStore.allItems());
     auto const& doc = *result.first;
     auto const chna = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
@@ -258,7 +257,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Two Programmes, Shared object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore);
+    auto result = serializer.serialize(programmeStore, itemStore.allItems());
     auto const& doc = *result.first;
     auto const chna = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
@@ -284,7 +283,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                            SpeakerLayout::ITU_BS_2051_0_2_0);
 
   ItemStore itemStore;
-  itemStore[connectionId] = item;
+  itemStore.setItem(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
                                                   .withName("TestProg")
@@ -292,7 +291,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                                                   .withObject(connectionId));
 
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(programmeStore, itemStore);
+  auto result = serializer.serialize(programmeStore, itemStore.allItems());
   auto const& doc = *result.first;
   auto chna = result.second;
 
@@ -339,9 +338,9 @@ TEST_CASE("Toggle group with three members") {
   auto secondAltId = ConnectionId::generate();
   auto secondAltItem = simpleObjectItem(secondAltId, "alternative_2", 2);
   ItemStore itemStore;
-  itemStore[defaultId] = defaultItem;
-  itemStore[altId] = altItem;
-  itemStore[secondAltId] = secondAltItem;
+  itemStore.setItem(defaultId, defaultItem);
+  itemStore.setItem(altId, altItem);
+  itemStore.setItem(secondAltId, secondAltItem);
 
   auto toggle = ToggleBuilder{}
       .withDefaultItem(defaultId)
@@ -354,7 +353,7 @@ TEST_CASE("Toggle group with three members") {
                                                          .withToggle(toggle));
 
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(programmeStore, itemStore);
+  auto result = serializer.serialize(programmeStore, itemStore.allItems());
   auto const& doc = *result.first;
   auto chna = result.second;
 
@@ -418,7 +417,7 @@ TEST_CASE("On_Off interactive") {
   ItemStore itemStore;
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
-  itemStore[connectionId] = item;
+  itemStore.setItem(connectionId, item);
   auto programme = ProgrammeBuilder{}
       .withName("TestProg")
       .withLanguage("English")
@@ -430,7 +429,7 @@ TEST_CASE("On_Off interactive") {
 
   SECTION("With single object") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore);
+    auto result = serializer.serialize(programmeStore, itemStore.allItems());
     auto const& doc = *result.first;
     auto chna = result.second;
     REQUIRE(doc.getElements<AudioObject>().size() == 1);
@@ -447,7 +446,7 @@ TEST_CASE("On_Off interactive") {
     programmeStore =
         programmeStore.withProgramme(programme);
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore);
+    auto result = serializer.serialize(programmeStore, itemStore.allItems());
     auto const& doc = *result.first;
     auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();
@@ -471,7 +470,7 @@ TEST_CASE("On_Off interactive") {
                                          .withLanguage("English")
                                          .withObject(connectionId));
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore);
+    auto result = serializer.serialize(programmeStore, itemStore.allItems());
     auto const& doc = *result.first;
     auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();

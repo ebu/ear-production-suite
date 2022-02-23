@@ -6,6 +6,7 @@
 #include <adm/elements_fwd.hpp>
 #include <bw64/bw64.hpp>
 #include <vector>
+#include <map>
 #include <helper/common_definition_helper.h>
 
 namespace ear {
@@ -14,7 +15,8 @@ namespace plugin {
 class ProgrammeStoreAdmSerializer {
  public:
   std::pair<std::shared_ptr<adm::Document>, bw64::ChnaChunk> serialize(
-      proto::ProgrammeStore programmes, ItemStore items);
+    proto::ProgrammeStore programmes,
+    std::map<communication::ConnectionId, proto::InputItemMetadata> items);
  private:
   void serializeToggle(std::shared_ptr<adm::AudioProgramme> programme,
                        const proto::Toggle& toggle);
@@ -34,7 +36,7 @@ class ProgrammeStoreAdmSerializer {
   bool isAlreadySerialized(proto::Object const& object) const;
 
   proto::ProgrammeStore programmes_;
-  ItemStore items_;
+  std::map<communication::ConnectionId, proto::InputItemMetadata> items_;
   std::shared_ptr<adm::Document> doc;
   bw64::ChnaChunk chna;
   std::map<std::string, std::vector<std::shared_ptr<adm::AudioTrackUid>>>
