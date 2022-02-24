@@ -103,7 +103,7 @@ void SceneBackend::setup() {
           auto previous = itemStore_.setItem(id, item);
           // UPDATE ITEM
           if(!previous || !MessageDifferencer::ApproximatelyEquivalent(*previous, item)) {
-              frontendConnector_->updateItem(id, item);
+//              frontendConnector_->updateItem(id, item);
               rebuildSceneStore_ = true;
             }
         });
@@ -224,15 +224,13 @@ void SceneBackend::onConnectionEvent(
     EAR_LOGGER_INFO(logger_, "Got new input connection {}", id.string());
     auto& info = connectionManager_.connectionInfo(id);
     itemStore_.addItem(id);
-    frontendConnector_->addItem(id);
+//    frontendConnector_->addItem(id);
   } else if (event ==
              communication::SceneConnectionManager::Event::INPUT_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Input {} disconnected", id.string());
-    {
-      itemStore_.removeItem(id);
-      rebuildSceneStore_ = true;
-    }
-    frontendConnector_->removeItem(id);
+    itemStore_.removeItem(id);
+    rebuildSceneStore_ = true;
+//    frontendConnector_->removeItem(id);
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
@@ -252,6 +250,9 @@ void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
 
 std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> SceneBackend::stores() {
   return {itemStore_.allItems(), programmeStore_.get()};
+}
+void SceneBackend::addItemStoreListener(std::shared_ptr<ItemStore::Listener> const& listener) {
+  itemStore_.addListener(listener);
 }
 
 }  // namespace plugin

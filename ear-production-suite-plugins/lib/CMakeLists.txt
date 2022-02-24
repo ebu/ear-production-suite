@@ -27,6 +27,7 @@ add_library(ear-plugin-base STATIC
   src/direct_speakers_backend.cpp
   src/hoa_backend.cpp
   src/helper/protobuf_utilities.cpp
+  src/proto_printers.cpp
   src/log.cpp
   src/binaural_monitoring_audio_processor.cpp
   src/binaural_monitoring_backend.cpp
@@ -50,7 +51,7 @@ add_library(ear-plugin-base STATIC
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
   ${EAR_PROTO_SRC}
-        include/proto_printers.hpp src/proto_printers.cpp )
+)
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp
@@ -78,6 +79,7 @@ set(EAR_BASE_HEADERS
 	include/direct_speakers_backend.hpp
 	include/helper/eps_to_ear_metadata_converter.hpp
 	include/helper/move.hpp
+	include/helper/weak_ptr.hpp
 	include/helper/protobuf_utilities.hpp
 	include/item_store.hpp
 	include/log.hpp

@@ -53,6 +53,7 @@ class SceneBackend {
   SceneBackend &operator=(const SceneBackend &) = delete;
   void triggerMetadataSend(bool forExporting = false);
   void setup();
+  void addItemStoreListener(std::shared_ptr<ItemStore::Listener> const& listener);
 
   std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> stores();
 

@@ -27,7 +27,9 @@ class ObjectView;
 class GroupView;
 class ToggleView;
 
-class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
+class JuceSceneFrontendConnector :
+    public ItemStore::Listener,
+    public SceneFrontendBackendConnector,
                                    private ProgrammeView::Listener,
                                    private ElementsContainer::Listener,
                                    private ItemsContainer::Listener,
@@ -48,10 +50,10 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
       std::shared_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay);
 
  protected:
-  void doAddItem(communication::ConnectionId id) override;
-  void doRemoveItem(communication::ConnectionId id) override;
-  void doUpdateItem(communication::ConnectionId id,
-                    proto::InputItemMetadata item) override;
+//  void doAddItem(communication::ConnectionId id) override;
+//  void doRemoveItem(communication::ConnectionId id) override;
+//  void doUpdateItem(communication::ConnectionId id,
+//                    proto::InputItemMetadata item) override;
   void updateElementOverviews();
   void updateItemView(communication::ConnectionId id,
                       proto::InputItemMetadata item);
@@ -62,6 +64,11 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
   void removeFromItemView(communication::ConnectionId id);
   void doSetMultipleScenePluginsOverlayVisible(const bool& visible) override;
   ItemStore& doGetItemStore() override;
+  // ItemStore listener
+  void addItem(const proto::InputItemMetadata& item) override;
+  void changeItem(proto::InputItemMetadata const& oldItem,
+                  proto::InputItemMetadata const& newItem) override;
+  void removeItem(proto::InputItemMetadata const& oldItem) override;
 
  private:
   // --- Restore Editor
