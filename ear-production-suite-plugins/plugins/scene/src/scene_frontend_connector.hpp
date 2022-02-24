@@ -69,7 +69,7 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
   void reloadProgrammeCache();
 
   // --- Programme Management
-  proto::Programme* addProgramme();
+//  proto::Programme* addProgramme();
   void addProgrammeView(const proto::Programme& programme);
   void selectProgramme(int index);
   void selectProgrammeView(int index);
@@ -143,7 +143,7 @@ class JuceSceneFrontendConnector : public SceneFrontendBackendConnector,
   std::weak_ptr<ItemsContainer> itemsContainer_;
   std::weak_ptr<ProgrammesContainer> programmesContainer_;
 
-  bool updateAndCheckPendingStore(const communication::ConnectionId& id,
+  bool updateAndCheckPendingElements(const communication::ConnectionId& id,
                                   const proto::InputItemMetadata& item) const;
 };
 

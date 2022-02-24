@@ -175,17 +175,16 @@ AudioProcessorEditor* SceneAudioProcessor::createEditor() {
 }
 
 void SceneAudioProcessor::getStateInformation(MemoryBlock& destData) {
-  std::lock_guard<std::mutex> lock(programmeStoreMutex_);
-  destData.setSize(programmeStore_.ByteSizeLong());
-  programmeStore_.SerializeToArray(destData.getData(), destData.getSize());
+  auto programmes = programmeStore_.get();
+  destData.setSize(programmes.ByteSizeLong());
+  programmes.SerializeToArray(destData.getData(), destData.getSize());
 }
 
 void SceneAudioProcessor::setStateInformation(const void* data,
                                               int sizeInBytes) {
-  {
-    std::lock_guard<std::mutex> lock(programmeStoreMutex_);
-    programmeStore_.ParseFromArray(data, sizeInBytes);
-  }
+  ear::plugin::proto::ProgrammeStore store;
+  store.ParseFromArray(data, sizeInBytes);
+  programmeStore_.set(store);
   connector_->triggerProgrammeStoreChanged();
 }
 
