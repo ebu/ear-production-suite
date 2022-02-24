@@ -79,10 +79,10 @@ class SceneAudioProcessor : public AudioProcessor {
   void doSampleRateChecks();
   void sendAdmMetadata();
   void recvAdmMetadata(std::string admStr, std::vector<uint32_t> mappings);
-  std::unique_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
+  std::mutex programmeStoreMutex_;
+  std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
 
-  std::mutex programmeStoreMutex_;
   ear::plugin::ProgrammeStore programmeStore_;
   ear::plugin::proto::ProgrammeStore pendingStore_;
   std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
