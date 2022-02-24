@@ -67,19 +67,6 @@ class ProgrammeStore {
       proto::Programme* programme,
       const communication::ConnectionId id);
 
-  template<typename F>
-  void removeDeadListenersAfter(F&& fn) {
-    listeners_.erase(
-        std::remove_if(listeners_.begin(),
-                       listeners_.end(),
-                       [&fn](auto const& weak) {
-                         auto shared = weak.lock();
-                         if(shared) {
-                           fn(shared);
-                         }
-                         return !shared;
-                       }), listeners_.end());
-  }
 
   void notifyObjectAdded(proto::Object const& object);
   void notifyStoreChanged(proto::ProgrammeStore const& store);

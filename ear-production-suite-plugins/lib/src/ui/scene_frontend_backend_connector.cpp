@@ -4,18 +4,18 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-void SceneFrontendBackendConnector::addItem(communication::ConnectionId id) {
-  doAddItem(id);
-}
-
-void SceneFrontendBackendConnector::removeItem(communication::ConnectionId id) {
-  doRemoveItem(id);
-}
-
-void SceneFrontendBackendConnector::updateItem(communication::ConnectionId id,
-                                               proto::InputItemMetadata item) {
-  doUpdateItem(id, item);
-}
+//void SceneFrontendBackendConnector::addItem(communication::ConnectionId id) {
+//  doAddItem(id);
+//}
+//
+//void SceneFrontendBackendConnector::removeItem(communication::ConnectionId id) {
+//  doRemoveItem(id);
+//}
+//
+//void SceneFrontendBackendConnector::updateItem(communication::ConnectionId id,
+//                                               proto::InputItemMetadata item) {
+//  doUpdateItem(id, item);
+//}
 
 void SceneFrontendBackendConnector::notifyProgrammeStoreChanged(
     proto::ProgrammeStore store) {

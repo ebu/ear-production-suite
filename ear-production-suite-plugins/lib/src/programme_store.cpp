@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "item_store.hpp"
 #include "helper/move.hpp"
+#include "helper/weak_ptr.hpp"
 
 using namespace ear::plugin;
 
@@ -274,14 +275,14 @@ proto::Object* ProgrammeStore::addObject(proto::Programme* programme,
 }
 
 void ProgrammeStore::notifyObjectAdded(const proto::Object& object) {
-  removeDeadListenersAfter(
+  removeDeadPointersAfter(listeners_,
       [&object](auto const& listener) {
         listener->objectAdded(object);
       });
 }
 
 void ProgrammeStore::notifyStoreChanged(const proto::ProgrammeStore& store) {
-  removeDeadListenersAfter(
+  removeDeadPointersAfter(listeners_,
       [&store](auto const& listener) {
         listener->storeChanged(store);
       });

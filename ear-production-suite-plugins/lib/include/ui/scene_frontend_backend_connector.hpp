@@ -53,10 +53,10 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
     programmeStoreCallback_ = callback;
   }
 
-  void addItem(communication::ConnectionId id);
-  void updateItem(communication::ConnectionId id,
-                  proto::InputItemMetadata item);
-  void removeItem(communication::ConnectionId id);
+//  void addItem(communication::ConnectionId id);
+//  void updateItem(communication::ConnectionId id,
+//                  proto::InputItemMetadata item);
+//  void removeItem(communication::ConnectionId id);
 
   void setMultipleScenePluginsOverlayVisible(const bool visible) {
     this->doSetMultipleScenePluginsOverlayVisible(visible);
@@ -66,10 +66,10 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
 
  protected:
   SceneFrontendBackendConnector(){};
-  virtual void doAddItem(communication::ConnectionId id) = 0;
-  virtual void doUpdateItem(communication::ConnectionId id,
-                            proto::InputItemMetadata item) = 0;
-  virtual void doRemoveItem(communication::ConnectionId id) = 0;
+//  virtual void doAddItem(communication::ConnectionId id) = 0;
+//  virtual void doUpdateItem(communication::ConnectionId id,
+//                            proto::InputItemMetadata item) = 0;
+//  virtual void doRemoveItem(communication::ConnectionId id) = 0;
 
   void notifyProgrammeStoreChanged(proto::ProgrammeStore store);
   virtual void doSetMultipleScenePluginsOverlayVisible(const bool& visible) = 0;

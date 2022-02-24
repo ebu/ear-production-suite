@@ -11,7 +11,7 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-JuceSceneFrontendConnector::JuceSceneFrontendConnector(
+JuceSceneFrontendConnector::JuceSceneFrontendConnector (
     SceneAudioProcessor* processor)
     : SceneFrontendBackendConnector(), p_(processor) {
   reloadProgrammeCache();
@@ -177,22 +177,8 @@ void JuceSceneFrontendConnector::reloadItemListCache() {
 
 // --- ItemList Management
 
-void JuceSceneFrontendConnector::doAddItem(communication::ConnectionId id) {
-  updater_.callOnMessageThread([this, id]() {
-    {
-      itemStore_.addItem(id);
-    }
-    {
-      std::lock_guard<std::mutex> programmeStoreLock(
-          p_->getProgrammeStoreMutex());
-      if (p_->getProgrammeStore().autoModeEnabled()) {
-        auto result = p_->getProgrammeStore().addItemToSelectedProgramme(id);
-        addObjectView(result.first, result.second);
-        notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-      }
-    }
-  });
-}
+//void JuceSceneFrontendConnector::doAddItem(communication::ConnectionId id) {
+//}
 
 namespace {
   bool routingChanged(std::optional<proto::InputItemMetadata> const& previous,
@@ -201,24 +187,9 @@ namespace {
   }
 }
 
-void JuceSceneFrontendConnector::doUpdateItem(communication::ConnectionId id,
-                                              proto::InputItemMetadata item) {
-  updater_.callOnMessageThread([this, id, item]() {
-    auto previousItem = itemStore_.setItem(id, item);
-    bool storeChanged{false};
-    bool autoMode{false};
-    {
-      storeChanged = updateAndCheckPendingElements(id, item);
-      autoMode = p_->getProgrammeStore().autoModeEnabled();
-    }
-    if (storeChanged || (routingChanged(previousItem, item) && autoMode)) {
-      triggerProgrammeStoreChanged();
-    }
-    updateElementOverviews();
-    updateItemView(id, item);
-    updateObjectViews(id, item);
-  });
-}
+//void JuceSceneFrontendConnector::doUpdateItem(communication::ConnectionId id,
+//                                              proto::InputItemMetadata item) {
+//}
 
 bool JuceSceneFrontendConnector::updateAndCheckPendingElements(
     const communication::ConnectionId& id,
@@ -331,15 +302,8 @@ void JuceSceneFrontendConnector::updateObjectViews(
   }
 }
 
-void JuceSceneFrontendConnector::doRemoveItem(communication::ConnectionId id) {
-  updater_.callOnMessageThread([this, id]() {
-    itemStore_.removeItem(id);
-    removeFromProgrammes(id);
-    removeFromObjectViews(id);
-    removeFromItemView(id);
-    updateElementOverviews();
-  });
-}
+//void JuceSceneFrontendConnector::doRemoveItem(communication::ConnectionId id) {
+//}
 
 namespace {
 void removeItemFromViews(communication::ConnectionId const& id,
@@ -842,6 +806,50 @@ void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
 
 ItemStore& JuceSceneFrontendConnector::doGetItemStore() {
   return itemStore_;
+}
+
+void JuceSceneFrontendConnector::addItem(const proto::InputItemMetadata& item) {
+  updater_.callOnMessageThread([this, item]() {
+    auto const& id = item.connection_id();
+    itemStore_.addItem(id);
+    {
+      std::lock_guard<std::mutex> programmeStoreLock(
+          p_->getProgrammeStoreMutex());
+      if (p_->getProgrammeStore().autoModeEnabled()) {
+        auto result = p_->getProgrammeStore().addItemToSelectedProgramme(id);
+        addObjectView(result.first, result.second);
+        notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+      }
+    }
+  });
+}
+
+void JuceSceneFrontendConnector::changeItem(proto::InputItemMetadata const& oldItem,
+                                            proto::InputItemMetadata const& newItem) {
+  auto id = newItem.connection_id();
+  updater_.callOnMessageThread([this, id, newItem]() {
+    auto previousItem = itemStore_.setItem(id, newItem);
+    auto storeChanged = updateAndCheckPendingElements(id, newItem);
+    auto autoMode = p_->getProgrammeStore().autoModeEnabled();
+    if (storeChanged || (routingChanged(previousItem, newItem) && autoMode)) {
+      triggerProgrammeStoreChanged();
+    }
+    updateElementOverviews();
+    updateItemView(id, newItem);
+    updateObjectViews(id, newItem);
+  });
+}
+
+void JuceSceneFrontendConnector::removeItem(proto::InputItemMetadata const& oldItem) {
+  auto const& id = oldItem.connection_id();
+  updater_.callOnMessageThread([this, id]() {
+    itemStore_.removeItem(id);
+    removeFromProgrammes(id);
+    removeFromObjectViews(id);
+    removeFromItemView(id);
+    updateElementOverviews();
+  });
+
 }
 
 }  // namespace ui
