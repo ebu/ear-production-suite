@@ -129,8 +129,8 @@ void SceneBackend::setup() {
 
 void SceneBackend::updateSceneStore() {
   sceneStore_.clear_monitoring_items();
-  if (auto programme = getSelectedProgramme()) {
-    for (auto& element : programme->element()) {
+  if (auto programme = programmeStore_.selectedProgramme()) {
+    for (auto const& element : programme->element()) {
       addGroupToSceneStore(element);
       addToggleToSceneStore(element);
       addElementToSceneStore(element);
@@ -150,18 +150,6 @@ void SceneBackend::updateSceneStore() {
   for (auto const& item : sceneStore_.monitoring_items()) {
     previousScene_.emplace(item.connection_id());
   }
-}
-
-proto::Programme const* SceneBackend::getSelectedProgramme() {
-  if (programmeStore_.has_selected_programme_index()) {
-    auto index = programmeStore_.selected_programme_index();
-    if (index >= 0) {  // could be -1 if plugin just initialised
-      assert(index < programmeStore_.programme_size());
-      auto& programme = programmeStore_.programme(index);
-      return &programme;
-    }
-  }
-  return nullptr;
 }
 
 void SceneBackend::addGroupToSceneStore(
@@ -256,14 +244,14 @@ void SceneBackend::onConnectionEvent(
 }
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
-  programmeStore_ = store;
+  programmeStore_.set(std::move(store));
   rebuildSceneStore_ = true;
   triggerMetadataSend();  // Allows monitoring plugins to know that renderer
                           // channel counts likely need to update.
 }
 
 std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> SceneBackend::stores() {
-  return {itemStore_.allItems(), programmeStore_};
+  return {itemStore_.allItems(), programmeStore_.get()};
 }
 
 }  // namespace plugin

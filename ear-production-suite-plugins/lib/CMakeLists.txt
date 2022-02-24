@@ -40,6 +40,7 @@ add_library(ear-plugin-base STATIC
   src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
+  src/programme_store.cpp
   src/programme_store_adm_populator.cpp
   src/programme_store_adm_serializer.cpp
   src/ui/direct_speakers_frontend_backend_connector.cpp
@@ -49,7 +50,7 @@ add_library(ear-plugin-base STATIC
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
   ${EAR_PROTO_SRC}
-        include/proto_printers.hpp src/proto_printers.cpp)
+        include/proto_printers.hpp src/proto_printers.cpp )
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp
@@ -104,6 +105,7 @@ set(EAR_BASE_HEADERS
 	include/nng-cpp/socket_base.hpp
 	include/object_backend.hpp
 	include/programme_element_visitor.hpp
+	include/programme_store.hpp
 	include/programme_store_adm_populator.hpp
 	include/programme_store_adm_serializer.hpp
 	include/programme_types.hpp
