@@ -7,7 +7,7 @@
 #include "input_item_metadata.pb.h"
 #include "scene_store.pb.h"
 #include "item_store.hpp"
-#include "programme_store.pb.h"
+#include "programme_store.hpp"
 #include "log.hpp"
 #include "ear-plugin-base/export.h"
 #include <mutex>
@@ -63,7 +63,6 @@ class SceneBackend {
   void initializeProgrammeStore();
 
   void updateSceneStore();
-  const proto::Programme *getSelectedProgramme();
   void addGroupToSceneStore(const proto::ProgrammeElement &element);
   void addToggleToSceneStore(const proto::ProgrammeElement &element);
   void addElementToSceneStore(const proto::ProgrammeElement &element);
@@ -80,7 +79,7 @@ class SceneBackend {
   ItemStore itemStore_;
   proto::SceneStore sceneStore_;
   bool rebuildSceneStore_;
-  proto::ProgrammeStore programmeStore_;
+  ProgrammeStore programmeStore_;
   nng::PubSocket metadataSender_;
   std::set<communication::ConnectionId> previousScene_;
   std::set<std::string> overlappingIds_;
