@@ -569,8 +569,9 @@ void JuceSceneFrontendConnector::languageChanged(ProgrammeView* view,
 void JuceSceneFrontendConnector::addTabClicked(
     EarTabbedComponent* tabbedComponent) {
 
-  auto [programmeIndex, name] = p_->getProgrammeStore().addProgramme();
-  setProgrammeViewName(programmeIndex, name);
+  auto [programmeIndex, programme] = p_->getProgrammeStore().addProgramme();
+  addProgrammeView(programme);
+  setProgrammeViewName(programmeIndex, programme.name());
   selectProgramme(programmeIndex);
   selectProgrammeView(programmeIndex);
 }
