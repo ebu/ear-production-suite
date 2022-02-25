@@ -11,6 +11,7 @@
 #include "programmes_container.hpp"
 #include "scene_plugin_processor.hpp"
 #include "helper/multi_async_updater.h"
+#include "ui_item_store_listener.hpp"
 
 #include <optional>
 #include <memory>
@@ -19,17 +20,14 @@
 namespace ear {
 namespace plugin {
 namespace ui {
-class InputItemList;
 class EarTabbedComponent;
 class ProgrammeView;
 class Overlay;
 class ObjectView;
-class GroupView;
-class ToggleView;
 
 class JuceSceneFrontendConnector :
-    public ItemStore::Listener,
     public SceneFrontendBackendConnector,
+    public UIItemStoreListener,
                                    private ProgrammeView::Listener,
                                    private ElementsContainer::Listener,
                                    private ItemsContainer::Listener,
