@@ -98,13 +98,13 @@ void ProgrammeStore::selectProgramme(int index) {
   store_.set_selected_programme_index(index);
 }
 
-std::pair<int, std::string> ProgrammeStore::addProgramme() {
+std::pair<int, proto::Programme> ProgrammeStore::addProgramme() {
   std::lock_guard<std::mutex> lock(mutex_);
   std::string name{"Programme_"};
   auto index = store_.programme_size();
   name.append(std::to_string(index));
   auto programme = addProgrammeImpl(name, "");
-  return {index, name};
+  return {index, *programme};
 }
 
 bool ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {

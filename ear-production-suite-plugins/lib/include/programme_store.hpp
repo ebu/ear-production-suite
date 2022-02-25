@@ -45,7 +45,7 @@ class ProgrammeStore {
   void set(proto::ProgrammeStore store);
   void setAutoMode(bool enable);
   void selectProgramme(int index);
-  std::pair<int, std::string> addProgramme();
+  std::pair<int, proto::Programme> addProgramme();
   bool moveProgramme(int oldIndex, int newIndex);
   void removeProgramme(int index);
   void setProgrammeName(int index, std::string const& name);
