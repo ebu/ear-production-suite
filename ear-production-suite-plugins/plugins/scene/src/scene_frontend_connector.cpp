@@ -809,46 +809,40 @@ ItemStore& JuceSceneFrontendConnector::doGetItemStore() {
 }
 
 void JuceSceneFrontendConnector::addItem(const proto::InputItemMetadata& item) {
-  updater_.callOnMessageThread([this, item]() {
-    auto const& id = item.connection_id();
-    itemStore_.addItem(id);
-    {
-      std::lock_guard<std::mutex> programmeStoreLock(
-          p_->getProgrammeStoreMutex());
-      if (p_->getProgrammeStore().autoModeEnabled()) {
-        auto result = p_->getProgrammeStore().addItemToSelectedProgramme(id);
-        addObjectView(result.first, result.second);
-        notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-      }
+  auto const& id = item.connection_id();
+  itemStore_.addItem(id);
+  {
+    std::lock_guard<std::mutex> programmeStoreLock(
+        p_->getProgrammeStoreMutex());
+    if (p_->getProgrammeStore().autoModeEnabled()) {
+      auto result = p_->getProgrammeStore().addItemToSelectedProgramme(id);
+      addObjectView(result.first, result.second);
+      notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
     }
-  });
+  }
 }
 
 void JuceSceneFrontendConnector::changeItem(proto::InputItemMetadata const& oldItem,
                                             proto::InputItemMetadata const& newItem) {
   auto id = newItem.connection_id();
-  updater_.callOnMessageThread([this, id, newItem]() {
-    auto previousItem = itemStore_.setItem(id, newItem);
-    auto storeChanged = updateAndCheckPendingElements(id, newItem);
-    auto autoMode = p_->getProgrammeStore().autoModeEnabled();
-    if (storeChanged || (routingChanged(previousItem, newItem) && autoMode)) {
-      triggerProgrammeStoreChanged();
-    }
-    updateElementOverviews();
-    updateItemView(id, newItem);
-    updateObjectViews(id, newItem);
-  });
+  auto previousItem = itemStore_.setItem(id, newItem);
+  auto storeChanged = updateAndCheckPendingElements(id, newItem);
+  auto autoMode = p_->getProgrammeStore().autoModeEnabled();
+  if (storeChanged || (routingChanged(previousItem, newItem) && autoMode)) {
+    triggerProgrammeStoreChanged();
+  }
+  updateElementOverviews();
+  updateItemView(id, newItem);
+  updateObjectViews(id, newItem);
 }
 
 void JuceSceneFrontendConnector::removeItem(proto::InputItemMetadata const& oldItem) {
   auto const& id = oldItem.connection_id();
-  updater_.callOnMessageThread([this, id]() {
-    itemStore_.removeItem(id);
-    removeFromProgrammes(id);
-    removeFromObjectViews(id);
-    removeFromItemView(id);
-    updateElementOverviews();
-  });
+  itemStore_.removeItem(id);
+  removeFromProgrammes(id);
+  removeFromObjectViews(id);
+  removeFromItemView(id);
+  updateElementOverviews();
 
 }
 
