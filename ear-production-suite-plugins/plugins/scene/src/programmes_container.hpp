@@ -1,31 +1,61 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include "JuceHeader.h"
-
 #include "components/ear_tabbed_component.hpp"
-#include "programme_view.hpp"
+#include "communication/common_types.hpp"
 
-namespace ear {
-namespace plugin {
+namespace ear::plugin {
+class LevelMeterCalculator;
+
+namespace proto {
+  class InputItemMetadata;
+  class Programme;
+  class Object;
+}
+
 namespace ui {
 
-class ProgrammesContainer : public Component {
+class JuceSceneFrontendConnector;
+class ProgrammeView;
+class ElementViewList;
+class ObjectView;
+
+class ProgrammesContainer : public juce::Component {
  public:
-  ProgrammesContainer() : tabs(std::make_shared<EarTabbedComponent>()) {
-    addAndMakeVisible(tabs.get());
-  }
-
-  void resized() override { tabs->setBounds(getLocalBounds()); }
-
-  std::shared_ptr<EarTabbedComponent> tabs;
-  std::vector<std::shared_ptr<ProgrammeView>> programmes;
+  ProgrammesContainer();
+  void resized() override;
+  std::shared_ptr<ObjectView> addObjectView(
+      int programmeIndex,
+      const proto::InputItemMetadata& inputItem,
+      const proto::Object& programmeElement,
+      std::shared_ptr<LevelMeterCalculator> const& meterCalculator);
+  void clear();
+  void removeListeners(JuceSceneFrontendConnector* connector);
+  void addTabListener(EarTabbedComponent::Listener* listener);
+  void updateElementOverview(int programmeIndex, proto::Programme const& programme);
+  int programmeCount() const;
+  void updateViews(proto::InputItemMetadata const& item,
+                   std::shared_ptr<LevelMeterCalculator> const& meterCalculator);
+  void removeFromElementViews(communication::ConnectionId const& id);
+  void addProgrammeView(const proto::Programme& programme,
+                        JuceSceneFrontendConnector& connector);
+  void selectTab(int index);
+  void moveProgrammeView(int oldIndex, int newIndex);
+  void removeProgrammeView(int index);
+  void setProgrammeViewName(int programmeIndex,
+                            const juce::String& newName);
+  int getProgrammeIndex(ProgrammeView* view) const;
+  int getProgrammeIndex(ElementViewList* list) const;
 
  private:
+  mutable std::mutex mutex_;
+  std::shared_ptr<EarTabbedComponent> tabs_;
+  std::vector<std::shared_ptr<ProgrammeView>> programmes_;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgrammesContainer)
 };
 
 }  // namespace ui
-}  // namespace plugin
-}  // namespace ear
+}  // namespace ear::plugin
