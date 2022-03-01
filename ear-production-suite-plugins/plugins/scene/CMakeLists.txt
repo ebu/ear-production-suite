@@ -17,6 +17,7 @@ set(SOURCES_SCENE
   src/element_view.cpp
   src/ui_item_store_listener.cpp
   src/programmes_container.cpp
+  src/items_container.cpp
 )
 
 set(HEADERS_SCENE

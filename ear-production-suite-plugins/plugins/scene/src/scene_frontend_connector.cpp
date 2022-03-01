@@ -114,61 +114,9 @@ void JuceSceneFrontendConnector::reloadProgrammeCache() {
   selectProgrammeView(selectedProgramme);
 }
 
-namespace {
-communication::ConnectionId getId(proto::InputItemMetadata const& item) {
-  return {item.connection_id()};
-}
-
-std::shared_ptr<ItemView> itemViewFor(communication::ConnectionId const& id,
-                                      std::vector<std::shared_ptr<ItemView>> const& views) {
-  std::shared_ptr<ItemView> itemView;
-  auto it = std::find_if(views.cbegin(),
-                         views.cend(),
-                         [&id](auto const& item) {
-                           return item->getId() == id;
-                         });
-  if(it != views.cend()) {
-    itemView = *it;
-  }
-  return itemView;
-}
-
-void createOrUpdateView(proto::InputItemMetadata const& item,
-                        std::vector<std::shared_ptr<ItemView>>& views,
-                        ItemViewList& viewList) {
-
-  auto view = itemViewFor(getId(item), views);
-  if (view) {
-    view->setMetadata(item);
-  } else {
-    view = std::make_shared<ItemView>();
-    view->setMetadata(item);
-    views.push_back(view);
-    viewList.addItem(view.get());
-  }
-}
-}
-
 void JuceSceneFrontendConnector::reloadItemListCache() {
-  std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
-  auto items = itemStore_.allItems();
   if (auto container = itemsContainer_.lock()) {
-    for (auto const& entry : items) {
-      auto item = entry.second;
-      if (item.has_ds_metadata()) {
-        createOrUpdateView(item,
-                           container->directSpeakersItems,
-                           *container->directSpeakersList);
-      } else if (item.has_obj_metadata()) {
-        createOrUpdateView(item,
-                           container->objectsItems,
-                           *container->objectsList);
-      } else if (item.has_hoa_metadata()) {
-        createOrUpdateView(item,
-                           container->hoaItems,
-                           *container->hoaList);
-      }
-    }
+    container->createOrUpdateViews(itemStore_.allItems());
   }
 }
 
@@ -220,46 +168,9 @@ void JuceSceneFrontendConnector::updateElementOverviews() {
 
 void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
                                                 proto::InputItemMetadata item) {
-  std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
 
   if (auto container = itemsContainer_.lock()) {
-    if (item.has_ds_metadata()) {
-      auto it = std::find_if(container->directSpeakersItems.begin(),
-                             container->directSpeakersItems.end(),
-                             [id](auto entry) { return id == entry->getId(); });
-      if (it != container->directSpeakersItems.end()) {
-        (*it)->setMetadata(item);
-      } else {
-        auto view = std::make_shared<ItemView>();
-        view->setMetadata(item);
-        container->directSpeakersItems.push_back(view);
-        container->directSpeakersList->addItem(view.get());
-      }
-    } else if (item.has_obj_metadata()) {
-      auto it = std::find_if(container->objectsItems.begin(),
-                             container->objectsItems.end(),
-                             [id](auto entry) { return id == entry->getId(); });
-      if (it != container->objectsItems.end()) {
-        (*it)->setMetadata(item);
-      } else {
-        auto view = std::make_shared<ItemView>();
-        view->setMetadata(item);
-        container->objectsItems.push_back(view);
-        container->objectsList->addItem(view.get());
-      }
-    } else if (item.has_hoa_metadata()) {
-      auto it =
-          std::find_if(container->hoaItems.begin(), container->hoaItems.end(),
-                       [id](auto entry) { return id == entry->getId(); });
-      if (it != container->hoaItems.end()) {
-        (*it)->setMetadata(item);
-      } else {
-        auto view = std::make_shared<ItemView>();
-        view->setMetadata(item);
-        container->hoaItems.push_back(view);
-        container->hoaList->addItem(view.get());
-      }
-    }
+    container->updateView(id, item);
   }
 }
 
@@ -275,27 +186,11 @@ void JuceSceneFrontendConnector::updateObjectViews(
 //void JuceSceneFrontendConnector::doRemoveItem(communication::ConnectionId id) {
 //}
 
-namespace {
-void removeItemFromViews(communication::ConnectionId const& id,
-                         std::vector<std::shared_ptr<ItemView>>& views,
-                         ItemViewList& viewList) {
-  auto it = std::find_if(views.begin(), views.end(), [&id](auto const& view) {
-    return id == view->getId();
-  });
-  if (it != views.end()) {
-    viewList.removeItem(it->get());
-    views.erase(it);
-  }
-}
-}
 
 void JuceSceneFrontendConnector::removeFromItemView(
     communication::ConnectionId id) {
-  std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
   if (auto container = itemsContainer_.lock()) {
-    removeItemFromViews(id, container->directSpeakersItems, *container->directSpeakersList);
-    removeItemFromViews(id, container->objectsItems, *container->objectsList);
-    removeItemFromViews(id, container->hoaItems, *container->hoaList);
+    container->removeView(id);
   }
 }
 
@@ -419,34 +314,6 @@ int JuceSceneFrontendConnector::getProgrammeIndex(ProgrammeView* view) {
   return -1;
 }
 
-namespace {
-void setPresentTheme(ItemView& view) {
-  view.setEnabled(false);
-  view.setAlpha(Emphasis::disabled);
-  view.setSelected(true);
-}
-
-void setMissingTheme(ItemView& view) {
-  view.setEnabled(true);
-  view.setAlpha(Emphasis::full);
-  view.setSelected(false);
-}
-
-void setItemTheme(ItemView& view, proto::Programme const& programme) {
-  if (isItemInProgramme(view.getId(), programme)) {
-    setPresentTheme(view);
-  } else {
-    setMissingTheme(view);
-  }
-}
-
-void themeItemsFor(std::vector<std::shared_ptr<ItemView>> const& items,
-                   proto::Programme const& programme) {
-  for (auto const& item : items) {
-    setItemTheme(*item, programme);
-  }
-}
-}
 
 void JuceSceneFrontendConnector::addItemClicked(ProgrammeView* view) {
   std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
@@ -457,9 +324,7 @@ void JuceSceneFrontendConnector::addItemClicked(ProgrammeView* view) {
     auto index = getProgrammeIndex(view);
     auto programme = p_->getProgrammeStore().programmeAtIndex(index);
     assert(programme);
-    themeItemsFor(itemsContainer->directSpeakersItems, *programme);
-    themeItemsFor(itemsContainer->objectsItems, *programme);
-    themeItemsFor(itemsContainer->hoaItems, *programme);
+    itemsContainer->themeItemsFor(*programme);
   }
 }
 
@@ -670,7 +535,7 @@ void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
 
 // ObjectView::Listener
 void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
-  auto id = getId(data.item);
+  auto id = communication::ConnectionId(data.item.connection_id());
   if(p_->getProgrammeStore().updateElement(id, data.object)) {
     notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
   }
