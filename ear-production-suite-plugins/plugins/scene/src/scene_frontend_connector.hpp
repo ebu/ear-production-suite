@@ -12,6 +12,8 @@
 #include "scene_plugin_processor.hpp"
 #include "helper/multi_async_updater.h"
 #include "ui_item_store_listener.hpp"
+#include "element_view.hpp"
+#include "programme_view.hpp"
 
 #include <optional>
 #include <memory>
@@ -28,12 +30,12 @@ class ObjectView;
 class JuceSceneFrontendConnector :
     public SceneFrontendBackendConnector,
     public UIItemStoreListener,
-                                   private ProgrammeView::Listener,
-                                   private ElementsContainer::Listener,
-                                   private ItemsContainer::Listener,
-                                   private AutoModeOverlay::Listener,
-                                   private EarTabbedComponent::Listener,
-                                   private ObjectView::Listener {
+    public EarTabbedComponent::Listener,
+    public ProgrammeView::Listener,
+    public ElementsContainer::Listener,
+    private ItemsContainer::Listener,
+    private AutoModeOverlay::Listener,
+    private ObjectView::Listener {
  public:
   JuceSceneFrontendConnector(SceneAudioProcessor* processor);
   ~JuceSceneFrontendConnector();
@@ -69,6 +71,10 @@ class JuceSceneFrontendConnector :
   void removeItem(proto::InputItemMetadata const& oldItem) override;
 
  private:
+  std::shared_ptr<ProgrammesContainer> lockProgrammes() {
+    std::lock_guard<std::mutex> lock(programmeViewsMutex_);
+    return programmesContainer_.lock();
+  }
   // --- Restore Editor
   void reloadItemListCache();
   void reloadProgrammeCache();
