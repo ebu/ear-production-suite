@@ -140,7 +140,6 @@ class JuceSceneFrontendConnector :
 
   SceneAudioProcessor* p_;
 
-  std::mutex itemStoreMutex_;
   ItemStore itemStore_;
 
   std::mutex itemViewMutex_;
