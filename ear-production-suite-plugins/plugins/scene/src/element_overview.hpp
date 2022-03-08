@@ -23,6 +23,7 @@ class ElementOverview : public Component, private Timer {
       : connector_{connector},
         rotateLeftButton_(std::make_unique<EarButton>()),
         rotateRightButton_(std::make_unique<EarButton>()),
+        startViewingAngle_(0.f),
         currentViewingAngle_(180.f),
         endViewingAngle_(180.f) {
     rotateLeftButton_->setOffStateIcon(std::unique_ptr<Drawable>(
@@ -66,65 +67,78 @@ class ElementOverview : public Component, private Timer {
     }
   }
 
-  void paint(Graphics& g) override {
-    {  // draw background
-      g.drawImageAt(cachedBackground_, 0, 0);
-    }
-    {  // draw elements
-      auto items = connector_->itemStore().allItems();
-      for (auto element : programme_.element()) {
-        if (element.has_object()) {
-          communication::ConnectionId id(element.object().connection_id());
-          if (items.find(id) != items.end()) {
-            auto item = items.at(id);
-            auto colour = Colour(item.colour());
-            if (item.has_ds_metadata()) {
-              for (auto speaker : item.ds_metadata().speakers()) {
-                if (!speaker.is_lfe()) {
-                  auto position = speaker.position();
-                  drawCircle(g, position, colour);
-                }
-              }
-            } else if (item.has_obj_metadata()) {
-              auto position = item.obj_metadata().position();
-              drawCircle(g, position, colour);
-            }
-          }
-        }
+  void paintDirectSpeakers(Graphics& g,
+                           proto::DirectSpeakersTypeMetadata const& data,
+                           juce::Colour const& colour) {
+    auto const& speakers = data.speakers();
+    for (auto const& speaker : speakers) {
+      if (!speaker.is_lfe()) {
+        auto const& position = speaker.position();
+        drawCircle(g, position, colour);
       }
     }
-    {  // draw
-      auto sphere = getLocalBounds()
-                        .toFloat()
-                        .removeFromBottom(126.f)
-                        .removeFromLeft(156.f)
-                        .withTrimmedLeft(50.f)
-                        .withTrimmedBottom(20.f);
-      g.setColour(EarColours::Sphere);
-      drawSphereInRect(g, sphere, 1.f);
-      g.setFont(EarFonts::Description);
-      g.setColour(EarColours::Label);
-      auto depthSphere = sphere.withSizeKeepingCentre(
-          sphere.getWidth(), depthFactor_ * sphere.getHeight());
+  }
 
-      std::vector<String> labels = {
-          String::fromUTF8("Front"), String::fromUTF8("+90°"),
-          String::fromUTF8("Back"), String::fromUTF8("–90°")};
+  void paintObject(Graphics& g,
+                    proto::ObjectsTypeMetadata const& data,
+                    juce::Colour const& colour) {
+    auto const& position = data.position();
+    drawCircle(g, position, colour);
+  }
 
-      int startIndex = getSectorIndex(endViewingAngle_);
-      auto frontLabelArea = depthSphere.withY(depthSphere.getBottom() + 2.f);
-      g.drawText(labels.at(startIndex), frontLabelArea,
-                 Justification::centredTop);
-      auto rightLabelArea = sphere.withX(sphere.getRight() + 5.f);
-      g.drawText(labels.at((startIndex + 1) % 4), rightLabelArea,
-                 Justification::left);
-      auto backLabelArea = depthSphere.withBottom(depthSphere.getY() - 2.f);
-      g.drawText(labels.at((startIndex + 2) % 4), backLabelArea,
-                 Justification::centredBottom);
-      auto leftLabelArea = sphere.withRightX(sphere.getX() - 5.f);
-      g.drawText(labels.at((startIndex + 3) % 4), leftLabelArea,
-                 Justification::right);
+  void paintBackGround(juce::Graphics& g) {
+    g.drawImageAt(cachedBackground_, 0, 0);
+  }
+
+  void paintElements(juce::Graphics& g) {
+    for (auto const& item : visibleItems_) {
+      auto const& inputData = item.second.inputMetadata;
+      auto colour = Colour(inputData.colour());
+      if (inputData.has_ds_metadata()) {
+        paintDirectSpeakers(g, inputData.ds_metadata(), colour);
+      } else if (inputData.has_obj_metadata()) {
+        paintObject(g, inputData.obj_metadata(), colour);
+      }
     }
+  }
+
+  void paintSphere(Graphics& g) {
+    auto sphere = getLocalBounds()
+        .toFloat()
+        .removeFromBottom(126.f)
+        .removeFromLeft(156.f)
+        .withTrimmedLeft(50.f)
+        .withTrimmedBottom(20.f);
+    g.setColour(EarColours::Sphere);
+    drawSphereInRect(g, sphere, 1.f);
+    g.setFont(EarFonts::Description);
+    g.setColour(EarColours::Label);
+    auto depthSphere = sphere.withSizeKeepingCentre(
+        sphere.getWidth(), depthFactor_ * sphere.getHeight());
+
+    std::vector<String> labels = {
+        String::fromUTF8("Front"), String::fromUTF8("+90°"),
+        String::fromUTF8("Back"), String::fromUTF8("–90°")};
+
+    int startIndex = getSectorIndex(endViewingAngle_);
+    auto frontLabelArea = depthSphere.withY(depthSphere.getBottom() + 2.f);
+    g.drawText(labels.at(startIndex), frontLabelArea,
+               Justification::centredTop);
+    auto rightLabelArea = sphere.withX(sphere.getRight() + 5.f);
+    g.drawText(labels.at((startIndex + 1) % 4), rightLabelArea,
+               Justification::left);
+    auto backLabelArea = depthSphere.withBottom(depthSphere.getY() - 2.f);
+    g.drawText(labels.at((startIndex + 2) % 4), backLabelArea,
+               Justification::centredBottom);
+    auto leftLabelArea = sphere.withRightX(sphere.getX() - 5.f);
+    g.drawText(labels.at((startIndex + 3) % 4), leftLabelArea,
+               Justification::right);
+  }
+
+  void paint(Graphics& g) override {
+    paintBackGround(g);
+    paintElements(g);
+    paintSphere(g);
   }
 
   void drawSphereInRect(Graphics& g, Rectangle<float> rect, float linewidth) {
@@ -151,7 +165,7 @@ class ElementOverview : public Component, private Timer {
     float yProjected = y * sphereArea_.getHeight() * depthFactor_ / 2.f -
                        z * sphereArea_.getHeight() / 2.f;
 
-    juce::Rectangle circleArea(0.f, 0.f, circleRadiusScaled * 2.f,
+    juce::Rectangle<float> circleArea(0.f, 0.f, circleRadiusScaled * 2.f,
                                circleRadiusScaled * 2.f);
     circleArea.translate(-circleRadiusScaled, -circleRadiusScaled);
 
@@ -273,7 +287,38 @@ class ElementOverview : public Component, private Timer {
     rotateRightButton_->setBounds(area.removeFromLeft(30));
   }
 
+  void itemsAdded(std::vector<ProgrammeObject> const& items) {
+    for(auto const& item : items) {
+      visibleItems_.insert({getUuid(item), item});
+    }
+    repaint();
+  }
+
+  void itemRemoved(communication::ConnectionId id) {
+    visibleItems_.erase(id.getUuid());
+    repaint();
+  }
+
+  void itemChanged(ProgrammeObject const& item) {
+    auto it = visibleItems_.find(getUuid(item));
+    if(it != visibleItems_.end()) {
+      it->second = item;
+      repaint();
+    }
+  }
+
+  void resetItems(ProgrammeObjects const& objects) {
+    visibleItems_.clear();
+    for(auto const& object : objects) {
+      visibleItems_.insert({getUuid(object), object});
+    }
+    repaint();
+  }
+
  private:
+  static boost::uuids::uuid getUuid(ProgrammeObject const& pair) {
+    return communication::ConnectionId(pair.inputMetadata.connection_id()).getUuid();
+  }
   SceneFrontendBackendConnector* connector_;
   proto::Programme programme_;
 
@@ -281,6 +326,9 @@ class ElementOverview : public Component, private Timer {
   std::unique_ptr<EarButton> rotateRightButton_;
 
   Image cachedBackground_;
+  std::unordered_map<boost::uuids::uuid,
+                     ProgrammeObject,
+                     boost::hash<boost::uuids::uuid>> visibleItems_;
 
   juce::Rectangle<float> sphereArea_;
   const float depthFactor_ = 0.3f;

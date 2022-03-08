@@ -31,6 +31,9 @@ class EarTabbedComponent : public Component {
   void moveTabTo(int oldIndex, int newIndex);
   void removeTab(int index);
   void removeAllTabs();
+  int tabCount() {
+    return static_cast<int>(tabs_.size());
+  }
 
   void resized() override;
 

@@ -43,12 +43,10 @@ bool ear::plugin::isItemInProgramme(communication::ConnectionId const& id,
 }
 
 proto::ProgrammeStore ProgrammeStore::get() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return store_;
 }
 
 std::optional<proto::Programme> ProgrammeStore::selectedProgramme() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   if (store_.has_selected_programme_index()) {
     auto index = store_.selected_programme_index();
     if (index >= 0) {  // could be -1 if plugin just initialised
@@ -62,115 +60,170 @@ std::optional<proto::Programme> ProgrammeStore::selectedProgramme() const {
 
 std::optional<proto::Programme> ProgrammeStore::programmeAtIndex(
     int index) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return programmeAtIndexImpl(index);
 }
 
 int ProgrammeStore::programmeCount() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return store_.programme_size();
 }
 
 std::string ProgrammeStore::programmeName(int index) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   assert(index < store_.programme_size());
   return store_.programme(index).name();
 }
 
 bool ProgrammeStore::autoModeEnabled() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return store_.auto_mode();
 }
 
-void ProgrammeStore::set(proto::ProgrammeStore store) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  store_ = std::move(store);
-  notifyStoreChanged(store_);
+void ProgrammeStore::set(proto::ProgrammeStore const& store) {
+  store_ = store;
+  fireEvent([&store](auto const& listener) {
+    listener->storeChanged(store);
+  });
 }
 
 void ProgrammeStore::setAutoMode(bool enable) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  store_.set_auto_mode(enable);
+  auto old = store_.auto_mode();
+  if(old != enable) {
+    store_.set_auto_mode(enable);
+    fireEvent([enable](auto const& listener) {
+      listener->autoModeSet(enable);
+    });
+  }
 }
 
 void ProgrammeStore::selectProgramme(int index) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  store_.set_selected_programme_index(index);
+  auto oldIndex = store_.selected_programme_index();
+  if(oldIndex != index) {
+    store_.set_selected_programme_index(index);
+    auto prog = store_.programme(index);
+    fireEvent([index, &prog](auto const& listener){
+      listener->programmeSelected(index, prog);
+    });
+  }
 }
 
-std::pair<int, proto::Programme> ProgrammeStore::addProgramme() {
-  std::lock_guard<std::mutex> lock(mutex_);
+void ProgrammeStore::addProgramme() {
   std::string name{"Programme_"};
   auto index = store_.programme_size();
   name.append(std::to_string(index));
   auto programme = addProgrammeImpl(name, "");
-  return {index, *programme};
+  bool selected = (index == store_.selected_programme_index());
+
+  fireEvent([index, selected, &programme](auto const& listener) {
+    listener->programmeAdded({index, selected}, *programme);
+  });
 }
 
-bool ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
-  std::lock_guard<std::mutex> lock(mutex_);
+void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
   auto programmes = store_.mutable_programme();
   auto size = programmes->size();
   bool moved = false;
   if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
       oldIndex != newIndex) {
     move(programmes->begin(), oldIndex, newIndex);
-    moved = true;
+    auto programme = programmes->at(newIndex);
+    fireEvent([oldIndex, newIndex, &programme](auto const& listener) {
+      listener->programmeMoved(Movement{oldIndex, newIndex}, programme);
+    });
   }
-  return moved;
 }
 
 void ProgrammeStore::removeProgramme(int index) {
-  std::lock_guard<std::mutex> lock(mutex_);
   auto programme = store_.mutable_programme();
   assert(index < store_.programme_size());
   programme->erase(programme->begin() + index);
   auto selected_index = store_.selected_programme_index();
+  fireEvent([index](auto const& listener) {
+    listener->programmeRemoved(index);
+  });
   if(selected_index >= programme->size()) {
-    store_.set_selected_programme_index(std::max<int>(programme->size() - 1, 0));
+    auto newIndex = std::max<int>(programme->size() - 1, 0);
+    store_.set_selected_programme_index(newIndex);
+    auto prog = store_.programme(newIndex);
+    fireEvent([newIndex, &prog](auto const& listener) {
+      listener->programmeSelected(newIndex, prog);
+    });
   }
 }
 
 void ProgrammeStore::setProgrammeName(int index, const std::string& name) {
-  std::lock_guard<std::mutex> lock(mutex_);
   assert(index < store_.programme_size());
-  store_.mutable_programme(index)->set_name(name);
+  if(name != store_.programme(index).name()) {
+    store_.mutable_programme(index)->set_name(name);
+    auto prog = store_.programme(index);
+    auto selectedIndex = store_.selected_programme_index();
+    fireEvent([index, &prog](auto const& listener) {
+      listener->programmeUpdated(index, prog);
+    });
+  }
 }
 
 void ProgrammeStore::setProgrammeLanguage(int programmeIndex,
                                           const std::string& language) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  store_.mutable_programme(programmeIndex)->set_language(language);
+  if(!(store_.programme(programmeIndex).has_language() &&
+        store_.programme(programmeIndex).language() == language)) {
+    store_.mutable_programme(programmeIndex)->set_language(language);
+    auto prog = store_.programme(programmeIndex);
+    fireEvent([programmeIndex, &prog](auto const& listener) {
+      listener->programmeUpdated(programmeIndex, prog);
+    });
+  }
 }
 
 void ProgrammeStore::clearProgrammeLanguage(int programmeIndex) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  store_.mutable_programme(programmeIndex)->clear_language();
+  if(store_.programme(programmeIndex).has_language()) {
+    store_.mutable_programme(programmeIndex)->clear_language();
+    auto prog = store_.programme(programmeIndex);
+    fireEvent([programmeIndex, &prog](auto const& listener) {
+      listener->programmeUpdated(programmeIndex, prog);
+    });
+  }
 }
 
-std::pair<int, proto::Object> ProgrammeStore::addItemToSelectedProgramme(
-    communication::ConnectionId const& id) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  auto programmeIndex =
-      store_.selected_programme_index();
-  auto programme =
-      store_.mutable_programme(programmeIndex);
-  return {programmeIndex, *addObject(programme, id)};
+void ProgrammeStore::addItemsToSelectedProgramme(std::vector<
+    communication::ConnectionId> const& ids) {
+  assert(!ids.empty());
+  auto programmeIndex = 0;
+  programmeIndex = store_.selected_programme_index();
+  auto programme = store_.mutable_programme(programmeIndex);
+  std::vector<proto::Object> elements;
+  elements.reserve(ids.size());
+  for(auto const& id : ids) {
+    auto object = addObject(programme, id);
+    elements.push_back(*object);
+  }
+
+  fireEvent([&elements, programmeIndex](auto const& listener) {
+    listener->itemsAdded({programmeIndex, true}, elements);
+  });
 }
 
-void ProgrammeStore::removeElement(int programmeIndex, int elementIndex) {
-  std::lock_guard<std::mutex> lock(mutex_);
+void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementIndex) {
   assert(programmeIndex >=0 && programmeIndex < store_.programme_size());
   auto elements =
       store_.mutable_programme(programmeIndex)
           ->mutable_element();
   assert(elementIndex >= 0 && elementIndex < std::distance(elements->begin(), elements->end()));
+  auto element = store_.programme(programmeIndex).element(elementIndex);
+  ProgrammeStatus status{};
+  bool hasObject{false};
+  if(element.has_object()) {
+    status.index = programmeIndex;
+    status.isSelected = false;
+    hasObject = true;
+  }
   elements->erase(elements->begin() + elementIndex);
+  if(hasObject) {
+    fireEvent([status, &element](auto const& listener) {
+      listener->itemRemoved(status, element.object());
+    });
+  }
 }
 
-bool ProgrammeStore::updateElement(const communication::ConnectionId& id,
+void ProgrammeStore::updateElement(const communication::ConnectionId& id,
                                    const proto::Object& element) {
-  std::lock_guard<std::mutex> lock(mutex_);
   auto programmeIndex = store_.selected_programme_index();
   auto elements = store_.mutable_programme(programmeIndex)->mutable_element();
 
@@ -185,37 +238,44 @@ bool ProgrammeStore::updateElement(const communication::ConnectionId& id,
 
   if (it != elements->end()) {
     *(it->mutable_object()) = element;
-    return true;
+    ProgrammeStatus status{
+        programmeIndex,
+        true
+    };
+    fireEvent([status, &element](auto const& listener) {
+      listener->itemUpdated(status, element);
+    });
   }
-  return false;
 }
 
-std::vector<int> ProgrammeStore::removeFromAllProgrammes(
-    const communication::ConnectionId& id) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  std::vector<int> changedProgrammeIndices;
+void ProgrammeStore::removeElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
+  auto elements =
+      store_.mutable_programme(programmeIndex)->mutable_element();
+  auto element =
+      std::find_if(elements->begin(), elements->end(), [id](auto const& entry) {
+        return communication::ConnectionId(entry.object().connection_id()) ==
+               id;
+      });
+  if (element != elements->end()) {
+    auto elementIndex = static_cast<int>(std::distance(elements->begin(), element));
+    removeElementFromProgramme(programmeIndex, elementIndex);
+  }
+}
+
+//void ProgrammeStore::removeElementFromSelectedProgramme(const communication::ConnectionId& id) {
+//  removeElementFromProgramme(store_.selected_programme_index(), id);
+//}
+
+void ProgrammeStore::removeElementFromAllProgrammes(const communication::ConnectionId& id) {
   for (int programmeIndex = 0;
        programmeIndex != store_.programme_size();
        ++programmeIndex) {
-    auto elements =
-        store_.mutable_programme(programmeIndex)->mutable_element();
-    auto element =
-        std::find_if(elements->begin(), elements->end(), [id](auto const& entry) {
-          return communication::ConnectionId(entry.object().connection_id()) ==
-                 id;
-        });
-    if (element != elements->end()) {
-      auto elementIndex = std::distance(elements->begin(), element);
-      elements->erase(elements->begin() + elementIndex);
-      changedProgrammeIndices.push_back(programmeIndex);
-    }
+    removeElementFromProgramme(programmeIndex, id);
   }
-  return changedProgrammeIndices;
 }
 
-bool ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
+void ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
                                  int newIndex) {
-  std::lock_guard<std::mutex> lock(mutex_);
   auto elements =
       store_.mutable_programme(programmeIndex)
           ->mutable_element();
@@ -225,13 +285,14 @@ bool ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
       newIndex < elements->size() &&  //
       oldIndex != newIndex) {
     move(elements->begin(), oldIndex, newIndex);
-    return true;
+    auto programme = store_.programme(programmeIndex);
+    fireEvent([programmeIndex, &programme](auto const& listener) {
+      listener->programmeUpdated(programmeIndex, programme);
+    });
   }
-  return false;
 }
 
 void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
-  std::lock_guard<std::mutex> lock(mutex_);
   if (store_.auto_mode()) {
     store_.clear_programme();
     auto defaultProgramme = addProgrammeImpl("Default", "");
@@ -240,6 +301,11 @@ void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
     for (auto const& routeItem : itemsSortedByRoute) {
       addObject(defaultProgramme, routeItem.second);
     }
+    auto index = store_.selected_programme_index();
+    auto const prog = *defaultProgramme;
+    fireEvent([index, &prog](auto const& listener) {
+      listener->programmeUpdated(index, prog);
+    });
   }
 }
 
@@ -270,20 +336,5 @@ proto::Object* ProgrammeStore::addObject(proto::Programme* programme,
   auto object = new proto::Object{};
   object->set_connection_id(id.string());
   element->set_allocated_object(object);
-  notifyObjectAdded(*object);
   return object;
-}
-
-void ProgrammeStore::notifyObjectAdded(const proto::Object& object) {
-  removeDeadPointersAfter(listeners_,
-      [&object](auto const& listener) {
-        listener->objectAdded(object);
-      });
-}
-
-void ProgrammeStore::notifyStoreChanged(const proto::ProgrammeStore& store) {
-  removeDeadPointersAfter(listeners_,
-      [&store](auto const& listener) {
-        listener->storeChanged(store);
-      });
 }

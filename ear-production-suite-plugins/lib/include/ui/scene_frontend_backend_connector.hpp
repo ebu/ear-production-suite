@@ -11,7 +11,6 @@
 
 namespace ear {
 namespace plugin {
-class ItemStore;
 namespace ui {
 
 /**
@@ -62,8 +61,6 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
     this->doSetMultipleScenePluginsOverlayVisible(visible);
   }
 
-  ItemStore& itemStore();
-
  protected:
   SceneFrontendBackendConnector(){};
 //  virtual void doAddItem(communication::ConnectionId id) = 0;
@@ -73,7 +70,6 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
 
   void notifyProgrammeStoreChanged(proto::ProgrammeStore store);
   virtual void doSetMultipleScenePluginsOverlayVisible(const bool& visible) = 0;
-  virtual ItemStore& doGetItemStore() = 0;
 
  private:
   ProgrammeStoreChangedCallback programmeStoreCallback_;

@@ -18,7 +18,7 @@ set(SOURCES_SCENE
   src/ui_item_store_listener.cpp
   src/programmes_container.cpp
   src/items_container.cpp
-)
+        )
 
 set(HEADERS_SCENE
 	${EPS_PLUGIN_BASE_DIR}/include/communication/common_types.hpp
@@ -88,7 +88,7 @@ set(HEADERS_SCENE
 	src/scene_plugin_editor.hpp
 	src/scene_plugin_processor.hpp
 	src/ui_item_store_listener.hpp
-)
+        )
 
 source_group("Header Files" FILES ${HEADERS_SCENE})
 

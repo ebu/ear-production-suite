@@ -6,15 +6,13 @@
 
 using namespace ear::plugin;
 
-proto::InputItemMetadata ItemStore::get(
+proto::InputItemMetadata ItemStore::getItem(
     const communication::ConnectionId& id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return store_.at(id);
 }
 
 std::optional<proto::InputItemMetadata> ItemStore::maybeGet(
     const communication::ConnectionId& id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   std::optional<proto::InputItemMetadata> item;
   if(auto it = store_.find(id); it != store_.end()) {
     item = it->second;
@@ -24,12 +22,10 @@ std::optional<proto::InputItemMetadata> ItemStore::maybeGet(
 
 std::map<communication::ConnectionId, proto::InputItemMetadata>
 ItemStore::allItems() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   return store_;
 }
 
 std::multimap<int, communication::ConnectionId> ItemStore::routeMap() const {
-  std::lock_guard<std::mutex> lock(mutex_);
   std::multimap<int, communication::ConnectionId> routes;
   std::transform(store_.cbegin(), store_.cend(),
                  std::inserter(routes, routes.begin()),
@@ -40,43 +36,37 @@ std::multimap<int, communication::ConnectionId> ItemStore::routeMap() const {
   return routes;
 }
 
-void ItemStore::addItem(const communication::ConnectionId& id) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  proto::InputItemMetadata emptyItemMetadata;
-  emptyItemMetadata.set_connection_id(id.string());
-  store_[id] = emptyItemMetadata;
-  notifyItemAdded(emptyItemMetadata);
-}
-
-std::optional<proto::InputItemMetadata> ItemStore::setItem(
+void ItemStore::setItem(
     const communication::ConnectionId& id,
     const proto::InputItemMetadata& item) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  std::optional<proto::InputItemMetadata> previousItem;
   assert(id.string() == item.connection_id());
   if (auto result = store_.emplace(id, item); result.second) {
     // Currently this should never be called, but this path should be used
     // when we remove addItem
     assert(false);
-    notifyItemAdded(item);
+    fireEvent([&item](auto const& listener) {
+      listener->itemAdded(item);
+    });
   } else {
-    previousItem = result.first->second;
+    auto previousItem = result.first->second;
     result.first->second = item;
-    notifyItemChanged(result.first->second, item);
-  }
-  return previousItem;
-}
-void ItemStore::removeItem(const communication::ConnectionId& id) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  if(auto it = store_.find(id); it != store_.end()) {
-    auto item = it->second;
-    store_.erase(it);
-    notifyItemRemoved(item);
+    fireEvent([&previousItem, &item](auto const& listener) {
+      listener->itemChanged(previousItem, item);
+    });
   }
 }
 
-bool ItemStore::clearChanged() {
-  std::lock_guard<std::mutex> lock(mutex_);
+void ItemStore::removeItem(const communication::ConnectionId& id) {
+  if(auto it = store_.find(id); it != store_.end()) {
+    auto item = it->second;
+    store_.erase(it);
+    fireEvent([&item](auto const& listener) {
+      listener->itemRemoved(item);
+    });
+  }
+}
+
+void ItemStore::clearChanged() {
   bool clearedAny{false};
   for(auto& item : store_) {
     if(item.second.changed()) {
@@ -84,7 +74,16 @@ bool ItemStore::clearChanged() {
       clearedAny = true;
     }
   }
-  return clearedAny;
+
+  if(clearedAny) {
+    fireEvent([](auto const& listener) {
+      listener->changesCleared();
+    });
+  }
+}
+
+ItemMap ItemStore::get() const {
+  return store_;
 }
 
 void ItemStore::addListener(const std::shared_ptr<Listener>& listener) {
@@ -104,4 +103,7 @@ void ItemStore::Listener::itemRemoved(const proto::InputItemMetadata& oldItem) {
 }
 void ItemStore::Listener::dispatch(std::function<void()> event) {
   event();
+}
+void ItemStore::Listener::changesCleared() {
+  clearChanges();
 }

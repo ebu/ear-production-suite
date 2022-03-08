@@ -29,11 +29,12 @@ void ElementsContainer::resized() {
   list->setBounds(area.reduced(2, 2));
 }
 
+// TODO store element id with view and send that to listeners instead of index
 void ElementsContainer::removeElementUiInteraction(ElementView * element)
 {
   auto it = std::find_if(
     elements.begin(), elements.end(),
-    [element](auto candidate) { return candidate.get() == element; });
+    [element](auto const& candidate) { return candidate.get() == element; });
   auto index = std::distance(elements.begin(), it);
   removeElement(index);
   Component::BailOutChecker checker(this);
