@@ -65,12 +65,11 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
-  p_->getFrontendConnector()->setItemsContainer(itemsContainer_);
-  p_->getFrontendConnector()->setProgrammesContainer(programmesContainer_);
-  p_->getFrontendConnector()->setItemsOverlay(itemsOverlay_);
-  p_->getFrontendConnector()->setAutoModeOverlay(autoModeOverlay_);
-  p_->getFrontendConnector()->setMultipleScenePluginsOverlay(
-      multipleScenePluginsOverlay_);
+  p_->getFrontendConnector()->repopulateUIComponents(itemsContainer_,
+                                                     itemsOverlay_,
+                                                     autoModeOverlay_,
+                                                     programmesContainer_,
+                                                     multipleScenePluginsOverlay_);
 
   setResizable(true, false);
   setResizeLimits(1100, 620, std::numeric_limits<int>::max(),

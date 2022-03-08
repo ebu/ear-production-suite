@@ -6,6 +6,7 @@
 #include "item_view.hpp"
 #include "item_view_list.hpp"
 #include "programme_store.hpp"
+#include "store_metadata.hpp"
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
@@ -64,17 +65,17 @@ ItemsContainer::ItemsContainer()
   addButton_->setButtonText("Add");
   addButton_->onClick = [&]() {
     std::vector<communication::ConnectionId> ids;
-    for (auto item : this->objectsItems) {
+    for (auto const& item : this->objectsItems) {
       if (item->isEnabled() && item->isSelected()) {
         ids.push_back(item->getId());
       }
     }
-    for (auto item : this->directSpeakersItems) {
+    for (auto const& item : this->directSpeakersItems) {
       if (item->isEnabled() && item->isSelected()) {
         ids.push_back(item->getId());
       }
     }
-    for (auto item : this->hoaItems) {
+    for (auto const& item : this->hoaItems) {
       if (item->isEnabled() && item->isSelected()) {
         ids.push_back(item->getId());
       }
@@ -195,43 +196,18 @@ void ItemsContainer::updateView(const communication::ConnectionId& id,
                                 const proto::InputItemMetadata& item) {
   std::lock_guard<std::mutex> lock(mutex);
   if (item.has_ds_metadata()) {
-    auto it = std::find_if(directSpeakersItems.begin(),
-                           directSpeakersItems.end(),
-                           [id](auto entry) { return id == entry->getId(); });
-    if (it != directSpeakersItems.end()) {
-      (*it)->setMetadata(item);
-    } else {
-      auto view = std::make_shared<ItemView>();
-      view->setMetadata(item);
-      directSpeakersItems.push_back(view);
-      directSpeakersList->addItem(view.get());
-    }
+    createOrUpdateView(item,
+                       directSpeakersItems,
+                       *directSpeakersList);
   } else if (item.has_obj_metadata()) {
-    auto it = std::find_if(objectsItems.begin(),
-                           objectsItems.end(),
-                           [id](auto entry) { return id == entry->getId(); });
-    if (it != objectsItems.end()) {
-      (*it)->setMetadata(item);
-    } else {
-      auto view = std::make_shared<ItemView>();
-      view->setMetadata(item);
-      objectsItems.push_back(view);
-      objectsList->addItem(view.get());
-    }
+    createOrUpdateView(item,
+                       objectsItems,
+                       *objectsList);
   } else if (item.has_hoa_metadata()) {
-    auto it =
-        std::find_if(hoaItems.begin(), hoaItems.end(),
-                     [id](auto entry) { return id == entry->getId(); });
-    if (it != hoaItems.end()) {
-      (*it)->setMetadata(item);
-    } else {
-      auto view = std::make_shared<ItemView>();
-      view->setMetadata(item);
-      hoaItems.push_back(view);
-      hoaList->addItem(view.get());
-    }
+    createOrUpdateView(item,
+                       hoaItems,
+                       *hoaList);
   }
-
 }
 
 namespace {
@@ -268,26 +244,20 @@ void setMissingTheme(ItemView& view) {
   view.setSelected(false);
 }
 
-void setItemTheme(ItemView& view, proto::Programme const& programme) {
-  if (isItemInProgramme(view.getId(), programme)) {
-    setPresentTheme(view);
-  } else {
-    setMissingTheme(view);
-  }
-}
-
-void themeItemsFor(std::vector<std::shared_ptr<ItemView>> const& items,
-                   proto::Programme const& programme) {
-  for (auto const& item : items) {
-    setItemTheme(*item, programme);
+void themeItemsFor(std::vector<std::shared_ptr<ItemView>>& views,
+                const ProgrammeObjects& programme) {
+  for (auto const& view : views) {
+    if(programme.dataItem(view->getId())) {
+      setPresentTheme(*view);
+    }
+    setMissingTheme(*view);
   }
 }
 }
 
-void ItemsContainer::themeItemsFor(const proto::Programme& programme) {
+void ItemsContainer::themeItemsFor(const ProgrammeObjects& programme) {
   std::lock_guard<std::mutex> lock(mutex);
   ::themeItemsFor(directSpeakersItems, programme);
   ::themeItemsFor(objectsItems, programme);
   ::themeItemsFor(hoaItems, programme);
-
 }

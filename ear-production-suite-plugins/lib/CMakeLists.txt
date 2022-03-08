@@ -51,7 +51,7 @@ add_library(ear-plugin-base STATIC
   src/ui/scene_frontend_backend_connector.cpp
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
-  ${EAR_PROTO_SRC})
+  ${EAR_PROTO_SRC} src/store_metadata.cpp include/store_metadata.hpp)
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp

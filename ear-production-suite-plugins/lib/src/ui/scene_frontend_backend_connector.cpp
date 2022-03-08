@@ -23,9 +23,6 @@ void SceneFrontendBackendConnector::notifyProgrammeStoreChanged(
     programmeStoreCallback_(std::move(store));
   }
 }
-ItemStore& SceneFrontendBackendConnector::itemStore() {
-  return doGetItemStore();
-}
 
 }  // namespace ui
 }  // namespace plugin

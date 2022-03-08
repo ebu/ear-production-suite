@@ -109,11 +109,27 @@ void ProgrammesContainer::addTabListener(
   tabs_->addListener(listener);
 }
 
-void ProgrammesContainer::updateElementOverview(
-    int programmeIndex, const ear::plugin::proto::Programme &programme) {
+void ProgrammesContainer::itemsAddedToProgramme(
+    ProgrammeStatus status, std::vector<ProgrammeObject> const& items) {
+  assert(!items.empty());
+  auto programmeIndex = status.index;
   std::lock_guard<std::mutex> lock(mutex_);
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
-  overview->setProgramme(programme);
+  overview->itemsAdded(items);
+}
+
+void ProgrammesContainer::itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) {
+  auto programmeIndex = status.index;
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto overview = programmes_.at(programmeIndex)->getElementOverview();
+  overview->itemRemoved(item.inputMetadata.connection_id());
+}
+
+void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
+  auto programmeIndex = status.index;
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto overview = programmes_.at(programmeIndex)->getElementOverview();
+  overview->itemChanged(item);
 }
 
 int ProgrammesContainer::programmeCount() const {
@@ -235,4 +251,10 @@ int ProgrammesContainer::getProgrammeIndex(ElementViewList *list) const {
     return std::distance(programmes_.begin(), it);
   }
   return -1;
+}
+
+void ProgrammesContainer::updateElementOverview(
+ProgrammeObjects const& objects) {
+  auto view = programmes_.at(objects.index());
+  view->getElementOverview()->resetItems(objects);
 }

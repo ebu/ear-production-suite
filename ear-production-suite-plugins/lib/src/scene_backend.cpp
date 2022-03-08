@@ -12,8 +12,8 @@ using std::placeholders::_2;
 
 namespace ear {
 namespace plugin {
-SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend)
-    : connectionManager_(), frontendConnector_(frontend) {
+SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend, Metadata& data)
+    : data_(data), connectionManager_(), frontendConnector_(frontend) {
   logger_ = createLogger(fmt::format("Scene Master @{}", (const void*)this));
 #ifndef NDEBUG
   logger_->set_level(spdlog::level::trace);
@@ -55,7 +55,10 @@ void SceneBackend::triggerMetadataSend(bool forExporting) {
                           ec.message());
         }
       });
-  rebuildSceneStore_ = rebuildSceneStore_ || itemStore_.clearChanged();
+}
+
+void SceneBackend::changesCleared() {
+  rebuildSceneStore_ = true;
 }
 
 void SceneBackend::setup() {
@@ -100,12 +103,15 @@ void SceneBackend::setup() {
         [this](communication::ConnectionId id, proto::InputItemMetadata item) {
           EAR_LOGGER_DEBUG(this->logger_,
                            "Received metadata from connection {}", id.string());
-          auto previous = itemStore_.setItem(id, item);
-          // UPDATE ITEM
-          if(!previous || !MessageDifferencer::ApproximatelyEquivalent(*previous, item)) {
-//              frontendConnector_->updateItem(id, item);
-              rebuildSceneStore_ = true;
-            }
+          data_.withItemStore([&id, &item](auto& store) {
+            store.setItem(id, item);
+          });
+//          auto previous = itemStore_.setItem(id, item);
+//          // UPDATE ITEM
+//          if(!previous || !MessageDifferencer::ApproximatelyEquivalent(*previous, item)) {
+////              frontendConnector_->updateItem(id, item);
+//              rebuildSceneStore_ = true;
+//            }
         });
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_,
@@ -128,28 +134,28 @@ void SceneBackend::setup() {
 }
 
 void SceneBackend::updateSceneStore() {
-  sceneStore_.clear_monitoring_items();
-  if (auto programme = programmeStore_.selectedProgramme()) {
-    for (auto const& element : programme->element()) {
-      addGroupToSceneStore(element);
-      addToggleToSceneStore(element);
-      addElementToSceneStore(element);
-    }
-  }
-
-  sceneStore_.clear_all_available_items();
-  addAvailableInputItemsToSceneStore();
-
-  auto overlaps = getOverlapIds(sceneStore_);
-  if (overlappingIds_ != overlaps) {
-    flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
-  }
-  overlappingIds_ = overlaps;
-
-  previousScene_.clear();
-  for (auto const& item : sceneStore_.monitoring_items()) {
-    previousScene_.emplace(item.connection_id());
-  }
+//  sceneStore_.clear_monitoring_items();
+//  if (auto programme = programmeStore_.selectedProgramme()) {
+//    for (auto const& element : programme->element()) {
+//      addGroupToSceneStore(element);
+//      addToggleToSceneStore(element);
+//      addElementToSceneStore(element);
+//    }
+//  }
+//
+//  sceneStore_.clear_all_available_items();
+//  addAvailableInputItemsToSceneStore();
+//
+//  auto overlaps = getOverlapIds(sceneStore_);
+//  if (overlappingIds_ != overlaps) {
+//    flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
+//  }
+//  overlappingIds_ = overlaps;
+//
+//  previousScene_.clear();
+//  for (auto const& item : sceneStore_.monitoring_items()) {
+//    previousScene_.emplace(item.connection_id());
+//  }
 }
 
 void SceneBackend::addGroupToSceneStore(
@@ -175,12 +181,12 @@ void SceneBackend::addToggleToSceneStore(
 
 void SceneBackend::addElementToSceneStore(
     proto::ProgrammeElement const& element) {
-  if (element.has_object()) {
-    if(auto item =
-            itemStore_.maybeGet(element.object().connection_id()); item) {
-      addToSceneStore(*item);
-    }
-  }
+//  if (element.has_object()) {
+//    if(auto item =
+//            itemStore_.maybeGet(element.object().connection_id()); item) {
+//      addToSceneStore(*item);
+//    }
+//  }
 }
 
 void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
@@ -209,12 +215,12 @@ void SceneBackend::addToSceneStore(proto::InputItemMetadata const& inputItem) {
 }
 
 void SceneBackend::addAvailableInputItemsToSceneStore() {
-  auto items = itemStore_.allItems();
-  for (auto const& itemPair : items) {
-    auto& itemStoreInputItem = itemPair.second;
-    auto sceneStoreInputItem = sceneStore_.add_all_available_items();
-    sceneStoreInputItem->CopyFrom(itemStoreInputItem);
-  }
+//  auto items = itemStore_.allItems();
+//  for (auto const& itemPair : items) {
+//    auto& itemStoreInputItem = itemPair.second;
+//    auto sceneStoreInputItem = sceneStore_.add_all_available_items();
+//    sceneStoreInputItem->CopyFrom(itemStoreInputItem);
+//  }
 }
 
 void SceneBackend::onConnectionEvent(
@@ -223,12 +229,17 @@ void SceneBackend::onConnectionEvent(
   if (event == communication::SceneConnectionManager::Event::INPUT_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new input connection {}", id.string());
     auto& info = connectionManager_.connectionInfo(id);
-    itemStore_.addItem(id);
+//    data_.withItemStore([&id](auto& store){
+//      proto::InputItemMetadata data{};
+//      store.setItem(id, data);
+//    });
 //    frontendConnector_->addItem(id);
   } else if (event ==
              communication::SceneConnectionManager::Event::INPUT_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Input {} disconnected", id.string());
-    itemStore_.removeItem(id);
+    data_.withItemStore([&id](auto& store) {
+      store.removeItem(id);
+    });
     rebuildSceneStore_ = true;
 //    frontendConnector_->removeItem(id);
   } else if (event ==
@@ -242,17 +253,11 @@ void SceneBackend::onConnectionEvent(
 }
 
 void SceneBackend::onProgrammeStoreChanged(proto::ProgrammeStore store) {
-  programmeStore_.set(std::move(store));
+
+//  programmeStore_.set(std::move(store));
   rebuildSceneStore_ = true;
   triggerMetadataSend();  // Allows monitoring plugins to know that renderer
                           // channel counts likely need to update.
-}
-
-std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> SceneBackend::stores() {
-  return {itemStore_.allItems(), programmeStore_.get()};
-}
-void SceneBackend::addItemStoreListener(std::shared_ptr<ItemStore::Listener> const& listener) {
-  itemStore_.addListener(listener);
 }
 
 }  // namespace plugin

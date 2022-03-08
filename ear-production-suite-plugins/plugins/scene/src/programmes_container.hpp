@@ -6,15 +6,10 @@
 #include "JuceHeader.h"
 #include "components/ear_tabbed_component.hpp"
 #include "communication/common_types.hpp"
+#include "store_metadata.hpp"
 
 namespace ear::plugin {
 class LevelMeterCalculator;
-
-namespace proto {
-  class InputItemMetadata;
-  class Programme;
-  class Object;
-}
 
 namespace ui {
 
@@ -35,8 +30,11 @@ class ProgrammesContainer : public juce::Component {
   void clear();
   void removeListeners(JuceSceneFrontendConnector* connector);
   void addTabListener(EarTabbedComponent::Listener* listener);
-  void updateElementOverview(int programmeIndex, proto::Programme const& programme);
+  void updateElementOverview(ProgrammeObjects const& objects);
   int programmeCount() const;
+  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items);
+  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item);
+  void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item);
   void updateViews(proto::InputItemMetadata const& item,
                    std::shared_ptr<LevelMeterCalculator> const& meterCalculator);
   void removeFromElementViews(communication::ConnectionId const& id);
