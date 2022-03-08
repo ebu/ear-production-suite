@@ -15,8 +15,9 @@ namespace ui {
 
 JuceSceneFrontendConnector::JuceSceneFrontendConnector (
     SceneAudioProcessor* processor)
-    : SceneFrontendBackendConnector(), p_(processor) {
-  reloadProgrammeCache();
+    : SceneFrontendBackendConnector(), p_(processor),
+      data_{processor->getData()}{
+
 }
 
 JuceSceneFrontendConnector::~JuceSceneFrontendConnector() {
@@ -27,97 +28,87 @@ JuceSceneFrontendConnector::~JuceSceneFrontendConnector() {
 
 // --- Component Setter
 
-void JuceSceneFrontendConnector::setItemsContainer(
-    std::shared_ptr<ItemsContainer> container) {
-  container->addListener(this);
-  {
-    std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
-    itemsContainer_ = container;
-  }
-  reloadItemListCache();
+void JuceSceneFrontendConnector::repopulateUIComponents(
+    std::shared_ptr<ItemsContainer> const& itemsContainer,
+    std::shared_ptr<Overlay> const& addItemsOverlay,
+    std::shared_ptr<AutoModeOverlay> const& autoModeOverlay,
+    std::shared_ptr<ProgrammesContainer> const& programmesContainer,
+    std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
+) {
+  itemsContainer->addListener(this);
+  autoModeOverlay->addListener(this);
+  programmesContainer->addTabListener(this);
+  itemsContainer_ = itemsContainer;
+  itemsOverlay_ = addItemsOverlay;
+  autoModeOverlay_ = autoModeOverlay;
+  programmesContainer_ = programmesContainer;
+  multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
+  multipleScenePluginsOverlay->setVisible(false);
+  data_.refreshUI();
 }
 
-void JuceSceneFrontendConnector::setItemsOverlay(
-    std::shared_ptr<Overlay> overlay) {
-  {
-    std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
-    itemsOverlay_ = overlay;
+//TODO call on message thread
+void JuceSceneFrontendConnector::doSetMultipleScenePluginsOverlayVisible(const bool& visible) {
+  if(auto overlay = multipleScenePluginsOverlay_.lock()) {
+    overlay->setVisible(visible);
   }
-}
 
-void JuceSceneFrontendConnector::setAutoModeOverlay(
-    std::shared_ptr<AutoModeOverlay> overlay) {
-  {
-    std::lock_guard<std::mutex> programmeStoreMutex(
-        p_->getProgrammeStoreMutex());
-    overlay->setVisible(p_->getProgrammeStore().autoModeEnabled());
-  }
-  overlay->addListener(this);
-  autoModeOverlay_ = overlay;
-}
-
-void JuceSceneFrontendConnector::setProgrammesContainer(
-    std::shared_ptr<ProgrammesContainer> container) {
-  container->addTabListener(this);
-  {
-    std::lock_guard<std::mutex> programmeViewsLock(programmeViewsMutex_);
-    programmesContainer_ = container;
-  }
-  reloadProgrammeCache();
 }
 
 void JuceSceneFrontendConnector::triggerProgrammeStoreChanged() {
-  {
-    std::lock_guard<std::mutex> programmeStoreMutex(
-        p_->getProgrammeStoreMutex());
-    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-  }
-  reloadProgrammeCache();
+//  {
+//    std::lock_guard<std::mutex> programmeStoreMutex(
+//        p_->getProgrammeStoreMutex());
+//    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+//  }
+//  reloadProgrammeCache();
 }
 
 // --- Restore Editor
 
 
-void JuceSceneFrontendConnector::reloadProgrammeCache() {
+void JuceSceneFrontendConnector::dataReset(
+    proto::ProgrammeStore const& programmeStore,
+    ItemMap const& items) {
   {
     if (auto programmesContainer = lockProgrammes()) {
       programmesContainer->clear();
     }
   }
-  int selectedProgramme = 0;
   bool autoMode = false;
-  {
-    std::lock_guard<std::mutex> programmeStoreLock(
-        p_->getProgrammeStoreMutex());
-    auto& programmeStore_ = p_->getProgrammeStore();
-    programmeStore_.autoUpdateFrom(itemStore_);
-    auto store = programmeStore_.get();
-    selectedProgramme = store.selected_programme_index();
-    selectedProgramme = selectedProgramme == -1 ? 0 : selectedProgramme;
+  auto selectedProgramme = programmeStore.selected_programme_index();
+  selectedProgramme = std::max<int>(selectedProgramme, 0);
 
-    for (int i = 0; i < store.programme_size(); ++i) {
-      auto programme = store.programme(i);
-      addProgrammeView(programme);
-      updateElementOverview(i);
-      for (auto element : programme.element()) {
-        if (element.has_object()) {
-          addObjectView(i, element.object());
-        }
+
+  for (int i = 0; i < programmeStore.programme_size(); ++i) {
+    auto const& programme = programmeStore.programme(i);
+    ProgrammeObjects programmeObjects({i, i == selectedProgramme},
+                                      programme,
+                                      items);
+    addProgrammeView(programme);
+    updateElementOverview(programmeObjects);
+    for (auto const& element : programme.element()) {
+      if (element.has_object()) {
+        auto const& object = element.object();
+        auto id = communication::ConnectionId{object.connection_id()};
+        ProgrammeStatus status {i, i == selectedProgramme};
+        addObjectView(status, {element.object(), items.at(id)});
       }
     }
   }
+
   if (auto overlay = autoModeOverlay_.lock()) {
-    overlay->setVisible(autoMode);
+    overlay->setVisible(programmeStore.auto_mode());
   }
-  // selectProgramme(selectedProgramme); - selectProgrammeView will trigger
-  // selectProgramme anyway
   selectProgrammeView(selectedProgramme);
+
+  if (auto container = itemsContainer_.lock()) {
+    container->createOrUpdateViews(items);
+  }
 }
 
+
 void JuceSceneFrontendConnector::reloadItemListCache() {
-  if (auto container = itemsContainer_.lock()) {
-    container->createOrUpdateViews(itemStore_.allItems());
-  }
 }
 
 // --- ItemList Management
@@ -156,15 +147,15 @@ bool JuceSceneFrontendConnector::updateAndCheckPendingElements(
   return storeChanged;
 }
 
-void JuceSceneFrontendConnector::updateElementOverviews() {
-  if (auto programmesContainer = lockProgrammes()) {
-    for (int programmeIndex = 0;
-         programmeIndex < programmesContainer->programmeCount();
-         ++programmeIndex) {
-      updateElementOverview(programmeIndex);
-    }
-  }
-}
+//void JuceSceneFrontendConnector::updateElementOverviews() {
+//  if (auto programmesContainer = lockProgrammes()) {
+//    for (int programmeIndex = 0;
+//         programmeIndex < programmesContainer->programmeCount();
+//         ++programmeIndex) {
+//      updateElementOverview(programmeIndex);
+//    }
+//  }
+//}
 
 void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
                                                 proto::InputItemMetadata item) {
@@ -194,33 +185,12 @@ void JuceSceneFrontendConnector::removeFromItemView(
   }
 }
 
-void JuceSceneFrontendConnector::setMultipleScenePluginsOverlay(
-    std::shared_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay) {
-  multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
-  doSetMultipleScenePluginsOverlayVisible(false);
-}
 
-void JuceSceneFrontendConnector::doSetMultipleScenePluginsOverlayVisible(
-    const bool& visible) {
-  auto multipleScenePluginsOverlay = multipleScenePluginsOverlay_;
 
-  updater_.callOnMessageThread([visible, multipleScenePluginsOverlay]() {
-    if (auto multipleScenePluginsOverlayLocked =
-            multipleScenePluginsOverlay.lock()) {
-      multipleScenePluginsOverlayLocked->setVisible(visible);
-    }
-  });
-}
-
-void JuceSceneFrontendConnector::removeFromProgrammes(
-    communication::ConnectionId id) {
-  auto changedProgIndices = p_->getProgrammeStore().removeFromAllProgrammes(id);
-  if(!changedProgIndices.empty()) {
-    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-  }
-  for(auto index : changedProgIndices) {
-    updateElementOverview(index);
-  }
+void JuceSceneFrontendConnector::programmeUpdated(int programmeIndex,
+                                                  proto::Programme const& programme) {
+//  updateElementOverview(programmeIndex, programme);
+  setProgrammeViewName(programmeIndex, programme.name());
 }
 
 void JuceSceneFrontendConnector::removeFromObjectViews(
@@ -249,20 +219,14 @@ void JuceSceneFrontendConnector::addProgrammeView(
 }
 
 void JuceSceneFrontendConnector::selectProgramme(int index) {
-  p_->getProgrammeStore().selectProgramme(index);
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+  data_.withProgrammeStore([index](auto& store){
+    store.selectProgramme(index);
+  });
 }
 
 void JuceSceneFrontendConnector::selectProgrammeView(int index) {
   if (auto container = lockProgrammes()) {
     container->selectTab(index);
-  }
-}
-
-void JuceSceneFrontendConnector::moveProgramme(int oldIndex, int newIndex) {
-  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
-  if(p_->getProgrammeStore().moveProgramme(oldIndex, newIndex)) {
-    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
   }
 }
 
@@ -272,21 +236,10 @@ void JuceSceneFrontendConnector::moveProgrammeView(int oldIndex, int newIndex) {
   }
 }
 
-void JuceSceneFrontendConnector::removeProgramme(int index) {
-  p_->getProgrammeStore().removeProgramme(index);
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-}
-
 void JuceSceneFrontendConnector::removeProgrammeView(int index) {
   if (auto container = lockProgrammes()) {
     container->removeProgrammeView(index);
   }
-}
-
-void JuceSceneFrontendConnector::setProgrammeName(int programmeIndex,
-                                                  const std::string& newName) {
-  p_->getProgrammeStore().setProgrammeName(programmeIndex, newName);
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
 }
 
 void JuceSceneFrontendConnector::setProgrammeViewName(int programmeIndex,
@@ -298,13 +251,16 @@ void JuceSceneFrontendConnector::setProgrammeViewName(int programmeIndex,
 
 void JuceSceneFrontendConnector::setProgrammeLanguage(int programmeIndex,
                                                       int languageIndex) {
-  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
   if (languageIndex >= 0 && languageIndex < LANGUAGES.size()) {
-    p_->getProgrammeStore().setProgrammeLanguage(languageIndex, LANGUAGES.at(languageIndex).alpha3);
+    auto language = LANGUAGES.at(languageIndex).alpha3;
+    data_.withProgrammeStore([programmeIndex, &language](auto& store) {
+      store.setProgrammeLanguage(programmeIndex, language);
+    });
   } else {
-    p_->getProgrammeStore().clearProgrammeLanguage(languageIndex);
+    data_.withProgrammeStore([programmeIndex](auto& store) {
+      store.clearProgrammeLanguage(programmeIndex);
+    });
   }
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
 }
 
 int JuceSceneFrontendConnector::getProgrammeIndex(ProgrammeView* view) {
@@ -321,10 +277,10 @@ void JuceSceneFrontendConnector::addItemClicked(ProgrammeView* view) {
   auto itemsContainer = itemsContainer_.lock();
   if (overlay && itemsContainer) {
     overlay->setVisible(true);
-    auto index = getProgrammeIndex(view);
-    auto programme = p_->getProgrammeStore().programmeAtIndex(index);
-    assert(programme);
-    itemsContainer->themeItemsFor(*programme);
+//    auto index = getProgrammeIndex(view);
+//    auto programme = p_->getProgrammeStore().programmeAtIndex(index);
+//    assert(programme);
+//    itemsContainer->themeItemsFor(*programme);
   }
 }
 
@@ -340,10 +296,13 @@ void JuceSceneFrontendConnector::nameChanged(ProgrammeView* view,
                                              const String& newName) {
   auto index = getProgrammeIndex(view);
   if (index >= 0) {
-    setProgrammeName(index, newName.toStdString());
-    setProgrammeViewName(index, newName);
+    data_.withProgrammeStore([index, &newName](auto& store){
+      store.setProgrammeName(index, newName.toStdString());
+    });
   }
 }
+
+
 
 void JuceSceneFrontendConnector::languageChanged(ProgrammeView* view,
                                                  int languageIndex) {
@@ -356,11 +315,31 @@ void JuceSceneFrontendConnector::languageChanged(ProgrammeView* view,
 void JuceSceneFrontendConnector::addTabClicked(
     EarTabbedComponent* tabbedComponent) {
 
-  auto [programmeIndex, programme] = p_->getProgrammeStore().addProgramme();
+  data_.withProgrammeStore([](auto& store){
+    store.addProgramme();
+  });
+}
+
+void JuceSceneFrontendConnector::programmeAdded(
+    int programmeIndex,
+    proto::Programme const& programme) {
   addProgrammeView(programme);
   setProgrammeViewName(programmeIndex, programme.name());
   selectProgramme(programmeIndex);
-  selectProgrammeView(programmeIndex);
+}
+
+void JuceSceneFrontendConnector::programmeSelected(ProgrammeObjects const& objects) {
+
+  selectProgrammeView(objects.index());
+  updateAddItemsContainer(objects);
+}
+
+void JuceSceneFrontendConnector::updateAddItemsContainer(ProgrammeObjects const& objects) {
+  auto overlay = itemsOverlay_.lock();
+  auto itemsContainer = itemsContainer_.lock();
+  if (overlay && itemsContainer) {
+    itemsContainer->themeItemsFor(objects);
+  }
 }
 
 void JuceSceneFrontendConnector::tabSelected(EarTabbedComponent*, int index) {
@@ -369,14 +348,19 @@ void JuceSceneFrontendConnector::tabSelected(EarTabbedComponent*, int index) {
 
 void JuceSceneFrontendConnector::tabMoved(EarTabbedComponent*, int oldIndex,
                                           int newIndex) {
-  moveProgramme(oldIndex, newIndex);
-  moveProgrammeView(oldIndex, newIndex);
-  selectProgramme(newIndex);
+  data_.withProgrammeStore([oldIndex, newIndex](auto& store) {
+    store.moveProgramme(oldIndex, newIndex);
+  });
+}
+
+void JuceSceneFrontendConnector::programmeMoved(Movement motion,
+                                                const proto::Programme& programme) {
+  moveProgrammeView(motion.to, motion.from);
 }
 
 void JuceSceneFrontendConnector::removeTabClicked(
     EarTabbedComponent* tabbedComponent, int index) {
-  auto progCount = p_->getProgrammeStore().programmeCount();
+  auto progCount = tabbedComponent->tabCount();
   if (auto programmesContainer = lockProgrammes(); programmesContainer && progCount == 1) {
     NativeMessageBox::showMessageBox(MessageBoxIconType::NoIcon,
                                      String("Cannot delete last programme"),
@@ -384,9 +368,7 @@ void JuceSceneFrontendConnector::removeTabClicked(
                                      programmesContainer.get());
     return;
   }
-  String programmeName;
-
-  programmeName = p_->getProgrammeStore().programmeName(index);
+  auto programmeName = tabbedComponent->getName();
   auto text = String("Do you really want to delete \"");
   text += String(programmeName);
   text += String("\"?");
@@ -397,10 +379,15 @@ void JuceSceneFrontendConnector::removeTabClicked(
           text,
           programmesContainer.get(),
           nullptr)) {
-      removeProgramme(index);
-      removeProgrammeView(index);
+      data_.withProgrammeStore([index](auto& store) {
+        store.removeProgramme(index);
+      });
     }
   }
+}
+
+void JuceSceneFrontendConnector::programmeRemoved(int programmeIndex) {
+  removeProgrammeView(programmeIndex);
 }
 
 void JuceSceneFrontendConnector::tabBarDoubleClicked(
@@ -411,40 +398,54 @@ void JuceSceneFrontendConnector::tabBarDoubleClicked(
 // ItemsContainer::Listener
 void JuceSceneFrontendConnector::addItemsClicked(
     ItemsContainer* container, std::vector<communication::ConnectionId> ids) {
-  auto index{0};
-  for(auto const& id : ids) {
-    auto [programmeIndex, object]  = p_->getProgrammeStore().addItemToSelectedProgramme(id);
-    addObjectView(programmeIndex, object);
-    index = programmeIndex;
-  }
+  data_.withProgrammeStore([&ids](auto& store) {
+    store.addItemsToSelectedProgramme(ids);
+  });
 
   if (auto overlay = itemsOverlay_.lock()) {
     overlay->setVisible(false);
   }
-
-  updateElementOverview(index);
 }
 
-void JuceSceneFrontendConnector::updateElementOverview(int programmeIndex) {
+void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) {
+  for(auto const& item : items) {
+    addObjectView(status, item);
+  }
   if (auto programmesContainer = lockProgrammes()) {
+    programmesContainer->itemsAddedToProgramme(status, items);
+  }
+//  updateElementOverview(items.back().programmeElement.index);
+}
 
-    auto programme = p_->getProgrammeStore().programmeAtIndex(programmeIndex);
-    assert(programme);
-    programmesContainer->updateElementOverview(programmeIndex, *programme);
+void JuceSceneFrontendConnector::itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) {
+  if (auto programmesContainer = lockProgrammes()) {
+    programmesContainer->itemRemovedFromProgramme(status, item);
+  }
+}
+
+void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
+  if (auto programmesContainer = lockProgrammes()) {
+    programmesContainer->programmeItemUpdated(status, item);
+  }
+}
+
+void JuceSceneFrontendConnector::updateElementOverview(ProgrammeObjects const& objects) {
+  if (auto programmesContainer = lockProgrammes()) {
+    programmesContainer->updateElementOverview(objects);
   }
 }
 
 // --- Programme Element Management
 
-proto::Object* JuceSceneFrontendConnector::addObject(
-    proto::Programme* programme, const communication::ConnectionId id) {
-  auto element = programme->add_element();
-  auto object = new proto::Object{};
-  object->set_connection_id(id.string());
-  element->set_allocated_object(object);
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-  return object;
-}
+//proto::Object* JuceSceneFrontendConnector::addObject(
+//    proto::Programme* programme, const communication::ConnectionId id) {
+//  auto element = programme->add_element();
+//  auto object = new proto::Object{};
+//  object->set_connection_id(id.string());
+//  element->set_allocated_object(object);
+//  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+//  return object;
+//}
 
 proto::Group* JuceSceneFrontendConnector::addGroup(
     proto::Programme* programme) {
@@ -460,19 +461,32 @@ proto::Toggle* JuceSceneFrontendConnector::addToggle(
   return {};
 }
 
-void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
-                                               const proto::Object& object) {
+//void JuceSceneFrontendConnector::addObjectView(int programmeIndex,
+//                                               const proto::Object& object) {
+//  auto meterCalculator = p_->getLevelMeter().lock();
+//  auto programmesContainer = lockProgrammes();
+//  if (meterCalculator && programmesContainer) {
+//    auto id = communication::ConnectionId{object.connection_id()};
+//    auto item = itemStore_.getItem(id);
+//    auto view = programmesContainer->addObjectView(programmeIndex,
+//                                                   item,
+//                                                   object,
+//                                                   meterCalculator);
+//    view->addListener(this);
+//  }
+//}
+
+void JuceSceneFrontendConnector::addObjectView(ProgrammeStatus status, ProgrammeObject const& item) {
   auto meterCalculator = p_->getLevelMeter().lock();
   auto programmesContainer = lockProgrammes();
   if (meterCalculator && programmesContainer) {
-    auto id = communication::ConnectionId{object.connection_id()};
-    auto item = itemStore_.get(id);
-    auto view = programmesContainer->addObjectView(programmeIndex,
-                                                   item,
-                                                   object,
+    auto view = programmesContainer->addObjectView(status.index,
+                                                   item.inputMetadata,
+                                                   item.programmeObject,
                                                    meterCalculator);
     view->addListener(this);
   }
+
 }
 
 void JuceSceneFrontendConnector::addGroupView(int programmeIndex,
@@ -485,20 +499,23 @@ void JuceSceneFrontendConnector::addToggleView(int programmeIndex,
   throw std::runtime_error("Toggle view not implemented");
 }
 
-void JuceSceneFrontendConnector::moveElement(int programmeIndex, int oldIndex,
-                                             int newIndex) {
-  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
-  if(p_->getProgrammeStore().moveElement(programmeIndex, oldIndex, newIndex)) {
-    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-  }
-}
+//void JuceSceneFrontendConnector::moveElement(int programmeIndex, int oldIndex,
+//                                             int newIndex) {
+//  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
+//  if(p_->getProgrammeStore().moveElement(programmeIndex, oldIndex, newIndex)) {
+//    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+//  }
+//}
 
-void JuceSceneFrontendConnector::removeElement(int programmeIndex,
-                                               int elementIndex) {
-  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
-  p_->getProgrammeStore().removeElement(programmeIndex, elementIndex);
-  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-}
+//void JuceSceneFrontendConnector::removeElement(int programmeIndex,
+//                                               int elementIndex) {
+//  data_.withProgrammeStore([programmeIndex, elementIndex](auto& store) {
+//    store.removeElementFromSelectedProgramme(elementIndex);
+//  });
+//  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
+//  p_->getProgrammeStore().removeElement(programmeIndex, elementIndex);
+//  notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+//}
 
 // ElementsContainer::Listener
 void JuceSceneFrontendConnector::elementMoved(ElementViewList* list,
@@ -510,76 +527,88 @@ void JuceSceneFrontendConnector::elementMoved(ElementViewList* list,
     }
   }
   assert(programmeIndex >= 0);
-  moveElement(programmeIndex, oldIndex, newIndex);
+  data_.withProgrammeStore([programmeIndex, oldIndex, newIndex](auto& store){
+    store.moveElement(programmeIndex, oldIndex, newIndex);
+  });
 }
 
 void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
                                                       int index) {
   int programmeIndex = -1;
   {
+    ProgrammesContainer c;
     if (auto programmesContainer = lockProgrammes()) {
       programmeIndex = programmesContainer->getProgrammeIndex(list);
     }
   }
   assert(programmeIndex >= 0);
-  removeElement(programmeIndex, index);
-  updateElementOverview(programmeIndex);
+  data_.withProgrammeStore([programmeIndex, index](auto& store){
+    store.removeElementFromProgramme(programmeIndex, index);
+  });
 }
 
 // AutoModeOverlay::Listener
 void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
                                                  bool state) {
-  std::lock_guard<std::mutex> programmeStoreLock(p_->getProgrammeStoreMutex());
-  p_->getProgrammeStore().setAutoMode(state);
+  data_.withProgrammeStore([state](auto& store) {
+    store.setAutoMode(state);
+  });
 }
 
 // ObjectView::Listener
 void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
-  auto id = communication::ConnectionId(data.item.connection_id());
-  if(p_->getProgrammeStore().updateElement(id, data.object)) {
-    notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-  }
+  data_.withProgrammeStore([&data](auto& store) {
+      store.updateElement(data.item.connection_id(), data.object);
+  });
+
+  data_.withItemStore([&data](auto& store) {
+    store.setItem(data.item.connection_id(), data.item);
+  });
 }
 
-ItemStore& JuceSceneFrontendConnector::doGetItemStore() {
-  return itemStore_;
-}
+//void JuceSceneFrontendConnector::addItem(const proto::InputItemMetadata& item) {
+//  data_.withItemStore([&item](auto& store) {
+//    store.setItem(item.connection_id(), item);
+//  });
+////  {
+////    std::lock_guard<std::mutex> programmeStoreLock(
+////        p_->getProgrammeStoreMutex());
+////    if (p_->getProgrammeStore().autoModeEnabled()) {
+////      auto result = p_->getProgrammeStore().addItemsToSelectedProgramme({id});
+////      addObjectView(result.first, result.second);
+////      notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
+////    }
+////  }
+//}
 
-void JuceSceneFrontendConnector::addItem(const proto::InputItemMetadata& item) {
-  auto const& id = item.connection_id();
-  itemStore_.addItem(id);
-  {
-    std::lock_guard<std::mutex> programmeStoreLock(
-        p_->getProgrammeStoreMutex());
-    if (p_->getProgrammeStore().autoModeEnabled()) {
-      auto result = p_->getProgrammeStore().addItemToSelectedProgramme(id);
-      addObjectView(result.first, result.second);
-      notifyProgrammeStoreChanged(p_->getProgrammeStore().get());
-    }
-  }
-}
+//void JuceSceneFrontendConnector::changeItem(proto::InputItemMetadata const& oldItem,
+//                                            proto::InputItemMetadata const& newItem) {
+//  auto id = newItem.connection_id();
+//  auto previousItem = itemStore_.setItem(id, newItem);
+//  auto storeChanged = updateAndCheckPendingElements(id, newItem);
+//  auto autoMode = p_->getProgrammeStore().autoModeEnabled();
+//  if (storeChanged || (routingChanged(previousItem, newItem) && autoMode)) {
+//    triggerProgrammeStoreChanged();
+//  }
+////  updateElementOverviews();
+//  updateItemView(id, newItem);
+//  updateObjectViews(id, newItem);
+//}
 
-void JuceSceneFrontendConnector::changeItem(proto::InputItemMetadata const& oldItem,
-                                            proto::InputItemMetadata const& newItem) {
-  auto id = newItem.connection_id();
-  auto previousItem = itemStore_.setItem(id, newItem);
-  auto storeChanged = updateAndCheckPendingElements(id, newItem);
-  auto autoMode = p_->getProgrammeStore().autoModeEnabled();
-  if (storeChanged || (routingChanged(previousItem, newItem) && autoMode)) {
-    triggerProgrammeStoreChanged();
-  }
-  updateElementOverviews();
-  updateItemView(id, newItem);
-  updateObjectViews(id, newItem);
-}
-
-void JuceSceneFrontendConnector::removeItem(proto::InputItemMetadata const& oldItem) {
-  auto const& id = oldItem.connection_id();
-  itemStore_.removeItem(id);
-  removeFromProgrammes(id);
+void JuceSceneFrontendConnector::inputRemoved(communication::ConnectionId const& id) {
   removeFromObjectViews(id);
   removeFromItemView(id);
-  updateElementOverviews();
+}
+void JuceSceneFrontendConnector::autoModeChanged(bool enabled) {
+  if(auto overlay = autoModeOverlay_.lock()) {
+    overlay->setVisible(enabled);
+  }
+}
+void JuceSceneFrontendConnector::inputAdded(const InputItem& item) {
+
+}
+void JuceSceneFrontendConnector::inputUpdated(const InputItem& item) {
+
 }
 
 }  // namespace ui

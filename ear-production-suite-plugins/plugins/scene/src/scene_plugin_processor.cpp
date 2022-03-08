@@ -19,8 +19,7 @@ SceneAudioProcessor::SceneAudioProcessor()
                           true))
 {
   connector_ = std::make_shared<ear::plugin::ui::JuceSceneFrontendConnector>(this);
-  backend_ = std::make_unique<ear::plugin::SceneBackend>(connector_.get());
-  backend_->addItemStoreListener(connector_);
+  backend_ = std::make_unique<ear::plugin::SceneBackend>(connector_.get(), metadata_);
 
   try {
     backend_->setup();
@@ -176,17 +175,20 @@ AudioProcessorEditor* SceneAudioProcessor::createEditor() {
 }
 
 void SceneAudioProcessor::getStateInformation(MemoryBlock& destData) {
-  auto programmes = programmeStore_.get();
-  destData.setSize(programmes.ByteSizeLong());
-  programmes.SerializeToArray(destData.getData(), destData.getSize());
+  metadata_.withProgrammeStore([&destData](auto& store){
+    auto programmes = store.get();
+    destData.setSize(programmes.ByteSizeLong());
+    programmes.SerializeToArray(destData.getData(), destData.getSize());
+  });
 }
 
 void SceneAudioProcessor::setStateInformation(const void* data,
                                               int sizeInBytes) {
   ear::plugin::proto::ProgrammeStore store;
   store.ParseFromArray(data, sizeInBytes);
-  programmeStore_.set(store);
-  connector_->triggerProgrammeStoreChanged();
+  metadata_.withProgrammeStore([&store](auto& programmeStore) {
+    programmeStore.set(store);
+  });
 }
 
 ear::plugin::ui::JuceSceneFrontendConnector*
@@ -206,7 +208,7 @@ void SceneAudioProcessor::sendAdmMetadata() {
   // This is going to fail if two uids reference the same channel. (the second
   // will overwrite the first) Need to change the way channelMapping is sent if
   // we want to handle that case
-  auto [itemStore, progStore] = backend_->stores();
+  auto [itemStore, progStore] = metadata_.stores();
   ear::plugin::ProgrammeStoreAdmSerializer serializer{};
   auto [adm, chna] =
       serializer.serialize(std::move(progStore), std::move(itemStore));
@@ -234,7 +236,6 @@ void SceneAudioProcessor::recvAdmMetadata(std::string admStr,
                                           std::vector<uint32_t> mappings) {
   auto iss = std::istringstream{std::move(admStr)};
   auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
-  auto lock = std::lock_guard<std::mutex>(programmeStoreMutex_);
   pendingElements_ =
       ear::plugin::populateStoreFromAdm(*doc, pendingStore_, mappings);
 }

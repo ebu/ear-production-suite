@@ -5,6 +5,7 @@
 #include "helper/nng_wrappers.h"
 #include "programme_store.pb.h"
 #include "programme_store.hpp"
+#include "store_metadata.hpp"
 #include "components/read_only_audio_parameter_int.hpp"
 #include "components/level_meter_calculator.hpp"
 #include "backend_setup_timer.hpp"
@@ -52,13 +53,9 @@ class SceneAudioProcessor : public AudioProcessor {
   void setStateInformation(const void* data, int sizeInBytes) override;
 
   ear::plugin::ui::JuceSceneFrontendConnector* getFrontendConnector();
-  ear::plugin::ProgrammeStore& getProgrammeStore() {
-    return programmeStore_;
+  ear::plugin::Metadata& getData() {
+    return metadata_;
   }
-  std::mutex& getProgrammeStoreMutex() { return programmeStoreMutex_; }
-//  ear::plugin::proto::ProgrammeStore getProgrammeStoreCopy() {
-//    return programmeStore_;
-//  }
 
   void incomingMessage(std::shared_ptr<NngMsg> msg);
 
@@ -71,7 +68,12 @@ class SceneAudioProcessor : public AudioProcessor {
     return pendingElements_;
   }
 
-  void setStoreFromPending() { programmeStore_.set(pendingStore_); }
+  void setStoreFromPending() {
+    metadata_.withProgrammeStore(
+        [this](auto& store) {
+          store.set(pendingStore_);
+        });
+  }
 
   void setupBackend();
 
@@ -83,7 +85,7 @@ class SceneAudioProcessor : public AudioProcessor {
   std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
 
-  ear::plugin::ProgrammeStore programmeStore_;
+  ear::plugin::Metadata metadata_;
   ear::plugin::proto::ProgrammeStore pendingStore_;
   std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
 

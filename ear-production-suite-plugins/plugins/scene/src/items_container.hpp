@@ -9,6 +9,7 @@
 
 namespace ear {
 namespace plugin {
+class ProgrammeObjects;
 namespace proto {
   class InputItemMetadata;
   class ItemStore;
@@ -46,7 +47,7 @@ class ItemsContainer : public Component {
   void updateView(communication::ConnectionId const& id,
                   proto::InputItemMetadata const& item);
   void removeView(communication::ConnectionId const& id);
-  void themeItemsFor(proto::Programme const& programme);
+  void themeItemsFor(ProgrammeObjects const& programme);
 
  private:
   std::mutex mutex;

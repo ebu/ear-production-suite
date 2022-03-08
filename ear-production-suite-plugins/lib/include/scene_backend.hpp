@@ -4,10 +4,8 @@
 #include "communication/scene_command_receiver.hpp"
 #include "communication/scene_metadata_receiver.hpp"
 #include "communication/scene_connection_manager.hpp"
-#include "input_item_metadata.pb.h"
+#include "store_metadata.hpp"
 #include "scene_store.pb.h"
-#include "item_store.hpp"
-#include "programme_store.hpp"
 #include "log.hpp"
 #include "ear-plugin-base/export.h"
 #include <mutex>
@@ -45,7 +43,7 @@ class SceneFrontendBackendConnector;
  */
 class SceneBackend {
  public:
-  EAR_PLUGIN_BASE_EXPORT SceneBackend(ui::SceneFrontendBackendConnector *);
+  EAR_PLUGIN_BASE_EXPORT SceneBackend(ui::SceneFrontendBackendConnector *, Metadata& data);
   EAR_PLUGIN_BASE_EXPORT ~SceneBackend();
   SceneBackend(const SceneBackend &) = delete;
   SceneBackend(SceneBackend &&) = delete;
@@ -53,9 +51,8 @@ class SceneBackend {
   SceneBackend &operator=(const SceneBackend &) = delete;
   void triggerMetadataSend(bool forExporting = false);
   void setup();
+  void changesCleared();
   void addItemStoreListener(std::shared_ptr<ItemStore::Listener> const& listener);
-
-  std::pair<std::map<communication::ConnectionId, proto::InputItemMetadata>, proto::ProgrammeStore> stores();
 
  private:
   communication::MessageBuffer getMessage(bool forExporting = false);
@@ -73,14 +70,13 @@ class SceneBackend {
   void onProgrammeStoreChanged(proto::ProgrammeStore store);
 
   std::shared_ptr<spdlog::logger> logger_;
+  Metadata& data_;
   communication::SceneCommandReceiver commandReceiver_;
   communication::SceneConnectionManager connectionManager_;
   communication::SceneMetadataReceiver metadataReceiver_;
   ui::SceneFrontendBackendConnector *frontendConnector_;
-  ItemStore itemStore_;
   proto::SceneStore sceneStore_;
   bool rebuildSceneStore_;
-  ProgrammeStore programmeStore_;
   nng::PubSocket metadataSender_;
   std::set<communication::ConnectionId> previousScene_;
   std::set<std::string> overlappingIds_;

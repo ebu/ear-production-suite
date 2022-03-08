@@ -9,6 +9,13 @@
 namespace ear {
 namespace plugin {
 
+struct InputItem {
+  communication::ConnectionId id;
+  proto::InputItemMetadata data;
+};
+
+using ItemMap = std::map<communication::ConnectionId, proto::InputItemMetadata>;
+
 /*
  * Item store fully describes items provided by all connected input plugins
  * along with their configuration in those plugins.
@@ -25,6 +32,7 @@ class ItemStore {
                             proto::InputItemMetadata const& newItem) = 0;
 
     virtual void removeItem(proto::InputItemMetadata const& oldItem) = 0;
+    virtual void clearChanges() = 0;
     friend class ItemStore;
    private:
     void itemAdded(proto::InputItemMetadata const& item);
@@ -32,26 +40,31 @@ class ItemStore {
                      proto::InputItemMetadata const& newItem);
 
     void itemRemoved(proto::InputItemMetadata const& oldItem);
+    void changesCleared();
   };
 
-  [[ nodiscard ]] proto::InputItemMetadata get(communication::ConnectionId const& id) const;
+  [[ nodiscard ]] ItemMap get() const;
+  [[ nodiscard ]] proto::InputItemMetadata getItem(communication::ConnectionId const& id) const;
   std::optional<proto::InputItemMetadata> maybeGet(communication::ConnectionId const& id) const;
   [[ nodiscard ]] std::map<communication::ConnectionId, proto::InputItemMetadata> allItems() const;
   std::multimap<int, communication::ConnectionId> routeMap() const;
 
 
-  // TODO remove this as setItem will do.
-  void addItem(communication::ConnectionId const& id);
-  std::optional<proto::InputItemMetadata> setItem(communication::ConnectionId const& id, proto::InputItemMetadata const& item);
+  void setItem(communication::ConnectionId const& id,
+               proto::InputItemMetadata const& item);
   void removeItem(communication::ConnectionId const& id);
-  [[ nodiscard ]] bool clearChanged();
-
+  void clearChanged();
   void addListener(std::shared_ptr<Listener> const& listener);
 
  private:
-  mutable std::mutex mutex_;
   std::vector<std::weak_ptr<Listener>> listeners_;
-  std::map<communication::ConnectionId, proto::InputItemMetadata> store_;
+  ItemMap store_;
+
+  template <typename Fn>
+  void fireEvent(Fn&& fn) {
+    removeDeadPointersAfter(listeners_,
+                            std::forward<Fn>(fn));
+  }
 
   // note deliberate capture by value in inner lambda, this is so
   // we can dispatch asynchronously without the listener expiring or
