@@ -4,114 +4,15 @@
 
 #ifndef EAR_PRODUCTION_SUITE_STORE_METADATA_HPP
 #define EAR_PRODUCTION_SUITE_STORE_METADATA_HPP
+#include <algorithm>
+#include <memory>
+#include <vector>
 #include "item_store.hpp"
 #include "programme_store.hpp"
-#include "input_item_metadata.pb.h"
-#include "programme_store.hpp"
+#include "metadata_listener.hpp"
 #include "helper/weak_ptr.hpp"
-#include <algorithm>
-#include <vector>
-#include <memory>
 
 namespace ear::plugin {
-
-struct ProgrammeObject {
-  proto::Object programmeObject;
-  proto::InputItemMetadata inputMetadata;
-};
-
-class ProgrammeObjects {
- public:
-  ProgrammeObjects(ProgrammeStatus status,
-                   proto::Programme const& programme,
-                   ItemMap const& inputItems)
-      : status{status},
-        name_{programme.has_name() ? programme.name() : ""},
-        hasLanguage_{programme.has_language()},
-        language_{programme.has_language() ? programme.language() : ""} {
-    data.reserve(programme.element_size());
-    for (auto const& element : programme.element()) {
-      if (element.has_object()) {
-        auto id = element.object().connection_id();
-        if (auto inputItemIt = inputItems.find(id);
-            inputItemIt != inputItems.end()) {
-          data.push_back({element.object(), inputItemIt->second});
-        }
-      }
-    }
-  }
-
-  [[nodiscard]]
-  int index() const {
-    return status.index;
-  }
-
-  [[nodiscard]]
-  bool isSelected() const {
-    return status.isSelected;
-  }
-
-  [[nodiscard]]
-  bool hasLanguage() const {
-     return hasLanguage_;
-  };
-
-  std::string const& language() {
-    return language_;
-  }
-
-  [[nodiscard]]
-  std::optional<ProgrammeObject> dataItem(communication::ConnectionId const& id) const {
-    auto it = std::find_if(data.begin(), data.end(), [this, &id](auto const& item) {
-      return communication::ConnectionId(item.inputMetadata.connection_id()) == id;
-    });
-    std::optional<ProgrammeObject> item;
-    if(it != data.end()) {
-      item = *it;
-    }
-    return item;
-  }
-  using const_iterator = std::vector<ProgrammeObject>::const_iterator;
-  [[nodiscard]]
-  const_iterator begin() const {
-    return data.begin();
-  }
-  [[nodiscard]]
-  const_iterator end() const {
-    return data.end();
-  }
-  [[nodiscard]]
-  const_iterator cbegin() const {
-    return data.cbegin();
-  }
-  [[nodiscard]]
-  const_iterator cend() const {
-    return data.cend();
-  }
- private:
-  std::string name_;
-  bool hasLanguage_;
-  std::string language_;
-  ProgrammeStatus status;
-  std::vector<ProgrammeObject> data;
-};
-
-class MetadataListener {
- public:
-  virtual void dataReset(proto::ProgrammeStore const& programmes, ItemMap const& items) = 0;
-  virtual void programmeAdded(int programmeIndex, proto::Programme const& programme) = 0;
-  virtual void programmeRemoved(int programmeIndex) = 0;
-  virtual void programmeUpdated(int programmeIndex, proto::Programme const& programme) = 0;
-  virtual void programmeSelected(ProgrammeObjects const& objects) = 0;
-  virtual void programmeMoved(Movement motion, proto::Programme const& programme) = 0;
-  virtual void autoModeChanged(bool enabled) = 0;
-  virtual void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& objects) = 0;
-  virtual void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& object) = 0;
-  virtual void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) = 0;
-  virtual void inputAdded(InputItem const& item) = 0;
-  virtual void inputRemoved(communication::ConnectionId const& id) = 0;
-  virtual void inputUpdated(InputItem const& item) = 0;
-};
 
 class EventDispatcher {
  public:
@@ -124,9 +25,13 @@ class Metadata : private ProgrammeStoreListener,
                  private ItemStore::Listener {
  public:
   explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
-      uiDispatcher_{std::move(uiDispatcher)} {}
+      uiDispatcher_{std::move(uiDispatcher)} {
+    programmeStore.addListener(this);
+    itemStore.addListener(this);
+  }
 
   void addUIListener(std::weak_ptr<MetadataListener> listener) {
+    std::lock_guard<std::mutex> lock(mutex_);
     uiListeners_.push_back(std::move(listener));
   }
 
@@ -143,11 +48,13 @@ class Metadata : private ProgrammeStoreListener,
   }
 
   std::pair<ItemMap, proto::ProgrammeStore> stores() const {
+    std::lock_guard<std::mutex> lock(mutex_);
     return{itemStore.get(), programmeStore.get()};
   }
 
   void refreshUI() {
-    fireEvent(&MetadataListener::dataReset,
+    std::lock_guard<std::mutex> lock(mutex_);
+    fireEvent(&MetadataListener::notifyDataReset,
               programmeStore.get(),
               itemStore.get());
   }
@@ -217,13 +124,14 @@ class Metadata : private ProgrammeStoreListener,
                                    }), listeners.end());
   }
 
+  // ItemStoreListener
   void addItem(const proto::InputItemMetadata& item) override;
   void changeItem(const proto::InputItemMetadata& oldItem,
                   const proto::InputItemMetadata& newItem) override;
   void removeItem(const proto::InputItemMetadata& oldItem) override;
   void clearChanges() override;
 
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
   ProgrammeStore programmeStore;
   ItemStore itemStore;

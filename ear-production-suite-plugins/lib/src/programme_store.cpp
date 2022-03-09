@@ -42,7 +42,7 @@ bool ear::plugin::isItemInProgramme(communication::ConnectionId const& id,
   });
 }
 
-proto::ProgrammeStore ProgrammeStore::get() const {
+proto::ProgrammeStore const& ProgrammeStore::get() const {
   return store_;
 }
 
@@ -309,8 +309,7 @@ void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
   }
 }
 
-void ProgrammeStore::addListener(
-    const std::shared_ptr<ProgrammeStoreListener>& listener) {
+void ProgrammeStore::addListener(ProgrammeStoreListener* listener) {
   listeners_.push_back(listener);
 }
 std::optional<proto::Programme> ProgrammeStore::programmeAtIndexImpl(

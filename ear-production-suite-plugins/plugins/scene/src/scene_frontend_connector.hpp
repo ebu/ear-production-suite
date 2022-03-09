@@ -46,8 +46,6 @@ class JuceSceneFrontendConnector :
       std::shared_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay);
 
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
-  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) override;
-  void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
   void repopulateUIComponents(
       std::shared_ptr<ItemsContainer> const& itemsContainer,
       std::shared_ptr<Overlay> const& addItemsOverlay,
@@ -56,7 +54,7 @@ class JuceSceneFrontendConnector :
       std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
       );
 
-  virtual void doSetMultipleScenePluginsOverlayVisible(const bool& visible) override;
+  void doSetMultipleScenePluginsOverlayVisible(const bool& visible) override;
 
   // MetadataListener
   void dataReset (proto::ProgrammeStore const& programmes,
