@@ -16,6 +16,7 @@ set(SOURCES_SCENE
   src/element_view_list.cpp
   src/element_view.cpp
   src/ui_item_store_listener.cpp
+		src/ui_event_dispatcher.cpp
   src/programmes_container.cpp
   src/items_container.cpp
         )
@@ -88,6 +89,7 @@ set(HEADERS_SCENE
 	src/scene_plugin_editor.hpp
 	src/scene_plugin_processor.hpp
 	src/ui_item_store_listener.hpp
+		src/ui_event_dispatcher.hpp
         )
 
 source_group("Header Files" FILES ${HEADERS_SCENE})
