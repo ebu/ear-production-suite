@@ -113,9 +113,23 @@ class MetadataListener {
   virtual void inputUpdated(InputItem const& item) = 0;
 };
 
+class EventDispatcher {
+ public:
+  void dispatchEvent(std::function<void()> event);
+ protected:
+  virtual void doDispatch(std::function<void()> event) {}
+};
+
 class Metadata : private ProgrammeStoreListener,
                  private ItemStore::Listener {
  public:
+  explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
+      uiDispatcher_{std::move(uiDispatcher)} {}
+
+  void addUIListener(std::weak_ptr<MetadataListener> listener) {
+    uiListeners_.push_back(std::move(listener));
+  }
+
   template <typename F>
   void withProgrammeStore(F&& fn) {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -133,10 +147,9 @@ class Metadata : private ProgrammeStoreListener,
   }
 
   void refreshUI() {
-    fireEvent([this](auto const& listener){
-      listener->dataReset(programmeStore.get(),
-                          itemStore.get());
-    });
+    fireEvent(&MetadataListener::dataReset,
+              programmeStore.get(),
+              itemStore.get());
   }
 
  private:
@@ -152,12 +165,58 @@ class Metadata : private ProgrammeStoreListener,
   void setAutoMode(bool enabled) override;
 
 
-  template<typename F>
-  void fireEvent(F&& fn) {
-      removeDeadPointersAfter(listeners_,
-                              std::forward<F>(fn));
-
+  template<typename F, typename... Args>
+  void fireEvent(F const & fn, Args const&... args) {
+    fireEventOnMsgThread(fn, args...);
+    // TODO have a specific communication thread for metadata updates and
+    // fire the events below on that.
+    fireEventOnCurrentThread(fn, args...);
   }
+
+  template<typename F, typename... Args>
+  auto fireEventOnMsgThread(F&& f, Args&&... args) {
+    // clear out any dead weak_ptrs
+    removeDeadListeners(uiListeners_);
+
+    auto& listeners = uiListeners_;
+
+    // dispatcher handles actual post of event on JUCE message thread
+    // as needs to be in the plugin not library code
+    uiDispatcher_->dispatchEvent(
+        // copy all arguments and listener list once for thread safety, via
+        // lambda capture list.
+        // This happens on the thread that fires the event, all methods that
+        // fire events hold the metadata lock so the copy is safe.
+        [listeners, f, args...] () {
+          // The body of the lambda will be called on message thread
+          for(auto const& weak : listeners) {
+            if(auto listener = weak.lock()) {
+              // other than small parameters, all should be passed by const& to avoid
+              // copy per listener - i.e. the listener interface passes by const&
+              // invoke is just an easy way to generically call member functions
+              // on the listener
+              std::invoke(f, *listener, args...);
+            }
+          }
+        }
+    );
+  }
+
+  template<typename F, typename... Args>
+  auto fireEventOnCurrentThread(F const& f, Args const&... args) {
+    removeDeadPointersAfter(listeners_,
+                            [&f, &args...](auto const& listener) {
+                              std::invoke(f, listener, args...);
+                            });
+  }
+
+  static void removeDeadListeners(std::vector<std::weak_ptr<MetadataListener>>& listeners) {
+    listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+                                   [](auto const& listener) {
+                                     return listener.expired();
+                                   }), listeners.end());
+  }
+
   void addItem(const proto::InputItemMetadata& item) override;
   void changeItem(const proto::InputItemMetadata& oldItem,
                   const proto::InputItemMetadata& newItem) override;
@@ -165,9 +224,11 @@ class Metadata : private ProgrammeStoreListener,
   void clearChanges() override;
 
   std::mutex mutex_;
+  std::unique_ptr<EventDispatcher> uiDispatcher_;
   ProgrammeStore programmeStore;
   ItemStore itemStore;
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
+  std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 };
 }
 

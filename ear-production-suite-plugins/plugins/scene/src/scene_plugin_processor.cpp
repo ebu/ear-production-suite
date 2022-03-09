@@ -16,9 +16,11 @@ SceneAudioProcessor::SceneAudioProcessor()
           BusesProperties()
               .withInput("Input", AudioChannelSet::discreteChannels(64), true)
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
-                          true))
+                          true)),
+      metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>())
 {
   connector_ = std::make_shared<ear::plugin::ui::JuceSceneFrontendConnector>(this);
+  metadata_.addUIListener(connector_);
   backend_ = std::make_unique<ear::plugin::SceneBackend>(connector_.get(), metadata_);
 
   try {

@@ -9,6 +9,7 @@
 #include "components/read_only_audio_parameter_int.hpp"
 #include "components/level_meter_calculator.hpp"
 #include "backend_setup_timer.hpp"
+#include "ui_event_dispatcher.hpp"
 
 namespace ear {
 namespace plugin {
