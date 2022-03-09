@@ -11,13 +11,12 @@ proto::InputItemMetadata ItemStore::getItem(
   return store_.at(id);
 }
 
-std::optional<proto::InputItemMetadata> ItemStore::maybeGet(
+proto::InputItemMetadata const& ItemStore::get(
     const communication::ConnectionId& id) const {
   std::optional<proto::InputItemMetadata> item;
-  if(auto it = store_.find(id); it != store_.end()) {
-    item = it->second;
-  }
-  return item;
+  auto it = store_.find(id);
+  assert(it != store_.end());
+  return it->second;
 }
 
 std::map<communication::ConnectionId, proto::InputItemMetadata>
@@ -41,9 +40,6 @@ void ItemStore::setItem(
     const proto::InputItemMetadata& item) {
   assert(id.string() == item.connection_id());
   if (auto result = store_.emplace(id, item); result.second) {
-    // Currently this should never be called, but this path should be used
-    // when we remove addItem
-    assert(false);
     fireEvent([&item](auto const& listener) {
       listener->itemAdded(item);
     });

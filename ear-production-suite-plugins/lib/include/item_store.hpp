@@ -45,7 +45,7 @@ class ItemStore {
 
   [[ nodiscard ]] ItemMap get() const;
   [[ nodiscard ]] proto::InputItemMetadata getItem(communication::ConnectionId const& id) const;
-  std::optional<proto::InputItemMetadata> maybeGet(communication::ConnectionId const& id) const;
+  proto::InputItemMetadata const& get(communication::ConnectionId const& id) const;
   [[ nodiscard ]] std::map<communication::ConnectionId, proto::InputItemMetadata> allItems() const;
   std::multimap<int, communication::ConnectionId> routeMap() const;
 
