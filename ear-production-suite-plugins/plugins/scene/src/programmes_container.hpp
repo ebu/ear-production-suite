@@ -6,7 +6,7 @@
 #include "JuceHeader.h"
 #include "components/ear_tabbed_component.hpp"
 #include "communication/common_types.hpp"
-#include "store_metadata.hpp"
+#include "metadata_listener.hpp"
 
 namespace ear::plugin {
 class LevelMeterCalculator;
@@ -18,7 +18,7 @@ class ProgrammeView;
 class ElementViewList;
 class ObjectView;
 
-class ProgrammesContainer : public juce::Component {
+class ProgrammesContainer : public juce::Component, public MetadataListener {
  public:
   ProgrammesContainer();
   void resized() override;
@@ -32,9 +32,6 @@ class ProgrammesContainer : public juce::Component {
   void addTabListener(EarTabbedComponent::Listener* listener);
   void updateElementOverview(ProgrammeObjects const& objects);
   int programmeCount() const;
-  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items);
-  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item);
-  void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item);
   void updateViews(proto::InputItemMetadata const& item,
                    std::shared_ptr<LevelMeterCalculator> const& meterCalculator);
   void removeFromElementViews(communication::ConnectionId const& id);
@@ -52,6 +49,9 @@ class ProgrammesContainer : public juce::Component {
   mutable std::mutex mutex_;
   std::shared_ptr<EarTabbedComponent> tabs_;
   std::vector<std::shared_ptr<ProgrammeView>> programmes_;
+  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
+  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) override;
+  void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgrammesContainer)
 };
 

@@ -42,6 +42,7 @@ void JuceSceneFrontendConnector::repopulateUIComponents(
   itemsOverlay_ = addItemsOverlay;
   autoModeOverlay_ = autoModeOverlay;
   programmesContainer_ = programmesContainer;
+  data_.addUIListener(programmesContainer_);
   multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
   multipleScenePluginsOverlay->setVisible(false);
   data_.refreshUI();
@@ -92,7 +93,11 @@ void JuceSceneFrontendConnector::dataReset(
         auto const& object = element.object();
         auto id = communication::ConnectionId{object.connection_id()};
         ProgrammeStatus status {i, i == selectedProgramme};
-        addObjectView(status, {element.object(), items.at(id)});
+        auto itemIt = items.find(id);
+        // this might fail on project reload before inputs connect
+        if(itemIt != items.end()) {
+          addObjectView(status, {element.object(), items.at(id)});
+        }
       }
     }
   }
@@ -411,23 +416,23 @@ void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, s
   for(auto const& item : items) {
     addObjectView(status, item);
   }
-  if (auto programmesContainer = lockProgrammes()) {
-    programmesContainer->itemsAddedToProgramme(status, items);
-  }
+//  if (auto programmesContainer = lockProgrammes()) {V
+//    programmesContainer->itemsAddedToProgramme(status, items);
+//  }
 //  updateElementOverview(items.back().programmeElement.index);
 }
 
-void JuceSceneFrontendConnector::itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) {
-  if (auto programmesContainer = lockProgrammes()) {
-    programmesContainer->itemRemovedFromProgramme(status, item);
-  }
-}
+//void JuceSceneFrontendConnector::itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) {
+////  if (auto programmesContainer = lockProgrammes()) {
+////    programmesContainer->itemRemovedFromProgramme(status, item);
+////  }
+//}
 
-void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
-  if (auto programmesContainer = lockProgrammes()) {
-    programmesContainer->programmeItemUpdated(status, item);
-  }
-}
+//void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
+////  if (auto programmesContainer = lockProgrammes()) {
+////    programmesContainer->programmeItemUpdated(status, item);
+////  }
+//}
 
 void JuceSceneFrontendConnector::updateElementOverview(ProgrammeObjects const& objects) {
   if (auto programmesContainer = lockProgrammes()) {

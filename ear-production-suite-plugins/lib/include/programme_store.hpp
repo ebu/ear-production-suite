@@ -10,7 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "programme_store.pb.h"
+#include "metadata.hpp"
 
 namespace ear::plugin {
 class ItemStore;
@@ -18,15 +18,6 @@ namespace communication {
 class ConnectionId;
 }
 
-struct ProgrammeStatus {
-  int index;
-  bool isSelected;
-};
-
-struct Movement {
-  int from;
-  int to;
-};
 
 class ProgrammeStoreListener {
  public:
@@ -81,7 +72,7 @@ class ProgrammeStoreListener {
 
 class ProgrammeStore {
  public:
-  [[ nodiscard ]] proto::ProgrammeStore get() const;
+  [[ nodiscard ]] proto::ProgrammeStore const& get() const;
   [[ nodiscard ]] std::optional<proto::Programme> selectedProgramme() const;
   [[ nodiscard ]] std::optional<proto::Programme> programmeAtIndex(int index) const;
   [[ nodiscard ]] int programmeCount() const;
@@ -103,7 +94,7 @@ class ProgrammeStore {
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void autoUpdateFrom(ItemStore const& itemStore);
-  void addListener(std::shared_ptr<ProgrammeStoreListener> const& listener);
+  void addListener(ProgrammeStoreListener* listener);
 
  private:
   void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
@@ -114,12 +105,15 @@ class ProgrammeStore {
       const communication::ConnectionId id);
 
   template <typename Fn>
-  void fireEvent(Fn&& fn) {
-    removeDeadPointersAfter(listeners_,
-                            std::forward<Fn>(fn));
+  void fireEvent(Fn fn) {
+    for (auto const& listener : listeners_) {
+      fn(listener);
+    }
+//    removeDeadPointersAfter(listeners_,
+//                            std::forward<Fn>(fn));
   }
 
-  std::vector<std::weak_ptr<ProgrammeStoreListener>> listeners_;
+  std::vector<ProgrammeStoreListener*> listeners_;
   proto::ProgrammeStore store_;
 };
 
