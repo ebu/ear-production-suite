@@ -1,20 +1,12 @@
 #pragma once
 
-#include "communication/common_types.hpp"
-#include "input_item_metadata.pb.h"
 #include <map>
 #include <vector>
+#include "metadata.hpp"
 #include "helper/weak_ptr.hpp"
 
 namespace ear {
 namespace plugin {
-
-struct InputItem {
-  communication::ConnectionId id;
-  proto::InputItemMetadata data;
-};
-
-using ItemMap = std::map<communication::ConnectionId, proto::InputItemMetadata>;
 
 /*
  * Item store fully describes items provided by all connected input plugins
@@ -45,56 +37,26 @@ class ItemStore {
 
   [[ nodiscard ]] ItemMap get() const;
   [[ nodiscard ]] proto::InputItemMetadata getItem(communication::ConnectionId const& id) const;
-  proto::InputItemMetadata const& get(communication::ConnectionId const& id) const;
+  [[ nodiscard ]] proto::InputItemMetadata const& get(communication::ConnectionId const& id) const;
   [[ nodiscard ]] std::map<communication::ConnectionId, proto::InputItemMetadata> allItems() const;
-  std::multimap<int, communication::ConnectionId> routeMap() const;
+  [[ nodiscard ]] std::multimap<int, communication::ConnectionId> routeMap() const;
 
 
   void setItem(communication::ConnectionId const& id,
                proto::InputItemMetadata const& item);
   void removeItem(communication::ConnectionId const& id);
   void clearChanged();
-  void addListener(std::shared_ptr<Listener> const& listener);
+  void addListener(Listener* listener);
 
  private:
-  std::vector<std::weak_ptr<Listener>> listeners_;
+  std::vector<Listener*> listeners_;
   ItemMap store_;
 
   template <typename Fn>
   void fireEvent(Fn&& fn) {
-    removeDeadPointersAfter(listeners_,
-                            std::forward<Fn>(fn));
-  }
-
-  // note deliberate capture by value in inner lambda, this is so
-  // we can dispatch asynchronously without the listener expiring or
-  // synchronisation issues with the item store data
-  void notifyItemAdded(proto::InputItemMetadata const& item) {
-    removeDeadPointersAfter(listeners_,
-                            [&item, this](auto const& listener) {
-                              listener->dispatch([item, listener]{
-                                listener->itemAdded(item);
-                              });
-                            });
-  }
-
-  void notifyItemChanged(proto::InputItemMetadata const& newItem,
-                   proto::InputItemMetadata const& oldItem) {
-    removeDeadPointersAfter(listeners_,
-                            [&oldItem, &newItem, this](auto const& listener) {
-                              listener->dispatch([oldItem, newItem, listener]{
-                                listener->itemChanged(oldItem, newItem);
-                              });
-                            });
-  }
-
-  void notifyItemRemoved(proto::InputItemMetadata const& oldItem) {
-    removeDeadPointersAfter(listeners_,
-                            [&oldItem, this](auto const& listener) {
-                              listener->dispatch([oldItem, listener]{
-                                listener->itemRemoved(oldItem);
-                              });
-                            });
+    for(auto listener : listeners_) {
+      fn(listener);
+    }
   }
 
 };

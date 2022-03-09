@@ -82,7 +82,7 @@ ItemMap ItemStore::get() const {
   return store_;
 }
 
-void ItemStore::addListener(const std::shared_ptr<Listener>& listener) {
+void ItemStore::addListener(Listener* listener) {
   listeners_.emplace_back(listener);
 }
 

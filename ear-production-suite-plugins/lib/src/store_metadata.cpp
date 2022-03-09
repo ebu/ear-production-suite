@@ -3,6 +3,7 @@
 //
 
 #include "store_metadata.hpp"
+#include <algorithm>
 
 using namespace ear::plugin;
 
@@ -20,7 +21,7 @@ void Metadata::addItems(ProgrammeStatus status,
     pairs.push_back({item, itemStore.getItem(id)});
   }
 
-  fireEvent(&MetadataListener::itemsAddedToProgramme,
+  fireEvent(&MetadataListener::notifyItemsAddedToProgramme,
             status, pairs);
 //  fireEvent([status, &pairs](auto const& listener) {
 //    listener->itemsAddedToProgramme(status, pairs);
@@ -29,7 +30,7 @@ void Metadata::addItems(ProgrammeStatus status,
 
 void Metadata::changeStore(proto::ProgrammeStore const& store) {
   auto items = itemStore.get();
-  fireEvent(&MetadataListener::dataReset,
+  fireEvent(&MetadataListener::notifyDataReset,
             store, items);
 //  fireEvent([&store, &items](auto const& listener) {
 //    listener->dataReset(store, items);
@@ -37,7 +38,7 @@ void Metadata::changeStore(proto::ProgrammeStore const& store) {
 }
 void Metadata::addProgramme(
     ProgrammeStatus status, const proto::Programme& programme) {
-  fireEvent(&MetadataListener::programmeAdded,
+  fireEvent(&MetadataListener::notifyProgrammeAdded,
             status.index, programme);
 //  fireEvent([status, &programme](auto const& listener) {
 //    listener->programmeAdded(status.index, programme);
@@ -46,14 +47,14 @@ void Metadata::addProgramme(
 void Metadata::moveProgramme(
     Movement movement,
     const proto::Programme& programme) {
-  fireEvent(&MetadataListener::programmeMoved,
+  fireEvent(&MetadataListener::notifyProgrammeMoved,
             movement, programme);
 //  fireEvent([movement, &programme](auto const& listener) {
 //    listener->programmeMoved(movement, programme);
 //  });
 }
 void Metadata::removeProgramme(int index) {
-  fireEvent(&MetadataListener::programmeRemoved,
+  fireEvent(&MetadataListener::notifyProgrammeRemoved,
             index);
 //  fireEvent([index](auto const& listener) {
 //    listener->programmeRemoved(index);
@@ -61,7 +62,7 @@ void Metadata::removeProgramme(int index) {
 }
 void Metadata::selectProgramme(int index, proto::Programme const& programme) {
   ProgrammeObjects objects({index, true}, programme, itemStore.allItems());
-  fireEvent(&MetadataListener::programmeSelected,
+  fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 //  fireEvent([&objects](auto const& listener) {
 //    listener->programmeSelected(objects);
@@ -72,7 +73,7 @@ void Metadata::removeItem(ProgrammeStatus status, const proto::Object& element) 
   auto id = communication::ConnectionId(element.connection_id());
   auto const& item = itemStore.get(id);
 
-  fireEvent(&MetadataListener::itemRemovedFromProgramme,
+  fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
             status, ProgrammeObject{element, item});
 //  fireEvent([status, &element, &item](auto const& listener) {
 //    listener->itemRemovedFromProgramme(status, {element, item});
@@ -82,7 +83,7 @@ void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) 
   auto id = communication::ConnectionId(element.connection_id());
   auto const& item = itemStore.get(id);
 
-  fireEvent(&MetadataListener::programmeItemUpdated,
+  fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
             status, ProgrammeObject{element, item});
 //  fireEvent([status, &element, &item](auto const& listener) {
 //    listener->programmeItemUpdated(status, {element, item});
@@ -91,7 +92,7 @@ void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) 
 }
 
 void Metadata::setAutoMode(bool enabled) {
-  fireEvent(&MetadataListener::autoModeChanged,
+  fireEvent(&MetadataListener::notifyAutoModeChanged,
             enabled);
 //  fireEvent([enabled](auto const& listener) {
 //    listener->autoModeChanged(enabled);
@@ -100,7 +101,7 @@ void Metadata::setAutoMode(bool enabled) {
 
 void Metadata::updateProgramme(
     int index, const proto::Programme& programme) {
-  fireEvent(&MetadataListener::programmeUpdated,
+  fireEvent(&MetadataListener::notifyProgrammeUpdated,
             index, programme);
 //  fireEvent([index, &programme](auto const& listener) {
 //    listener->programmeUpdated(index, programme);
@@ -109,7 +110,7 @@ void Metadata::updateProgramme(
 
 void Metadata::addItem(
     const proto::InputItemMetadata& item) {
-  fireEvent(&MetadataListener::inputAdded,
+  fireEvent(&MetadataListener::notifyInputAdded,
             InputItem{item.connection_id(), item});
 //  fireEvent([&item](auto const& listener) {
 //    listener->inputAdded({item.connection_id(), item});
@@ -119,8 +120,26 @@ void Metadata::changeItem(
     const proto::InputItemMetadata& oldItem,
     const proto::InputItemMetadata& newItem) {
   programmeStore.autoUpdateFrom(itemStore);
+  auto selectedIndex = programmeStore.get().selected_programme_index();
 
-  fireEvent(&MetadataListener::inputUpdated,
+  for(auto i = 0; i != programmeStore.programmeCount(); ++i) {
+    auto const& programme = programmeStore.programmeAtIndex(i);
+    auto const& elements = programme->element();
+    auto id = newItem.connection_id();
+    if(auto it = std::find_if(elements.begin(), elements.end(), [id, selectedIndex](auto const& element){
+          if(element.has_object()) {
+            return element.object().connection_id() == id;
+          }
+          return false;
+        });
+        it != elements.end()) {
+      fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
+                ProgrammeStatus{i, i == selectedIndex},
+                ProgrammeObject{it->object(), newItem});
+    }
+  }
+
+  fireEvent(&MetadataListener::notifyInputUpdated,
             InputItem{newItem.connection_id(), newItem});
 //  fireEvent([&newItem](auto const& listener) {
 //    listener->inputUpdated({newItem.connection_id(), newItem});
@@ -130,7 +149,7 @@ void Metadata::removeItem(
     const proto::InputItemMetadata& oldItem) {
   programmeStore.removeElementFromAllProgrammes(oldItem.connection_id());
   programmeStore.autoUpdateFrom(itemStore);
-  fireEvent(&MetadataListener::inputRemoved,
+  fireEvent(&MetadataListener::notifyInputRemoved,
             oldItem.connection_id());
 //  fireEvent([&oldItem](auto const& listener) {
 //    listener->inputRemoved(oldItem.connection_id());
