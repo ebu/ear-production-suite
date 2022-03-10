@@ -54,7 +54,7 @@ admplug::testing::CartesianCoordBlock::operator adm::AudioBlockFormatObjects() c
     return adm::AudioBlockFormatObjects{block};
 }
 
-admplug::testing::SphericalCoordBlock::SphericalCoordBlock() : block {adm::Azimuth{0.0},
+admplug::testing::SphericalCoordBlock::SphericalCoordBlock() : block {adm::SphericalPosition{},
                                                                       adm::Rtime{std::chrono::seconds{0}},
                                                                       adm::Duration{std::chrono::seconds{0}}}
 {}
