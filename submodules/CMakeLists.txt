@@ -18,6 +18,9 @@ if((NOT DEFINED REAPPLY_JUCE_PATCHES) OR (${REAPPLY_JUCE_PATCHES}))
 endif()
 
 # VST3
+if (MSVC) # Fix for MSVC 2022 based on https://forums.steinberg.net/t/pluginterfaces-lib-compilation-error-win-10-vs-2022/768976/4
+	set(SMTG_USE_STDATOMIC_H OFF CACHE BOOL "" FORCE)
+endif()
 set(SMTG_USE_STATIC_CRT ON CACHE BOOL "" FORCE)
 set(SMTG_ADD_VSTGUI OFF CACHE BOOL "" FORCE)
 if((NOT DEFINED REAPPLY_VST3_PATCHES) OR (${REAPPLY_VST3_PATCHES}))
