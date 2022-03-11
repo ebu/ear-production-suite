@@ -16,7 +16,7 @@ class ItemView : public Component {
  public:
   struct Data {
     ear::plugin::proto::InputItemMetadata metadata;
-    bool selected;
+    bool selected = false;
   };
 
   ItemView() {
@@ -56,7 +56,7 @@ class ItemView : public Component {
   }
 
   void setData(Data data) {
-    data_ = data;
+    data_ = std::move(data);
     repaint();
   }
 
@@ -69,10 +69,10 @@ class ItemView : public Component {
     data_.selected = selected;
     repaint();
   }
-  bool isSelected() { return data_.selected; }
+  bool isSelected() const { return data_.selected; }
 
-  communication::ConnectionId getId() {
-    return communication::ConnectionId(data_.metadata.connection_id());
+  communication::ConnectionId getId() const {
+    return data_.metadata.connection_id();
   }
 
   void mouseDown(const MouseEvent& event) override {}
@@ -92,7 +92,7 @@ class ItemView : public Component {
     return MouseCursor::NormalCursor;
   }
 
-  int getDesiredHeight() { return 46; }
+  static int getDesiredHeight() { return 46; }
 
  protected:
   std::unique_ptr<Drawable> onStateIcon_;

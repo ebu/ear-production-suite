@@ -12,7 +12,7 @@
 #include "components/ear_slider_range.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "programme_store.pb.h"
+#include "metadata.hpp"
 #include "helper/common_definition_helper.h"
 #include <memory>
 

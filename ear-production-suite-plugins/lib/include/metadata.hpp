@@ -74,7 +74,7 @@ class ProgrammeObjects {
 
   [[nodiscard]]
   std::optional<ProgrammeObject> dataItem(communication::ConnectionId const& id) const {
-    auto it = std::find_if(data.begin(), data.end(), [this, &id](auto const& item) {
+    auto it = std::find_if(data.begin(), data.end(), [&id](auto const& item) {
       return communication::ConnectionId(item.inputMetadata.connection_id()) == id;
     });
     std::optional<ProgrammeObject> item;

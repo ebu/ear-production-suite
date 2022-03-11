@@ -4,12 +4,12 @@
 #include <memory>
 
 #include "JuceHeader.h"
-
 #include "communication/common_types.hpp"
 
 namespace ear {
 namespace plugin {
 class ProgrammeObjects;
+class ProgrammeObject;
 namespace proto {
   class InputItemMetadata;
   class ItemStore;
@@ -44,10 +44,10 @@ class ItemsContainer : public Component {
   void createOrUpdateViews(
       std::map<communication::ConnectionId,
       proto::InputItemMetadata> const& allItems);
-  void updateView(communication::ConnectionId const& id,
-                  proto::InputItemMetadata const& item);
   void removeView(communication::ConnectionId const& id);
   void themeItemsFor(ProgrammeObjects const& programme);
+  void setMissingThemeFor(const ProgrammeObject& object);
+  void setPresentThemeFor(const ProgrammeObject& object);
 
  private:
   std::mutex mutex;
