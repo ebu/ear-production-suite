@@ -4,7 +4,7 @@
 #include "helper/move.hpp"
 #include "components/overlay.hpp"
 #include "helper/iso_lang_codes.hpp"
-#include "element_view.hpp"
+#include "object_view.hpp"
 
 #include <numeric>
 #include <memory>
@@ -80,6 +80,9 @@ void JuceSceneFrontendConnector::dataReset(
   auto selectedProgramme = programmeStore.selected_programme_index();
   selectedProgramme = std::max<int>(selectedProgramme, 0);
 
+  if (auto container = itemsContainer_.lock()) {
+    container->createOrUpdateViews(items);
+  }
 
   for (int i = 0; i < programmeStore.programme_size(); ++i) {
     auto const& programme = programmeStore.programme(i);
@@ -88,6 +91,10 @@ void JuceSceneFrontendConnector::dataReset(
                                       items);
     addProgrammeView(programme);
     updateElementOverview(programmeObjects);
+    if(i == selectedProgramme) {
+      updateAddItemsContainer(programmeObjects);
+    }
+
     for (auto const& element : programme.element()) {
       if (element.has_object()) {
         auto const& object = element.object();
@@ -106,10 +113,6 @@ void JuceSceneFrontendConnector::dataReset(
     overlay->setVisible(programmeStore.auto_mode());
   }
   selectProgrammeView(selectedProgramme);
-
-  if (auto container = itemsContainer_.lock()) {
-    container->createOrUpdateViews(items);
-  }
 }
 
 
@@ -152,22 +155,9 @@ bool JuceSceneFrontendConnector::updateAndCheckPendingElements(
   return storeChanged;
 }
 
-//void JuceSceneFrontendConnector::updateElementOverviews() {
-//  if (auto programmesContainer = lockProgrammes()) {
-//    for (int programmeIndex = 0;
-//         programmeIndex < programmesContainer->programmeCount();
-//         ++programmeIndex) {
-//      updateElementOverview(programmeIndex);
-//    }
-//  }
-//}
-
 void JuceSceneFrontendConnector::updateItemView(communication::ConnectionId id,
                                                 proto::InputItemMetadata item) {
 
-  if (auto container = itemsContainer_.lock()) {
-    container->updateView(id, item);
-  }
 }
 
 void JuceSceneFrontendConnector::updateObjectViews(
@@ -178,10 +168,6 @@ void JuceSceneFrontendConnector::updateObjectViews(
     }
   }
 }
-
-//void JuceSceneFrontendConnector::doRemoveItem(communication::ConnectionId id) {
-//}
-
 
 void JuceSceneFrontendConnector::removeFromItemView(
     communication::ConnectionId id) {
@@ -194,8 +180,8 @@ void JuceSceneFrontendConnector::removeFromItemView(
 
 void JuceSceneFrontendConnector::programmeUpdated(int programmeIndex,
                                                   proto::Programme const& programme) {
-//  updateElementOverview(programmeIndex, programme);
   setProgrammeViewName(programmeIndex, programme.name());
+  //  updateElementOverview(programmeIndex, programme);
 }
 
 void JuceSceneFrontendConnector::removeFromObjectViews(
@@ -416,6 +402,15 @@ void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, s
   for(auto const& item : items) {
     addObjectView(status, item);
   }
+  if(status.isSelected) {
+    for(auto const& item : items) {
+      auto overlay = itemsOverlay_.lock();
+      auto itemsContainer = itemsContainer_.lock();
+      if (overlay && itemsContainer) {
+        itemsContainer->setPresentThemeFor(item);
+      }
+    }
+  }
 //  if (auto programmesContainer = lockProgrammes()) {V
 //    programmesContainer->itemsAddedToProgramme(status, items);
 //  }
@@ -428,11 +423,12 @@ void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, s
 ////  }
 //}
 
-//void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
-////  if (auto programmesContainer = lockProgrammes()) {
-////    programmesContainer->programmeItemUpdated(status, item);
-////  }
-//}
+void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
+//  if (auto programmesContainer = lockProgrammes()) {
+//    programmesContainer->programmeItemUpdated(status, item);
+//  }
+    auto storeChanged = updateAndCheckPendingElements(item.inputMetadata.connection_id(), item.inputMetadata);
+}
 
 void JuceSceneFrontendConnector::updateElementOverview(ProgrammeObjects const& objects) {
   if (auto programmesContainer = lockProgrammes()) {
@@ -538,18 +534,21 @@ void JuceSceneFrontendConnector::elementMoved(ElementViewList* list,
 }
 
 void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
-                                                      int index) {
+                                                      ElementView* view) {
   int programmeIndex = -1;
   {
     ProgrammesContainer c;
     if (auto programmesContainer = lockProgrammes()) {
       programmeIndex = programmesContainer->getProgrammeIndex(list);
     }
+    assert (programmeIndex >= 0);
+    if(auto objectView = dynamic_cast<ObjectView*>(view)) {
+      auto id = objectView->getData().item.connection_id();
+      data_.withProgrammeStore([programmeIndex, &id](auto& store){
+        store.removeElementFromProgramme(programmeIndex, id);
+      });
+    }
   }
-  assert(programmeIndex >= 0);
-  data_.withProgrammeStore([programmeIndex, index](auto& store){
-    store.removeElementFromProgramme(programmeIndex, index);
-  });
 }
 
 // AutoModeOverlay::Listener
@@ -614,6 +613,16 @@ void JuceSceneFrontendConnector::inputAdded(const InputItem& item) {
 }
 void JuceSceneFrontendConnector::inputUpdated(const InputItem& item) {
 
+}
+void JuceSceneFrontendConnector::itemRemovedFromProgramme(
+    ProgrammeStatus status, const ProgrammeObject& object) {
+  if(status.isSelected) {
+    auto overlay = itemsOverlay_.lock();
+    auto itemsContainer = itemsContainer_.lock();
+    if (overlay && itemsContainer) {
+      itemsContainer->setMissingThemeFor(object);
+    }
+  }
 }
 
 }  // namespace ui
