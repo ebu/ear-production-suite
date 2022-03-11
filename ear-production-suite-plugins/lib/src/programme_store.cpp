@@ -211,7 +211,7 @@ void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementI
   bool hasObject{false};
   if(element.has_object()) {
     status.index = programmeIndex;
-    status.isSelected = false;
+    status.isSelected = programmeIndex == store_.selected_programme_index();
     hasObject = true;
   }
   elements->erase(elements->begin() + elementIndex);
@@ -249,15 +249,15 @@ void ProgrammeStore::updateElement(const communication::ConnectionId& id,
 }
 
 void ProgrammeStore::removeElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
-  auto elements =
-      store_.mutable_programme(programmeIndex)->mutable_element();
+  auto const& elements =
+      store_.programme(programmeIndex).element();
   auto element =
-      std::find_if(elements->begin(), elements->end(), [id](auto const& entry) {
+      std::find_if(elements.begin(), elements.end(), [id](auto const& entry) {
         return communication::ConnectionId(entry.object().connection_id()) ==
                id;
       });
-  if (element != elements->end()) {
-    auto elementIndex = static_cast<int>(std::distance(elements->begin(), element));
+  if (element != elements.end()) {
+    auto elementIndex = static_cast<int>(std::distance(elements.begin(), element));
     removeElementFromProgramme(programmeIndex, elementIndex);
   }
 }

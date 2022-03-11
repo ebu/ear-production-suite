@@ -90,14 +90,14 @@ class ProgrammeStore {
   void clearProgrammeLanguage(int programmeIndex);
   void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
-  void removeElementFromProgramme(int programmeIndex, int elementIndex);
+  void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void autoUpdateFrom(ItemStore const& itemStore);
   void addListener(ProgrammeStoreListener* listener);
 
  private:
-  void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
+  void removeElementFromProgramme(int programmeIndex, int elementIndex);
   std::optional<proto::Programme> programmeAtIndexImpl(int index) const;
   proto::Programme* addProgrammeImpl(std::string const& name, std::string const& language);
   proto::Object* addObject(

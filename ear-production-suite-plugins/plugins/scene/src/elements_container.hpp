@@ -6,6 +6,7 @@
 
 #include "element_view.hpp"
 #include "element_view_list.hpp"
+#include "communication/common_types.hpp"
 
 namespace ear {
 namespace plugin {
@@ -32,7 +33,7 @@ class ElementsContainer : public Component {
 
     virtual void elementMoved(ElementViewList* list, int oldIndex,
                               int newIndex) = 0;
-    virtual void removeElementClicked(ElementViewList* list, int index) = 0;
+    virtual void removeElementClicked(ElementViewList* list, ElementView* view) = 0;
   };
 
   void addListener(Listener* l);

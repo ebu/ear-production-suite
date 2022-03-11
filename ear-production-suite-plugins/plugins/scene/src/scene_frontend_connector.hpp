@@ -64,6 +64,8 @@ class JuceSceneFrontendConnector :
   void programmeSelected(ProgrammeObjects const& objects) override;
   void programmeUpdated(int programmeIndex, proto::Programme const& programme) override;
   void programmeMoved(Movement motion, proto::Programme const& programme) override;
+  void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
+  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& object) override;
   void inputRemoved(communication::ConnectionId const& id) override;
   void autoModeChanged(bool enabled) override;
   void inputAdded(const InputItem& item) override;
@@ -136,7 +138,7 @@ class JuceSceneFrontendConnector :
 
   // ElementViewList::Listener
   void elementMoved(ElementViewList* list, int oldIndex, int newIndex) override;
-  void removeElementClicked(ElementViewList* list, int index) override;
+  void removeElementClicked(ElementViewList* list, ElementView* view) override;
 
   // AutoModeOverlay::Listener
   void autoModeChanged(AutoModeOverlay* overlay, bool state) override;

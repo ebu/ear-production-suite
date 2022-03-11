@@ -7,6 +7,7 @@
 #include "item_view_list.hpp"
 #include "programme_store.hpp"
 #include "store_metadata.hpp"
+#include <iostream>
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
@@ -192,24 +193,6 @@ void ItemsContainer::createOrUpdateViews(
   }
 }
 
-void ItemsContainer::updateView(const communication::ConnectionId& id,
-                                const proto::InputItemMetadata& item) {
-  std::lock_guard<std::mutex> lock(mutex);
-  if (item.has_ds_metadata()) {
-    createOrUpdateView(item,
-                       directSpeakersItems,
-                       *directSpeakersList);
-  } else if (item.has_obj_metadata()) {
-    createOrUpdateView(item,
-                       objectsItems,
-                       *objectsList);
-  } else if (item.has_hoa_metadata()) {
-    createOrUpdateView(item,
-                       hoaItems,
-                       *hoaList);
-  }
-}
-
 namespace {
 void removeItemFromViews(communication::ConnectionId const& id,
                          std::vector<std::shared_ptr<ItemView>>& views,
@@ -245,12 +228,23 @@ void setMissingTheme(ItemView& view) {
 }
 
 void themeItemsFor(std::vector<std::shared_ptr<ItemView>>& views,
-                const ProgrammeObjects& programme) {
+                   const ProgrammeObjects& programme) {
   for (auto const& view : views) {
-    if(programme.dataItem(view->getId())) {
+    if (programme.dataItem(view->getId())) {
       setPresentTheme(*view);
+    } else {
+      setMissingTheme(*view);
     }
-    setMissingTheme(*view);
+  }
+}
+void setThemeFor(std::vector<std::shared_ptr<ItemView>>& views,
+                 const ProgrammeObject& object, bool present) {
+  communication::ConnectionId id{object.inputMetadata.connection_id()};
+  auto view = std::find_if(views.begin(), views.end(), [&id](auto const& view) {
+    return view->getId() == id;
+  });
+  if (view != views.end()) {
+    present ? setPresentTheme(**view) : setMissingTheme(**view);
   }
 }
 }
@@ -261,3 +255,16 @@ void ItemsContainer::themeItemsFor(const ProgrammeObjects& programme) {
   ::themeItemsFor(objectsItems, programme);
   ::themeItemsFor(hoaItems, programme);
 }
+
+void ItemsContainer::setMissingThemeFor(const ProgrammeObject& object) {
+  ::setThemeFor(directSpeakersItems, object, false);
+  ::setThemeFor(objectsItems, object, false);
+  ::setThemeFor(hoaItems, object, false);
+}
+
+void ItemsContainer::setPresentThemeFor(const ProgrammeObject& object) {
+  ::setThemeFor(directSpeakersItems, object, true);
+  ::setThemeFor(objectsItems, object, true);
+  ::setThemeFor(hoaItems, object, true);
+}
+

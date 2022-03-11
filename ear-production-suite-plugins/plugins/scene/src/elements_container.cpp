@@ -35,14 +35,17 @@ void ElementsContainer::removeElementUiInteraction(ElementView * element)
   auto it = std::find_if(
     elements.begin(), elements.end(),
     [element](auto const& candidate) { return candidate.get() == element; });
-  auto index = std::distance(elements.begin(), it);
-  removeElement(index);
-  Component::BailOutChecker checker(this);
-  listeners_.callChecked(checker, [this, index](Listener& l) {
-    l.removeElementClicked(this->list.get(), index);
-  });
-  if (checker.shouldBailOut()) {
-    return;
+  if(it != elements.end()) {
+    Component::BailOutChecker checker(this);
+
+      auto index = static_cast<int>(std::distance(elements.begin(), it));
+      removeElement(index);
+      listeners_.callChecked(checker, [this, element](Listener& l) {
+        l.removeElementClicked(this->list.get(), element);
+      });
+      if (checker.shouldBailOut()) {
+        return;
+      }
   }
 }
 
