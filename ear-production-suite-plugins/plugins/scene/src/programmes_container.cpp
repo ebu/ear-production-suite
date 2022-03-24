@@ -118,11 +118,11 @@ void ProgrammesContainer::itemsAddedToProgramme(
   overview->itemsAdded(items);
 }
 
-void ProgrammesContainer::itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) {
+void ProgrammesContainer::itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) {
   auto programmeIndex = status.index;
   std::lock_guard<std::mutex> lock(mutex_);
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
-  overview->itemRemoved(item.inputMetadata.connection_id());
+  overview->itemRemoved(id);
 }
 
 void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
@@ -176,7 +176,7 @@ void ProgrammesContainer::removeFromElementViews(
   std::lock_guard<std::mutex> lock(mutex_);
 
   for (int programmeIndex = 0;
-       programmeIndex < programmeCount();
+       programmeIndex < programmes_.size();
        ++programmeIndex) {
     auto const& container = programmes_.at(programmeIndex)
         ->getElementsContainer();
