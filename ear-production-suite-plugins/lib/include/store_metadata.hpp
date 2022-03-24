@@ -35,6 +35,10 @@ class Metadata : private ProgrammeStoreListener,
     uiListeners_.push_back(std::move(listener));
   }
 
+  void addListener(std::weak_ptr<MetadataListener> listener) {
+      listeners_.push_back(std::move(listener));
+  }
+
   template <typename F>
   void withProgrammeStore(F&& fn) {
     std::lock_guard<std::mutex> lock(mutex_);
