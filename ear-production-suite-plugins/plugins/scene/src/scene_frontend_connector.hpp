@@ -38,12 +38,8 @@ class JuceSceneFrontendConnector :
     private AutoModeOverlay::Listener,
     private ObjectView::Listener {
  public:
-  JuceSceneFrontendConnector(SceneAudioProcessor* processor);
-  ~JuceSceneFrontendConnector();
-
-  void triggerProgrammeStoreChanged();
-  void setMultipleScenePluginsOverlay(
-      std::shared_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay);
+  explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
+  ~JuceSceneFrontendConnector() override;
 
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void repopulateUIComponents(
@@ -72,12 +68,6 @@ class JuceSceneFrontendConnector :
   void inputUpdated(const InputItem& item) override;
 
  protected:
-//  void doAddItem(communication::ConnectionId id) override;
-//  void doRemoveItem(communication::ConnectionId id) override;
-//  void doUpdateItem(communication::ConnectionId id,
-//                    proto::InputItemMetadata item) override;
-  void updateItemView(communication::ConnectionId id,
-                      proto::InputItemMetadata item);
   void updateObjectViews(communication::ConnectionId id,
                          proto::InputItemMetadata item);
   void removeFromObjectViews(communication::ConnectionId id);
@@ -95,7 +85,6 @@ class JuceSceneFrontendConnector :
   void reloadItemListCache();
 
   // --- Programme Management
-//  proto::Programme* addProgramme();
   void addProgrammeView(const proto::Programme& programme);
   void selectProgramme(int index);
   void selectProgrammeView(int index);
