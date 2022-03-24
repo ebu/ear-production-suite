@@ -54,6 +54,7 @@ class Metadata : private ProgrammeStoreListener,
 
   void refreshUI() {
     std::lock_guard<std::mutex> lock(mutex_);
+    programmeStore.autoUpdateFrom(itemStore);
     fireEvent(&MetadataListener::notifyDataReset,
               programmeStore.get(),
               itemStore.get());

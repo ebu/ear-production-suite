@@ -76,7 +76,6 @@ void JuceSceneFrontendConnector::dataReset(
       programmesContainer->clear();
     }
   }
-  bool autoMode = false;
   auto selectedProgramme = programmeStore.selected_programme_index();
   selectedProgramme = std::max<int>(selectedProgramme, 0);
 
@@ -407,7 +406,7 @@ void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, s
       auto overlay = itemsOverlay_.lock();
       auto itemsContainer = itemsContainer_.lock();
       if (overlay && itemsContainer) {
-        itemsContainer->setPresentThemeFor(item);
+        itemsContainer->setPresentThemeFor(item.inputMetadata.connection_id());
       }
     }
   }
@@ -609,18 +608,22 @@ void JuceSceneFrontendConnector::autoModeChanged(bool enabled) {
   }
 }
 void JuceSceneFrontendConnector::inputAdded(const InputItem& item) {
-
 }
-void JuceSceneFrontendConnector::inputUpdated(const InputItem& item) {
 
+void JuceSceneFrontendConnector::inputUpdated(const InputItem& item) {
+    auto overlay = itemsOverlay_.lock();
+    auto itemsContainer = itemsContainer_.lock();
+    if (overlay && itemsContainer) {
+        itemsContainer->createOrUpdateView(item.data);
+    }
 }
 void JuceSceneFrontendConnector::itemRemovedFromProgramme(
-    ProgrammeStatus status, const ProgrammeObject& object) {
+    ProgrammeStatus status, const communication::ConnectionId& id) {
   if(status.isSelected) {
     auto overlay = itemsOverlay_.lock();
     auto itemsContainer = itemsContainer_.lock();
     if (overlay && itemsContainer) {
-      itemsContainer->setMissingThemeFor(object);
+      itemsContainer->setMissingThemeFor(id);
     }
   }
 }

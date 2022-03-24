@@ -50,7 +50,7 @@ class ProgrammesContainer : public juce::Component, public MetadataListener {
   std::shared_ptr<EarTabbedComponent> tabs_;
   std::vector<std::shared_ptr<ProgrammeView>> programmes_;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
-  void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& item) override;
+  void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgrammesContainer)
 };

@@ -41,13 +41,14 @@ class ItemsContainer : public Component {
 
   void addListener(Listener* l) { listeners_.add(l); }
   void removeListener(Listener* l) { listeners_.remove(l); }
+  void createOrUpdateView(proto::InputItemMetadata const& item);
   void createOrUpdateViews(
       std::map<communication::ConnectionId,
       proto::InputItemMetadata> const& allItems);
   void removeView(communication::ConnectionId const& id);
   void themeItemsFor(ProgrammeObjects const& programme);
-  void setMissingThemeFor(const ProgrammeObject& object);
-  void setPresentThemeFor(const ProgrammeObject& object);
+  void setMissingThemeFor(const communication::ConnectionId& id);
+  void setPresentThemeFor(const communication::ConnectionId& id);
 
  private:
   std::mutex mutex;
