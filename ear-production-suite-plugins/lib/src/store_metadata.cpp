@@ -57,10 +57,8 @@ void Metadata::selectProgramme(int index, proto::Programme const& programme) {
 
 void Metadata::removeItem(ProgrammeStatus status, const proto::Object& element) {
   auto id = communication::ConnectionId(element.connection_id());
-  auto const& item = itemStore.get(id);
-
   fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
-            status, ProgrammeObject{element, item});
+            status, id);
 }
 
 void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) {

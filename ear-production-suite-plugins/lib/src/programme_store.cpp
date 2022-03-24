@@ -97,10 +97,12 @@ void ProgrammeStore::selectProgramme(int index) {
   auto oldIndex = store_.selected_programme_index();
   if(oldIndex != index) {
     store_.set_selected_programme_index(index);
-    auto prog = store_.programme(index);
-    fireEvent([index, &prog](auto const& listener){
-      listener->programmeSelected(index, prog);
-    });
+    if(index >= 0 && index < store_.programme_size()) {
+      auto prog = store_.programme(index);
+      fireEvent([index, &prog](auto const& listener) {
+        listener->programmeSelected(index, prog);
+      });
+    }
   }
 }
 
@@ -294,12 +296,27 @@ void ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
 
 void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
   if (store_.auto_mode()) {
+    auto programmeCount = store_.programme_size();
     store_.clear_programme();
+    for(auto i = 0; i != programmeCount; ++i) {
+        fireEvent([i](auto const& listener) {
+            listener->programmeRemoved(i);
+        });
+    }
     auto defaultProgramme = addProgrammeImpl("Default", "");
     store_.set_selected_programme_index(0);
+    fireEvent([&defaultProgramme](auto const& listener) {
+      listener->programmeAdded({0, true}, *defaultProgramme);
+    });
+    fireEvent([&defaultProgramme](auto const& listener) {
+      listener->programmeSelected(0, *defaultProgramme);
+    });
     auto itemsSortedByRoute = itemStore.routeMap();
     for (auto const& routeItem : itemsSortedByRoute) {
-      addObject(defaultProgramme, routeItem.second);
+      auto object = addObject(defaultProgramme, routeItem.second);
+        fireEvent([object](auto const& listener) {
+            listener->itemsAdded({0, true}, {*object});
+        });
     }
     auto index = store_.selected_programme_index();
     auto const prog = *defaultProgramme;

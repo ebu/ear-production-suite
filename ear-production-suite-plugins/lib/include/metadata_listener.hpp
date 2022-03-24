@@ -38,8 +38,8 @@ class MetadataListener {
   void notifyItemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& objects) {
     itemsAddedToProgramme(status, objects);
   }
-  void notifyItemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& object) {
-    itemRemovedFromProgramme(status, object);
+  void notifyItemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) {
+    itemRemovedFromProgramme(status, id);
   }
   void notifyProgrammeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) {
     programmeItemUpdated(status, object);
@@ -62,7 +62,7 @@ class MetadataListener {
   virtual void programmeMoved(Movement motion, proto::Programme const& programme) {}
   virtual void autoModeChanged(bool enabled) {}
   virtual void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& objects) {}
-  virtual void itemRemovedFromProgramme(ProgrammeStatus status, ProgrammeObject const& object) {}
+  virtual void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) {}
   virtual void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) {}
   virtual void inputAdded(InputItem const& item) {}
   virtual void inputRemoved(communication::ConnectionId const& id) {}

@@ -171,25 +171,28 @@ void createOrUpdateView(proto::InputItemMetadata const& item,
 }
 }
 
+void ItemsContainer::createOrUpdateView(proto::InputItemMetadata const& item) {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (item.has_ds_metadata()) {
+        ::createOrUpdateView(item,
+                             directSpeakersItems,
+                             *directSpeakersList);
+    } else if (item.has_obj_metadata()) {
+        ::createOrUpdateView(item,
+                             objectsItems,
+                             *objectsList);
+    } else if (item.has_hoa_metadata()) {
+        ::createOrUpdateView(item,
+                             hoaItems,
+                             *hoaList);
+    }
+}
+
 void ItemsContainer::createOrUpdateViews(
     const std::map<communication::ConnectionId, proto::InputItemMetadata>&
     allItems) {
-  std::lock_guard<std::mutex> lock(mutex);
   for (auto const& entry : allItems) {
-    auto item = entry.second;
-    if (item.has_ds_metadata()) {
-      createOrUpdateView(item,
-                         directSpeakersItems,
-                         *directSpeakersList);
-    } else if (item.has_obj_metadata()) {
-      createOrUpdateView(item,
-                         objectsItems,
-                         *objectsList);
-    } else if (item.has_hoa_metadata()) {
-      createOrUpdateView(item,
-                         hoaItems,
-                         *hoaList);
-    }
+      createOrUpdateView(entry.second);
   }
 }
 
@@ -238,8 +241,7 @@ void themeItemsFor(std::vector<std::shared_ptr<ItemView>>& views,
   }
 }
 void setThemeFor(std::vector<std::shared_ptr<ItemView>>& views,
-                 const ProgrammeObject& object, bool present) {
-  communication::ConnectionId id{object.inputMetadata.connection_id()};
+                 communication::ConnectionId const& id, bool present) {
   auto view = std::find_if(views.begin(), views.end(), [&id](auto const& view) {
     return view->getId() == id;
   });
@@ -256,15 +258,15 @@ void ItemsContainer::themeItemsFor(const ProgrammeObjects& programme) {
   ::themeItemsFor(hoaItems, programme);
 }
 
-void ItemsContainer::setMissingThemeFor(const ProgrammeObject& object) {
-  ::setThemeFor(directSpeakersItems, object, false);
-  ::setThemeFor(objectsItems, object, false);
-  ::setThemeFor(hoaItems, object, false);
+void ItemsContainer::setMissingThemeFor(const communication::ConnectionId& id) {
+  ::setThemeFor(directSpeakersItems, id, false);
+  ::setThemeFor(objectsItems, id, false);
+  ::setThemeFor(hoaItems, id, false);
 }
 
-void ItemsContainer::setPresentThemeFor(const ProgrammeObject& object) {
-  ::setThemeFor(directSpeakersItems, object, true);
-  ::setThemeFor(objectsItems, object, true);
-  ::setThemeFor(hoaItems, object, true);
+void ItemsContainer::setPresentThemeFor(const communication::ConnectionId& id) {
+  ::setThemeFor(directSpeakersItems, id, true);
+  ::setThemeFor(objectsItems, id, true);
+  ::setThemeFor(hoaItems, id, true);
 }
 
