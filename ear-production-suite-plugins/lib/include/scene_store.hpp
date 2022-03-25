@@ -14,7 +14,7 @@ namespace ear::plugin {
 class SceneStore : public MetadataListener {
 public:
     explicit SceneStore(std::function<void(proto::SceneStore const&)> update);
-    proto::SceneStore get() const;
+    void triggerSend();
 
 private:
     mutable std::mutex mutex_;
@@ -31,6 +31,7 @@ private:
     void addMonitoringItem(proto::InputItemMetadata const& inputItem);
     void addGroup(proto::ProgrammeElement const& element);
     void addToggle(proto::ProgrammeElement const& element);
+    void sendUpdate();
 };
 }
 

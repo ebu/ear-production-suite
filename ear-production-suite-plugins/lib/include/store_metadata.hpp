@@ -5,6 +5,7 @@
 #ifndef EAR_PRODUCTION_SUITE_STORE_METADATA_HPP
 #define EAR_PRODUCTION_SUITE_STORE_METADATA_HPP
 #include <algorithm>
+#include "log.hpp"
 #include <memory>
 #include <vector>
 #include "item_store.hpp"
@@ -25,7 +26,9 @@ class Metadata : private ProgrammeStoreListener,
                  private ItemStore::Listener {
  public:
   explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
+      logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
       uiDispatcher_{std::move(uiDispatcher)} {
+      logger_->set_level(spdlog::level::trace);
     programmeStore.addListener(this);
     itemStore.addListener(this);
   }
@@ -137,6 +140,7 @@ class Metadata : private ProgrammeStoreListener,
   void clearChanges() override;
 
   mutable std::mutex mutex_;
+  std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
   ProgrammeStore programmeStore;
   ItemStore itemStore;

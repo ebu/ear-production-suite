@@ -11,8 +11,9 @@ namespace ear {
 namespace plugin {
 
 ObjectBackend::ObjectBackend(ui::ObjectsFrontendBackendConnector* connector)
-    : connector_(connector), controlConnection_() {
-  logger_ = createLogger(fmt::format("Object Input@{}", (const void*)this));
+    : logger_(createLogger(fmt::format("Object Input@{}", (const void*)this))),
+    connector_(connector),
+    controlConnection_(logger_) {
 
 #ifndef NDEBUG
   logger_->set_level(spdlog::level::trace);
@@ -21,12 +22,12 @@ ObjectBackend::ObjectBackend(ui::ObjectsFrontendBackendConnector* connector)
 #endif
 
   metadataSender_.logger(logger_);
+
   if (connector_) {
     connector_->setStatusBarText("Failure: No connection to Scene");
     connector_->onParameterChanged(
         std::bind(&ObjectBackend::onParameterChanged, this, _1, _2));
   }
-  controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&ObjectBackend::onConnection, this, _1, _2));
   controlConnection_.onConnectionLost(
@@ -47,6 +48,7 @@ ObjectBackend::~ObjectBackend() {
 }
 
 void ObjectBackend::setConnectionId(communication::ConnectionId id) {
+    EAR_LOGGER_TRACE(logger_, "Restoring connection id {}", id.string())
   controlConnection_.setConnectionId(id);
 }
 

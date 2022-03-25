@@ -11,8 +11,8 @@ namespace ear {
 namespace plugin {
 
 HoaBackend::HoaBackend(ui::HoaFrontendBackendConnector* connector)
-    : connector_(connector), controlConnection_() {
-  logger_ = createLogger(fmt::format("HOA Input@{}", (const void*)this));
+    : logger_ {createLogger(fmt::format("HOA Input@{}", (const void*)this))},
+    connector_(connector), controlConnection_(logger_) {
 
 #ifndef NDEBUG
   logger_->set_level(spdlog::level::trace);
@@ -26,7 +26,6 @@ HoaBackend::HoaBackend(ui::HoaFrontendBackendConnector* connector)
     connector_->onParameterChanged(
         std::bind(&HoaBackend::onParameterChanged, this, _1, _2));
   }
-  controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&HoaBackend::onConnection, this, _1, _2));
   controlConnection_.onConnectionLost(

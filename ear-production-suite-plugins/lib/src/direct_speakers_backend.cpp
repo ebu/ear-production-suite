@@ -13,10 +13,9 @@ namespace ear {
 namespace plugin {
 
 DirectSpeakersBackend::DirectSpeakersBackend(
-    ui::DirectSpeakersFrontendBackendConnector* connector)
-    : connector_(connector), controlConnection_() {
-  logger_ =
-      createLogger(fmt::format("DirectSpeakers Input@{}", (const void*)this));
+    ui::DirectSpeakersFrontendBackendConnector* connector) :
+    logger_ {createLogger(fmt::format("DirectSpeakers Input@{}", (const void*)this))},
+     connector_(connector), controlConnection_(logger_) {
 
 #ifndef NDEBUG
   logger_->set_level(spdlog::level::trace);
@@ -30,7 +29,6 @@ DirectSpeakersBackend::DirectSpeakersBackend(
     connector_->onParameterChanged(
         std::bind(&DirectSpeakersBackend::onParameterChanged, this, _1, _2));
   }
-  controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&DirectSpeakersBackend::onConnection, this, _1, _2));
   controlConnection_.onConnectionLost(

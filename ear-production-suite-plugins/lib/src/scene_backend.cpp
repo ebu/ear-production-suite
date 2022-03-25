@@ -45,7 +45,6 @@ SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
 //}
 
 void SceneBackend::triggerMetadataSend(const proto::SceneStore &store) {
-    std::lock_guard<std::mutex> lock(mutex_);
     communication::MessageBuffer buffer =
             communication::allocBuffer(store.ByteSizeLong());
     store.SerializeToArray(buffer.data(), buffer.size());
@@ -60,7 +59,7 @@ void SceneBackend::triggerMetadataSend(const proto::SceneStore &store) {
 }
 
 void SceneBackend::triggerMetadataSend() {
-    triggerMetadataSend(sceneStore_->get());
+    sceneStore_->triggerSend();
 }
 //  auto message = getMessage();
 //  metadataSender_.asyncWait();
@@ -212,7 +211,7 @@ void SceneBackend::onConnectionEvent(
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
-    triggerMetadataSend(sceneStore_->get());
+    sceneStore_->triggerSend();
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Monitoring {} disconnected", id.string());
