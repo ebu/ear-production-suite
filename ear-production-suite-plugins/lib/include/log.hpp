@@ -1,7 +1,7 @@
 #include <memory>
 #include <string>
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #else
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_OFF
@@ -14,7 +14,7 @@ namespace spdlog {
 class logger;
 }
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
 #define EAR_LOGGER_TRACE(logger, ...)         \
   if (logger) {                               \
     SPDLOG_LOGGER_TRACE(logger, __VA_ARGS__); \

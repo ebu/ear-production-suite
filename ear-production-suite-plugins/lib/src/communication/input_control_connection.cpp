@@ -15,7 +15,7 @@ InputControlConnection::InputControlConnection(std::shared_ptr<spdlog::logger> l
     socket_{ [this]{connected();},
              [this]{
                std::lock_guard<std::mutex> lock(stateMutex_);
-               EAR_LOGGER_WARN(logger_, "Socket disconnect")
+               EAR_LOGGER_WARN(logger_, "Socket disconnect");
                disconnected();}
     },
     connected_(false) {
@@ -113,7 +113,7 @@ void InputControlConnection::disconnected() {
   if (disconnectedCallback_) {
     disconnectedCallback_();
   } else {
-      EAR_LOGGER_WARN(logger_, "Disconnected from {} but no callback provided", connectionId_.string())
+      EAR_LOGGER_WARN(logger_, "Disconnected from {} but no callback provided", connectionId_.string());
   }
 }
 
