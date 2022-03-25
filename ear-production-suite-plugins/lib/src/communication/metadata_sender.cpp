@@ -19,6 +19,7 @@ MetadataSender::~MetadataSender() {
 ConnectionId MetadataSender::connectionId() { return connectionId_; }
 
 void MetadataSender::disconnect() {
+    EAR_LOGGER_TRACE(logger_, "Disconnecting from metadata endpoint")
   timer_.cancel();
   timer_.wait();
   socket_.asyncCancel();

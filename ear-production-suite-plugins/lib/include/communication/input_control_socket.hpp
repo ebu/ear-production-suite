@@ -5,6 +5,7 @@
 #include "ear-plugin-base/export.h"
 #include "communication/commands.hpp"
 #include "nng-cpp/nng.hpp"
+#include "log.hpp"
 
 #ifndef EAR_PRODUCTION_SUITE_INPUT_CONTROL_SOCKET_HPP
 #define EAR_PRODUCTION_SUITE_INPUT_CONTROL_SOCKET_HPP
@@ -28,7 +29,7 @@ EAR_PLUGIN_BASE_EXPORT class InputControlSocket {
     auto buffer = serialize(message);
     socket_.send(buffer);
   }
-
+  std::shared_ptr<spdlog::logger> logger_;
   nng::ReqSocket socket_;
 };
 }

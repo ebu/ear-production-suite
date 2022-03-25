@@ -10,11 +10,6 @@ SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
 
 }
 
-proto::SceneStore SceneStore::get() const {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return store_;
-}
-
 void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
                                         const ear::plugin::ItemMap &items) {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -35,7 +30,7 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
             }
         }
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
@@ -44,7 +39,7 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
     for(auto const& object : objects) {
         addMonitoringItem(object.inputMetadata);
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
@@ -55,7 +50,7 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
             addMonitoringItem(object.inputMetadata);
         }
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeStatus status,
@@ -71,7 +66,7 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
             monitoringItems->erase(item);
         }
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus status,
@@ -85,10 +80,10 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
                                  });
         if(item != monitoringItems->end()) {
             monitoringItems->erase(item);
-            addMonitoringItem(object.inputMetadata);
         }
+        addMonitoringItem(object.inputMetadata);
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void SceneStore::inputRemoved(const communication::ConnectionId &id) {
@@ -102,7 +97,7 @@ void SceneStore::inputRemoved(const communication::ConnectionId &id) {
     if(existingItem != availableItems->end()) {
         availableItems->erase(existingItem);
     }
-    updateCallback_(store_);
+    sendUpdate();
 }
 
 void SceneStore::inputUpdated(const InputItem &item) {
@@ -118,7 +113,6 @@ void SceneStore::inputUpdated(const InputItem &item) {
         auto newItem = store_.add_all_available_items();
         newItem->CopyFrom(item.data);
     }
-    updateCallback_(store_);
 }
 
 void SceneStore::addAvailableInputItemsToSceneStore(const ear::plugin::ItemMap& items) {
@@ -158,6 +152,19 @@ void SceneStore::addGroup(const proto::ProgrammeElement &element) {
 
 void SceneStore::addToggle(const proto::ProgrammeElement &element) {
 
+}
+
+void SceneStore::sendUpdate() {
+  updateCallback_(store_);
+  auto& mutableItems = *store_.mutable_monitoring_items();
+  for(auto& item : mutableItems) {
+     item.set_changed(false);
+  }
+}
+
+void SceneStore::triggerSend() {
+  std::lock_guard lock(mutex_);
+  sendUpdate();
 }
 
 

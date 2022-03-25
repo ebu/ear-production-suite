@@ -10,10 +10,12 @@ using namespace std::chrono_literals;
 namespace ear {
 namespace plugin {
 namespace communication {
-InputControlConnection::InputControlConnection() :
+InputControlConnection::InputControlConnection(std::shared_ptr<spdlog::logger> logger) :
+    logger_{std::move(logger)},
     socket_{ [this]{connected();},
              [this]{
                std::lock_guard<std::mutex> lock(stateMutex_);
+               EAR_LOGGER_WARN(logger_, "Socket disconnect")
                disconnected();}
     },
     connected_(false) {
@@ -30,8 +32,15 @@ void InputControlConnection::logger(std::shared_ptr<spdlog::logger> logger) {
 
 void InputControlConnection::setConnectionId(ConnectionId id) {
   std::lock_guard<std::mutex> lock(stateMutex_);
-  disconnect();
-  handshake(id);
+// It's possible for this to be called before or after the socket has completed connection
+// if after, disconnect and re-negotiate with requested ID
+  if(connected_) {
+      disconnect();
+      handshake(id);
+// if before, just set the id and let the connection callback negotiate
+  } else {
+      connectionId_ = id;
+  }
 }
 
 ConnectionId InputControlConnection::getConnectionId() const {
@@ -78,6 +87,8 @@ void InputControlConnection::handshake(ConnectionId const& id) {
 
       if (connectedCallback_) {
         connectedCallback_(connectionId_, streamEndpoint);
+      } else {
+          EAR_LOGGER_WARN(logger_, "Connected with {} but no callback provided", connectionId_.string());
       }
     }
   } catch (const std::runtime_error& e) {
@@ -97,10 +108,12 @@ void InputControlConnection::connected() {
 }
 
 void InputControlConnection::disconnected() {
-  EAR_LOGGER_WARN(logger_, "Lost connection to scene master");
+  EAR_LOGGER_TRACE(logger_, "Lost connection to scene master");
   connected_ = false;
   if (disconnectedCallback_) {
     disconnectedCallback_();
+  } else {
+      EAR_LOGGER_WARN(logger_, "Disconnected from {} but no callback provided", connectionId_.string())
   }
 }
 
@@ -114,6 +127,7 @@ void InputControlConnection::disconnect() {
                        reply.errorDescription());
       return;
     } else {
+      EAR_LOGGER_TRACE(logger_, "Disconnect successfully completed");
       disconnected();
     }
   }

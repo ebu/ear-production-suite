@@ -37,7 +37,7 @@ class InputControlConnection {
       std::function<void(ConnectionId, std::string)>;
   using ConnectionLostHandler = std::function<void()>;
 
-  EAR_PLUGIN_BASE_EXPORT InputControlConnection();
+  EAR_PLUGIN_BASE_EXPORT explicit InputControlConnection(std::shared_ptr<spdlog::logger> logger);
   InputControlConnection(const InputControlConnection&) = delete;
   InputControlConnection& operator=(const InputControlConnection&) = delete;
   InputControlConnection(InputControlConnection&&) = delete;
