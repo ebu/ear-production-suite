@@ -3,11 +3,11 @@
 //
 
 #include "../include/scene_store.hpp"
+#include "routing_overlap.hpp"
 #include <algorithm>
 using namespace ear::plugin;
 SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
     updateCallback_{std::move(update)} {
-
 }
 
 void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
@@ -30,6 +30,12 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
             }
         }
     }
+    auto overlaps = getOverlapIds(store_);
+    if (overlappingIds_ != overlaps) {
+        flagChangedOverlaps(overlappingIds_, overlaps, store_);
+    }
+    overlappingIds_ = overlaps;
+
     sendUpdate();
 }
 
@@ -79,9 +85,10 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
                                      return item.connection_id() == object.inputMetadata.connection_id();
                                  });
         if(item != monitoringItems->end()) {
-            monitoringItems->erase(item);
+            setMonitoringItemFrom(*item, object.inputMetadata);
+        } else {
+            addMonitoringItem(object.inputMetadata);
         }
-        addMonitoringItem(object.inputMetadata);
     }
     sendUpdate();
 }
@@ -123,27 +130,32 @@ void SceneStore::addAvailableInputItemsToSceneStore(const ear::plugin::ItemMap& 
     }
 }
 
-void SceneStore::addMonitoringItem(proto::InputItemMetadata const& inputItem) {
-    auto monitoringItem = store_.add_monitoring_items();
-    monitoringItem->set_connection_id(inputItem.connection_id());
-    monitoringItem->set_routing(inputItem.routing());
-    monitoringItem->set_changed(true);
+void SceneStore::setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoringItem,
+                                       proto::InputItemMetadata const& inputItem) {
+    monitoringItem.set_connection_id(inputItem.connection_id());
+    monitoringItem.set_routing(inputItem.routing());
+    monitoringItem.set_changed(true);
     if (inputItem.has_ds_metadata()) {
-        monitoringItem->set_allocated_ds_metadata(
+        monitoringItem.set_allocated_ds_metadata(
                 new proto::DirectSpeakersTypeMetadata{inputItem.ds_metadata()});
     } else if (inputItem.has_mtx_metadata()) {
-        monitoringItem->set_allocated_mtx_metadata(
+        monitoringItem.set_allocated_mtx_metadata(
                 new proto::MatrixTypeMetadata{inputItem.mtx_metadata()});
     } else if (inputItem.has_obj_metadata()) {
-        monitoringItem->set_allocated_obj_metadata(
+        monitoringItem.set_allocated_obj_metadata(
                 new proto::ObjectsTypeMetadata{inputItem.obj_metadata()});
     } else if (inputItem.has_hoa_metadata()) {
-        monitoringItem->set_allocated_hoa_metadata(
+        monitoringItem.set_allocated_hoa_metadata(
                 new proto::HoaTypeMetadata{inputItem.hoa_metadata()});
     } else if (inputItem.has_bin_metadata()) {
-        monitoringItem->set_allocated_bin_metadata(
+        monitoringItem.set_allocated_bin_metadata(
                 new proto::BinauralTypeMetadata{inputItem.bin_metadata()});
     }
+}
+
+void SceneStore::addMonitoringItem(proto::InputItemMetadata const& inputItem) {
+    auto monitoringItem = store_.add_monitoring_items();
+    setMonitoringItemFrom(*monitoringItem, inputItem);
 }
 
 void SceneStore::addGroup(const proto::ProgrammeElement &element) {
