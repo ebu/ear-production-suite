@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <mutex>
+#include <set>
 #include "metadata_listener.hpp"
 #include "scene_store.pb.h"
 
@@ -19,6 +20,7 @@ public:
 private:
     mutable std::mutex mutex_;
     proto::SceneStore store_;
+    std::set<std::string> overlappingIds_;
     std::function<void(proto::SceneStore const&)> updateCallback_;
     void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
     void programmeSelected(const ProgrammeObjects &objects) override;
@@ -29,6 +31,8 @@ private:
     void inputUpdated(const InputItem &item) override;
     void addAvailableInputItemsToSceneStore(ItemMap const& items);
     void addMonitoringItem(proto::InputItemMetadata const& inputItem);
+    void setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoringItem,
+                               proto::InputItemMetadata const& inputItem);
     void addGroup(proto::ProgrammeElement const& element);
     void addToggle(proto::ProgrammeElement const& element);
     void sendUpdate();
