@@ -17,7 +17,7 @@ DirectSpeakersBackend::DirectSpeakersBackend(
     logger_ {createLogger(fmt::format("DirectSpeakers Input@{}", (const void*)this))},
      connector_(connector), controlConnection_(logger_) {
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
   logger_->set_level(spdlog::level::trace);
 #else
   logger_->set_level(spdlog::level::off);

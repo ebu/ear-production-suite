@@ -56,7 +56,7 @@ void Metadata::selectProgramme(int index, proto::Programme const& programme) {
 }
 
 void Metadata::removeItem(ProgrammeStatus status, const proto::Object& element) {
-    EAR_LOGGER_TRACE(logger_, "remove programme item id {}", element.connection_id())
+    EAR_LOGGER_TRACE(logger_, "remove programme item id {}", element.connection_id());
   auto id = communication::ConnectionId(element.connection_id());
   fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
             status, id);
@@ -83,7 +83,7 @@ void Metadata::updateProgramme(
 
 void Metadata::addItem(
     const proto::InputItemMetadata& item) {
-    EAR_LOGGER_TRACE(logger_, "addItem id {}", item.connection_id())
+    EAR_LOGGER_TRACE(logger_, "addItem id {}", item.connection_id());
   fireEvent(&MetadataListener::notifyInputAdded,
             InputItem{item.connection_id(), item});
 }

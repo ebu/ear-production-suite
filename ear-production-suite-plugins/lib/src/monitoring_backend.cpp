@@ -16,7 +16,7 @@ MonitoringBackend::MonitoringBackend(
       controlConnection_() {
   logger_ = createLogger(fmt::format("Monitoring@{}", (const void*)this));
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
   logger_->set_level(spdlog::level::trace);
 #else
   logger_->set_level(spdlog::level::off);
