@@ -28,7 +28,7 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   logger_ =
       createLogger(fmt::format("BinauralMonitoring@{}", (const void*)this));
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
   logger_->set_level(spdlog::level::trace);
 #else
   logger_->set_level(spdlog::level::off);

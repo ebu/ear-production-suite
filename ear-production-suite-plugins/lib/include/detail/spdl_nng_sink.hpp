@@ -18,7 +18,7 @@ class NNGSink : public spdlog::sinks::base_sink<Mutex> {
 
  public:
   NNGSink() : messageQueue_(512), base_sink(), socket_() {
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
     socket_.dial(ear::plugin::detail::DEFAULT_LOG_ENDPOINT,
                  nng::Flags::nonblock);
 #endif
@@ -27,7 +27,7 @@ class NNGSink : public spdlog::sinks::base_sink<Mutex> {
 
  protected:
   void sink_it_(const spdlog::details::log_msg& msg) override {
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
 #if SPDLOG_VER_MAJOR <= 1 && SPDLOG_VER_MINOR <= 3
     fmt::memory_buffer formatted;
 #else
@@ -48,7 +48,7 @@ class NNGSink : public spdlog::sinks::base_sink<Mutex> {
 
  private:
   void sendMessage(std::string message) {
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
     socket_.asyncSend(message,
                       [this](std::error_code ec, const nng::Message& m) {
                         this->handleSend(ec, m);

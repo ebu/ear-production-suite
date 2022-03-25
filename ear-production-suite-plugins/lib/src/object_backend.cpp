@@ -15,7 +15,7 @@ ObjectBackend::ObjectBackend(ui::ObjectsFrontendBackendConnector* connector)
     connector_(connector),
     controlConnection_(logger_) {
 
-#ifndef NDEBUG
+#ifdef EPS_ENABLE_LOGGING
   logger_->set_level(spdlog::level::trace);
 #else
   logger_->set_level(spdlog::level::off);
@@ -48,7 +48,7 @@ ObjectBackend::~ObjectBackend() {
 }
 
 void ObjectBackend::setConnectionId(communication::ConnectionId id) {
-    EAR_LOGGER_TRACE(logger_, "Restoring connection id {}", id.string())
+    EAR_LOGGER_TRACE(logger_, "Restoring connection id {}", id.string());
   controlConnection_.setConnectionId(id);
 }
 
