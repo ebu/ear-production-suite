@@ -9,70 +9,6 @@
 
 using namespace ear::plugin;
 
-namespace adm {
-
-/**
-* @brief Create and add `AudioObject` with common definitions direct speakers
-* channel bed to document
-*
-* Creates an `AudioObject` and corresponding `AudioTrackUids` and connects it
-* to the common definition ADM elements for the given speaker layout. The
-* created ADM elements are added to the given document.
-* This follows a similar pattern to `addSimpleCommonDefinitionsObjectTo` from
-* libadm, but adds objects via AudioPack/AudioTrackFormatIds without using
-* libadms hardcoded lookup table.
-*
-* @note The document must already have the common definition elements added.
-*
-* @param document The document where the `AudioObject` and the
-* `AudioTrackUids` should be added to and whose common definition ADM
-* elements should be used.
-* @param name Name that will be used for the created `AudioObject`.
-* @param packFormatId AudioPackFormatId of the given layout.
-* @param trackFormatIds AudioTrackFormatIds of all the speakers in the layout.
-* @param speakerLabels Labels of all the speakers in the layout.
-*/
-
-SimpleCommonDefinitionsObjectHolder addDirectSpeakersCommonDefinitionsObjectTo(
-  std::shared_ptr<Document> document, const std::string& name,
-  const std::string& packFormatId,
-  const std::vector<std::string>& trackFormatIds,
-  const std::vector<std::string>& speakerLabels) {
-  SimpleCommonDefinitionsObjectHolder holder;
-  holder.audioObject = AudioObject::create(AudioObjectName(name));
-  auto packFormat =
-    document->lookup(adm::parseAudioPackFormatId(packFormatId));
-  if(!packFormat) {
-    std::stringstream ss;
-    ss << "AudioPackFormatId \"" << packFormatId
-      << "\" not found. Are the common definitions added to the document?";
-    throw error::AdmException(ss.str());
-  }
-  holder.audioObject->addReference(packFormat);
-  if(trackFormatIds.size() != speakerLabels.size()) {
-    throw error::AdmException(
-      "Sizes of trackFormatIds and speakerLabels arguments do not match.");
-  }
-  for(size_t i = 0; i < trackFormatIds.size(); i++) {
-    auto track =
-      document->lookup(adm::parseAudioTrackFormatId(trackFormatIds.at(i)));
-    if(!track) {
-      std::stringstream ss;
-      ss << "AudioTrackFormatId \"" << trackFormatIds.at(i)
-        << "\" not found. Id might be invalid.";
-      throw error::AdmException(ss.str());
-    }
-    auto uid = AudioTrackUid::create();
-    uid->setReference(packFormat);
-    uid->setReference(track);
-    holder.audioObject->addReference(uid);
-    holder.audioTrackUids[speakerLabels.at(i)] = uid;
-  }
-  document->add(holder.audioObject);
-  return holder;
-}
-}
-
 namespace {
 
 template <typename T>
@@ -456,17 +392,18 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       auto layoutIndex = metadata.ds_metadata().layout();
       if (layoutIndex >= 0) {
         std::vector<std::string> speakerLabels;
-        std::vector<std::string> trackFormatIds;
+        std::vector<adm::AudioTrackFormatId> trackFormatIds;
         auto& speakerSetup = SPEAKER_SETUPS.at(layoutIndex);
         for (auto& speaker : speakerSetup.speakers) {
           speakerLabels.push_back(speaker.label);
           auto channelFormatId = speaker.channelFormatId;
           auto trackFormatId = channelFormatId.replace(0, 2, "AT") + "_01";
-          trackFormatIds.push_back(trackFormatId);
+          trackFormatIds.push_back(adm::parseAudioTrackFormatId(trackFormatId));
         }
-        auto objectHolder = addDirectSpeakersCommonDefinitionsObjectTo(
-            doc, metadata.name(), speakerSetup.packFormatId, trackFormatIds,
-            speakerLabels);
+        auto objectHolder = addTailoredCommonDefinitionsObjectTo(
+            doc, metadata.name(),
+            adm::parseAudioPackFormatId(speakerSetup.packFormatId),
+            trackFormatIds, speakerLabels);
         setInteractivity(*objectHolder.audioObject, object);
         content.addReference(objectHolder.audioObject);
         for (auto i{0u}; i < objectHolder.audioTrackUids.size(); ++i) {
@@ -476,7 +413,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
                            ->get<adm::AudioTrackUidId>());
           chna.addAudioId(
               bw64::AudioId{static_cast<uint16_t>(metadata.routing() + i + 1),
-                            audioTrackUidId, trackFormatIds.at(i),
+                            audioTrackUidId, formatId(trackFormatIds.at(i)),
                             speakerSetup.packFormatId});
         }
         serializedObjects[connectionId] = objectHolder.audioObject;
