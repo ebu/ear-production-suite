@@ -48,7 +48,7 @@ class MultiAsyncUpdater : AsyncUpdater {
  private:
   void handleAsyncUpdate() override {
     lock.enter();
-    auto queueCopy = queue;
+    auto queueCopy = std::move(queue);
     queue.clear();
     lock.exit();
 
