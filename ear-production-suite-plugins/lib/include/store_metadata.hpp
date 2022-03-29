@@ -93,28 +93,31 @@ class Metadata : private ProgrammeStoreListener,
     // clear out any dead weak_ptrs
     removeDeadListeners(uiListeners_);
 
-    auto& listeners = uiListeners_;
+    // worth checking before copy as if UI is closed there's nothing to do
+    if(!uiListeners_.empty()) {
+        auto &listeners = uiListeners_;
 
-    // dispatcher handles actual post of event on JUCE message thread
-    // as needs to be in the plugin not library code
-    uiDispatcher_->dispatchEvent(
-        // copy all arguments and listener list once for thread safety, via
-        // lambda capture list.
-        // This happens on the thread that fires the event, all methods that
-        // fire events hold the metadata lock so the copy is safe.
-        [listeners, f, args...] () {
-          // The body of the lambda will be called on message thread
-          for(auto const& weak : listeners) {
-            if(auto listener = weak.lock()) {
-              // other than small parameters, all should be passed by const& to avoid
-              // copy per listener - i.e. the listener interface passes by const&
-              // invoke is just an easy way to generically call member functions
-              // on the listener
-              std::invoke(f, *listener, args...);
-            }
-          }
-        }
-    );
+        // dispatcher handles actual post of event on JUCE message thread
+        // as needs to be in the plugin not library code
+        uiDispatcher_->dispatchEvent(
+                // copy all arguments and listener list once for thread safety, via
+                // lambda capture list.
+                // This happens on the thread that fires the event, all methods that
+                // fire events hold the metadata lock so the copy is safe.
+                [listeners, f, args...]() {
+                    // The body of the lambda will be called on message thread
+                    for (auto const &weak: listeners) {
+                        if (auto listener = weak.lock()) {
+                            // other than small parameters, all should be passed by const& to avoid
+                            // copy per listener - i.e. the listener interface passes by const&
+                            // invoke is just an easy way to generically call member functions
+                            // on the listener
+                            std::invoke(f, *listener, args...);
+                        }
+                    }
+                }
+        );
+    }
   }
 
   template<typename F, typename... Args>
