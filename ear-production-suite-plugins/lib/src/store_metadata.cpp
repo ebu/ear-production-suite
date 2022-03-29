@@ -91,9 +91,10 @@ void Metadata::addItem(
 void Metadata::changeItem(
     const proto::InputItemMetadata& oldItem,
     const proto::InputItemMetadata& newItem) {
+  fireEvent(&MetadataListener::notifyInputUpdated,
+          InputItem{newItem.connection_id(), newItem});
   programmeStore.autoUpdateFrom(itemStore);
   auto selectedIndex = programmeStore.get().selected_programme_index();
-
   for(auto i = 0; i != programmeStore.programmeCount(); ++i) {
     auto const& programme = programmeStore.programmeAtIndex(i);
     auto const& elements = programme->element();
@@ -110,9 +111,6 @@ void Metadata::changeItem(
                 ProgrammeObject{it->object(), newItem});
     }
   }
-
-  fireEvent(&MetadataListener::notifyInputUpdated,
-            InputItem{newItem.connection_id(), newItem});
 }
 
 void Metadata::removeItem(
