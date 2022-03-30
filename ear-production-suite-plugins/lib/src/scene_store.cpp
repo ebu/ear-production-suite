@@ -35,8 +35,6 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
         flagChangedOverlaps(overlappingIds_, overlaps, store_);
     }
     overlappingIds_ = overlaps;
-
-    sendUpdate();
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
@@ -45,7 +43,6 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
     for(auto const& object : objects) {
         addMonitoringItem(object.inputMetadata);
     }
-    sendUpdate();
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
@@ -56,7 +53,6 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
             addMonitoringItem(object.inputMetadata);
         }
     }
-    sendUpdate();
 }
 
 void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeStatus status,
@@ -72,7 +68,6 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
             monitoringItems->erase(item);
         }
     }
-    sendUpdate();
 }
 
 void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus status,
@@ -90,7 +85,6 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
             addMonitoringItem(object.inputMetadata);
         }
     }
-    sendUpdate();
 }
 
 void SceneStore::inputRemoved(const communication::ConnectionId &id) {
@@ -104,7 +98,6 @@ void SceneStore::inputRemoved(const communication::ConnectionId &id) {
     if(existingItem != availableItems->end()) {
         availableItems->erase(existingItem);
     }
-    sendUpdate();
 }
 
 void SceneStore::inputUpdated(const InputItem &item) {
@@ -134,7 +127,7 @@ void SceneStore::setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoring
                                        proto::InputItemMetadata const& inputItem) {
     monitoringItem.set_connection_id(inputItem.connection_id());
     monitoringItem.set_routing(inputItem.routing());
-    monitoringItem.set_changed(true);
+    monitoringItem.set_changed(inputItem.changed());
     if (inputItem.has_ds_metadata()) {
         monitoringItem.set_allocated_ds_metadata(
                 new proto::DirectSpeakersTypeMetadata{inputItem.ds_metadata()});
@@ -174,9 +167,15 @@ void SceneStore::sendUpdate() {
   }
 }
 
-void SceneStore::triggerSend() {
+void SceneStore::triggerSend(bool force) {
   std::lock_guard lock(mutex_);
-  sendUpdate();
+  auto const& items = store_.monitoring_items();
+
+  if(force || std::any_of(items.cbegin(), items.cend(), [](auto const& item) {
+      return item.changed();
+  })) {
+      sendUpdate();
+  }
 }
 
 

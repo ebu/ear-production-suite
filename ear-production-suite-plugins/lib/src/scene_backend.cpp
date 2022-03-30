@@ -33,17 +33,6 @@ SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend, Metadata
 
 SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
 
-//communication::MessageBuffer SceneBackend::getMessage() {
-//  if (rebuildSceneStore_) {
-//    rebuildSceneStore_ = false;
-//    updateSceneStore();
-//  }
-//  communication::MessageBuffer buffer =
-//      communication::allocBuffer(sceneStore_.ByteSizeLong());
-//  sceneStore_.SerializeToArray(buffer.data(), buffer.size());
-//  return buffer;
-//}
-
 void SceneBackend::triggerMetadataSend(const proto::SceneStore &store) {
     communication::MessageBuffer buffer =
             communication::allocBuffer(store.ByteSizeLong());
@@ -61,20 +50,6 @@ void SceneBackend::triggerMetadataSend(const proto::SceneStore &store) {
 void SceneBackend::triggerMetadataSend() {
     sceneStore_->triggerSend();
 }
-//  auto message = getMessage();
-//  metadataSender_.asyncWait();
-//  metadataSender_.asyncSend(
-//      message, [this](std::error_code ec, const nng::Message&) {
-//        if (ec) {
-//          EAR_LOGGER_WARN(this->logger_, "Sending scene metadata failed: {}",
-//                          ec.message());
-//        }
-//      });
-//}
-
-//void SceneBackend::changesCleared() {
-//  rebuildSceneStore_ = true;
-//}
 
 void SceneBackend::setup() {
   try {
@@ -121,12 +96,6 @@ void SceneBackend::setup() {
           data_.withItemStore([&id, &item](auto& store) {
             store.setItem(id, item);
           });
-//          auto previous = itemStore_.setItem(id, item);
-//          // UPDATE ITEM
-//          if(!previous || !MessageDifferencer::ApproximatelyEquivalent(*previous, item)) {
-////              frontendConnector_->updateItem(id, item);
-//              rebuildSceneStore_ = true;
-//            }
         });
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_,
@@ -137,10 +106,6 @@ void SceneBackend::setup() {
 
   try {
     metadataSender_.listen(detail::SCENE_MASTER_SCENE_STREAM_ENDPOINT);
-//    if (frontendConnector_) {
-//      frontendConnector_->onProgrammeStoreChanged(
-//          std::bind(&SceneBackend::onProgrammeStoreChanged, this, _1));
-//    }
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(
         logger_, "Scene Master: Failed to start metadata sender: {}", e.what());
@@ -149,28 +114,6 @@ void SceneBackend::setup() {
 }
 
 void SceneBackend::updateSceneStore() {
-//  sceneStore_.clear_monitoring_items();
-//  if (auto programme = programmeStore_.selectedProgramme()) {
-//    for (auto const& element : programme->element()) {
-//      addGroupToSceneStore(element);
-//      addToggleToSceneStore(element);
-//      addElementToSceneStore(element);
-//    }
-//  }
-//
-//  sceneStore_.clear_all_available_items();
-//  addAvailableInputItemsToSceneStore();
-//
-//  auto overlaps = getOverlapIds(sceneStore_);
-//  if (overlappingIds_ != overlaps) {
-//    flagChangedOverlaps(overlappingIds_, overlaps, sceneStore_);
-//  }
-//  overlappingIds_ = overlaps;
-//
-//  previousScene_.clear();
-//  for (auto const& item : sceneStore_.monitoring_items()) {
-//    previousScene_.emplace(item.connection_id());
-//  }
 }
 
 void SceneBackend::addGroupToSceneStore(
@@ -207,11 +150,10 @@ void SceneBackend::onConnectionEvent(
       store.removeItem(id);
     });
     rebuildSceneStore_ = true;
-//    frontendConnector_->removeItem(id);
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
-    sceneStore_->triggerSend();
+    sceneStore_->triggerSend(true);
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Monitoring {} disconnected", id.string());

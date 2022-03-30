@@ -99,7 +99,7 @@ void Metadata::changeItem(
     auto const& programme = programmeStore.programmeAtIndex(i);
     auto const& elements = programme->element();
     auto const& id = newItem.connection_id();
-    if(auto it = std::find_if(elements.begin(), elements.end(), [id, selectedIndex](auto const& element){
+    if(auto it = std::find_if(elements.begin(), elements.end(), [id](auto const& element){
           if(element.has_object()) {
             return element.object().connection_id() == id;
           }
