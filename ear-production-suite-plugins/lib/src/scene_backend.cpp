@@ -4,7 +4,6 @@
 #include "programme_store_adm_serializer.hpp"
 #include <functional>
 #include <memory>
-#include <google/protobuf/util/message_differencer.h>
 #include <cassert>
 #include "routing_overlap.hpp"
 
@@ -86,7 +85,6 @@ void SceneBackend::setup() {
     frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
   }
 
-  using google::protobuf::util::MessageDifferencer;
   try {
     metadataReceiver_.run(
         detail::SCENE_MASTER_METADATA_ENDPOINT,
