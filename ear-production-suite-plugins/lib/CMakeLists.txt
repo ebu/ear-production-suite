@@ -141,8 +141,7 @@ target_link_libraries(ear-plugin-base PUBLIC
   spdlog::spdlog
   bw64
   adm
-  Eigen3::Eigen
-  sml)
+  Eigen3::Eigen)
 if(SPDLOG_FMT_EXTERNAL)
   target_link_libraries(ear-plugin-base PUBLIC fmt::fmt)
 endif()
