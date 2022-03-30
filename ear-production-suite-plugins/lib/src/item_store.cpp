@@ -3,6 +3,7 @@
 //
 
 #include "item_store.hpp"
+#include <google/protobuf/util/message_differencer.h>
 
 using namespace ear::plugin;
 
@@ -38,6 +39,8 @@ std::multimap<int, communication::ConnectionId> ItemStore::routeMap() const {
 void ItemStore::setItem(
     const communication::ConnectionId& id,
     const proto::InputItemMetadata& item) {
+  using google::protobuf::util::MessageDifferencer;
+
   assert(id.string() == item.connection_id());
   if (auto result = store_.emplace(id, item); result.second) {
     fireEvent([&item](auto const& listener) {
@@ -45,10 +48,12 @@ void ItemStore::setItem(
     });
   } else {
     auto previousItem = result.first->second;
-    result.first->second = item;
-    fireEvent([&previousItem, &item](auto const& listener) {
-      listener->itemChanged(previousItem, item);
-    });
+    if(!MessageDifferencer::ApproximatelyEquals(previousItem, item)) {
+        result.first->second = item;
+        fireEvent([&previousItem, &item](auto const& listener) {
+          listener->itemChanged(previousItem, item);
+        });
+    }
   }
 }
 
