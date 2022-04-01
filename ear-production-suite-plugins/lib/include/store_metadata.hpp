@@ -22,15 +22,15 @@ class EventDispatcher {
   virtual void doDispatch(std::function<void()> event) {}
 };
 
-class Metadata : private ItemStore::Listener {
+class Metadata {
  public:
-  explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
-      logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
-      uiDispatcher_{std::move(uiDispatcher)},
-      programmeStore(*this) {
-      logger_->set_level(spdlog::level::trace);
-    itemStore.addListener(this);
-  }
+    explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
+            logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
+            uiDispatcher_{std::move(uiDispatcher)},
+            programmeStore(*this),
+            itemStore(*this) {
+        logger_->set_level(spdlog::level::trace);
+    }
 
   void addUIListener(std::weak_ptr<MetadataListener> listener) {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -79,7 +79,15 @@ class Metadata : private ItemStore::Listener {
   void changeStore(proto::ProgrammeStore const& store);
   void setAutoMode(bool enabled);
 
-  template<typename F, typename... Args>
+  // ItemStore callbacks
+  void addItem(const proto::InputItemMetadata& item);
+  void changeItem(const proto::InputItemMetadata& oldItem,
+                const proto::InputItemMetadata& newItem);
+  void removeItem(const proto::InputItemMetadata& oldItem);
+  void clearChanges();
+
+
+    template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {
     fireEventOnMsgThread(fn, args...);
     // TODO have a specific communication thread for metadata updates and
@@ -134,13 +142,6 @@ class Metadata : private ItemStore::Listener {
                                    }), listeners.end());
   }
 
-  // ItemStoreListener
-  void addItem(const proto::InputItemMetadata& item) override;
-  void changeItem(const proto::InputItemMetadata& oldItem,
-                  const proto::InputItemMetadata& newItem) override;
-  void removeItem(const proto::InputItemMetadata& oldItem) override;
-  void clearChanges() override;
-
   mutable std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
@@ -150,6 +151,7 @@ class Metadata : private ItemStore::Listener {
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 
   friend class ProgrammeStore;
+  friend class ItemStore;
 };
 }
 
