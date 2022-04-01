@@ -22,14 +22,13 @@ class EventDispatcher {
   virtual void doDispatch(std::function<void()> event) {}
 };
 
-class Metadata : private ProgrammeStoreListener,
-                 private ItemStore::Listener {
+class Metadata : private ItemStore::Listener {
  public:
   explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
       logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
-      uiDispatcher_{std::move(uiDispatcher)} {
+      uiDispatcher_{std::move(uiDispatcher)},
+      programmeStore(*this) {
       logger_->set_level(spdlog::level::trace);
-    programmeStore.addListener(this);
     itemStore.addListener(this);
   }
 
@@ -68,17 +67,17 @@ class Metadata : private ProgrammeStoreListener,
   }
 
  private:
-  void addItems(ProgrammeStatus status, std::vector<proto::Object> const& items) override;
-  void removeItem(ProgrammeStatus status, const proto::Object& element) override;
-  void updateItem(ProgrammeStatus status, const proto::Object& element) override;
-  void addProgramme(ProgrammeStatus status, const proto::Programme& element) override;
-  void moveProgramme(Movement move, proto::Programme const& programme) override;
-  void removeProgramme(int index) override;
-  void selectProgramme(int index, proto::Programme const&) override;
-  void updateProgramme(int index, const proto::Programme& programme) override;
-  void changeStore(proto::ProgrammeStore const& store) override;
-  void setAutoMode(bool enabled) override;
-
+  // ProgrammeStore callbacks
+  void addItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
+  void removeItem(ProgrammeStatus status, const proto::Object& element);
+  void updateItem(ProgrammeStatus status, const proto::Object& element);
+  void addProgramme(ProgrammeStatus status, const proto::Programme& element);
+  void moveProgramme(Movement move, proto::Programme const& programme);
+  void removeProgramme(int index);
+  void selectProgramme(int index, proto::Programme const&);
+  void updateProgramme(int index, const proto::Programme& programme);
+  void changeStore(proto::ProgrammeStore const& store);
+  void setAutoMode(bool enabled);
 
   template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {
@@ -149,6 +148,8 @@ class Metadata : private ProgrammeStoreListener,
   ItemStore itemStore;
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
+
+  friend class ProgrammeStore;
 };
 }
 
