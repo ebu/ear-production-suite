@@ -7,6 +7,7 @@
 #include "item_store.hpp"
 #include "helper/move.hpp"
 #include "helper/weak_ptr.hpp"
+#include "store_metadata.hpp"
 
 using namespace ear::plugin;
 
@@ -78,18 +79,14 @@ bool ProgrammeStore::autoModeEnabled() const {
 
 void ProgrammeStore::set(proto::ProgrammeStore const& store) {
   store_ = store;
-  fireEvent([&store](auto const& listener) {
-    listener->storeChanged(store);
-  });
+  metadata_.changeStore(store_);
 }
 
 void ProgrammeStore::setAutoMode(bool enable) {
   auto old = store_.auto_mode();
   if(old != enable) {
     store_.set_auto_mode(enable);
-    fireEvent([enable](auto const& listener) {
-      listener->autoModeSet(enable);
-    });
+    metadata_.setAutoMode(enable);
   }
 }
 
@@ -99,9 +96,7 @@ void ProgrammeStore::selectProgramme(int index) {
     store_.set_selected_programme_index(index);
     if(index >= 0 && index < store_.programme_size()) {
       auto prog = store_.programme(index);
-      fireEvent([index, &prog](auto const& listener) {
-        listener->programmeSelected(index, prog);
-      });
+      metadata_.selectProgramme(index, prog);
     }
   }
 }
@@ -113,9 +108,7 @@ void ProgrammeStore::addProgramme() {
   auto programme = addProgrammeImpl(name, "");
   bool selected = (index == store_.selected_programme_index());
 
-  fireEvent([index, selected, &programme](auto const& listener) {
-    listener->programmeAdded({index, selected}, *programme);
-  });
+  metadata_.addProgramme({index, selected}, *programme);
 }
 
 void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
@@ -126,9 +119,7 @@ void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
       oldIndex != newIndex) {
     move(programmes->begin(), oldIndex, newIndex);
     auto programme = programmes->at(newIndex);
-    fireEvent([oldIndex, newIndex, &programme](auto const& listener) {
-      listener->programmeMoved(Movement{oldIndex, newIndex}, programme);
-    });
+    metadata_.moveProgramme({oldIndex, newIndex}, programme);
   }
 }
 
@@ -137,16 +128,13 @@ void ProgrammeStore::removeProgramme(int index) {
   assert(index < store_.programme_size());
   programme->erase(programme->begin() + index);
   auto selected_index = store_.selected_programme_index();
-  fireEvent([index](auto const& listener) {
-    listener->programmeRemoved(index);
-  });
+  metadata_.removeProgramme(index);
+
   if(selected_index >= programme->size()) {
     auto newIndex = std::max<int>(programme->size() - 1, 0);
     store_.set_selected_programme_index(newIndex);
     auto prog = store_.programme(newIndex);
-    fireEvent([newIndex, &prog](auto const& listener) {
-      listener->programmeSelected(newIndex, prog);
-    });
+    metadata_.selectProgramme(newIndex, prog);
   }
 }
 
@@ -156,9 +144,7 @@ void ProgrammeStore::setProgrammeName(int index, const std::string& name) {
     store_.mutable_programme(index)->set_name(name);
     auto prog = store_.programme(index);
     auto selectedIndex = store_.selected_programme_index();
-    fireEvent([index, &prog](auto const& listener) {
-      listener->programmeUpdated(index, prog);
-    });
+    metadata_.updateProgramme(index, prog);
   }
 }
 
@@ -168,9 +154,7 @@ void ProgrammeStore::setProgrammeLanguage(int programmeIndex,
         store_.programme(programmeIndex).language() == language)) {
     store_.mutable_programme(programmeIndex)->set_language(language);
     auto prog = store_.programme(programmeIndex);
-    fireEvent([programmeIndex, &prog](auto const& listener) {
-      listener->programmeUpdated(programmeIndex, prog);
-    });
+    metadata_.updateProgramme(programmeIndex, prog);
   }
 }
 
@@ -178,9 +162,7 @@ void ProgrammeStore::clearProgrammeLanguage(int programmeIndex) {
   if(store_.programme(programmeIndex).has_language()) {
     store_.mutable_programme(programmeIndex)->clear_language();
     auto prog = store_.programme(programmeIndex);
-    fireEvent([programmeIndex, &prog](auto const& listener) {
-      listener->programmeUpdated(programmeIndex, prog);
-    });
+    metadata_.updateProgramme(programmeIndex, prog);
   }
 }
 
@@ -197,9 +179,7 @@ void ProgrammeStore::addItemsToSelectedProgramme(std::vector<
     elements.push_back(*object);
   }
 
-  fireEvent([&elements, programmeIndex](auto const& listener) {
-    listener->itemsAdded({programmeIndex, true}, elements);
-  });
+  metadata_.addItems({programmeIndex, true}, elements);
 }
 
 void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementIndex) {
@@ -218,9 +198,7 @@ void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementI
   }
   elements->erase(elements->begin() + elementIndex);
   if(hasObject) {
-    fireEvent([status, &element](auto const& listener) {
-      listener->itemRemoved(status, element.object());
-    });
+      metadata_.removeItem(status, element.object());
   }
 }
 
@@ -244,9 +222,7 @@ void ProgrammeStore::updateElement(const communication::ConnectionId& id,
         programmeIndex,
         true
     };
-    fireEvent([status, &element](auto const& listener) {
-      listener->itemUpdated(status, element);
-    });
+    metadata_.updateItem(status, element);
   }
 }
 
@@ -263,10 +239,6 @@ void ProgrammeStore::removeElementFromProgramme(int programmeIndex, const commun
     removeElementFromProgramme(programmeIndex, elementIndex);
   }
 }
-
-//void ProgrammeStore::removeElementFromSelectedProgramme(const communication::ConnectionId& id) {
-//  removeElementFromProgramme(store_.selected_programme_index(), id);
-//}
 
 void ProgrammeStore::removeElementFromAllProgrammes(const communication::ConnectionId& id) {
   for (int programmeIndex = 0;
@@ -288,9 +260,7 @@ void ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
       oldIndex != newIndex) {
     move(elements->begin(), oldIndex, newIndex);
     auto programme = store_.programme(programmeIndex);
-    fireEvent([programmeIndex, &programme](auto const& listener) {
-      listener->programmeUpdated(programmeIndex, programme);
-    });
+    metadata_.updateProgramme(programmeIndex, programme);
   }
 }
 
@@ -299,36 +269,22 @@ void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
     auto programmeCount = store_.programme_size();
     store_.clear_programme();
     for(auto i = 0; i != programmeCount; ++i) {
-        fireEvent([i](auto const& listener) {
-            listener->programmeRemoved(i);
-        });
+        metadata_.removeProgramme(i);
     }
     auto defaultProgramme = addProgrammeImpl("Default", "");
     store_.set_selected_programme_index(0);
-    fireEvent([&defaultProgramme](auto const& listener) {
-      listener->programmeAdded({0, true}, *defaultProgramme);
-    });
-    fireEvent([&defaultProgramme](auto const& listener) {
-      listener->programmeSelected(0, *defaultProgramme);
-    });
+    metadata_.addProgramme({0, true}, *defaultProgramme);
     auto itemsSortedByRoute = itemStore.routeMap();
     for (auto const& routeItem : itemsSortedByRoute) {
       auto object = addObject(defaultProgramme, routeItem.second);
-        fireEvent([object](auto const& listener) {
-            listener->itemsAdded({0, true}, {*object});
-        });
+      metadata_.addItems({0, true}, {*object});
     }
     auto index = store_.selected_programme_index();
     auto const prog = *defaultProgramme;
-    fireEvent([index, &prog](auto const& listener) {
-      listener->programmeUpdated(index, prog);
-    });
+    metadata_.updateProgramme(index, prog);
   }
 }
 
-void ProgrammeStore::addListener(ProgrammeStoreListener* listener) {
-  listeners_.push_back(listener);
-}
 std::optional<proto::Programme> ProgrammeStore::programmeAtIndexImpl(
     int index) const {
   std::optional<proto::Programme> programme;

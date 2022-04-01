@@ -14,64 +14,15 @@
 
 namespace ear::plugin {
 class ItemStore;
+class Metadata;
 namespace communication {
 class ConnectionId;
 }
 
-
-class ProgrammeStoreListener {
- public:
-  void itemsAdded(ProgrammeStatus status, std::vector<proto::Object> const& items) {
-    addItems(status, items);
-  }
-  void itemRemoved(ProgrammeStatus status, proto::Object const& item) {
-    removeItem(status, item);
-  }
-  void itemUpdated(ProgrammeStatus status, proto::Object const& item) {
-    updateItem(status, item);
-  }
-  void storeChanged(proto::ProgrammeStore const& store) {
-    changeStore(store);
-  }
-  void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) {
-    addProgramme(status, programme);
-  }
-
-  void programmeMoved(Movement movement, proto::Programme const& programme) {
-    moveProgramme(movement, programme);
-  }
-
-  void programmeSelected(int index, proto::Programme const& programme) {
-    selectProgramme(index, programme);
-  }
-
-  void programmeRemoved(int index) {
-    removeProgramme(index);
-  }
-
-  void autoModeSet(bool enabled) {
-    setAutoMode(enabled);
-  }
-
-  void programmeUpdated(int index, proto::Programme const& programme) {
-    updateProgramme(index, programme);
-  }
-
- protected:
-  virtual void addItems(ProgrammeStatus status, std::vector<proto::Object> const& items) {}
-  virtual void removeItem(ProgrammeStatus status, proto::Object const& item) {}
-  virtual void updateItem(ProgrammeStatus status, proto::Object const& item) {}
-  virtual void addProgramme(ProgrammeStatus status, proto::Programme const& programme) {}
-  virtual void changeStore(proto::ProgrammeStore const& store) {}
-  virtual void moveProgramme(Movement movement, proto::Programme const& programme) {}
-  virtual void removeProgramme(int index) {}
-  virtual void selectProgramme(int index, proto::Programme const& programme) {}
-  virtual void setAutoMode(bool enabled) {}
-  virtual void updateProgramme(int index, proto::Programme const& programme) {}
-};
-
 class ProgrammeStore {
  public:
+  explicit ProgrammeStore(Metadata& metadata) : metadata_{metadata} {}
+
   [[ nodiscard ]] proto::ProgrammeStore const& get() const;
   [[ nodiscard ]] std::optional<proto::Programme> selectedProgramme() const;
   [[ nodiscard ]] std::optional<proto::Programme> programmeAtIndex(int index) const;
@@ -94,7 +45,6 @@ class ProgrammeStore {
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void autoUpdateFrom(ItemStore const& itemStore);
-  void addListener(ProgrammeStoreListener* listener);
 
  private:
   void removeElementFromProgramme(int programmeIndex, int elementIndex);
@@ -104,16 +54,7 @@ class ProgrammeStore {
       proto::Programme* programme,
       const communication::ConnectionId id);
 
-  template <typename Fn>
-  void fireEvent(Fn fn) {
-    for (auto const& listener : listeners_) {
-      fn(listener);
-    }
-//    removeDeadPointersAfter(listeners_,
-//                            std::forward<Fn>(fn));
-  }
-
-  std::vector<ProgrammeStoreListener*> listeners_;
+  Metadata& metadata_;
   proto::ProgrammeStore store_;
 };
 
