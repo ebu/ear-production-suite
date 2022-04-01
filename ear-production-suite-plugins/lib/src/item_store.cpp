@@ -4,6 +4,7 @@
 
 #include "item_store.hpp"
 #include <google/protobuf/util/message_differencer.h>
+#include "store_metadata.hpp"
 
 using namespace ear::plugin;
 
@@ -43,16 +44,12 @@ void ItemStore::setItem(
 
   assert(id.string() == item.connection_id());
   if (auto result = store_.emplace(id, item); result.second) {
-    fireEvent([&item](auto const& listener) {
-      listener->itemAdded(item);
-    });
+      metadata_.addItem(item);
   } else {
     auto previousItem = result.first->second;
     if(!MessageDifferencer::ApproximatelyEquals(previousItem, item)) {
         result.first->second = item;
-        fireEvent([&previousItem, &item](auto const& listener) {
-          listener->itemChanged(previousItem, item);
-        });
+        metadata_.changeItem(previousItem, item);
     }
   }
 }
@@ -61,9 +58,7 @@ void ItemStore::removeItem(const communication::ConnectionId& id) {
   if(auto it = store_.find(id); it != store_.end()) {
     auto item = it->second;
     store_.erase(it);
-    fireEvent([&item](auto const& listener) {
-      listener->itemRemoved(item);
-    });
+    metadata_.removeItem(item);
   }
 }
 
@@ -77,34 +72,10 @@ void ItemStore::clearChanged() {
   }
 
   if(clearedAny) {
-    fireEvent([](auto const& listener) {
-      listener->changesCleared();
-    });
+    metadata_.clearChanges();
   }
 }
 
 ItemMap ItemStore::get() const {
   return store_;
-}
-
-void ItemStore::addListener(Listener* listener) {
-  listeners_.emplace_back(listener);
-}
-
-void ItemStore::Listener::itemAdded(const proto::InputItemMetadata& item) {
-  addItem(item);
-}
-
-void ItemStore::Listener::itemChanged(const proto::InputItemMetadata& oldItem,
-                                      const proto::InputItemMetadata& newItem) {
-  changeItem(oldItem, newItem);
-}
-void ItemStore::Listener::itemRemoved(const proto::InputItemMetadata& oldItem) {
-  removeItem(oldItem);
-}
-void ItemStore::Listener::dispatch(std::function<void()> event) {
-  event();
-}
-void ItemStore::Listener::changesCleared() {
-  clearChanges();
 }

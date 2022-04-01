@@ -11,7 +11,6 @@
 #include "programmes_container.hpp"
 #include "scene_plugin_processor.hpp"
 #include "helper/multi_async_updater.h"
-#include "ui_item_store_listener.hpp"
 #include "element_view.hpp"
 #include "programme_view.hpp"
 #include "store_metadata.hpp"
