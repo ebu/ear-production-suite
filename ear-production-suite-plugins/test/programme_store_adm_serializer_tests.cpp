@@ -6,6 +6,7 @@
 #include <adm/common_definitions.hpp>
 #include <algorithm>
 #include <functional>
+#include "store_metadata.hpp"
 
 using namespace ear::plugin;
 using namespace ear::plugin::communication;
@@ -165,7 +166,7 @@ class ProgrammeBuilder {
     programme_.set_language(name);
     return *this;
   }
-  void addToStore(ProgrammeStore& store) const {
+  void addToStore(proto::ProgrammeStore& store) const {
     auto prog = store.add_programme();
     *prog = programme_;
   }
@@ -174,16 +175,16 @@ class ProgrammeBuilder {
 
 class StoreBuilder {
  public:
-  operator ProgrammeStore() const& {
+  operator proto::ProgrammeStore() const& {
     return store_;
   }
-  operator ProgrammeStore() && {
+  operator proto::ProgrammeStore() && {
     return std::move(store_);
   }
-  ProgrammeStore build() const& {
+  proto::ProgrammeStore build() const& {
     return store_;
   }
-  ProgrammeStore build() && {
+  proto::ProgrammeStore build() && {
     return std::move(store_);
   }
   StoreBuilder& withProgramme(ProgrammeBuilder& builder) {
@@ -191,7 +192,7 @@ class StoreBuilder {
     return *this;
   }
  private:
-  ProgrammeStore store_;
+  proto::ProgrammeStore store_;
 };
 
 ItemBuilder simpleItem(ConnectionId const& id,
@@ -222,7 +223,8 @@ InputItemMetadata simpleDsItem(ConnectionId const& id,
 }
 
 TEST_CASE("Programme parser tests") {
-  ItemStore itemStore;
+  Metadata metadata{std::make_unique<EventDispatcher>()};
+  ItemStore itemStore{metadata};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
   itemStore.setItem(connectionId, item);
@@ -282,7 +284,8 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                            2,
                            SpeakerLayout::ITU_BS_2051_0_2_0);
 
-  ItemStore itemStore;
+    Metadata metadata{std::make_unique<EventDispatcher>()};
+    ItemStore itemStore{metadata};
   itemStore.setItem(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
@@ -337,7 +340,8 @@ TEST_CASE("Toggle group with three members") {
   auto altItem = simpleObjectItem(altId, "alternative", 1);
   auto secondAltId = ConnectionId::generate();
   auto secondAltItem = simpleObjectItem(secondAltId, "alternative_2", 2);
-  ItemStore itemStore;
+    Metadata metadata{std::make_unique<EventDispatcher>()};
+    ItemStore itemStore{metadata};
   itemStore.setItem(defaultId, defaultItem);
   itemStore.setItem(altId, altItem);
   itemStore.setItem(secondAltId, secondAltItem);
@@ -414,7 +418,8 @@ TEST_CASE("Toggle group with three members") {
 }
 
 TEST_CASE("On_Off interactive") {
-  ItemStore itemStore;
+    Metadata metadata{std::make_unique<EventDispatcher>()};
+    ItemStore itemStore{metadata};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
   itemStore.setItem(connectionId, item);
