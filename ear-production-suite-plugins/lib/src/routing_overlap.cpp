@@ -5,6 +5,9 @@
 #include <vector>
 
 #include "routing_overlap.hpp"
+#include "helper/common_definition_helper.h"
+
+
 namespace ear {
 namespace plugin {
 
@@ -60,15 +63,23 @@ std::vector<Overlap> getOverlaps(
 }
 
 // determine routings from scene store. 1 channel per ID for objects, n channels
-// for directspeakers
-// TODO update for HOA
+// for directspeakers or hoa
 std::unordered_map<std::string, Routing> getRoutings(
     proto::SceneStore const& store) {
   std::unordered_map<std::string, Routing> routings;
   auto const& items = store.monitoring_items();
   for (auto const& item : items) {
-    auto routeWidth =
-        item.has_ds_metadata() ? item.ds_metadata().speakers().size() : 1;
+    int routeWidth = 1;
+    if(item.has_ds_metadata()) {
+      routeWidth = item.ds_metadata().speakers().size();
+    } else if(item.has_hoa_metadata()) {
+      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto hoaId = item.hoa_metadata().packformatidvalue();
+      auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
+      if (pfData) {
+        routeWidth = pfData->relatedChannelFormats.size();
+      }
+    }
     routings.emplace(item.connection_id(), Routing{item.routing(), routeWidth});
   }
   return routings;
