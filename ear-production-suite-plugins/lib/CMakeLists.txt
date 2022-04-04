@@ -55,8 +55,10 @@ set(EAR_BASE_HEADERS
 	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
 	include/communication/common_types.hpp
+	include/communication/data_wrapper.hpp
 	include/communication/metadata_sender.hpp
 	include/communication/direct_speakers_metadata_sender.hpp
+	include/communication/hoa_metadata_sender.hpp
 	include/communication/input_control_connection.hpp
 	include/communication/message_buffer.hpp
 	include/communication/monitoring_control_connection.hpp
