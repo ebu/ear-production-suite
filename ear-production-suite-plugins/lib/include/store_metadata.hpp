@@ -62,23 +62,22 @@ class Metadata {
  private:
     RouteMap routeMap() const;
   // ProgrammeStore callbacks
-  void addItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
-  void removeItem(ProgrammeStatus status, const proto::Object& element);
-  void updateItem(ProgrammeStatus status, const proto::Object& element);
-  void addProgramme(ProgrammeStatus status, const proto::Programme& element);
-  void moveProgramme(Movement move, proto::Programme const& programme);
-  void removeProgramme(int index);
-  void selectProgramme(int index, proto::Programme const&);
-  void updateProgramme(int index, const proto::Programme& programme);
-  void changeStore(proto::ProgrammeStore const& store);
-  void setAutoMode(bool enabled);
+  void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
+  void doRemoveItem(ProgrammeStatus status, const proto::Object& element);
+  void doUpdateItem(ProgrammeStatus status, const proto::Object& element);
+  void doAddProgramme(ProgrammeStatus status, const proto::Programme& element);
+  void doMoveProgramme(Movement move, proto::Programme const& programme);
+  void doRemoveProgramme(int index);
+  void doSelectProgramme(int index, proto::Programme const& programme);
+  void doUpdateProgramme(int index, const proto::Programme& programme);
+  void doChangeStore(proto::ProgrammeStore const& store);
+  void doSetAutoMode(bool enabled);
 
   // ItemStore callbacks
-  void addItem(const proto::InputItemMetadata& item);
-  void changeItem(const proto::InputItemMetadata& oldItem,
-                const proto::InputItemMetadata& newItem);
-  void removeItem(const proto::InputItemMetadata& oldItem);
-  void clearChanges();
+  void doAddInputItem(const proto::InputItemMetadata& item);
+  void doChangeInputItem(const proto::InputItemMetadata& oldItem,
+                         const proto::InputItemMetadata& newItem);
+  void doRemoveInputItem(const proto::InputItemMetadata& oldItem);
 
 
     template<typename F, typename... Args>

@@ -177,11 +177,9 @@ AudioProcessorEditor* SceneAudioProcessor::createEditor() {
 }
 
 void SceneAudioProcessor::getStateInformation(MemoryBlock& destData) {
-  metadata_.withProgrammeStore([&destData](auto& store){
-    auto programmes = store.get();
-    destData.setSize(programmes.ByteSizeLong());
-    programmes.SerializeToArray(destData.getData(), destData.getSize());
-  });
+  auto [programmes, _] = metadata_.stores();
+  destData.setSize(programmes.ByteSizeLong());
+  programmes.SerializeToArray(destData.getData(), destData.getSize());
 }
 
 void SceneAudioProcessor::setStateInformation(const void* data,

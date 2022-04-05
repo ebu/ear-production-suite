@@ -174,7 +174,7 @@ void JuceSceneFrontendConnector::addProgrammeView(
 
 void JuceSceneFrontendConnector::selectProgramme(int index) {
   data_.withProgrammeStore([index](auto& store){
-    store.selectProgramme(index);
+      store.selectProgramme(index);
   });
 }
 
@@ -264,7 +264,7 @@ void JuceSceneFrontendConnector::addTabClicked(
     EarTabbedComponent* tabbedComponent) {
 
   data_.withProgrammeStore([](auto& store){
-    store.addProgramme();
+      store.addProgramme();
   });
 }
 
@@ -297,7 +297,7 @@ void JuceSceneFrontendConnector::tabSelected(EarTabbedComponent*, int index) {
 void JuceSceneFrontendConnector::tabMoved(EarTabbedComponent*, int oldIndex,
                                           int newIndex) {
   data_.withProgrammeStore([oldIndex, newIndex](auto& store) {
-    store.moveProgramme(oldIndex, newIndex);
+      store.moveProgramme(oldIndex, newIndex);
   });
 }
 
@@ -328,7 +328,7 @@ void JuceSceneFrontendConnector::removeTabClicked(
           programmesContainer.get(),
           nullptr)) {
       data_.withProgrammeStore([index](auto& store) {
-        store.removeProgramme(index);
+          store.removeProgramme(index);
       });
     }
   }
@@ -456,7 +456,7 @@ void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
 void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
                                                  bool state) {
   data_.withProgrammeStore([state](auto& store) {
-    store.setAutoMode(state);
+      store.setAutoMode(state);
   });
 }
 
