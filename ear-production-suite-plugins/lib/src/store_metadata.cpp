@@ -86,16 +86,15 @@ void Metadata::removeProgramme(int index) {
     auto programme = programmeStore_.mutable_programme();
     assert(index < programmeStore_.programme_size());
     programme->erase(programme->begin() + index);
-    auto selected_index = programmeStore_.selected_programme_index();
+    auto newIndex = programmeStore_.selected_programme_index();
+    if(newIndex >= programme->size()) {
+        newIndex = std::max<int>(programme->size() - 1, 0);
+    }
+    programmeStore_.set_selected_programme_index(newIndex);
     fireEvent(&MetadataListener::notifyProgrammeRemoved,
               index);
-
-    if(selected_index >= programme->size()) {
-        auto newIndex = std::max<int>(programme->size() - 1, 0);
-        programmeStore_.set_selected_programme_index(newIndex);
-        auto prog = programmeStore_.programme(newIndex);
-        doSelectProgramme(newIndex, prog);
-    }
+    auto prog = programmeStore_.programme(newIndex);
+    doSelectProgramme(newIndex, prog);
 }
 
 void Metadata::moveProgramme(int oldIndex, int newIndex) {
