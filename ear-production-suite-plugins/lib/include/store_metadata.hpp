@@ -55,14 +55,14 @@ class Metadata {
 
   std::pair<proto::ProgrammeStore, ItemMap> stores() const {
     std::lock_guard<std::mutex> lock(mutex_);
-    return{store_, itemStore_};
+    return{programmeStore_, itemStore_};
   }
 
   void refreshUI() {
     std::lock_guard<std::mutex> lock(mutex_);
 //    programmeStore.autoUpdateFrom(itemStore_);
     fireEvent(&MetadataListener::notifyDataReset,
-              store_,
+              programmeStore_,
               itemStore_);
   }
 
@@ -71,24 +71,16 @@ class Metadata {
     RouteMap routeMap() const;
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
-  void doRemoveItem(ProgrammeStatus status, const proto::Object& element);
-  void doUpdateItem(ProgrammeStatus status, const proto::Object& element);
   void doAddProgramme(ProgrammeStatus status, const proto::Programme& element);
-  void doMoveProgramme(Movement move, proto::Programme const& programme);
   void doRemoveProgramme(int index);
   void doSelectProgramme(int index, proto::Programme const& programme);
   void doUpdateProgramme(int index, const proto::Programme& programme);
-  void doChangeStore();
-  void doSetAutoMode(bool enabled);
 
   // ItemStore callbacks
   void doAddInputItem(const proto::InputItemMetadata& item);
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,
                          const proto::InputItemMetadata& newItem);
   void doRemoveInputItem(const proto::InputItemMetadata& oldItem);
-
-  // implementation
-  [[ nodiscard ]] proto::ProgrammeStore const& get() const;
 
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void removeElementFromProgramme(int programmeIndex, int elementIndex);
@@ -155,13 +147,10 @@ class Metadata {
   mutable std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
-  proto::ProgrammeStore store_;
+  proto::ProgrammeStore programmeStore_;
   ItemMap itemStore_;
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
-
-//  friend class ProgrammeStore;
-//  friend class ItemStore;
 };
 }
 
