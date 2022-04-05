@@ -181,10 +181,9 @@ bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
 }
 
 std::pair<std::shared_ptr<adm::Document>, bw64::ChnaChunk>
-ProgrammeStoreAdmSerializer::serialize(proto::ProgrammeStore programmes,
-                                       std::map<communication::ConnectionId, proto::InputItemMetadata> items) {
-  programmes_ = std::move(programmes);
-  items_ = std::move(items);
+ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap> stores) {
+  programmes_ = std::move(stores.first);
+  items_ = std::move(stores.second);
   doc = adm::Document::create();
   addCommonDefinitionsTo(doc);
   chna = bw64::ChnaChunk();

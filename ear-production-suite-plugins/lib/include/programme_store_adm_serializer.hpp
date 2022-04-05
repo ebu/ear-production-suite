@@ -2,7 +2,7 @@
 
 #include "programme_store.pb.h"
 #include "input_item_metadata.pb.h"
-#include "item_store.hpp"
+#include "store_metadata.hpp"
 #include <adm/elements_fwd.hpp>
 #include <bw64/bw64.hpp>
 #include <vector>
@@ -15,8 +15,7 @@ namespace plugin {
 class ProgrammeStoreAdmSerializer {
  public:
   std::pair<std::shared_ptr<adm::Document>, bw64::ChnaChunk> serialize(
-    proto::ProgrammeStore programmes,
-    std::map<communication::ConnectionId, proto::InputItemMetadata> items);
+    std::pair<proto::ProgrammeStore, ItemMap> stores);
  private:
   void serializeToggle(std::shared_ptr<adm::AudioProgramme> programme,
                        const proto::Toggle& toggle);

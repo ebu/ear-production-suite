@@ -24,18 +24,15 @@ class ProgrammeStore {
   explicit ProgrammeStore(Metadata& metadata) : metadata_{metadata} {}
 
   [[ nodiscard ]] proto::ProgrammeStore const& get() const;
-  [[ nodiscard ]] std::optional<proto::Programme> selectedProgramme() const;
   [[ nodiscard ]] std::optional<proto::Programme> programmeAtIndex(int index) const;
   [[ nodiscard ]] int programmeCount() const;
-  [[ nodiscard ]] std::string programmeName(int index) const;;
-  [[ nodiscard ]] bool autoModeEnabled() const;
 
   void set(proto::ProgrammeStore const& store);
-  void setAutoMode(bool enable);
-  void selectProgramme(int index);
   void addProgramme();
-  void moveProgramme(int oldIndex, int newIndex);
   void removeProgramme(int index);
+  void moveProgramme(int oldIndex, int newIndex);
+  void selectProgramme(int index);
+  void setAutoMode(bool enable);
   void setProgrammeName(int index, std::string const& name);
   void setProgrammeLanguage(int programmeIndex, std::string const& language);
   void clearProgrammeLanguage(int programmeIndex);
@@ -44,7 +41,7 @@ class ProgrammeStore {
   void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
-  void autoUpdateFrom(ItemStore const& itemStore);
+  void autoUpdateFrom(RouteMap const& itemStore);
 
  private:
   void removeElementFromProgramme(int programmeIndex, int elementIndex);
@@ -58,9 +55,6 @@ class ProgrammeStore {
   proto::ProgrammeStore store_;
 };
 
-[[ nodiscard ]]
-bool isItemInProgramme(communication::ConnectionId const& id,
-                       proto::Programme const& programme);
 }
 
 #endif  // EAR_PRODUCTION_SUITE_PROGRAMME_STORE_HPP
