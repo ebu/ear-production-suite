@@ -28,13 +28,16 @@ class Metadata {
         logger_->set_level(spdlog::level::trace);
     }
 
+  std::pair<proto::ProgrammeStore, ItemMap> stores() const;
+  void refreshUI();
+
   // Input item manipulation
   void setInputItemMetadata(communication::ConnectionId const& id,
                           proto::InputItemMetadata const& item);
   void removeInput(communication::ConnectionId const& id);
 
   // Programme manipulation
-  void set(proto::ProgrammeStore const& store);
+  void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
   void removeProgramme(int index);
   void moveProgramme(int oldIndex, int newIndex);
@@ -47,47 +50,28 @@ class Metadata {
   void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
-  void autoUpdateFrom(RouteMap const& itemStore);
 
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
   void addListener(std::weak_ptr<MetadataListener> listener);
 
-  std::pair<proto::ProgrammeStore, ItemMap> stores() const {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return{programmeStore_, itemStore_};
-  }
-
-  void refreshUI() {
-    std::lock_guard<std::mutex> lock(mutex_);
-//    programmeStore.autoUpdateFrom(itemStore_);
-    fireEvent(&MetadataListener::notifyDataReset,
-              programmeStore_,
-              itemStore_);
-  }
-
-
  private:
-    RouteMap routeMap() const;
+  void autoUpdateFrom(RouteMap const& itemStore);
+  RouteMap routeMap() const;
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
-  void doAddProgramme(ProgrammeStatus status, const proto::Programme& element);
-  void doRemoveProgramme(int index);
   void doSelectProgramme(int index, proto::Programme const& programme);
-  void doUpdateProgramme(int index, const proto::Programme& programme);
 
   // ItemStore callbacks
-  void doAddInputItem(const proto::InputItemMetadata& item);
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,
                          const proto::InputItemMetadata& newItem);
   void doRemoveInputItem(const proto::InputItemMetadata& oldItem);
 
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
+  void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id);
   void removeElementFromProgramme(int programmeIndex, int elementIndex);
   proto::Programme* addProgrammeImpl(std::string const& name, std::string const& language);
-  proto::Object* addObject(
-          proto::Programme* programme,
-          const communication::ConnectionId id);
+  proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
 
   template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {

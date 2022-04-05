@@ -69,7 +69,7 @@ class SceneAudioProcessor : public AudioProcessor {
   }
 
   void setStoreFromPending() {
-    metadata_.set(pendingStore_);
+    metadata_.setStore(pendingStore_);
   }
 
   void setupBackend();

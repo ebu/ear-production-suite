@@ -186,7 +186,7 @@ void SceneAudioProcessor::setStateInformation(const void* data,
                                               int sizeInBytes) {
   ear::plugin::proto::ProgrammeStore store;
   store.ParseFromArray(data, sizeInBytes);
-  metadata_.set(store);
+  metadata_.setStore(store);
 }
 
 ear::plugin::ui::JuceSceneFrontendConnector*
