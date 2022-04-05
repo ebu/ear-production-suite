@@ -33,6 +33,7 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
     auto overlaps = getOverlapIds(store_);
     if (overlappingIds_ != overlaps) {
         flagChangedOverlaps(overlappingIds_, overlaps, store_);
+        changed = true;
     }
     overlappingIds_ = overlaps;
 }
@@ -41,7 +42,9 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
     std::lock_guard<std::mutex> lock(mutex_);
     store_.clear_monitoring_items();
     for(auto const& object : objects) {
-        addMonitoringItem(object.inputMetadata);
+        auto inputData = object.inputMetadata;
+        inputData.set_changed(true);
+        addMonitoringItem(inputData);
     }
 }
 
@@ -66,6 +69,7 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
                                  });
         if(item != monitoringItems->end()) {
             monitoringItems->erase(item);
+            changed = true;
         }
     }
 }
@@ -97,6 +101,7 @@ void SceneStore::inputRemoved(const communication::ConnectionId &id) {
                                      });
     if(existingItem != availableItems->end()) {
         availableItems->erase(existingItem);
+        changed = true;
     }
 }
 
@@ -112,6 +117,7 @@ void SceneStore::inputUpdated(const InputItem &item) {
     if(existingItem == availableItems->end()) {
         auto newItem = store_.add_all_available_items();
         newItem->CopyFrom(item.data);
+        changed = true;
     }
 }
 
@@ -127,6 +133,7 @@ void SceneStore::setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoring
                                        proto::InputItemMetadata const& inputItem) {
     monitoringItem.set_connection_id(inputItem.connection_id());
     monitoringItem.set_routing(inputItem.routing());
+    changed = changed || inputItem.changed();
     monitoringItem.set_changed(inputItem.changed());
     if (inputItem.has_ds_metadata()) {
         monitoringItem.set_allocated_ds_metadata(
@@ -165,15 +172,14 @@ void SceneStore::sendUpdate() {
   for(auto& item : mutableItems) {
      item.set_changed(false);
   }
+  changed = false;
 }
 
 void SceneStore::triggerSend(bool force) {
   std::lock_guard lock(mutex_);
   auto const& items = store_.monitoring_items();
 
-  if(force || std::any_of(items.cbegin(), items.cend(), [](auto const& item) {
-      return item.changed();
-  })) {
+  if(force || changed) {
       sendUpdate();
   }
 }
