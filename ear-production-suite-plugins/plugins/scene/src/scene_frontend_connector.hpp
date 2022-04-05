@@ -5,7 +5,6 @@
 #include "helper/iso_lang_codes.hpp"
 #include "auto_mode_overlay.hpp"
 #include "multiple_scene_plugins_overlay.hpp"
-#include "item_store.hpp"
 #include "items_container.hpp"
 #include "object_view.hpp"
 #include "programmes_container.hpp"

@@ -210,10 +210,9 @@ void SceneAudioProcessor::sendAdmMetadata() {
   // This is going to fail if two uids reference the same channel. (the second
   // will overwrite the first) Need to change the way channelMapping is sent if
   // we want to handle that case
-  auto [itemStore, progStore] = metadata_.stores();
   ear::plugin::ProgrammeStoreAdmSerializer serializer{};
   auto [adm, chna] =
-      serializer.serialize(std::move(progStore), std::move(itemStore));
+      serializer.serialize(metadata_.stores());
 
   std::stringstream ss;
   adm::writeXml(ss, adm);

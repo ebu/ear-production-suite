@@ -8,7 +8,7 @@ namespace ui {
 //  doAddItem(id);
 //}
 //
-//void SceneFrontendBackendConnector::removeItem(communication::ConnectionId id) {
+//void SceneFrontendBackendConnector::removeInput(communication::ConnectionId id) {
 //  doRemoveItem(id);
 //}
 //

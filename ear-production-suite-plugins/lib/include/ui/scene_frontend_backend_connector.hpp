@@ -18,7 +18,7 @@ namespace ui {
  * scene master plugin backend and the frontend (i.e. juce Processor and
  * Editor).
  *
- * The backend can use the `addItem` and `removeItem` methods
+ * The backend can use the `addItem` and `removeInput` methods
  * to inform the ui about newly registered input plugins.
  * It is ensured that the actual data changing operations (and thus any frontend
  * listeners attached) are called on the message thread.
@@ -55,7 +55,7 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
 //  void addItem(communication::ConnectionId id);
 //  void updateItem(communication::ConnectionId id,
 //                  proto::InputItemMetadata item);
-//  void removeItem(communication::ConnectionId id);
+//  void removeInput(communication::ConnectionId id);
 
   void setMultipleScenePluginsOverlayVisible(const bool visible) {
     this->doSetMultipleScenePluginsOverlayVisible(visible);

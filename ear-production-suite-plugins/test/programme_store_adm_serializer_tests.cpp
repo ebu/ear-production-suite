@@ -224,19 +224,21 @@ InputItemMetadata simpleDsItem(ConnectionId const& id,
 
 TEST_CASE("Programme parser tests") {
   Metadata metadata{std::make_unique<EventDispatcher>()};
-  ItemStore itemStore{metadata};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
-  itemStore.setItem(connectionId, item);
+  metadata.setInputItemMetadata(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
                                                   .withName("TestProg")
                                                   .withLanguage("English")
                                                   .withObject(connectionId));
+  metadata.withProgrammeStore([&programmeStore](auto& store) {
+     store.set(programmeStore);
+  });
 
   SECTION("Single Programme, Single object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore.allItems());
+    auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
     auto const chna = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
@@ -257,9 +259,13 @@ TEST_CASE("Programme parser tests") {
                                                     .withLanguage("English")
                                                     .withObject(connectionId));
 
+  metadata.withProgrammeStore([&programmeStore](auto& store) {
+      store.set(programmeStore);
+  });
+
   SECTION("Two Programmes, Shared object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore.allItems());
+    auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
     auto const chna = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
@@ -285,16 +291,19 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                            SpeakerLayout::ITU_BS_2051_0_2_0);
 
     Metadata metadata{std::make_unique<EventDispatcher>()};
-    ItemStore itemStore{metadata};
-  itemStore.setItem(connectionId, item);
+  metadata.setInputItemMetadata(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
                                                   .withName("TestProg")
                                                   .withLanguage("English")
                                                   .withObject(connectionId));
 
+  metadata.withProgrammeStore([&programmeStore](auto& store) {
+    store.set(programmeStore);
+  });
+
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(programmeStore, itemStore.allItems());
+  auto result = serializer.serialize(metadata.stores());
   auto const& doc = *result.first;
   auto chna = result.second;
 
@@ -340,11 +349,10 @@ TEST_CASE("Toggle group with three members") {
   auto altItem = simpleObjectItem(altId, "alternative", 1);
   auto secondAltId = ConnectionId::generate();
   auto secondAltItem = simpleObjectItem(secondAltId, "alternative_2", 2);
-    Metadata metadata{std::make_unique<EventDispatcher>()};
-    ItemStore itemStore{metadata};
-  itemStore.setItem(defaultId, defaultItem);
-  itemStore.setItem(altId, altItem);
-  itemStore.setItem(secondAltId, secondAltItem);
+  Metadata metadata{std::make_unique<EventDispatcher>()};
+  metadata.setInputItemMetadata(defaultId, defaultItem);
+  metadata.setInputItemMetadata(altId, altItem);
+  metadata.setInputItemMetadata(secondAltId, secondAltItem);
 
   auto toggle = ToggleBuilder{}
       .withDefaultItem(defaultId)
@@ -356,8 +364,12 @@ TEST_CASE("Toggle group with three members") {
                                                          .withLanguage("English")
                                                          .withToggle(toggle));
 
+  metadata.withProgrammeStore([&programmeStore](auto& store) {
+    store.set(programmeStore);
+  });
+
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(programmeStore, itemStore.allItems());
+  auto result = serializer.serialize(metadata.stores());
   auto const& doc = *result.first;
   auto chna = result.second;
 
@@ -419,10 +431,9 @@ TEST_CASE("Toggle group with three members") {
 
 TEST_CASE("On_Off interactive") {
     Metadata metadata{std::make_unique<EventDispatcher>()};
-    ItemStore itemStore{metadata};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
-  itemStore.setItem(connectionId, item);
+  metadata.setInputItemMetadata(connectionId, item);
   auto programme = ProgrammeBuilder{}
       .withName("TestProg")
       .withLanguage("English")
@@ -431,10 +442,13 @@ TEST_CASE("On_Off interactive") {
                 .withOnOffInteractionEnabled());
 
   auto programmeStore = StoreBuilder{}.withProgramme(programme);
+  metadata.withProgrammeStore([&programmeStore](auto& store) {
+    store.set(programmeStore);
+  });
 
   SECTION("With single object") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore.allItems());
+    auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
     auto chna = result.second;
     REQUIRE(doc.getElements<AudioObject>().size() == 1);
@@ -450,8 +464,11 @@ TEST_CASE("On_Off interactive") {
   SECTION("When same input has same interaction settings in two programmes") {
     programmeStore =
         programmeStore.withProgramme(programme);
+    metadata.withProgrammeStore([&programmeStore](auto& store) {
+        store.set(programmeStore);
+    });
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore.allItems());
+    auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
     auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();
@@ -474,8 +491,11 @@ TEST_CASE("On_Off interactive") {
                                          .withName("Second Programme")
                                          .withLanguage("English")
                                          .withObject(connectionId));
+    metadata.withProgrammeStore([&programmeStore](auto& store) {
+        store.set(programmeStore);
+    });
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(programmeStore, itemStore.allItems());
+    auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
     auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();

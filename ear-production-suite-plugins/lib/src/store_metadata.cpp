@@ -3,6 +3,7 @@
 //
 
 #include "store_metadata.hpp"
+#include <google/protobuf/util/message_differencer.h>
 #include <algorithm>
 
 using namespace ear::plugin;
@@ -18,7 +19,7 @@ void Metadata::addItems(ProgrammeStatus status,
   auto selectedIndex = programmeStore.get().selected_programme_index();
   for(auto const& item : items) {
     auto id = communication::ConnectionId(item.connection_id());
-    pairs.push_back({item, itemStore.getItem(id)});
+    pairs.push_back({item, itemStore_.at(id)});
   }
 
   fireEvent(&MetadataListener::notifyItemsAddedToProgramme,
@@ -26,7 +27,7 @@ void Metadata::addItems(ProgrammeStatus status,
 }
 
 void Metadata::changeStore(proto::ProgrammeStore const& store) {
-  auto items = itemStore.get();
+  auto items = itemStore_;
   fireEvent(&MetadataListener::notifyDataReset,
             store, items);
 }
@@ -50,7 +51,7 @@ void Metadata::removeProgramme(int index) {
 }
 
 void Metadata::selectProgramme(int index, proto::Programme const& programme) {
-  ProgrammeObjects objects({index, true}, programme, itemStore.allItems());
+  ProgrammeObjects objects({index, true}, programme, itemStore_);
   fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 }
@@ -64,7 +65,7 @@ void Metadata::removeItem(ProgrammeStatus status, const proto::Object& element) 
 
 void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) {
   auto id = communication::ConnectionId(element.connection_id());
-  auto const& item = itemStore.get(id);
+  auto const& item = itemStore_.at(id);
 
   fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
             status, ProgrammeObject{element, item});
@@ -93,7 +94,7 @@ void Metadata::changeItem(
     const proto::InputItemMetadata& newItem) {
   fireEvent(&MetadataListener::notifyInputUpdated,
           InputItem{newItem.connection_id(), newItem});
-  programmeStore.autoUpdateFrom(itemStore);
+  programmeStore.autoUpdateFrom(routeMap());
   auto selectedIndex = programmeStore.get().selected_programme_index();
   for(auto i = 0; i != programmeStore.programmeCount(); ++i) {
     auto const& programme = programmeStore.programmeAtIndex(i);
@@ -115,10 +116,58 @@ void Metadata::changeItem(
 
 void Metadata::removeItem(
     const proto::InputItemMetadata& oldItem) {
-    EAR_LOGGER_TRACE(logger_, "removeItem id {}", oldItem.connection_id());
+    EAR_LOGGER_TRACE(logger_, "removeInput id {}", oldItem.connection_id());
   programmeStore.removeElementFromAllProgrammes(oldItem.connection_id());
-  programmeStore.autoUpdateFrom(itemStore);
+  programmeStore.autoUpdateFrom(routeMap());
   fireEvent(&MetadataListener::notifyInputRemoved,
             oldItem.connection_id());
 }
 void Metadata::clearChanges() {}
+
+void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    uiListeners_.push_back(std::move(listener));
+}
+
+void Metadata::addListener(std::weak_ptr<MetadataListener> listener) {
+    listeners_.push_back(std::move(listener));
+}
+
+void Metadata::setInputItemMetadata(
+        const communication::ConnectionId& id,
+        const proto::InputItemMetadata& item) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    using google::protobuf::util::MessageDifferencer;
+
+    assert(id.string() == item.connection_id());
+    if (auto result = itemStore_.emplace(id, item); result.second) {
+        addItem(item);
+    } else {
+        auto previousItem = result.first->second;
+        if(!MessageDifferencer::ApproximatelyEquals(previousItem, item)) {
+            result.first->second = item;
+            changeItem(previousItem, item);
+        }
+    }
+    itemStore_[id].set_changed(false);
+}
+
+void Metadata::removeInput(const communication::ConnectionId& id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if(auto it = itemStore_.find(id); it != itemStore_.end()) {
+        auto item = it->second;
+        itemStore_.erase(it);
+        removeItem(item);
+    }
+}
+
+RouteMap Metadata::routeMap() const {
+    RouteMap routes;
+    std::transform(itemStore_.cbegin(), itemStore_.cend(),
+                   std::inserter(routes, routes.begin()),
+                   [](auto const& idItemPair) {
+                       return std::make_pair(idItemPair.second.routing(),
+                                             idItemPair.first);
+                   });
+    return routes;
+}

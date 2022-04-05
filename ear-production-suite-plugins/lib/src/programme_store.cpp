@@ -4,59 +4,14 @@
 
 #include "../include/programme_store.hpp"
 #include <algorithm>
-#include "item_store.hpp"
 #include "helper/move.hpp"
 #include "helper/weak_ptr.hpp"
 #include "store_metadata.hpp"
 
 using namespace ear::plugin;
 
-namespace {
-[[nodiscard]] bool isItemInElement(communication::ConnectionId const& id,
-                                   proto::ProgrammeElement const& element) {
-  if (element.has_object()) {
-    return communication::ConnectionId{element.object().connection_id()} == id;
-  } else if (element.has_toggle()) {
-    for (auto const& toggleElement : element.toggle().element()) {
-      if (isItemInElement(id, toggleElement)) {
-        return true;
-      }
-    }
-  } else if (element.has_group()) {
-    for (auto const& groupElement : element.group().element()) {
-      if (isItemInElement(id, groupElement)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-}
-
-bool ear::plugin::isItemInProgramme(communication::ConnectionId const& id,
-                       proto::Programme const& programme) {
-  auto elements = programme.element();
-  return std::any_of(elements.cbegin(),
-                     elements.cend(),
-                     [&id](proto::ProgrammeElement const& element) {
-    return isItemInElement(id, element);
-  });
-}
-
 proto::ProgrammeStore const& ProgrammeStore::get() const {
   return store_;
-}
-
-std::optional<proto::Programme> ProgrammeStore::selectedProgramme() const {
-  if (store_.has_selected_programme_index()) {
-    auto index = store_.selected_programme_index();
-    if (index >= 0) {  // could be -1 if plugin just initialised
-      assert(index < store_.programme_size());
-      auto& programme = store_.programme(index);
-      return programme;
-    }
-  }
-  return {};
 }
 
 std::optional<proto::Programme> ProgrammeStore::programmeAtIndex(
@@ -66,15 +21,6 @@ std::optional<proto::Programme> ProgrammeStore::programmeAtIndex(
 
 int ProgrammeStore::programmeCount() const {
   return store_.programme_size();
-}
-
-std::string ProgrammeStore::programmeName(int index) const {
-  assert(index < store_.programme_size());
-  return store_.programme(index).name();
-}
-
-bool ProgrammeStore::autoModeEnabled() const {
-  return store_.auto_mode();
 }
 
 void ProgrammeStore::set(proto::ProgrammeStore const& store) {
@@ -114,7 +60,6 @@ void ProgrammeStore::addProgramme() {
 void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
   auto programmes = store_.mutable_programme();
   auto size = programmes->size();
-  bool moved = false;
   if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
       oldIndex != newIndex) {
     move(programmes->begin(), oldIndex, newIndex);
@@ -264,7 +209,7 @@ void ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
   }
 }
 
-void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
+void ProgrammeStore::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {
   if (store_.auto_mode()) {
     auto programmeCount = store_.programme_size();
     store_.clear_programme();
@@ -274,7 +219,6 @@ void ProgrammeStore::autoUpdateFrom(const ItemStore& itemStore) {
     auto defaultProgramme = addProgrammeImpl("Default", "");
     store_.set_selected_programme_index(0);
     metadata_.addProgramme({0, true}, *defaultProgramme);
-    auto itemsSortedByRoute = itemStore.routeMap();
     for (auto const& routeItem : itemsSortedByRoute) {
       auto object = addObject(defaultProgramme, routeItem.second);
       metadata_.addItems({0, true}, {*object});
