@@ -20,6 +20,7 @@ public:
 private:
     mutable std::mutex mutex_;
     proto::SceneStore store_;
+    bool changed{true};
     std::set<std::string> overlappingIds_;
     std::function<void(proto::SceneStore const&)> updateCallback_;
     void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;

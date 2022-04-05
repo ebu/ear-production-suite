@@ -314,9 +314,6 @@ void Metadata::doRemoveProgramme(int index) {
 
 void Metadata::doSelectProgramme(int index, proto::Programme const& programme) {
   ProgrammeObjects objects({index, true}, programme, itemStore_);
-  for(auto& object : objects) {
-      object.inputMetadata.set_changed(true);
-  }
   fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 }
