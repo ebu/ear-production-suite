@@ -9,6 +9,13 @@
 
 using namespace ear::plugin;
 
+template<typename ItT>
+auto findObjectWithId(ItT begin, ItT end, communication::ConnectionId const& id) {
+    return std::find_if(begin, end, [&id](auto const& element) {
+        return element.has_object() && element.object().connection_id() == id.string();
+    });
+}
+
 std::pair<proto::ProgrammeStore, ItemMap> Metadata::stores() const {
     std::lock_guard<std::mutex> lock(mutex_);
     return{programmeStore_, itemStore_};
@@ -204,16 +211,8 @@ void Metadata::updateElement(const communication::ConnectionId& id,
     auto programmeIndex = programmeStore_.selected_programme_index();
     auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
 
-    auto it =
-            std::find_if(elements->begin(), elements->end(), [&id](auto const& element) {
-                if(element.has_object()) {
-                    communication::ConnectionId elementId(element.object().connection_id());
-                    return id == elementId;
-                }
-                return false;
-            });
-
-    if (it != elements->end()) {
+    if(auto it = findObjectWithId(elements->begin(), elements->end(), id);
+       it != elements->end() && it->has_object()) {
         *(it->mutable_object()) = element;
         ProgrammeStatus status{
                 programmeIndex,
@@ -269,13 +268,8 @@ void Metadata::removeElementFromAllProgrammes(const communication::ConnectionId&
 void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
     auto const& elements =
             programmeStore_.programme(programmeIndex).element();
-    auto element =
-            std::find_if(elements.begin(), elements.end(), [id](auto const& entry) {
-                return communication::ConnectionId(entry.object().connection_id()) ==
-                       id;
-            });
-    if (element != elements.end()) {
-        auto elementIndex = static_cast<int>(std::distance(elements.begin(), element));
+    if(auto it = findObjectWithId(elements.begin(), elements.end(), id); it != elements.end()) {
+        auto elementIndex = static_cast<int>(std::distance(elements.begin(), it));
         removeElementFromProgramme(programmeIndex, elementIndex);
     }
 }
@@ -354,12 +348,7 @@ void Metadata::doChangeInputItem(
     auto const& programme = programmeStore_.programme(i);
     auto const& elements = programme.element();
     auto const& id = newItem.connection_id();
-    if(auto it = std::find_if(elements.begin(), elements.end(), [id](auto const& element){
-          if(element.has_object()) {
-            return element.object().connection_id() == id;
-          }
-          return false;
-        });
+    if(auto it = findObjectWithId(elements.begin(), elements.end(), id);
         it != elements.end()) {
       fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
                 ProgrammeStatus{i, i == selectedIndex},
