@@ -232,7 +232,7 @@ TEST_CASE("Programme parser tests") {
                                                   .withName("TestProg")
                                                   .withLanguage("English")
                                                   .withObject(connectionId));
-  metadata.set(programmeStore);
+  metadata.setStore(programmeStore);
 
   SECTION("Single Programme, Single object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
@@ -257,7 +257,7 @@ TEST_CASE("Programme parser tests") {
                                                     .withLanguage("English")
                                                     .withObject(connectionId));
 
-  metadata.set(programmeStore);
+  metadata.setStore(programmeStore);
 
   SECTION("Two Programmes, Shared object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
@@ -294,7 +294,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                                                   .withLanguage("English")
                                                   .withObject(connectionId));
 
-  metadata.set(programmeStore);
+  metadata.setStore(programmeStore);
 
   ProgrammeStoreAdmSerializer serializer;
   auto result = serializer.serialize(metadata.stores());
@@ -358,7 +358,7 @@ TEST_CASE("Toggle group with three members") {
                                                          .withLanguage("English")
                                                          .withToggle(toggle));
 
-  metadata.set(programmeStore);
+  metadata.setStore(programmeStore);
 
   ProgrammeStoreAdmSerializer serializer;
   auto result = serializer.serialize(metadata.stores());
@@ -434,7 +434,7 @@ TEST_CASE("On_Off interactive") {
                 .withOnOffInteractionEnabled());
 
   auto programmeStore = StoreBuilder{}.withProgramme(programme);
-  metadata.set(programmeStore);
+  metadata.setStore(programmeStore);
 
   SECTION("With single object") {
     ProgrammeStoreAdmSerializer serializer;
@@ -454,7 +454,7 @@ TEST_CASE("On_Off interactive") {
   SECTION("When same input has same interaction settings in two programmes") {
     programmeStore =
         programmeStore.withProgramme(programme);
-    metadata.set(programmeStore);
+    metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
@@ -479,7 +479,7 @@ TEST_CASE("On_Off interactive") {
                                          .withName("Second Programme")
                                          .withLanguage("English")
                                          .withObject(connectionId));
-    metadata.set(programmeStore);
+    metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
