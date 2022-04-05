@@ -85,15 +85,6 @@ class ProgrammeObjects {
     return item;
   }
   using const_iterator = std::vector<ProgrammeObject>::const_iterator;
-  using iterator = std::vector<ProgrammeObject>::iterator;
-  [[nodiscard]]
-  iterator begin() {
-      return data.begin();
-  }
-  [[nodiscard]]
-  iterator end() {
-      return data.end();
-  }
   [[nodiscard]]
   const_iterator begin() const {
     return data.begin();
