@@ -276,7 +276,7 @@ void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communicat
             programmeIndex == programmeStore_.selected_programme_index()
         };
         elements->erase(it);
-        EAR_LOGGER_TRACE(logger_, "remove programme item id {}", id);
+        EAR_LOGGER_TRACE(logger_, "remove programme item id {}", id.string());
         fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
                   status, id);
     }
