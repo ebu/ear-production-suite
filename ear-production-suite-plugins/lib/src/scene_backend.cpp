@@ -91,9 +91,7 @@ void SceneBackend::setup() {
         [this](communication::ConnectionId id, proto::InputItemMetadata item) {
           EAR_LOGGER_DEBUG(this->logger_,
                            "Received metadata from connection {}", id.string());
-          data_.withItemStore([&id, &item](auto& store) {
-            store.setItem(id, item);
-          });
+            data_.setInputItemMetadata(id, item);
         });
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_,
@@ -144,9 +142,7 @@ void SceneBackend::onConnectionEvent(
   } else if (event ==
              communication::SceneConnectionManager::Event::INPUT_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Input {} disconnected", id.string());
-    data_.withItemStore([&id](auto& store) {
-      store.removeItem(id);
-    });
+      data_.removeInput(id);
     rebuildSceneStore_ = true;
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {

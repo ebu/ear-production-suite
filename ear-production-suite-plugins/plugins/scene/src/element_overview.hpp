@@ -6,7 +6,7 @@
 #include "components/ear_button.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include "item_store.hpp"
+#include "store_metadata.hpp"
 #include "programme_store.pb.h"
 #include "ui/scene_frontend_backend_connector.hpp"
 

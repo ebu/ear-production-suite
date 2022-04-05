@@ -466,9 +466,7 @@ void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
       store.updateElement(data.item.connection_id(), data.object);
   });
 
-  data_.withItemStore([&data](auto& store) {
-    store.setItem(data.item.connection_id(), data.item);
-  });
+  data_.setInputItemMetadata(data.item.connection_id(), data.item);
 }
 
 void JuceSceneFrontendConnector::inputRemoved(communication::ConnectionId const& id) {

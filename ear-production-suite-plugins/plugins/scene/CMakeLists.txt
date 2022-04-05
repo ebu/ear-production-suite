@@ -24,7 +24,6 @@ set(HEADERS_SCENE
 	${EPS_PLUGIN_BASE_DIR}/include/communication/common_types.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/detail/constants.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/helper/move.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/item_store.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_populator.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_serializer.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/scene_backend.hpp

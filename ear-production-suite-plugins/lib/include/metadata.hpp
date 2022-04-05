@@ -16,6 +16,7 @@ struct InputItem {
 };
 
 using ItemMap = std::map<communication::ConnectionId, proto::InputItemMetadata>;
+using RouteMap = std::multimap<int, communication::ConnectionId>;
 
 struct ProgrammeStatus {
   int index;

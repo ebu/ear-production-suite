@@ -8,7 +8,6 @@
 #include "log.hpp"
 #include <memory>
 #include <vector>
-#include "item_store.hpp"
 #include "programme_store.hpp"
 #include "metadata_listener.hpp"
 #include "helper/weak_ptr.hpp"
@@ -27,19 +26,18 @@ class Metadata {
     explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
             logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
             uiDispatcher_{std::move(uiDispatcher)},
-            programmeStore(*this),
-            itemStore(*this) {
+            programmeStore(*this) {
         logger_->set_level(spdlog::level::trace);
     }
 
-  void addUIListener(std::weak_ptr<MetadataListener> listener) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    uiListeners_.push_back(std::move(listener));
-  }
+  // Input item manipulation
+  void setInputItemMetadata(communication::ConnectionId const& id,
+                          proto::InputItemMetadata const& item);
+  void removeInput(communication::ConnectionId const& id);
 
-  void addListener(std::weak_ptr<MetadataListener> listener) {
-      listeners_.push_back(std::move(listener));
-  }
+  // Listeners
+  void addUIListener(std::weak_ptr<MetadataListener> listener);
+  void addListener(std::weak_ptr<MetadataListener> listener);
 
   template <typename F>
   void withProgrammeStore(F&& fn) {
@@ -47,26 +45,22 @@ class Metadata {
     return fn(programmeStore);
   }
 
-  template <typename F>
-  void withItemStore(F&& fn) {
+  std::pair<proto::ProgrammeStore, ItemMap> stores() const {
     std::lock_guard<std::mutex> lock(mutex_);
-    return fn(itemStore);
-  }
-
-  std::pair<ItemMap, proto::ProgrammeStore> stores() const {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return{itemStore.get(), programmeStore.get()};
+    return{programmeStore.get(), itemStore_};
   }
 
   void refreshUI() {
     std::lock_guard<std::mutex> lock(mutex_);
-    programmeStore.autoUpdateFrom(itemStore);
+//    programmeStore.autoUpdateFrom(itemStore_);
     fireEvent(&MetadataListener::notifyDataReset,
               programmeStore.get(),
-              itemStore.get());
+              itemStore_);
   }
 
+
  private:
+    RouteMap routeMap() const;
   // ProgrammeStore callbacks
   void addItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
   void removeItem(ProgrammeStatus status, const proto::Object& element);
@@ -146,7 +140,7 @@ class Metadata {
   std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
   ProgrammeStore programmeStore;
-  ItemStore itemStore;
+  ItemMap itemStore_;
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 

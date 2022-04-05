@@ -37,8 +37,7 @@ add_library(ear-plugin-base STATIC
   src/multichannel_convolver.cpp
   src/nng-cpp/error_handling.cpp
   src/object_backend.cpp
-  src/item_store.cpp
-  src/programme_types.cpp
+        src/programme_types.cpp
   src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
@@ -83,8 +82,7 @@ set(EAR_BASE_HEADERS
 	include/helper/move.hpp
 	include/helper/weak_ptr.hpp
 	include/helper/protobuf_utilities.hpp
-	include/item_store.hpp
-	include/log.hpp
+        include/log.hpp
 	include/listener_orientation.hpp
 	include/monitoring_audio_processor.hpp
 	include/monitoring_backend.hpp
