@@ -5,7 +5,6 @@
 #include "components/ear_button.hpp"
 #include "item_view.hpp"
 #include "item_view_list.hpp"
-#include "programme_store.hpp"
 #include "store_metadata.hpp"
 #include <iostream>
 
