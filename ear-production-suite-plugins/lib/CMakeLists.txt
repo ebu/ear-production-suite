@@ -41,8 +41,7 @@ add_library(ear-plugin-base STATIC
   src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
-  src/programme_store.cpp
-  src/store_metadata.cpp
+        src/store_metadata.cpp
   src/metadata_listener.cpp
   src/programme_store_adm_populator.cpp
   src/programme_store_adm_serializer.cpp
@@ -107,8 +106,7 @@ set(EAR_BASE_HEADERS
 	include/nng-cpp/socket_base.hpp
 	include/object_backend.hpp
 	include/programme_element_visitor.hpp
-	include/programme_store.hpp
-	include/store_metadata.hpp
+        include/store_metadata.hpp
 	include/metadata_listener.hpp
 	include/programme_store_adm_populator.hpp
 	include/programme_store_adm_serializer.hpp

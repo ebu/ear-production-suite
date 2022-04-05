@@ -8,7 +8,6 @@
 #include "log.hpp"
 #include <memory>
 #include <vector>
-#include "programme_store.hpp"
 #include "metadata_listener.hpp"
 #include "helper/weak_ptr.hpp"
 
@@ -25,8 +24,7 @@ class Metadata {
  public:
     explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
             logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
-            uiDispatcher_{std::move(uiDispatcher)},
-            programmeStore(*this) {
+            uiDispatcher_{std::move(uiDispatcher)} {
         logger_->set_level(spdlog::level::trace);
     }
 
@@ -35,26 +33,36 @@ class Metadata {
                           proto::InputItemMetadata const& item);
   void removeInput(communication::ConnectionId const& id);
 
+  // Programme manipulation
+  void set(proto::ProgrammeStore const& store);
+  void addProgramme();
+  void removeProgramme(int index);
+  void moveProgramme(int oldIndex, int newIndex);
+  void selectProgramme(int index);
+  void setAutoMode(bool enable);
+  void setProgrammeName(int index, std::string const& name);
+  void setProgrammeLanguage(int programmeIndex, std::string const& language);
+  void clearProgrammeLanguage(int programmeIndex);
+  void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
+  void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
+  void moveElement(int programmeIndex, int oldIndex, int newIndex);
+  void updateElement(communication::ConnectionId const& id, proto::Object const& element);
+  void autoUpdateFrom(RouteMap const& itemStore);
+
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
   void addListener(std::weak_ptr<MetadataListener> listener);
 
-  template <typename F>
-  void withProgrammeStore(F&& fn) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return fn(programmeStore);
-  }
-
   std::pair<proto::ProgrammeStore, ItemMap> stores() const {
     std::lock_guard<std::mutex> lock(mutex_);
-    return{programmeStore.get(), itemStore_};
+    return{store_, itemStore_};
   }
 
   void refreshUI() {
     std::lock_guard<std::mutex> lock(mutex_);
 //    programmeStore.autoUpdateFrom(itemStore_);
     fireEvent(&MetadataListener::notifyDataReset,
-              programmeStore.get(),
+              store_,
               itemStore_);
   }
 
@@ -70,7 +78,7 @@ class Metadata {
   void doRemoveProgramme(int index);
   void doSelectProgramme(int index, proto::Programme const& programme);
   void doUpdateProgramme(int index, const proto::Programme& programme);
-  void doChangeStore(proto::ProgrammeStore const& store);
+  void doChangeStore();
   void doSetAutoMode(bool enabled);
 
   // ItemStore callbacks
@@ -79,8 +87,17 @@ class Metadata {
                          const proto::InputItemMetadata& newItem);
   void doRemoveInputItem(const proto::InputItemMetadata& oldItem);
 
+  // implementation
+  [[ nodiscard ]] proto::ProgrammeStore const& get() const;
 
-    template<typename F, typename... Args>
+  void removeElementFromAllProgrammes(communication::ConnectionId const& id);
+  void removeElementFromProgramme(int programmeIndex, int elementIndex);
+  proto::Programme* addProgrammeImpl(std::string const& name, std::string const& language);
+  proto::Object* addObject(
+          proto::Programme* programme,
+          const communication::ConnectionId id);
+
+  template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {
     fireEventOnMsgThread(fn, args...);
     // TODO have a specific communication thread for metadata updates and
@@ -138,13 +155,13 @@ class Metadata {
   mutable std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
-  ProgrammeStore programmeStore;
+  proto::ProgrammeStore store_;
   ItemMap itemStore_;
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 
-  friend class ProgrammeStore;
-  friend class ItemStore;
+//  friend class ProgrammeStore;
+//  friend class ItemStore;
 };
 }
 

@@ -4,7 +4,6 @@
 #include "JuceHeader.h"
 #include "helper/nng_wrappers.h"
 #include "programme_store.pb.h"
-#include "programme_store.hpp"
 #include "store_metadata.hpp"
 #include "components/read_only_audio_parameter_int.hpp"
 #include "components/level_meter_calculator.hpp"
@@ -70,10 +69,7 @@ class SceneAudioProcessor : public AudioProcessor {
   }
 
   void setStoreFromPending() {
-    metadata_.withProgrammeStore(
-        [this](auto& store) {
-          store.set(pendingStore_);
-        });
+    metadata_.set(pendingStore_);
   }
 
   void setupBackend();

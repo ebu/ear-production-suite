@@ -173,9 +173,7 @@ void JuceSceneFrontendConnector::addProgrammeView(
 }
 
 void JuceSceneFrontendConnector::selectProgramme(int index) {
-  data_.withProgrammeStore([index](auto& store){
-      store.selectProgramme(index);
-  });
+  data_.selectProgramme(index);
 }
 
 void JuceSceneFrontendConnector::selectProgrammeView(int index) {
@@ -207,13 +205,9 @@ void JuceSceneFrontendConnector::setProgrammeLanguage(int programmeIndex,
                                                       int languageIndex) {
   if (languageIndex >= 0 && languageIndex < LANGUAGES.size()) {
     auto language = LANGUAGES.at(languageIndex).alpha3;
-    data_.withProgrammeStore([programmeIndex, &language](auto& store) {
-      store.setProgrammeLanguage(programmeIndex, language);
-    });
+    data_.setProgrammeLanguage(programmeIndex, language);
   } else {
-    data_.withProgrammeStore([programmeIndex](auto& store) {
-      store.clearProgrammeLanguage(programmeIndex);
-    });
+    data_.clearProgrammeLanguage(programmeIndex);
   }
 }
 
@@ -246,9 +240,7 @@ void JuceSceneFrontendConnector::nameChanged(ProgrammeView* view,
                                              const String& newName) {
   auto index = getProgrammeIndex(view);
   if (index >= 0) {
-    data_.withProgrammeStore([index, &newName](auto& store){
-      store.setProgrammeName(index, newName.toStdString());
-    });
+      data_.setProgrammeName(index, newName.toStdString());
   }
 }
 
@@ -263,9 +255,7 @@ void JuceSceneFrontendConnector::languageChanged(ProgrammeView* view,
 void JuceSceneFrontendConnector::addTabClicked(
     EarTabbedComponent* tabbedComponent) {
 
-  data_.withProgrammeStore([](auto& store){
-      store.addProgramme();
-  });
+  data_.addProgramme();
 }
 
 void JuceSceneFrontendConnector::programmeAdded(
@@ -296,9 +286,7 @@ void JuceSceneFrontendConnector::tabSelected(EarTabbedComponent*, int index) {
 
 void JuceSceneFrontendConnector::tabMoved(EarTabbedComponent*, int oldIndex,
                                           int newIndex) {
-  data_.withProgrammeStore([oldIndex, newIndex](auto& store) {
-      store.moveProgramme(oldIndex, newIndex);
-  });
+  data_.moveProgramme(oldIndex, newIndex);
 }
 
 void JuceSceneFrontendConnector::programmeMoved(Movement motion,
@@ -327,9 +315,7 @@ void JuceSceneFrontendConnector::removeTabClicked(
           text,
           programmesContainer.get(),
           nullptr)) {
-      data_.withProgrammeStore([index](auto& store) {
-          store.removeProgramme(index);
-      });
+      data_.removeProgramme(index);
     }
   }
 }
@@ -346,9 +332,7 @@ void JuceSceneFrontendConnector::tabBarDoubleClicked(
 // ItemsContainer::Listener
 void JuceSceneFrontendConnector::addItemsClicked(
     ItemsContainer* container, std::vector<communication::ConnectionId> ids) {
-  data_.withProgrammeStore([&ids](auto& store) {
-    store.addItemsToSelectedProgramme(ids);
-  });
+  data_.addItemsToSelectedProgramme(ids);
 
   if (auto overlay = itemsOverlay_.lock()) {
     overlay->setVisible(false);
@@ -429,9 +413,7 @@ void JuceSceneFrontendConnector::elementMoved(ElementViewList* list,
     }
   }
   assert(programmeIndex >= 0);
-  data_.withProgrammeStore([programmeIndex, oldIndex, newIndex](auto& store){
-    store.moveElement(programmeIndex, oldIndex, newIndex);
-  });
+  data_.moveElement(programmeIndex, oldIndex, newIndex);
 }
 
 void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
@@ -445,9 +427,7 @@ void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
     assert (programmeIndex >= 0);
     if(auto objectView = dynamic_cast<ObjectView*>(view)) {
       auto id = objectView->getData().item.connection_id();
-      data_.withProgrammeStore([programmeIndex, &id](auto& store){
-        store.removeElementFromProgramme(programmeIndex, id);
-      });
+      data_.removeElementFromProgramme(programmeIndex, id);
     }
   }
 }
@@ -455,17 +435,12 @@ void JuceSceneFrontendConnector::removeElementClicked(ElementViewList* list,
 // AutoModeOverlay::Listener
 void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
                                                  bool state) {
-  data_.withProgrammeStore([state](auto& store) {
-      store.setAutoMode(state);
-  });
+  data_.setAutoMode(state);
 }
 
 // ObjectView::Listener
 void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
-  data_.withProgrammeStore([&data](auto& store) {
-      store.updateElement(data.item.connection_id(), data.object);
-  });
-
+  data_.updateElement(data.item.connection_id(), data.object);
   data_.setInputItemMetadata(data.item.connection_id(), data.item);
 }
 
