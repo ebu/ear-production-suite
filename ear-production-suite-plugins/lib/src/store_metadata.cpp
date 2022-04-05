@@ -9,11 +9,13 @@
 
 using namespace ear::plugin;
 
-template<typename ItT>
-auto findObjectWithId(ItT begin, ItT end, communication::ConnectionId const& id) {
-    return std::find_if(begin, end, [&id](auto const& element) {
-        return element.has_object() && element.object().connection_id() == id.string();
-    });
+namespace {
+    template<typename ItT>
+    auto findObjectWithId(ItT begin, ItT end, communication::ConnectionId const &id) {
+        return std::find_if(begin, end, [&id](auto const &element) {
+            return element.has_object() && element.object().connection_id() == id.string();
+        });
+    }
 }
 
 std::pair<proto::ProgrammeStore, ItemMap> Metadata::stores() const {
@@ -266,31 +268,15 @@ void Metadata::removeElementFromAllProgrammes(const communication::ConnectionId&
 }
 
 void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
-    auto const& elements =
-            programmeStore_.programme(programmeIndex).element();
-    if(auto it = findObjectWithId(elements.begin(), elements.end(), id); it != elements.end()) {
-        auto elementIndex = static_cast<int>(std::distance(elements.begin(), it));
-        removeElementFromProgramme(programmeIndex, elementIndex);
-    }
-}
-
-void Metadata::removeElementFromProgramme(int programmeIndex, int elementIndex) {
-    assert(programmeIndex >=0 && programmeIndex < programmeStore_.programme_size());
     auto elements =
-            programmeStore_.mutable_programme(programmeIndex)
-                    ->mutable_element();
-    assert(elementIndex >= 0 && elementIndex < std::distance(elements->begin(), elements->end()));
-    auto element = programmeStore_.programme(programmeIndex).element(elementIndex);
-    ProgrammeStatus status{};
-    bool hasObject{false};
-    if(element.has_object()) {
-        status.index = programmeIndex;
-        status.isSelected = programmeIndex == programmeStore_.selected_programme_index();
-        hasObject = true;
-    }
-    elements->erase(elements->begin() + elementIndex);
-    if(hasObject) {
-        auto id = element.object().connection_id();
+            programmeStore_.mutable_programme(programmeIndex)->mutable_element();
+
+    if(auto it = findObjectWithId(elements->begin(), elements->end(), id); it != elements->end()) {
+        ProgrammeStatus status {
+            programmeIndex,
+            programmeIndex == programmeStore_.selected_programme_index()
+        };
+        elements->erase(it);
         EAR_LOGGER_TRACE(logger_, "remove programme item id {}", id);
         fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
                   status, id);
