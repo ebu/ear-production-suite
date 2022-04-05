@@ -69,7 +69,7 @@ class Metadata {
 
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id);
-  void removeElementFromProgramme(int programmeIndex, int elementIndex);
+
   proto::Programme* addProgrammeImpl(std::string const& name, std::string const& language);
   proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
 
