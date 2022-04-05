@@ -12,11 +12,10 @@ void EventDispatcher::dispatchEvent(std::function<void()> event) {
   doDispatch(std::move(event));
 }
 
-void Metadata::addItems(ProgrammeStatus status,
+void Metadata::doAddItems(ProgrammeStatus status,
     const std::vector<proto::Object>& items) {
   std::vector<ProgrammeObject> pairs;
   pairs.reserve(items.size());
-  auto selectedIndex = programmeStore.get().selected_programme_index();
   for(auto const& item : items) {
     auto id = communication::ConnectionId(item.connection_id());
     pairs.push_back({item, itemStore_.at(id)});
@@ -26,44 +25,44 @@ void Metadata::addItems(ProgrammeStatus status,
             status, pairs);
 }
 
-void Metadata::changeStore(proto::ProgrammeStore const& store) {
+void Metadata::doChangeStore(proto::ProgrammeStore const& store) {
   auto items = itemStore_;
   fireEvent(&MetadataListener::notifyDataReset,
             store, items);
 }
 
-void Metadata::addProgramme(
+void Metadata::doAddProgramme(
     ProgrammeStatus status, const proto::Programme& programme) {
   fireEvent(&MetadataListener::notifyProgrammeAdded,
             status.index, programme);
 }
 
-void Metadata::moveProgramme(
+void Metadata::doMoveProgramme(
     Movement movement,
     const proto::Programme& programme) {
   fireEvent(&MetadataListener::notifyProgrammeMoved,
             movement, programme);
 }
 
-void Metadata::removeProgramme(int index) {
+void Metadata::doRemoveProgramme(int index) {
   fireEvent(&MetadataListener::notifyProgrammeRemoved,
             index);
 }
 
-void Metadata::selectProgramme(int index, proto::Programme const& programme) {
+void Metadata::doSelectProgramme(int index, proto::Programme const& programme) {
   ProgrammeObjects objects({index, true}, programme, itemStore_);
   fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 }
 
-void Metadata::removeItem(ProgrammeStatus status, const proto::Object& element) {
+void Metadata::doRemoveItem(ProgrammeStatus status, const proto::Object& element) {
     EAR_LOGGER_TRACE(logger_, "remove programme item id {}", element.connection_id());
   auto id = communication::ConnectionId(element.connection_id());
   fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
             status, id);
 }
 
-void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) {
+void Metadata::doUpdateItem(ProgrammeStatus status, const proto::Object& element) {
   auto id = communication::ConnectionId(element.connection_id());
   auto const& item = itemStore_.at(id);
 
@@ -71,25 +70,25 @@ void Metadata::updateItem(ProgrammeStatus status, const proto::Object& element) 
             status, ProgrammeObject{element, item});
 }
 
-void Metadata::setAutoMode(bool enabled) {
+void Metadata::doSetAutoMode(bool enabled) {
   fireEvent(&MetadataListener::notifyAutoModeChanged,
             enabled);
 }
 
-void Metadata::updateProgramme(
+void Metadata::doUpdateProgramme(
     int index, const proto::Programme& programme) {
   fireEvent(&MetadataListener::notifyProgrammeUpdated,
             index, programme);
 }
 
-void Metadata::addItem(
+void Metadata::doAddInputItem(
     const proto::InputItemMetadata& item) {
     EAR_LOGGER_TRACE(logger_, "addItem id {}", item.connection_id());
   fireEvent(&MetadataListener::notifyInputAdded,
             InputItem{item.connection_id(), item});
 }
 
-void Metadata::changeItem(
+void Metadata::doChangeInputItem(
     const proto::InputItemMetadata& oldItem,
     const proto::InputItemMetadata& newItem) {
   fireEvent(&MetadataListener::notifyInputUpdated,
@@ -114,7 +113,7 @@ void Metadata::changeItem(
   }
 }
 
-void Metadata::removeItem(
+void Metadata::doRemoveInputItem(
     const proto::InputItemMetadata& oldItem) {
     EAR_LOGGER_TRACE(logger_, "removeInput id {}", oldItem.connection_id());
   programmeStore.removeElementFromAllProgrammes(oldItem.connection_id());
@@ -122,7 +121,6 @@ void Metadata::removeItem(
   fireEvent(&MetadataListener::notifyInputRemoved,
             oldItem.connection_id());
 }
-void Metadata::clearChanges() {}
 
 void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -141,12 +139,12 @@ void Metadata::setInputItemMetadata(
 
     assert(id.string() == item.connection_id());
     if (auto result = itemStore_.emplace(id, item); result.second) {
-        addItem(item);
+        doAddInputItem(item);
     } else {
         auto previousItem = result.first->second;
         if(!MessageDifferencer::ApproximatelyEquals(previousItem, item)) {
             result.first->second = item;
-            changeItem(previousItem, item);
+            doChangeInputItem(previousItem, item);
         }
     }
     itemStore_[id].set_changed(false);
@@ -157,7 +155,7 @@ void Metadata::removeInput(const communication::ConnectionId& id) {
     if(auto it = itemStore_.find(id); it != itemStore_.end()) {
         auto item = it->second;
         itemStore_.erase(it);
-        removeItem(item);
+        doRemoveInputItem(item);
     }
 }
 

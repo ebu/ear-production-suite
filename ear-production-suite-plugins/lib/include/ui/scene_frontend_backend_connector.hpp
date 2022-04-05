@@ -36,8 +36,6 @@ namespace ui {
  */
 class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
  public:
-  using ProgrammeStoreChangedCallback =
-      std::function<void(proto::ProgrammeStore store)>;
 
   virtual ~SceneFrontendBackendConnector() = default;
   enum class ItemType { OBJECTS };
@@ -48,14 +46,6 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
   SceneFrontendBackendConnector& operator=(SceneFrontendBackendConnector&&) =
       delete;
 
-  void onProgrammeStoreChanged(ProgrammeStoreChangedCallback callback) {
-    programmeStoreCallback_ = callback;
-  }
-
-//  void addItem(communication::ConnectionId id);
-//  void updateItem(communication::ConnectionId id,
-//                  proto::InputItemMetadata item);
-//  void removeInput(communication::ConnectionId id);
 
   void setMultipleScenePluginsOverlayVisible(const bool visible) {
     this->doSetMultipleScenePluginsOverlayVisible(visible);
@@ -63,16 +53,10 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
 
  protected:
   SceneFrontendBackendConnector(){};
-//  virtual void doAddItem(communication::ConnectionId id) = 0;
-//  virtual void doUpdateItem(communication::ConnectionId id,
-//                            proto::InputItemMetadata item) = 0;
-//  virtual void doRemoveItem(communication::ConnectionId id) = 0;
 
-  void notifyProgrammeStoreChanged(proto::ProgrammeStore store);
   virtual void doSetMultipleScenePluginsOverlayVisible(const bool& visible) = 0;
 
  private:
-  ProgrammeStoreChangedCallback programmeStoreCallback_;
 };
 
 }  // namespace ui

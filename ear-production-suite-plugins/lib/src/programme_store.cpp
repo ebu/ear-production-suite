@@ -25,14 +25,14 @@ int ProgrammeStore::programmeCount() const {
 
 void ProgrammeStore::set(proto::ProgrammeStore const& store) {
   store_ = store;
-  metadata_.changeStore(store_);
+    metadata_.doChangeStore(store_);
 }
 
 void ProgrammeStore::setAutoMode(bool enable) {
   auto old = store_.auto_mode();
   if(old != enable) {
     store_.set_auto_mode(enable);
-    metadata_.setAutoMode(enable);
+      metadata_.doSetAutoMode(enable);
   }
 }
 
@@ -42,7 +42,7 @@ void ProgrammeStore::selectProgramme(int index) {
     store_.set_selected_programme_index(index);
     if(index >= 0 && index < store_.programme_size()) {
       auto prog = store_.programme(index);
-      metadata_.selectProgramme(index, prog);
+        metadata_.doSelectProgramme(index, prog);
     }
   }
 }
@@ -54,7 +54,7 @@ void ProgrammeStore::addProgramme() {
   auto programme = addProgrammeImpl(name, "");
   bool selected = (index == store_.selected_programme_index());
 
-  metadata_.addProgramme({index, selected}, *programme);
+    metadata_.doAddProgramme({index, selected}, *programme);
 }
 
 void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
@@ -64,7 +64,7 @@ void ProgrammeStore::moveProgramme(int oldIndex, int newIndex) {
       oldIndex != newIndex) {
     move(programmes->begin(), oldIndex, newIndex);
     auto programme = programmes->at(newIndex);
-    metadata_.moveProgramme({oldIndex, newIndex}, programme);
+      metadata_.doMoveProgramme({oldIndex, newIndex}, programme);
   }
 }
 
@@ -73,13 +73,13 @@ void ProgrammeStore::removeProgramme(int index) {
   assert(index < store_.programme_size());
   programme->erase(programme->begin() + index);
   auto selected_index = store_.selected_programme_index();
-  metadata_.removeProgramme(index);
+    metadata_.doRemoveProgramme(index);
 
   if(selected_index >= programme->size()) {
     auto newIndex = std::max<int>(programme->size() - 1, 0);
     store_.set_selected_programme_index(newIndex);
     auto prog = store_.programme(newIndex);
-    metadata_.selectProgramme(newIndex, prog);
+      metadata_.doSelectProgramme(newIndex, prog);
   }
 }
 
@@ -89,7 +89,7 @@ void ProgrammeStore::setProgrammeName(int index, const std::string& name) {
     store_.mutable_programme(index)->set_name(name);
     auto prog = store_.programme(index);
     auto selectedIndex = store_.selected_programme_index();
-    metadata_.updateProgramme(index, prog);
+      metadata_.doUpdateProgramme(index, prog);
   }
 }
 
@@ -99,7 +99,7 @@ void ProgrammeStore::setProgrammeLanguage(int programmeIndex,
         store_.programme(programmeIndex).language() == language)) {
     store_.mutable_programme(programmeIndex)->set_language(language);
     auto prog = store_.programme(programmeIndex);
-    metadata_.updateProgramme(programmeIndex, prog);
+      metadata_.doUpdateProgramme(programmeIndex, prog);
   }
 }
 
@@ -107,7 +107,7 @@ void ProgrammeStore::clearProgrammeLanguage(int programmeIndex) {
   if(store_.programme(programmeIndex).has_language()) {
     store_.mutable_programme(programmeIndex)->clear_language();
     auto prog = store_.programme(programmeIndex);
-    metadata_.updateProgramme(programmeIndex, prog);
+      metadata_.doUpdateProgramme(programmeIndex, prog);
   }
 }
 
@@ -124,7 +124,7 @@ void ProgrammeStore::addItemsToSelectedProgramme(std::vector<
     elements.push_back(*object);
   }
 
-  metadata_.addItems({programmeIndex, true}, elements);
+  metadata_.doAddItems({programmeIndex, true}, elements);
 }
 
 void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementIndex) {
@@ -143,7 +143,7 @@ void ProgrammeStore::removeElementFromProgramme(int programmeIndex, int elementI
   }
   elements->erase(elements->begin() + elementIndex);
   if(hasObject) {
-      metadata_.removeItem(status, element.object());
+      metadata_.doRemoveItem(status, element.object());
   }
 }
 
@@ -167,7 +167,7 @@ void ProgrammeStore::updateElement(const communication::ConnectionId& id,
         programmeIndex,
         true
     };
-    metadata_.updateItem(status, element);
+      metadata_.doUpdateItem(status, element);
   }
 }
 
@@ -205,7 +205,7 @@ void ProgrammeStore::moveElement(int programmeIndex, int oldIndex,
       oldIndex != newIndex) {
     move(elements->begin(), oldIndex, newIndex);
     auto programme = store_.programme(programmeIndex);
-    metadata_.updateProgramme(programmeIndex, programme);
+      metadata_.doUpdateProgramme(programmeIndex, programme);
   }
 }
 
@@ -214,18 +214,18 @@ void ProgrammeStore::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {
     auto programmeCount = store_.programme_size();
     store_.clear_programme();
     for(auto i = 0; i != programmeCount; ++i) {
-        metadata_.removeProgramme(i);
+        metadata_.doRemoveProgramme(i);
     }
     auto defaultProgramme = addProgrammeImpl("Default", "");
     store_.set_selected_programme_index(0);
-    metadata_.addProgramme({0, true}, *defaultProgramme);
+      metadata_.doAddProgramme({0, true}, *defaultProgramme);
     for (auto const& routeItem : itemsSortedByRoute) {
       auto object = addObject(defaultProgramme, routeItem.second);
-      metadata_.addItems({0, true}, {*object});
+      metadata_.doAddItems({0, true}, {*object});
     }
     auto index = store_.selected_programme_index();
     auto const prog = *defaultProgramme;
-    metadata_.updateProgramme(index, prog);
+      metadata_.doUpdateProgramme(index, prog);
   }
 }
 
