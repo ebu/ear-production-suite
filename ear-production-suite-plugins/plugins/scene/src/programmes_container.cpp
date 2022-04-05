@@ -9,6 +9,7 @@
 #include "helper/move.hpp"
 
 using namespace ear::plugin::ui;
+using namespace ear::plugin;
 
 ProgrammesContainer::ProgrammesContainer()
     : tabs_(std::make_shared<EarTabbedComponent>()) {
