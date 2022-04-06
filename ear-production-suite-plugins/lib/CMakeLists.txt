@@ -37,11 +37,11 @@ add_library(ear-plugin-base STATIC
   src/multichannel_convolver.cpp
   src/nng-cpp/error_handling.cpp
   src/object_backend.cpp
-        src/programme_types.cpp
+  src/programme_types.cpp
   src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
-        src/store_metadata.cpp
+  src/store_metadata.cpp
   src/metadata_listener.cpp
   src/programme_store_adm_populator.cpp
   src/programme_store_adm_serializer.cpp
@@ -50,8 +50,10 @@ add_library(ear-plugin-base STATIC
   src/ui/object_frontend_backend_connector.cpp
   src/ui/scene_frontend_backend_connector.cpp
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
+  src/scene_store.cpp
+  src/communication/metadata_thread.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
-  ${EAR_PROTO_SRC} src/scene_store.cpp include/scene_store.hpp src/communication/metadata_thread.cpp include/metadata_thread.hpp)
+  ${EAR_PROTO_SRC} )
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp
@@ -81,7 +83,7 @@ set(EAR_BASE_HEADERS
 	include/helper/move.hpp
 	include/helper/weak_ptr.hpp
 	include/helper/protobuf_utilities.hpp
-        include/log.hpp
+	include/log.hpp
 	include/listener_orientation.hpp
 	include/monitoring_audio_processor.hpp
 	include/monitoring_backend.hpp
@@ -106,7 +108,7 @@ set(EAR_BASE_HEADERS
 	include/nng-cpp/socket_base.hpp
 	include/object_backend.hpp
 	include/programme_element_visitor.hpp
-        include/store_metadata.hpp
+	include/store_metadata.hpp
 	include/metadata_listener.hpp
 	include/programme_store_adm_populator.hpp
 	include/programme_store_adm_serializer.hpp
@@ -121,6 +123,8 @@ set(EAR_BASE_HEADERS
 	include/ui/object_frontend_backend_connector.hpp
 	include/ui/scene_frontend_backend_connector.hpp
 	include/variable_block_adapter.hpp
+	include/scene_store.hpp
+	include/communication/metadata_thread.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 
