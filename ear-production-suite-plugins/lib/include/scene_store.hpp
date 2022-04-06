@@ -15,7 +15,7 @@ namespace ear::plugin {
 class SceneStore : public MetadataListener {
 public:
     explicit SceneStore(std::function<void(proto::SceneStore const&)> update);
-    void triggerSend(bool force = false);
+    void triggerSend();
 
 private:
     mutable std::mutex mutex_;

@@ -30,7 +30,7 @@ class Metadata {
     }
 
   std::pair<proto::ProgrammeStore, ItemMap> stores() const;
-  void refreshUI();
+  void refresh();
   void setDuplicateScene(bool isDuplicate);
 
   // Input item manipulation
