@@ -12,7 +12,6 @@ SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
 
 void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
                                         const ear::plugin::ItemMap &items) {
-    std::lock_guard<std::mutex> lock(mutex_);
     store_ = {};
     addAvailableInputItemsToSceneStore(items);
     auto selectedIndex = programmes.selected_programme_index();
@@ -39,7 +38,6 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
-    std::lock_guard<std::mutex> lock(mutex_);
     store_.clear_monitoring_items();
     for(auto const& object : objects) {
         auto inputData = object.inputMetadata;
@@ -50,7 +48,6 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
                                                     const std::vector<ProgrammeObject> &objects) {
-    std::lock_guard<std::mutex> lock(mutex_);
     if(status.isSelected) {
         for (auto const &object: objects) {
             addMonitoringItem(object.inputMetadata);
@@ -60,7 +57,6 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
 
 void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeStatus status,
                                                        const ear::plugin::communication::ConnectionId &id) {
-    std::lock_guard<std::mutex> lock(mutex_);
     if(status.isSelected) {
         auto monitoringItems = store_.mutable_monitoring_items();
         auto item = std::find_if(monitoringItems->begin(), monitoringItems->end(),
@@ -76,7 +72,6 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
 
 void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus status,
                                                    const ear::plugin::ProgrammeObject &object) {
-    std::lock_guard<std::mutex> lock(mutex_);
     if(status.isSelected) {
         auto monitoringItems = store_.mutable_monitoring_items();
         auto item = std::find_if(monitoringItems->begin(), monitoringItems->end(),
@@ -92,7 +87,6 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
 }
 
 void SceneStore::inputRemoved(const communication::ConnectionId &id) {
-    std::lock_guard<std::mutex> lock(mutex_);
     auto availableItems = store_.mutable_all_available_items();
     auto existingItem = std::find_if(availableItems->begin(),
                                      availableItems->end(),
@@ -106,7 +100,6 @@ void SceneStore::inputRemoved(const communication::ConnectionId &id) {
 }
 
 void SceneStore::inputUpdated(const InputItem &item) {
-    std::lock_guard<std::mutex> lock(mutex_);
     auto availableItems = store_.mutable_all_available_items();
     auto const& itemId = item.id;
     auto existingItem = std::find_if(availableItems->begin(),
@@ -180,7 +173,6 @@ void SceneStore::sendUpdate() {
 }
 
 void SceneStore::triggerSend() {
-  std::lock_guard lock(mutex_);
   if(changed) {
       sendUpdate();
   }
