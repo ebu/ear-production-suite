@@ -20,10 +20,10 @@ class DataWrapper {
   }
 
   template <typename FunctionT>
-  void readAccess(FunctionT&& accessor) {
+  auto readAccess(FunctionT&& accessor) {
     std::lock_guard<std::mutex> lock{mutex_};
     auto const& data{data_};
-    std::invoke(accessor, data);
+    return std::invoke(accessor, data);
   }
 
   MessageBuffer prepareMessage() {
