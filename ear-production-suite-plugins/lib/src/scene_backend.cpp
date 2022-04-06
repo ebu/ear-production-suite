@@ -25,7 +25,7 @@ SceneBackend::SceneBackend(Metadata& data)
 
   commandReceiver_.setLogger(logger_);
   metadataReceiver_.setLogger(logger_);
-  data_.addListener(sceneStore_);
+  data_.addBackendListener(sceneStore_);
 }
 
 SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
