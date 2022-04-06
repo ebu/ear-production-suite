@@ -57,10 +57,6 @@ class SceneBackend {
   void onConnectionEvent(communication::SceneConnectionManager::Event,
                          communication::ConnectionId id);
 
-  void updateSceneStore();
-  void addGroupToSceneStore(const proto::ProgrammeElement &element);
-  void addToggleToSceneStore(const proto::ProgrammeElement &element);
-
   std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   Metadata& data_;
@@ -69,7 +65,6 @@ class SceneBackend {
   communication::SceneMetadataReceiver metadataReceiver_;
   ui::SceneFrontendBackendConnector *frontendConnector_;
   std::shared_ptr<SceneStore> sceneStore_;
-  bool rebuildSceneStore_;
   nng::PubSocket metadataSender_;
   std::set<communication::ConnectionId> previousScene_;
   std::set<std::string> overlappingIds_;

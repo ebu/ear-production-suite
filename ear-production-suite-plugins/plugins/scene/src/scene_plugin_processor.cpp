@@ -289,6 +289,5 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
 void SceneAudioProcessor::setupBackend() {
   if (backend_) {
     backend_->setup();
-    connector_->setMultipleScenePluginsOverlayVisible(false);
   }
 }
