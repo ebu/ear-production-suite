@@ -241,8 +241,8 @@ void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
     uiListeners_.push_back(std::move(listener));
 }
 
-void Metadata::addListener(std::weak_ptr<MetadataListener> listener) {
-    listeners_.push_back(std::move(listener));
+void Metadata::addBackendListener(std::weak_ptr<MetadataListener> listener) {
+    backendListeners_.push_back(std::move(listener));
 }
 
 void Metadata::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {

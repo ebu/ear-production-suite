@@ -9,6 +9,7 @@
 #include "components/level_meter_calculator.hpp"
 #include "backend_setup_timer.hpp"
 #include "ui_event_dispatcher.hpp"
+#include "metadata_thread.hpp"
 
 namespace ear {
 namespace plugin {
@@ -78,6 +79,7 @@ class SceneAudioProcessor : public AudioProcessor {
   void doSampleRateChecks();
   void sendAdmMetadata();
   void recvAdmMetadata(std::string admStr, std::vector<uint32_t> mappings);
+  ear::plugin::MetadataThread metadataThread_;
   std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
 
