@@ -205,30 +205,40 @@ static const std::vector<IsoLanguageTriplet> LANGUAGES{
     IsoLanguageTriplet{"zha", "za", "Zhuang; Chuang"},
     IsoLanguageTriplet{"zul", "zu", "Zulu"}};
 
-inline int getIndexForAlpha3(const std::string alpha3) {
+inline int getIndexForAlpha3(const std::string& alpha3) {
   auto it = std::find_if(
       LANGUAGES.begin(), LANGUAGES.end(),
-      [alpha3](auto language) { return language.alpha3 == alpha3; });
+      [&alpha3](auto const& language) { return language.alpha3 == alpha3; });
   if (it != LANGUAGES.end()) {
     return std::distance(LANGUAGES.begin(), it);
   }
   return -1;
 }
 
-inline int getIndexForAlpha2(const std::string alpha2) {
+inline int getIndexForAlpha2(const std::string& alpha2) {
   auto it = std::find_if(
       LANGUAGES.begin(), LANGUAGES.end(),
-      [alpha2](auto language) { return language.alpha2 == alpha2; });
+      [&alpha2](auto const& language) { return language.alpha2 == alpha2; });
   if (it != LANGUAGES.end()) {
     return std::distance(LANGUAGES.begin(), it);
   }
   return -1;
 }
 
-inline int getIndexForAlphaN(const std::string alpha) {
+inline int getIndexForAlphaN(const std::string& alpha) {
     if(alpha.length() == 2) return getIndexForAlpha2(alpha);
     if(alpha.length() == 3) return getIndexForAlpha3(alpha);
     return -1;
+}
+
+inline int getLanguageIndex(const std::string& language) {
+    auto index = getIndexForAlphaN(language);
+    if(index >= 0) return index;
+    if(auto it = std::find_if(LANGUAGES.begin(), LANGUAGES.end(), [&language](auto const& triplet) {
+        return triplet.english == language;
+    }); it != LANGUAGES.end()) {
+        return static_cast<int>(std::distance(LANGUAGES.begin(), it));
+    }
 }
 
 }  // namespace ui

@@ -50,7 +50,7 @@ class ProgrammeView : public Component {
 
     for (std::size_t i = 0; i < LANGUAGES.size(); ++i) {
       langComboBox_->addTextEntry(
-          String::fromUTF8(LANGUAGES[i].english.c_str()));
+          String::fromUTF8(LANGUAGES[i].english.c_str()), static_cast<int>(i));
     }
     langComboBox_->setDefaultText("select language");
     langComboBox_->onValueChange = [this](int index) {
