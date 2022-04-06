@@ -48,7 +48,6 @@ class ProgrammesContainer : public juce::Component, public MetadataListener {
   int getProgrammeIndex(ElementViewList* list) const;
 
  private:
-  mutable std::mutex mutex_;
   std::shared_ptr<EarTabbedComponent> tabs_;
   std::vector<std::shared_ptr<ProgrammeView>> programmes_;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
