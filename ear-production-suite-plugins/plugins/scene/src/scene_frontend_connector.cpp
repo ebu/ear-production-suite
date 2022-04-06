@@ -197,7 +197,6 @@ int JuceSceneFrontendConnector::getProgrammeIndex(ProgrammeView* view) {
 
 
 void JuceSceneFrontendConnector::addItemClicked(ProgrammeView* view) {
-  std::lock_guard<std::mutex> itemViewLock(itemViewMutex_);
   auto overlay = itemsOverlay_.lock();
   auto itemsContainer = itemsContainer_.lock();
   if (overlay && itemsContainer) {

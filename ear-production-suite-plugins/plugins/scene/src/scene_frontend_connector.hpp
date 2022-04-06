@@ -67,7 +67,6 @@ class JuceSceneFrontendConnector :
 
  private:
   std::shared_ptr<ProgrammesContainer> lockProgrammes() {
-    std::lock_guard<std::mutex> lock(programmeViewsMutex_);
     return programmesContainer_.lock();
   }
 
@@ -125,11 +124,6 @@ class JuceSceneFrontendConnector :
 
   SceneAudioProcessor* p_;
   Metadata& data_;
-
-  std::mutex itemViewMutex_;
-  std::mutex programmeViewsMutex_;
-
-  MultiAsyncUpdater updater_;
 
   std::weak_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay_;
   std::weak_ptr<Overlay> itemsOverlay_;
