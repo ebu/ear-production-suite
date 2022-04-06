@@ -227,6 +227,16 @@ void ProgrammesContainer::setProgrammeViewName(int programmeIndex,
       ->setText(newName);
 }
 
+void ProgrammesContainer::setProgrammeViewLanguage(int programmeIndex,
+                                                   const std::optional<std::string>& language) {
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if(language) {
+        auto languageIndex = getLanguageIndex(*language);
+        programmes_.at(programmeIndex)->getLanguageComboBox()->setSelectedId(languageIndex, NotificationType::dontSendNotification);
+    }
+}
+
 int ProgrammesContainer::getProgrammeIndex(ProgrammeView *view) const {
   std::lock_guard<std::mutex> lock(mutex_);
   if(!view) {

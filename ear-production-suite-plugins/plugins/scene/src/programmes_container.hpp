@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "JuceHeader.h"
 #include "components/ear_tabbed_component.hpp"
@@ -42,6 +43,7 @@ class ProgrammesContainer : public juce::Component, public MetadataListener {
   void removeProgrammeView(int index);
   void setProgrammeViewName(int programmeIndex,
                             const juce::String& newName);
+  void setProgrammeViewLanguage(int programmeIndex, const std::optional<std::string>& language);
   int getProgrammeIndex(ProgrammeView* view) const;
   int getProgrammeIndex(ElementViewList* list) const;
 
