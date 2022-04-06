@@ -42,14 +42,13 @@ void JuceSceneFrontendConnector::repopulateUIComponents(
   programmesContainer_ = programmesContainer;
   data_.addUIListener(programmesContainer_);
   multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
-  multipleScenePluginsOverlay->setVisible(false);
   data_.refreshUI();
 }
 
 //TODO call on message thread
-void JuceSceneFrontendConnector::doSetMultipleScenePluginsOverlayVisible(const bool& visible) {
+void JuceSceneFrontendConnector::duplicateSceneDetected(bool isDuplicate) {
   if(auto overlay = multipleScenePluginsOverlay_.lock()) {
-    overlay->setVisible(visible);
+    overlay->setVisible(isDuplicate);
   }
 
 }

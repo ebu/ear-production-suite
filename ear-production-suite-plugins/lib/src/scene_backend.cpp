@@ -1,10 +1,8 @@
 #include "scene_backend.hpp"
 #include "ui/scene_frontend_backend_connector.hpp"
 #include "detail/constants.hpp"
-#include "programme_store_adm_serializer.hpp"
 #include <functional>
 #include <memory>
-#include <cassert>
 #include "routing_overlap.hpp"
 
 using std::placeholders::_1;
@@ -57,7 +55,7 @@ void SceneBackend::setup() {
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger_, "Scene Master: Failed to set event handler: {}",
                      e.what());
-    frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
+    data_.setDuplicateScene(true);
   }
 
   try {
@@ -69,7 +67,7 @@ void SceneBackend::setup() {
                      e.what());
 
     connectionManager_.setEventHandler(nullptr);
-    frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
+    data_.setDuplicateScene(true);
     throw;
   }
 
@@ -82,7 +80,7 @@ void SceneBackend::setup() {
     EAR_LOGGER_ERROR(logger_,
                      "Scene Master: Failed to start command receiver: {}",
                      e.what());
-    frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
+    data_.setDuplicateScene(true);
   }
 
   try {
@@ -97,7 +95,7 @@ void SceneBackend::setup() {
     EAR_LOGGER_ERROR(logger_,
                      "Scene Master: Failed to start metadata receiver: {}",
                      e.what());
-    frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
+    data_.setDuplicateScene(true);
   }
 
   try {
@@ -105,32 +103,8 @@ void SceneBackend::setup() {
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(
         logger_, "Scene Master: Failed to start metadata sender: {}", e.what());
-    frontendConnector_->setMultipleScenePluginsOverlayVisible(true);
+    data_.setDuplicateScene(true);
   }
-}
-
-void SceneBackend::updateSceneStore() {
-}
-
-void SceneBackend::addGroupToSceneStore(
-    proto::ProgrammeElement const& element) {
-//  if (element.has_group()) {
-//    for (auto& progItem : element.group().element()) {
-//      addElementToSceneStore(progItem);
-//    }
-//  }
-}
-
-void SceneBackend::addToggleToSceneStore(
-    proto::ProgrammeElement const& element) {
-//  if (element.has_toggle()) {
-//    auto toggle = element.toggle();
-//    if (toggle.has_selected_element_index()) {
-//      assert(toggle.selected_element_index() < toggle.element().size());
-//      auto& progItem = toggle.element(toggle.selected_element_index());
-//      addElementToSceneStore(progItem);
-//    }
-//  }
 }
 
 void SceneBackend::onConnectionEvent(
@@ -143,7 +117,6 @@ void SceneBackend::onConnectionEvent(
              communication::SceneConnectionManager::Event::INPUT_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Input {} disconnected", id.string());
       data_.removeInput(id);
-    rebuildSceneStore_ = true;
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());

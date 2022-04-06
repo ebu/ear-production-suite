@@ -46,15 +46,8 @@ class EAR_PLUGIN_BASE_EXPORT SceneFrontendBackendConnector {
   SceneFrontendBackendConnector& operator=(SceneFrontendBackendConnector&&) =
       delete;
 
-
-  void setMultipleScenePluginsOverlayVisible(const bool visible) {
-    this->doSetMultipleScenePluginsOverlayVisible(visible);
-  }
-
  protected:
   SceneFrontendBackendConnector(){};
-
-  virtual void doSetMultipleScenePluginsOverlayVisible(const bool& visible) = 0;
 
  private:
 };
