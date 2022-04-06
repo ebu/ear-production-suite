@@ -101,23 +101,10 @@ void JuceSceneFrontendConnector::dataReset(
   selectProgrammeView(selectedProgramme);
 }
 
-
-void JuceSceneFrontendConnector::reloadItemListCache() {
-}
-
 // --- ItemList Management
-
-namespace {
-  bool routingChanged(std::optional<proto::InputItemMetadata> const& previous,
-                      proto::InputItemMetadata const& current) {
-    return (previous && previous->routing() != current.routing());
-  }
-}
-
-bool JuceSceneFrontendConnector::updateAndCheckPendingElements(
+void JuceSceneFrontendConnector::updateAndCheckPendingElements(
     const communication::ConnectionId& id,
     const proto::InputItemMetadata& item) const {
-  bool storeChanged{false};
   auto& pendingElements = p_->getPendingElements();
   auto range = pendingElements.equal_range(item.routing());
   if (range.first != range.second) {
@@ -128,17 +115,6 @@ bool JuceSceneFrontendConnector::updateAndCheckPendingElements(
 
     if (pendingElements.empty()) {
       p_->setStoreFromPending();
-      storeChanged = true;
-    }
-  }
-  return storeChanged;
-}
-
-void JuceSceneFrontendConnector::updateObjectViews(
-    communication::ConnectionId id, proto::InputItemMetadata item) {
-  if (auto programmesContainer = lockProgrammes()) {
-    if(auto meterCalculator = p_->getLevelMeter().lock()) {
-      programmesContainer->updateViews(item, meterCalculator);
     }
   }
 }
@@ -166,7 +142,6 @@ void JuceSceneFrontendConnector::removeFromObjectViews(
 }
 
 // --- Programme Management
-
 void JuceSceneFrontendConnector::addProgrammeView(
     const proto::Programme& programme) {
   if (auto container = lockProgrammes()) {
@@ -357,7 +332,7 @@ void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, s
 }
 
 void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
-    auto storeChanged = updateAndCheckPendingElements(item.inputMetadata.connection_id(), item.inputMetadata);
+    updateAndCheckPendingElements(item.inputMetadata.connection_id(), item.inputMetadata);
 }
 
 void JuceSceneFrontendConnector::updateElementOverview(ProgrammeObjects const& objects) {
@@ -367,21 +342,6 @@ void JuceSceneFrontendConnector::updateElementOverview(ProgrammeObjects const& o
 }
 
 // --- Programme Element Management
-
-proto::Group* JuceSceneFrontendConnector::addGroup(
-    proto::Programme* programme) {
-  throw std::runtime_error(
-      "[scene_frontend_connector] adding group not implemented");
-  return {};
-}
-
-proto::Toggle* JuceSceneFrontendConnector::addToggle(
-    proto::Programme* programme) {
-  throw std::runtime_error(
-      "[scene_frontend_connector] adding toggle not implemented");
-  return {};
-}
-
 void JuceSceneFrontendConnector::addObjectView(ProgrammeStatus status, ProgrammeObject const& item) {
   auto meterCalculator = p_->getLevelMeter().lock();
   auto programmesContainer = lockProgrammes();
@@ -393,16 +353,6 @@ void JuceSceneFrontendConnector::addObjectView(ProgrammeStatus status, Programme
     view->addListener(this);
   }
 
-}
-
-void JuceSceneFrontendConnector::addGroupView(int programmeIndex,
-                                              const proto::Group& group) {
-  throw std::runtime_error("Group view not implemented");
-}
-
-void JuceSceneFrontendConnector::addToggleView(int programmeIndex,
-                                               const proto::Toggle& toggle) {
-  throw std::runtime_error("Toggle view not implemented");
 }
 
 // ElementsContainer::Listener

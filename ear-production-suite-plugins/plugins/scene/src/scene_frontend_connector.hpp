@@ -39,7 +39,6 @@ class JuceSceneFrontendConnector :
   explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
   ~JuceSceneFrontendConnector() override;
 
-  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void repopulateUIComponents(
       std::shared_ptr<ItemsContainer> const& itemsContainer,
       std::shared_ptr<Overlay> const& addItemsOverlay,
@@ -48,28 +47,23 @@ class JuceSceneFrontendConnector :
       std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
       );
 
-  void duplicateSceneDetected(bool isDuplicate) override;
 
   // MetadataListener
   void dataReset (proto::ProgrammeStore const& programmes,
                   ItemMap const& items) override;
+  void duplicateSceneDetected(bool isDuplicate) override;
   void programmeAdded(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
   void programmeRemoved(int programmeIndex) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
   void programmeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
   void programmeMoved(Movement motion, proto::Programme const& programme) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
+  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
   void inputRemoved(communication::ConnectionId const& id) override;
   void autoModeChanged(bool enabled) override;
   void inputAdded(const InputItem& item) override;
   void inputUpdated(const InputItem& item) override;
-
- protected:
-  void updateObjectViews(communication::ConnectionId id,
-                         proto::InputItemMetadata item);
-  void removeFromObjectViews(communication::ConnectionId id);
-  void removeFromItemView(communication::ConnectionId id);
 
  private:
   std::shared_ptr<ProgrammesContainer> lockProgrammes() {
@@ -77,10 +71,11 @@ class JuceSceneFrontendConnector :
     return programmesContainer_.lock();
   }
 
+  void removeFromObjectViews(communication::ConnectionId id);
+  void removeFromItemView(communication::ConnectionId id);
   void updateAddItemsContainer(ProgrammeObjects const& objects);
-
-  // --- Restore Editor
-  void reloadItemListCache();
+  void updateAndCheckPendingElements(const communication::ConnectionId& id,
+                                     const proto::InputItemMetadata& item) const;
 
   // --- Programme Management
   void addProgrammeView(const proto::Programme& programme);
@@ -93,12 +88,7 @@ class JuceSceneFrontendConnector :
   int getProgrammeIndex(ProgrammeView* view);
 
   // --- Programme Element Management
-
-  proto::Group* addGroup(proto::Programme* programme);
-  proto::Toggle* addToggle(proto::Programme* programme);
   void addObjectView(ProgrammeStatus status, ProgrammeObject const& item);
-  void addGroupView(int programmeIndex, const proto::Group& group);
-  void addToggleView(int programmeIndex, const proto::Toggle& toggle);
 
   // --- ElementOverview
   void updateElementOverview(ProgrammeObjects const& objects);
@@ -147,8 +137,6 @@ class JuceSceneFrontendConnector :
   std::weak_ptr<ItemsContainer> itemsContainer_;
   std::weak_ptr<ProgrammesContainer> programmesContainer_;
 
-  bool updateAndCheckPendingElements(const communication::ConnectionId& id,
-                                  const proto::InputItemMetadata& item) const;
 };
 
 }  // namespace ui
