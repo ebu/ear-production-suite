@@ -17,13 +17,13 @@ class MetadataListener {
   void notifyDataReset(proto::ProgrammeStore const& programmes, ItemMap const& items) {
     dataReset(programmes, items);
   }
-  void notifyProgrammeAdded(int programmeIndex, proto::Programme const& programme) {
-    programmeAdded(programmeIndex, programme);
+  void notifyProgrammeAdded(ProgrammeStatus status, proto::Programme const& programme) {
+    programmeAdded(status, programme);
   }
   void notifyProgrammeRemoved(int programmeIndex) {
     programmeRemoved(programmeIndex);
   }
-  void notifyProgrammeUpdated(int programmeIndex, proto::Programme const& programme) {
+  void notifyProgrammeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) {
     programmeUpdated(programmeIndex, programme);
   }
   void notifyProgrammeSelected(ProgrammeObjects const& objects) {
@@ -55,9 +55,9 @@ class MetadataListener {
   }
  private:
   virtual void dataReset(proto::ProgrammeStore const& programmes, ItemMap const& items) {}
-  virtual void programmeAdded(int programmeIndex, proto::Programme const& programme) {}
+  virtual void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) {}
   virtual void programmeRemoved(int programmeIndex) {}
-  virtual void programmeUpdated(int programmeIndex, proto::Programme const& programme) {}
+  virtual void programmeUpdated(ProgrammeStatus status, proto::Programme const& programme) {}
   virtual void programmeSelected(ProgrammeObjects const& objects) {}
   virtual void programmeMoved(Movement motion, proto::Programme const& programme) {}
   virtual void autoModeChanged(bool enabled) {}

@@ -53,10 +53,10 @@ class JuceSceneFrontendConnector :
   // MetadataListener
   void dataReset (proto::ProgrammeStore const& programmes,
                   ItemMap const& items) override;
-  void programmeAdded(int programmeIndex, proto::Programme const& programme) override;
+  void programmeAdded(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
   void programmeRemoved(int programmeIndex) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
-  void programmeUpdated(int programmeIndex, proto::Programme const& programme) override;
+  void programmeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
   void programmeMoved(Movement motion, proto::Programme const& programme) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;

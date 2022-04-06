@@ -76,9 +76,8 @@ void Metadata::addProgramme() {
     name.append(std::to_string(index));
     auto programme = addProgrammeImpl(name, "");
     bool selected = (index == programmeStore_.selected_programme_index());
-
     fireEvent(&MetadataListener::notifyProgrammeAdded,
-              index, *programme);
+              ProgrammeStatus{index, selected}, *programme);
 }
 
 void Metadata::removeProgramme(int index) {
@@ -140,7 +139,7 @@ void Metadata::setProgrammeName(int index, const std::string& name) {
         auto prog = programmeStore_.programme(index);
         auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  index, prog);
+                  ProgrammeStatus{index, index == selectedIndex}, prog);
     }
 }
 
@@ -151,8 +150,9 @@ void Metadata::setProgrammeLanguage(int programmeIndex,
          programmeStore_.programme(programmeIndex).language() == language)) {
         programmeStore_.mutable_programme(programmeIndex)->set_language(language);
         auto prog = programmeStore_.programme(programmeIndex);
+        auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  programmeIndex, prog);
+                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, prog);
     }
 }
 
@@ -161,8 +161,9 @@ void Metadata::clearProgrammeLanguage(int programmeIndex) {
     if(programmeStore_.programme(programmeIndex).has_language()) {
         programmeStore_.mutable_programme(programmeIndex)->clear_language();
         auto prog = programmeStore_.programme(programmeIndex);
+        auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  programmeIndex, prog);
+                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, prog);
     }
 }
 
@@ -170,8 +171,7 @@ void Metadata::addItemsToSelectedProgramme(std::vector<
         communication::ConnectionId> const& ids) {
     std::lock_guard<std::mutex> lock(mutex_);
     assert(!ids.empty());
-    auto programmeIndex = 0;
-    programmeIndex = programmeStore_.selected_programme_index();
+    auto programmeIndex = programmeStore_.selected_programme_index();
     auto programme = programmeStore_.mutable_programme(programmeIndex);
     std::vector<proto::Object> elements;
     elements.reserve(ids.size());
@@ -201,8 +201,9 @@ void Metadata::moveElement(int programmeIndex, int oldIndex,
         oldIndex != newIndex) {
         move(elements->begin(), oldIndex, newIndex);
         auto programme = programmeStore_.programme(programmeIndex);
+        auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  programmeIndex, programme);
+                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, programme);
     }
 }
 
@@ -246,7 +247,7 @@ void Metadata::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {
         auto defaultProgramme = addProgrammeImpl("Default", "");
         programmeStore_.set_selected_programme_index(0);
         fireEvent(&MetadataListener::notifyProgrammeAdded,
-                  0, *defaultProgramme);
+                  ProgrammeStatus{0, true}, *defaultProgramme);
         for (auto const& routeItem : itemsSortedByRoute) {
             auto object = addObject(defaultProgramme, routeItem.second);
             doAddItems({0, true}, {*object});
@@ -254,7 +255,7 @@ void Metadata::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {
         auto index = programmeStore_.selected_programme_index();
         auto const prog = *defaultProgramme;
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  index, prog);
+                  ProgrammeStatus{index, true}, prog);
     }
 }
 
@@ -325,14 +326,13 @@ void Metadata::doSelectProgramme(int index, proto::Programme const& programme) {
 void Metadata::doChangeInputItem(
     const proto::InputItemMetadata& oldItem,
     const proto::InputItemMetadata& newItem) {
+  auto const& id = newItem.connection_id();
   fireEvent(&MetadataListener::notifyInputUpdated,
-          InputItem{newItem.connection_id(), newItem});
+          InputItem{id, newItem});
   autoUpdateFrom(routeMap());
   auto selectedIndex = programmeStore_.selected_programme_index();
   for(auto i = 0; i != programmeStore_.programme_size(); ++i) {
-    auto const& programme = programmeStore_.programme(i);
-    auto const& elements = programme.element();
-    auto const& id = newItem.connection_id();
+    auto const& elements = programmeStore_.programme(i).element();
     if(auto it = findObjectWithId(elements.begin(), elements.end(), id);
         it != elements.end()) {
       fireEvent(&MetadataListener::notifyProgrammeItemUpdated,

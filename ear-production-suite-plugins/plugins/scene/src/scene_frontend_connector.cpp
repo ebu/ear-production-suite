@@ -151,9 +151,12 @@ void JuceSceneFrontendConnector::removeFromItemView(
   }
 }
 
-void JuceSceneFrontendConnector::programmeUpdated(int programmeIndex,
+void JuceSceneFrontendConnector::programmeUpdated(ProgrammeStatus status,
                                                   proto::Programme const& programme) {
-  setProgrammeViewName(programmeIndex, programme.name());
+  setProgrammeViewName(status.index, programme.name());
+    if (auto container = lockProgrammes()) {
+        container->setProgrammeViewLanguage(status.index, programme.language());
+    }
 }
 
 void JuceSceneFrontendConnector::removeFromObjectViews(
@@ -259,11 +262,11 @@ void JuceSceneFrontendConnector::addTabClicked(
 }
 
 void JuceSceneFrontendConnector::programmeAdded(
-    int programmeIndex,
-    proto::Programme const& programme) {
+        ProgrammeStatus status,
+        proto::Programme const& programme) {
   addProgrammeView(programme);
-  setProgrammeViewName(programmeIndex, programme.name());
-  selectProgramme(programmeIndex);
+  setProgrammeViewName(status.index, programme.name());
+  selectProgramme(status.index);
 }
 
 void JuceSceneFrontendConnector::programmeSelected(ProgrammeObjects const& objects) {
