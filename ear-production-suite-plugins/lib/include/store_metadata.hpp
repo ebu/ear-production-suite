@@ -9,7 +9,6 @@
 #include <memory>
 #include <vector>
 #include "metadata_listener.hpp"
-#include "helper/weak_ptr.hpp"
 
 namespace ear::plugin {
 
@@ -81,8 +80,6 @@ class Metadata {
   void fireEvent(F const & fn, Args const&... args) {
     fireEventWith(uiListeners_, *uiDispatcher_, fn, args...);
     fireEventWith(backendListeners_, *backendDispatcher_, fn, args...);
-    // TODO have a specific communication thread for metadata updates and
-    // fire the events below on that.
   }
 
   template<typename F, typename... Args>
@@ -96,15 +93,15 @@ class Metadata {
     if(!listeners.empty()) {
         auto &threadListeners = listeners;
 
-        // dispatcher handles actual post of event on JUCE message thread
-        // as needs to be in the plugin not library code
+        // dispatcher runs the passed lambda on some thread
         dispatcher.dispatchEvent(
                 // copy all arguments and listener list once for thread safety, via
                 // lambda capture list.
                 // This happens on the thread that fires the event, all methods that
                 // fire events hold the metadata lock so the copy is safe.
                 [threadListeners, f, args...]() {
-                    // The body of the lambda will be called on message thread
+                    // The body of the lambda will be called asynchronously by the dispatcher
+                    // after the lock is released
                     for (auto const &weak: threadListeners) {
                         if (auto listener = weak.lock()) {
                             // other than small parameters, all should be passed by const& to avoid

@@ -3,7 +3,7 @@
 //
 
 #include "metadata_event_dispatcher.hpp"
-#include "metadata_thread.hpp"
+#include "communication/metadata_thread.hpp"
 namespace ear::plugin {
 
 void MetadataEventDispatcher::doDispatch(std::function<void()> event) {

@@ -9,7 +9,7 @@
 #include "components/level_meter_calculator.hpp"
 #include "backend_setup_timer.hpp"
 #include "ui_event_dispatcher.hpp"
-#include "metadata_thread.hpp"
+#include "communication/metadata_thread.hpp"
 
 namespace ear {
 namespace plugin {
