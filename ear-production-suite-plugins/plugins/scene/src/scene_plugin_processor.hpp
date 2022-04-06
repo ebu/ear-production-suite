@@ -78,7 +78,6 @@ class SceneAudioProcessor : public AudioProcessor {
   void doSampleRateChecks();
   void sendAdmMetadata();
   void recvAdmMetadata(std::string admStr, std::vector<uint32_t> mappings);
-  std::mutex programmeStoreMutex_;
   std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
 
