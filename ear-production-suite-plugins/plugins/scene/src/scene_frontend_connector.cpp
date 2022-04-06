@@ -393,7 +393,6 @@ void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
 // ObjectView::Listener
 void JuceSceneFrontendConnector::objectDataChanged(ObjectView::Data data) {
   data_.updateElement(data.item.connection_id(), data.object);
-  data_.setInputItemMetadata(data.item.connection_id(), data.item);
 }
 
 void JuceSceneFrontendConnector::inputRemoved(communication::ConnectionId const& id) {
