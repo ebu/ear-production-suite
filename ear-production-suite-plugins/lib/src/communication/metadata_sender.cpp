@@ -31,22 +31,26 @@ void MetadataSender::disconnect() {
 
 void MetadataSender::triggerSend() {
   std::lock_guard<std::mutex> lock(sendMutex_);
-  socket_.asyncWait();
-  if (!connectionId_.isValid()) {
-    return;
+  if(data_.readAccess([](auto const& item) {
+     return item.changed();
+  })) {
+      socket_.asyncWait();
+      if (!connectionId_.isValid()) {
+          return;
+      }
+      auto msg = data_.prepareMessage();
+      socket_.asyncSend(
+              msg, [this](std::error_code ec, const nng::Message &ignored) {
+                  if (!ec) {
+                      std::lock_guard<std::mutex> lock(timeoutMutex_);
+                      lastSendTimestamp_ = std::chrono::system_clock::now();
+                  } else {
+                      // this sets changed flag
+                      data_.writeAccess([](auto) {});
+                      EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
+                  }
+              });
   }
-  auto msg = data_.prepareMessage();
-  socket_.asyncSend(
-      msg, [this](std::error_code ec, const nng::Message& ignored) {
-        if (!ec) {
-          std::lock_guard<std::mutex> lock(timeoutMutex_);
-          lastSendTimestamp_ = std::chrono::system_clock::now();
-        } else {
-          // this sets changed flag
-          data_.writeAccess([](auto){});
-          EAR_LOGGER_WARN(logger_, "Metadata sending failed: {}", ec.message());
-        }
-      });
 }
 
 void MetadataSender::startTimer() {
