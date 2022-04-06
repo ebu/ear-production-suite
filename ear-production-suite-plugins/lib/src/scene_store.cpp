@@ -118,6 +118,9 @@ void SceneStore::inputUpdated(const InputItem &item) {
         auto newItem = store_.add_all_available_items();
         newItem->CopyFrom(item.data);
         changed = true;
+    } else {
+        existingItem->CopyFrom(item.data);
+        changed = changed || item.data.changed();
     }
 }
 
