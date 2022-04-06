@@ -51,7 +51,6 @@ class ItemsContainer : public Component {
   void setPresentThemeFor(const communication::ConnectionId& id);
 
  private:
-  std::mutex mutex;
   std::unique_ptr<ItemViewList> objectsList;
   std::unique_ptr<ItemViewList> directSpeakersList;
   std::unique_ptr<ItemViewList> hoaList;
