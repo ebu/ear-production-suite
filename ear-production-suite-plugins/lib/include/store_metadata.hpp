@@ -26,6 +26,7 @@ class Metadata {
             logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
             uiDispatcher_{std::move(uiDispatcher)} {
         logger_->set_level(spdlog::level::trace);
+        autoUpdateFrom(routeMap());
     }
 
   std::pair<proto::ProgrammeStore, ItemMap> stores() const;
