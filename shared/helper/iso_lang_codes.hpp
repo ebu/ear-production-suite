@@ -239,6 +239,7 @@ inline int getLanguageIndex(const std::string& language) {
     }); it != LANGUAGES.end()) {
         return static_cast<int>(std::distance(LANGUAGES.begin(), it));
     }
+    return -1;
 }
 
 }  // namespace ui
