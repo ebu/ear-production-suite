@@ -120,7 +120,7 @@ void SceneBackend::onConnectionEvent(
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_ADDED) {
     EAR_LOGGER_INFO(logger_, "Got new monitoring connection {}", id.string());
-    sceneStore_->triggerSend(true);
+      data_.refresh();
   } else if (event ==
              communication::SceneConnectionManager::Event::MONITORING_REMOVED) {
     EAR_LOGGER_INFO(logger_, "Monitoring {} disconnected", id.string());
