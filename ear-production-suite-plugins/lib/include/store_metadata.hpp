@@ -22,10 +22,12 @@ class EventDispatcher {
 
 class Metadata {
  public:
-    explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher) :
+    explicit Metadata(std::unique_ptr<EventDispatcher> uiDispatcher,
+                      std::unique_ptr<EventDispatcher> backendDispatcher) :
             logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
-            uiDispatcher_{std::move(uiDispatcher)} {
-        logger_->set_level(spdlog::level::trace);
+            uiDispatcher_{std::move(uiDispatcher)},
+            backendDispatcher_{std::move(backendDispatcher)} {
+            logger_->set_level(spdlog::level::trace);
         autoUpdateFrom(routeMap());
     }
 
@@ -55,7 +57,7 @@ class Metadata {
 
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
-  void addListener(std::weak_ptr<MetadataListener> listener);
+  void addBackendListener(std::weak_ptr<MetadataListener> listener);
 
  private:
   void autoUpdateFrom(RouteMap const& itemStore);
@@ -77,31 +79,33 @@ class Metadata {
 
   template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {
-    fireEventOnMsgThread(fn, args...);
+    fireEventWith(uiListeners_, *uiDispatcher_, fn, args...);
+    fireEventWith(backendListeners_, *backendDispatcher_, fn, args...);
     // TODO have a specific communication thread for metadata updates and
     // fire the events below on that.
-    fireEventOnCurrentThread(fn, args...);
   }
 
   template<typename F, typename... Args>
-  auto fireEventOnMsgThread(F&& f, Args&&... args) {
+  void fireEventWith(std::vector<std::weak_ptr<MetadataListener>>& listeners,
+                     EventDispatcher& dispatcher,
+                     F&& f, Args&&... args) {
     // clear out any dead weak_ptrs
-    removeDeadListeners(uiListeners_);
+    removeDeadListeners(listeners);
 
     // worth checking before copy as if UI is closed there's nothing to do
-    if(!uiListeners_.empty()) {
-        auto &listeners = uiListeners_;
+    if(!listeners.empty()) {
+        auto &threadListeners = listeners;
 
         // dispatcher handles actual post of event on JUCE message thread
         // as needs to be in the plugin not library code
-        uiDispatcher_->dispatchEvent(
+        dispatcher.dispatchEvent(
                 // copy all arguments and listener list once for thread safety, via
                 // lambda capture list.
                 // This happens on the thread that fires the event, all methods that
                 // fire events hold the metadata lock so the copy is safe.
-                [listeners, f, args...]() {
+                [threadListeners, f, args...]() {
                     // The body of the lambda will be called on message thread
-                    for (auto const &weak: listeners) {
+                    for (auto const &weak: threadListeners) {
                         if (auto listener = weak.lock()) {
                             // other than small parameters, all should be passed by const& to avoid
                             // copy per listener - i.e. the listener interface passes by const&
@@ -115,14 +119,6 @@ class Metadata {
     }
   }
 
-  template<typename F, typename... Args>
-  auto fireEventOnCurrentThread(F const& f, Args const&... args) {
-    removeDeadPointersAfter(listeners_,
-                            [&f, &args...](auto const& listener) {
-                              std::invoke(f, listener, args...);
-                            });
-  }
-
   static void removeDeadListeners(std::vector<std::weak_ptr<MetadataListener>>& listeners) {
     listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
                                    [](auto const& listener) {
@@ -133,10 +129,11 @@ class Metadata {
   mutable std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   std::unique_ptr<EventDispatcher> uiDispatcher_;
+  std::unique_ptr<EventDispatcher> backendDispatcher_;
   proto::ProgrammeStore programmeStore_;
   ItemMap itemStore_;
   bool isDuplicateScene_{false};
-  std::vector<std::weak_ptr<MetadataListener>> listeners_;
+  std::vector<std::weak_ptr<MetadataListener>> backendListeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 };
 }

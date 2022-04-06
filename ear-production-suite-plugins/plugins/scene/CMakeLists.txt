@@ -15,7 +15,8 @@ set(SOURCES_SCENE
   src/elements_container.cpp
   src/element_view_list.cpp
   src/element_view.cpp
-        src/ui_event_dispatcher.cpp
+  src/ui_event_dispatcher.cpp
+  src/metadata_event_dispatcher.cpp
   src/programmes_container.cpp
   src/items_container.cpp
         )

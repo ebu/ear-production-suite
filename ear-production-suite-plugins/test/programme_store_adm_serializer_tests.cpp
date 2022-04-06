@@ -223,7 +223,7 @@ InputItemMetadata simpleDsItem(ConnectionId const& id,
 }
 
 TEST_CASE("Programme parser tests") {
-  Metadata metadata{std::make_unique<EventDispatcher>()};
+  Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
   metadata.setInputItemMetadata(connectionId, item);
@@ -286,7 +286,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
                            2,
                            SpeakerLayout::ITU_BS_2051_0_2_0);
 
-    Metadata metadata{std::make_unique<EventDispatcher>()};
+  Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   metadata.setInputItemMetadata(connectionId, item);
 
   auto programmeStore = StoreBuilder{}.withProgramme(ProgrammeBuilder{}
@@ -343,7 +343,7 @@ TEST_CASE("Toggle group with three members") {
   auto altItem = simpleObjectItem(altId, "alternative", 1);
   auto secondAltId = ConnectionId::generate();
   auto secondAltItem = simpleObjectItem(secondAltId, "alternative_2", 2);
-  Metadata metadata{std::make_unique<EventDispatcher>()};
+  Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   metadata.setInputItemMetadata(defaultId, defaultItem);
   metadata.setInputItemMetadata(altId, altItem);
   metadata.setInputItemMetadata(secondAltId, secondAltItem);
@@ -422,7 +422,7 @@ TEST_CASE("Toggle group with three members") {
 }
 
 TEST_CASE("On_Off interactive") {
-    Metadata metadata{std::make_unique<EventDispatcher>()};
+  Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
   metadata.setInputItemMetadata(connectionId, item);

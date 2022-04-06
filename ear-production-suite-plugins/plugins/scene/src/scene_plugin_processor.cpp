@@ -10,6 +10,7 @@
 #include <programme_store.pb.h>
 #include "scene_backend.hpp"
 #include "scene_frontend_connector.hpp"
+#include "metadata_event_dispatcher.hpp"
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
@@ -17,7 +18,8 @@ SceneAudioProcessor::SceneAudioProcessor()
               .withInput("Input", AudioChannelSet::discreteChannels(64), true)
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
                           true)),
-      metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>())
+      metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>(),
+                std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_))
 {
   connector_ = std::make_shared<ear::plugin::ui::JuceSceneFrontendConnector>(this);
   metadata_.addUIListener(connector_);
@@ -127,15 +129,15 @@ bool SceneAudioProcessor::isBusesLayoutSupported(
 
 void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                        MidiBuffer& midiMessages) {
+  auto sendSamples = sendSamplesToExtension;
+  metadataThread_.post([this, sendSamples](){
+    backend_->triggerMetadataSend(sendSamples);
+  });
   doSampleRateChecks();
 
   if(!sendSamplesToExtension) {
-    backend_->triggerMetadataSend();
     levelMeter_->process(buffer);
-
   } else {
-    backend_->triggerMetadataSend(true);
-
     size_t sampleSize = sizeof(float);
     uint8_t numChannels = 64;
     size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize;
