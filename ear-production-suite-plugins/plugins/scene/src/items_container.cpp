@@ -171,7 +171,6 @@ void createOrUpdateView(proto::InputItemMetadata const& item,
 }
 
 void ItemsContainer::createOrUpdateView(proto::InputItemMetadata const& item) {
-    std::lock_guard<std::mutex> lock(mutex);
     if (item.has_ds_metadata()) {
         ::createOrUpdateView(item,
                              directSpeakersItems,
@@ -210,7 +209,6 @@ void removeItemFromViews(communication::ConnectionId const& id,
 }
 
 void ItemsContainer::removeView(const communication::ConnectionId& id) {
-  std::lock_guard<std::mutex> lock(mutex);
   removeItemFromViews(id, directSpeakersItems, *directSpeakersList);
   removeItemFromViews(id, objectsItems, *objectsList);
   removeItemFromViews(id, hoaItems, *hoaList);
@@ -251,7 +249,6 @@ void setThemeFor(std::vector<std::shared_ptr<ItemView>>& views,
 }
 
 void ItemsContainer::themeItemsFor(const ProgrammeObjects& programme) {
-  std::lock_guard<std::mutex> lock(mutex);
   ::themeItemsFor(directSpeakersItems, programme);
   ::themeItemsFor(objectsItems, programme);
   ::themeItemsFor(hoaItems, programme);
