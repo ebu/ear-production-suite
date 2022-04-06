@@ -17,7 +17,6 @@ ProgrammesContainer::ProgrammesContainer()
 }
 
 void ear::plugin::ui::ProgrammesContainer::resized() {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->setBounds(getLocalBounds());
 }
 
@@ -25,7 +24,6 @@ std::shared_ptr<ObjectView> ear::plugin::ui::ProgrammesContainer::addObjectView(
     int programmeIndex, const proto::InputItemMetadata &inputItem,
     const proto::Object &programmeElement,
     const std::shared_ptr<LevelMeterCalculator> &meterCalculator) {
-  std::lock_guard<std::mutex> lock(mutex_);
 
   auto objectType = ObjectView::ObjectType::Other;
 
@@ -76,7 +74,6 @@ std::shared_ptr<ObjectView> ear::plugin::ui::ProgrammesContainer::addObjectView(
 
 void ear::plugin::ui::ProgrammesContainer::addProgrammeView(
     const proto::Programme &programme, JuceSceneFrontendConnector &connector) {
-  std::lock_guard<std::mutex> lock(mutex_);
 
   auto view = std::make_shared<ProgrammeView>(&connector);
   view->getNameTextEditor()->setText(programme.name(), false);
@@ -90,14 +87,12 @@ void ear::plugin::ui::ProgrammesContainer::addProgrammeView(
 }
 
 void ProgrammesContainer::clear() {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->removeAllTabs();
   programmes_.clear();
 }
 
 void ProgrammesContainer::removeListeners(
     ear::plugin::ui::JuceSceneFrontendConnector *connector) {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->removeListener(connector);
   for (auto const& view : programmes_) {
     view->removeListener(connector);
@@ -106,7 +101,6 @@ void ProgrammesContainer::removeListeners(
 
 void ProgrammesContainer::addTabListener(
     EarTabbedComponent::Listener *listener) {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->addListener(listener);
 }
 
@@ -114,21 +108,18 @@ void ProgrammesContainer::itemsAddedToProgramme(
     ProgrammeStatus status, std::vector<ProgrammeObject> const& items) {
   assert(!items.empty());
   auto programmeIndex = status.index;
-  std::lock_guard<std::mutex> lock(mutex_);
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
   overview->itemsAdded(items);
 }
 
 void ProgrammesContainer::itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) {
   auto programmeIndex = status.index;
-  std::lock_guard<std::mutex> lock(mutex_);
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
   overview->itemRemoved(id);
 }
 
 void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
   auto programmeIndex = status.index;
-  std::lock_guard<std::mutex> lock(mutex_);
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
   overview->itemChanged(item);
 }
@@ -174,7 +165,6 @@ void ProgrammesContainer::updateViews(
 
 void ProgrammesContainer::removeFromElementViews(
     const ear::plugin::communication::ConnectionId &id) {
-  std::lock_guard<std::mutex> lock(mutex_);
 
   for (int programmeIndex = 0;
        programmeIndex < programmes_.size();
@@ -199,12 +189,10 @@ void ProgrammesContainer::removeFromElementViews(
 }
 
 void ProgrammesContainer::selectTab(int index) {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->selectTab(index);
 }
 
 void ProgrammesContainer::moveProgrammeView(int oldIndex, int newIndex) {
-  std::lock_guard<std::mutex> lock(mutex_);
   auto size = programmes_.size();
   if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
       oldIndex != newIndex) {
@@ -213,14 +201,12 @@ void ProgrammesContainer::moveProgrammeView(int oldIndex, int newIndex) {
 }
 
 void ProgrammesContainer::removeProgrammeView(int index) {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->removeTab(index);
   programmes_.erase(programmes_.begin() + index);
 }
 
 void ProgrammesContainer::setProgrammeViewName(int programmeIndex,
                                                const String &newName) {
-  std::lock_guard<std::mutex> lock(mutex_);
   tabs_->setTabName(programmeIndex, newName);
   programmes_.at(programmeIndex)
       ->getNameTextEditor()
@@ -230,7 +216,6 @@ void ProgrammesContainer::setProgrammeViewName(int programmeIndex,
 void ProgrammesContainer::setProgrammeViewLanguage(int programmeIndex,
                                                    const std::optional<std::string>& language) {
 
-    std::lock_guard<std::mutex> lock(mutex_);
     if(language) {
         auto languageIndex = getLanguageIndex(*language);
         programmes_.at(programmeIndex)->getLanguageComboBox()->setSelectedId(languageIndex, NotificationType::dontSendNotification);
@@ -238,7 +223,6 @@ void ProgrammesContainer::setProgrammeViewLanguage(int programmeIndex,
 }
 
 int ProgrammesContainer::getProgrammeIndex(ProgrammeView *view) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   if(!view) {
     return -1;
   }
@@ -252,7 +236,6 @@ int ProgrammesContainer::getProgrammeIndex(ProgrammeView *view) const {
 }
 
 int ProgrammesContainer::getProgrammeIndex(ElementViewList *list) const {
-  std::lock_guard<std::mutex> lock(mutex_);
   auto it = std::find_if(
       programmes_.begin(),
       programmes_.end(), [list](auto const& entry) {
