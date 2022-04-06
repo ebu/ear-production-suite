@@ -23,7 +23,7 @@ std::pair<proto::ProgrammeStore, ItemMap> Metadata::stores() const {
     return{programmeStore_, itemStore_};
 }
 
-void Metadata::refreshUI() {
+void Metadata::refresh() {
     std::lock_guard<std::mutex> lock(mutex_);
     fireEvent(&MetadataListener::notifyDataReset,
               programmeStore_,

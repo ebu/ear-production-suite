@@ -42,7 +42,7 @@ void JuceSceneFrontendConnector::repopulateUIComponents(
   programmesContainer_ = programmesContainer;
   data_.addUIListener(programmesContainer_);
   multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
-  data_.refreshUI();
+    data_.refresh();
 }
 
 //TODO call on message thread

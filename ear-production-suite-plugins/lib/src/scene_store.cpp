@@ -33,9 +33,9 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
     auto overlaps = getOverlapIds(store_);
     if (overlappingIds_ != overlaps) {
         flagChangedOverlaps(overlappingIds_, overlaps, store_);
-        changed = true;
     }
     overlappingIds_ = overlaps;
+    changed = true;
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
@@ -129,6 +129,7 @@ void SceneStore::addAvailableInputItemsToSceneStore(const ear::plugin::ItemMap& 
         auto& itemStoreInputItem = itemPair.second;
         auto sceneStoreInputItem = store_.add_all_available_items();
         sceneStoreInputItem->CopyFrom(itemStoreInputItem);
+        sceneStoreInputItem->set_changed(true);
     }
 }
 
@@ -178,11 +179,9 @@ void SceneStore::sendUpdate() {
   changed = false;
 }
 
-void SceneStore::triggerSend(bool force) {
+void SceneStore::triggerSend() {
   std::lock_guard lock(mutex_);
-  auto const& items = store_.monitoring_items();
-
-  if(force || changed) {
+  if(changed) {
       sendUpdate();
   }
 }
