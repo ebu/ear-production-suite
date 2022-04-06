@@ -18,7 +18,6 @@ public:
     void triggerSend();
 
 private:
-    mutable std::mutex mutex_;
     proto::SceneStore store_;
     bool changed{true};
     std::set<std::string> overlappingIds_;
