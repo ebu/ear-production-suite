@@ -30,6 +30,7 @@ class Metadata {
 
   std::pair<proto::ProgrammeStore, ItemMap> stores() const;
   void refreshUI();
+  void setDuplicateScene(bool isDuplicate);
 
   // Input item manipulation
   void setInputItemMetadata(communication::ConnectionId const& id,
@@ -133,6 +134,7 @@ class Metadata {
   std::unique_ptr<EventDispatcher> uiDispatcher_;
   proto::ProgrammeStore programmeStore_;
   ItemMap itemStore_;
+  bool isDuplicateScene_{false};
   std::vector<std::weak_ptr<MetadataListener>> listeners_;
   std::vector<std::weak_ptr<MetadataListener>> uiListeners_;
 };

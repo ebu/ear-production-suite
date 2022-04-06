@@ -28,6 +28,15 @@ void Metadata::refreshUI() {
     fireEvent(&MetadataListener::notifyDataReset,
               programmeStore_,
               itemStore_);
+    fireEvent(&MetadataListener::notifyDuplicateScene,
+              isDuplicateScene_);
+}
+
+void Metadata::setDuplicateScene(bool isDuplicate) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    isDuplicateScene_ = isDuplicate;
+    fireEvent(&MetadataListener::notifyDuplicateScene,
+              isDuplicateScene_);
 }
 
 
@@ -361,3 +370,4 @@ RouteMap Metadata::routeMap() const {
                    });
     return routes;
 }
+

@@ -48,7 +48,7 @@ class JuceSceneFrontendConnector :
       std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
       );
 
-  void doSetMultipleScenePluginsOverlayVisible(const bool& visible) override;
+  void duplicateSceneDetected(bool isDuplicate) override;
 
   // MetadataListener
   void dataReset (proto::ProgrammeStore const& programmes,
