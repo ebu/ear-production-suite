@@ -13,9 +13,6 @@
 
 namespace ear {
 namespace plugin {
-namespace ui {
-class SceneFrontendBackendConnector;
-}
 
 /**
  * @brief Coordinates plugin communication and consolidates scene metadata
@@ -43,7 +40,7 @@ class SceneFrontendBackendConnector;
  */
 class SceneBackend {
  public:
-  EAR_PLUGIN_BASE_EXPORT SceneBackend(ui::SceneFrontendBackendConnector *, Metadata& data);
+  EAR_PLUGIN_BASE_EXPORT SceneBackend(Metadata& data);
   EAR_PLUGIN_BASE_EXPORT ~SceneBackend();
   SceneBackend(const SceneBackend &) = delete;
   SceneBackend(SceneBackend &&) = delete;
@@ -63,7 +60,6 @@ class SceneBackend {
   communication::SceneCommandReceiver commandReceiver_;
   communication::SceneConnectionManager connectionManager_;
   communication::SceneMetadataReceiver metadataReceiver_;
-  ui::SceneFrontendBackendConnector *frontendConnector_;
   std::shared_ptr<SceneStore> sceneStore_;
   nng::PubSocket metadataSender_;
   std::set<communication::ConnectionId> previousScene_;

@@ -10,8 +10,8 @@ using std::placeholders::_2;
 
 namespace ear {
 namespace plugin {
-SceneBackend::SceneBackend(ui::SceneFrontendBackendConnector* frontend, Metadata& data)
-    : data_(data), connectionManager_(), frontendConnector_(frontend),
+SceneBackend::SceneBackend(Metadata& data)
+    : data_(data), connectionManager_(),
       sceneStore_(std::make_shared<SceneStore>([this](proto::SceneStore const& store) {
           triggerMetadataSend(store);
       })) {

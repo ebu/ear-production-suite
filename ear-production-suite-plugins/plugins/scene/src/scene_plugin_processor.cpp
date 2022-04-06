@@ -21,7 +21,7 @@ SceneAudioProcessor::SceneAudioProcessor()
 {
   connector_ = std::make_shared<ear::plugin::ui::JuceSceneFrontendConnector>(this);
   metadata_.addUIListener(connector_);
-  backend_ = std::make_unique<ear::plugin::SceneBackend>(connector_.get(), metadata_);
+  backend_ = std::make_unique<ear::plugin::SceneBackend>(metadata_);
 
   try {
     backend_->setup();
