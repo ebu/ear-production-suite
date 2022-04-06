@@ -32,9 +32,6 @@ class ProgrammesContainer : public juce::Component, public MetadataListener {
   void removeListeners(JuceSceneFrontendConnector* connector);
   void addTabListener(EarTabbedComponent::Listener* listener);
   void updateElementOverview(ProgrammeObjects const& objects);
-  int programmeCount() const;
-  void updateViews(proto::InputItemMetadata const& item,
-                   std::shared_ptr<LevelMeterCalculator> const& meterCalculator);
   void removeFromElementViews(communication::ConnectionId const& id);
   void addProgrammeView(const proto::Programme& programme,
                         JuceSceneFrontendConnector& connector);

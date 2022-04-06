@@ -30,7 +30,6 @@ std::shared_ptr<ObjectView> ear::plugin::ui::ProgrammesContainer::addObjectView(
   auto container = programmes_.at(programmeIndex)
       ->getElementsContainer();
 
-  String speakerSetup;
   int numberOfChannels = 1;
 
   if (inputItem.has_obj_metadata()) {
@@ -41,8 +40,7 @@ std::shared_ptr<ObjectView> ear::plugin::ui::ProgrammesContainer::addObjectView(
     objectType = ObjectView::ObjectType::DirectSpeakers;
     auto layoutIndex = inputItem.ds_metadata().layout();
     if (layoutIndex >= 0) {
-      speakerSetup = SPEAKER_SETUPS.at(layoutIndex).commonName;
-      numberOfChannels = SPEAKER_SETUPS.at(layoutIndex).speakers.size();
+      numberOfChannels = static_cast<int>(SPEAKER_SETUPS.at(layoutIndex).speakers.size());
     }
   }
   if (inputItem.has_hoa_metadata()) {
@@ -54,10 +52,9 @@ std::shared_ptr<ObjectView> ear::plugin::ui::ProgrammesContainer::addObjectView(
           commonDefinitionHelper->getElementRelationships();
       auto pfData =
           commonDefinitionHelper->getPackFormatData(4, packFormatId);
-      size_t cfCount(0);
       if (pfData) {
         numberOfChannels =
-            static_cast<size_t>(pfData->relatedChannelFormats.size());
+            static_cast<int>(pfData->relatedChannelFormats.size());
       }
     }
   }
@@ -124,53 +121,11 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
   overview->itemChanged(item);
 }
 
-int ProgrammesContainer::programmeCount() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return programmes_.size();
-}
-
-void ProgrammesContainer::updateViews(
-    const ear::plugin::proto::InputItemMetadata &item,
-    const std::shared_ptr<LevelMeterCalculator> &meterCalculator) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  auto id = item.connection_id();
-  for(auto const& programme : programmes_) {
-    auto const& elements = programme->getElementsContainer()->elements;
-    auto it = std::find_if(elements.begin(), elements.end(), [id](auto const& element) {
-      if(auto objectView = std::dynamic_pointer_cast<ObjectView>(element)) {
-        return id == objectView->getData().object.connection_id();
-      }
-      return false;
-    });
-
-    if(it != elements.end()) {
-      auto view = std::dynamic_pointer_cast<ObjectView>(*it);
-      int numberOfChannels = 1;
-      if (item.has_ds_metadata()) {
-        auto layoutIndex = item.ds_metadata().layout();
-        if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
-          numberOfChannels = SPEAKER_SETUPS.at(layoutIndex).speakers.size();
-        }
-      }
-      auto data = view->getData();
-      data.item = item;
-      assert(data.object.connection_id() == data.item.connection_id());
-      view->setData(data);
-      std::vector<int> routing(numberOfChannels);
-      std::iota(routing.begin(), routing.end(), item.routing());
-      view->getLevelMeter()->setMeter(meterCalculator, routing);
-    }
-  }
-}
 
 void ProgrammesContainer::removeFromElementViews(
     const ear::plugin::communication::ConnectionId &id) {
-
-  for (int programmeIndex = 0;
-       programmeIndex < programmes_.size();
-       ++programmeIndex) {
-    auto const& container = programmes_.at(programmeIndex)
-        ->getElementsContainer();
+  for (auto const& programme : programmes_) {
+    auto const& container = programme->getElementsContainer();
     auto const& elements = container->elements;
     auto it = std::find_if(
         elements.begin(), elements.end(), [id](auto elementView) {
@@ -183,7 +138,7 @@ void ProgrammesContainer::removeFromElementViews(
         });
     if (it != container->elements.end()) {
       auto index = std::distance(elements.begin(), it);
-      container->removeElement(index);
+      container->removeElement(static_cast<int>(index));
     }
   }
 }
@@ -230,7 +185,7 @@ int ProgrammesContainer::getProgrammeIndex(ProgrammeView *view) const {
       std::find_if(programmes_.begin(), programmes_.end(),
                    [view](auto const& entry) { return view == entry.get(); });
   if (it != programmes_.end()) {
-    return std::distance(programmes_.begin(), it);
+    return static_cast<int>(std::distance(programmes_.begin(), it));
   }
   return -1;
 }
@@ -242,7 +197,7 @@ int ProgrammesContainer::getProgrammeIndex(ElementViewList *list) const {
         return entry->getElementsContainer()->list.get() == list;
       });
   if(it != programmes_.end()) {
-    return std::distance(programmes_.begin(), it);
+    return static_cast<int>(std::distance(programmes_.begin(), it));
   }
   return -1;
 }
