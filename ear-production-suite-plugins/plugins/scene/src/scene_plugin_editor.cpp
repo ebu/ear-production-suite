@@ -25,7 +25,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
       programmesContainer_(std::make_shared<ProgrammesContainer>(
               p_->getLevelMeter().lock(),
               p_->metadata())),
-      autoModeOverlay_(std::make_shared<AutoModeOverlay>()),
+      autoModeOverlay_(std::make_shared<AutoModeOverlay>(p->metadata())),
       multipleScenePluginsOverlay_(
           std::make_shared<MultipleScenePluginsOverlay>()),
       propertiesFileLock_(
@@ -60,20 +60,20 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   p_->metadata().addUIListener(itemsContainer_);
   programmesContainer_->addListener(this);
   p_->metadata().addUIListener(programmesContainer_);
+  p_->metadata().addUIListener(autoModeOverlay_);
 
   addAndMakeVisible(header_.get());
   addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
   addChildComponent(itemsOverlay_.get());
   addAndMakeVisible(programmesContainer_.get());
-  addAndMakeVisible(autoModeOverlay_.get());
+  addChildComponent(autoModeOverlay_.get());
   addChildComponent(multipleScenePluginsOverlay_.get());
 
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
-  p_->getFrontendConnector()->repopulateUIComponents(autoModeOverlay_,
-                                                     multipleScenePluginsOverlay_);
+  p_->getFrontendConnector()->repopulateUIComponents(multipleScenePluginsOverlay_);
 
   setResizable(true, false);
   setResizeLimits(1100, 620, std::numeric_limits<int>::max(),
