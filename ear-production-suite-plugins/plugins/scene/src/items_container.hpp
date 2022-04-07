@@ -14,7 +14,6 @@ class ProgrammeObject;
 class Metadata;
 namespace proto {
   class InputItemMetadata;
-  class ItemStore;
   class Programme;
 }
 

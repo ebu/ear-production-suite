@@ -132,12 +132,9 @@ void Metadata::selectProgramme(int index) {
 
 void Metadata::setAutoMode(bool enable) {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto old = programmeStore_.auto_mode();
-    if(old != enable) {
-        programmeStore_.set_auto_mode(enable);
-        fireEvent(&MetadataListener::notifyAutoModeChanged,
-                  enable);
-    }
+    programmeStore_.set_auto_mode(enable);
+    fireEvent(&MetadataListener::notifyAutoModeChanged,
+              enable);
 }
 
 void Metadata::setProgrammeName(int index, const std::string& name) {
