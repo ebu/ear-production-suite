@@ -22,7 +22,9 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
       onBoardingContent_(std::make_unique<Onboarding>()),
       itemsOverlay_(std::make_shared<Overlay>()),
       itemsContainer_(std::make_shared<ItemsContainer>()),
-      programmesContainer_(std::make_shared<ProgrammesContainer>()),
+      programmesContainer_(std::make_shared<ProgrammesContainer>(
+              p_->getLevelMeter().lock(),
+              p_->metadata())),
       autoModeOverlay_(std::make_shared<AutoModeOverlay>()),
       multipleScenePluginsOverlay_(
           std::make_shared<MultipleScenePluginsOverlay>()),
@@ -54,6 +56,10 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   itemsOverlay_->setContent(itemsContainer_.get());
   itemsOverlay_->setWindowSize(706, 596);
 
+  itemsContainer_->addListener(this);
+  programmesContainer_->addListener(this);
+  p_->metadata().addUIListener(programmesContainer_);
+
   addAndMakeVisible(header_.get());
   addAndMakeVisible(onBoardingButton_.get());
   addChildComponent(onBoardingOverlay_.get());
@@ -66,9 +72,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   addAndMakeVisible(versionLabel);
 
   p_->getFrontendConnector()->repopulateUIComponents(itemsContainer_,
-                                                     itemsOverlay_,
                                                      autoModeOverlay_,
-                                                     programmesContainer_,
                                                      multipleScenePluginsOverlay_);
 
   setResizable(true, false);
@@ -107,4 +111,13 @@ void SceneAudioProcessorEditor::endButtonClicked(Onboarding* onboarding) {
 void SceneAudioProcessorEditor::moreButtonClicked(Onboarding* onboarding) {
   onBoardingOverlay_->setVisible(false);
   URL(ear::plugin::detail::MORE_INFO_URL).launchInDefaultBrowser();
+}
+
+void SceneAudioProcessorEditor::addItemsClicked(ear::plugin::ui::ItemsContainer*,
+                     std::vector<ear::plugin::communication::ConnectionId>) {
+    itemsOverlay_->setVisible(false);
+}
+
+void SceneAudioProcessorEditor::addItemClicked() {
+    itemsOverlay_->setVisible(true);
 }

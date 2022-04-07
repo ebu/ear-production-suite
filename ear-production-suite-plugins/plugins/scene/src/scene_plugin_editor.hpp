@@ -17,7 +17,9 @@
 
 class SceneAudioProcessorEditor
     : public AudioProcessorEditor,
-      private ear::plugin::ui::Onboarding::Listener {
+      private ear::plugin::ui::Onboarding::Listener,
+      private ear::plugin::ui::ProgrammesContainer::Listener,
+      private ear::plugin::ui::ItemsContainer::Listener {
  public:
   SceneAudioProcessorEditor(SceneAudioProcessor*);
   ~SceneAudioProcessorEditor();
@@ -48,6 +50,13 @@ class SceneAudioProcessorEditor
   // --- Onboarding::Listener
   void endButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
   void moreButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
+
+  // --- ProgrammesContainer::Listener
+  void addItemClicked() override;
+
+  // --- ItemsContainer::Listener
+  void addItemsClicked(ear::plugin::ui::ItemsContainer* container,
+                       std::vector<ear::plugin::communication::ConnectionId> ids) override;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SceneAudioProcessorEditor)
 };
