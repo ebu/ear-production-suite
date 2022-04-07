@@ -5,11 +5,13 @@
 
 #include "JuceHeader.h"
 #include "communication/common_types.hpp"
+#include "metadata_listener.hpp"
 
 namespace ear {
 namespace plugin {
 class ProgrammeObjects;
 class ProgrammeObject;
+class Metadata;
 namespace proto {
   class InputItemMetadata;
   class ItemStore;
@@ -22,9 +24,10 @@ class ItemViewList;
 class ItemView;
 class EarButton;
 
-class ItemsContainer : public Component {
+class ItemsContainer : public Component,
+        public MetadataListener {
  public:
-  ItemsContainer();
+  explicit ItemsContainer(Metadata& metadata);
   ~ItemsContainer();
   void paint(Graphics& g) override;
   void resized() override;
@@ -50,7 +53,16 @@ class ItemsContainer : public Component {
   void setMissingThemeFor(const communication::ConnectionId& id);
   void setPresentThemeFor(const communication::ConnectionId& id);
 
+  // MetadataListener
+  void dataReset (proto::ProgrammeStore const& programmes,
+                  ItemMap const& items) override;
+  void programmeSelected(ProgrammeObjects const& objects) override;
+  void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
+  void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
+  void inputRemoved(communication::ConnectionId const& id) override;
+  void inputUpdated(const InputItem& item) override;
  private:
+  Metadata& data_;
   std::unique_ptr<ItemViewList> objectsList;
   std::unique_ptr<ItemViewList> directSpeakersList;
   std::unique_ptr<ItemViewList> hoaList;
