@@ -21,13 +21,10 @@ JuceSceneFrontendConnector::JuceSceneFrontendConnector (
 // --- Component Setter
 
 void JuceSceneFrontendConnector::repopulateUIComponents(
-    std::shared_ptr<ItemsContainer> const& itemsContainer,
     std::shared_ptr<AutoModeOverlay> const& autoModeOverlay,
     std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
 ) {
-  itemsContainer->addListener(this);
   autoModeOverlay->addListener(this);
-  itemsContainer_ = itemsContainer;
   autoModeOverlay_ = autoModeOverlay;
   multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
   data_.refresh();
@@ -41,30 +38,11 @@ void JuceSceneFrontendConnector::duplicateSceneDetected(bool isDuplicate) {
 
 }
 
-// --- Restore Editor
-
 void JuceSceneFrontendConnector::dataReset(
-    proto::ProgrammeStore const& programmeStore,
-    ItemMap const& items) {
-
-    auto selectedProgramme = programmeStore.selected_programme_index();
-    selectedProgramme = std::max<int>(selectedProgramme, 0);
-
-    if (auto container = itemsContainer_.lock()) {
-        container->createOrUpdateViews(items);
-    }
-
-    for (int i = 0; i < programmeStore.programme_size(); ++i) {
-        auto const &programme = programmeStore.programme(i);
-        if (i == selectedProgramme) {
-            updateAddItemsContainer({{i, true},
-                                     programme,
-                                     items});
-        }
-
-        if (auto overlay = autoModeOverlay_.lock()) {
-            overlay->setVisible(programmeStore.auto_mode());
-        }
+        proto::ProgrammeStore const& programmeStore,
+        ItemMap const& items) {
+    if (auto overlay = autoModeOverlay_.lock()) {
+        overlay->setVisible(programmeStore.auto_mode());
     }
 }
 
@@ -86,43 +64,6 @@ void JuceSceneFrontendConnector::updateAndCheckPendingElements(
   }
 }
 
-void JuceSceneFrontendConnector::removeFromItemView(
-    communication::ConnectionId id) {
-  if (auto container = itemsContainer_.lock()) {
-    container->removeView(id);
-  }
-}
-
-// --- Programme Management
-void JuceSceneFrontendConnector::programmeSelected(ProgrammeObjects const& objects) {
-  updateAddItemsContainer(objects);
-}
-
-void JuceSceneFrontendConnector::updateAddItemsContainer(ProgrammeObjects const& objects) {
-  if (auto itemsContainer = itemsContainer_.lock()) {
-    itemsContainer->themeItemsFor(objects);
-  }
-}
-
-// ItemsContainer::Listener
-void JuceSceneFrontendConnector::addItemsClicked(
-    ItemsContainer* container, std::vector<communication::ConnectionId> ids) {
-  if(!ids.empty()) {
-      data_.addItemsToSelectedProgramme(ids);
-  }
-}
-
-void JuceSceneFrontendConnector::itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) {
-  if(status.isSelected) {
-    for(auto const& item : items) {
-      auto itemsContainer = itemsContainer_.lock();
-      if (itemsContainer) {
-        itemsContainer->setPresentThemeFor(item.inputMetadata.connection_id());
-      }
-    }
-  }
-}
-
 void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) {
     updateAndCheckPendingElements(item.inputMetadata.connection_id(), item.inputMetadata);
 }
@@ -133,30 +74,9 @@ void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
   data_.setAutoMode(state);
 }
 
-void JuceSceneFrontendConnector::inputRemoved(communication::ConnectionId const& id) {
-  removeFromItemView(id);
-}
 void JuceSceneFrontendConnector::autoModeChanged(bool enabled) {
   if(auto overlay = autoModeOverlay_.lock()) {
     overlay->setVisible(enabled);
-  }
-}
-void JuceSceneFrontendConnector::inputAdded(const InputItem& item) {
-}
-
-void JuceSceneFrontendConnector::inputUpdated(const InputItem& item) {
-    auto itemsContainer = itemsContainer_.lock();
-    if (itemsContainer) {
-        itemsContainer->createOrUpdateView(item.data);
-    }
-}
-void JuceSceneFrontendConnector::itemRemovedFromProgramme(
-    ProgrammeStatus status, const communication::ConnectionId& id) {
-  if(status.isSelected) {
-    auto itemsContainer = itemsContainer_.lock();
-    if (itemsContainer) {
-      itemsContainer->setMissingThemeFor(id);
-    }
   }
 }
 
