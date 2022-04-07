@@ -293,3 +293,7 @@ void SceneAudioProcessor::setupBackend() {
     backend_->setup();
   }
 }
+
+ear::plugin::Metadata &SceneAudioProcessor::metadata() {
+    return metadata_;
+}

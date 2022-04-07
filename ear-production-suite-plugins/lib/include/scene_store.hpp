@@ -22,6 +22,8 @@ private:
     bool changed{true};
     std::set<std::string> overlappingIds_;
     std::function<void(proto::SceneStore const&)> updateCallback_;
+
+    // MetadataListener interface
     void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
     void programmeSelected(const ProgrammeObjects &objects) override;
     void itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) override;
@@ -29,6 +31,8 @@ private:
     void programmeItemUpdated(ProgrammeStatus status, const ProgrammeObject &object) override;
     void inputRemoved(const communication::ConnectionId &id) override;
     void inputUpdated(const InputItem &item) override;
+
+    // Implementation details
     void addAvailableInputItemsToSceneStore(ItemMap const& items);
     void addMonitoringItem(proto::InputItemMetadata const& inputItem);
     void setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoringItem,

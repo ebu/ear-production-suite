@@ -29,34 +29,22 @@ class ObjectView;
 class JuceSceneFrontendConnector :
     public MetadataListener,
     public SceneFrontendBackendConnector,
-    public EarTabbedComponent::Listener,
-    public ProgrammeView::Listener,
-    public ElementsContainer::Listener,
     private ItemsContainer::Listener,
-    private AutoModeOverlay::Listener,
-    private ObjectView::Listener {
+    private AutoModeOverlay::Listener {
  public:
   explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
-  ~JuceSceneFrontendConnector() override;
 
   void repopulateUIComponents(
       std::shared_ptr<ItemsContainer> const& itemsContainer,
-      std::shared_ptr<Overlay> const& addItemsOverlay,
       std::shared_ptr<AutoModeOverlay> const& autoModeOverlay,
-      std::shared_ptr<ProgrammesContainer> const& programmesContainer,
-      std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
-      );
+      std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay);
 
 
   // MetadataListener
   void dataReset (proto::ProgrammeStore const& programmes,
                   ItemMap const& items) override;
   void duplicateSceneDetected(bool isDuplicate) override;
-  void programmeAdded(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
-  void programmeRemoved(int programmeIndex) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
-  void programmeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
-  void programmeMoved(Movement motion, proto::Programme const& programme) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
@@ -66,61 +54,17 @@ class JuceSceneFrontendConnector :
   void inputUpdated(const InputItem& item) override;
 
  private:
-  std::shared_ptr<ProgrammesContainer> lockProgrammes() {
-    return programmesContainer_.lock();
-  }
-
-  void removeFromObjectViews(communication::ConnectionId id);
   void removeFromItemView(communication::ConnectionId id);
   void updateAddItemsContainer(ProgrammeObjects const& objects);
   void updateAndCheckPendingElements(const communication::ConnectionId& id,
                                      const proto::InputItemMetadata& item) const;
 
-  // --- Programme Management
-  void addProgrammeView(const proto::Programme& programme);
-  void selectProgramme(int index);
-  void selectProgrammeView(int index);
-  void moveProgrammeView(int oldIndex, int newIndex);
-  void removeProgrammeView(int index);
-  void setProgrammeViewName(int programmeIndex, const String& newName);
-  void setProgrammeLanguage(int programmeIndex, int languageIndex);
-  int getProgrammeIndex(ProgrammeView* view);
-
-  // --- Programme Element Management
-  void addObjectView(ProgrammeStatus status, ProgrammeObject const& item);
-
-  // --- ElementOverview
-  void updateElementOverview(ProgrammeObjects const& objects);
-
-  // ProgrammeView::Listener
-  void addItemClicked(ProgrammeView* view) override;
-  void addGroupClicked(ProgrammeView* view) override;
-  void addToggleClicked(ProgrammeView* view) override;
-  void nameChanged(ProgrammeView* view, const String& newName) override;
-  void languageChanged(ProgrammeView* view, int index) override;
-
   // ItemsContainer::Listener
   void addItemsClicked(ItemsContainer* container,
                        std::vector<communication::ConnectionId> ids) override;
 
-  // EarTabbedComponent::Listener
-  void addTabClicked(EarTabbedComponent* tabbedComponent) override;
-  void tabSelected(EarTabbedComponent* tabbedComponent, int index) override;
-  void tabMoved(EarTabbedComponent* tabbedComponent, int oldIndex,
-                int newIndex) override;
-  void removeTabClicked(EarTabbedComponent* tabbedComponent,
-                        int index) override;
-  void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) override;
-
-  // ElementViewList::Listener
-  void elementMoved(ElementViewList* list, int oldIndex, int newIndex) override;
-  void removeElementClicked(ElementViewList* list, ElementView* view) override;
-
   // AutoModeOverlay::Listener
   void autoModeChanged(AutoModeOverlay* overlay, bool state) override;
-
-  // ObjectView::Listener
-  void objectDataChanged(ObjectView::Data data) override;
 
   SceneAudioProcessor* p_;
   Metadata& data_;
@@ -129,8 +73,6 @@ class JuceSceneFrontendConnector :
   std::weak_ptr<Overlay> itemsOverlay_;
   std::weak_ptr<AutoModeOverlay> autoModeOverlay_;
   std::weak_ptr<ItemsContainer> itemsContainer_;
-  std::weak_ptr<ProgrammesContainer> programmesContainer_;
-
 };
 
 }  // namespace ui
