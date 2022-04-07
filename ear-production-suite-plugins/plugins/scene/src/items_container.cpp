@@ -7,14 +7,16 @@
 #include "item_view_list.hpp"
 #include "store_metadata.hpp"
 #include <iostream>
+#include "store_metadata.hpp"
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
 
 ItemsContainer::~ItemsContainer() = default;
 
-ItemsContainer::ItemsContainer()
-    : objectsList(std::make_unique<ItemViewList>()),
+ItemsContainer::ItemsContainer(Metadata& metadata)
+    : data_{metadata},
+      objectsList(std::make_unique<ItemViewList>()),
       directSpeakersList(std::make_unique<ItemViewList>()),
       hoaList(std::make_unique<ItemViewList>()),
       objectsViewport_(std::make_unique<Viewport>()),
@@ -80,9 +82,15 @@ ItemsContainer::ItemsContainer()
         ids.push_back(item->getId());
       }
     }
+
+    if(!ids.empty()) {
+      data_.addItemsToSelectedProgramme(ids);
+    }
     Component::BailOutChecker checker(this);
     listeners_.callChecked(
-        checker, [this, ids](Listener& l) { l.addItemsClicked(this, ids); });
+          checker, [this, ids](Listener& l) {
+              l.addItemsClicked(this, ids);
+          });
     if (checker.shouldBailOut()) {
       return;
     }
@@ -266,3 +274,40 @@ void ItemsContainer::setPresentThemeFor(const communication::ConnectionId& id) {
   ::setThemeFor(hoaItems, id, true);
 }
 
+void ItemsContainer::dataReset(const proto::ProgrammeStore &programmeStore, const ItemMap &items) {
+    auto selectedIndex = programmeStore.selected_programme_index();
+    selectedIndex = std::max<int>(selectedIndex, 0);
+    createOrUpdateViews(items);
+    if(selectedIndex < programmeStore.programme_size()) {
+        auto const& selectedProgramme = programmeStore.programme(selectedIndex);
+        themeItemsFor({{selectedIndex, true},
+                       selectedProgramme,
+                       items});
+    }
+}
+
+void ItemsContainer::programmeSelected(ProgrammeObjects const& objects) {
+    themeItemsFor(objects);
+}
+
+void ItemsContainer::itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) {
+    if(status.isSelected) {
+        for(auto const& item : items) {
+            setPresentThemeFor(item.inputMetadata.connection_id());
+        }
+    }
+}
+
+void ItemsContainer::itemRemovedFromProgramme(ProgrammeStatus status, const communication::ConnectionId &id) {
+    if(status.isSelected) {
+        setMissingThemeFor(id);
+    }
+}
+
+void ItemsContainer::inputRemoved(const communication::ConnectionId &id) {
+    removeView(id);
+}
+
+void ItemsContainer::inputUpdated(const InputItem &item) {
+    createOrUpdateView(item.data);
+}

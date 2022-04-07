@@ -21,7 +21,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
       onBoardingOverlay_(std::make_unique<Overlay>()),
       onBoardingContent_(std::make_unique<Onboarding>()),
       itemsOverlay_(std::make_shared<Overlay>()),
-      itemsContainer_(std::make_shared<ItemsContainer>()),
+      itemsContainer_(std::make_shared<ItemsContainer>(p_->metadata())),
       programmesContainer_(std::make_shared<ProgrammesContainer>(
               p_->getLevelMeter().lock(),
               p_->metadata())),
@@ -57,6 +57,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   itemsOverlay_->setWindowSize(706, 596);
 
   itemsContainer_->addListener(this);
+  p_->metadata().addUIListener(itemsContainer_);
   programmesContainer_->addListener(this);
   p_->metadata().addUIListener(programmesContainer_);
 
@@ -71,8 +72,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
-  p_->getFrontendConnector()->repopulateUIComponents(itemsContainer_,
-                                                     autoModeOverlay_,
+  p_->getFrontendConnector()->repopulateUIComponents(autoModeOverlay_,
                                                      multipleScenePluginsOverlay_);
 
   setResizable(true, false);
