@@ -4,6 +4,7 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include "store_metadata.hpp"
 
 #include <memory>
 
@@ -11,9 +12,9 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class AutoModeOverlay : public Component {
+class AutoModeOverlay : public Component, public MetadataListener {
  public:
-  AutoModeOverlay() {}
+  explicit AutoModeOverlay(Metadata& data) : data_{data} {}
 
   void paint(Graphics& g) override {
     auto area = getLocalBounds();
@@ -35,20 +36,20 @@ class AutoModeOverlay : public Component {
   }
 
   void mouseDown(const MouseEvent& event) override {}
-  void mouseUp(const MouseEvent& event) override { setVisible(false); }
+  void mouseUp(const MouseEvent& event) override { data_.setAutoMode(false); }
 
   MouseCursor getMouseCursor() override {
     return MouseCursor::PointingHandCursor;
   }
 
-  void visibilityChanged() override {
-    Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker, [this](Listener& l) {
-      l.autoModeChanged(this, this->isVisible());
-    });
-    if (checker.shouldBailOut()) {
-      return;
-    }
+  // MetadataListener interface
+  void dataReset(proto::ProgrammeStore const& programmeStore,
+               ItemMap const& items) override {
+    setVisible(programmeStore.auto_mode());
+  }
+
+  void autoModeChanged(bool enabled) override {
+      setVisible(enabled);
   }
 
   class Listener {
@@ -61,6 +62,7 @@ class AutoModeOverlay : public Component {
   void removeListener(Listener* l) { listeners_.remove(l); }
 
  private:
+  Metadata& data_;
   ListenerList<Listener> listeners_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoModeOverlay)

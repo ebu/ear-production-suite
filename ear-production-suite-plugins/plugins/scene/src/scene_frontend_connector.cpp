@@ -21,11 +21,8 @@ JuceSceneFrontendConnector::JuceSceneFrontendConnector (
 // --- Component Setter
 
 void JuceSceneFrontendConnector::repopulateUIComponents(
-    std::shared_ptr<AutoModeOverlay> const& autoModeOverlay,
     std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay
 ) {
-  autoModeOverlay->addListener(this);
-  autoModeOverlay_ = autoModeOverlay;
   multipleScenePluginsOverlay_ = multipleScenePluginsOverlay;
   data_.refresh();
 }
@@ -36,14 +33,6 @@ void JuceSceneFrontendConnector::duplicateSceneDetected(bool isDuplicate) {
     overlay->setVisible(isDuplicate);
   }
 
-}
-
-void JuceSceneFrontendConnector::dataReset(
-        proto::ProgrammeStore const& programmeStore,
-        ItemMap const& items) {
-    if (auto overlay = autoModeOverlay_.lock()) {
-        overlay->setVisible(programmeStore.auto_mode());
-    }
 }
 
 // --- ItemList Management
@@ -68,17 +57,6 @@ void JuceSceneFrontendConnector::programmeItemUpdated(ProgrammeStatus status, Pr
     updateAndCheckPendingElements(item.inputMetadata.connection_id(), item.inputMetadata);
 }
 
-// AutoModeOverlay::Listener
-void JuceSceneFrontendConnector::autoModeChanged(AutoModeOverlay* overlay,
-                                                 bool state) {
-  data_.setAutoMode(state);
-}
-
-void JuceSceneFrontendConnector::autoModeChanged(bool enabled) {
-  if(auto overlay = autoModeOverlay_.lock()) {
-    overlay->setVisible(enabled);
-  }
-}
 
 }  // namespace ui
 }  // namespace plugin

@@ -7,7 +7,6 @@
 #include "item_view_list.hpp"
 #include "store_metadata.hpp"
 #include <iostream>
-#include "store_metadata.hpp"
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;

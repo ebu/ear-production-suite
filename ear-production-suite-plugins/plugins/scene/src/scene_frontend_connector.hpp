@@ -28,34 +28,25 @@ class ObjectView;
 
 class JuceSceneFrontendConnector :
     public MetadataListener,
-    public SceneFrontendBackendConnector,
-    private AutoModeOverlay::Listener {
+    public SceneFrontendBackendConnector {
  public:
   explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
 
   void repopulateUIComponents(
-      std::shared_ptr<AutoModeOverlay> const& autoModeOverlay,
       std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay);
 
   // MetadataListener
-  void dataReset (proto::ProgrammeStore const& programmes,
-                  ItemMap const& items) override;
   void duplicateSceneDetected(bool isDuplicate) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
-  void autoModeChanged(bool enabled) override;
 
  private:
   void updateAndCheckPendingElements(const communication::ConnectionId& id,
                                      const proto::InputItemMetadata& item) const;
 
-  // AutoModeOverlay::Listener
-  void autoModeChanged(AutoModeOverlay* overlay, bool state) override;
-
   SceneAudioProcessor* p_;
   Metadata& data_;
 
   std::weak_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay_;
-  std::weak_ptr<AutoModeOverlay> autoModeOverlay_;
 };
 
 }  // namespace ui
