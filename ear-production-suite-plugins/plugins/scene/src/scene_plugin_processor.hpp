@@ -75,6 +75,8 @@ class SceneAudioProcessor : public AudioProcessor {
 
   void setupBackend();
 
+  ear::plugin::Metadata& metadata();
+
  private:
   void doSampleRateChecks();
   void sendAdmMetadata();

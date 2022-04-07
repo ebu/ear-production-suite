@@ -20,14 +20,14 @@ namespace ui {
 
 class ProgrammeView : public Component {
  public:
-  explicit ProgrammeView(SceneFrontendBackendConnector* connector)
+  explicit ProgrammeView()
       : nameTextEditor_(std::make_shared<EarNameTextEditor>()),
         langLabel_(std::make_unique<Label>()),
         langComboBox_(std::make_shared<EarComboBox>()),
         addItemButton_(std::make_unique<EarButton>()),
         addGroupButton_(std::make_unique<EarButton>()),
         addToggleButton_(std::make_unique<EarButton>()),
-        elementOverview_(std::make_unique<ElementOverview>(connector)),
+        elementOverview_(std::make_unique<ElementOverview>()),
         elementsContainer_(std::make_shared<ElementsContainer>()) {
     nameTextEditor_->setLabelText("Name");
     nameTextEditor_->setFont(EarFonts::Label);
@@ -166,11 +166,11 @@ class ProgrammeView : public Component {
    public:
     virtual ~Listener() = default;
 
-    virtual void addItemClicked(ProgrammeView* view) = 0;
-    virtual void addGroupClicked(ProgrammeView* view) = 0;
-    virtual void addToggleClicked(ProgrammeView* view) = 0;
-    virtual void nameChanged(ProgrammeView* view, const String& newName) = 0;
-    virtual void languageChanged(ProgrammeView* view, int index) = 0;
+    virtual void addItemClicked(ProgrammeView* view) {}
+    virtual void addGroupClicked(ProgrammeView* view) {}
+    virtual void addToggleClicked(ProgrammeView* view) {}
+    virtual void nameChanged(ProgrammeView* view, const String& newName) {}
+    virtual void languageChanged(ProgrammeView* view, int index) {}
   };
 
   void addListener(Listener* l) { listeners_.add(l); }

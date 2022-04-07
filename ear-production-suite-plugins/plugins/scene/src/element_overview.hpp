@@ -19,9 +19,8 @@ class SceneFrontendBackendConnector;
 
 class ElementOverview : public Component, private Timer {
  public:
-  explicit ElementOverview(SceneFrontendBackendConnector* connector)
-      : connector_{connector},
-        rotateLeftButton_(std::make_unique<EarButton>()),
+  ElementOverview()
+      : rotateLeftButton_(std::make_unique<EarButton>()),
         rotateRightButton_(std::make_unique<EarButton>()),
         startViewingAngle_(0.f),
         currentViewingAngle_(180.f),
@@ -319,7 +318,6 @@ class ElementOverview : public Component, private Timer {
   static boost::uuids::uuid getUuid(ProgrammeObject const& pair) {
     return communication::ConnectionId(pair.inputMetadata.connection_id()).getUuid();
   }
-  SceneFrontendBackendConnector* connector_;
   proto::Programme programme_;
 
   std::unique_ptr<EarButton> rotateLeftButton_;
