@@ -1,16 +1,13 @@
 #include "scene_plugin_processor.hpp"
-#include <sstream>
-
 #include "scene_plugin_editor.hpp"
 #include <adm/write.hpp>
-#include <adm/parse.hpp>
 #include "programme_store_adm_serializer.hpp"
-#include "programme_store_adm_populator.hpp"
 #include <future>
 #include <programme_store.pb.h>
 #include "scene_backend.hpp"
 #include "scene_frontend_connector.hpp"
 #include "metadata_event_dispatcher.hpp"
+#include "pending_store.hpp"
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
@@ -191,11 +188,6 @@ void SceneAudioProcessor::setStateInformation(const void* data,
   metadata_.setStore(store);
 }
 
-ear::plugin::ui::JuceSceneFrontendConnector*
-SceneAudioProcessor::getFrontendConnector() {
-  return connector_.get();
-}
-
 void SceneAudioProcessor::doSampleRateChecks() {
   auto curSampleRate = static_cast<int>(getSampleRate());
   if (samplerate_ != curSampleRate) {
@@ -233,10 +225,10 @@ void SceneAudioProcessor::sendAdmMetadata() {
 
 void SceneAudioProcessor::recvAdmMetadata(std::string admStr,
                                           std::vector<uint32_t> mappings) {
-  auto iss = std::istringstream{std::move(admStr)};
-  auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
-  pendingElements_ =
-      ear::plugin::populateStoreFromAdm(*doc, pendingStore_, mappings);
+    pendingStore_ = std::make_shared<ear::plugin::PendingStore>(metadata_,
+                                                                std::move(admStr),
+                                                                std::move(mappings));
+    metadata_.addBackendListener(pendingStore_);
 }
 
 void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
