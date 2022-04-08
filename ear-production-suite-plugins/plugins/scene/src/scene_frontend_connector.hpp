@@ -32,11 +32,9 @@ class JuceSceneFrontendConnector :
  public:
   explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
 
-  void repopulateUIComponents(
-      std::shared_ptr<MultipleScenePluginsOverlay> const& multipleScenePluginsOverlay);
+  void repopulateUIComponents();
 
   // MetadataListener
-  void duplicateSceneDetected(bool isDuplicate) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
 
  private:
@@ -45,8 +43,6 @@ class JuceSceneFrontendConnector :
 
   SceneAudioProcessor* p_;
   Metadata& data_;
-
-  std::weak_ptr<MultipleScenePluginsOverlay> multipleScenePluginsOverlay_;
 };
 
 }  // namespace ui
