@@ -55,32 +55,44 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
     }
 }
 
+namespace {
+    template<typename T>
+    auto findItem(T mutableRepeatedField, std::string const& connectionId) {
+        return std::find_if(mutableRepeatedField->begin(),
+                            mutableRepeatedField->end(),
+                            [&connectionId](auto const& item) {
+            return item.connection_id() == connectionId;
+        });
+    }
+}
+
 void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeStatus status,
                                                        const ear::plugin::communication::ConnectionId &id) {
     if(status.isSelected) {
         auto monitoringItems = store_.mutable_monitoring_items();
-        auto item = std::find_if(monitoringItems->begin(), monitoringItems->end(),
-                                 [&id](auto const &item) {
-                                     return item.connection_id() == id.string();
-                                 });
-        if(item != monitoringItems->end()) {
+        if(auto item = findItem(monitoringItems, id.string());
+                item != monitoringItems->end()) {
             monitoringItems->erase(item);
             changed = true;
         }
     }
 }
 
+bool SceneStore::updateMonitoringItem(proto::InputItemMetadata const& inputItem) {
+    auto monitoringItems = store_.mutable_monitoring_items();
+    if(auto item = findItem(monitoringItems, inputItem.connection_id());
+            item != monitoringItems->end()) {
+        setMonitoringItemFrom(*item, inputItem);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus status,
                                                    const ear::plugin::ProgrammeObject &object) {
     if(status.isSelected) {
-        auto monitoringItems = store_.mutable_monitoring_items();
-        auto item = std::find_if(monitoringItems->begin(), monitoringItems->end(),
-                                 [&object](auto const &item) {
-                                     return item.connection_id() == object.inputMetadata.connection_id();
-                                 });
-        if(item != monitoringItems->end()) {
-            setMonitoringItemFrom(*item, object.inputMetadata);
-        } else {
+        if(!updateMonitoringItem(object.inputMetadata)) {
             addMonitoringItem(object.inputMetadata);
         }
     }
@@ -88,31 +100,26 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
 
 void SceneStore::inputRemoved(const communication::ConnectionId &id) {
     auto availableItems = store_.mutable_all_available_items();
-    auto existingItem = std::find_if(availableItems->begin(),
-                                     availableItems->end(),
-                                     [&id](auto const& item) {
-                                         return item.connection_id() == id.string();
-                                     });
-    if(existingItem != availableItems->end()) {
-        availableItems->erase(existingItem);
-        changed = true;
+    if(auto existingItem = findItem(availableItems, id.string());
+       existingItem != availableItems->end()) {
+          availableItems->erase(existingItem);
+          changed = true;
     }
 }
 
 void SceneStore::inputUpdated(const InputItem &item) {
     auto availableItems = store_.mutable_all_available_items();
-    auto const& itemId = item.id;
-    auto existingItem = std::find_if(availableItems->begin(),
-                                     availableItems->end(),
-                                     [&itemId](auto const& item) {
-                                         return item.connection_id() == itemId.string();
-                                     });
-    if(existingItem == availableItems->end()) {
+    if(auto existingItem = findItem(availableItems, item.id.string());
+            existingItem == availableItems->end()) {
         auto newItem = store_.add_all_available_items();
         newItem->CopyFrom(item.data);
         changed = true;
     } else {
         existingItem->CopyFrom(item.data);
+        // Update monitoring items here as events are asynchronous,
+        // otherwise we risk an update between reducing channel count
+        // here and updating rendered items via programmeItemUpdated.
+        updateMonitoringItem(item.data);
         changed = changed || item.data.changed();
     }
 }
@@ -177,6 +184,3 @@ void SceneStore::triggerSend() {
       sendUpdate();
   }
 }
-
-
-

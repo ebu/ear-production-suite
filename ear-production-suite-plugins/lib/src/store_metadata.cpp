@@ -65,8 +65,10 @@ void Metadata::removeInput(const communication::ConnectionId& id) {
     std::lock_guard<std::mutex> lock(mutex_);
     if(auto it = itemStore_.find(id); it != itemStore_.end()) {
         auto item = it->second;
+        removeElementFromAllProgrammes(id);
         itemStore_.erase(it);
-        doRemoveInputItem(item);
+        fireEvent(&MetadataListener::notifyInputRemoved,
+                  id);
     }
 }
 
@@ -83,10 +85,7 @@ void Metadata::addProgramme() {
     std::string name{"Programme_"};
     auto index = programmeStore_.programme_size();
     name.append(std::to_string(index));
-    auto programme = addProgrammeImpl(name, "");
-    bool selected = (index == programmeStore_.selected_programme_index());
-    fireEvent(&MetadataListener::notifyProgrammeAdded,
-              ProgrammeStatus{index, selected}, *programme);
+    addProgrammeImpl(name, "");
 }
 
 void Metadata::removeProgramme(int index) {
@@ -176,6 +175,10 @@ void Metadata::clearProgrammeLanguage(int programmeIndex) {
 void Metadata::addItemsToSelectedProgramme(std::vector<
         communication::ConnectionId> const& ids) {
     std::lock_guard<std::mutex> lock(mutex_);
+    doAddItemsToSelectedProgramme(ids);
+}
+
+void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids) {
     assert(!ids.empty());
     auto programmeIndex = programmeStore_.selected_programme_index();
     auto programme = programmeStore_.mutable_programme(programmeIndex);
@@ -187,6 +190,7 @@ void Metadata::addItemsToSelectedProgramme(std::vector<
     }
 
     doAddItems({programmeIndex, true}, elements);
+
 }
 
 void Metadata::removeElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
@@ -242,26 +246,10 @@ void Metadata::addBackendListener(std::weak_ptr<MetadataListener> listener) {
     backendListeners_.push_back(std::move(listener));
 }
 
-void Metadata::autoUpdateFrom(const RouteMap& itemsSortedByRoute) {
-    if (programmeStore_.auto_mode()) {
-        auto programmeCount = programmeStore_.programme_size();
-        programmeStore_.clear_programme();
-        for(auto i = 0; i != programmeCount; ++i) {
-            fireEvent(&MetadataListener::notifyProgrammeRemoved,
-                      i);
-        }
-        auto defaultProgramme = addProgrammeImpl("Default", "");
-        programmeStore_.set_selected_programme_index(0);
-        fireEvent(&MetadataListener::notifyProgrammeAdded,
-                  ProgrammeStatus{0, true}, *defaultProgramme);
-        for (auto const& routeItem : itemsSortedByRoute) {
-            auto object = addObject(defaultProgramme, routeItem.second);
-            doAddItems({0, true}, {*object});
-        }
-        auto index = programmeStore_.selected_programme_index();
-        auto const prog = *defaultProgramme;
-        fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{index, true}, prog);
+void Metadata::ensureDefaultProgrammePresent() {
+    if(programmeStore_.programme_size() == 0) {
+        addProgrammeImpl("Default", "");
+        doSelectProgramme(0, programmeStore_.programme(0));
     }
 }
 
@@ -289,12 +277,15 @@ void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communicat
     }
 }
 
-proto::Programme* Metadata::addProgrammeImpl(
-        const std::string& name, const std::string& language) {
+void Metadata::addProgrammeImpl(
+        const std::string& name,
+        const std::string& language) {
+    auto index = programmeStore_.programme_size();
     auto programme = programmeStore_.add_programme();
     programme->set_name(name);
     programme->set_language(language);
-    return programme;
+    fireEvent(&MetadataListener::notifyProgrammeAdded,
+              ProgrammeStatus{index, false}, *programme);
 }
 
 proto::Object* Metadata::addObject(proto::Programme* programme,
@@ -335,27 +326,34 @@ void Metadata::doChangeInputItem(
   auto const& id = newItem.connection_id();
   fireEvent(&MetadataListener::notifyInputUpdated,
           InputItem{id, newItem});
-  autoUpdateFrom(routeMap());
-  auto selectedIndex = programmeStore_.selected_programme_index();
-  for(auto i = 0; i != programmeStore_.programme_size(); ++i) {
-    auto const& elements = programmeStore_.programme(i).element();
-    if(auto it = findObjectWithId(elements.begin(), elements.end(), id);
-        it != elements.end()) {
-      fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                ProgrammeStatus{i, i == selectedIndex},
-                ProgrammeObject{it->object(), newItem});
-    }
+  auto selectedIndex = 0;
+  bool shouldUpdate{true};
+
+  if(programmeStore_.auto_mode()) {
+      ensureDefaultProgrammePresent();
+      auto const& elements = programmeStore_.programme(0).element();
+      if(auto it = findObjectWithId(elements.begin(), elements.end(), newItem.connection_id());
+      it == elements.end()) {
+          doAddItemsToSelectedProgramme({newItem.connection_id()});
+          shouldUpdate = false;
+      }
+  } else {
+      selectedIndex = programmeStore_.selected_programme_index();
+  }
+
+  if(shouldUpdate) {
+      for (auto i = 0; i != programmeStore_.programme_size(); ++i) {
+          auto const &elements = programmeStore_.programme(i).element();
+          if (auto it = findObjectWithId(elements.begin(), elements.end(), id);
+                  it != elements.end()) {
+              fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
+                        ProgrammeStatus{i, i == selectedIndex},
+                        ProgrammeObject{it->object(), newItem});
+          }
+      }
   }
 }
 
-void Metadata::doRemoveInputItem(
-    const proto::InputItemMetadata& oldItem) {
-    EAR_LOGGER_TRACE(logger_, "removeInput id {}", oldItem.connection_id());
-  removeElementFromAllProgrammes(oldItem.connection_id());
-  autoUpdateFrom(routeMap());
-  fireEvent(&MetadataListener::notifyInputRemoved,
-            oldItem.connection_id());
-}
 
 RouteMap Metadata::routeMap() const {
     RouteMap routes;

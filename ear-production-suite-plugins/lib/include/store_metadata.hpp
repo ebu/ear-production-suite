@@ -26,8 +26,8 @@ class Metadata {
             logger_{createLogger(fmt::format("Metadata Store@{}", (const void*)this))},
             uiDispatcher_{std::move(uiDispatcher)},
             backendDispatcher_{std::move(backendDispatcher)} {
-            logger_->set_level(spdlog::level::trace);
-        autoUpdateFrom(routeMap());
+        logger_->set_level(spdlog::level::trace);
+        ensureDefaultProgrammePresent();
     }
 
   std::pair<proto::ProgrammeStore, ItemMap> stores() const;
@@ -59,21 +59,21 @@ class Metadata {
   void addBackendListener(std::weak_ptr<MetadataListener> listener);
 
  private:
-  void autoUpdateFrom(RouteMap const& itemStore);
   RouteMap routeMap() const;
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
+  void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids);
   void doSelectProgramme(int index, proto::Programme const& programme);
 
   // ItemStore callbacks
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,
                          const proto::InputItemMetadata& newItem);
-  void doRemoveInputItem(const proto::InputItemMetadata& oldItem);
 
   void removeElementFromAllProgrammes(communication::ConnectionId const& id);
   void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id);
 
-  proto::Programme* addProgrammeImpl(std::string const& name, std::string const& language);
+  void addProgrammeImpl(std::string const& name, std::string const& language);
+  void ensureDefaultProgrammePresent();
   proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
 
   template<typename F, typename... Args>
