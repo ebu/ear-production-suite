@@ -48,8 +48,7 @@ add_library(ear-plugin-base STATIC
   src/ui/direct_speakers_frontend_backend_connector.cpp
   src/ui/hoa_frontend_backend_connector.cpp
   src/ui/object_frontend_backend_connector.cpp
-  src/ui/scene_frontend_backend_connector.cpp
-  src/ui/binaural_monitoring_frontend_backend_connector.cpp
+        src/ui/binaural_monitoring_frontend_backend_connector.cpp
   src/scene_store.cpp
   src/communication/metadata_thread.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
@@ -121,8 +120,7 @@ set(EAR_BASE_HEADERS
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
-	include/ui/scene_frontend_backend_connector.hpp
-	include/variable_block_adapter.hpp
+        include/variable_block_adapter.hpp
 	include/scene_store.hpp
 	include/communication/metadata_thread.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
