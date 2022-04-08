@@ -1,9 +1,8 @@
 #pragma once
 
-#include <map>
+#include <string>
 #include "JuceHeader.h"
 #include "helper/nng_wrappers.h"
-#include "programme_store.pb.h"
 #include "store_metadata.hpp"
 #include "components/read_only_audio_parameter_int.hpp"
 #include "components/level_meter_calculator.hpp"
@@ -17,6 +16,7 @@ namespace ui {
 class JuceSceneFrontendConnector;
 }
 class SceneBackend;
+class PendingStore;
 }  // namespace plugin
 }  // namespace ear
 
@@ -53,7 +53,6 @@ class SceneAudioProcessor : public AudioProcessor {
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 
-  ear::plugin::ui::JuceSceneFrontendConnector* getFrontendConnector();
   ear::plugin::Metadata& getData() {
     return metadata_;
   }
@@ -63,15 +62,6 @@ class SceneAudioProcessor : public AudioProcessor {
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
   };
-
-  std::multimap<int, ear::plugin::proto::ProgrammeElement*>&
-  getPendingElements() {
-    return pendingElements_;
-  }
-
-  void setStoreFromPending() {
-    metadata_.setStore(pendingStore_);
-  }
 
   void setupBackend();
 
@@ -84,10 +74,8 @@ class SceneAudioProcessor : public AudioProcessor {
   ear::plugin::MetadataThread metadataThread_;
   std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
-
   ear::plugin::Metadata metadata_;
-  ear::plugin::proto::ProgrammeStore pendingStore_;
-  std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
+  std::shared_ptr<ear::plugin::PendingStore> pendingStore_;
 
   ear::plugin::ui::ReadOnlyAudioParameterInt* commandPort;
   ear::plugin::ui::ReadOnlyAudioParameterInt* samplesPort;
