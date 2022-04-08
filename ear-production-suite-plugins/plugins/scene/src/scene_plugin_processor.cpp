@@ -5,7 +5,6 @@
 #include <future>
 #include <programme_store.pb.h>
 #include "scene_backend.hpp"
-#include "scene_frontend_connector.hpp"
 #include "metadata_event_dispatcher.hpp"
 #include "pending_store.hpp"
 
@@ -18,18 +17,14 @@ SceneAudioProcessor::SceneAudioProcessor()
       metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>(),
                 std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_))
 {
-  connector_ = std::make_shared<ear::plugin::ui::JuceSceneFrontendConnector>(this);
-  metadata_.addUIListener(connector_);
   backend_ = std::make_unique<ear::plugin::SceneBackend>(metadata_);
 
   try {
     backend_->setup();
   } catch (const std::exception& e) {
-    if (connector_) {
-      backendSetupTimer_ =
-          std::make_unique<ear::plugin::BackendSetupTimer>(this);
-      backendSetupTimer_->startTimer(1000);
-    }
+    backendSetupTimer_ =
+      std::make_unique<ear::plugin::BackendSetupTimer>(this);
+    backendSetupTimer_->startTimer(1000);
   }
 
   levelMeter_ =

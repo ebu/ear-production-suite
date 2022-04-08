@@ -2,7 +2,6 @@
 // Created by Richard Bailey on 28/02/2022.
 //
 #include "programmes_container.hpp"
-#include "scene_frontend_connector.hpp"
 #include "element_view_list.hpp"
 #include "object_view.hpp"
 #include "programme_view.hpp"
