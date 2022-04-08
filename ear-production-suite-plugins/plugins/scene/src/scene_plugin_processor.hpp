@@ -52,11 +52,6 @@ class SceneAudioProcessor : public AudioProcessor {
 
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
-
-  ear::plugin::Metadata& getData() {
-    return metadata_;
-  }
-
   void incomingMessage(std::shared_ptr<NngMsg> msg);
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
@@ -72,7 +67,6 @@ class SceneAudioProcessor : public AudioProcessor {
   void sendAdmMetadata();
   void recvAdmMetadata(std::string admStr, std::vector<uint32_t> mappings);
   ear::plugin::MetadataThread metadataThread_;
-  std::shared_ptr<ear::plugin::ui::JuceSceneFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
   ear::plugin::Metadata metadata_;
   std::shared_ptr<ear::plugin::PendingStore> pendingStore_;

@@ -5,7 +5,6 @@
 #include "helper/properties_file.hpp"
 #include "detail/constants.hpp"
 #include "scene_plugin_processor.hpp"
-#include "scene_frontend_connector.hpp"
 #include "components/version_label.hpp"
 
 #include <memory>

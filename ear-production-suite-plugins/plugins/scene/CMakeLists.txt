@@ -8,8 +8,7 @@ set(SOURCES_SCENE
   ${EPS_SHARED_DIR}/components/ear_tab_button_bar.cpp
   ${EPS_SHARED_DIR}/components/ear_tabbed_component.cpp
   ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
-  src/scene_frontend_connector.cpp
-  src/backend_setup_timer.cpp
+        src/backend_setup_timer.cpp
   src/scene_plugin_editor.cpp
   src/scene_plugin_processor.cpp
   src/elements_container.cpp
@@ -84,8 +83,7 @@ set(HEADERS_SCENE
 	src/position_interaction_settings.hpp
 	src/programme_view.hpp
 	src/programmes_container.hpp
-	src/scene_frontend_connector.hpp
-	src/scene_plugin_editor.hpp
+        src/scene_plugin_editor.hpp
 	src/scene_plugin_processor.hpp
         src/ui_event_dispatcher.hpp
         )

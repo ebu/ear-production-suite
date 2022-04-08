@@ -8,7 +8,6 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "store_metadata.hpp"
 #include "programme_store.pb.h"
-#include "ui/scene_frontend_backend_connector.hpp"
 
 #include <memory>
 
