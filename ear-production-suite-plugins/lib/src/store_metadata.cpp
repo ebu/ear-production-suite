@@ -249,6 +249,7 @@ void Metadata::addBackendListener(std::weak_ptr<MetadataListener> listener) {
 void Metadata::ensureDefaultProgrammePresent() {
     if(programmeStore_.programme_size() == 0) {
         addProgrammeImpl("Default", "");
+        programmeStore_.set_selected_programme_index(0);
         doSelectProgramme(0, programmeStore_.programme(0));
     }
 }
