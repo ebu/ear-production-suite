@@ -35,6 +35,7 @@ private:
     // Implementation details
     void addAvailableInputItemsToSceneStore(ItemMap const& items);
     void addMonitoringItem(proto::InputItemMetadata const& inputItem);
+    bool updateMonitoringItem(proto::InputItemMetadata const& inputItem);
     void setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoringItem,
                                proto::InputItemMetadata const& inputItem);
     void addGroup(proto::ProgrammeElement const& element);
@@ -42,6 +43,5 @@ private:
     void sendUpdate();
 };
 }
-
 
 #endif //EAR_PRODUCTION_SUITE_SCENE_STORE_HPP
