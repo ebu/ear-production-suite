@@ -74,7 +74,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
-  p_->getFrontendConnector()->repopulateUIComponents();
+  p_->metadata().refresh();
 
   setResizable(true, false);
   setResizeLimits(1100, 620, std::numeric_limits<int>::max(),

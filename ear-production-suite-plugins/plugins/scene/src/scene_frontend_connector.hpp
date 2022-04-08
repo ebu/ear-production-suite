@@ -32,17 +32,13 @@ class JuceSceneFrontendConnector :
  public:
   explicit JuceSceneFrontendConnector(SceneAudioProcessor* processor);
 
-  void repopulateUIComponents();
-
   // MetadataListener
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
 
  private:
   void updateAndCheckPendingElements(const communication::ConnectionId& id,
                                      const proto::InputItemMetadata& item) const;
-
   SceneAudioProcessor* p_;
-  Metadata& data_;
 };
 
 }  // namespace ui

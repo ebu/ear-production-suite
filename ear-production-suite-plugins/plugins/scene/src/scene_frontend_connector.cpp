@@ -9,15 +9,8 @@ namespace ui {
 
 JuceSceneFrontendConnector::JuceSceneFrontendConnector (
     SceneAudioProcessor* processor)
-    : SceneFrontendBackendConnector(), p_(processor),
-      data_{processor->getData()} {
-}
-
-// --- Component Setter
-
-void JuceSceneFrontendConnector::repopulateUIComponents() {
-  data_.refresh();
-}
+    : SceneFrontendBackendConnector(), p_(processor)
+      {}
 
 // --- ItemList Management
 void JuceSceneFrontendConnector::updateAndCheckPendingElements(
