@@ -5,6 +5,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/shadows.hpp"
+#include "metadata_listener.hpp"
 
 #include <memory>
 
@@ -12,9 +13,10 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class MultipleScenePluginsOverlay : public Component {
+class MultipleScenePluginsOverlay : public Component,
+        public MetadataListener {
  public:
-  MultipleScenePluginsOverlay() {}
+  MultipleScenePluginsOverlay() = default;
 
   void paint(Graphics& g) override {
     auto area = getLocalBounds();
@@ -41,6 +43,9 @@ class MultipleScenePluginsOverlay : public Component {
   }
 
  private:
+    void duplicateSceneDetected(bool isDuplicate) override {
+        setVisible(isDuplicate);
+    }
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultipleScenePluginsOverlay)
 };
 

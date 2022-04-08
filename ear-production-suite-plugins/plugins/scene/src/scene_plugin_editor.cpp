@@ -61,6 +61,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   programmesContainer_->addListener(this);
   p_->metadata().addUIListener(programmesContainer_);
   p_->metadata().addUIListener(autoModeOverlay_);
+  p_->metadata().addUIListener(multipleScenePluginsOverlay_);
 
   addAndMakeVisible(header_.get());
   addAndMakeVisible(onBoardingButton_.get());
@@ -73,7 +74,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
-  p_->getFrontendConnector()->repopulateUIComponents(multipleScenePluginsOverlay_);
+  p_->getFrontendConnector()->repopulateUIComponents();
 
   setResizable(true, false);
   setResizeLimits(1100, 620, std::numeric_limits<int>::max(),
@@ -81,7 +82,7 @@ SceneAudioProcessorEditor::SceneAudioProcessorEditor(SceneAudioProcessor* p)
   setSize(1280, 880);
 }
 
-SceneAudioProcessorEditor::~SceneAudioProcessorEditor() {}
+SceneAudioProcessorEditor::~SceneAudioProcessorEditor() = default;
 
 void SceneAudioProcessorEditor::paint(Graphics& g) {
   g.fillAll(EarColours::Background);
@@ -104,11 +105,11 @@ void SceneAudioProcessorEditor::resized() {
   programmesContainer_->setBounds(area);
 }
 
-void SceneAudioProcessorEditor::endButtonClicked(Onboarding* onboarding) {
+void SceneAudioProcessorEditor::endButtonClicked(Onboarding*) {
   onBoardingOverlay_->setVisible(false);
   propertiesFile_->setValue("showOnboarding", false);
 }
-void SceneAudioProcessorEditor::moreButtonClicked(Onboarding* onboarding) {
+void SceneAudioProcessorEditor::moreButtonClicked(Onboarding*) {
   onBoardingOverlay_->setVisible(false);
   URL(ear::plugin::detail::MORE_INFO_URL).launchInDefaultBrowser();
 }
