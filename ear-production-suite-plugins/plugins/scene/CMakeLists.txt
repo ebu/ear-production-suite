@@ -8,7 +8,7 @@ set(SOURCES_SCENE
   ${EPS_SHARED_DIR}/components/ear_tab_button_bar.cpp
   ${EPS_SHARED_DIR}/components/ear_tabbed_component.cpp
   ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
-        src/backend_setup_timer.cpp
+  src/backend_setup_timer.cpp
   src/scene_plugin_editor.cpp
   src/scene_plugin_processor.cpp
   src/elements_container.cpp
@@ -27,8 +27,6 @@ set(HEADERS_SCENE
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_populator.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/programme_store_adm_serializer.hpp
 	${EPS_PLUGIN_BASE_DIR}/include/scene_backend.hpp
-	${EPS_PLUGIN_BASE_DIR}/include/ui/scene_frontend_backend_connector.hpp
-
 	${EPS_SHARED_DIR}/binary_data.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 
