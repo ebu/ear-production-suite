@@ -7,6 +7,7 @@
 #include "scene_backend.hpp"
 #include "metadata_event_dispatcher.hpp"
 #include "pending_store.hpp"
+#include "restored_pending_store.hpp"
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
@@ -15,8 +16,11 @@ SceneAudioProcessor::SceneAudioProcessor()
               .withOutput("Output", AudioChannelSet::discreteChannels(64),
                           true)),
       metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>(),
-                std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_))
+                std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_)),
+      autoModeController_(std::make_shared<ear::plugin::AutoModeController>(metadata_))
 {
+  metadata_.addUIListener(autoModeController_);
+
   backend_ = std::make_unique<ear::plugin::SceneBackend>(metadata_);
 
   try {
@@ -180,7 +184,12 @@ void SceneAudioProcessor::setStateInformation(const void* data,
                                               int sizeInBytes) {
   ear::plugin::proto::ProgrammeStore store;
   store.ParseFromArray(data, sizeInBytes);
-  metadata_.setStore(store);
+  restoredStore_ = std::make_shared<ear::plugin::RestoredPendingStore>(metadata_);
+  metadata_.addUIListener(restoredStore_);
+  // start on the message thread to avoid data race between start and scene updates
+  juce::MessageManager::callAsync([restored = std::move(store), this]() {
+        restoredStore_->start(restored, metadata_.stores());
+  });
 }
 
 void SceneAudioProcessor::doSampleRateChecks() {

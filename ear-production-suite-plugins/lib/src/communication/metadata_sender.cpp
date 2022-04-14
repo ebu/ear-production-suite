@@ -8,7 +8,7 @@ MetadataSender::MetadataSender(
     std::shared_ptr<spdlog::logger> logger)
     : data_{data},
       logger_{std::move(logger)},
-      maxSendInterval_{std::chrono::milliseconds(100)},
+      maxSendInterval_{std::chrono::milliseconds(250)},
       lastSendTimestamp_{std::chrono::system_clock::now()} {}
 
 MetadataSender::~MetadataSender() {
@@ -29,9 +29,9 @@ void MetadataSender::disconnect() {
   socket_ = nng::PushSocket{};
 }
 
-void MetadataSender::triggerSend() {
+void MetadataSender::triggerSend(bool force) {
   std::lock_guard<std::mutex> lock(sendMutex_);
-  if(data_.readAccess([](auto const& item) {
+  if(force || data_.readAccess([](auto const& item) {
      return item.changed();
   })) {
       socket_.asyncWait();
@@ -58,7 +58,7 @@ void MetadataSender::startTimer() {
   if (maxSendInterval_ > 0ms) {
     bool expected{false};
     if (timerRunning.compare_exchange_strong(expected, true)) {
-      timer_.sleep(maxSendInterval_,
+      timer_.sleep(maxSendInterval_ + 5ms,
                    std::bind(&MetadataSender::handleTimeout, this,
                              nng::placeholders::ErrorCode));
     }
@@ -75,7 +75,7 @@ void MetadataSender::handleTimeout(std::error_code ec) {
       deltaT = now - lastSendTimestamp_;
     }
     if (deltaT > maxSendInterval_) {
-      triggerSend();
+      triggerSend(true);
     }
     startTimer();
   }

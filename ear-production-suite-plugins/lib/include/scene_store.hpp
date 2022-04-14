@@ -30,7 +30,7 @@ private:
     void itemRemovedFromProgramme(ProgrammeStatus status, const communication::ConnectionId &id) override;
     void programmeItemUpdated(ProgrammeStatus status, const ProgrammeObject &object) override;
     void inputRemoved(const communication::ConnectionId &id) override;
-    void inputUpdated(const InputItem &item) override;
+    void inputUpdated(const InputItem &item, proto::InputItemMetadata const&) override;
 
     // Implementation details
     void addAvailableInputItemsToSceneStore(ItemMap const& items);
