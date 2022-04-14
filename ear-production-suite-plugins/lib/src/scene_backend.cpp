@@ -27,7 +27,8 @@ SceneBackend::SceneBackend(Metadata& data)
   data_.addBackendListener(sceneStore_);
 }
 
-SceneBackend::~SceneBackend() { metadataSender_.asyncStop(); }
+SceneBackend::~SceneBackend() {
+    metadataSender_.asyncStop(); }
 
 void SceneBackend::triggerMetadataSend(const proto::SceneStore &store) {
     communication::MessageBuffer buffer =

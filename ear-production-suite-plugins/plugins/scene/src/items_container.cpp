@@ -307,6 +307,6 @@ void ItemsContainer::inputRemoved(const communication::ConnectionId &id) {
     removeView(id);
 }
 
-void ItemsContainer::inputUpdated(const InputItem &item) {
+void ItemsContainer::inputUpdated(const InputItem &item, proto::InputItemMetadata const&) {
     createOrUpdateView(item.data);
 }

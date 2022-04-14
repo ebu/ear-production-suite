@@ -107,7 +107,7 @@ void SceneStore::inputRemoved(const communication::ConnectionId &id) {
     }
 }
 
-void SceneStore::inputUpdated(const InputItem &item) {
+void SceneStore::inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) {
     auto availableItems = store_.mutable_all_available_items();
     if(auto existingItem = findItem(availableItems, item.id.string());
             existingItem == availableItems->end()) {

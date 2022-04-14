@@ -9,6 +9,7 @@
 #include "backend_setup_timer.hpp"
 #include "ui_event_dispatcher.hpp"
 #include "communication/metadata_thread.hpp"
+#include "auto_mode_controller.hpp"
 
 namespace ear {
 namespace plugin {
@@ -17,6 +18,7 @@ class JuceSceneFrontendConnector;
 }
 class SceneBackend;
 class PendingStore;
+class RestoredPendingStore;
 }  // namespace plugin
 }  // namespace ear
 
@@ -70,6 +72,8 @@ class SceneAudioProcessor : public AudioProcessor {
   std::unique_ptr<ear::plugin::SceneBackend> backend_;
   ear::plugin::Metadata metadata_;
   std::shared_ptr<ear::plugin::PendingStore> pendingStore_;
+  std::shared_ptr<ear::plugin::RestoredPendingStore> restoredStore_;
+  std::shared_ptr<ear::plugin::AutoModeController> autoModeController_;
 
   ear::plugin::ui::ReadOnlyAudioParameterInt* commandPort;
   ear::plugin::ui::ReadOnlyAudioParameterInt* samplesPort;

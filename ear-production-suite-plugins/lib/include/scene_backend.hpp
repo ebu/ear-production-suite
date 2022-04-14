@@ -57,13 +57,13 @@ class SceneBackend {
   std::mutex mutex_;
   std::shared_ptr<spdlog::logger> logger_;
   Metadata& data_;
-  communication::SceneCommandReceiver commandReceiver_;
-  communication::SceneConnectionManager connectionManager_;
-  communication::SceneMetadataReceiver metadataReceiver_;
   std::shared_ptr<SceneStore> sceneStore_;
-  nng::PubSocket metadataSender_;
   std::set<communication::ConnectionId> previousScene_;
   std::set<std::string> overlappingIds_;
+  communication::SceneConnectionManager connectionManager_;
+  nng::PubSocket metadataSender_;
+  communication::SceneCommandReceiver commandReceiver_;
+  communication::SceneMetadataReceiver metadataReceiver_;
 };
 
 }  // namespace plugin

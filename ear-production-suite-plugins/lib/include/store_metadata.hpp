@@ -52,6 +52,7 @@ class Metadata {
   void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
   void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
+  void setElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
 
   // Listeners
@@ -75,6 +76,7 @@ class Metadata {
   void addProgrammeImpl(std::string const& name, std::string const& language);
   void ensureDefaultProgrammePresent();
   proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
+  void doSetElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
 
   template<typename F, typename... Args>
   void fireEvent(F const & fn, Args const&... args) {

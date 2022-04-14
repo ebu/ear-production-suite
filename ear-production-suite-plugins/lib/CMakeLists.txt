@@ -48,11 +48,13 @@ add_library(ear-plugin-base STATIC
   src/ui/direct_speakers_frontend_backend_connector.cpp
   src/ui/hoa_frontend_backend_connector.cpp
   src/ui/object_frontend_backend_connector.cpp
-        src/ui/binaural_monitoring_frontend_backend_connector.cpp
+  src/ui/binaural_monitoring_frontend_backend_connector.cpp
   src/scene_store.cpp
   src/communication/metadata_thread.cpp
+  src/pending_store.cpp include/pending_store.hpp
+  src/auto_mode_controller.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
-  ${EAR_PROTO_SRC} src/pending_store.cpp include/pending_store.hpp)
+  ${EAR_PROTO_SRC} src/restored_pending_store.cpp include/restored_pending_store.hpp)
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp
@@ -123,6 +125,7 @@ set(EAR_BASE_HEADERS
         include/variable_block_adapter.hpp
 	include/scene_store.hpp
 	include/communication/metadata_thread.hpp
+		include/auto_mode_controller.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 

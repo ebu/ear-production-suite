@@ -53,8 +53,8 @@ class MetadataListener {
   void notifyInputRemoved(communication::ConnectionId const& id) {
     inputRemoved(id);
   }
-  void notifyInputUpdated(InputItem const& item) {
-    inputUpdated(item);
+  void notifyInputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) {
+    inputUpdated(item, oldItem);
   }
  private:
   virtual void dataReset(proto::ProgrammeStore const& programmes, ItemMap const& items) {}
@@ -70,7 +70,7 @@ class MetadataListener {
   virtual void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) {}
   virtual void inputAdded(InputItem const& item) {}
   virtual void inputRemoved(communication::ConnectionId const& id) {}
-  virtual void inputUpdated(InputItem const& item) {}
+  virtual void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) {}
 };
 
 }  // namespace plugin

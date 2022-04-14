@@ -43,6 +43,7 @@ class SceneCommandReceiver {
   SceneCommandReceiver& operator=(const SceneCommandReceiver&) = delete;
   SceneCommandReceiver(SceneCommandReceiver&&) = delete;
   SceneCommandReceiver& operator=(SceneCommandReceiver&&) = delete;
+  ~SceneCommandReceiver() {socket_.asyncStop();}
 
   void setLogger(std::shared_ptr<spdlog::logger> logger) { logger_ = logger; }
 
