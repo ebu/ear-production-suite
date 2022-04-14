@@ -3,7 +3,6 @@
 //
 
 #include "store_metadata.hpp"
-#include <google/protobuf/util/message_differencer.h>
 #include "helper/move.hpp"
 #include <algorithm>
 
@@ -44,7 +43,6 @@ void Metadata::setInputItemMetadata(
         const communication::ConnectionId& id,
         const proto::InputItemMetadata& item) {
     std::lock_guard<std::mutex> lock(mutex_);
-    using google::protobuf::util::MessageDifferencer;
 
     assert(id.string() == item.connection_id());
     if (auto result = itemStore_.emplace(id, item); result.second) {
@@ -53,10 +51,8 @@ void Metadata::setInputItemMetadata(
                   InputItem{item.connection_id(), item});
     } else {
         auto previousItem = result.first->second;
-        if(!MessageDifferencer::ApproximatelyEquals(previousItem, item)) {
-            result.first->second = item;
-            doChangeInputItem(previousItem, item);
-        }
+        result.first->second = item;
+        doChangeInputItem(previousItem, item);
     }
     itemStore_[id].set_changed(false);
 }
@@ -185,12 +181,15 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
     std::vector<proto::Object> elements;
     elements.reserve(ids.size());
     for(auto const& id : ids) {
-        auto object = addObject(programme, id);
-        elements.push_back(*object);
+        if( auto element = std::find_if(elements.begin(), elements.end(),
+                                        [&id](auto const& element) {
+            return element.connection_id() == id.string(); });
+            element == elements.end()) {
+                auto object = addObject(programme, id);
+                elements.push_back(*object);
+        }
     }
-
     doAddItems({programmeIndex, true}, elements);
-
 }
 
 void Metadata::removeElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
@@ -326,31 +325,16 @@ void Metadata::doChangeInputItem(
     const proto::InputItemMetadata& newItem) {
   auto const& id = newItem.connection_id();
   fireEvent(&MetadataListener::notifyInputUpdated,
-          InputItem{id, newItem});
-  auto selectedIndex = 0;
-  bool shouldUpdate{true};
+          InputItem{id, newItem}, oldItem);
+  auto selectedIndex = programmeStore_.selected_programme_index();
 
-  if(programmeStore_.auto_mode()) {
-      ensureDefaultProgrammePresent();
-      auto const& elements = programmeStore_.programme(0).element();
-      if(auto it = findObjectWithId(elements.begin(), elements.end(), newItem.connection_id());
-      it == elements.end()) {
-          doAddItemsToSelectedProgramme({newItem.connection_id()});
-          shouldUpdate = false;
-      }
-  } else {
-      selectedIndex = programmeStore_.selected_programme_index();
-  }
-
-  if(shouldUpdate) {
-      for (auto i = 0; i != programmeStore_.programme_size(); ++i) {
-          auto const &elements = programmeStore_.programme(i).element();
-          if (auto it = findObjectWithId(elements.begin(), elements.end(), id);
-                  it != elements.end()) {
-              fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                        ProgrammeStatus{i, i == selectedIndex},
-                        ProgrammeObject{it->object(), newItem});
-          }
+  for (auto i = 0; i != programmeStore_.programme_size(); ++i) {
+      auto const &elements = programmeStore_.programme(i).element();
+      if (auto it = findObjectWithId(elements.begin(), elements.end(), id);
+              it != elements.end()) {
+          fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
+                    ProgrammeStatus{i, i == selectedIndex},
+                    ProgrammeObject{it->object(), newItem});
       }
   }
 }
@@ -365,5 +349,41 @@ RouteMap Metadata::routeMap() const {
                                              idItemPair.first);
                    });
     return routes;
+}
+
+void Metadata::setElementOrder(int programmeIndex, const std::vector<communication::ConnectionId> &order) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    doSetElementOrder(programmeIndex, order);
+}
+
+// This is horribly inefficient algorithm wise (O(n^2)?).
+// OTOH, order.size() is always <= 64 so a linear vector search probably still wins over a map. (it may fit in cache.)
+// If this ends up profiling slow, try changing it.
+// This should only be called rarely (on a routing change in auto mode or an element move in the GUI),
+// so it's not on a hot path.
+// An alternative would be so store element ordering separately to data in ProgrammeStore, so we could just modify that
+// without having to do a lookup / search at all, and rebuild the gui whenever it changes.
+// Probably a better option long term as would make sorting by some other key trivial (just have a sort key field
+// and the ordering) - key only needed to indicate what was used in the gui.
+void Metadata::doSetElementOrder(int programmeIndex, const std::vector<communication::ConnectionId> &order) {
+    auto currentElements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
+    auto targetIndexOf = [](proto::ProgrammeElement const& element, std::vector<communication::ConnectionId> const& order) {
+        if(!element.has_object()) return order.size();
+        std::size_t i = 0;
+        for(; i != order.size(); ++i) {
+            if(order[i].string() == element.object().connection_id()) return i;
+        }
+        return i;
+    };
+
+    std::stable_sort(currentElements->begin(), currentElements->end(),
+                     [&order, targetIndexOf](auto const& lhs, auto const& rhs) {
+                         return targetIndexOf(lhs, order) < targetIndexOf(rhs, order);
+                     });
+
+    auto selectedIndex = programmeStore_.selected_programme_index();
+    fireEvent(&MetadataListener::notifyProgrammeUpdated,
+              ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex},
+              programmeStore_.programme(programmeIndex));
 }
 

@@ -22,7 +22,7 @@ class MetadataSender {
                ConnectionId id);
   ConnectionId connectionId();
   void disconnect();
-  void triggerSend();
+  void triggerSend(bool force = false);
   void logger(std::shared_ptr<spdlog::logger> logger);
  private:
   void startTimer();

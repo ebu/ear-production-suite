@@ -249,6 +249,23 @@ void ProgrammesContainer::programmeUpdated(
         proto::Programme const& programme) {
     setProgrammeViewName(status.index, programme.name());
     setProgrammeViewLanguage(status.index, programme.language());
+    auto& elementViews = programmes_.at(status.index)->getElementsContainer()->elements;
+    auto const& progElements = programme.element();
+    std::stable_sort(elementViews.begin(), elementViews.end(), [&progElements](auto const& lhs, auto const& rhs) {
+       auto lhsObject = std::dynamic_pointer_cast<ObjectView>(lhs);
+       auto rhsObject = std::dynamic_pointer_cast<ObjectView>(rhs);
+       if(!lhsObject || !rhsObject) return false;
+       auto lhPosition = std::find_if(progElements.begin(), progElements.end(), [&lhsObject](auto const& el) {
+           if(!el.has_object()) return false;
+           return el.object().connection_id() == lhsObject->getData().item.connection_id();
+       });
+       auto rhPosition = std::find_if(progElements.begin(), progElements.end(), [&rhsObject](auto const& el) {
+          if(!el.has_object()) return false;
+          return el.object().connection_id() == rhsObject->getData().item.connection_id();
+       });
+       return lhPosition < rhPosition;
+    });
+    programmes_.at(status.index)->getElementsContainer()->list->resized();
 }
 
 void ProgrammesContainer::objectDataChanged(ObjectView::Data data) {

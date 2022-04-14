@@ -59,7 +59,7 @@ class ItemsContainer : public Component,
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
   void inputRemoved(communication::ConnectionId const& id) override;
-  void inputUpdated(const InputItem& item) override;
+  void inputUpdated(const InputItem& item, proto::InputItemMetadata const&) override;
  private:
   Metadata& data_;
   std::unique_ptr<ItemViewList> objectsList;
