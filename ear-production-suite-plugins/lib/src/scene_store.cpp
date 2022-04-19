@@ -29,11 +29,7 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
             }
         }
     }
-    auto overlaps = getOverlapIds(store_);
-    if (overlappingIds_ != overlaps) {
-        flagChangedOverlaps(overlappingIds_, overlaps, store_);
-    }
-    overlappingIds_ = overlaps;
+    flagOverlaps();
     changed = true;
 }
 
@@ -44,6 +40,7 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
         inputData.set_changed(true);
         addMonitoringItem(inputData);
     }
+    flagOverlaps();
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
@@ -52,6 +49,7 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
         for (auto const &object: objects) {
             addMonitoringItem(object.inputMetadata);
         }
+        flagOverlaps();
     }
 }
 
@@ -74,6 +72,7 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
                 item != monitoringItems->end()) {
             monitoringItems->erase(item);
             changed = true;
+            flagOverlaps();
         }
     }
 }
@@ -82,7 +81,11 @@ bool SceneStore::updateMonitoringItem(proto::InputItemMetadata const& inputItem)
     auto monitoringItems = store_.mutable_monitoring_items();
     if(auto item = findItem(monitoringItems, inputItem.connection_id());
             item != monitoringItems->end()) {
+        auto routingChanged = item->routing() != inputItem.routing();
         setMonitoringItemFrom(*item, inputItem);
+        if(routingChanged) {
+            flagOverlaps();
+        }
         return true;
     } else {
         return false;
@@ -94,6 +97,7 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
     if(status.isSelected) {
         if(!updateMonitoringItem(object.inputMetadata)) {
             addMonitoringItem(object.inputMetadata);
+            flagOverlaps();
         }
     }
 }
@@ -194,4 +198,13 @@ void SceneStore::exporting(bool isExporting) {
         sendData = true;
     }
     changed = true;
+}
+
+void SceneStore::flagOverlaps() {
+    auto overlaps = getOverlapIds(store_);
+    if (overlappingIds_ != overlaps) {
+        flagChangedOverlaps(overlappingIds_, overlaps, store_);
+    }
+    overlappingIds_ = overlaps;
+
 }
