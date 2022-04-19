@@ -387,3 +387,8 @@ void Metadata::doSetElementOrder(int programmeIndex, const std::vector<communica
               programmeStore_.programme(programmeIndex));
 }
 
+void Metadata::setExporting(bool exporting) {
+    fireEvent(&MetadataListener::notifyExporting,
+              exporting);
+}
+

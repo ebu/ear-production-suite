@@ -20,10 +20,12 @@ public:
 private:
     proto::SceneStore store_;
     bool changed{true};
+    bool sendData{true};
     std::set<std::string> overlappingIds_;
     std::function<void(proto::SceneStore const&)> updateCallback_;
 
     // MetadataListener interface
+    void exporting(bool isExporting) override;
     void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
     void programmeSelected(const ProgrammeObjects &objects) override;
     void itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) override;

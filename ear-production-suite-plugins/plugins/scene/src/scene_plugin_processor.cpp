@@ -125,9 +125,9 @@ bool SceneAudioProcessor::isBusesLayoutSupported(
 
 void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                        MidiBuffer& midiMessages) {
-  auto sendSamples = sendSamplesToExtension;
-  metadataThread_.post([this, sendSamples](){
-    backend_->triggerMetadataSend(sendSamples);
+
+  metadataThread_.post([this](){
+    backend_->triggerMetadataSend();
   });
   doSampleRateChecks();
 
@@ -160,7 +160,7 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     assert(resSend == 0);
     if (resSend != 0) {
       // TODO: Log this error somewhere - this means we can't send our samples
-      sendSamplesToExtension = false;
+      stopExport();
       return;
     }
   }
@@ -240,11 +240,11 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
   memcpy(&cmd, msg->getBufferPointer(), sizeof(uint8_t));
 
   if (cmd == commandSocket->Command::StartRender) {
-    sendSamplesToExtension = true;
+    startExport();
     commandSocket->sendResp(cmd);
 
   } else if (cmd == commandSocket->Command::StopRender) {
-    sendSamplesToExtension = false;
+    stopExport();
     commandSocket->sendResp(cmd);
 
   } else if (cmd == commandSocket->Command::GetAdmAndMappings) {
@@ -293,3 +293,13 @@ void SceneAudioProcessor::setupBackend() {
 ear::plugin::Metadata &SceneAudioProcessor::metadata() {
     return metadata_;
 }
+
+void SceneAudioProcessor::startExport() {
+    metadata_.setExporting(true);
+    sendSamplesToExtension = true;
+}
+
+void SceneAudioProcessor::stopExport() {
+    metadata_.setExporting(false);
+    sendSamplesToExtension = false;
+};
