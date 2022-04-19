@@ -46,7 +46,7 @@ class SceneBackend {
   SceneBackend(SceneBackend &&) = delete;
   SceneBackend &operator=(SceneBackend &&) = delete;
   SceneBackend &operator=(const SceneBackend &) = delete;
-  void triggerMetadataSend(bool forExporting = false);
+  void triggerMetadataSend();
   void triggerMetadataSend(proto::SceneStore const& store);
   void setup();
 

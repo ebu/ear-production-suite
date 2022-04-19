@@ -180,7 +180,18 @@ void SceneStore::sendUpdate() {
 }
 
 void SceneStore::triggerSend() {
-  if(changed) {
+  if(sendData && changed) {
       sendUpdate();
+      if(store_.is_exporting()) sendData = false;
   }
+}
+
+void SceneStore::exporting(bool isExporting) {
+    if(isExporting) {
+        store_.set_is_exporting(true);
+    } else {
+        store_.set_is_exporting(false);
+        sendData = true;
+    }
+    changed = true;
 }
