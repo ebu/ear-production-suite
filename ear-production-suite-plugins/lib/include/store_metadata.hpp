@@ -33,6 +33,7 @@ class Metadata {
   std::pair<proto::ProgrammeStore, ItemMap> stores() const;
   void refresh();
   void setDuplicateScene(bool isDuplicate);
+  void setExporting(bool exporting);
 
   // Input item manipulation
   void setInputItemMetadata(communication::ConnectionId const& id,

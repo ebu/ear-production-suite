@@ -20,6 +20,9 @@ class MetadataListener {
   void notifyDuplicateScene(bool isDuplicate) {
     duplicateSceneDetected(isDuplicate);
   }
+  void notifyExporting(bool isExporting) {
+      exporting(isExporting);
+  }
   void notifyProgrammeAdded(ProgrammeStatus status, proto::Programme const& programme) {
     programmeAdded(status, programme);
   }
@@ -59,6 +62,7 @@ class MetadataListener {
  private:
   virtual void dataReset(proto::ProgrammeStore const& programmes, ItemMap const& items) {}
   virtual void duplicateSceneDetected(bool isDuplicate) {}
+  virtual void exporting(bool isExporting) {}
   virtual void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) {}
   virtual void programmeRemoved(int programmeIndex) {}
   virtual void programmeUpdated(ProgrammeStatus status, proto::Programme const& programme) {}
