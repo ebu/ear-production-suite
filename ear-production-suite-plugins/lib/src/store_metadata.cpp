@@ -182,8 +182,8 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
     elements.reserve(ids.size());
     for(auto const& id : ids) {
         if( auto element = std::find_if(elements.begin(), elements.end(),
-                                        [&id](auto const& element) {
-            return element.connection_id() == id.string(); });
+                                        [&id](auto const& checkElement) {
+            return checkElement.connection_id() == id.string(); });
             element == elements.end()) {
                 auto object = addObject(programme, id);
                 elements.push_back(*object);
