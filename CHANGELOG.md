@@ -1,3 +1,15 @@
+Version 0.7.2
+
+* Binaural monitoring axis inversion controls - closes [#177](https://github.com/ebu/ear-production-suite/issues/177)
+* Save binaural monitoring config to file - closes [#182](https://github.com/ebu/ear-production-suite/issues/182)
+* Patch JUCE so Windows can detect failure to open UDP port - closes [#169](https://github.com/ebu/ear-production-suite/issues/169)
+* Don't crash if binaural monitoring plugin receives 0.6.0 metadata - closes [#180](https://github.com/ebu/ear-production-suite/issues/180)
+* Fix potential race condition in weak pointer usage [#181](https://github.com/ebu/ear-production-suite/issues/181)
+* Use mono mix for export waveform display, hide channel selection in export dialog [#185](https://github.com/ebu/ear-production-suite/pull/185)
+* Disable renderers when exporting to ADM for improved export speed [#185](https://github.com/ebu/ear-production-suite/pull/185)
+* Fix resolution of overlapping routings from HOA input plugin [#191](https://github.com/ebu/ear-production-suite/issues/191)
+* Pushed custom libadm changes upstream and updated submodule [#189](https://github.com/ebu/ear-production-suite/pull/189)
+
 Version 0.7.1 
 
 * Updated JUCE framework to 6.1.5 [#171](https://github.com/ebu/ear-production-suite/pull/171), fixes arm64/macos crash on unhandled keydown events [#174](https://github.com/ebu/ear-production-suite/issues/174)
