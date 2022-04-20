@@ -9,6 +9,7 @@
 #include <condition_variable>
 #include <vector>
 #include <functional>
+#include <atomic>
 
 namespace ear::plugin {
 class MetadataThread {
