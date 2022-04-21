@@ -65,8 +65,8 @@ private:
     std::mutex mutex_;
     std::condition_variable condition_;
     std::atomic_bool run_{true};
-    std::thread thread_;
     std::vector<std::function<void()>> messages_;
+    std::thread thread_;
     static const int INITIAL_QUEUE_CAPACITY{64};
 };
 }
