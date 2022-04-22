@@ -28,13 +28,25 @@ namespace ear::plugin {
         tryRestore();
     }
 
+    void RestoredPendingStore::inputAdded(InputItem const & item)
+    {
+        if(on_) {
+          checkAgainstMissingInputs(item);
+        }
+    }
+
     void RestoredPendingStore::inputUpdated(const InputItem &item, const proto::InputItemMetadata &oldItem) {
         if(on_) {
-            if (auto missingInput = missingInputs.find(item.id.string());
-                    missingInput != missingInputs.end()) {
-                missingInputs.erase(missingInput);
-                tryRestore();
-            }
+          checkAgainstMissingInputs(item);
+        }
+    }
+
+    void RestoredPendingStore::checkAgainstMissingInputs(InputItem const & item)
+    {
+        if (auto missingInput = missingInputs.find(item.id.string());
+            missingInput != missingInputs.end()) {
+          missingInputs.erase(missingInput);
+          tryRestore();
         }
     }
 
