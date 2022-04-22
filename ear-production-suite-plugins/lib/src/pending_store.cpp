@@ -22,21 +22,32 @@ namespace ear {
             pendingElements_ = populateStoreFromAdm(*doc, pendingStore_, mappings);
         }
 
-        void PendingStore::programmeItemUpdated(ProgrammeStatus status, const ProgrammeObject &item) {
-            if(!finished) {
-                auto range = pendingElements_.equal_range(item.inputMetadata.routing());
-                if (range.first != range.second) {
-                    for (auto el = range.first; el != range.second; ++el) {
-                        el->second->mutable_object()->set_connection_id(item.inputMetadata.connection_id());
-                    }
-                    pendingElements_.erase(range.first, range.second);
+        void PendingStore::inputAdded(InputItem const & item)
+        {
+          checkAgainstPendingElements(item);
+        }
 
-                    if (pendingElements_.empty()) {
-                        data_.setStore(pendingStore_);
-                        finished = true;
-                    }
-                }
+        void PendingStore::inputUpdated(InputItem const & item, proto::InputItemMetadata const & oldItem)
+        {
+          checkAgainstPendingElements(item);
+        }
+
+        void PendingStore::checkAgainstPendingElements(InputItem const & item)
+        {
+          if(!finished) {
+            auto range = pendingElements_.equal_range(item.data.routing());
+            if (range.first != range.second) {
+              for (auto el = range.first; el != range.second; ++el) {
+                el->second->mutable_object()->set_connection_id(item.data.connection_id());
+              }
+              pendingElements_.erase(range.first, range.second);
+
+              if (pendingElements_.empty()) {
+                data_.setStore(pendingStore_);
+                finished = true;
+              }
             }
+          }
         }
 
     } // ear
