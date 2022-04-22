@@ -18,14 +18,15 @@ namespace ear::plugin {
                    std::pair<proto::ProgrammeStore, ItemMap> const& currentStores);
 
     private:
-        void inputUpdated(const InputItem &item, const proto::InputItemMetadata &oldItem) override;
-        void tryRestore();
+        void inputAdded(InputItem const& item) override;
+        void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) override;
 
-    private:
         Metadata& data_;
         proto::ProgrammeStore store_;
         bool on_{false};
         std::unordered_set<std::string> missingInputs;
+        void checkAgainstMissingInputs(InputItem const& item);
+        void tryRestore();
     };
 
 }
