@@ -15,7 +15,8 @@ namespace ear::plugin {
 class MetadataThread {
 public:
     using MessageQueue = std::vector<std::function<void()>>;
-    MetadataThread() : thread_([this](){updateLoop();}) {
+    MetadataThread() {
+      thread_ = std::make_unique<std::thread>([this]() {updateLoop(); });
     }
     ~MetadataThread() {
         stop();
@@ -59,13 +60,13 @@ private:
     void stop() {
         run_.store(false);
         condition_.notify_one();
-        thread_.join();
+        thread_->join();
     }
 
     std::mutex mutex_;
     std::condition_variable condition_;
     std::atomic_bool run_{true};
-    std::thread thread_;
+    std::unique_ptr<std::thread> thread_;
     std::vector<std::function<void()>> messages_;
     static const int INITIAL_QUEUE_CAPACITY{64};
 };
