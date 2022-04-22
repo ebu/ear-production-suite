@@ -14,12 +14,16 @@ namespace ear::plugin {
                      std::string admStr,
                      std::vector<uint32_t> mappings);
         void populateFromAdm(std::string const& admStr, std::vector<uint32_t> const& mappings);
-        void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
+
     private:
+        void inputAdded(InputItem const& item) override;
+        void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) override;
+
         bool finished{false};
         Metadata& data_;
         std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
         ear::plugin::proto::ProgrammeStore pendingStore_;
+        void checkAgainstPendingElements(InputItem const& item);
     };
 } // ear::plugin
 
