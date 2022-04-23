@@ -11,10 +11,8 @@ namespace ear::plugin {
     class AutoModeController : public MetadataListener {
     public:
         explicit AutoModeController(Metadata& data);
-        void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
-        void autoModeChanged(bool enabled) override;
-        void itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) override;
 
+    private:
         struct IDRoute {
             int route;
             communication::ConnectionId id;
@@ -28,15 +26,13 @@ namespace ear::plugin {
             }
         };
 
-
-    private:
-
-
-    private:
         Metadata& data_;
         std::vector<IDRoute> itemOrder;
         bool on_{true};
         void setNewRoutes();
+        void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
+        void autoModeChanged(bool enabled) override;
+        void itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) override;
         void itemRemovedFromProgramme(ProgrammeStatus status, const communication::ConnectionId &id) override;
         void inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) override;
     };
