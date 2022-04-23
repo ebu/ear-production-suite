@@ -45,19 +45,6 @@ void AutoModeController::dataReset(const proto::ProgrammeStore &programmes,
     }
 }
 
-void AutoModeController::programmeItemUpdated(ProgrammeStatus status,
-                                              const ProgrammeObject &object) {
-    if(on_) {
-        auto routing = object.inputMetadata.routing();
-        auto idRoute = findElement(itemOrder, object.inputMetadata.connection_id());
-        if(idRoute != itemOrder.end() && idRoute->route != routing) {
-            idRoute->route = routing;
-            sortRoutes(itemOrder);
-            setNewRoutes();
-        }
-    }
-}
-
 void AutoModeController::autoModeChanged(bool enabled) {
     on_ = enabled;
 }
