@@ -12,7 +12,6 @@ namespace ear::plugin {
     public:
         explicit AutoModeController(Metadata& data);
         void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
-        void programmeItemUpdated(ProgrammeStatus status, const ProgrammeObject &object) override;
         void autoModeChanged(bool enabled) override;
         void itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) override;
 
