@@ -236,6 +236,18 @@ void Metadata::updateElement(const communication::ConnectionId& id,
     }
 }
 
+int ear::plugin::Metadata::getSelectedProgrammeIndex()
+{
+  return programmeStore_.selected_programme_index();
+}
+
+bool ear::plugin::Metadata::programmeHasElement(int programmeIndex, communication::ConnectionId const & id)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
+  return findObjectWithId(elements->begin(), elements->end(), id) != elements->end();
+}
+
 void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
     std::lock_guard<std::mutex> lock(mutex_);
     uiListeners_.push_back(std::move(listener));

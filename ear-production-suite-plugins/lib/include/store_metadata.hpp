@@ -56,6 +56,10 @@ class Metadata {
   void setElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
 
+  // Queries
+  int getSelectedProgrammeIndex();
+  bool programmeHasElement(int programmeIndex, communication::ConnectionId const& id);
+
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
   void addBackendListener(std::weak_ptr<MetadataListener> listener);
