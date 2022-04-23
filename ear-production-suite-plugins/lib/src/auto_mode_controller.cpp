@@ -58,14 +58,23 @@ void AutoModeController::setNewRoutes() {
     data_.setElementOrder(0, newOrder);
 }
 
-void AutoModeController::itemsAddedToProgramme(ProgrammeStatus status, const std::vector<ProgrammeObject> &objects) {
-    if(on_ && status.isSelected) {
-        assert(status.index == 0);
-        for(auto const& object : objects) {
-            itemOrder.push_back({object.inputMetadata.routing(), object.inputMetadata.connection_id()});
-        }
+void ear::plugin::AutoModeController::addOrUpdateItem(const InputItem & item)
+{
+    auto id = item.id.string();
+    auto el = findElement(itemOrder, id);
+    if(el != itemOrder.end()) {
+      auto newRoute = item.data.routing();
+      auto oldRoute = el->route;
+      if(newRoute != oldRoute) {
+        el->route = newRoute;
         sortRoutes(itemOrder);
         setNewRoutes();
+      }
+    } else {
+      itemOrder.push_back({item.data.routing(), id});
+      sortRoutes(itemOrder);
+      setNewRoutes();
+      data_.addItemsToSelectedProgramme({item.id});
     }
 }
 
@@ -78,18 +87,15 @@ void AutoModeController::itemRemovedFromProgramme(ProgrammeStatus status, const 
     }
 }
 
+void ear::plugin::AutoModeController::inputAdded(InputItem const & item)
+{
+    if(on_) {
+      addOrUpdateItem(item);
+    }
+}
+
 void AutoModeController::inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) {
     if(on_) {
-        auto route = item.data.routing();
-        if(route != oldItem.routing()) {
-            auto el = findElement(itemOrder, oldItem.connection_id());
-            if(el != itemOrder.end()) {
-                el->route = route;
-                sortRoutes(itemOrder);
-                setNewRoutes();
-            } else {
-                data_.addItemsToSelectedProgramme({item.id});
-            }
-        }
+      addOrUpdateItem(item);
     }
 }
