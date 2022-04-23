@@ -41,7 +41,7 @@ void AutoModeController::dataReset(const proto::ProgrammeStore &programmes,
             }
         }
         sortRoutes(itemOrder);
-        setNewRoutes();
+        pushItemOrdering();
     }
 }
 
@@ -49,7 +49,7 @@ void AutoModeController::autoModeChanged(bool enabled) {
     on_ = enabled;
 }
 
-void AutoModeController::setNewRoutes() {
+void AutoModeController::pushItemOrdering() {
     std::vector<communication::ConnectionId> newOrder;
     newOrder.reserve(itemOrder.size());
     std::transform(itemOrder.begin(), itemOrder.end(), std::back_inserter(newOrder), [](auto const& element){
@@ -68,12 +68,12 @@ void ear::plugin::AutoModeController::addOrUpdateItem(const InputItem & item)
       if(newRoute != oldRoute) {
         el->route = newRoute;
         sortRoutes(itemOrder);
-        setNewRoutes();
+        pushItemOrdering();
       }
     } else {
       itemOrder.push_back({item.data.routing(), id});
       sortRoutes(itemOrder);
-      setNewRoutes();
+      pushItemOrdering();
       data_.addItemsToSelectedProgramme({item.id});
     }
 }
@@ -83,7 +83,7 @@ void AutoModeController::itemRemovedFromProgramme(ProgrammeStatus status, const 
         assert(status.index == 0);
         auto el = findElement(itemOrder, id.string());
         itemOrder.erase(el);
-        setNewRoutes();
+        pushItemOrdering();
     }
 }
 

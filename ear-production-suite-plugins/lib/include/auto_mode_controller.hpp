@@ -29,7 +29,7 @@ namespace ear::plugin {
         Metadata& data_;
         std::vector<IDRoute> itemOrder;
         bool on_{true};
-        void setNewRoutes();
+        void pushItemOrdering();
         void addOrUpdateItem(const InputItem &item);
 
         void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
