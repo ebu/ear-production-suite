@@ -27,11 +27,8 @@ namespace ear::plugin {
         };
 
         Metadata& data_;
-        bool on_{true};
         bool addItemIfNecessary(const InputItem &item);
 
-        void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
-        void autoModeChanged(bool enabled) override;
         void inputAdded(InputItem const& item) override;
         void inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) override;
     };
