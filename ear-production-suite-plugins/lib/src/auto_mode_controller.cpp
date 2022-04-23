@@ -30,21 +30,13 @@ AutoModeController::AutoModeController(Metadata& data) : data_{data} {}
 
 bool ear::plugin::AutoModeController::addItemIfNecessary(const InputItem & item)
 {
-  if(!on_) return false;
+  if(!data_.getAutoMode()) return false;
   auto selectedProgrammeIndex = data_.getSelectedProgrammeIndex();
   if(data_.programmeHasElement(selectedProgrammeIndex, item.id)) return false;
   data_.addItemsToSelectedProgramme({ item.id });
   return true;
 }
 
-void AutoModeController::dataReset(const proto::ProgrammeStore &programmes,
-                                   const ItemMap &items) {
-    on_ = programmes.auto_mode();
-}
-
-void AutoModeController::autoModeChanged(bool enabled) {
-    on_ = enabled;
-}
 /*
 void AutoModeController::pushItemOrdering() {
 
