@@ -7,6 +7,7 @@
 #include "store_metadata.hpp"
 using namespace ear::plugin;
 
+/*
 namespace {
     template<typename V>
     auto findElement(V& container, std::string const& id) {
@@ -23,33 +24,30 @@ namespace {
         });
     }
 }
+*/
 
 AutoModeController::AutoModeController(Metadata& data) : data_{data} {}
+
+bool ear::plugin::AutoModeController::addItemIfNecessary(const InputItem & item)
+{
+  if(!on_) return false;
+  auto selectedProgrammeIndex = data_.getSelectedProgrammeIndex();
+  if(data_.programmeHasElement(selectedProgrammeIndex, item.id)) return false;
+  data_.addItemsToSelectedProgramme({ item.id });
+  return true;
+}
 
 void AutoModeController::dataReset(const proto::ProgrammeStore &programmes,
                                    const ItemMap &items) {
     on_ = programmes.auto_mode();
-    if(on_) {
-        itemOrder.clear();
-        auto index = programmes.selected_programme_index();
-        assert(index == 0);
-        auto const& elements = programmes.programme(index).element();
-        for(auto const& element : elements) {
-            if(element.has_object()) {
-                auto id = communication::ConnectionId{element.object().connection_id()};
-                itemOrder.push_back({items.at(id).routing(), {element.object().connection_id()}});
-            }
-        }
-        sortRoutes(itemOrder);
-        pushItemOrdering();
-    }
 }
 
 void AutoModeController::autoModeChanged(bool enabled) {
     on_ = enabled;
 }
-
+/*
 void AutoModeController::pushItemOrdering() {
+
     std::vector<communication::ConnectionId> newOrder;
     newOrder.reserve(itemOrder.size());
     std::transform(itemOrder.begin(), itemOrder.end(), std::back_inserter(newOrder), [](auto const& element){
@@ -57,45 +55,22 @@ void AutoModeController::pushItemOrdering() {
     });
     data_.setElementOrder(0, newOrder);
 }
-
-void ear::plugin::AutoModeController::addOrUpdateItem(const InputItem & item)
-{
-    auto id = item.id.string();
-    auto el = findElement(itemOrder, id);
-    if(el != itemOrder.end()) {
-      auto newRoute = item.data.routing();
-      auto oldRoute = el->route;
-      if(newRoute != oldRoute) {
-        el->route = newRoute;
-        sortRoutes(itemOrder);
-        pushItemOrdering();
-      }
-    } else {
-      itemOrder.push_back({item.data.routing(), id});
-      sortRoutes(itemOrder);
-      pushItemOrdering();
-      data_.addItemsToSelectedProgramme({item.id});
-    }
-}
-
-void AutoModeController::itemRemovedFromProgramme(ProgrammeStatus status, const communication::ConnectionId &id) {
-    if(on_ && status.isSelected) {
-        assert(status.index == 0);
-        auto el = findElement(itemOrder, id.string());
-        itemOrder.erase(el);
-        pushItemOrdering();
-    }
-}
-
+*/
 void ear::plugin::AutoModeController::inputAdded(InputItem const & item)
 {
-    if(on_) {
-      addOrUpdateItem(item);
-    }
+  if(addItemIfNecessary(item)) {
+    auto selectedProgrammeIndex = data_.getSelectedProgrammeIndex();
+    data_.sortProgrammeElements(selectedProgrammeIndex);
+  }
 }
 
-void AutoModeController::inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) {
-    if(on_) {
-      addOrUpdateItem(item);
-    }
+void AutoModeController::inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem)
+{
+  bool doSort = false;
+  if(addItemIfNecessary(item)) doSort = true;
+  if(item.data.routing() != oldItem.routing()) doSort = true;
+  if(doSort) {
+    auto selectedProgrammeIndex = data_.getSelectedProgrammeIndex();
+    data_.sortProgrammeElements(selectedProgrammeIndex);
+  }
 }

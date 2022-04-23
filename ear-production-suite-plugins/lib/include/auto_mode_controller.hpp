@@ -27,14 +27,11 @@ namespace ear::plugin {
         };
 
         Metadata& data_;
-        std::vector<IDRoute> itemOrder;
         bool on_{true};
-        void pushItemOrdering();
-        void addOrUpdateItem(const InputItem &item);
+        bool addItemIfNecessary(const InputItem &item);
 
         void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
         void autoModeChanged(bool enabled) override;
-        void itemRemovedFromProgramme(ProgrammeStatus status, const communication::ConnectionId &id) override;
         void inputAdded(InputItem const& item) override;
         void inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) override;
     };
