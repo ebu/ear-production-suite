@@ -253,6 +253,11 @@ bool ear::plugin::Metadata::programmeHasElement(int programmeIndex, communicatio
   return findObjectWithId(elements->begin(), elements->end(), id) != elements->end();
 }
 
+bool ear::plugin::Metadata::getAutoMode()
+{
+  return programmeStore_.auto_mode();
+}
+
 void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
     std::lock_guard<std::mutex> lock(mutex_);
     uiListeners_.push_back(std::move(listener));

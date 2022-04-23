@@ -60,6 +60,7 @@ class Metadata {
   // Queries
   int getSelectedProgrammeIndex();
   bool programmeHasElement(int programmeIndex, communication::ConnectionId const& id);
+  bool getAutoMode();
 
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
