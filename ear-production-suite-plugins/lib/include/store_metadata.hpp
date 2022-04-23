@@ -55,6 +55,7 @@ class Metadata {
   void moveElement(int programmeIndex, int oldIndex, int newIndex);
   void setElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
+  void sortProgrammeElements(int programmeIndex);
 
   // Queries
   int getSelectedProgrammeIndex();
