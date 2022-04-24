@@ -168,16 +168,27 @@ class ObjectView : public ElementView,
       data_.object.interactive_position().max_r(), dontSendNotification);
   }
 
-  void updateFromInternalDataInputItemMetadata() {
+  bool updateFromInternalDataInputItemMetadata() {
     // NOTE - will require repaint()!!
-    colourIndicator_->setColour(Colour(data_.item.colour()));
-    nameLabel_->setText(String(data_.item.name()), dontSendNotification);
+    bool changes = false;
+
+    auto colour = Colour(data_.item.colour());
+    if(colourIndicator_->getColour() != colour) {
+      colourIndicator_->setColour(colour);
+      changes = true;
+    }
+
+    juce::String nameLabelText{data_.item.name()};
+    if(nameLabel_->getText() != nameLabelText) {
+      nameLabel_->setText(nameLabelText, dontSendNotification);
+      changes = true;
+    }
+
+    juce::String metadataLabelText;
     if (data_.item.has_ds_metadata()) {
       auto layoutIndex = data_.item.ds_metadata().layout();
       if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
-        metadataLabel_->setText(
-          String(SPEAKER_SETUPS.at(layoutIndex).commonName),
-          dontSendNotification);
+        metadataLabelText = String(SPEAKER_SETUPS.at(layoutIndex).commonName);
       }
     } else if (data_.item.has_hoa_metadata()) {
       auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
@@ -186,15 +197,18 @@ class ObjectView : public ElementView,
       if (pfData) {
         int cfCount = pfData->relatedChannelFormats.size();
         int order = std::sqrt(cfCount) - 1;
-        metadataLabel_->setText("HOA order " + String(order),
-                                dontSendNotification);
+        metadataLabelText = "HOA order " + String(order);
       } else {
-        metadataLabel_->setText("HOA",
-                                dontSendNotification);
+        metadataLabelText = "HOA";
       }
-    } else {
-      metadataLabel_->setText("", dontSendNotification);
     }
+
+    if(metadataLabel_->getText() != metadataLabelText) {
+      metadataLabel_->setText(metadataLabelText, dontSendNotification);
+      changes = true;
+    }
+
+    return changes;
   }
 
   void setData(const Data& data) {
@@ -208,8 +222,9 @@ class ObjectView : public ElementView,
 
   void setInputItemMetadata(const ear::plugin::proto::InputItemMetadata &item) {
     data_.item = item;
-    updateFromInternalDataInputItemMetadata();
-    repaint();
+    if(updateFromInternalDataInputItemMetadata()) {
+      repaint(); // Only repaint if something actually changed!
+    }
   }
 
   std::string getConnectionId() {
