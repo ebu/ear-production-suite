@@ -15,14 +15,12 @@
 #include "metadata.hpp"
 #include "helper/common_definition_helper.h"
 #include <memory>
-#include "metadata_listener.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
 
 class ObjectView : public ElementView,
-                   public MetadataListener,
                    private Slider::Listener,
                    private EarSliderRange::Listener {
  public:
