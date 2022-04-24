@@ -15,12 +15,14 @@
 #include "metadata.hpp"
 #include "helper/common_definition_helper.h"
 #include <memory>
+#include "metadata_listener.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
 
 class ObjectView : public ElementView,
+                   public MetadataListener,
                    private Slider::Listener,
                    private EarSliderRange::Listener {
  public:
@@ -128,21 +130,59 @@ class ObjectView : public ElementView,
     updateDesiredHeight();
   }
 
-  void setData(const Data& data) {
-    data_ = data;
+  void updateFromInternalDataObject() {
+    // NOTE - will require repaint()!!
+    settingsButton_->setToggleState(data_.object.show_settings(),
+                                    dontSendNotification);
+    updateSettingsButtonColour();
+
+    onOffInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
+    gainInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
+    positionInteractionPanel_->setVisible(
+      this->settingsButton_->getToggleState());
+    updateDesiredHeight();
+
+    onOffInteractionPanel_->setExpanded(
+      data_.object.interactive_on_off().enabled());
+    gainInteractionPanel_->setExpanded(
+      data_.object.interactive_gain().enabled());
+    gainInteractionSettings_->gainMinSlider->setValue(
+      Decibels::gainToDecibels(data_.object.interactive_gain().min()),
+      dontSendNotification);
+    gainInteractionSettings_->gainMaxSlider->setValue(
+      Decibels::gainToDecibels(data_.object.interactive_gain().max()),
+      dontSendNotification);
+    positionInteractionPanel_->setExpanded(
+      data_.object.interactive_position().enabled());
+    positionInteractionSettings_->azimuthMinSlider->setValue(
+      data_.object.interactive_position().min_az(), dontSendNotification);
+    positionInteractionSettings_->azimuthMaxSlider->setValue(
+      data_.object.interactive_position().max_az(), dontSendNotification);
+    positionInteractionSettings_->elevationMinSlider->setValue(
+      data_.object.interactive_position().min_el(), dontSendNotification);
+    positionInteractionSettings_->elevationMaxSlider->setValue(
+      data_.object.interactive_position().max_el(), dontSendNotification);
+    positionInteractionSettings_->distanceMinSlider->setValue(
+      data_.object.interactive_position().min_r(), dontSendNotification);
+    positionInteractionSettings_->distanceMaxSlider->setValue(
+      data_.object.interactive_position().max_r(), dontSendNotification);
+  }
+
+  void updateFromInternalDataInputItemMetadata() {
+    // NOTE - will require repaint()!!
     colourIndicator_->setColour(Colour(data_.item.colour()));
     nameLabel_->setText(String(data_.item.name()), dontSendNotification);
     if (data_.item.has_ds_metadata()) {
       auto layoutIndex = data_.item.ds_metadata().layout();
       if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
         metadataLabel_->setText(
-            String(SPEAKER_SETUPS.at(layoutIndex).commonName),
-            dontSendNotification);
+          String(SPEAKER_SETUPS.at(layoutIndex).commonName),
+          dontSendNotification);
       }
     } else if (data_.item.has_hoa_metadata()) {
       auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(
-          4, data_.item.hoa_metadata().packformatidvalue());
+        4, data_.item.hoa_metadata().packformatidvalue());
       if (pfData) {
         int cfCount = pfData->relatedChannelFormats.size();
         int order = std::sqrt(cfCount) - 1;
@@ -155,45 +195,26 @@ class ObjectView : public ElementView,
     } else {
       metadataLabel_->setText("", dontSendNotification);
     }
+  }
 
-    settingsButton_->setToggleState(data_.object.show_settings(),
-                                    dontSendNotification);
-    updateSettingsButtonColour();
-
-    onOffInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
-    gainInteractionPanel_->setVisible(this->settingsButton_->getToggleState());
-    positionInteractionPanel_->setVisible(
-        this->settingsButton_->getToggleState());
-    updateDesiredHeight();
-
-    onOffInteractionPanel_->setExpanded(
-        data_.object.interactive_on_off().enabled());
-    gainInteractionPanel_->setExpanded(
-        data_.object.interactive_gain().enabled());
-    gainInteractionSettings_->gainMinSlider->setValue(
-        Decibels::gainToDecibels(data_.object.interactive_gain().min()),
-        dontSendNotification);
-    gainInteractionSettings_->gainMaxSlider->setValue(
-        Decibels::gainToDecibels(data_.object.interactive_gain().max()),
-        dontSendNotification);
-    positionInteractionPanel_->setExpanded(
-        data_.object.interactive_position().enabled());
-    positionInteractionSettings_->azimuthMinSlider->setValue(
-        data_.object.interactive_position().min_az(), dontSendNotification);
-    positionInteractionSettings_->azimuthMaxSlider->setValue(
-        data_.object.interactive_position().max_az(), dontSendNotification);
-    positionInteractionSettings_->elevationMinSlider->setValue(
-        data_.object.interactive_position().min_el(), dontSendNotification);
-    positionInteractionSettings_->elevationMaxSlider->setValue(
-        data_.object.interactive_position().max_el(), dontSendNotification);
-    positionInteractionSettings_->distanceMinSlider->setValue(
-        data_.object.interactive_position().min_r(), dontSendNotification);
-    positionInteractionSettings_->distanceMaxSlider->setValue(
-        data_.object.interactive_position().max_r(), dontSendNotification);
+  void setData(const Data& data) {
+    data_ = data;
+    updateFromInternalDataObject();
+    updateFromInternalDataInputItemMetadata();
     repaint();
   }
 
   Data getData() { return data_; }
+
+  void setInputItemMetadata(const ear::plugin::proto::InputItemMetadata &item) {
+    data_.item = item;
+    updateFromInternalDataInputItemMetadata();
+    repaint();
+  }
+
+  std::string getConnectionId() {
+    return data_.item.connection_id();
+  }
 
   int getDesiredHeight() override { return desiredHeight_; }
 
