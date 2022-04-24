@@ -5,6 +5,7 @@
 #include "JuceHeader.h"
 
 #include "element_view.hpp"
+#include "object_view.hpp"
 #include "element_view_list.hpp"
 #include "communication/common_types.hpp"
 
@@ -26,6 +27,8 @@ class ElementsContainer : public Component {
   void addElement(std::shared_ptr<ElementView> element);
   void removeElement(int index);
   void moveElement(int oldIndex, int newIndex);
+
+  std::shared_ptr<ObjectView> getObjectView(std::string connectionId);
 
   class Listener {
    public:
