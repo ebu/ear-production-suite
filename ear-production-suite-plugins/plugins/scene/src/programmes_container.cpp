@@ -115,6 +115,11 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
   auto programmeIndex = status.index;
   auto overview = programmes_.at(programmeIndex)->getElementOverview();
   overview->itemChanged(item);
+  auto container = programmes_.at(programmeIndex)->getElementsContainer();
+  auto view = container->getObjectView(item.inputMetadata.connection_id());
+  if(view) {
+    view->setInputItemMetadata(item.inputMetadata);
+  }
 }
 
 void ProgrammesContainer::programmeMoved(Movement motion,

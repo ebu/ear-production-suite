@@ -76,6 +76,17 @@ void ElementsContainer::moveElement(int oldIndex, int newIndex) {
   }
 }
 
+std::shared_ptr<ObjectView> ElementsContainer::getObjectView(std::string connectionId)
+{
+  for(auto view : elements) {
+    auto objectView = std::dynamic_pointer_cast<ObjectView> (view);
+    if(objectView && objectView->getConnectionId() == connectionId) {
+      return objectView;
+    }
+  }
+  return nullptr;
+}
+
 void ElementsContainer::addElement(std::shared_ptr<ElementView> element) {
   element->getRemoveButton()->onClick = [this, element]() {
     removeElementUiInteraction(element.get());
