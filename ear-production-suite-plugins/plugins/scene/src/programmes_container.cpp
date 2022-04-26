@@ -119,6 +119,7 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
   auto view = container->getObjectView(item.inputMetadata.connection_id());
   if(view) {
     view->setInputItemMetadata(item.inputMetadata);
+    view->getLevelMeter()->setMeter(meterCalculator_, item.inputMetadata.routing());
   }
 }
 
