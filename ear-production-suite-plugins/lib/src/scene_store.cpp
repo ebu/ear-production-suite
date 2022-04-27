@@ -41,6 +41,7 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
         addMonitoringItem(inputData);
     }
     flagOverlaps();
+    changed = true;
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
