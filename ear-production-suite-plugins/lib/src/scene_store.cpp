@@ -51,6 +51,7 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
             addMonitoringItem(object.inputMetadata);
         }
         flagOverlaps();
+        changed = true;
     }
 }
 
