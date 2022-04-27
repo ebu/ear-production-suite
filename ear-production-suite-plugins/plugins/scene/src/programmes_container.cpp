@@ -335,7 +335,7 @@ void ProgrammesContainer::removeTabClicked(
                                          this);
         return;
     }
-    auto programmeName = tabbedComponent->getName();
+    auto programmeName = tabbedComponent->getTabName(tabbedComponent->getSelectedTabIndex());
     auto text = String("Do you really want to delete \"");
     text += String(programmeName);
     text += String("\"?");

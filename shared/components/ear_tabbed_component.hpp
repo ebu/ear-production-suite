@@ -26,6 +26,7 @@ class EarTabbedComponent : public Component {
   void addTab(const String& name, Component* component, bool select = true,
               bool scroll = true);
   void setTabName(int index, const String& name);
+  String getTabName(int index);
   void selectTab(int index, bool scroll = true);
   int getSelectedTabIndex();
   void moveTabTo(int oldIndex, int newIndex);
