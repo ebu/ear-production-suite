@@ -79,6 +79,16 @@ void EarTabbedComponent::setTabName(int index, const String& name) {
   }
 }
 
+String ear::plugin::ui::EarTabbedComponent::getTabName(int index)
+{
+    if(index >= 0 && index < tabs_.size()) {
+      if(auto button = tabs_.at(index).button) {
+          return button->getText();
+      }
+    }
+    return String();
+}
+
 void EarTabbedComponent::selectTab(int index, bool scroll) {
   clearSelected();
   if (index < tabs_.size()) {
