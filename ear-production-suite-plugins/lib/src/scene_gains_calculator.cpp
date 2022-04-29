@@ -135,8 +135,9 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     auto earMetadata = EpsToEarMetadataConverter::convert(item.ds_metadata());
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.size();
+    auto finalChannel = routing->inputStartingChannel + routing->inputChannelCount - 1;
 
-    if(routing->inputStartingChannel >= 0) {
+    if(routing->inputStartingChannel >= 0 && finalChannel < direct_.size()) {
       for(int i = 0; i < routing->inputChannelCount; i++) {
         auto inputChannel = routing->inputStartingChannel + i;
         if(inputChannel >= 0 && inputChannel < direct_.size()) {
@@ -166,8 +167,9 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     }
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.degrees.size();
+    auto finalChannel = routing->inputStartingChannel + routing->inputChannelCount - 1;
 
-    if(routing->inputStartingChannel >= 0) {
+    if(routing->inputStartingChannel >= 0 && finalChannel < direct_.size()) {
       std::vector<std::vector<float>> hoaGains(
         routing->inputChannelCount,
         std::vector<float>(direct_[0].size(), 0));
