@@ -27,7 +27,7 @@ namespace ear::plugin {
         };
 
         Metadata& data_;
-        bool addItemIfNecessary(const InputItem &item);
+        void addItemIfNecessary(const InputItem &item);
 
         void inputAdded(InputItem const& item) override;
         void inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) override;
