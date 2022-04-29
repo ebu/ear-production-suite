@@ -136,7 +136,7 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.size();
 
-    if(routing->inputStartingChannel > 0) {
+    if(routing->inputStartingChannel >= 0) {
       for(int i = 0; i < routing->inputChannelCount; i++) {
         auto inputChannel = routing->inputStartingChannel + i;
         if(inputChannel >= 0 && inputChannel < direct_.size()) {
@@ -167,7 +167,7 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.degrees.size();
 
-    if(routing->inputStartingChannel > 0) {
+    if(routing->inputStartingChannel >= 0) {
       std::vector<std::vector<float>> hoaGains(
         routing->inputChannelCount,
         std::vector<float>(direct_[0].size(), 0));
