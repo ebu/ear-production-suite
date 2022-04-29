@@ -236,11 +236,6 @@ void Metadata::updateElement(const communication::ConnectionId& id,
     }
 }
 
-void ear::plugin::Metadata::sortProgrammeElements(int programmeIndex)
-{
-    /////////////////////// TODO
-}
-
 int ear::plugin::Metadata::getSelectedProgrammeIndex()
 {
   return programmeStore_.selected_programme_index();
