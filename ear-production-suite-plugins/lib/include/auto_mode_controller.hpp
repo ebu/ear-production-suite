@@ -13,19 +13,6 @@ namespace ear::plugin {
         explicit AutoModeController(Metadata& data);
 
     private:
-        struct IDRoute {
-            int route;
-            communication::ConnectionId id;
-            friend bool operator!=(IDRoute const& lhs,
-                                   IDRoute const& rhs) {
-                return std::tie(lhs.route, lhs.id) != std::tie(rhs.route, rhs.id);
-            }
-            friend bool operator==(IDRoute const& lhs,
-                                   IDRoute const& rhs) {
-                return !(lhs != rhs);
-            }
-        };
-
         Metadata& data_;
         void addItemIfNecessary(const InputItem &item);
 
