@@ -53,6 +53,7 @@ message Programme {
   optional string name = 1 [default = "Default"];
   optional string language = 2 [default = ""];
   repeated ProgrammeElement element = 3;
+  optional string programme_internal_id = 4  [default = "00000000-0000-0000-0000-000000000000"];
 }
 message ProgrammeStore {
   repeated Programme programme = 1;
