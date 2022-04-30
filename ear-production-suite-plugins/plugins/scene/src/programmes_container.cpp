@@ -75,7 +75,7 @@ void ProgrammesContainer::addObjectView(
 void ear::plugin::ui::ProgrammesContainer::addProgrammeView(
     const proto::Programme &programme) {
 
-  auto view = std::make_shared<ProgrammeView>();
+  auto view = std::make_shared<ProgrammeView>(programme.programme_internal_id());
   view->getNameTextEditor()->setText(programme.name(), false);
   view->getLanguageComboBox()->selectEntry(
       getIndexForAlphaN(programme.language()), dontSendNotification);
@@ -83,7 +83,7 @@ void ear::plugin::ui::ProgrammesContainer::addProgrammeView(
   view->getElementsContainer()->addListener(this);
   view->getElementOverview()->setProgramme(programme);
   programmes_.push_back(view);
-  tabs_->addTab(programme.name(), view.get(), false);
+  tabs_->addTab(programme.name(), view.get(), programme.programme_internal_id(), false);
 }
 
 void ProgrammesContainer::clear() {
@@ -219,8 +219,9 @@ void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, con
     auto selectedProgramme = programmes.selected_programme_index();
     for (int i = 0; i < programmes.programme_size(); ++i) {
         auto const& programme = programmes.programme(i);
+        auto id = programme.programme_internal_id();
         addProgrammeView(programme);
-        ProgrammeObjects programmeObjects({i, i == selectedProgramme},
+        ProgrammeObjects programmeObjects({i, id, i == selectedProgramme},
                                           programme,
                                           items);
         updateElementOverview(programmeObjects);
@@ -247,7 +248,7 @@ void ProgrammesContainer::programmeAdded(
         proto::Programme const& programme) {
     addProgrammeView(programme);
     setProgrammeViewName(status.index, programme.name());
-    data_.selectProgramme(status.index);
+    data_.selectProgramme(status.id);
 }
 
 void ProgrammesContainer::programmeUpdated(
@@ -279,35 +280,35 @@ void ProgrammesContainer::objectDataChanged(ObjectView::Data data) {
 }
 
 void ProgrammesContainer::nameChanged(ProgrammeView* view, const String& newName) {
-    auto index = getProgrammeIndex(view);
-    if (index >= 0) {
-        data_.setProgrammeName(index, newName.toStdString());
-    }
+    data_.setProgrammeName(view->getProgrammeId(), newName.toStdString());
 }
 void ProgrammesContainer::languageChanged(ProgrammeView* view, int languageIndex) {
-    auto programmeIndex = getProgrammeIndex(view);
-    if (programmeIndex >= 0) {
-        if (languageIndex >= 0 && languageIndex < LANGUAGES.size()) {
-            auto language = LANGUAGES.at(languageIndex).alpha3;
-            data_.setProgrammeLanguage(programmeIndex, language);
-        } else {
-            data_.clearProgrammeLanguage(programmeIndex);
-        }
-    }
+      if (languageIndex >= 0 && languageIndex < LANGUAGES.size()) {
+          auto language = LANGUAGES.at(languageIndex).alpha3;
+          data_.setProgrammeLanguage(view->getProgrammeId(), language);
+      } else {
+          data_.clearProgrammeLanguage(view->getProgrammeId());
+      }
 }
 
 void ProgrammesContainer::elementMoved(ElementViewList* list, int oldIndex, int newIndex) {
-    auto programmeIndex = getProgrammeIndex(list);
-    assert(programmeIndex >= 0);
-    data_.moveElement(programmeIndex, oldIndex, newIndex);
+    auto view = dynamic_cast<ProgrammeView*>(list->getParentComponent());
+    assert(view);
+    if(view) {
+      data_.moveElement(view->getProgrammeId(), oldIndex, newIndex);
+    }
 }
 
-void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* view) {
-    auto programmeIndex = getProgrammeIndex(list);
-    assert (programmeIndex >= 0);
-    if(auto objectView = dynamic_cast<ObjectView*>(view)) {
-        auto id = objectView->getData().item.connection_id();
-        data_.removeElementFromProgramme(programmeIndex, id);
+void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* eView) {
+    auto pView = dynamic_cast<ProgrammeView*>(list->getParentComponent());
+    assert(pView);
+    if(pView) {
+      auto oView = dynamic_cast<ObjectView*>(pView);
+      assert(oView);
+      if(oView) {
+        auto id = oView->getData().item.connection_id();
+        data_.removeElementFromProgramme(pView->getProgrammeId(), id);
+      }
     }
 }
 
@@ -316,17 +317,17 @@ void ProgrammesContainer::addTabClicked(
     data_.addProgramme();
 }
 
-void ProgrammesContainer::tabSelected(EarTabbedComponent*, int index) {
-    data_.selectProgramme(index);
+void ProgrammesContainer::tabSelectedId(EarTabbedComponent*, const std::string& id) {
+    data_.selectProgramme(id);
 }
 
-void ProgrammesContainer::tabMoved(EarTabbedComponent*, int oldIndex,
+void ProgrammesContainer::tabMovedId(EarTabbedComponent*, const std::string& id,
                                           int newIndex) {
-    data_.moveProgramme(oldIndex, newIndex);
+    data_.moveProgramme(id, newIndex);
 }
 
-void ProgrammesContainer::removeTabClicked(
-        EarTabbedComponent* tabbedComponent, int index) {
+void ProgrammesContainer::removeTabClickedId(
+        EarTabbedComponent* tabbedComponent, const std::string& id) {
     auto progCount = tabbedComponent->tabCount();
     if (progCount == 1) {
         NativeMessageBox::showMessageBox(MessageBoxIconType::NoIcon,
@@ -335,7 +336,7 @@ void ProgrammesContainer::removeTabClicked(
                                          this);
         return;
     }
-    auto programmeName = tabbedComponent->getTabName(tabbedComponent->getSelectedTabIndex());
+    auto programmeName = tabbedComponent->getTabName(id);
     auto text = String("Do you really want to delete \"");
     text += String(programmeName);
     text += String("\"?");
@@ -345,7 +346,7 @@ void ProgrammesContainer::removeTabClicked(
             text,
             this,
             nullptr)) {
-        data_.removeProgramme(index);
+        data_.removeProgramme(id);
     }
 }
 

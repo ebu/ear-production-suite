@@ -43,23 +43,25 @@ class Metadata {
   // Programme manipulation
   void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
-  void removeProgramme(int index);
-  void moveProgramme(int oldIndex, int newIndex);
-  void selectProgramme(int index);
+  void removeProgramme(const std::string &id);
+  void moveProgramme(const std::string &id, int newIndex);
+  void selectProgramme(const std::string &id);
   void setAutoMode(bool enable);
-  void setProgrammeName(int index, std::string const& name);
-  void setProgrammeLanguage(int programmeIndex, std::string const& language);
-  void clearProgrammeLanguage(int programmeIndex);
+  void setProgrammeName(const std::string &id, std::string const& name);
+  void setProgrammeLanguage(const std::string &id, std::string const& language);
+  void clearProgrammeLanguage(const std::string &id);
   void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
-  void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
-  void moveElement(int programmeIndex, int oldIndex, int newIndex);
-  void setElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
+  void removeElementFromProgramme(const std::string &id, communication::ConnectionId const& connId);
+  void moveElement(const std::string &id, int oldIndex, int newIndex);
+  void setElementOrder(const std::string &id, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& id, proto::Object const& element);
 
   // Queries
   int getSelectedProgrammeIndex();
-  bool programmeHasElement(int programmeIndex, communication::ConnectionId const& id);
+  std::string getSelectedProgrammeId();
+  bool programmeHasElement(const std::string &id, communication::ConnectionId const& connId);
   bool getAutoMode();
+  int getProgrammeIndex(const std::string &id);
 
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);

@@ -1,4 +1,6 @@
 #include "programme_store_adm_populator.hpp"
+#include "programme_internal_id.hpp"
+
 using namespace ear::plugin;
 using namespace adm;
 namespace {
@@ -143,6 +145,8 @@ void ProgrammeStoreAdmPopulator::operator()(
       programmeElement->set_language(
           prog->get<adm::AudioProgrammeLanguage>().get());
     }
+    auto id = newProgrammeInternalId();
+    programmeElement->set_programme_internal_id(id);
     insertionIt->second = programmeElement;
   }
   currentProgramme = insertionIt->second;

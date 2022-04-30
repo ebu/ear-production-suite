@@ -20,8 +20,9 @@ namespace ui {
 
 class ProgrammeView : public Component {
  public:
-  explicit ProgrammeView()
-      : nameTextEditor_(std::make_shared<EarNameTextEditor>()),
+   explicit ProgrammeView(const std::string& programmeId)
+      : programmeId_{ programmeId },
+        nameTextEditor_(std::make_shared<EarNameTextEditor>()),
         langLabel_(std::make_unique<Label>()),
         langComboBox_(std::make_shared<EarComboBox>()),
         addItemButton_(std::make_unique<EarButton>()),
@@ -162,6 +163,10 @@ class ProgrammeView : public Component {
     return elementOverview_;
   }
 
+  std::string getProgrammeId() {
+    return programmeId_;
+  }
+
   class Listener {
    public:
     virtual ~Listener() = default;
@@ -177,6 +182,7 @@ class ProgrammeView : public Component {
   void removeListener(Listener* l) { listeners_.remove(l); }
 
  private:
+  std::string programmeId_;
   std::shared_ptr<EarNameTextEditor> nameTextEditor_;
   std::unique_ptr<Label> langLabel_;
   std::shared_ptr<EarComboBox> langComboBox_;

@@ -20,6 +20,7 @@ using RouteMap = std::multimap<int, communication::ConnectionId>;
 
 struct ProgrammeStatus {
   int index;
+  std::string id;
   bool isSelected;
 };
 

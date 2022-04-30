@@ -64,11 +64,11 @@ void removeElementClicked(ElementViewList* list, ElementView* view) override;
 
 // EarTabbedComponent::Listener
 void addTabClicked(EarTabbedComponent* tabbedComponent) override;
-void tabSelected(EarTabbedComponent* tabbedComponent, int index) override;
-void tabMoved(EarTabbedComponent* tabbedComponent, int oldIndex,
+void tabSelectedId(EarTabbedComponent* tabbedComponent, const std::string& id) override;
+void tabMovedId(EarTabbedComponent* tabbedComponent, const std::string& id,
               int newIndex) override;
-void removeTabClicked(EarTabbedComponent* tabbedComponent,
-                      int index) override;
+void removeTabClickedId(EarTabbedComponent* tabbedComponent,
+                        const std::string& id) override;
 void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) override;
 
 class Listener {

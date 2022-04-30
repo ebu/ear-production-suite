@@ -279,7 +279,7 @@ void ItemsContainer::dataReset(const proto::ProgrammeStore &programmeStore, cons
     createOrUpdateViews(items);
     if(selectedIndex < programmeStore.programme_size()) {
         auto const& selectedProgramme = programmeStore.programme(selectedIndex);
-        themeItemsFor({{selectedIndex, true},
+        themeItemsFor({{selectedIndex, selectedProgramme.programme_internal_id(), true},
                        selectedProgramme,
                        items});
     }
