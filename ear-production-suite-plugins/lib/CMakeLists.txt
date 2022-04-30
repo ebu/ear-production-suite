@@ -111,6 +111,7 @@ set(EAR_BASE_HEADERS
 	include/programme_element_visitor.hpp
 	include/store_metadata.hpp
 	include/metadata_listener.hpp
+	include/programme_internal_id.hpp
 	include/programme_store_adm_populator.hpp
 	include/programme_store_adm_serializer.hpp
 	include/programme_types.hpp
