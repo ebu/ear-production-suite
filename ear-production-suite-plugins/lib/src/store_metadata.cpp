@@ -130,8 +130,8 @@ void Metadata::moveProgramme(const std::string &progId, int newIndex) {
 void Metadata::selectProgramme(const std::string &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto oldIndex = programmeStore_.selected_programme_index();
-    auto oldId = programmeStore_.programme(oldIndex).programme_internal_id();
-    if(oldId != progId) {
+    if(oldIndex < 0 || oldIndex >= programmeStore_.programme_size() ||
+       programmeStore_.programme(oldIndex).programme_internal_id() != progId) {
       auto index = getProgrammeIndex(progId);
       programmeStore_.set_selected_programme_index(index);
       if(index >= 0 && index < programmeStore_.programme_size()) {
@@ -248,10 +248,11 @@ void Metadata::updateElement(const communication::ConnectionId& connId,
                                    const proto::Object& element) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = programmeStore_.selected_programme_index();
-    auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
+    if(programmeIndex >= 0 && programmeIndex < programmeStore_.programme_size()) {
+      auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
 
-    if(auto it = findObjectWithId(elements->begin(), elements->end(), connId);
-       it != elements->end() && it->has_object()) {
+      if(auto it = findObjectWithId(elements->begin(), elements->end(), connId);
+         it != elements->end() && it->has_object()) {
         *(it->mutable_object()) = element;
         ProgrammeStatus status{
                 programmeIndex,
@@ -261,7 +262,8 @@ void Metadata::updateElement(const communication::ConnectionId& connId,
 
         auto const& item = itemStore_.at(connId);
         fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                  status, ProgrammeObject{element, item});
+                  status, ProgrammeObject{ element, item });
+      }
     }
 }
 
