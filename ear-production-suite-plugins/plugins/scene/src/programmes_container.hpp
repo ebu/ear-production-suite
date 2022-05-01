@@ -86,13 +86,13 @@ public:
 
   // MetadataListener
   void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
-  void programmeAdded(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
-  void programmeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
+  void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) override;
+  void programmeUpdated(ProgrammeStatus status, proto::Programme const& programme) override;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
-  void programmeMoved(Movement movement, proto::Programme const& programme) override;
+  void programmeMoved(ProgrammeStatus status,Movement movement, proto::Programme const& programme) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
-  void programmeRemoved(int index) override;
+  void programmeRemoved(ProgrammeStatus status) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
   void inputRemoved(communication::ConnectionId const& id) override;
 

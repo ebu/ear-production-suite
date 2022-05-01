@@ -123,7 +123,7 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
   }
 }
 
-void ProgrammesContainer::programmeMoved(Movement motion,
+void ProgrammesContainer::programmeMoved(ProgrammeStatus status, Movement motion,
                                          const proto::Programme& programme) {
     moveProgrammeView(motion.to, motion.from);
 }
@@ -132,9 +132,9 @@ void ProgrammesContainer::programmeSelected(const ProgrammeObjects &objects) {
     tabs_->selectTab(objects.index());
 }
 
-void ProgrammesContainer::programmeRemoved(int programmeIndex) {
-    tabs_->removeTab(programmeIndex);
-    programmes_.erase(programmes_.begin() + programmeIndex);
+void ProgrammesContainer::programmeRemoved(ProgrammeStatus status) {
+    tabs_->removeTab(status.index);
+    programmes_.erase(programmes_.begin() + status.index);
 }
 
 void ProgrammesContainer::removeFromElementViews(

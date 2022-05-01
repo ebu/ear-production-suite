@@ -191,6 +191,17 @@ Component* EarTabbedComponent::getComponent(int index) {
   return nullptr;
 }
 
+Component * ear::plugin::ui::EarTabbedComponent::getComponent(const std::string & id)
+{
+    auto it = std::find_if(tabs_.begin(), tabs_.end(), [id](auto tab) {
+        return tab.id == id;
+    });
+    if (it != tabs_.end()) {
+        return it->component;
+    }
+    return nullptr;
+}
+
 void EarTabbedComponent::resized() {
   auto area = getLocalBounds();
   auto barArea = area.removeFromTop(buttonBarHeight);
