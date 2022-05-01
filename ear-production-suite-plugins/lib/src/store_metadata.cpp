@@ -93,9 +93,9 @@ void Metadata::addProgramme() {
 }
 
 void Metadata::removeProgramme(const std::string &id) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(id);
     assert(index >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     auto programme = programmeStore_.mutable_programme();
     assert(index < programmeStore_.programme_size());
     programme->erase(programme->begin() + index);
@@ -111,9 +111,9 @@ void Metadata::removeProgramme(const std::string &id) {
 }
 
 void Metadata::moveProgramme(const std::string &id, int newIndex) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto oldIndex = getProgrammeIndex(id);
     assert(oldIndex >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     auto programmes = programmeStore_.mutable_programme();
     auto size = programmes->size();
     if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
@@ -149,9 +149,9 @@ void Metadata::setAutoMode(bool enable) {
 }
 
 void Metadata::setProgrammeName(const std::string &id, const std::string& name) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(id);
     assert(index >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     assert(index < programmeStore_.programme_size());
     if(name != programmeStore_.programme(index).name()) {
         programmeStore_.mutable_programme(index)->set_name(name);
@@ -178,9 +178,9 @@ void Metadata::setProgrammeLanguage(const std::string &id,
 }
 
 void Metadata::clearProgrammeLanguage(const std::string &id) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = getProgrammeIndex(id);
     assert(programmeIndex >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     if(programmeStore_.programme(programmeIndex).has_language()) {
         programmeStore_.mutable_programme(programmeIndex)->clear_language();
         auto prog = programmeStore_.programme(programmeIndex);
@@ -225,9 +225,9 @@ void Metadata::removeElementFromProgramme(const std::string &progId, const commu
 
 void Metadata::moveElement(const std::string &id, int oldIndex,
                                  int newIndex) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = getProgrammeIndex(id);
     assert(programmeIndex >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     auto elements =
             programmeStore_.mutable_programme(programmeIndex)
                     ->mutable_element();
@@ -281,9 +281,9 @@ std::string ear::plugin::Metadata::getSelectedProgrammeId()
 
 bool ear::plugin::Metadata::programmeHasElement(const std::string &id, communication::ConnectionId const & connId)
 {
+  std::lock_guard<std::mutex> lock(mutex_);
   auto programmeIndex = getProgrammeIndex(id);
   assert(programmeIndex >= 0);
-  std::lock_guard<std::mutex> lock(mutex_);
   auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
   return findObjectWithId(elements->begin(), elements->end(), connId) != elements->end();
 }
@@ -295,7 +295,6 @@ bool ear::plugin::Metadata::getAutoMode()
 
 int ear::plugin::Metadata::getProgrammeIndex(const std::string & id)
 {
-  std::lock_guard<std::mutex> lock(mutex_);
   for(int index = 0; index < programmeStore_.programme_size(); index++) {
     if(programmeStore_.programme(index).programme_internal_id() == id) {
       return index;
@@ -423,9 +422,9 @@ RouteMap Metadata::routeMap() const {
 }
 
 void Metadata::setElementOrder(const std::string &id, const std::vector<communication::ConnectionId> &order) {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = getProgrammeIndex(id);
     assert(programmeIndex >= 0);
-    std::lock_guard<std::mutex> lock(mutex_);
     doSetElementOrder(programmeIndex, order);
 }
 

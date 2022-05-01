@@ -61,7 +61,6 @@ class Metadata {
   std::string getSelectedProgrammeId();
   bool programmeHasElement(const std::string &id, communication::ConnectionId const& connId);
   bool getAutoMode();
-  int getProgrammeIndex(const std::string &id);
 
   // Listeners
   void addUIListener(std::weak_ptr<MetadataListener> listener);
@@ -69,6 +68,8 @@ class Metadata {
 
  private:
   RouteMap routeMap() const;
+  int getProgrammeIndex(const std::string &id);
+
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
   void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids);
