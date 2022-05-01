@@ -36,30 +36,30 @@ class Metadata {
   void setExporting(bool exporting);
 
   // Input item manipulation
-  void setInputItemMetadata(communication::ConnectionId const& id,
+  void setInputItemMetadata(communication::ConnectionId const& connId,
                           proto::InputItemMetadata const& item);
-  void removeInput(communication::ConnectionId const& id);
+  void removeInput(communication::ConnectionId const& connId);
 
   // Programme manipulation
   void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
-  void removeProgramme(const std::string &id);
-  void moveProgramme(const std::string &id, int newIndex);
-  void selectProgramme(const std::string &id);
+  void removeProgramme(const std::string &progId);
+  void moveProgramme(const std::string &progId, int newIndex);
+  void selectProgramme(const std::string &progId);
   void setAutoMode(bool enable);
-  void setProgrammeName(const std::string &id, std::string const& name);
-  void setProgrammeLanguage(const std::string &id, std::string const& language);
-  void clearProgrammeLanguage(const std::string &id);
-  void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
-  void removeElementFromProgramme(const std::string &id, communication::ConnectionId const& connId);
-  void moveElement(const std::string &id, int oldIndex, int newIndex);
-  void setElementOrder(const std::string &id, std::vector<communication::ConnectionId> const& order);
-  void updateElement(communication::ConnectionId const& id, proto::Object const& element);
+  void setProgrammeName(const std::string &progId, std::string const& name);
+  void setProgrammeLanguage(const std::string &progId, std::string const& language);
+  void clearProgrammeLanguage(const std::string &progId);
+  void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connId);
+  void removeElementFromProgramme(const std::string &progId, communication::ConnectionId const& connId);
+  void moveElement(const std::string &progId, int oldIndex, int newIndex);
+  void setElementOrder(const std::string &progId, std::vector<communication::ConnectionId> const& order);
+  void updateElement(communication::ConnectionId const& progId, proto::Object const& element);
 
   // Queries
   int getSelectedProgrammeIndex();
   std::string getSelectedProgrammeId();
-  bool programmeHasElement(const std::string &id, communication::ConnectionId const& connId);
+  bool programmeHasElement(const std::string &progId, communication::ConnectionId const& connId);
   bool getAutoMode();
 
   // Listeners
@@ -68,23 +68,23 @@ class Metadata {
 
  private:
   RouteMap routeMap() const;
-  int getProgrammeIndex(const std::string &id);
+  int getProgrammeIndex(const std::string &progId);
 
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
-  void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids);
+  void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connIds);
   void doSelectProgramme(int index, proto::Programme const& programme);
 
   // ItemStore callbacks
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,
                          const proto::InputItemMetadata& newItem);
 
-  void removeElementFromAllProgrammes(communication::ConnectionId const& id);
-  void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id);
+  void removeElementFromAllProgrammes(communication::ConnectionId const& connId);
+  void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& connId);
 
   void addProgrammeImpl(std::string const& name, std::string const& language);
   void ensureDefaultProgrammePresent();
-  proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
+  proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& connId);
   void doSetElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
 
   template<typename F, typename... Args>
