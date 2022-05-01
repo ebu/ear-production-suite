@@ -116,13 +116,18 @@ void Metadata::moveProgramme(const std::string &progId, int newIndex) {
     assert(oldIndex >= 0);
     auto programmes = programmeStore_.mutable_programme();
     auto size = programmes->size();
+    auto selectedIndex = programmeStore_.selected_programme_index();
+    std::string selectedProgrammeId;
+    if(selectedIndex >= 0 && selectedIndex < size) {
+      selectedProgrammeId = programmes->at(selectedIndex).programme_internal_id();
+    }
     if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
         oldIndex != newIndex) {
         move(programmes->begin(), oldIndex, newIndex);
+        programmeStore_.set_selected_programme_index(getProgrammeIndex(selectedProgrammeId));
         auto programme = programmes->at(newIndex);
-        auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeMoved,
-                  ProgrammeStatus{ newIndex, progId, newIndex == selectedIndex },
+                  ProgrammeStatus{ newIndex, progId, progId == selectedProgrammeId },
                   Movement{oldIndex, newIndex}, programme);
     }
 }
