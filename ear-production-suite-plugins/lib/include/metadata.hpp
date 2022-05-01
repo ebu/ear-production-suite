@@ -61,6 +61,11 @@ class ProgrammeObjects {
   }
 
   [[nodiscard]]
+  std::string id() const {
+    return status.id;
+  }
+
+  [[nodiscard]]
   bool isSelected() const {
     return status.isSelected;
   }
