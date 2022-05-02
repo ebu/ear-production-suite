@@ -57,6 +57,6 @@ message Programme {
 }
 message ProgrammeStore {
   repeated Programme programme = 1;
-  optional int32 selected_programme_index = 2 [default = -1];
+  optional string selected_programme_internal_id = 2  [default = "00000000-0000-0000-0000-000000000000"];
   optional bool auto_mode = 3 [default = true];
 }

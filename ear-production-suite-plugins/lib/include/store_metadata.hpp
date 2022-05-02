@@ -73,7 +73,7 @@ class Metadata {
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
   void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connIds);
-  void doSelectProgramme(int index, proto::Programme const& programme);
+  void doSelectProgramme(proto::Programme const& programme);
 
   // ItemStore callbacks
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,

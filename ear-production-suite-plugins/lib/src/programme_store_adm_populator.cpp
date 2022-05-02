@@ -152,7 +152,7 @@ void ProgrammeStoreAdmPopulator::operator()(
   currentProgramme = insertionIt->second;
 
   if (store->programme_size() == 1) {
-    store->set_selected_programme_index(0);
+    store->set_selected_programme_internal_id(store->programme(0).programme_internal_id());
   }
 }
 
@@ -232,10 +232,11 @@ std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
   }
 
   // for adm files with no high level metadata (no programmes)
-  // just stay in auto mode
+  // just stay in auto mode... otherwise...
   if (store.programme_size() > 0) {
     store.set_auto_mode(false);
-    store.set_selected_programme_index(0);
+
+    store.set_selected_programme_internal_id(store.programme(0).programme_internal_id());
     return populator.getTrackLookup();
   }
   return {};

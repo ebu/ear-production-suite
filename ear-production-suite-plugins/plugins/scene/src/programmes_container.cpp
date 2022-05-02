@@ -235,12 +235,12 @@ ProgrammeObjects const& objects) {
 
 void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) {
     clear();
-    auto selectedProgramme = programmes.selected_programme_index();
+    auto selectedProgrammeId = programmes.selected_programme_internal_id();
     for (int i = 0; i < programmes.programme_size(); ++i) {
         auto const& programme = programmes.programme(i);
         auto progId = programme.programme_internal_id();
         addProgrammeView(programme);
-        ProgrammeObjects programmeObjects({i, progId, i == selectedProgramme},
+        ProgrammeObjects programmeObjects({i, progId, progId == selectedProgrammeId},
                                           programme,
                                           items);
         updateElementOverview(programmeObjects);
@@ -259,7 +259,7 @@ void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, con
             }
         }
     }
-    tabs_->selectTab(selectedProgramme);
+    tabs_->selectTab(selectedProgrammeId);
 }
 
 void ProgrammesContainer::programmeAdded(
