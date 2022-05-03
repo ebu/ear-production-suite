@@ -110,7 +110,7 @@ void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
       }
       programmeStore_.set_selected_programme_internal_id(newSelectedId);
       fireEvent(&MetadataListener::notifyProgrammeRemoved,
-                ProgrammeStatus{ origIndex, progId, false });
+                ProgrammeStatus{ progId, false });
       auto prog = programmeStore_.programme(newSelectedIndex);
       doSelectProgramme(prog);
     }
@@ -144,9 +144,9 @@ void Metadata::setProgrammeOrder(std::vector<ProgrammeInternalId> const & order)
 
   std::vector<ProgrammeStatus> programmeStatuses;
   auto selectedProgId = programmeStore_.selected_programme_internal_id();
-  for(int i = 0; i < programmeStore_.programme_size(); i++) {
-      auto progId = programmeStore_.programme(i).programme_internal_id();
-      programmeStatuses.push_back(ProgrammeStatus{ i, progId, selectedProgId == progId });
+  for(const auto& programme : programmeStore_.programme()) {
+      auto progId = programme.programme_internal_id();
+      programmeStatuses.push_back(ProgrammeStatus{ progId, selectedProgId == progId });
   }
 
   fireEvent(&MetadataListener::notifyProgrammeOrderChanged, programmeStatuses);
@@ -176,7 +176,7 @@ void Metadata::setProgrammeName(const ProgrammeInternalId &progId, const std::st
         programmeStore_.mutable_programme(index)->set_name(name);
         auto prog = programmeStore_.programme(index);
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{index, progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
+                  ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
     }
 }
 
@@ -189,7 +189,7 @@ void Metadata::setProgrammeLanguage(const ProgrammeInternalId &progId,
       programmeStore_.mutable_programme(index)->set_language(language);
       auto prog = programmeStore_.programme(index);
       fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                ProgrammeStatus{index, progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
+                ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
 
     }
 }
@@ -201,7 +201,7 @@ void Metadata::clearProgrammeLanguage(const ProgrammeInternalId &progId) {
       programmeStore_.mutable_programme(index)->clear_language();
       auto prog = programmeStore_.programme(index);
       fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                ProgrammeStatus{index, progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
+                ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
 
     }
 }
@@ -228,7 +228,7 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
               elements.push_back(*object);
           }
         }
-      doAddItems({ programmeIndex, programmeStore_.programme(programmeIndex).programme_internal_id(), true }, elements);
+      doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, elements);
     }
 }
 
@@ -255,7 +255,7 @@ void Metadata::moveElement(const ProgrammeInternalId &progId, int oldIndex,
         move(elements->begin(), oldIndex, newIndex);
         auto programme = programmeStore_.programme(programmeIndex);
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{programmeIndex, progId, progId == programmeStore_.selected_programme_internal_id()}, programme);
+                  ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, programme);
     }
 }
 
@@ -269,12 +269,7 @@ void Metadata::updateElement(const communication::ConnectionId& connId,
       if(auto it = findObjectWithId(elements->begin(), elements->end(), connId);
          it != elements->end() && it->has_object()) {
         *(it->mutable_object()) = element;
-        ProgrammeStatus status{
-                programmeIndex,
-                programmeStore_.programme(programmeIndex).programme_internal_id(),
-                true
-        };
-
+        ProgrammeStatus status{ programmeStore_.programme(programmeIndex).programme_internal_id(), true };
         auto const& item = itemStore_.at(connId);
         fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
                   status, ProgrammeObject{ element, item });
@@ -345,7 +340,6 @@ void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communicat
     auto selectedIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
     if(auto it = findObjectWithId(elements->begin(), elements->end(), connId); it != elements->end()) {
         ProgrammeStatus status {
-            programmeIndex,
             programmeStore_.programme(programmeIndex).programme_internal_id(),
             programmeIndex == selectedIndex
         };
@@ -359,14 +353,13 @@ void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communicat
 void Metadata::addProgrammeImpl(
         const std::string& name,
         const std::string& language) {
-    auto index = programmeStore_.programme_size();
     auto programme = programmeStore_.add_programme();
     programme->set_name(name);
     programme->set_language(language);
     auto progId = newProgrammeInternalId();
     programme->set_programme_internal_id(progId);
     fireEvent(&MetadataListener::notifyProgrammeAdded,
-              ProgrammeStatus{index, progId, false}, *programme);
+              ProgrammeStatus{progId, false}, *programme);
 }
 
 proto::Object* Metadata::addObject(proto::Programme* programme,
@@ -396,8 +389,7 @@ void Metadata::doAddItems(ProgrammeStatus status,
 }
 
 void Metadata::doSelectProgramme(proto::Programme const& programme) {
-  auto index = getProgrammeIndex(programme.programme_internal_id());
-  ProgrammeObjects objects({index, programme.programme_internal_id(), true}, programme, itemStore_);
+  ProgrammeObjects objects({programme.programme_internal_id(), true}, programme, itemStore_);
   fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 }
@@ -408,14 +400,13 @@ void Metadata::doChangeInputItem(
   auto const& id = newItem.connection_id();
   fireEvent(&MetadataListener::notifyInputUpdated,
           InputItem{id, newItem}, oldItem);
-  auto selectedIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
 
-  for (auto i = 0; i != programmeStore_.programme_size(); ++i) {
-      auto const &elements = programmeStore_.programme(i).element();
+  for (const auto& programme : programmeStore_.programme()) {
+      auto const &elements = programme.element();
       if (auto it = findObjectWithId(elements.begin(), elements.end(), id);
               it != elements.end()) {
           fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                    ProgrammeStatus{i, programmeStore_.programme(i).programme_internal_id(), i == selectedIndex},
+                    ProgrammeStatus{programme.programme_internal_id(), programme.programme_internal_id() == programmeStore_.selected_programme_internal_id()},
                     ProgrammeObject{it->object(), newItem});
       }
   }
@@ -467,7 +458,7 @@ void Metadata::doSetElementOrder(int programmeIndex, const std::vector<communica
 
     auto selectedIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
     fireEvent(&MetadataListener::notifyProgrammeUpdated,
-              ProgrammeStatus{programmeIndex, programmeStore_.programme(programmeIndex).programme_internal_id(), programmeIndex == selectedIndex},
+              ProgrammeStatus{programmeStore_.programme(programmeIndex).programme_internal_id(), programmeIndex == selectedIndex},
               programmeStore_.programme(programmeIndex));
 }
 

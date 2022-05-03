@@ -20,7 +20,6 @@ using ItemMap = std::map<communication::ConnectionId, proto::InputItemMetadata>;
 using RouteMap = std::multimap<int, communication::ConnectionId>;
 
 struct ProgrammeStatus {
-  int index;
   ProgrammeInternalId id;
   bool isSelected;
 };
@@ -49,11 +48,6 @@ class ProgrammeObjects {
         }
       }
     }
-  }
-
-  [[nodiscard]]
-  int index() const {
-    return status.index;
   }
 
   [[nodiscard]]

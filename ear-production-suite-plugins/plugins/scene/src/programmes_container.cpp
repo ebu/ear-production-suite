@@ -257,11 +257,10 @@ ProgrammeObjects const& objects) {
 void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) {
     clear();
     auto selectedProgrammeId = programmes.selected_programme_internal_id();
-    for (int i = 0; i < programmes.programme_size(); ++i) {
-        auto const& programme = programmes.programme(i);
+    for (const auto& programme : programmes.programme()) {
         auto progId = programme.programme_internal_id();
         addProgrammeView(programme);
-        ProgrammeObjects programmeObjects({i, progId, progId == selectedProgrammeId},
+        ProgrammeObjects programmeObjects({progId, progId == selectedProgrammeId},
                                           programme,
                                           items);
         updateElementOverview(programmeObjects);
