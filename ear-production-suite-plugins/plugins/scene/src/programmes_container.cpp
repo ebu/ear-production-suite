@@ -247,8 +247,11 @@ int ProgrammesContainer::getProgrammeIndex(ElementViewList *list) const {
 
 void ProgrammesContainer::updateElementOverview(
 ProgrammeObjects const& objects) {
-  auto view = programmes_.at(objects.index());
-  view->getElementOverview()->resetItems(objects);
+  for(auto programme : programmes_) {
+    if(programme->getProgrammeId() == objects.id()) {
+      programme->getElementOverview()->resetItems(objects);
+    }
+  }
 }
 
 void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) {
