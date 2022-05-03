@@ -51,10 +51,11 @@ add_library(ear-plugin-base STATIC
   src/ui/binaural_monitoring_frontend_backend_connector.cpp
   src/scene_store.cpp
   src/communication/metadata_thread.cpp
-  src/pending_store.cpp include/pending_store.hpp
+  src/pending_store.cpp
   src/auto_mode_controller.cpp
   ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
-  ${EAR_PROTO_SRC} src/restored_pending_store.cpp include/restored_pending_store.hpp)
+  ${EAR_PROTO_SRC} src/restored_pending_store.cpp
+  )
 		
 set(EAR_BASE_HEADERS		
 	include/binaural_monitoring_audio_processor.hpp
@@ -86,6 +87,7 @@ set(EAR_BASE_HEADERS
 	include/helper/protobuf_utilities.hpp
 	include/log.hpp
 	include/listener_orientation.hpp
+	include/metadata.hpp
 	include/monitoring_audio_processor.hpp
 	include/monitoring_backend.hpp
 	include/multichannel_convolver.hpp
@@ -111,11 +113,13 @@ set(EAR_BASE_HEADERS
 	include/programme_element_visitor.hpp
 	include/store_metadata.hpp
 	include/metadata_listener.hpp
+	include/pending_store.hpp
 	include/programme_internal_id.hpp
 	include/programme_store_adm_populator.hpp
 	include/programme_store_adm_serializer.hpp
 	include/programme_types.hpp
 	include/proto_printers.hpp
+	include/restored_pending_store.hpp
 	include/routing_overlap.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
@@ -123,10 +127,10 @@ set(EAR_BASE_HEADERS
 	include/ui/direct_speakers_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
-        include/variable_block_adapter.hpp
+	include/variable_block_adapter.hpp
 	include/scene_store.hpp
 	include/communication/metadata_thread.hpp
-		include/auto_mode_controller.hpp
+	include/auto_mode_controller.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 
