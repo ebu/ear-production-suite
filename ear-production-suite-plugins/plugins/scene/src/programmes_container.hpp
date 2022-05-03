@@ -43,7 +43,7 @@ class ProgrammesContainer : public juce::Component,
   void updateElementOverview(ProgrammeObjects const& objects);
   void removeFromElementViews(communication::ConnectionId const& id);
   void addProgrammeView(const proto::Programme& programme);
-  void moveProgrammeView(int oldIndex, int newIndex);
+  void setProgrammeViewOrder(std::vector<ProgrammeInternalId> progIds);
   void setProgrammeViewName(const ProgrammeInternalId& progId,
                             const juce::String& newName);
   void setProgrammeViewLanguage(const ProgrammeInternalId& progId, const std::optional<std::string>& language);
@@ -91,7 +91,7 @@ public:
   void programmeUpdated(ProgrammeStatus status, proto::Programme const& programme) override;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
-  void programmeMoved(ProgrammeStatus status,Movement movement, proto::Programme const& programme) override;
+  void programmeOrderChanged(std::vector<ProgrammeStatus> programmes) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
   void programmeRemoved(ProgrammeStatus status) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;

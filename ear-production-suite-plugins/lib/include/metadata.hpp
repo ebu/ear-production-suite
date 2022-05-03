@@ -25,11 +25,6 @@ struct ProgrammeStatus {
   bool isSelected;
 };
 
-struct Movement {
-  int from;
-  int to;
-};
-
 struct ProgrammeObject {
   proto::Object programmeObject;
   proto::InputItemMetadata inputMetadata;

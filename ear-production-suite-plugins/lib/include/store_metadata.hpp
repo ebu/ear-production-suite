@@ -45,7 +45,7 @@ class Metadata {
   void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
   void removeProgramme(const ProgrammeInternalId &progId);
-  void moveProgramme(const ProgrammeInternalId &progId, int newIndex);
+  void setProgrammeOrder(std::vector<ProgrammeInternalId> const& order);
   void selectProgramme(const ProgrammeInternalId &progId);
   void setAutoMode(bool enable);
   void setProgrammeName(const ProgrammeInternalId &progId, std::string const& name);

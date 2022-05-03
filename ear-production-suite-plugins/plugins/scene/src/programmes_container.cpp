@@ -135,9 +135,13 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
   }
 }
 
-void ProgrammesContainer::programmeMoved(ProgrammeStatus status, Movement motion,
-                                         const proto::Programme& programme) {
-    moveProgrammeView(motion.to, motion.from);
+void ear::plugin::ui::ProgrammesContainer::programmeOrderChanged(std::vector<ProgrammeStatus> programmes)
+{
+  std::vector<ProgrammeInternalId> progIds;
+  for(const auto &programme : programmes) {
+    progIds.push_back(programme.id);
+  }
+  setProgrammeViewOrder(progIds);
 }
 
 void ProgrammesContainer::programmeSelected(const ProgrammeObjects &objects) {
@@ -174,12 +178,26 @@ void ProgrammesContainer::removeFromElementViews(
   }
 }
 
-void ProgrammesContainer::moveProgrammeView(int oldIndex, int newIndex) {
-  auto size = programmes_.size();
-  if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
-      oldIndex != newIndex) {
-    move(programmes_.begin(), oldIndex, newIndex);
+void ear::plugin::ui::ProgrammesContainer::setProgrammeViewOrder(std::vector<ProgrammeInternalId> progIds)
+{
+  std::vector<std::shared_ptr<ProgrammeView>> orderedProgrammes;
+  std::vector<bool> programmeViewChecklist(programmes_.size(), false);
+
+  for(const auto& progId : progIds) {
+    for(int i = 0; i < programmes_.size(); i++) {
+      if(programmes_[i]->getProgrammeId() == progId) {
+        programmeViewChecklist[i] = true;
+        orderedProgrammes.push_back(programmes_[i]);
+      }
+    }
   }
+  // Re-add anything we didn't find to the end
+  for(int i = 0; i < programmeViewChecklist.size(); i++) {
+    if(!programmeViewChecklist[i]) {
+      orderedProgrammes.push_back(programmes_[i]);
+    }
+  }
+  programmes_ = orderedProgrammes;
 }
 
 void ProgrammesContainer::setProgrammeViewName(const ProgrammeInternalId& progId,
@@ -347,7 +365,11 @@ void ProgrammesContainer::tabSelectedId(EarTabbedComponent*, const std::string& 
 
 void ProgrammesContainer::tabMovedId(EarTabbedComponent*, const std::string& progId,
                                           int newIndex) {
-    data_.moveProgramme(progId, newIndex);
+    std::vector<ProgrammeInternalId> progIds;
+    for(int i = 0; i < tabs_->tabCount(); i++) {
+      progIds.push_back(tabs_->getTabIdFromIndex(i));
+    }
+    data_.setProgrammeOrder(progIds);
 }
 
 void ProgrammesContainer::removeTabClickedId(

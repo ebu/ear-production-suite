@@ -116,21 +116,40 @@ void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
     }
 }
 
-void Metadata::moveProgramme(const ProgrammeInternalId &progId, int newIndex) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto oldIndex = getProgrammeIndex(progId);
-    if(oldIndex >= 0) {
-      auto programmes = programmeStore_.mutable_programme();
-      auto size = programmes->size();
-      if(oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
-         oldIndex != newIndex) {
-        move(programmes->begin(), oldIndex, newIndex);
-        auto programme = programmes->at(newIndex);
-        fireEvent(&MetadataListener::notifyProgrammeMoved,
-                  ProgrammeStatus{ newIndex, progId, progId == programmeStore_.selected_programme_internal_id() },
-                  Movement{ oldIndex, newIndex }, programme);
+void Metadata::setProgrammeOrder(std::vector<ProgrammeInternalId> const & order)
+{
+
+  auto targetIndexOf = [=](proto::Programme const& prog, std::vector<ProgrammeInternalId> const& order) {
+    ProgrammeInternalId progId = prog.programme_internal_id();
+    for(int i = 0; i < order.size(); i++) {
+      if(order[i] == progId) {
+        return i;
       }
     }
+    // Not found in new list - use existing order after the sorted list
+    for(int i = 0; i < programmeStore_.programme_size(); i++) {
+      if(programmeStore_.programme(i).programme_internal_id() == progId) {
+        return (int)order.size() + i;
+      }
+    }
+    // Still not found (can't happen, but complete return routes)- move to very end
+    return (int)order.size() + programmeStore_.programme_size();
+  };
+
+  auto programmes = programmeStore_.mutable_programme();
+  std::stable_sort(programmes->begin(), programmes->end(),
+                   [&order, targetIndexOf](auto const& lhs, auto const& rhs) {
+    return targetIndexOf(lhs, order) < targetIndexOf(rhs, order);
+  });
+
+  std::vector<ProgrammeStatus> programmeStatuses;
+  auto selectedProgId = programmeStore_.selected_programme_internal_id();
+  for(int i = 0; i < programmeStore_.programme_size(); i++) {
+      auto progId = programmeStore_.programme(i).programme_internal_id();
+      programmeStatuses.push_back(ProgrammeStatus{ i, progId, selectedProgId == progId });
+  }
+
+  fireEvent(&MetadataListener::notifyProgrammeOrderChanged, programmeStatuses);
 }
 
 void Metadata::selectProgramme(const ProgrammeInternalId &progId) {
