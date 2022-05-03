@@ -12,6 +12,7 @@
 #include "object_view.hpp"
 #include "programme_view.hpp"
 #include "elements_container.hpp"
+#include "programme_internal_id.hpp"
 
 namespace ear::plugin {
 class LevelMeterCalculator;
@@ -35,7 +36,7 @@ class ProgrammesContainer : public juce::Component,
                       Metadata& data);
   void resized() override;
   void addObjectView(
-      const std::string& progId,
+      const ProgrammeInternalId& progId,
       const proto::InputItemMetadata& inputItem,
       const proto::Object& programmeElement);
   void clear();
@@ -43,9 +44,9 @@ class ProgrammesContainer : public juce::Component,
   void removeFromElementViews(communication::ConnectionId const& id);
   void addProgrammeView(const proto::Programme& programme);
   void moveProgrammeView(int oldIndex, int newIndex);
-  void setProgrammeViewName(std::string progId,
+  void setProgrammeViewName(const ProgrammeInternalId& progId,
                             const juce::String& newName);
-  void setProgrammeViewLanguage(std::string progId, const std::optional<std::string>& language);
+  void setProgrammeViewLanguage(const ProgrammeInternalId& progId, const std::optional<std::string>& language);
   int getProgrammeIndex(ProgrammeView* view) const;
   int getProgrammeIndex(ElementViewList* list) const;
   void addListener(Listener* listener);
@@ -64,11 +65,11 @@ void removeElementClicked(ElementViewList* list, ElementView* view) override;
 
 // EarTabbedComponent::Listener
 void addTabClicked(EarTabbedComponent* tabbedComponent) override;
-void tabSelectedId(EarTabbedComponent* tabbedComponent, const std::string& progId) override;
-void tabMovedId(EarTabbedComponent* tabbedComponent, const std::string& progId,
+void tabSelectedId(EarTabbedComponent* tabbedComponent, const std::string& tabId) override;
+void tabMovedId(EarTabbedComponent* tabbedComponent, const std::string& tabId,
               int newIndex) override;
 void removeTabClickedId(EarTabbedComponent* tabbedComponent,
-                        const std::string& progId) override;
+                        const std::string& tabId) override;
 void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) override;
 
 class Listener {

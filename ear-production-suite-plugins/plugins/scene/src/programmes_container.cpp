@@ -26,7 +26,7 @@ void ear::plugin::ui::ProgrammesContainer::resized() {
 }
 
 void ProgrammesContainer::addObjectView(
-  const std::string& progId, const proto::InputItemMetadata &inputItem,
+  const ProgrammeInternalId& progId, const proto::InputItemMetadata &inputItem,
     const proto::Object &programmeElement) {
 
   auto objectType = ObjectView::ObjectType::Other;
@@ -182,7 +182,7 @@ void ProgrammesContainer::moveProgrammeView(int oldIndex, int newIndex) {
   }
 }
 
-void ProgrammesContainer::setProgrammeViewName(std::string progId,
+void ProgrammesContainer::setProgrammeViewName(const ProgrammeInternalId& progId,
                                                const String &newName) {
   tabs_->setTabName(progId, newName);
   for(auto programme : programmes_) {
@@ -192,7 +192,7 @@ void ProgrammesContainer::setProgrammeViewName(std::string progId,
   }
 }
 
-void ProgrammesContainer::setProgrammeViewLanguage(std::string progId,
+void ProgrammesContainer::setProgrammeViewLanguage(const ProgrammeInternalId& progId,
                                                    const std::optional<std::string>& language) {
   for(auto programme : programmes_) {
     if(programme->getProgrammeId() == progId) {

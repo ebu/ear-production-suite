@@ -6,6 +6,7 @@
 #define EAR_PRODUCTION_SUITE_METADATA_HPP
 #include "programme_store.pb.h"
 #include "input_item_metadata.pb.h"
+#include "programme_internal_id.hpp"
 #include "communication/common_types.hpp"
 
 namespace ear::plugin {
@@ -20,7 +21,7 @@ using RouteMap = std::multimap<int, communication::ConnectionId>;
 
 struct ProgrammeStatus {
   int index;
-  std::string id;
+  ProgrammeInternalId id;
   bool isSelected;
 };
 
@@ -61,7 +62,7 @@ class ProgrammeObjects {
   }
 
   [[nodiscard]]
-  std::string id() const {
+  ProgrammeInternalId id() const {
     return status.id;
   }
 

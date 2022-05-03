@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include "metadata_listener.hpp"
+#include "programme_internal_id.hpp"
 
 namespace ear::plugin {
 
@@ -43,23 +44,23 @@ class Metadata {
   // Programme manipulation
   void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
-  void removeProgramme(const std::string &progId);
-  void moveProgramme(const std::string &progId, int newIndex);
-  void selectProgramme(const std::string &progId);
+  void removeProgramme(const ProgrammeInternalId &progId);
+  void moveProgramme(const ProgrammeInternalId &progId, int newIndex);
+  void selectProgramme(const ProgrammeInternalId &progId);
   void setAutoMode(bool enable);
-  void setProgrammeName(const std::string &progId, std::string const& name);
-  void setProgrammeLanguage(const std::string &progId, std::string const& language);
-  void clearProgrammeLanguage(const std::string &progId);
+  void setProgrammeName(const ProgrammeInternalId &progId, std::string const& name);
+  void setProgrammeLanguage(const ProgrammeInternalId &progId, std::string const& language);
+  void clearProgrammeLanguage(const ProgrammeInternalId &progId);
   void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connId);
-  void removeElementFromProgramme(const std::string &progId, communication::ConnectionId const& connId);
-  void moveElement(const std::string &progId, int oldIndex, int newIndex);
-  void setElementOrder(const std::string &progId, std::vector<communication::ConnectionId> const& order);
+  void removeElementFromProgramme(const ProgrammeInternalId &progId, communication::ConnectionId const& connId);
+  void moveElement(const ProgrammeInternalId &progId, int oldIndex, int newIndex);
+  void setElementOrder(const ProgrammeInternalId &progId, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& progId, proto::Object const& element);
 
   // Queries
   int getSelectedProgrammeIndex();
-  std::string getSelectedProgrammeId();
-  bool programmeHasElement(const std::string &progId, communication::ConnectionId const& connId);
+  ProgrammeInternalId getSelectedProgrammeId();
+  bool programmeHasElement(const ProgrammeInternalId &progId, communication::ConnectionId const& connId);
   bool getAutoMode();
 
   // Listeners
@@ -68,7 +69,7 @@ class Metadata {
 
  private:
   RouteMap routeMap() const;
-  int getProgrammeIndex(const std::string &progId);
+  int getProgrammeIndex(const ProgrammeInternalId &progId);
 
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);

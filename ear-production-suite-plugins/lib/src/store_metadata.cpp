@@ -95,7 +95,7 @@ void Metadata::addProgramme() {
     addProgrammeImpl(name, "");
 }
 
-void Metadata::removeProgramme(const std::string &progId) {
+void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto programmes = programmeStore_.mutable_programme();
     auto origIndex = getProgrammeIndex(progId);
@@ -116,7 +116,7 @@ void Metadata::removeProgramme(const std::string &progId) {
     }
 }
 
-void Metadata::moveProgramme(const std::string &progId, int newIndex) {
+void Metadata::moveProgramme(const ProgrammeInternalId &progId, int newIndex) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto oldIndex = getProgrammeIndex(progId);
     if(oldIndex >= 0) {
@@ -133,7 +133,7 @@ void Metadata::moveProgramme(const std::string &progId, int newIndex) {
     }
 }
 
-void Metadata::selectProgramme(const std::string &progId) {
+void Metadata::selectProgramme(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(progId);
     if(index >= 0 && programmeStore_.selected_programme_internal_id() != progId) {
@@ -150,7 +150,7 @@ void Metadata::setAutoMode(bool enable) {
               enable);
 }
 
-void Metadata::setProgrammeName(const std::string &progId, const std::string& name) {
+void Metadata::setProgrammeName(const ProgrammeInternalId &progId, const std::string& name) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(progId);
     if(index >= 0 && name != programmeStore_.programme(index).name()) {
@@ -161,7 +161,7 @@ void Metadata::setProgrammeName(const std::string &progId, const std::string& na
     }
 }
 
-void Metadata::setProgrammeLanguage(const std::string &progId,
+void Metadata::setProgrammeLanguage(const ProgrammeInternalId &progId,
                                     const std::string& language) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(progId);
@@ -175,7 +175,7 @@ void Metadata::setProgrammeLanguage(const std::string &progId,
     }
 }
 
-void Metadata::clearProgrammeLanguage(const std::string &progId) {
+void Metadata::clearProgrammeLanguage(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto index = getProgrammeIndex(progId);
     if(index >= 0 && programmeStore_.programme(index).has_language()) {
@@ -213,14 +213,14 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
     }
 }
 
-void Metadata::removeElementFromProgramme(const std::string &progId, const communication::ConnectionId& connId) {
+void Metadata::removeElementFromProgramme(const ProgrammeInternalId &progId, const communication::ConnectionId& connId) {
     auto programmeIndex = getProgrammeIndex(progId);
     assert(programmeIndex >= 0);
     std::lock_guard<std::mutex> lock(mutex_);
     doRemoveElementFromProgramme(programmeIndex, connId);
 }
 
-void Metadata::moveElement(const std::string &progId, int oldIndex,
+void Metadata::moveElement(const ProgrammeInternalId &progId, int oldIndex,
                                  int newIndex) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = getProgrammeIndex(progId);
@@ -269,13 +269,13 @@ int ear::plugin::Metadata::getSelectedProgrammeIndex()
   return getProgrammeIndex(programmeStore_.selected_programme_internal_id());
 }
 
-std::string ear::plugin::Metadata::getSelectedProgrammeId()
+ProgrammeInternalId ear::plugin::Metadata::getSelectedProgrammeId()
 {
   std::lock_guard<std::mutex> lock(mutex_);
   return programmeStore_.selected_programme_internal_id();
 }
 
-bool ear::plugin::Metadata::programmeHasElement(const std::string &progId, communication::ConnectionId const & connId)
+bool ear::plugin::Metadata::programmeHasElement(const ProgrammeInternalId &progId, communication::ConnectionId const & connId)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   auto programmeIndex = getProgrammeIndex(progId);
@@ -289,7 +289,7 @@ bool ear::plugin::Metadata::getAutoMode()
   return programmeStore_.auto_mode();
 }
 
-int ear::plugin::Metadata::getProgrammeIndex(const std::string& progId)
+int ear::plugin::Metadata::getProgrammeIndex(const ProgrammeInternalId& progId)
 {
   return getProgrammeIndexFromId(programmeStore_, progId);
 }
@@ -414,7 +414,7 @@ RouteMap Metadata::routeMap() const {
     return routes;
 }
 
-void Metadata::setElementOrder(const std::string &progId, const std::vector<communication::ConnectionId> &order) {
+void Metadata::setElementOrder(const ProgrammeInternalId &progId, const std::vector<communication::ConnectionId> &order) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto programmeIndex = getProgrammeIndex(progId);
     assert(programmeIndex >= 0);
