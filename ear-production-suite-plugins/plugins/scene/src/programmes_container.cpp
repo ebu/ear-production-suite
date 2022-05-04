@@ -336,11 +336,17 @@ void ProgrammesContainer::languageChanged(ProgrammeView* view, int languageIndex
 }
 
 void ProgrammesContainer::elementMoved(ElementViewList* list, int oldIndex, int newIndex) {
-    auto view = dynamic_cast<ProgrammeView*>(list->getParentComponent());
-    assert(view);
-    if(view) {
-      data_.moveElement(view->getProgrammeId(), oldIndex, newIndex);
+    // ElementViewList will be a few components down from the associated ProgrammeView - trace up
+    auto parentComponent = list->getParentComponent();
+    while(parentComponent) {
+      auto view = dynamic_cast<ProgrammeView*>(parentComponent);
+      if(view) {
+        data_.moveElement(view->getProgrammeId(), oldIndex, newIndex);
+        return;
+      }
+      parentComponent = parentComponent->getParentComponent();
     }
+    assert(false); // Never found the ProgrammeView
 }
 
 void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* eView) {
