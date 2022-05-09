@@ -53,7 +53,6 @@ class Metadata {
   void clearProgrammeLanguage(const ProgrammeInternalId &progId);
   void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connId);
   void removeElementFromProgramme(const ProgrammeInternalId &progId, communication::ConnectionId const& connId);
-  void moveElement(const ProgrammeInternalId &progId, int oldIndex, int newIndex);
   void setElementOrder(const ProgrammeInternalId &progId, std::vector<communication::ConnectionId> const& order);
   void updateElement(communication::ConnectionId const& progId, proto::Object const& element);
 

@@ -239,26 +239,6 @@ void Metadata::removeElementFromProgramme(const ProgrammeInternalId &progId, con
     doRemoveElementFromProgramme(programmeIndex, connId);
 }
 
-void Metadata::moveElement(const ProgrammeInternalId &progId, int oldIndex,
-                                 int newIndex) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto programmeIndex = getProgrammeIndex(progId);
-    assert(programmeIndex >= 0);
-    auto elements =
-            programmeStore_.mutable_programme(programmeIndex)
-                    ->mutable_element();
-    if (oldIndex >= 0 &&  //
-        newIndex >= 0 &&  //
-        oldIndex < elements->size() &&  //
-        newIndex < elements->size() &&  //
-        oldIndex != newIndex) {
-        move(elements->begin(), oldIndex, newIndex);
-        auto programme = programmeStore_.programme(programmeIndex);
-        fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, programme);
-    }
-}
-
 void Metadata::updateElement(const communication::ConnectionId& connId,
                                    const proto::Object& element) {
     std::lock_guard<std::mutex> lock(mutex_);
