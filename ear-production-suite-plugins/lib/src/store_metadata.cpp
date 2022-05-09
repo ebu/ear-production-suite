@@ -103,8 +103,13 @@ void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
       programmes->erase(programmes->begin() + origIndex);
       auto newSelectedId = programmeStore_.selected_programme_internal_id();
       auto newSelectedIndex =  getProgrammeIndex(newSelectedId);
-      if(programmeStore_.selected_programme_internal_id() == progId) {
-        newSelectedIndex = std::max<int>(programmeStore_.programme_size() - 1, origIndex);
+      if(newSelectedIndex < 0) {
+        // Programme we want to select no longer exists - pick a suitable alternative
+        if(origIndex < programmeStore_.programme_size()) {
+          newSelectedIndex = origIndex;
+        } else {
+          newSelectedIndex = programmeStore_.programme_size() - 1;
+        }
         assert(newSelectedIndex >= 0); // should always have >0 progs
         newSelectedId = programmes->at(newSelectedIndex).programme_internal_id();
       }
