@@ -29,7 +29,6 @@ void ElementsContainer::resized() {
   list->setBounds(area.reduced(2, 2));
 }
 
-// TODO store element id with view and send that to listeners instead of index
 void ElementsContainer::removeElementUiInteraction(ElementView * element)
 {
   auto it = std::find_if(
