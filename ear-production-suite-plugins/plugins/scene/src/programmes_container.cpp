@@ -7,6 +7,7 @@
 #include "programme_view.hpp"
 #include "helper/move.hpp"
 #include "components/overlay.hpp"
+#include "communication/common_types.hpp"
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
@@ -337,16 +338,29 @@ void ProgrammesContainer::languageChanged(ProgrammeView* view, int languageIndex
 
 void ProgrammesContainer::elementMoved(ElementViewList* list, int oldIndex, int newIndex) {
     // ElementViewList will be a few components down from the associated ProgrammeView - trace up
+    ProgrammeView* programmeView;
+
     auto parentComponent = list->getParentComponent();
     while(parentComponent) {
-      auto view = dynamic_cast<ProgrammeView*>(parentComponent);
-      if(view) {
-        data_.moveElement(view->getProgrammeId(), oldIndex, newIndex);
-        return;
-      }
+      programmeView = dynamic_cast<ProgrammeView*>(parentComponent);
+      if(programmeView) break;
       parentComponent = parentComponent->getParentComponent();
     }
-    assert(false); // Never found the ProgrammeView
+    assert(programmeView); // Assert here means traced through entire tree without finding ProgrammeView
+
+    if(programmeView) {
+      auto associatedProgId = programmeView->getProgrammeId();
+      if(auto elementsContainer = programmeView->getElementsContainer()) {
+        std::vector<ear::plugin::communication::ConnectionId> ids;
+        for(const auto& element : elementsContainer->elements) {
+          auto objectView = std::dynamic_pointer_cast<ObjectView> (element);
+          if(objectView) {
+            ids.push_back(objectView->getConnectionId());
+          }
+        }
+        data_.setElementOrder(associatedProgId, ids);
+      }
+    }
 }
 
 void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* eView) {
