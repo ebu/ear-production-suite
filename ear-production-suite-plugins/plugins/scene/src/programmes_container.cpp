@@ -9,6 +9,22 @@
 #include "components/overlay.hpp"
 #include "communication/common_types.hpp"
 
+namespace {
+
+template <typename ComponentType>
+ComponentType* getAncestorComponentOfType(Component* startingComponent) {
+  auto parentComponent = startingComponent->getParentComponent();
+  while(parentComponent) {
+    auto candidate = dynamic_cast<ComponentType*>(parentComponent);
+    if(candidate) return candidate;
+    parentComponent = parentComponent->getParentComponent();
+  }
+  return nullptr;
+}
+
+}
+
+
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
 
@@ -338,15 +354,8 @@ void ProgrammesContainer::languageChanged(ProgrammeView* view, int languageIndex
 
 void ProgrammesContainer::elementMoved(ElementViewList* list, int oldIndex, int newIndex) {
     // ElementViewList will be a few components down from the associated ProgrammeView - trace up
-    ProgrammeView* programmeView;
-
-    auto parentComponent = list->getParentComponent();
-    while(parentComponent) {
-      programmeView = dynamic_cast<ProgrammeView*>(parentComponent);
-      if(programmeView) break;
-      parentComponent = parentComponent->getParentComponent();
-    }
-    assert(programmeView); // Assert here means traced through entire tree without finding ProgrammeView
+    ProgrammeView* programmeView = getAncestorComponentOfType<ProgrammeView>(list);
+    assert(programmeView);
 
     if(programmeView) {
       auto associatedProgId = programmeView->getProgrammeId();
@@ -363,15 +372,18 @@ void ProgrammesContainer::elementMoved(ElementViewList* list, int oldIndex, int 
     }
 }
 
-void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* eView) {
-    auto pView = dynamic_cast<ProgrammeView*>(list->getParentComponent());
-    assert(pView);
-    if(pView) {
-      auto oView = dynamic_cast<ObjectView*>(pView);
-      assert(oView);
-      if(oView) {
-        auto id = oView->getData().item.connection_id();
-        data_.removeElementFromProgramme(pView->getProgrammeId(), id);
+void ProgrammesContainer::removeElementClicked(ElementViewList* list, ElementView* elementView) {
+    // ElementViewList will be a few components down from the associated ProgrammeView - trace up
+    ProgrammeView* programmeView = getAncestorComponentOfType<ProgrammeView>(list);
+    assert(programmeView);
+
+    if(programmeView) {
+      auto objectView = dynamic_cast<ObjectView*>(elementView);
+      assert(objectView);
+      if(objectView) {
+        auto associatedProgId = programmeView->getProgrammeId();
+        auto id = objectView->getData().item.connection_id();
+        data_.removeElementFromProgramme(associatedProgId, id);
       }
     }
 }
