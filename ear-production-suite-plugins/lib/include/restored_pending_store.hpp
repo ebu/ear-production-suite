@@ -18,7 +18,7 @@ namespace ear::plugin {
                    std::pair<proto::ProgrammeStore, ItemMap> const& currentStores);
 
     private:
-        void inputAdded(InputItem const& item) override;
+        void inputAdded(InputItem const& item, bool autoModeState) override;
         void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) override;
 
         Metadata& data_;

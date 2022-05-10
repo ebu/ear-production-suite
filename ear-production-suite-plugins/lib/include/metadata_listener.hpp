@@ -50,8 +50,8 @@ class MetadataListener {
   void notifyProgrammeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) {
     programmeItemUpdated(status, object);
   }
-  void notifyInputAdded(InputItem const& item) {
-    inputAdded(item);
+  void notifyInputAdded(InputItem const& item, bool autoModeState) {
+    inputAdded(item, autoModeState);
   }
   void notifyInputRemoved(communication::ConnectionId const& id) {
     inputRemoved(id);
@@ -72,7 +72,7 @@ class MetadataListener {
   virtual void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& objects) {}
   virtual void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) {}
   virtual void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& object) {}
-  virtual void inputAdded(InputItem const& item) {}
+  virtual void inputAdded(InputItem const& item, bool autoModeState) {}
   virtual void inputRemoved(communication::ConnectionId const& id) {}
   virtual void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) {}
 };

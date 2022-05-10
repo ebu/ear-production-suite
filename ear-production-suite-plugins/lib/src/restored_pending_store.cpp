@@ -28,7 +28,7 @@ namespace ear::plugin {
         tryRestore();
     }
 
-    void RestoredPendingStore::inputAdded(InputItem const & item)
+    void RestoredPendingStore::inputAdded(InputItem const & item, bool autoModeState)
     {
         if(on_) {
           checkAgainstMissingInputs(item);

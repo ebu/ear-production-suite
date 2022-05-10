@@ -19,7 +19,7 @@ SceneAudioProcessor::SceneAudioProcessor()
                 std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_)),
       autoModeController_(std::make_shared<ear::plugin::AutoModeController>(metadata_))
 {
-  metadata_.addUIListener(autoModeController_);
+  metadata_.addBackendListener(autoModeController_);
 
   backend_ = std::make_unique<ear::plugin::SceneBackend>(metadata_);
 

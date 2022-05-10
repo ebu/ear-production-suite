@@ -50,7 +50,7 @@ void Metadata::setInputItemMetadata(
     if (auto result = itemStore_.emplace(connId, item); result.second) {
         EAR_LOGGER_TRACE(logger_, "addItem id {}", item.connection_id());
         fireEvent(&MetadataListener::notifyInputAdded,
-                  InputItem{item.connection_id(), item});
+                  InputItem{item.connection_id(), item}, programmeStore_.auto_mode());
     } else {
         auto previousItem = result.first->second;
         result.first->second = item;
@@ -260,32 +260,6 @@ void Metadata::updateElement(const communication::ConnectionId& connId,
                   status, ProgrammeObject{ element, item });
       }
     }
-}
-
-int ear::plugin::Metadata::getSelectedProgrammeIndex()
-{
-  std::lock_guard<std::mutex> lock(mutex_);
-  return getProgrammeIndex(programmeStore_.selected_programme_internal_id());
-}
-
-ProgrammeInternalId ear::plugin::Metadata::getSelectedProgrammeId()
-{
-  std::lock_guard<std::mutex> lock(mutex_);
-  return programmeStore_.selected_programme_internal_id();
-}
-
-bool ear::plugin::Metadata::programmeHasElement(const ProgrammeInternalId &progId, communication::ConnectionId const & connId)
-{
-  std::lock_guard<std::mutex> lock(mutex_);
-  auto programmeIndex = getProgrammeIndex(progId);
-  assert(programmeIndex >= 0);
-  auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
-  return findObjectWithId(elements->begin(), elements->end(), connId) != elements->end();
-}
-
-bool ear::plugin::Metadata::getAutoMode()
-{
-  return programmeStore_.auto_mode();
 }
 
 int ear::plugin::Metadata::getProgrammeIndex(const ProgrammeInternalId& progId)
