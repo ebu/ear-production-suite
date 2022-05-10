@@ -235,7 +235,9 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
           newElements.push_back(*object);
         }
       }
-      doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, newElements);
+      if(newElements.size() > 0) {
+        doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, newElements);
+      }
     }
 }
 
