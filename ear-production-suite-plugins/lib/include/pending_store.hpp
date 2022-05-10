@@ -16,7 +16,7 @@ namespace ear::plugin {
         void populateFromAdm(std::string const& admStr, std::vector<uint32_t> const& mappings);
 
     private:
-        void inputAdded(InputItem const& item) override;
+        void inputAdded(InputItem const& item, bool autoModeState) override;
         void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) override;
 
         bool finished{false};

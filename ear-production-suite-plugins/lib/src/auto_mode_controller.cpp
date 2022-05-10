@@ -9,22 +9,10 @@ using namespace ear::plugin;
 
 AutoModeController::AutoModeController(Metadata& data) : data_{data} {}
 
-void ear::plugin::AutoModeController::addItemIfNecessary(const InputItem & item)
+void ear::plugin::AutoModeController::inputAdded(InputItem const & item, bool autoModeEnabled)
 {
-  if(data_.getAutoMode()) {
-    auto selectedProgrammeId = data_.getSelectedProgrammeId();
-    if(!data_.programmeHasElement(selectedProgrammeId, item.id)) {
-      data_.addItemsToSelectedProgramme({ item.id });
-    }
+  if(autoModeEnabled) {
+    data_.addItemsToSelectedProgramme({ item.id });
   }
 }
 
-void ear::plugin::AutoModeController::inputAdded(InputItem const & item)
-{
-  addItemIfNecessary(item);
-}
-
-void AutoModeController::inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem)
-{
-  addItemIfNecessary(item);
-}
