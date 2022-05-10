@@ -14,10 +14,7 @@ namespace ear::plugin {
 
     private:
         Metadata& data_;
-        void addItemIfNecessary(const InputItem &item);
-
-        void inputAdded(InputItem const& item) override;
-        void inputUpdated(const InputItem &item, proto::InputItemMetadata const& oldItem) override;
+        void inputAdded(InputItem const& item, bool autoModeState) override;
     };
 }
 

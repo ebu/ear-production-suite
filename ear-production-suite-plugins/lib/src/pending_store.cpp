@@ -22,7 +22,7 @@ namespace ear {
             pendingElements_ = populateStoreFromAdm(*doc, pendingStore_, mappings);
         }
 
-        void PendingStore::inputAdded(InputItem const & item)
+        void PendingStore::inputAdded(InputItem const & item, bool autoModeState)
         {
           checkAgainstPendingElements(item);
         }
