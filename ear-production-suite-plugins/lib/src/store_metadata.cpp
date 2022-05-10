@@ -222,18 +222,20 @@ void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::Connecti
     auto programmeIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
     if(programmeIndex >= 0) {
       auto programme = programmeStore_.mutable_programme(programmeIndex);
-        std::vector<proto::Object> elements;
-        elements.reserve(connIds.size());
-        for(auto const& connId : connIds) {
-          if(auto element = std::find_if(elements.begin(), elements.end(),
-                                         [&connId](auto const& checkElement) {
-            return checkElement.connection_id() == connId.string(); });
-             element == elements.end()) {
-            auto object = addObject(programme, connId);
-              elements.push_back(*object);
-          }
+      std::vector<proto::Object> newElements;
+      newElements.reserve(connIds.size());
+      for(auto const& connId : connIds) {
+        auto programmeElements = programme->element();
+        auto element = std::find_if(programmeElements.begin(), programmeElements.end(),
+                                    [&connId](auto const& checkElement) {
+          return checkElement.has_object() && checkElement.object().connection_id() == connId.string();
+        });
+        if(element == programmeElements.end()) {
+          auto object = addObject(programme, connId);
+          newElements.push_back(*object);
         }
-      doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, elements);
+      }
+      doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, newElements);
     }
 }
 
