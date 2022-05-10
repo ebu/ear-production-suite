@@ -293,15 +293,17 @@ void BinauralMonitoringJuceFrontendConnector::orientationChange(
   parameterListenersEnabled = true;
 
   // UI - dontSendNotification to avoid recursive loop
-  if (auto orientationControl = yawControl_.lock()) {
-    orientationControl->setValue(euler.y, dontSendNotification);
-  }
-  if (auto orientationControl = pitchControl_.lock()) {
-    orientationControl->setValue(euler.p, dontSendNotification);
-  }
-  if (auto orientationControl = rollControl_.lock()) {
-    orientationControl->setValue(euler.r, dontSendNotification);
-  }
+  updater_.callOnMessageThread([euler, yaw = yawControl_, pitch = pitchControl_, roll = rollControl_](){
+      if(auto control = yaw.lock()) {
+          control->setValue(euler.y, dontSendNotification);
+      }
+      if(auto control = pitch.lock()) {
+          control->setValue(euler.p, dontSendNotification);
+      }
+      if(auto control = roll.lock()) {
+          control->setValue(euler.r, dontSendNotification);
+      }
+  });
 }
 
 void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(
