@@ -4,15 +4,17 @@
 
 #include "store_metadata.hpp"
 #include "helper/move.hpp"
+#include "programme_internal_id.hpp"
+
 #include <algorithm>
 
 using namespace ear::plugin;
 
 namespace {
     template<typename ItT>
-    auto findObjectWithId(ItT begin, ItT end, communication::ConnectionId const &id) {
-        return std::find_if(begin, end, [&id](auto const &element) {
-            return element.has_object() && element.object().connection_id() == id.string();
+    auto findObjectWithId(ItT begin, ItT end, communication::ConnectionId const &connId) {
+        return std::find_if(begin, end, [&connId](auto const &element) {
+            return element.has_object() && element.object().connection_id() == connId.string();
         });
     }
 }
@@ -40,12 +42,12 @@ void Metadata::setDuplicateScene(bool isDuplicate) {
 
 
 void Metadata::setInputItemMetadata(
-        const communication::ConnectionId& id,
+        const communication::ConnectionId& connId,
         const proto::InputItemMetadata& item) {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    assert(id.string() == item.connection_id());
-    if (auto result = itemStore_.emplace(id, item); result.second) {
+    assert(connId.string() == item.connection_id());
+    if (auto result = itemStore_.emplace(connId, item); result.second) {
         EAR_LOGGER_TRACE(logger_, "addItem id {}", item.connection_id());
         fireEvent(&MetadataListener::notifyInputAdded,
                   InputItem{item.connection_id(), item});
@@ -54,26 +56,35 @@ void Metadata::setInputItemMetadata(
         result.first->second = item;
         doChangeInputItem(previousItem, item);
     }
-    itemStore_[id].set_changed(false);
+    itemStore_[connId].set_changed(false);
 }
 
-void Metadata::removeInput(const communication::ConnectionId& id) {
+void Metadata::removeInput(const communication::ConnectionId& connId) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if(auto it = itemStore_.find(id); it != itemStore_.end()) {
+    if(auto it = itemStore_.find(connId); it != itemStore_.end()) {
         auto item = it->second;
-        removeElementFromAllProgrammes(id);
+        removeElementFromAllProgrammes(connId);
         itemStore_.erase(it);
         fireEvent(&MetadataListener::notifyInputRemoved,
-                  id);
+                  connId);
     }
 }
 
 void Metadata::setStore(proto::ProgrammeStore const& store) {
     std::lock_guard<std::mutex> lock(mutex_);
     programmeStore_ = store;
+    for(int i = 0; i < programmeStore_.programme_size(); i++) {
+      if(!programmeStore_.programme(i).has_programme_internal_id()) {
+        auto id = newProgrammeInternalId();
+        programmeStore_.mutable_programme(i)->set_programme_internal_id(id);
+      }
+    }
+    if(!programmeStore_.has_selected_programme_internal_id() && programmeStore_.programme_size() > 0) {
+      programmeStore_.set_selected_programme_internal_id(programmeStore_.programme(0).programme_internal_id());
+    }
     auto items = itemStore_;
     fireEvent(&MetadataListener::notifyDataReset,
-              store, items);
+              programmeStore_, items);
 }
 
 void Metadata::addProgramme() {
@@ -84,44 +95,75 @@ void Metadata::addProgramme() {
     addProgrammeImpl(name, "");
 }
 
-void Metadata::removeProgramme(int index) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto programme = programmeStore_.mutable_programme();
-    assert(index < programmeStore_.programme_size());
-    programme->erase(programme->begin() + index);
-    auto newIndex = programmeStore_.selected_programme_index();
-    if(newIndex >= programme->size()) {
-        newIndex = std::max<int>(programme->size() - 1, 0);
-    }
-    programmeStore_.set_selected_programme_index(newIndex);
-    fireEvent(&MetadataListener::notifyProgrammeRemoved,
-              index);
-    auto prog = programmeStore_.programme(newIndex);
-    doSelectProgramme(newIndex, prog);
-}
-
-void Metadata::moveProgramme(int oldIndex, int newIndex) {
+void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto programmes = programmeStore_.mutable_programme();
-    auto size = programmes->size();
-    if (oldIndex >= 0 && newIndex >= 0 && oldIndex < size && newIndex < size &&
-        oldIndex != newIndex) {
-        move(programmes->begin(), oldIndex, newIndex);
-        auto programme = programmes->at(newIndex);
-        fireEvent(&MetadataListener::notifyProgrammeMoved,
-                  Movement{oldIndex, newIndex}, programme);
+    auto origIndex = getProgrammeIndex(progId);
+    if(origIndex >= 0) {
+      programmes->erase(programmes->begin() + origIndex);
+      auto newSelectedId = programmeStore_.selected_programme_internal_id();
+      auto newSelectedIndex =  getProgrammeIndex(newSelectedId);
+      if(newSelectedIndex < 0) {
+        // Programme we want to select no longer exists - pick a suitable alternative
+        if(origIndex < programmeStore_.programme_size()) {
+          newSelectedIndex = origIndex;
+        } else {
+          newSelectedIndex = programmeStore_.programme_size() - 1;
+        }
+        assert(newSelectedIndex >= 0); // should always have >0 progs
+        newSelectedId = programmes->at(newSelectedIndex).programme_internal_id();
+      }
+      programmeStore_.set_selected_programme_internal_id(newSelectedId);
+      fireEvent(&MetadataListener::notifyProgrammeRemoved,
+                ProgrammeStatus{ progId, false });
+      auto prog = programmeStore_.programme(newSelectedIndex);
+      doSelectProgramme(prog);
     }
 }
 
-void Metadata::selectProgramme(int index) {
+void Metadata::setProgrammeOrder(std::vector<ProgrammeInternalId> const & order)
+{
+
+  auto targetIndexOf = [=](proto::Programme const& prog, std::vector<ProgrammeInternalId> const& order) {
+    ProgrammeInternalId progId = prog.programme_internal_id();
+    for(int i = 0; i < order.size(); i++) {
+      if(order[i] == progId) {
+        return i;
+      }
+    }
+    // Not found in new list - use existing order after the sorted list
+    for(int i = 0; i < programmeStore_.programme_size(); i++) {
+      if(programmeStore_.programme(i).programme_internal_id() == progId) {
+        return (int)order.size() + i;
+      }
+    }
+    // Still not found (can't happen, but complete return routes)- move to very end
+    return (int)order.size() + programmeStore_.programme_size();
+  };
+
+  auto programmes = programmeStore_.mutable_programme();
+  std::stable_sort(programmes->begin(), programmes->end(),
+                   [&order, targetIndexOf](auto const& lhs, auto const& rhs) {
+    return targetIndexOf(lhs, order) < targetIndexOf(rhs, order);
+  });
+
+  std::vector<ProgrammeStatus> programmeStatuses;
+  auto selectedProgId = programmeStore_.selected_programme_internal_id();
+  for(const auto& programme : programmeStore_.programme()) {
+      auto progId = programme.programme_internal_id();
+      programmeStatuses.push_back(ProgrammeStatus{ progId, selectedProgId == progId });
+  }
+
+  fireEvent(&MetadataListener::notifyProgrammeOrderChanged, programmeStatuses);
+}
+
+void Metadata::selectProgramme(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto oldIndex = programmeStore_.selected_programme_index();
-    if(oldIndex != index) {
-        programmeStore_.set_selected_programme_index(index);
-        if(index >= 0 && index < programmeStore_.programme_size()) {
-            auto prog = programmeStore_.programme(index);
-            doSelectProgramme(index, prog);
-        }
+    auto index = getProgrammeIndex(progId);
+    if(index >= 0 && programmeStore_.selected_programme_internal_id() != progId) {
+      programmeStore_.set_selected_programme_internal_id(progId);
+      auto index = getProgrammeIndex(progId);
+      doSelectProgramme(programmeStore_.programme(index));
     }
 }
 
@@ -132,125 +174,123 @@ void Metadata::setAutoMode(bool enable) {
               enable);
 }
 
-void Metadata::setProgrammeName(int index, const std::string& name) {
+void Metadata::setProgrammeName(const ProgrammeInternalId &progId, const std::string& name) {
     std::lock_guard<std::mutex> lock(mutex_);
-    assert(index < programmeStore_.programme_size());
-    if(name != programmeStore_.programme(index).name()) {
+    auto index = getProgrammeIndex(progId);
+    if(index >= 0 && name != programmeStore_.programme(index).name()) {
         programmeStore_.mutable_programme(index)->set_name(name);
         auto prog = programmeStore_.programme(index);
-        auto selectedIndex = programmeStore_.selected_programme_index();
         fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{index, index == selectedIndex}, prog);
+                  ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
     }
 }
 
-void Metadata::setProgrammeLanguage(int programmeIndex,
+void Metadata::setProgrammeLanguage(const ProgrammeInternalId &progId,
                                     const std::string& language) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if(!(programmeStore_.programme(programmeIndex).has_language() &&
-         programmeStore_.programme(programmeIndex).language() == language)) {
-        programmeStore_.mutable_programme(programmeIndex)->set_language(language);
-        auto prog = programmeStore_.programme(programmeIndex);
-        auto selectedIndex = programmeStore_.selected_programme_index();
-        fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, prog);
+    auto index = getProgrammeIndex(progId);
+    if(index >= 0 && !(programmeStore_.programme(index).has_language() &&
+                       programmeStore_.programme(index).language() == language)) {
+      programmeStore_.mutable_programme(index)->set_language(language);
+      auto prog = programmeStore_.programme(index);
+      fireEvent(&MetadataListener::notifyProgrammeUpdated,
+                ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
+
     }
 }
 
-void Metadata::clearProgrammeLanguage(int programmeIndex) {
+void Metadata::clearProgrammeLanguage(const ProgrammeInternalId &progId) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if(programmeStore_.programme(programmeIndex).has_language()) {
-        programmeStore_.mutable_programme(programmeIndex)->clear_language();
-        auto prog = programmeStore_.programme(programmeIndex);
-        auto selectedIndex = programmeStore_.selected_programme_index();
-        fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, prog);
+    auto index = getProgrammeIndex(progId);
+    if(index >= 0 && programmeStore_.programme(index).has_language()) {
+      programmeStore_.mutable_programme(index)->clear_language();
+      auto prog = programmeStore_.programme(index);
+      fireEvent(&MetadataListener::notifyProgrammeUpdated,
+                ProgrammeStatus{progId, progId == programmeStore_.selected_programme_internal_id()}, prog);
+
     }
 }
 
 void Metadata::addItemsToSelectedProgramme(std::vector<
-        communication::ConnectionId> const& ids) {
+        communication::ConnectionId> const& connIds) {
     std::lock_guard<std::mutex> lock(mutex_);
-    doAddItemsToSelectedProgramme(ids);
+    doAddItemsToSelectedProgramme(connIds);
 }
 
-void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids) {
-    assert(!ids.empty());
-    auto programmeIndex = programmeStore_.selected_programme_index();
-    auto programme = programmeStore_.mutable_programme(programmeIndex);
-    std::vector<proto::Object> elements;
-    elements.reserve(ids.size());
-    for(auto const& id : ids) {
-        if( auto element = std::find_if(elements.begin(), elements.end(),
-                                        [&id](auto const& checkElement) {
-            return checkElement.connection_id() == id.string(); });
-            element == elements.end()) {
-                auto object = addObject(programme, id);
-                elements.push_back(*object);
+void Metadata::doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connIds) {
+    assert(!connIds.empty());
+    auto programmeIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
+    if(programmeIndex >= 0) {
+      auto programme = programmeStore_.mutable_programme(programmeIndex);
+        std::vector<proto::Object> elements;
+        elements.reserve(connIds.size());
+        for(auto const& connId : connIds) {
+          if(auto element = std::find_if(elements.begin(), elements.end(),
+                                         [&connId](auto const& checkElement) {
+            return checkElement.connection_id() == connId.string(); });
+             element == elements.end()) {
+            auto object = addObject(programme, connId);
+              elements.push_back(*object);
+          }
         }
-    }
-    doAddItems({programmeIndex, true}, elements);
-}
-
-void Metadata::removeElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    doRemoveElementFromProgramme(programmeIndex, id);
-}
-
-void Metadata::moveElement(int programmeIndex, int oldIndex,
-                                 int newIndex) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto elements =
-            programmeStore_.mutable_programme(programmeIndex)
-                    ->mutable_element();
-    if (oldIndex >= 0 &&  //
-        newIndex >= 0 &&  //
-        oldIndex < elements->size() &&  //
-        newIndex < elements->size() &&  //
-        oldIndex != newIndex) {
-        move(elements->begin(), oldIndex, newIndex);
-        auto programme = programmeStore_.programme(programmeIndex);
-        auto selectedIndex = programmeStore_.selected_programme_index();
-        fireEvent(&MetadataListener::notifyProgrammeUpdated,
-                  ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex}, programme);
+      doAddItems({ programmeStore_.programme(programmeIndex).programme_internal_id(), true }, elements);
     }
 }
 
-void Metadata::updateElement(const communication::ConnectionId& id,
+void Metadata::removeElementFromProgramme(const ProgrammeInternalId &progId, const communication::ConnectionId& connId) {
+    auto programmeIndex = getProgrammeIndex(progId);
+    assert(programmeIndex >= 0);
+    std::lock_guard<std::mutex> lock(mutex_);
+    doRemoveElementFromProgramme(programmeIndex, connId);
+}
+
+void Metadata::updateElement(const communication::ConnectionId& connId,
                                    const proto::Object& element) {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto programmeIndex = programmeStore_.selected_programme_index();
-    auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
+    auto programmeIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
+    if(programmeIndex >= 0) {
+      auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
 
-    if(auto it = findObjectWithId(elements->begin(), elements->end(), id);
-       it != elements->end() && it->has_object()) {
+      if(auto it = findObjectWithId(elements->begin(), elements->end(), connId);
+         it != elements->end() && it->has_object()) {
         *(it->mutable_object()) = element;
-        ProgrammeStatus status{
-                programmeIndex,
-                true
-        };
-
-        auto const& item = itemStore_.at(id);
+        ProgrammeStatus status{ programmeStore_.programme(programmeIndex).programme_internal_id(), true };
+        auto const& item = itemStore_.at(connId);
         fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                  status, ProgrammeObject{element, item});
+                  status, ProgrammeObject{ element, item });
+      }
     }
 }
 
 int ear::plugin::Metadata::getSelectedProgrammeIndex()
 {
-  return programmeStore_.selected_programme_index();
+  std::lock_guard<std::mutex> lock(mutex_);
+  return getProgrammeIndex(programmeStore_.selected_programme_internal_id());
 }
 
-bool ear::plugin::Metadata::programmeHasElement(int programmeIndex, communication::ConnectionId const & id)
+ProgrammeInternalId ear::plugin::Metadata::getSelectedProgrammeId()
 {
   std::lock_guard<std::mutex> lock(mutex_);
+  return programmeStore_.selected_programme_internal_id();
+}
+
+bool ear::plugin::Metadata::programmeHasElement(const ProgrammeInternalId &progId, communication::ConnectionId const & connId)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto programmeIndex = getProgrammeIndex(progId);
+  assert(programmeIndex >= 0);
   auto elements = programmeStore_.mutable_programme(programmeIndex)->mutable_element();
-  return findObjectWithId(elements->begin(), elements->end(), id) != elements->end();
+  return findObjectWithId(elements->begin(), elements->end(), connId) != elements->end();
 }
 
 bool ear::plugin::Metadata::getAutoMode()
 {
   return programmeStore_.auto_mode();
+}
+
+int ear::plugin::Metadata::getProgrammeIndex(const ProgrammeInternalId& progId)
+{
+  return getProgrammeIndexFromId(programmeStore_, progId);
 }
 
 void Metadata::addUIListener(std::weak_ptr<MetadataListener> listener) {
@@ -265,51 +305,53 @@ void Metadata::addBackendListener(std::weak_ptr<MetadataListener> listener) {
 void Metadata::ensureDefaultProgrammePresent() {
     if(programmeStore_.programme_size() == 0) {
         addProgrammeImpl("Default", "");
-        programmeStore_.set_selected_programme_index(0);
-        doSelectProgramme(0, programmeStore_.programme(0));
+        auto defProgId = programmeStore_.programme(0).programme_internal_id();
+        programmeStore_.set_selected_programme_internal_id(defProgId);
+        doSelectProgramme(programmeStore_.programme(0));
     }
 }
 
-void Metadata::removeElementFromAllProgrammes(const communication::ConnectionId& id) {
+void Metadata::removeElementFromAllProgrammes(const communication::ConnectionId& connId) {
     for (int programmeIndex = 0;
          programmeIndex != programmeStore_.programme_size();
          ++programmeIndex) {
-        doRemoveElementFromProgramme(programmeIndex, id);
+        doRemoveElementFromProgramme(programmeIndex, connId);
     }
 }
 
-void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id) {
+void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& connId) {
     auto elements =
             programmeStore_.mutable_programme(programmeIndex)->mutable_element();
-
-    if(auto it = findObjectWithId(elements->begin(), elements->end(), id); it != elements->end()) {
+    auto selectedIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
+    if(auto it = findObjectWithId(elements->begin(), elements->end(), connId); it != elements->end()) {
         ProgrammeStatus status {
-            programmeIndex,
-            programmeIndex == programmeStore_.selected_programme_index()
+            programmeStore_.programme(programmeIndex).programme_internal_id(),
+            programmeIndex == selectedIndex
         };
         elements->erase(it);
-        EAR_LOGGER_TRACE(logger_, "remove programme item id {}", id.string());
+        EAR_LOGGER_TRACE(logger_, "remove programme item id {}", connId.string());
         fireEvent(&MetadataListener::notifyItemRemovedFromProgramme,
-                  status, id);
+                  status, connId);
     }
 }
 
 void Metadata::addProgrammeImpl(
         const std::string& name,
         const std::string& language) {
-    auto index = programmeStore_.programme_size();
     auto programme = programmeStore_.add_programme();
     programme->set_name(name);
     programme->set_language(language);
+    auto progId = newProgrammeInternalId();
+    programme->set_programme_internal_id(progId);
     fireEvent(&MetadataListener::notifyProgrammeAdded,
-              ProgrammeStatus{index, false}, *programme);
+              ProgrammeStatus{progId, false}, *programme);
 }
 
 proto::Object* Metadata::addObject(proto::Programme* programme,
-                                   const communication::ConnectionId& id) {
+                                   const communication::ConnectionId& connId) {
   auto element = programme->add_element();
   auto object = new proto::Object{};
-  object->set_connection_id(id.string());
+  object->set_connection_id(connId.string());
   element->set_allocated_object(object);
   return object;
 }
@@ -323,16 +365,16 @@ void Metadata::doAddItems(ProgrammeStatus status,
   std::vector<ProgrammeObject> pairs;
   pairs.reserve(items.size());
   for(auto const& item : items) {
-    auto id = communication::ConnectionId(item.connection_id());
-    pairs.push_back({item, itemStore_.at(id)});
+    auto connId = communication::ConnectionId(item.connection_id());
+    pairs.push_back({item, itemStore_.at(connId)});
   }
 
   fireEvent(&MetadataListener::notifyItemsAddedToProgramme,
             status, pairs);
 }
 
-void Metadata::doSelectProgramme(int index, proto::Programme const& programme) {
-  ProgrammeObjects objects({index, true}, programme, itemStore_);
+void Metadata::doSelectProgramme(proto::Programme const& programme) {
+  ProgrammeObjects objects({programme.programme_internal_id(), true}, programme, itemStore_);
   fireEvent(&MetadataListener::notifyProgrammeSelected,
             objects);
 }
@@ -343,14 +385,13 @@ void Metadata::doChangeInputItem(
   auto const& id = newItem.connection_id();
   fireEvent(&MetadataListener::notifyInputUpdated,
           InputItem{id, newItem}, oldItem);
-  auto selectedIndex = programmeStore_.selected_programme_index();
 
-  for (auto i = 0; i != programmeStore_.programme_size(); ++i) {
-      auto const &elements = programmeStore_.programme(i).element();
+  for (const auto& programme : programmeStore_.programme()) {
+      auto const &elements = programme.element();
       if (auto it = findObjectWithId(elements.begin(), elements.end(), id);
               it != elements.end()) {
           fireEvent(&MetadataListener::notifyProgrammeItemUpdated,
-                    ProgrammeStatus{i, i == selectedIndex},
+                    ProgrammeStatus{programme.programme_internal_id(), programme.programme_internal_id() == programmeStore_.selected_programme_internal_id()},
                     ProgrammeObject{it->object(), newItem});
       }
   }
@@ -368,8 +409,10 @@ RouteMap Metadata::routeMap() const {
     return routes;
 }
 
-void Metadata::setElementOrder(int programmeIndex, const std::vector<communication::ConnectionId> &order) {
+void Metadata::setElementOrder(const ProgrammeInternalId &progId, const std::vector<communication::ConnectionId> &order) {
     std::lock_guard<std::mutex> lock(mutex_);
+    auto programmeIndex = getProgrammeIndex(progId);
+    assert(programmeIndex >= 0);
     doSetElementOrder(programmeIndex, order);
 }
 
@@ -398,9 +441,9 @@ void Metadata::doSetElementOrder(int programmeIndex, const std::vector<communica
                          return targetIndexOf(lhs, order) < targetIndexOf(rhs, order);
                      });
 
-    auto selectedIndex = programmeStore_.selected_programme_index();
+    auto selectedIndex = getProgrammeIndex(programmeStore_.selected_programme_internal_id());
     fireEvent(&MetadataListener::notifyProgrammeUpdated,
-              ProgrammeStatus{programmeIndex, programmeIndex == selectedIndex},
+              ProgrammeStatus{programmeStore_.programme(programmeIndex).programme_internal_id(), programmeIndex == selectedIndex},
               programmeStore_.programme(programmeIndex));
 }
 

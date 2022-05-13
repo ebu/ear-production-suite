@@ -12,8 +12,8 @@ AutoModeController::AutoModeController(Metadata& data) : data_{data} {}
 void ear::plugin::AutoModeController::addItemIfNecessary(const InputItem & item)
 {
   if(data_.getAutoMode()) {
-    auto selectedProgrammeIndex = data_.getSelectedProgrammeIndex();
-    if(!data_.programmeHasElement(selectedProgrammeIndex, item.id)) {
+    auto selectedProgrammeId = data_.getSelectedProgrammeId();
+    if(!data_.programmeHasElement(selectedProgrammeId, item.id)) {
       data_.addItemsToSelectedProgramme({ item.id });
     }
   }

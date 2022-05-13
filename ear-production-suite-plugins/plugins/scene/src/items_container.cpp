@@ -6,6 +6,7 @@
 #include "item_view.hpp"
 #include "item_view_list.hpp"
 #include "store_metadata.hpp"
+#include "programme_internal_id.hpp"
 #include <iostream>
 
 using namespace ear::plugin::ui;
@@ -274,12 +275,12 @@ void ItemsContainer::setPresentThemeFor(const communication::ConnectionId& id) {
 }
 
 void ItemsContainer::dataReset(const proto::ProgrammeStore &programmeStore, const ItemMap &items) {
-    auto selectedIndex = programmeStore.selected_programme_index();
-    selectedIndex = std::max<int>(selectedIndex, 0);
+    auto selectedId = programmeStore.selected_programme_internal_id();
+    auto selectedIndex = getProgrammeIndexFromId(programmeStore, selectedId);
     createOrUpdateViews(items);
-    if(selectedIndex < programmeStore.programme_size()) {
+    if(selectedIndex >= 0) {
         auto const& selectedProgramme = programmeStore.programme(selectedIndex);
-        themeItemsFor({{selectedIndex, true},
+        themeItemsFor({{selectedProgramme.programme_internal_id(), true},
                        selectedProgramme,
                        items});
     }

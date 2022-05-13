@@ -17,14 +17,21 @@ namespace ui {
 struct EarTab {
   EarTabButton* button;
   Component* component;
+  std::string id;
 };
 
 class EarTabbedComponent : public Component {
  public:
   EarTabbedComponent();
 
-  void addTab(const String& name, Component* component, bool select = true,
-              bool scroll = true);
+  void addTab(const String& name, Component* component, std::string id = "",
+              bool select = true, bool scroll = true);
+  void setTabName(const std::string &id, const String& name);
+  String getTabName(const std::string &id);
+  void selectTab(const std::string &id, bool scroll = true);
+  std::string getSelectedTabId();
+  void moveTabTo(const std::string &id, int newIndex);
+  void removeTab(const std::string &id);
   void setTabName(int index, const String& name);
   String getTabName(int index);
   void selectTab(int index, bool scroll = true);
@@ -35,6 +42,8 @@ class EarTabbedComponent : public Component {
   int tabCount() {
     return static_cast<int>(tabs_.size());
   }
+  int getTabIndexFromId(const std::string &id);
+  std::string getTabIdFromIndex(int index);
 
   void resized() override;
 
@@ -45,19 +54,20 @@ class EarTabbedComponent : public Component {
   int getIndexForTabButton(EarTabButton* button);
   int getIndexForComponent(Component* component);
   Component* getComponent(int index);
+  Component* getComponent(const std::string &id);
 
   class Listener {
    public:
     virtual ~Listener() = default;
 
-    virtual void addTabClicked(EarTabbedComponent* tabbedComponent) = 0;
-    virtual void tabSelected(EarTabbedComponent* tabbedComponent,
-                             int index) = 0;
-    virtual void tabMoved(EarTabbedComponent* tabbedComponent, int oldIndex,
-                          int newIndex) = 0;
-    virtual void removeTabClicked(EarTabbedComponent* tabbedComponent,
-                                  int index) = 0;
-    virtual void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) = 0;
+    virtual void addTabClicked(EarTabbedComponent* tabbedComponent) {}
+    virtual void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) {}
+    virtual void tabSelectedId(EarTabbedComponent* tabbedComponent, const std::string &id) {}
+    virtual void tabMovedId(EarTabbedComponent* tabbedComponent, const std::string &id, int newIndex) {}
+    virtual void removeTabClickedId(EarTabbedComponent* tabbedComponent, const std::string &id) {}
+    virtual void tabSelected(EarTabbedComponent* tabbedComponent, int index) {}
+    virtual void tabMoved(EarTabbedComponent* tabbedComponent, int oldIndex, int newIndex) {}
+    virtual void removeTabClicked(EarTabbedComponent* tabbedComponent, int index) {}
   };
 
   void addListener(Listener* l) { listeners_.add(l); }

@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include "metadata_listener.hpp"
+#include "programme_internal_id.hpp"
 
 namespace ear::plugin {
 
@@ -36,29 +37,29 @@ class Metadata {
   void setExporting(bool exporting);
 
   // Input item manipulation
-  void setInputItemMetadata(communication::ConnectionId const& id,
+  void setInputItemMetadata(communication::ConnectionId const& connId,
                           proto::InputItemMetadata const& item);
-  void removeInput(communication::ConnectionId const& id);
+  void removeInput(communication::ConnectionId const& connId);
 
   // Programme manipulation
   void setStore(proto::ProgrammeStore const& store);
   void addProgramme();
-  void removeProgramme(int index);
-  void moveProgramme(int oldIndex, int newIndex);
-  void selectProgramme(int index);
+  void removeProgramme(const ProgrammeInternalId &progId);
+  void setProgrammeOrder(std::vector<ProgrammeInternalId> const& order);
+  void selectProgramme(const ProgrammeInternalId &progId);
   void setAutoMode(bool enable);
-  void setProgrammeName(int index, std::string const& name);
-  void setProgrammeLanguage(int programmeIndex, std::string const& language);
-  void clearProgrammeLanguage(int programmeIndex);
-  void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& id);
-  void removeElementFromProgramme(int programmeIndex, communication::ConnectionId const& id);
-  void moveElement(int programmeIndex, int oldIndex, int newIndex);
-  void setElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
-  void updateElement(communication::ConnectionId const& id, proto::Object const& element);
+  void setProgrammeName(const ProgrammeInternalId &progId, std::string const& name);
+  void setProgrammeLanguage(const ProgrammeInternalId &progId, std::string const& language);
+  void clearProgrammeLanguage(const ProgrammeInternalId &progId);
+  void addItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connId);
+  void removeElementFromProgramme(const ProgrammeInternalId &progId, communication::ConnectionId const& connId);
+  void setElementOrder(const ProgrammeInternalId &progId, std::vector<communication::ConnectionId> const& order);
+  void updateElement(communication::ConnectionId const& progId, proto::Object const& element);
 
   // Queries
   int getSelectedProgrammeIndex();
-  bool programmeHasElement(int programmeIndex, communication::ConnectionId const& id);
+  ProgrammeInternalId getSelectedProgrammeId();
+  bool programmeHasElement(const ProgrammeInternalId &progId, communication::ConnectionId const& connId);
   bool getAutoMode();
 
   // Listeners
@@ -67,21 +68,23 @@ class Metadata {
 
  private:
   RouteMap routeMap() const;
+  int getProgrammeIndex(const ProgrammeInternalId &progId);
+
   // ProgrammeStore callbacks
   void doAddItems(ProgrammeStatus status, std::vector<proto::Object> const& items);
-  void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& ids);
-  void doSelectProgramme(int index, proto::Programme const& programme);
+  void doAddItemsToSelectedProgramme(std::vector<communication::ConnectionId> const& connIds);
+  void doSelectProgramme(proto::Programme const& programme);
 
   // ItemStore callbacks
   void doChangeInputItem(const proto::InputItemMetadata& oldItem,
                          const proto::InputItemMetadata& newItem);
 
-  void removeElementFromAllProgrammes(communication::ConnectionId const& id);
-  void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& id);
+  void removeElementFromAllProgrammes(communication::ConnectionId const& connId);
+  void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& connId);
 
   void addProgrammeImpl(std::string const& name, std::string const& language);
   void ensureDefaultProgrammePresent();
-  proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& id);
+  proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& connId);
   void doSetElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
 
   template<typename F, typename... Args>
