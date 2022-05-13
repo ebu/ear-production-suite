@@ -1,6 +1,7 @@
 #include "scene_gains_calculator.hpp"
 #include "ear/metadata.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
+#include "helper/container_helpers.hpp"
 #include <future>
 #include <algorithm>
 
@@ -16,25 +17,6 @@ Eigen::MatrixXf toEigenMat(std::vector<std::vector<float>>& vec) {
       Eigen::VectorXf::Map(vec[i].data(), inputCount);
   }
   return mat;
-}
-
-template <typename Key, typename Value>
-Value* getValuePointerFromMap(std::map<Key, Value>& targetMap, Key key) {
-  auto it = targetMap.find(key);
-  if (it == targetMap.end()) return nullptr;
-  return &(it->second);
-}
-
-template <typename Key, typename Value>
-Value* setInMap(std::map<Key, Value>& targetMap, Key key, Value value) {
-  auto ins = targetMap.insert_or_assign(key, value);
-  return &(ins.first->second);
-}
-
-template <typename Key, typename Value>
-bool mapHasKey(std::map<Key, Value>& targetMap, Key key) {
-  auto it = targetMap.find(key);
-  return (it != targetMap.end());
 }
 
 }

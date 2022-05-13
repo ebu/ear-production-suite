@@ -2,6 +2,8 @@
 #include "communication/monitoring_metadata_receiver.hpp"
 #include "detail/constants.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
+#include "helper/container_helpers.hpp"
+
 #include <functional>
 #include <algorithm>
 
@@ -9,15 +11,13 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 namespace {
-  template<typename T>
-  bool vectorContains(std::vector<T> const& v, T k) {
-    return std::find(v.begin(), v.end(), k) != v.end();
-  }
 
-  bool isValidId(std::string const& id) {
-    return !(id.empty() || id == "00000000-0000-0000-0000-000000000000");
-  }
+bool isValidId(std::string const& id) {
+  return !(id.empty() || id == "00000000-0000-0000-0000-000000000000");
 }
+
+}
+
 
 namespace ear {
 namespace plugin {
@@ -252,9 +252,9 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
   for (const auto& item : store.monitoring_items()) {
     if (item.has_connection_id() &&
         isValidId(item.connection_id()) &&
-        vectorContains(availableItemIds, item.connection_id())) {
+        contains(availableItemIds, item.connection_id())) {
 
-      bool newItem = !vectorContains(allActiveIds, item.connection_id());
+      bool newItem = !contains(allActiveIds, item.connection_id());
 
       // clang-format off
       if (item.has_hoa_metadata()) {
