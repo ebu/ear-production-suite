@@ -209,7 +209,7 @@ Label* SliderLookAndFeel::createSliderTextBox(Slider& slider) {
 	l->onEditorShow = [this, l] {
 		auto* e = l->getCurrentTextEditor();
 		e->setLookAndFeel(this);
-		e->setJustification(Justification::centred);
+		e->setJustification(Justification::centredTop);
 		e->setFont(EarFonts::Values);
 		e->setColour(TextEditor::highlightColourId,
 			EarColours::Text.withAlpha(Emphasis::disabled));
@@ -217,12 +217,12 @@ Label* SliderLookAndFeel::createSliderTextBox(Slider& slider) {
 		int topIndent;
 		int leftIndent;
 		if (this->unit_.isNotEmpty()) {
-			topIndent = (e->getHeight() - 13.f - e->getFont().getHeight()) / 2;
+			topIndent = (e->getHeight() - 10.f - e->getFont().getHeight()) / 2;
 			leftIndent = 4.f;
 		}
 		else {
 			topIndent = (e->getHeight() - 1.f - e->getFont().getHeight()) / 2;
-			leftIndent = 5.f;
+			leftIndent = 4.f;
 		}
 		e->setIndents(leftIndent, topIndent);
 		e->resized();
