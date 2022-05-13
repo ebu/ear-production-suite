@@ -56,7 +56,6 @@ void Metadata::setInputItemMetadata(
         result.first->second = item;
         doChangeInputItem(previousItem, item);
     }
-    itemStore_[connId].set_changed(false);
 }
 
 void Metadata::removeInput(const communication::ConnectionId& connId) {

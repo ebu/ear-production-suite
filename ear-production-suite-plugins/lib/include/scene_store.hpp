@@ -19,10 +19,15 @@ public:
 
 private:
     proto::SceneStore store_;
-    bool changed{true};
-    bool sendData{true};
+    std::set<communication::ConnectionId> itemsChangedSinceLastSend;
     std::set<std::string> overlappingIds_;
     std::function<void(proto::SceneStore const&)> updateCallback_;
+    enum ExportingSendState {
+      NOT_EXPORTING,
+      EXPORT_START,
+      EXPORTING,
+      EXPORT_END
+    } exportingSendState;
 
     // MetadataListener interface
     void exporting(bool isExporting) override;
@@ -33,6 +38,7 @@ private:
     void programmeItemUpdated(ProgrammeStatus status, const ProgrammeObject &object) override;
     void inputRemoved(const communication::ConnectionId &id) override;
     void inputUpdated(const InputItem &item, proto::InputItemMetadata const&) override;
+    void inputAdded(const InputItem &item, bool autoModeState) override;
 
     // Implementation details
     void addAvailableInputItemsToSceneStore(ItemMap const& items);
