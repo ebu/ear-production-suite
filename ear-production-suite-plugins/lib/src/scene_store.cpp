@@ -7,6 +7,14 @@
 #include "programme_internal_id.hpp"
 #include <algorithm>
 
+namespace {
+template <typename C, typename T>
+bool contains(C const& container, T const& element) {
+  return std::find(container.begin(), container.end(), element) !=
+    container.end();
+}
+}
+
 using namespace ear::plugin;
 SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
     updateCallback_{std::move(update)} {
@@ -14,6 +22,9 @@ SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
 
 void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
                            const ear::plugin::ItemMap &items) {
+    for(const auto& item : store_.all_available_items()) {
+      itemsChangedSinceLastSend.insert(item.connection_id());
+    }
     store_ = {};
     addAvailableInputItemsToSceneStore(items);
     auto selectedId = programmes.selected_programme_internal_id();
@@ -32,18 +43,14 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
     }
 
     flagOverlaps();
-    changed = true;
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
     store_.clear_monitoring_items();
     for(auto const& object : objects) {
-        auto inputData = object.inputMetadata;
-        inputData.set_changed(true);
-        addMonitoringItem(inputData);
+        addMonitoringItem(object.inputMetadata);
     }
     flagOverlaps();
-    changed = true;
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
@@ -53,7 +60,6 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
             addMonitoringItem(object.inputMetadata);
         }
         flagOverlaps();
-        changed = true;
     }
 }
 
@@ -75,7 +81,7 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
         if(auto item = findItem(monitoringItems, id.string());
                 item != monitoringItems->end()) {
             monitoringItems->erase(item);
-            changed = true;
+            itemsChangedSinceLastSend.insert(id);
             flagOverlaps();
         }
     }
@@ -107,11 +113,11 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
 }
 
 void SceneStore::inputRemoved(const communication::ConnectionId &id) {
+    itemsChangedSinceLastSend.insert(id);
     auto availableItems = store_.mutable_all_available_items();
     if(auto existingItem = findItem(availableItems, id.string());
        existingItem != availableItems->end()) {
           availableItems->erase(existingItem);
-          changed = true;
     }
 }
 
@@ -119,16 +125,29 @@ void SceneStore::inputUpdated(const InputItem &item, proto::InputItemMetadata co
     auto availableItems = store_.mutable_all_available_items();
     if(auto existingItem = findItem(availableItems, item.id.string());
             existingItem == availableItems->end()) {
+        itemsChangedSinceLastSend.insert(item.data.connection_id());
         auto newItem = store_.add_all_available_items();
         newItem->CopyFrom(item.data);
-        changed = true;
     } else {
+        if(item.data.changed()) {
+          itemsChangedSinceLastSend.insert(item.data.connection_id());
+        }
         existingItem->CopyFrom(item.data);
         // Update monitoring items here as events are asynchronous,
         // otherwise we risk an update between reducing channel count
         // here and updating rendered items via programmeItemUpdated.
         updateMonitoringItem(item.data);
-        changed = changed || item.data.changed();
+    }
+}
+
+void ear::plugin::SceneStore::inputAdded(const InputItem & item, bool autoModeState)
+{
+    auto availableItems = store_.mutable_all_available_items();
+    if(auto existingItem = findItem(availableItems, item.id.string());
+       existingItem == availableItems->end()) {
+      itemsChangedSinceLastSend.insert(item.data.connection_id());
+      auto newItem = store_.add_all_available_items();
+      newItem->CopyFrom(item.data);
     }
 }
 
@@ -137,7 +156,7 @@ void SceneStore::addAvailableInputItemsToSceneStore(const ear::plugin::ItemMap& 
         auto& itemStoreInputItem = itemPair.second;
         auto sceneStoreInputItem = store_.add_all_available_items();
         sceneStoreInputItem->CopyFrom(itemStoreInputItem);
-        sceneStoreInputItem->set_changed(true);
+        itemsChangedSinceLastSend.insert(itemStoreInputItem.connection_id());
     }
 }
 
@@ -145,8 +164,10 @@ void SceneStore::setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoring
                                        proto::InputItemMetadata const& inputItem) {
     monitoringItem.set_connection_id(inputItem.connection_id());
     monitoringItem.set_routing(inputItem.routing());
-    changed = changed || inputItem.changed();
     monitoringItem.set_changed(inputItem.changed());
+    if(inputItem.changed()) {
+      itemsChangedSinceLastSend.insert(inputItem.connection_id());
+    }
     if (inputItem.has_ds_metadata()) {
         monitoringItem.set_allocated_ds_metadata(
                 new proto::DirectSpeakersTypeMetadata{inputItem.ds_metadata()});
@@ -168,6 +189,7 @@ void SceneStore::setMonitoringItemFrom(proto::MonitoringItemMetadata& monitoring
 void SceneStore::addMonitoringItem(proto::InputItemMetadata const& inputItem) {
     auto monitoringItem = store_.add_monitoring_items();
     setMonitoringItemFrom(*monitoringItem, inputItem);
+    itemsChangedSinceLastSend.insert(inputItem.connection_id());
 }
 
 void SceneStore::addGroup(const proto::ProgrammeElement &element) {
@@ -179,29 +201,54 @@ void SceneStore::addToggle(const proto::ProgrammeElement &element) {
 }
 
 void SceneStore::sendUpdate() {
-  updateCallback_(store_);
-  auto& mutableItems = *store_.mutable_monitoring_items();
-  for(auto& item : mutableItems) {
-     item.set_changed(false);
+  auto& mutableMonitoringItemMetadata = *store_.mutable_monitoring_items();
+  for(auto& item : mutableMonitoringItemMetadata) {
+    if(contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
+      item.set_changed(true);
+    }
   }
-  changed = false;
+  auto& mutableInputItemMetadata = *store_.mutable_all_available_items();
+  for(auto& item : mutableInputItemMetadata) {
+    if(contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
+      item.set_changed(true);
+    }
+  }
+  updateCallback_(store_);
+  itemsChangedSinceLastSend.clear();
 }
 
 void SceneStore::triggerSend() {
-  if(sendData && changed) {
+  bool doSend = true;
+  switch(exportingSendState) {
+    case ExportingSendState::EXPORT_START:
+      exportingSendState = ExportingSendState::EXPORTING;
+      doSend = true; // Force one-time update - next time falls to EXPORTING case
+      break;
+    case ExportingSendState::EXPORT_END:
+      exportingSendState = ExportingSendState::NOT_EXPORTING;
+      doSend = true; // Force one-time update - next time falls to NOT_EXPORTING case
+      break;
+    case ExportingSendState::EXPORTING:
+      doSend = false;
+      break;
+    default: // NOT_EXPORTING - depends upon changes to items
+      doSend = (itemsChangedSinceLastSend.size() > 0);
+      break;
+  }
+
+  if(doSend) {
       sendUpdate();
-      if(store_.is_exporting()) sendData = false;
   }
 }
 
 void SceneStore::exporting(bool isExporting) {
     if(isExporting) {
         store_.set_is_exporting(true);
+        exportingSendState = ExportingSendState::EXPORT_START;
     } else {
         store_.set_is_exporting(false);
-        sendData = true;
+        exportingSendState = ExportingSendState::EXPORT_END;
     }
-    changed = true;
 }
 
 void SceneStore::flagOverlaps() {
