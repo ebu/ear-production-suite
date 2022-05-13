@@ -39,11 +39,11 @@ EarTabbedComponent::EarTabbedComponent()
   addAndMakeVisible(addTabButton_.get());
 }
 
-void EarTabbedComponent::addTab(const String& name, Component* component,
+void EarTabbedComponent::addTab(const String& name, Component* component, std::string id,
                                 bool select, bool scroll) {
   buttons_.push_back(std::make_unique<EarTabButton>(name));
   auto button = buttons_.back().get();
-  tabs_.push_back(EarTab{button, component});
+  tabs_.push_back(EarTab{button, component, id});
 
   button->addMouseListener(this, false);
   button->onClick = [this](EarTabButton* src) {
@@ -51,9 +51,11 @@ void EarTabbedComponent::addTab(const String& name, Component* component,
   };
   button->onCloseClick = [this](EarTabButton* button) {
     auto index = getIndexForTabButton(button);
+    auto id = getTabIdFromIndex(index);
     Component::BailOutChecker checker(this);
-    listeners_.callChecked(checker, [this, index](Listener& l) {
+    listeners_.callChecked(checker, [this, index, id](Listener& l) {
       l.removeTabClicked(this, index);
+      l.removeTabClickedId(this, id);
     });
     if (checker.shouldBailOut()) {
       return;
@@ -71,8 +73,38 @@ void EarTabbedComponent::addTab(const String& name, Component* component,
   }
 }
 
+void ear::plugin::ui::EarTabbedComponent::setTabName(const std::string & id, const String & name)
+{
+    setTabName(getTabIndexFromId(id), name);
+}
+
+String ear::plugin::ui::EarTabbedComponent::getTabName(const std::string & id)
+{
+    return getTabName(getTabIndexFromId(id));
+}
+
+void ear::plugin::ui::EarTabbedComponent::selectTab(const std::string & id, bool scroll)
+{
+    selectTab(getTabIndexFromId(id), scroll);
+}
+
+std::string ear::plugin::ui::EarTabbedComponent::getSelectedTabId()
+{
+    return tabs_[selectedTabIndex_].id;
+}
+
+void ear::plugin::ui::EarTabbedComponent::moveTabTo(const std::string & id, int newIndex)
+{
+    moveTabTo(getTabIndexFromId(id), newIndex);
+}
+
+void ear::plugin::ui::EarTabbedComponent::removeTab(const std::string & id)
+{
+    removeTab(getTabIndexFromId(id));
+}
+
 void EarTabbedComponent::setTabName(int index, const String& name) {
-  if (index < tabs_.size()) {
+  if (index >= 0 && index < tabs_.size()) {
     if (auto button = tabs_.at(index).button) {
       button->setText(name);
     }
@@ -91,7 +123,7 @@ String ear::plugin::ui::EarTabbedComponent::getTabName(int index)
 
 void EarTabbedComponent::selectTab(int index, bool scroll) {
   clearSelected();
-  if (index < tabs_.size()) {
+  if (index >= 0 && index < tabs_.size()) {
     tabs_[index].component->setVisible(true);
     tabs_[index].button->setSelected(true);
     selectedTabIndex_ = index;
@@ -101,9 +133,13 @@ void EarTabbedComponent::selectTab(int index, bool scroll) {
   } else {
     selectedTabIndex_ = -1;
   }
+  auto id = getTabIdFromIndex(selectedTabIndex_);
   Component::BailOutChecker checker(this);
-  listeners_.callChecked(
-      checker, [this, index](Listener& l) { l.tabSelected(this, index); });
+  listeners_.callChecked(checker,
+    [this, index, id](Listener& l) {
+      l.tabSelected(this, index);
+      l.tabSelectedId(this, id);
+  });
   if (checker.shouldBailOut()) {
     return;
   }
@@ -112,23 +148,26 @@ void EarTabbedComponent::selectTab(int index, bool scroll) {
 int EarTabbedComponent::getSelectedTabIndex() { return selectedTabIndex_; }
 
 void EarTabbedComponent::moveTabTo(int oldIndex, int newIndex) {
-  if (oldIndex < tabs_.size() && newIndex < tabs_.size() &&
-      oldIndex != newIndex) {
-    auto selectedButton = tabs_.at(selectedTabIndex_).button;
-    move(tabs_.begin(), oldIndex, newIndex);
-    selectedTabIndex_ = getIndexForTabButton(selectedButton);
-  }
-  Component::BailOutChecker checker(this);
-  listeners_.callChecked(checker, [this, oldIndex, newIndex](Listener& l) {
-    l.tabMoved(this, oldIndex, newIndex);
-  });
-  if (checker.shouldBailOut()) {
-    return;
+  if(oldIndex < tabs_.size() && newIndex < tabs_.size() &&
+     oldIndex >= 0 && newIndex >= 0 && oldIndex != newIndex) {
+      auto id = getTabIdFromIndex(oldIndex);
+      auto selectedButton = tabs_.at(selectedTabIndex_).button;
+      move(tabs_.begin(), oldIndex, newIndex);
+      selectedTabIndex_ = getIndexForTabButton(selectedButton);
+      Component::BailOutChecker checker(this);
+      listeners_.callChecked(checker,
+        [this, oldIndex, newIndex, id](Listener& l) {
+          l.tabMoved(this, oldIndex, newIndex);
+          l.tabMovedId(this, id, newIndex);
+      });
+      if(checker.shouldBailOut()) {
+          return;
+      }
   }
 }
 
 void EarTabbedComponent::removeTab(int index) {
-  if (index < tabs_.size()) {
+  if (index >= 0 && index < tabs_.size()) {
     auto component = tabs_[index].component;
     removeChildComponent(tabs_[index].component);
     buttonBar_->removeButton(tabs_[index].button);
@@ -150,6 +189,17 @@ Component* EarTabbedComponent::getComponent(int index) {
     return tabs_.at(index).component;
   }
   return nullptr;
+}
+
+Component * ear::plugin::ui::EarTabbedComponent::getComponent(const std::string & id)
+{
+    auto it = std::find_if(tabs_.begin(), tabs_.end(), [id](auto tab) {
+        return tab.id == id;
+    });
+    if (it != tabs_.end()) {
+        return it->component;
+    }
+    return nullptr;
 }
 
 void EarTabbedComponent::resized() {
@@ -185,6 +235,24 @@ void EarTabbedComponent::mouseDrag(const MouseEvent& event) {
 
 void EarTabbedComponent::mouseUp(const MouseEvent& event) {
   buttonWidth_ = buttonBar_->updateTabBounds();
+}
+
+int ear::plugin::ui::EarTabbedComponent::getTabIndexFromId(const std::string & id)
+{
+    for(int i = 0; i < tabs_.size(); i++) {
+        if(tabs_[i].id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+std::string ear::plugin::ui::EarTabbedComponent::getTabIdFromIndex(int index)
+{
+    if(index >= 0 && index < tabs_.size()) {
+        return tabs_[index].id;
+    }
+    return std::string();
 }
 
 int EarTabbedComponent::getButtonIndexForXPosition(int xPos) {

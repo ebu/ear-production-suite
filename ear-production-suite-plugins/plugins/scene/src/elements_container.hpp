@@ -35,18 +35,18 @@ class ElementsContainer : public Component {
     virtual ~Listener() = default;
 
     virtual void elementMoved(ElementViewList* list, int oldIndex,
-                              int newIndex) = 0;
-    virtual void removeElementClicked(ElementViewList* list, ElementView* view) = 0;
+                              int newIndex) {};
+    virtual void removeElementClicked(ElementViewList* list, ElementView* view) {};
   };
 
   void addListener(Listener* l);
   void removeListener(Listener* l);
 
   std::unique_ptr<ElementViewList> list;
-  std::unique_ptr<Viewport> viewport;
   std::vector<std::shared_ptr<ElementView>> elements;
 
  private:
+  std::unique_ptr<Viewport> viewport;
   ListenerList<Listener> listeners_;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElementsContainer)
 };

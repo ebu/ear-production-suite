@@ -12,6 +12,7 @@
 #include "object_view.hpp"
 #include "programme_view.hpp"
 #include "elements_container.hpp"
+#include "programme_internal_id.hpp"
 
 namespace ear::plugin {
 class LevelMeterCalculator;
@@ -35,17 +36,17 @@ class ProgrammesContainer : public juce::Component,
                       Metadata& data);
   void resized() override;
   void addObjectView(
-      int programmeIndex,
+      const ProgrammeInternalId& progId,
       const proto::InputItemMetadata& inputItem,
       const proto::Object& programmeElement);
   void clear();
   void updateElementOverview(ProgrammeObjects const& objects);
   void removeFromElementViews(communication::ConnectionId const& id);
   void addProgrammeView(const proto::Programme& programme);
-  void moveProgrammeView(int oldIndex, int newIndex);
-  void setProgrammeViewName(int programmeIndex,
+  void setProgrammeViewOrder(std::vector<ProgrammeInternalId> progIds);
+  void setProgrammeViewName(const ProgrammeInternalId& progId,
                             const juce::String& newName);
-  void setProgrammeViewLanguage(int programmeIndex, const std::optional<std::string>& language);
+  void setProgrammeViewLanguage(const ProgrammeInternalId& progId, const std::optional<std::string>& language);
   int getProgrammeIndex(ProgrammeView* view) const;
   int getProgrammeIndex(ElementViewList* list) const;
   void addListener(Listener* listener);
@@ -64,11 +65,11 @@ void removeElementClicked(ElementViewList* list, ElementView* view) override;
 
 // EarTabbedComponent::Listener
 void addTabClicked(EarTabbedComponent* tabbedComponent) override;
-void tabSelected(EarTabbedComponent* tabbedComponent, int index) override;
-void tabMoved(EarTabbedComponent* tabbedComponent, int oldIndex,
+void tabSelectedId(EarTabbedComponent* tabbedComponent, const std::string& tabId) override;
+void tabMovedId(EarTabbedComponent* tabbedComponent, const std::string& tabId,
               int newIndex) override;
-void removeTabClicked(EarTabbedComponent* tabbedComponent,
-                      int index) override;
+void removeTabClickedId(EarTabbedComponent* tabbedComponent,
+                        const std::string& tabId) override;
 void tabBarDoubleClicked(EarTabbedComponent* tabbedComponent) override;
 
 class Listener {
@@ -86,13 +87,13 @@ public:
 
   // MetadataListener
   void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
-  void programmeAdded(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
-  void programmeUpdated(ProgrammeStatus programmeIndex, proto::Programme const& programme) override;
+  void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) override;
+  void programmeUpdated(ProgrammeStatus status, proto::Programme const& programme) override;
   void itemsAddedToProgramme(ProgrammeStatus status, std::vector<ProgrammeObject> const& items) override;
   void programmeItemUpdated(ProgrammeStatus status, ProgrammeObject const& item) override;
-  void programmeMoved(Movement movement, proto::Programme const& programme) override;
+  void programmeOrderChanged(std::vector<ProgrammeStatus> programmes) override;
   void programmeSelected(ProgrammeObjects const& objects) override;
-  void programmeRemoved(int index) override;
+  void programmeRemoved(ProgrammeStatus status) override;
   void itemRemovedFromProgramme(ProgrammeStatus status, communication::ConnectionId const& id) override;
   void inputRemoved(communication::ConnectionId const& id) override;
 

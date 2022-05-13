@@ -4,31 +4,33 @@
 
 #include "../include/scene_store.hpp"
 #include "routing_overlap.hpp"
+#include "programme_internal_id.hpp"
 #include <algorithm>
+
 using namespace ear::plugin;
 SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :
     updateCallback_{std::move(update)} {
 }
 
 void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
-                                        const ear::plugin::ItemMap &items) {
+                           const ear::plugin::ItemMap &items) {
     store_ = {};
     addAvailableInputItemsToSceneStore(items);
-    auto selectedIndex = programmes.selected_programme_index();
-    if(selectedIndex >= 0) {
-        assert(selectedIndex < programmes.programme_size());
-        auto const& selectedProgramme = programmes.programme(selectedIndex);
-        for (auto const& element : selectedProgramme.element()) {
+    auto selectedId = programmes.selected_programme_internal_id();
+    auto selectedProgramme = getProgrammeWithId(programmes, selectedId);
+    if(selectedProgramme) {
+        for(auto const& element : selectedProgramme->element()) {
             if(element.has_object()) {
-                auto const& object = element.object();
-                auto const& id = object.connection_id();
-                auto const& itemLocation = items.find(id);
-                if(itemLocation != items.end()) {
-                    addMonitoringItem(itemLocation->second);
-                }
+              auto const& object = element.object();
+              auto const& id = object.connection_id();
+              auto const& itemLocation = items.find(id);
+              if(itemLocation != items.end()) {
+                addMonitoringItem(itemLocation->second);
+              }
             }
         }
     }
+
     flagOverlaps();
     changed = true;
 }
