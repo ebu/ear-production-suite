@@ -7,9 +7,6 @@
 
 using namespace admplug;
 
-namespace {
-}
-
 RoutingWriterFactory::RoutingWriterFactory()
 {
 

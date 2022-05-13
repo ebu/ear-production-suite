@@ -59,6 +59,7 @@ set(HEADERS_SCENE
 	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
 
+	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/iso_lang_codes.hpp
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h

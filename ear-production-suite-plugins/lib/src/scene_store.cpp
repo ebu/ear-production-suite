@@ -5,15 +5,8 @@
 #include "../include/scene_store.hpp"
 #include "routing_overlap.hpp"
 #include "programme_internal_id.hpp"
+#include "helper/container_helpers.hpp"
 #include <algorithm>
-
-namespace {
-template <typename C, typename T>
-bool contains(C const& container, T const& element) {
-  return std::find(container.begin(), container.end(), element) !=
-    container.end();
-}
-}
 
 using namespace ear::plugin;
 SceneStore::SceneStore(std::function<void(proto::SceneStore const&)> update) :

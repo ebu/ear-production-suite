@@ -1,5 +1,6 @@
 #include "programme_store_adm_populator.hpp"
 #include "programme_internal_id.hpp"
+#include "helper/container_helpers.hpp"
 
 using namespace ear::plugin;
 using namespace adm;
@@ -9,17 +10,6 @@ constexpr auto const ADM_DEFAULT_AZ = 0.0f;
 constexpr auto const ADM_DEFAULT_EL = 0.0f;
 constexpr auto const ADM_DEFAULT_D = 0.f;
 constexpr auto const ADM_DEFAULT_GAIN = 1.0f;
-
-template <typename C, typename T>
-bool contains(C const& container, T const& element) {
-  return std::find(container.begin(), container.end(), element) !=
-         container.end();
-}
-
-template <typename C, typename T>
-auto find(C& container, T& element) {
-  return std::find(container.begin(), container.end(), element);
-}
 
 bool idValueEquals(uint32_t const& idAsUint,
                    std::shared_ptr<const AudioTrackUid> id) {
