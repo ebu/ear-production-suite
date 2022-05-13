@@ -107,6 +107,7 @@ void SceneAudioProcessor::changeProgramName(int index, const String& newName) {}
 
 void SceneAudioProcessor::prepareToPlay(double sampleRate,
                                         int samplesPerBlock) {
+  backend_->triggerMetadataSend();
   doSampleRateChecks();
 }
 
