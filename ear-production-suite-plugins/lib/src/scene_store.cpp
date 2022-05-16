@@ -39,6 +39,10 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
+    for(auto const& item : store_.monitoring_items()) {
+      auto id = item.connection_id();
+      itemsChangedSinceLastSend.insert(id);
+    }
     store_.clear_monitoring_items();
     for(auto const& object : objects) {
         addMonitoringItem(object.inputMetadata);
