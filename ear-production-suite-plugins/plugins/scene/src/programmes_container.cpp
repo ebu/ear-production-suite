@@ -162,7 +162,7 @@ void ear::plugin::ui::ProgrammesContainer::programmeOrderChanged(std::vector<Pro
 }
 
 void ProgrammesContainer::programmeSelected(const ProgrammeObjects &objects) {
-    tabs_->selectTab(objects.id());
+  tabs_->selectTab(objects.id(), dontSendNotification);
 }
 
 void ProgrammesContainer::programmeRemoved(ProgrammeStatus status) {
@@ -296,7 +296,7 @@ void ProgrammesContainer::dataReset(const proto::ProgrammeStore &programmes, con
             }
         }
     }
-    tabs_->selectTab(selectedProgrammeId);
+    tabs_->selectTab(selectedProgrammeId, dontSendNotification);
 }
 
 void ProgrammesContainer::programmeAdded(

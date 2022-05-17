@@ -6,6 +6,7 @@
 #include "look_and_feel/fonts.hpp"
 
 #include <cmath>
+#include <cassert>
 
 using namespace ear::plugin::ui;
 
@@ -47,7 +48,7 @@ void EarTabbedComponent::addTab(const String& name, Component* component, std::s
 
   button->addMouseListener(this, false);
   button->onClick = [this](EarTabButton* src) {
-    selectTab(this->getIndexForTabButton(src));
+    selectTab(this->getIndexForTabButton(src), sendNotification);
   };
   button->onCloseClick = [this](EarTabButton* button) {
     auto index = getIndexForTabButton(button);
@@ -66,7 +67,7 @@ void EarTabbedComponent::addTab(const String& name, Component* component, std::s
   component->setBounds(contentArea_);
   addChildComponent(component);
   if (select) {
-    selectTab(tabs_.size() - 1);
+    selectTab(tabs_.size() - 1, sendNotification);
   }
   if (scroll) {
     buttonBar_->scrollIfNecessaryTo(tabs_.size() - 1);
@@ -83,9 +84,9 @@ String ear::plugin::ui::EarTabbedComponent::getTabName(const std::string & id)
     return getTabName(getTabIndexFromId(id));
 }
 
-void ear::plugin::ui::EarTabbedComponent::selectTab(const std::string & id, bool scroll)
+void ear::plugin::ui::EarTabbedComponent::selectTab(const std::string & id, juce::NotificationType notify, bool scroll)
 {
-    selectTab(getTabIndexFromId(id), scroll);
+    selectTab(getTabIndexFromId(id), notify, scroll);
 }
 
 std::string ear::plugin::ui::EarTabbedComponent::getSelectedTabId()
@@ -121,7 +122,7 @@ String ear::plugin::ui::EarTabbedComponent::getTabName(int index)
     return String();
 }
 
-void EarTabbedComponent::selectTab(int index, bool scroll) {
+void EarTabbedComponent::selectTab(int index, juce::NotificationType notify, bool scroll) {
   clearSelected();
   if (index >= 0 && index < tabs_.size()) {
     tabs_[index].component->setVisible(true);
@@ -133,15 +134,18 @@ void EarTabbedComponent::selectTab(int index, bool scroll) {
   } else {
     selectedTabIndex_ = -1;
   }
-  auto id = getTabIdFromIndex(selectedTabIndex_);
-  Component::BailOutChecker checker(this);
-  listeners_.callChecked(checker,
-    [this, index, id](Listener& l) {
-      l.tabSelected(this, index);
-      l.tabSelectedId(this, id);
-  });
-  if (checker.shouldBailOut()) {
-    return;
+  assert(notify == sendNotification || notify == dontSendNotification);
+  if(notify == sendNotification) {
+      auto id = getTabIdFromIndex(selectedTabIndex_);
+      Component::BailOutChecker checker(this);
+      listeners_.callChecked(checker,
+                             [this, index, id](Listener& l) {
+          l.tabSelected(this, index);
+          l.tabSelectedId(this, id);
+      });
+      if(checker.shouldBailOut()) {
+          return;
+      }
   }
 }
 
