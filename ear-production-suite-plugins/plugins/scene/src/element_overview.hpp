@@ -47,19 +47,19 @@ class ElementOverview : public Component, private Timer {
   int getSectorIndex(float value) {
     float limitedRange = static_cast<int>(std::roundf(value)) % 360;
     if ((limitedRange >= -315 && limitedRange < -225)) {
-      return 1;
+      return 3;
     } else if ((limitedRange >= -225 && limitedRange < -135)) {
       return 2;
     } else if ((limitedRange >= -135 && limitedRange < -45)) {
-      return 3;
+      return 1;
     } else if ((limitedRange >= -45 && limitedRange < 45)) {
       return 0;
     } else if (limitedRange >= 45 && limitedRange < 135) {
-      return 1;
+      return 3;
     } else if (limitedRange >= 135 && limitedRange < 225) {
       return 2;
     } else if (limitedRange >= 225 && limitedRange < 315) {
-      return 3;
+      return 1;
     } else {
       return 0;
     }
