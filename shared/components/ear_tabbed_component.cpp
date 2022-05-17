@@ -172,8 +172,6 @@ void EarTabbedComponent::removeTab(int index) {
     removeChildComponent(tabs_[index].component);
     buttonBar_->removeButton(tabs_[index].button);
     tabs_.erase(tabs_.begin() + index);
-    index = index < tabs_.size() ? index : index - 1;
-    selectTab(index);
     buttonWidth_ = buttonBar_->updateTabBounds();
   }
 }
