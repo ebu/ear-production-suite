@@ -28,13 +28,13 @@ class EarTabbedComponent : public Component {
               bool select = true, bool scroll = true);
   void setTabName(const std::string &id, const String& name);
   String getTabName(const std::string &id);
-  void selectTab(const std::string &id, bool scroll = true);
+  void selectTab(const std::string &id, juce::NotificationType notify = sendNotification, bool scroll = true);
   std::string getSelectedTabId();
   void moveTabTo(const std::string &id, int newIndex);
   void removeTab(const std::string &id);
   void setTabName(int index, const String& name);
   String getTabName(int index);
-  void selectTab(int index, bool scroll = true);
+  void selectTab(int index, juce::NotificationType notify = sendNotification, bool scroll = true);
   int getSelectedTabIndex();
   void moveTabTo(int oldIndex, int newIndex);
   void removeTab(int index);
