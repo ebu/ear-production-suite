@@ -134,6 +134,7 @@ class ElementOverview : public Component, private Timer {
   }
 
   void paint(Graphics& g) override {
+    g.setOpacity(1.0f);
     paintBackGround(g);
     paintElements(g);
     paintSphere(g);
@@ -213,11 +214,12 @@ class ElementOverview : public Component, private Timer {
 
   void resized() override {
     {
-      Image img(Image::PixelFormat::ARGB, getWidth(), getHeight(), false);
+      Image img(Image::PixelFormat::RGB, getWidth(), getHeight(), false);
       Graphics g(img);
 
       // draw background
       auto area = getLocalBounds().toFloat();
+      g.setOpacity(1.0f);
       g.setColour(EarColours::Background);
       g.fillRect(area);
       float factorTop = 0.9;
