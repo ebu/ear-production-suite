@@ -100,7 +100,7 @@ class ElementOverview : public Component, private Timer {
     }
   }
 
-  void paintSphere(Graphics& g) {
+  void paintOrientationSphere(Graphics& g) {
     auto sphere = getLocalBounds()
         .toFloat()
         .removeFromBottom(126.f)
@@ -137,7 +137,6 @@ class ElementOverview : public Component, private Timer {
     g.setOpacity(1.0f);
     paintBackGround(g);
     paintElements(g);
-    paintSphere(g);
   }
 
   void drawSphereInRect(Graphics& g, Rectangle<float> rect, float linewidth) {
@@ -180,12 +179,85 @@ class ElementOverview : public Component, private Timer {
     repaint();
   }
 
+  void rebuildStaticBackgroundImage() {
+    Image img(Image::PixelFormat::RGB, getWidth(), getHeight(), false);
+    Graphics g(img);
+
+    // draw background
+    auto area = getLocalBounds().toFloat();
+    g.setOpacity(1.0f);
+    g.setColour(EarColours::Background);
+    g.fillRect(area);
+    float factorTop = 0.9;
+    float factorBottom = 0.8;
+    g.setColour(EarColours::Sphere);
+
+    auto xPositionTop = getWidth() / 2.f;
+    auto xPositionBottom = getWidth() / 2.f;
+    float distanceTop = getWidth() / 30.f;
+    float distanceBottom = getWidth() / 1.5f;
+    for (int i = 0; i < 10; ++i) {
+      g.drawLine(xPositionTop, 0.f, xPositionBottom, (float)getHeight());
+      distanceTop *= factorTop;
+      xPositionTop += distanceTop;
+      distanceBottom *= factorBottom;
+      xPositionBottom += distanceBottom;
+    }
+    xPositionTop = getWidth() / 2.f;
+    xPositionBottom = getWidth() / 2.f;
+    distanceTop = getWidth() / 20.f;
+    distanceBottom = getWidth() / 1.5f;
+    for (int i = 1; i < 10; ++i) {
+      g.drawLine(xPositionTop, 0.f, xPositionBottom, (float)getHeight());
+      distanceTop *= factorTop;
+      xPositionTop -= distanceTop;
+      distanceBottom *= factorBottom;
+      xPositionBottom -= distanceBottom;
+    }
+
+    float yPosition = (3.f * getHeight()) / 4.f;
+    float distance = getHeight() / 4.f;
+    float factor = 0.68f;
+    for (int i = 0; i < 15; ++i) {
+      g.drawLine(0, yPosition, getWidth(), yPosition);
+      distance *= factor;
+      yPosition -= distance;
+    }
+    g.setGradientFill(ColourGradient::vertical(
+      EarColours::Background, EarColours::Background.withAlpha(0.f),
+      area.withTrimmedTop(getHeight() / 4)
+      .withTrimmedBottom(getHeight() / 4)));
+    g.fillRect(area);
+    g.setColour(EarColours::ComboBoxPopupBackground);
+    g.drawRect(area, 2);
+
+    // draw sphere
+    area.removeFromBottom(getHeight() / 8.f);
+
+    float sphereSize;
+    if (area.getWidth() > area.getHeight()) {
+      sphereSize = area.getHeight() - 100;
+    } else {
+      sphereSize = area.getWidth() - 100;
+    }
+    sphereArea_ = area.withSizeKeepingCentre(sphereSize, sphereSize);
+    g.setColour(EarColours::Sphere);
+    drawSphereInRect(g, sphereArea_, 4.f);
+
+    // Orientation sphere
+    paintOrientationSphere(g);
+
+    // save Image
+    cachedBackground_ = img;
+  }
+
   void rotate(float angle) {
     if (isTimerRunning()) {
       stopTimer();
     }
     startViewingAngle_ = currentViewingAngle_;
     endViewingAngle_ += angle;
+    rebuildStaticBackgroundImage(); // Updates Labels for "orientation" sphere
     float animationRange = endViewingAngle_ - startViewingAngle_;
     if (std::abs(animationRange) >= 1.f) {
       startTimerHz(50);
@@ -213,74 +285,8 @@ class ElementOverview : public Component, private Timer {
   }
 
   void resized() override {
-    {
-      Image img(Image::PixelFormat::RGB, getWidth(), getHeight(), false);
-      Graphics g(img);
+    rebuildStaticBackgroundImage();
 
-      // draw background
-      auto area = getLocalBounds().toFloat();
-      g.setOpacity(1.0f);
-      g.setColour(EarColours::Background);
-      g.fillRect(area);
-      float factorTop = 0.9;
-      float factorBottom = 0.8;
-      g.setColour(EarColours::Sphere);
-
-      auto xPositionTop = getWidth() / 2.f;
-      auto xPositionBottom = getWidth() / 2.f;
-      float distanceTop = getWidth() / 30.f;
-      float distanceBottom = getWidth() / 1.5f;
-      for (int i = 0; i < 10; ++i) {
-        g.drawLine(xPositionTop, 0.f, xPositionBottom, (float)getHeight());
-        distanceTop *= factorTop;
-        xPositionTop += distanceTop;
-        distanceBottom *= factorBottom;
-        xPositionBottom += distanceBottom;
-      }
-      xPositionTop = getWidth() / 2.f;
-      xPositionBottom = getWidth() / 2.f;
-      distanceTop = getWidth() / 20.f;
-      distanceBottom = getWidth() / 1.5f;
-      for (int i = 1; i < 10; ++i) {
-        g.drawLine(xPositionTop, 0.f, xPositionBottom, (float)getHeight());
-        distanceTop *= factorTop;
-        xPositionTop -= distanceTop;
-        distanceBottom *= factorBottom;
-        xPositionBottom -= distanceBottom;
-      }
-
-      float yPosition = (3.f * getHeight()) / 4.f;
-      float distance = getHeight() / 4.f;
-      float factor = 0.68f;
-      for (int i = 0; i < 15; ++i) {
-        g.drawLine(0, yPosition, getWidth(), yPosition);
-        distance *= factor;
-        yPosition -= distance;
-      }
-      g.setGradientFill(ColourGradient::vertical(
-          EarColours::Background, EarColours::Background.withAlpha(0.f),
-          area.withTrimmedTop(getHeight() / 4)
-              .withTrimmedBottom(getHeight() / 4)));
-      g.fillRect(area);
-      g.setColour(EarColours::ComboBoxPopupBackground);
-      g.drawRect(area, 2);
-
-      // draw sphere
-      area.removeFromBottom(getHeight() / 8.f);
-
-      float sphereSize;
-      if (area.getWidth() > area.getHeight()) {
-        sphereSize = area.getHeight() - 100;
-      } else {
-        sphereSize = area.getWidth() - 100;
-      }
-      sphereArea_ = area.withSizeKeepingCentre(sphereSize, sphereSize);
-      g.setColour(EarColours::Sphere);
-      drawSphereInRect(g, sphereArea_, 4.f);
-
-      // save Image
-      cachedBackground_ = img;
-    }
     auto area = getLocalBounds().removeFromBottom(50).withTrimmedBottom(20);
     rotateLeftButton_->setBounds(area.removeFromLeft(50).withTrimmedLeft(20));
     area.removeFromLeft(106);  // skip sphere
