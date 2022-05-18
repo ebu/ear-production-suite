@@ -85,6 +85,8 @@ public:
   Metadata& data_;
   std::vector<Listener*> listeners_;
 
+  void updateMeter(const proto::InputItemMetadata &inputItem, std::shared_ptr<ObjectView> view, bool forceUpdate = false);
+
   // MetadataListener
   void dataReset(const proto::ProgrammeStore &programmes, const ItemMap &items) override;
   void programmeAdded(ProgrammeStatus status, proto::Programme const& programme) override;

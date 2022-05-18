@@ -48,41 +48,19 @@ void ProgrammesContainer::addObjectView(
 
   auto objectType = ObjectView::ObjectType::Other;
 
-  int numberOfChannels = 1;
-
   if (inputItem.has_obj_metadata()) {
     objectType = ObjectView::ObjectType::Object;
   }
-
   if (inputItem.has_ds_metadata()) {
     objectType = ObjectView::ObjectType::DirectSpeakers;
-    auto layoutIndex = inputItem.ds_metadata().layout();
-    if (layoutIndex >= 0) {
-      numberOfChannels = static_cast<int>(SPEAKER_SETUPS.at(layoutIndex).speakers.size());
-    }
   }
   if (inputItem.has_hoa_metadata()) {
     objectType = ObjectView::ObjectType::HOA;
-    auto packFormatId = inputItem.hoa_metadata().packformatidvalue();
-    if (packFormatId >= 0) {
-      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
-      auto elementRelationships =
-          commonDefinitionHelper->getElementRelationships();
-      auto pfData =
-          commonDefinitionHelper->getPackFormatData(4, packFormatId);
-      if (pfData) {
-        numberOfChannels =
-            static_cast<int>(pfData->relatedChannelFormats.size());
-      }
-    }
   }
 
   auto view = std::make_shared<ObjectView>(objectType);
   view->setData({inputItem, programmeElement});
-
-  std::vector<int> routing(numberOfChannels);
-  std::iota(routing.begin(), routing.end(), inputItem.routing());
-  view->getLevelMeter()->setMeter(meterCalculator_, routing);
+  updateMeter(inputItem, view, true);
   for(auto programme : programmes_) {
     if(programme->getProgrammeId() == progId) {
       auto container = programme->getElementsContainer();
@@ -145,8 +123,8 @@ void ProgrammesContainer::programmeItemUpdated(ProgrammeStatus status, Programme
       auto container = programme->getElementsContainer();
       auto view = container->getObjectView(item.inputMetadata.connection_id());
       if(view) {
+        updateMeter(item.inputMetadata, view);
         view->setInputItemMetadata(item.inputMetadata);
-        view->getLevelMeter()->setMeter(meterCalculator_, item.inputMetadata.routing());
       }
     }
   }
@@ -268,6 +246,58 @@ ProgrammeObjects const& objects) {
     if(programme->getProgrammeId() == objects.id()) {
       programme->getElementOverview()->resetItems(objects);
     }
+  }
+}
+
+void ear::plugin::ui::ProgrammesContainer::updateMeter(const proto::InputItemMetadata & item, std::shared_ptr<ObjectView> view, bool forceUpdate)
+{
+  assert(view);
+  auto oldItem = view->getData().item;
+
+  bool updateRequired = false;
+  int startingChannel = item.routing();
+  int channelCount = 1;
+
+  if(item.has_obj_metadata() && oldItem.has_obj_metadata()) {
+    if(forceUpdate ||
+       oldItem.routing() != item.routing()) {
+      updateRequired = true;
+    }
+  }
+
+  if(item.has_ds_metadata() && oldItem.has_ds_metadata()) {
+    if(forceUpdate ||
+       oldItem.routing() != item.routing() ||
+       oldItem.ds_metadata().layout() != item.ds_metadata().layout()) {
+      updateRequired = true;
+      channelCount = static_cast<int>(SPEAKER_SETUPS.at(item.ds_metadata().layout()).speakers.size());
+    }
+  }
+
+  if(item.has_hoa_metadata() && oldItem.has_hoa_metadata()) {
+    if(forceUpdate ||
+       oldItem.routing() != item.routing() ||
+       oldItem.hoa_metadata().packformatidvalue() != item.hoa_metadata().packformatidvalue()) {
+      auto packFormatId = item.hoa_metadata().packformatidvalue();
+      if(packFormatId >= 0) {
+        auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+        auto elementRelationships =
+          commonDefinitionHelper->getElementRelationships();
+        auto pfData =
+          commonDefinitionHelper->getPackFormatData(4, packFormatId);
+        if(pfData) {
+          updateRequired = true;
+          channelCount =
+            static_cast<int>(pfData->relatedChannelFormats.size());
+        }
+      }
+    }
+  }
+
+  if(updateRequired) {
+    std::vector<int> routing(channelCount);
+    std::iota(routing.begin(), routing.end(), startingChannel);
+    view->getLevelMeter()->setMeter(meterCalculator_, routing);
   }
 }
 
