@@ -2,14 +2,13 @@
 #include "PluginProcessor.h"
 #include <fstream>
 
-AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor() :
+AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     AudioProcessor (BusesProperties()
+  : AudioProcessor (BusesProperties()
          .withInput("Input", AudioChannelSet::discreteChannels(64), true)
          .withOutput("Output", AudioChannelSet::discreteChannels(64), true)
-     ),
+     )
 #endif
-    nngSelfRegister{ std::make_shared<NngSelfRegister>() } // Having a handle to this means we don't teardown the NNG globals prematurely.
 {
     CRT_SET
     sendSamples = false;
