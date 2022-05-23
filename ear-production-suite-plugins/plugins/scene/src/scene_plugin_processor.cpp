@@ -59,6 +59,9 @@ SceneAudioProcessor::SceneAudioProcessor()
 
 SceneAudioProcessor::~SceneAudioProcessor() {
   sendSamplesToExtension = false;
+  backend_.reset();
+  commandSocket->close();
+  delete commandSocket;
   samplesSocket->close();
   delete samplesSocket;
 }
