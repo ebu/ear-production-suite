@@ -197,7 +197,7 @@ private:
 
 class SocketBase {
 public:
-    SocketBase() : nngSelfRegister{std::make_shared<NngSelfRegister>()} {}
+    SocketBase() {}
     ~SocketBase() {}
 
     int getPort() {
@@ -251,7 +251,6 @@ protected:
     }
 
 private:
-    std::shared_ptr<NngSelfRegister> nngSelfRegister;
     int port{0};
     bool socketOpen{false};
 };

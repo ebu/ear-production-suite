@@ -85,8 +85,6 @@ public:
 private:
     AdmStemPluginAudioProcessorEditor* editor();
 
-    std::shared_ptr<NngSelfRegister> nngSelfRegister;
-
     int calcNumChannels();
     void updateNumChnsParam(bool force = false);
     void updateAdmParameters(bool force = false);

@@ -13,7 +13,6 @@ ExportManager::ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINST
     }
 
     dialogControl = std::make_unique<RenderDialogControl>(api, inst);
-    nngHandle = std::make_shared<NngSelfRegister>(); // Prevents the library closing down prematurely
 
     admSinkReg = pcmsink_register_t {
             ExportInfo.GetFmt,
