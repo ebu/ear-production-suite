@@ -1,12 +1,9 @@
 #pragma once
 #define NNG_STATIC_LIB
-#ifdef WIN32
-#define NNG_COMMAND_SOCKET_PREFIX "ipc://ep-c-"
-#define NNG_SAMPLES_SOCKET_PREFIX "ipc://ep-s-"
-#else
-#define NNG_COMMAND_SOCKET_PREFIX "ipc:///tmp/ep-c-"
-#define NNG_SAMPLES_SOCKET_PREFIX "ipc:///tmp/ep-s-"
-#endif
+
+#define NNG_PORT_UNKNOWN 0
+#define NNG_PORT_START 1
+#define NNG_PORT_END 65535
 
 #include <nng/nng.h>
 #include <nng/protocol/reqrep0/req.h>
@@ -17,6 +14,25 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+
+namespace NNGAddr {
+    const std::string protocol {"ipc://"};
+#ifdef WIN32
+    const std::string commandBasePath{"ep-c-"};
+    const std::string samplesBasePath{"ep-s-"};
+#else
+    const std::string commandBasePath{"/tmp/ep-c-"};
+    const std::string samplesBasePath{"/tmp/ep-s-"};
+#endif
+}
+
+#ifndef WIN32
+#include <sys/stat.h>
+inline bool exists (const std::string& path) {
+    struct stat buffer;
+    return (stat (path.c_str(), &buffer) == 0);
+}
+#endif
 
 /*
 NOTE:
@@ -178,10 +194,6 @@ public:
 private:
     int seqReadPos{0};
 };
-
-#define NNG_PORT_UNKNOWN 0
-#define NNG_PORT_START 1
-#define NNG_PORT_END 65535
 
 class SocketBase {
 public:
@@ -420,17 +432,30 @@ private:
     }
 
     int listenSpecifics() override {
-        std::string baseUrl = NNG_COMMAND_SOCKET_PREFIX;
         int portSuffix = NNG_PORT_START;
-        std::string fullUrl = baseUrl + std::to_string(portSuffix);
-        int res;
+        int res = -1;
+#ifdef WIN32
+        std::string fullUrl = NNGAddr::protocol + NNGAddr::commandBasePath + std::to_string(portSuffix);
         while (portSuffix < NNG_PORT_END &&
-            (res = nng_listen(socket, fullUrl.c_str(), NULL, 0)) ==
-               NNG_EADDRINUSE) {
+               (res = nng_listen(socket, fullUrl.c_str(), NULL, 0)) == NNG_EADDRINUSE) {
             portSuffix++;
-            fullUrl = baseUrl + std::to_string(portSuffix);
+            fullUrl = NNGAddr::protocol + NNGAddr::commandBasePath + std::to_string(portSuffix);
         }
-        if (portSuffix < NNG_PORT_END && res == 0) {
+#else
+        // For posix, you can not attempt to listen on a URL and look for NNG_EADDRINUSE
+        // Listen attempt seem to disrupt comms on whatever was already using that URL
+        // Instead, see if the path exists in the file system
+        for(; portSuffix < NNG_PORT_END; portSuffix++){
+            std::string fullPath = NNGAddr::commandBasePath + std::to_string(portSuffix);
+            if(!exists(fullPath)){
+                std::string fullUrl = NNGAddr::protocol + fullPath;
+                res = nng_listen(socket, fullUrl.c_str(), NULL, 0);
+                break;
+            }
+        }
+#endif
+        assert(res == 0);
+        if (res == 0) {
             setPort(portSuffix);
         } else {
             setPort(NNG_PORT_UNKNOWN);
@@ -498,8 +523,7 @@ private:
     }
 
     int dialSpecifics(int dialPortNum) override {
-        std::string url = NNG_COMMAND_SOCKET_PREFIX;
-        url.append(std::to_string(dialPortNum));
+        std::string url = NNGAddr::protocol + NNGAddr::commandBasePath + std::to_string(dialPortNum);
         auto res = nng_dial(socket, url.c_str(), NULL, 0);
         assert(res == 0);
         if (res == 0) setPort(dialPortNum);
@@ -540,17 +564,30 @@ private:
     }
 
     int listenSpecifics() override {
-        std::string baseUrl = NNG_SAMPLES_SOCKET_PREFIX;
         int portSuffix = NNG_PORT_START;
-        std::string fullUrl = baseUrl + std::to_string(portSuffix);
-        int res;
+        int res = -1;
+#ifdef WIN32
+        std::string fullUrl = NNGAddr::protocol + NNGAddr::samplesBasePath + std::to_string(portSuffix);
         while (portSuffix < NNG_PORT_END &&
-            (res = nng_listen(socket, fullUrl.c_str(), NULL, 0)) ==
-               NNG_EADDRINUSE) {
+               (res = nng_listen(socket, fullUrl.c_str(), NULL, 0)) == NNG_EADDRINUSE) {
             portSuffix++;
-            fullUrl = baseUrl + std::to_string(portSuffix);
+            fullUrl = NNGAddr::protocol + NNGAddr::samplesBasePath + std::to_string(portSuffix);
         }
-        if (portSuffix < NNG_PORT_END && res == 0) {
+#else
+        // For posix, you can not attempt to listen on a URL and look for NNG_EADDRINUSE
+        // Listen attempt seem to disrupt comms on whatever was already using that URL
+        // Instead, see if the path exists in the file system
+        for(; portSuffix < NNG_PORT_END; portSuffix++){
+            std::string fullPath = NNGAddr::samplesBasePath + std::to_string(portSuffix);
+            if(!exists(fullPath)){
+                std::string fullUrl = NNGAddr::protocol + fullPath;
+                res = nng_listen(socket, fullUrl.c_str(), NULL, 0);
+                break;
+            }
+        }
+#endif
+        assert(res == 0);
+        if (res == 0) {
             setPort(portSuffix);
         } else {
             setPort(NNG_PORT_UNKNOWN);
@@ -596,8 +633,7 @@ private:
     }
 
     int dialSpecifics(int dialPortNum) override {
-        std::string url = NNG_SAMPLES_SOCKET_PREFIX;
-        url.append(std::to_string(dialPortNum));
+        std::string url = NNGAddr::protocol + NNGAddr::samplesBasePath + std::to_string(dialPortNum);
         auto res = nng_dial(socket, url.c_str(), NULL, 0);
         assert(res == 0);
         if (res == 0) setPort(dialPortNum);
