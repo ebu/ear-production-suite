@@ -12,6 +12,7 @@
 #define EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION "Mono"
 #define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
 #define EXPECTED_NORMALIZE_BUTTON_TEXT "Normalize/Limit..."
+#define EXPECTED_SECOND_PASS_CHECKBOX_TEXT "2nd pass render"
 #define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
 #define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
@@ -151,6 +152,16 @@ LRESULT RenderDialogState::selectInComboBox(HWND hwnd, std::string text) {
 #endif
 }
 
+bool RenderDialogState::getCheckboxState(HWND hwnd)
+{
+    return SendMessage(hwnd, BM_GETCHECK, 0, 0) == BST_CHECKED;
+}
+
+void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
+{
+    SendMessage(hwnd, BM_SETCHECK, state? BST_CHECKED : BST_UNCHECKED, 0);
+}
+
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
 {
     // Our dialog displayed - reset all vars (might not be the first time around)
@@ -158,6 +169,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
     normalizeControlHwnd.reset();
+    secondPassControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
@@ -213,6 +225,14 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT){
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
                 normalizeControlHwnd = hwnd;
+                EnableWindow(hwnd, false);
+            }
+            if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
+                // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
+                // Could probably be recified, but disable as quick fix for now
+                secondPassControlHwnd = hwnd;
+                secondPassLastState = getCheckboxState(hwnd);
+                setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
         }
@@ -445,6 +465,11 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
         if(normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
+
+        if(secondPassControlHwnd) {
+            EnableWindow(*secondPassControlHwnd, true);
+            setCheckboxState(*secondPassControlHwnd, secondPassLastState);
+        }
 
         // NOTE: Sample Rate and Channels controls are;
         //       EDITABLECOMBO in REAPER <=6.11

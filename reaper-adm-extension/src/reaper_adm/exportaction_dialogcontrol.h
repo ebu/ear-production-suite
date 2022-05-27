@@ -37,6 +37,8 @@ private:
     std::string getComboBoxItemText(HWND hwnd, int idx = 0);
     std::string getWindowText(HWND hwnd);
     LRESULT selectInComboBox(HWND hwnd, std::string text);
+    bool getCheckboxState(HWND hwnd);
+    void setCheckboxState(HWND hwnd, bool state);
 
     std::shared_ptr<ReaperAPI> reaperApi;
     REAPER_PLUGIN_HINSTANCE reaperInst;
@@ -47,6 +49,7 @@ private:
     std::optional<HWND> sampleRateControlHwnd{};
     std::optional<HWND> channelsControlHwnd{};
     std::optional<HWND> channelsLabelHwnd{};
+    std::optional<HWND> secondPassControlHwnd{};
     std::optional<HWND> normalizeControlHwnd{};
     std::optional<HWND> resampleModeControlHwnd{};
     bool sampleRateControlSetError{false};
@@ -54,6 +57,7 @@ private:
 
     std::string sampleRateLastOption{};
     std::string channelsLastOption{};
+    bool secondPassLastState{ false };
 
     std::shared_ptr<AdmExportHandler> admExportHandler;
 
