@@ -29,7 +29,6 @@ class ReaperHost {
 public:
     ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_plugin_info_t* plug_info, bool testAPI = true);
     ~ReaperHost();
-    void prepareToClose();
 
     HWND parentWindow();
     std::shared_ptr<ReaperAPI> api();

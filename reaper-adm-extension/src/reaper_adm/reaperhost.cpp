@@ -34,7 +34,6 @@ admplug::ReaperHost::ReaperHost(REAPER_PLUGIN_HINSTANCE plug_hinstance, reaper_p
 
         // Extension Closing Down!!!
 
-        prepareToClose();
     }
 }
 
@@ -42,12 +41,6 @@ admplug::ReaperHost::~ReaperHost() {
     // Use with caution! This destructor will run every time the REAPER_PLUGIN_ENTRYPOINT runs!
     // i.e, it will construct and destruct on start up of the extension,
     //      AND construct and destruct on shutdown of the extension!
-}
-
-void admplug::ReaperHost::prepareToClose()
-{
-    ExportManager::closeManager();
-    // If any other managers need to tidy up before closing, put their clean-up methods here
 }
 
 HWND admplug::ReaperHost::parentWindow()
