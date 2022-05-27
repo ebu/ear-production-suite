@@ -11,6 +11,7 @@
 #define EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION "8000"
 #define EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION "Mono"
 #define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
+#define EXPECTED_NORMALIZE_BUTTON_TEXT "Normalize/Limit..."
 #define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
 #define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
@@ -156,6 +157,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
+    normalizeControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
@@ -206,6 +208,11 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
                 // This is the presets button which could be used to override our forced settings - disable it
                 presetsControlHwnd = hwnd;
+                EnableWindow(hwnd, false);
+            }
+            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT){
+                // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
+                normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
         }
@@ -382,6 +389,7 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         }
 
         auto infoPaneText = getAdmExportVstsInfoString();
+        // Note that some controls are not checked as they are not present in all versions of REAPER anyway, so it's OK for them to be missing
         bool allControlsSuccessful = boundsControlHwnd.has_value() &&
             sourceControlHwnd.has_value() &&
             presetsControlHwnd.has_value() &&
@@ -435,6 +443,7 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         // Reenable the controls we disabled.
         if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
+        if(normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
 
         // NOTE: Sample Rate and Channels controls are;

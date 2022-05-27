@@ -47,6 +47,7 @@ private:
     std::optional<HWND> sampleRateControlHwnd{};
     std::optional<HWND> channelsControlHwnd{};
     std::optional<HWND> channelsLabelHwnd{};
+    std::optional<HWND> normalizeControlHwnd{};
     std::optional<HWND> resampleModeControlHwnd{};
     bool sampleRateControlSetError{false};
     bool channelsControlSetError{false};
