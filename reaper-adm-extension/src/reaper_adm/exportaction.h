@@ -63,6 +63,5 @@ namespace admplug {
         std::shared_ptr<ReaperAPI> api;
         pcmsink_register_t admSinkReg;
         reaper_plugin_info_t *rec;
-        std::shared_ptr<NngSelfRegister> nngHandle; // Used to call nng_fini on ext close
     };
 };
