@@ -15,7 +15,6 @@ namespace admplug {
         ~ExportManager();
         static ExportManager& getManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec);
         static ExportManager& getManager();
-        static void closeManager();
 
         static struct ExportInfoStruct {
             static const unsigned int SINK_FOURCC{ REAPER_FOURCC('a', 'd', 'm', ' ') };
@@ -38,8 +37,6 @@ namespace admplug {
         } ExportInfo;
 
     private:
-        static ExportManager* exportMan;
-
         static const char* GetExtensionIfMatch(const void *cfg, int cfg_l)
         {
             return ExportInfo.cfgMatch(cfg, cfg_l)? ExportInfo.GetExtension() : NULL;
@@ -58,14 +55,13 @@ namespace admplug {
 
         static HWND ShowConfigIfMatch(const void *cfg, int cfg_l, HWND parent)
         {
-            return ExportInfo.cfgMatch(cfg, cfg_l)? RenderDialogControl::getInstance()->ShowConfig(cfg, cfg_l,parent) : 0;
+            return ExportInfo.cfgMatch(cfg, cfg_l)? RenderDialogControl::getInstance().ShowConfig(cfg, cfg_l,parent) : 0;
         }
 
         ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec);
 
         std::shared_ptr<ReaperAPI> api;
         pcmsink_register_t admSinkReg;
-        std::unique_ptr<RenderDialogControl> dialogControl;
         std::shared_ptr<NngSelfRegister> nngHandle;
     };
 };

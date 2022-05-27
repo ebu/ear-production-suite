@@ -23,13 +23,13 @@ int MakeWParam(int loWord, int hiWord)
     return (loWord & 0xFFFF) + ((hiWord & 0xFFFF) << 16);
 }
 
-RenderDialogControl::RenderDialogState::RenderDialogState(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst) : reaperApi{ api }, reaperInst{ *inst } {
+RenderDialogState::RenderDialogState(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst) : reaperApi{ api }, reaperInst{ *inst } {
 }
 
-RenderDialogControl::RenderDialogState::~RenderDialogState() {
+RenderDialogState::~RenderDialogState() {
 }
 
-RenderDialogControl::RenderDialogState::ControlType RenderDialogControl::RenderDialogState::getControlType(HWND hwnd){
+RenderDialogState::ControlType RenderDialogState::getControlType(HWND hwnd){
 
     if (!hwnd || !IsWindow(hwnd)) return UNKNOWN;
 
@@ -71,7 +71,7 @@ RenderDialogControl::RenderDialogState::ControlType RenderDialogControl::RenderD
     return UNKNOWN;
 }
 
-HWND RenderDialogControl::RenderDialogState::getComboBoxEdit(HWND hwnd){
+HWND RenderDialogState::getComboBoxEdit(HWND hwnd){
     auto controlType = getControlType(hwnd);
     if(controlType == COMBOBOX) return hwnd;
     if(controlType != EDITABLECOMBO) return HWND();
@@ -89,7 +89,7 @@ HWND RenderDialogControl::RenderDialogState::getComboBoxEdit(HWND hwnd){
     return HWND();
 }
 
-std::string RenderDialogControl::RenderDialogState::getComboBoxItemText(HWND hwnd, int itemIndex)
+std::string RenderDialogState::getComboBoxItemText(HWND hwnd, int itemIndex)
 {
     auto controlType = getControlType(hwnd);
     if(controlType != COMBOBOX && controlType != EDITABLECOMBO) return std::string();
@@ -102,14 +102,14 @@ std::string RenderDialogControl::RenderDialogState::getComboBoxItemText(HWND hwn
     return std::string(itmtxt);
 }
 
-std::string RenderDialogControl::RenderDialogState::getWindowText(HWND hwnd)
+std::string RenderDialogState::getWindowText(HWND hwnd)
 {
     char wintxt[100];
     GetWindowText(hwnd, wintxt, 100);
     return std::string(wintxt);
 }
 
-HWND RenderDialogControl::RenderDialogState::ShowConfig(const void *cfg, int cfg_l, HWND parent)
+HWND RenderDialogState::ShowConfig(const void *cfg, int cfg_l, HWND parent)
 {
         const void *x[2] = { cfg,(void *)&cfg_l };
         return CreateDialogParam(reaperInst, MAKEINTRESOURCE(IDD_EXPORT), parent,
@@ -117,7 +117,7 @@ HWND RenderDialogControl::RenderDialogState::ShowConfig(const void *cfg, int cfg
             (LPARAM)x);
 }
 
-LRESULT RenderDialogControl::RenderDialogState::selectInComboBox(HWND hwnd, std::string text) {
+LRESULT RenderDialogState::selectInComboBox(HWND hwnd, std::string text) {
 #ifdef WIN32
     auto lparam = text.c_str();
     // Find item
@@ -149,7 +149,7 @@ LRESULT RenderDialogControl::RenderDialogState::selectInComboBox(HWND hwnd, std:
 #endif
 }
 
-void RenderDialogControl::RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
+void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
 {
     // Our dialog displayed - reset all vars (might not be the first time around)
     boundsControlHwnd.reset();
@@ -172,7 +172,7 @@ void RenderDialogControl::RenderDialogState::startPreparingRenderControls(HWND h
              (TIMERPROC)NULL);    // no timer callback (use window message)
 }
 
-BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
+BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                 // Prepare Render Dialog Control for ADM export.
                                                                 // This will involve fixing some values and disabling those controls
 
@@ -191,7 +191,7 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass1
     return true; // MUST return true to continue iterating through controls
 }
 
-BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
+BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                                                              // Prepare Render Dialog Control for ADM export.
                                                                                                              // This will involve fixing some values and disabling those controls
 
@@ -260,7 +260,7 @@ BOOL CALLBACK RenderDialogControl::RenderDialogState::prepareRenderControl_pass2
     return true; // MUST return true to continue iterating through controls
 }
 
-std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString() {
+std::string RenderDialogState::getAdmExportVstsInfoString() {
     std::string itemStarter{ "\r\n - " };
     std::string op;
 
@@ -307,7 +307,7 @@ std::string RenderDialogControl::RenderDialogState::getAdmExportVstsInfoString()
     return op;
 }
 
-WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -459,4 +459,15 @@ WDL_DLGRET RenderDialogControl::RenderDialogState::wavecfgDlgProc(HWND hwndDlg, 
 
     }
     return 0;
+}
+
+RenderDialogControl & RenderDialogControl::getInstance(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE * inst)
+{
+    static RenderDialogControl singleton {api, inst};
+    return singleton;
+}
+
+RenderDialogControl & RenderDialogControl::getInstance()
+{
+    return getInstance(nullptr, nullptr);
 }
