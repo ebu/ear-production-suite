@@ -19,15 +19,12 @@ ExportManager::ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINST
     if (rec->Register("pcmsink", &admSinkReg)) {
         printf("Registered normal Sink!\n");
     }
-
-    nngHandle = std::make_unique<NngSelfRegister>();
 }
 
 ExportManager::~ExportManager() {
     if (rec && rec->Register("-pcmsink", &admSinkReg)) {
         printf("DeRegistered Sink!\n");
     }
-    nngHandle.reset(); // This handle will be lost anyway, but just to be explicit... (calls nng_fini to tidy up globals and false mem leak messages)
 }
 
 ExportManager &ExportManager::getManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec)
