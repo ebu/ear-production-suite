@@ -27,7 +27,7 @@ private:
     enum ControlType{
         UNKNOWN,
         TEXT, //Note: On OSX this can be editable text or a label. Mirrored this behaviour for Windows.
-        BUTTON, //Note: On OSX this includes radios and checkboxes.
+        BUTTON, //Note: This includes radios and checkboxes.
         COMBOBOX,
         EDITABLECOMBO
     };
