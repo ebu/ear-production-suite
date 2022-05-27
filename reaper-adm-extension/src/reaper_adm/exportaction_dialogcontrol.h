@@ -52,12 +52,16 @@ private:
     std::optional<HWND> secondPassControlHwnd{};
     std::optional<HWND> normalizeControlHwnd{};
     std::optional<HWND> resampleModeControlHwnd{};
+    std::optional<HWND> monoToMonoControlHwnd{};
+    std::optional<HWND> multiToMultiControlHwnd{};
     bool sampleRateControlSetError{false};
     bool channelsControlSetError{false};
 
     std::string sampleRateLastOption{};
     std::string channelsLastOption{};
     bool secondPassLastState{ false };
+    bool monoToMonoLastState{ false };
+    bool multiToMultiLastState{ false };
 
     std::shared_ptr<AdmExportHandler> admExportHandler;
 
