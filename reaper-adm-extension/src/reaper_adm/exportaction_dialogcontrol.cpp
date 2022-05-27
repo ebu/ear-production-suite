@@ -13,6 +13,8 @@
 #define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
 #define EXPECTED_NORMALIZE_BUTTON_TEXT "Normalize/Limit..."
 #define EXPECTED_SECOND_PASS_CHECKBOX_TEXT "2nd pass render"
+#define EXPECTED_MONO2MONO_CHECKBOX_TEXT "Tracks with only mono media to mono files"
+#define EXPECTED_MULTI2MULTI_CHECKBOX_TEXT "Multichannel tracks to multichannel files"
 #define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
 #define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
@@ -170,6 +172,8 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     presetsControlHwnd.reset();
     normalizeControlHwnd.reset();
     secondPassControlHwnd.reset();
+    monoToMonoControlHwnd.reset();
+    multiToMultiControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
@@ -232,6 +236,18 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 // Could probably be recified, but disable as quick fix for now
                 secondPassControlHwnd = hwnd;
                 secondPassLastState = getCheckboxState(hwnd);
+                setCheckboxState(hwnd, false);
+                EnableWindow(hwnd, false);
+            }
+            if (winStr == EXPECTED_MONO2MONO_CHECKBOX_TEXT){
+                monoToMonoControlHwnd = hwnd;
+                monoToMonoLastState = getCheckboxState(hwnd);
+                setCheckboxState(hwnd, false);
+                EnableWindow(hwnd, false);
+            }
+            if (winStr == EXPECTED_MULTI2MULTI_CHECKBOX_TEXT){
+                multiToMultiControlHwnd = hwnd;
+                multiToMultiLastState = getCheckboxState(hwnd);
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
@@ -469,6 +485,14 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(secondPassControlHwnd) {
             EnableWindow(*secondPassControlHwnd, true);
             setCheckboxState(*secondPassControlHwnd, secondPassLastState);
+        }
+        if(monoToMonoControlHwnd) {
+            EnableWindow(*monoToMonoControlHwnd, true);
+            setCheckboxState(*monoToMonoControlHwnd, monoToMonoLastState);
+        }
+        if(multiToMultiControlHwnd) {
+            EnableWindow(*multiToMultiControlHwnd, true);
+            setCheckboxState(*multiToMultiControlHwnd, multiToMultiLastState);
         }
 
         // NOTE: Sample Rate and Channels controls are;
