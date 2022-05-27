@@ -1,6 +1,6 @@
 #include "exportaction.h"
 
-ExportManager::ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec) : api{ api }
+ExportManager::ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec) : api{ api }, rec{ rec }
 {
     if(!(this->api)) {
         throw std::logic_error("api is null, make sure when getManager() is first called, a valid API pointer is provided.");
@@ -24,7 +24,10 @@ ExportManager::ExportManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINST
 }
 
 ExportManager::~ExportManager() {
-    nngHandle.reset(); // This handle will be lost anyway, but just to be explicit...
+    if (rec && rec->Register("-pcmsink", &admSinkReg)) {
+        printf("DeRegistered Sink!\n");
+    }
+    nngHandle.reset(); // This handle will be lost anyway, but just to be explicit... (calls nng_fini to tidy up globals and false mem leak messages)
 }
 
 ExportManager &ExportManager::getManager(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst, reaper_plugin_info_t *rec)
