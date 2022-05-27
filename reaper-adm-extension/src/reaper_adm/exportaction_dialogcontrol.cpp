@@ -15,6 +15,7 @@
 #define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
 #define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
 #define REQUIRED_CHANNEL_COUNT_COMBO_OPTION "Mono"
+#define EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION "Point Sampling (lowest quality, retro)"
 
 #define TIMER_ID 1
 
@@ -158,6 +159,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
+    resampleModeControlHwnd.reset();
     sampleRateControlSetError = false;
     channelsControlSetError = false;
     sampleRateLastOption.clear();
@@ -244,6 +246,13 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
                 UpdateWindow(editControl);
                 ShowWindow(hwnd, SW_HIDE);
+            }
+            // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
+            if(itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
+                resampleModeControlHwnd = hwnd;
+                auto editControl = getComboBoxEdit(hwnd);
+                EnableWindow(editControl, false);
+                UpdateWindow(editControl);
             }
         }
 
@@ -452,6 +461,11 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         }
         if(channelsLabelHwnd) {
             ShowWindow(*channelsLabelHwnd, SW_SHOW);
+        }
+        if(resampleModeControlHwnd) {
+            auto editControl = getComboBoxEdit(*resampleModeControlHwnd);
+            EnableWindow(editControl, true);
+            UpdateWindow(editControl);
         }
 
         return 0;
