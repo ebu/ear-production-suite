@@ -52,6 +52,7 @@ struct CrtBreakAllocSetter {
 
 CrtBreakAllocSetter g_crtBreakAllocSetter;
 */
+
 namespace {
 #ifdef WIN32
 const std::map<const std::string, const int> defaultMenuPositions = {
