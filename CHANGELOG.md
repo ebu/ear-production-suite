@@ -1,3 +1,14 @@
+Version 0.7.3
+
+* Fix 'no name' items in Scene and associated issues through major refactor [#197](https://github.com/ebu/ear-production-suite/issues/197)
+* Support new render dialog controls in recent version of REAPER [#202](https://github.com/ebu/ear-production-suite/issues/202)
+* Address silent crash logged on Windows when closing REAPER [#202](https://github.com/ebu/ear-production-suite/issues/202)
+* Fix hang on MacOS with multiple export sources on render [#202](https://github.com/ebu/ear-production-suite/issues/202)
+* Fix sockets left open after render [#202](https://github.com/ebu/ear-production-suite/issues/202)
+* Fix Scene view orientation mismatch [#197](https://github.com/ebu/ear-production-suite/issues/197)
+* Improve Scene GUI performance [#197](https://github.com/ebu/ear-production-suite/issues/197)
+* Correct textbox alignment after JUCE upgrade [#197](https://github.com/ebu/ear-production-suite/issues/197)
+
 Version 0.7.2
 
 * Binaural monitoring axis inversion controls - closes [#177](https://github.com/ebu/ear-production-suite/issues/177)

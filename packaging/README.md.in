@@ -9,23 +9,9 @@ Please download the files from there. The EAR Production Suite (EPS) download bu
 - REAPER session template
 
 ## Release notes
-0.7.2 Adds the following features:
-
-### Binaural rendering
-* Inversion controls for head tracking axis - This is to improve compatibility with head tracking devices.
-* Configuration persistence - these new settings are saved globally to avoid having to configure your device per session.
-
-### Performance
-* Improved ADM export performance by disabling renderers while export is taking place.
-
-### Bug fixes
-See detailed changelog below.
+0.7.3 is a bug-fix release. Please see detailed changelog below.
 
 ### Known issues
-We are aware of a problem that impacts the import or reloading of large projects. This bug can cause crashes, or result in inputs that appear as 'unnamed' in the Scene plugin and fail to render.
-
-We have identified and resolved this issue, but it required a fairly major internal restructure. This is now being tested and we hope to release the fix as 0.7.3.
-
 Please note that the EPS currently outputs ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
 While the EPS can import files that have been authored using the [Dolby Atmos ADM](https://professionalsupport.dolby.com/s/article/Dolby-Atmos-ADM-Profile-specification?language=en_US) profile, coordinates and directspeakers pack formats are converted on import and exported files will no longer conform to this profile.
 
