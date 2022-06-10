@@ -110,7 +110,7 @@ TEST_CASE("With a node creator and a simple object") {
         }
         SECTION("When an automation node is created") {
             auto takeElement = std::make_shared<NiceMock<MockTakeElement>>();
-            auto node = creator.createAutomationNode(ADMChannel{simpleObject.audioChannelFormat, simpleObject.audioPackFormat, simpleObject.audioTrackUid}, takeElement);
+            auto node = creator.createAutomationNode(ADMChannel{simpleObject.audioObject, simpleObject.audioChannelFormat, simpleObject.audioPackFormat, simpleObject.audioTrackUid}, takeElement);
             SECTION("It is not null") {
                 REQUIRE(node);
             }
