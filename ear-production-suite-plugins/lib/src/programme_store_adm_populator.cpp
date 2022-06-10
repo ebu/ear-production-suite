@@ -199,8 +199,6 @@ void ProgrammeStoreAdmPopulator::endRoute() {
 
 std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
     const Document& doc, proto::ProgrammeStore& store,
-  // This should only result in prog->content->obj->uid->pack routes
-  // i.e. nested objects ignored
     const std::vector<uint32_t>& audioObjectMaps) {
   auto tracer = adm::detail::GenericRouteTracer<adm::Route, StopAtChannel>{};
   store = proto::ProgrammeStore{};
