@@ -276,7 +276,7 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     memcpy(admStr.data(), bufPtr + bufOffset, admSz);
 
     auto future = std::async(std::launch::async, [this, admStr, trackUidMappings, objectMappings]() {
-      recvAdmMetadata(admStr, trackUidMappings);
+      recvAdmMetadata(admStr, objectMappings);
     });
     future.get();
     commandSocket->sendResp(cmd);

@@ -73,9 +73,9 @@ struct StopAtChannel {
   class ProgrammeStoreAdmPopulator : public boost::static_visitor<void> {
    public:
     ProgrammeStoreAdmPopulator(proto::ProgrammeStore* store,
-                               std::vector<uint32_t> trackMaps)
+                               std::vector<uint32_t> audioObjectMaps)
         : store{store},
-          trackMaps{std::move(trackMaps)}
+          audioObjectMaps{std::move(audioObjectMaps)}
           {};
     void operator()(std::shared_ptr<adm::AudioProgramme const>);
     void operator()(std::shared_ptr<adm::AudioContent const>){/*TODO, groups*/};
@@ -91,7 +91,7 @@ struct StopAtChannel {
     std::multimap<int, proto::ProgrammeElement*> getTrackLookup() { return elementTrackLookup; }
    private:
     proto::ProgrammeStore* store;
-    std::vector<uint32_t> trackMaps;
+    std::vector<uint32_t> audioObjectMaps;
     std::map<int, proto::ProgrammeElement*> programmeElementTrackLookup;
     std::multimap<int, proto::ProgrammeElement*> elementTrackLookup;
     std::map<std::shared_ptr<adm::AudioProgramme const>, proto::Programme*> importedProgrammes;
@@ -103,6 +103,6 @@ struct StopAtChannel {
   std::multimap<int, proto::ProgrammeElement *> populateStoreFromAdm(
       adm::Document const& doc,
       proto::ProgrammeStore& store,
-      std::vector<uint32_t> const& trackMaps);
+      std::vector<uint32_t> const& audioObjectMaps);
 }
 }
