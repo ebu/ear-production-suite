@@ -3,9 +3,10 @@
 
 using namespace admplug;
 
-ADMChannel::ADMChannel(std::shared_ptr<const adm::AudioChannelFormat> channelFormat,
+ADMChannel::ADMChannel(std::shared_ptr<const adm::AudioObject > object,
+                       std::shared_ptr<const adm::AudioChannelFormat> channelFormat,
                        std::shared_ptr<const adm::AudioPackFormat> packFormat,
-                       std::shared_ptr<const adm::AudioTrackUid> uid) : admChannelFormat{ channelFormat }, admPackFormat{ packFormat }, uid{ uid }
+                       std::shared_ptr<const adm::AudioTrackUid> uid) : admChannelFormat{ channelFormat }, admPackFormat{ packFormat }, uid{ uid }, admObject{ object }
 {
 
 }
@@ -13,6 +14,11 @@ ADMChannel::ADMChannel(std::shared_ptr<const adm::AudioChannelFormat> channelFor
 std::shared_ptr<adm::AudioTrackUid const> ADMChannel::trackUid() const
 {
     return uid;
+}
+
+std::shared_ptr<const adm::AudioObject> admplug::ADMChannel::object() const
+{
+    return admObject;
 }
 
 std::shared_ptr<const adm::AudioChannelFormat> ADMChannel::channelFormat() const

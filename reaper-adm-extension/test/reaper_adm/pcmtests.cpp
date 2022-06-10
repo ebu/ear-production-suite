@@ -40,11 +40,13 @@ namespace {
 std::vector<ADMChannel> getTestChannels(int count) {
     std::vector<ADMChannel> channels;
     for(auto i = 0; i != count; ++i) {
-        channels.emplace_back(adm::AudioChannelFormat::create(
-                                    adm::AudioChannelFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
-                                adm::AudioPackFormat::create(
-                                    adm::AudioPackFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
-                                  adm::AudioTrackUid::create());
+        channels.emplace_back(adm::AudioObject::create(
+                                adm::AudioObjectName{"Test " + std::to_string(i)}),
+                              adm::AudioChannelFormat::create(
+                                adm::AudioChannelFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
+                              adm::AudioPackFormat::create(
+                                adm::AudioPackFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
+                               adm::AudioTrackUid::create());
     }
     return channels;
 }

@@ -40,7 +40,7 @@ TEST_CASE("ObjectAutomationElement") {
     std::shared_ptr<const adm::AudioPackFormat> packFormat{ packFormatMutable };
 
     SECTION("parentTake returns element provided on construction") {
-        auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, audioTrackUid}, fakeParent);
+        auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, audioTrackUid}, fakeParent);
         auto aeParentTake = automationElement->parentTake();
         REQUIRE(aeParentTake == fakeParent);
     }
@@ -50,7 +50,7 @@ TEST_CASE("ObjectAutomationElement") {
         NiceMock<MockReaperAPI> api;
 
         SECTION("Pluginset onObjectAutomation called with node ref") {
-            auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, audioTrackUid}, fakeParent);
+            auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, audioTrackUid}, fakeParent);
             EXPECT_CALL(pluginSet, onObjectAutomation(Ref(*automationElement), Ref(api)));
             automationElement->createProjectElements(pluginSet, api);
         }
@@ -58,7 +58,7 @@ TEST_CASE("ObjectAutomationElement") {
         SECTION("blocks() returns blocks referenced by object") {
             auto block = adm::AudioBlockFormatObjects{ adm::SphericalPosition{adm::Azimuth{1.0}} };
             channelFormatMutable->add(block);
-            auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormatMutable, packFormatMutable, audioTrackUid}, fakeParent);
+            auto automationElement = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormatMutable, packFormatMutable, audioTrackUid}, fakeParent);
             REQUIRE(automationElement->blocks().size() == 1);
             REQUIRE(automationElement->blocks()[0].get<adm::SphericalPosition>().get<adm::Azimuth>() == block.get<adm::SphericalPosition>().get<adm::Azimuth>());
         }
