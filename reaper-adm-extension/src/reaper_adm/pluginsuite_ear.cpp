@@ -307,8 +307,12 @@ void EARPluginSuite::onObjectAutomation(const ObjectAutomation & automationEleme
 			// Store mapping to send to EAR Scene
 			auto takeChannel = automationElement.channel();
 			auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+            uint32_t audioObjectIdVal = 0;
+            if(auto ao = automationElement.channel().object()) {
+                audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+            }
 			trackMappingToAtu[*trackMapping] = trackUidVal;
-
+            trackMappingToAo[*trackMapping] = audioObjectIdVal;
 		}
 		else {
 			//TODO - need to tell user - no free channels
@@ -352,11 +356,18 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
                 plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackMapping));
                 track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
 
+                uint32_t audioObjectIdVal = 0;
+                if(auto ao = automationElement.channel().object()) {
+                    audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+                }
+
                 // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
                 int trackMappingOffset = 0;
                 for(auto &takeChannel : takeChannels) {
+                    auto trackNumber = (*trackMapping) + trackMappingOffset;
                     auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
-                    trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
+                    trackMappingToAtu[trackNumber] = trackUidVal;
+                    trackMappingToAo[trackNumber] = audioObjectIdVal;
                     trackMappingOffset++;
                 }
 
@@ -398,11 +409,18 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 			plugin->setParameter(*hoaTrackMappingParameter, hoaTrackMappingParameter->forwardMap(*trackMapping));
 			track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
 
+            uint32_t audioObjectIdVal = 0;
+            if(auto ao = automationElement.channel().object()) {
+                audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+            }
+
 			// Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
 			int trackMappingOffset = 0;
 			for (auto& takeChannel : takeChannels) {
+                auto trackNumber = (*trackMapping) + trackMappingOffset;
 				auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
-				trackMappingToAtu[(*trackMapping) + trackMappingOffset] = trackUidVal;
+				trackMappingToAtu[trackNumber] = trackUidVal;
+				trackMappingToAo[trackNumber] = audioObjectIdVal;
 				trackMappingOffset++;
 			}
 		}
