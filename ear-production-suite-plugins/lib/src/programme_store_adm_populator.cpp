@@ -149,17 +149,15 @@ void ProgrammeStoreAdmPopulator::operator()(
 void ProgrammeStoreAdmPopulator::operator()(
   std::shared_ptr<const AudioObject> admObject) {
   currentObject = admObject;
-  auto currentUids = admObject->getReferences<AudioTrackUid>();
-  auto it =
-    std::find_first_of(trackMaps.begin(), trackMaps.end(),
-                       currentUids.begin(), currentUids.end(), idValueEquals);
-  if(it != trackMaps.end()) {
+  auto aoId = currentObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+  auto it = std::find(audioObjectMaps.begin(), audioObjectMaps.end(), aoId);
+  if(it != audioObjectMaps.end()) {
     auto packs = admObject->getReferences<adm::AudioPackFormat>();
     if(!packs.empty()) {
       auto pfTd = packs.front()->get<TypeDescriptor>();
       if(pfTd == TypeDefinition::DIRECT_SPEAKERS ||
          pfTd == TypeDefinition::HOA) {
-        auto location = std::distance(trackMaps.begin(), it);
+        auto location = std::distance(audioObjectMaps.begin(), it);
         auto found = programmeElementTrackLookup.find(location);
         if(found == programmeElementTrackLookup.end()) {
           auto element = currentProgramme->add_element();
@@ -179,12 +177,10 @@ void ProgrammeStoreAdmPopulator::operator()(
 void ProgrammeStoreAdmPopulator::operator()(
     std::shared_ptr<const AudioChannelFormat> channel) {
   if (channel->get<TypeDescriptor>() == TypeDefinition::OBJECTS) {
-    auto uid = currentUid;
-    auto it = std::find_if(
-        trackMaps.begin(), trackMaps.end(),
-        [uid](uint32_t value) { return idValueEquals(value, uid); });
-    if (it != trackMaps.end()) {
-      auto location = std::distance(trackMaps.begin(), it);
+    auto aoId = currentObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+    auto it = std::find(audioObjectMaps.begin(), audioObjectMaps.end(), aoId);
+    if (it != audioObjectMaps.end()) {
+      auto location = std::distance(audioObjectMaps.begin(), it);
       auto element = currentProgramme->add_element();
       setInteractivity(element->mutable_object(), *currentObject);
       programmeElementTrackLookup[location] = element;
@@ -203,12 +199,12 @@ void ProgrammeStoreAdmPopulator::endRoute() {
 
 std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
     const Document& doc, proto::ProgrammeStore& store,
-    const std::vector<uint32_t>& trackMaps) {
   // This should only result in prog->content->obj->uid->pack routes
   // i.e. nested objects ignored
+    const std::vector<uint32_t>& audioObjectMaps) {
   auto tracer = adm::detail::GenericRouteTracer<adm::Route, StopAtChannel>{};
   store = proto::ProgrammeStore{};
-  ProgrammeStoreAdmPopulator populator(&store, trackMaps);
+  ProgrammeStoreAdmPopulator populator(&store, audioObjectMaps);
 
   for (auto& programme : doc.getElements<adm::AudioProgramme>()) {
     populator.startRoute();
