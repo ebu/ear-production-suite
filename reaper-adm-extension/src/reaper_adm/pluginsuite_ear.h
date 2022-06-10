@@ -58,6 +58,7 @@ private:
 
 	std::string originalAdmDocument;
 	std::vector<uint32_t> trackMappingToAtu;
+	std::vector<uint32_t> trackMappingToAo;
 	bool sceneMasterAlreadyExisted{ false };
 
 	static const int MAX_CHANNEL_COUNT;

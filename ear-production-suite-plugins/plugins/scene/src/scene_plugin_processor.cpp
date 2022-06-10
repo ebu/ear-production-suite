@@ -263,16 +263,20 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
 
   } else if (cmd == commandSocket->Command::SetAdmAndMappings) {
     uint32_t mapSz = (64 * 4);
-    uint32_t admSz = msg->getSize() - mapSz - 1;
-    std::vector<uint32_t> mappings(64, 0x00000000);
+    uint32_t admSz = msg->getSize() - mapSz - mapSz - 1;
+    std::vector<uint32_t> trackUidMappings(64, 0x00000000);
+    std::vector<uint32_t> objectMappings(64, 0x00000000);
     std::string admStr(admSz, 0);
     char* bufPtr = (char*)msg->getBufferPointer();
     int bufOffset = 1;  // Skip first "command" byte
-    memcpy(mappings.data(), bufPtr + bufOffset, mapSz);
+    memcpy(trackUidMappings.data(), bufPtr + bufOffset, mapSz);
+    bufOffset += mapSz;
+    memcpy(objectMappings.data(), bufPtr + bufOffset, mapSz);
     bufOffset += mapSz;
     memcpy(admStr.data(), bufPtr + bufOffset, admSz);
-    auto future = std::async(std::launch::async, [this, admStr, mappings]() {
-      recvAdmMetadata(admStr, mappings);
+
+    auto future = std::async(std::launch::async, [this, admStr, trackUidMappings, objectMappings]() {
+      recvAdmMetadata(admStr, trackUidMappings);
     });
     future.get();
     commandSocket->sendResp(cmd);

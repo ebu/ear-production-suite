@@ -50,7 +50,7 @@ the EPS plugins themselves.
 (Ideally, we want to consolidate these at some point.
 We will still need something very lightweight like this for
  quickly shifting audio between plugins and the extension.)
- 
+
 */
 
 
@@ -484,14 +484,15 @@ public:
         return std::move(nngMsg);
     }
 
-    std::shared_ptr<NngMsg> sendAdmAndMappings(std::string admStr, std::vector<uint32_t> channelToAtuMapping) {
+    std::shared_ptr<NngMsg> sendAdmAndMappings(std::string admStr, std::vector<uint32_t> channelToAtuMapping, std::vector<uint32_t> channelToAoMapping) {
         assert(channelToAtuMapping.size() == 64);
+        assert(channelToAoMapping.size() == 64);
         nng_msg* msg;
 
         uint8_t cmdInt = (uint8_t)Command::SetAdmAndMappings;
         uint32_t admSz = admStr.size();
         uint32_t mapSz = (64 * 4);
-        uint32_t totSz = 1 + mapSz + admSz;
+        uint32_t totSz = 1 + mapSz + mapSz + admSz;
         nng_msg_alloc(&msg, totSz);
 
         char* bufPtr = (char*)nng_msg_body(msg);
@@ -499,6 +500,8 @@ public:
         memcpy(bufPtr + bufOffset, &cmdInt, 1);
         bufOffset += 1;
         memcpy(bufPtr + bufOffset, channelToAtuMapping.data(), mapSz);
+        bufOffset += mapSz;
+        memcpy(bufPtr + bufOffset, channelToAoMapping.data(), mapSz);
         bufOffset += mapSz;
         memcpy(bufPtr + bufOffset, admStr.data(), admSz);
         bufOffset += admSz;
