@@ -184,7 +184,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioChannelFormat> chan
     if(state.packRepresentation == PackRepresentation::Undefined) {
         return;
     }
-    auto channel = ADMChannel{channelFormat, state.rootPack, state.currentUid};
+    auto channel = ADMChannel{state.currentObject, channelFormat, state.rootPack, state.currentUid};
 
     if (state.packRepresentation == PackRepresentation::SingleMultichannelTrack) {
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
