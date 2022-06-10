@@ -184,8 +184,9 @@ EARPluginSuite::~EARPluginSuite() = default;
 
 void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI&)
 {
-	// Prepare trackMappingToAtu vector for population
+	// Prepare trackMapping vectors for population
 	trackMappingToAtu = std::vector<uint32_t>(MAX_CHANNEL_COUNT, 0x00000000); // ATUID of 0x00000000 = not used
+	trackMappingToAo = std::vector<uint32_t>(MAX_CHANNEL_COUNT, 0x00000000);
 
 	// Store ADM document ready for transmitting to EAR Scene
 	assert(metadata);
@@ -199,6 +200,7 @@ void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> 
 void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 {
 	assert(trackMappingToAtu.size() == 64);
+	assert(trackMappingToAo.size() == 64);
 	assert(originalAdmDocument.length() > 0);
 
 	if (!sceneMasterAlreadyExisted) {
@@ -206,7 +208,7 @@ void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 		auto samplesPort = sceneMaster.getSamplesSocketPort();
 		auto commandPort = sceneMaster.getCommandSocketPort();
 		auto communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
-		communicator->sendAdmAndTrackMappings(originalAdmDocument, trackMappingToAtu);
+		communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
 	}
 }
 

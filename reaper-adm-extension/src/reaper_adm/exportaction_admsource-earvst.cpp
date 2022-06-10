@@ -850,9 +850,9 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
     return successful;
 }
 
-void EarVstCommunicator::sendAdmAndTrackMappings(std::string originalAdmStr, std::vector<uint32_t> trackMappingToAtu)
+void EarVstCommunicator::sendAdmAndMappings(std::string originalAdmStr, std::vector<uint32_t> trackMappingToAtu, std::vector<uint32_t> trackMappingToAo)
 {
-    auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, trackMappingToAtu);
+    auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, trackMappingToAtu, trackMappingToAo);
 }
 
 void EarVstCommunicator::infoExchange()
@@ -874,8 +874,8 @@ void EarVstCommunicator::admAndMappingExchange()
     uint32_t mapSz = (64 * 4);
     uint32_t admSz = resp->getSize() - mapSz;
 
-    auto mappings = std::vector<uint32_t>(64, 0x00000000);
-    memcpy(mappings.data(), bufPtr, mapSz);
+    auto trackUidMappings = std::vector<uint32_t>(64, 0x00000000);
+    memcpy(trackUidMappings.data(), bufPtr, mapSz);
     auto admStrRecv = std::string(admSz, 0);
     memcpy(admStrRecv.data(), bufPtr + mapSz, admSz);
 
@@ -884,7 +884,7 @@ void EarVstCommunicator::admAndMappingExchange()
     uint32_t atuVal = 0x00000000;
     uint8_t writtenChannelNum = 0;
     for(uint8_t originalChannelNum = 0; originalChannelNum < channelCount; originalChannelNum++) {
-        atuVal = mappings[originalChannelNum];
+        atuVal = trackUidMappings[originalChannelNum];
         if(atuVal != 0x00000000) {
             latestChannelMappings.push_back(ChannelMapping{ originalChannelNum, writtenChannelNum, atuVal });
             writtenChannelNum++;
