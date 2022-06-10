@@ -138,7 +138,7 @@ std::vector<admplug::ADMChannel> admplug::PluginSuite::reorderAndFilter(std::vec
 
         int channelsInOrder = (hoaOrder + 1) * (hoaOrder + 1);
 
-        std::vector<ADMChannel> newChannelOrder(channelsInOrder, ADMChannel{ nullptr, packFormat, nullptr });
+        std::vector<ADMChannel> newChannelOrder(channelsInOrder, ADMChannel{ nullptr, nullptr, packFormat, nullptr });
 
         for(auto channel : channels){
             if(channel.channelFormat()) {
@@ -194,7 +194,7 @@ std::vector<admplug::ADMChannel> admplug::PluginSuite::reorderAndFilter(std::vec
                 }
                 if(targetFoundCount == 0) {
                     // No track found - do a blank.
-                    newChannelOrder.emplace_back( nullptr, packFormat, nullptr );
+                    newChannelOrder.push_back(ADMChannel{ nullptr, nullptr, packFormat, nullptr });
                 } else if(targetFoundCount > 1) {
                     // TODO: Already have this channel - need to warn!
                     assert(false);

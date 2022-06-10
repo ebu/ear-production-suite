@@ -478,7 +478,7 @@ EARPluginSuite::reorderAndFilter(const std::vector<ADMChannel> &channels,
 		for (auto index : silentIndices) {
 			auto insertionPos = modifiedChannels.cbegin();
 			std::advance(insertionPos, index);
-			modifiedChannels.insert(insertionPos, ADMChannel{ nullptr, nullptr, nullptr });
+			modifiedChannels.insert(insertionPos, ADMChannel{ nullptr, nullptr, nullptr, nullptr });
 		}
 	}
 

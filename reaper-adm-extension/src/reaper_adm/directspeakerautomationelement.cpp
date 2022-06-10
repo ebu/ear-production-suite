@@ -106,6 +106,6 @@ std::vector<AutomationPoint> DirectSpeakersAutomationElement::pointsFor(Paramete
 ADMChannel admplug::DirectSpeakersAutomationElement::channel() const
 {
     auto index = channelIndex();
-    if(index < 0)  return ADMChannel{ nullptr, takeChannels().at(0).packFormat(), nullptr };
+    if(index < 0)  return ADMChannel{ nullptr, nullptr, takeChannels().at(0).packFormat(), nullptr };
     return takeChannels().at(static_cast<std::size_t>(index));
 }
