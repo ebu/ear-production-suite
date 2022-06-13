@@ -148,13 +148,13 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	assert(packFormatId.has_value());
 
 	if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
-        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatId);
-        if(pfData) {
-            int trackWidth = pfData->relatedChannelFormats.size();
-		    for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
-			    usedValues.push_back((*trackMapping) + channelCounter);
-		    }
-        }
+		auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatId);
+		if(pfData) {
+			int trackWidth = pfData->relatedChannelFormats.size();
+			for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
+				usedValues.push_back((*trackMapping) + channelCounter);
+			}
+		}
 	}
 
 	return usedValues;
@@ -173,10 +173,10 @@ bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupport
 
 EARPluginSuite::EARPluginSuite() :
 	objectTrackMappingParameter{ createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-    directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-    directPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) },
+	directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
+	directPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) },
 	hoaTrackMappingParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
-    hoaPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) }
+	hoaPackFormatIdValueParameter{ createPluginParameter(static_cast<int>(EarHoaParameters::PACKFORMAT_ID_VALUE), {PACKFORMAT_ID_VALUE_MIN, PACKFORMAT_ID_VALUE_MAX}) }
 {
 }
 
@@ -307,12 +307,12 @@ void EARPluginSuite::onObjectAutomation(const ObjectAutomation & automationEleme
 			// Store mapping to send to EAR Scene
 			auto takeChannel = automationElement.channel();
 			auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
-            uint32_t audioObjectIdVal = 0;
-            if(auto ao = automationElement.channel().object()) {
-                audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-            }
+			uint32_t audioObjectIdVal = 0;
+			if(auto ao = automationElement.channel().object()) {
+				audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+			}
 			trackMappingToAtu[*trackMapping] = trackUidVal;
-            trackMappingToAo[*trackMapping] = audioObjectIdVal;
+			trackMappingToAo[*trackMapping] = audioObjectIdVal;
 		}
 		else {
 			//TODO - need to tell user - no free channels
@@ -392,14 +392,14 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 	if (!plugin) {
 		plugin = track->createPlugin(HOA_METADATA_PLUGIN_NAME);
 
-        auto channelCount = 1;
-        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, packFormatId);
-        if(pfData) {
-            channelCount = pfData->relatedChannelFormats.size();
-        }
+		auto channelCount = 1;
+		auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, packFormatId);
+		if(pfData) {
+			channelCount = pfData->relatedChannelFormats.size();
+		}
 
 		track->setChannelCount(channelCount);
-        plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
+		plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
 
 		auto takeChannels = automationElement.takeChannels();
 
@@ -409,15 +409,15 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 			plugin->setParameter(*hoaTrackMappingParameter, hoaTrackMappingParameter->forwardMap(*trackMapping));
 			track->routeTo(*sceneMasterTrack, channelCount, 0, *trackMapping);
 
-            uint32_t audioObjectIdVal = 0;
-            if(auto ao = automationElement.channel().object()) {
-                audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-            }
+			uint32_t audioObjectIdVal = 0;
+			if(auto ao = automationElement.channel().object()) {
+				audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+			}
 
 			// Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
 			int trackMappingOffset = 0;
 			for (auto& takeChannel : takeChannels) {
-                auto trackNumber = (*trackMapping) + trackMappingOffset;
+				auto trackNumber = (*trackMapping) + trackMappingOffset;
 				auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
 				trackMappingToAtu[trackNumber] = trackUidVal;
 				trackMappingToAo[trackNumber] = audioObjectIdVal;
