@@ -44,7 +44,7 @@ private:
 	std::vector<std::unique_ptr<TrackParameter>> const& trackParameters();
 	std::shared_ptr<PluginParameter> objectTrackMappingParameter;
 	std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;
-    std::shared_ptr<PluginParameter> directPackFormatIdValueParameter;
+	std::shared_ptr<PluginParameter> directPackFormatIdValueParameter;
 	std::shared_ptr<PluginParameter> hoaTrackMappingParameter;
 	std::shared_ptr<PluginParameter> hoaPackFormatIdValueParameter;
 	std::unique_ptr<UniqueValueAssigner> trackMappingAssigner;
