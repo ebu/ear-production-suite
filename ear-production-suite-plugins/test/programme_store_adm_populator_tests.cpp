@@ -25,7 +25,7 @@ TEST_CASE("Simple ADM") {
   proto::ProgrammeStore pendingStore;
 
   SECTION("with single object") {
-    auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {1});
+    auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {0x1001});
     REQUIRE(pendingElements.size() == 1);
     REQUIRE(pendingStore.programme_size() == 1);
   }
@@ -33,7 +33,7 @@ TEST_CASE("Simple ADM") {
     auto objectInteraction = adm::AudioObjectInteraction{adm::OnOffInteract{true}};
     holder.audioObject->set(objectInteraction);
     holder.audioObject->set(adm::Interact{true});
-    auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {1});
+    auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {0x1001});
     REQUIRE(pendingElements.size() == 1);
     REQUIRE(pendingStore.programme_size() == 1);
     REQUIRE(pendingStore.programme(0).element_size() == 1);
@@ -65,7 +65,7 @@ TEST_CASE("Object in multiple programmes") {
 
   proto::ProgrammeStore pendingStore;
 
-  auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {1});
+  auto pendingElements = populateStoreFromAdm(*admDocument, pendingStore, {0x1001});
 
   REQUIRE(pendingElements.size() == 2);
   REQUIRE(pendingStore.programme_size() == 2);
@@ -90,7 +90,7 @@ TEST_CASE("simple DirectSpeaker") {
   proto::ProgrammeStore pendingStore;
   auto pendingElements = populateStoreFromAdm(*admDocument,
                                               pendingStore,
-                                              {1, 2, 3, 4, 5});
+                                              {0x1001});
 
   REQUIRE(pendingElements.size() == 1);
   REQUIRE(pendingStore.programme_size() == 1);
