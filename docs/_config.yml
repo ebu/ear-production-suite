@@ -19,7 +19,7 @@ description: > # this means to ignore newlines until "baseurl:"
   The EAR Production Suite enables you to produce ADM content natively without
   being tied to a specific NGA codec. It is a joint development of BBC R&D and
   IRT as an EBU project.
-baseurl: "/" # the subpath of your site, e.g. /blog
+baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://ear-production-suite.ebu.io/" # the base hostname & protocol for your site
 
 # Social
