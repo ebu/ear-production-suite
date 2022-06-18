@@ -362,13 +362,12 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
                 }
 
                 // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
-                int trackMappingOffset = 0;
+                auto trackNumber = *trackMapping;
+                trackMappingToAo[trackNumber] = audioObjectIdVal;
                 for(auto &takeChannel : takeChannels) {
-                    auto trackNumber = (*trackMapping) + trackMappingOffset;
                     auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
                     trackMappingToAtu[trackNumber] = trackUidVal;
-                    trackMappingToAo[trackNumber] = audioObjectIdVal;
-                    trackMappingOffset++;
+                    trackNumber++;
                 }
 
             } else {
@@ -415,13 +414,12 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 			}
 
 			// Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
-			int trackMappingOffset = 0;
+			auto trackNumber = *trackMapping;
+			trackMappingToAo[trackNumber] = audioObjectIdVal;
 			for (auto& takeChannel : takeChannels) {
-				auto trackNumber = (*trackMapping) + trackMappingOffset;
 				auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
 				trackMappingToAtu[trackNumber] = trackUidVal;
-				trackMappingToAo[trackNumber] = audioObjectIdVal;
-				trackMappingOffset++;
+				trackNumber++;
 			}
 		}
 		else {
