@@ -95,8 +95,6 @@ struct StopAtChannel {
     std::map<int, proto::ProgrammeElement*> programmeElementTrackLookup;
     std::multimap<int, proto::ProgrammeElement*> elementTrackLookup;
     std::map<std::shared_ptr<adm::AudioProgramme const>, proto::Programme*> importedProgrammes;
-    std::shared_ptr<adm::AudioTrackUid const> currentUid;
-    std::shared_ptr<adm::AudioObject const> currentObject;
     proto::Programme* currentProgramme;
   };
 

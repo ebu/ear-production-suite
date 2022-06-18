@@ -148,44 +148,27 @@ void ProgrammeStoreAdmPopulator::operator()(
 
 void ProgrammeStoreAdmPopulator::operator()(
   std::shared_ptr<const AudioObject> admObject) {
-  currentObject = admObject;
-  auto aoId = currentObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-  auto it = std::find(audioObjectMaps.begin(), audioObjectMaps.end(), aoId);
-  if(it != audioObjectMaps.end()) {
-    auto packs = admObject->getReferences<adm::AudioPackFormat>();
-    if(!packs.empty()) {
-      auto pfTd = packs.front()->get<TypeDescriptor>();
-      if(pfTd == TypeDefinition::DIRECT_SPEAKERS ||
-         pfTd == TypeDefinition::HOA) {
-        auto location = std::distance(audioObjectMaps.begin(), it);
-        auto found = programmeElementTrackLookup.find(location);
-        if(found == programmeElementTrackLookup.end()) {
-          auto element = currentProgramme->add_element();
-          setInteractivity(element->mutable_object(), *admObject);
-          programmeElementTrackLookup[location] = element;
-        }
+  auto aoId = admObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+
+  for(int ch = 0; ch < audioObjectMaps.size(); ch++) {
+    if(audioObjectMaps[ch] == aoId) {
+      auto found = programmeElementTrackLookup.find(ch);
+      if(found == programmeElementTrackLookup.end()) {
+        auto element = currentProgramme->add_element();
+        setInteractivity(element->mutable_object(), *admObject);
+        programmeElementTrackLookup[ch] = element;
       }
     }
   }
+
 }
 
 void ProgrammeStoreAdmPopulator::operator()(
     std::shared_ptr<const AudioTrackUid> uid) {
-  currentUid = uid;
 }
 
 void ProgrammeStoreAdmPopulator::operator()(
     std::shared_ptr<const AudioChannelFormat> channel) {
-  if (channel->get<TypeDescriptor>() == TypeDefinition::OBJECTS) {
-    auto aoId = currentObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-    auto it = std::find(audioObjectMaps.begin(), audioObjectMaps.end(), aoId);
-    if (it != audioObjectMaps.end()) {
-      auto location = std::distance(audioObjectMaps.begin(), it);
-      auto element = currentProgramme->add_element();
-      setInteractivity(element->mutable_object(), *currentObject);
-      programmeElementTrackLookup[location] = element;
-    }
-  }
 }
 
 void ProgrammeStoreAdmPopulator::startRoute() {
