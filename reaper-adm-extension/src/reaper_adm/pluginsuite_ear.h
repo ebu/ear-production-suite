@@ -33,6 +33,8 @@ public:
 	Parameter* getParameterFor(AdmParameter admParameter) override;
 	std::vector<ADMChannel> reorderAndFilter(std::vector<ADMChannel> const& channels, ReaperAPI const& api) override;
 
+    std::vector<uint32_t> getTrackMappingToAo() { return trackMappingToAo; }
+
 	static const char* OBJECT_METADATA_PLUGIN_NAME;
 	static const char* DIRECTSPEAKERS_METADATA_PLUGIN_NAME;
 	static const char* HOA_METADATA_PLUGIN_NAME;
