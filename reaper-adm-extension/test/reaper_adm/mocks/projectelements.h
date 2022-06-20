@@ -102,5 +102,26 @@ public:
   MOCK_CONST_METHOD2(apply, void(PluginParameter const&, Plugin const&));
   MOCK_CONST_METHOD2(apply, void(TrackParameter const&, Track const&));
 };
+
+class MockHoaAutomation : public HoaAutomation {
+public:
+    MOCK_METHOD2(createProjectElements,
+                 void(PluginSuite&, ReaperAPI const& api));
+    MOCK_CONST_METHOD1(hasAdmElement, bool(adm::ElementConstVariant));
+    MOCK_CONST_METHOD1(hasAdmElements, bool(std::vector<adm::ElementConstVariant>));
+    MOCK_CONST_METHOD0(getAdmElements, std::vector<adm::ElementConstVariant>());
+    MOCK_CONST_METHOD0(blocks,
+                       adm::BlockFormatsConstRange<adm::AudioBlockFormatHoa>());
+    MOCK_CONST_METHOD0(startTime,
+                       double());
+    MOCK_CONST_METHOD0(getTrack, std::shared_ptr<Track>());
+    MOCK_CONST_METHOD0(parentTake,
+                       std::shared_ptr<TakeElement const>());
+    MOCK_CONST_METHOD0(takeChannels, std::vector<ADMChannel>());
+    MOCK_CONST_METHOD0(channel, ADMChannel());
+    MOCK_CONST_METHOD0(channelIndex, int());
+    MOCK_CONST_METHOD2(apply, void(PluginParameter const&, Plugin const&));
+    MOCK_CONST_METHOD2(apply, void(TrackParameter const&, Track const&));
+};
 }  // namespace admplug
 
