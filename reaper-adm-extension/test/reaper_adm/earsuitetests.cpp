@@ -462,3 +462,143 @@ TEST_CASE("Tracks are routed sequentially") {
     //earSuite.onCreateObjectTrack(trackElement, api);
     earSuite.onObjectAutomation(*objectAuto, api);
 }
+
+auto createAdmDocument() {
+    auto doc = adm::Document::create();
+    adm::addCommonDefinitionsTo(doc);
+    return doc;
+}
+
+auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, const std::string &pfIdStr) {
+    auto helper = AdmCommonDefinitionHelper::getSingleton();
+    auto obj = adm::AudioObject::create(adm::AudioObjectName("AO"));
+    auto pfId = adm::parseAudioPackFormatId(pfIdStr);
+    doc->add(obj);
+    auto tdVal = std::stoi(pfIdStr.substr(3,4), nullptr, 16);
+    auto pfIdVal = std::stoi(pfIdStr.substr(7,4), nullptr, 16);
+    auto pf = doc->lookup(pfId);
+    obj->addReference(pf);
+    //Use helper to recurse all nested PFs
+    auto pfData = helper->getPackFormatData(tdVal, pfIdVal);
+    auto cfs = pf->getReferences<adm::AudioChannelFormat>();
+    for(auto relCf : pfData->relatedChannelFormats) {
+        // Need the doc instance of the CF, not the helpers
+        auto cfId = relCf->channelFormat->get<adm::AudioChannelFormatId>();
+        auto cf = doc->lookup(cfId);
+        // Need to find the trackformat for the CF
+        for(auto checkTf : doc->getElements<adm::AudioTrackFormat>()) {
+            auto checkSf = checkTf->getReference<adm::AudioStreamFormat>();
+            auto checkCf = checkSf->getReference<adm::AudioChannelFormat>();
+            if(checkCf == cf) {
+                auto uid = adm::AudioTrackUid::create();
+                uid->setReference(pf);
+                uid->setReference(checkTf);
+                obj->addReference(uid);
+                break;
+            }
+        }
+    }
+    return obj;
+}
+
+TEST_CASE("Object types create exactly one AudioObject track mapping entry") {
+
+    auto expectedAoMapping = std::vector<uint32_t>(64, 0);
+    expectedAoMapping[0] = 0x1001;
+
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    NiceMock<MockObjectAutomation> autoElement;
+    initProject(earSuite, api);
+
+    auto doc = createAdmDocument();
+    auto simpleObj = adm::createSimpleObject("Test");
+    doc->add(simpleObj.audioObject);
+    auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid);
+
+    auto track = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
+    ON_CALL(autoElement, takeChannels()).WillByDefault(Return(std::vector<ADMChannel>{ channel }));
+    ON_CALL(autoElement, channel()).WillByDefault(Return(channel));
+    ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    initProject(earSuite, api);
+    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+    earSuite.onObjectAutomation(autoElement, api);
+
+    REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
+}
+
+TEST_CASE("DirectSpeakers types create exactly one AudioObject track mapping entry regardless of channel count") {
+
+    auto expectedAoMapping = std::vector<uint32_t>(64, 0);
+    expectedAoMapping[0] = 0x1001;
+
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    NiceMock<MockDirectSpeakersAutomation> autoElement;
+    initProject(earSuite, api);
+
+    std::vector<ADMChannel> channels;
+    auto doc = createAdmDocument();
+    auto obj = createElementsFromCommonDefinition(doc, "AP_00010003"); //5.1
+    for(auto uid : obj->getReferences<adm::AudioTrackUid>()) {
+        auto pf = uid->getReference<adm::AudioPackFormat>();
+        auto tf = uid->getReference<adm::AudioTrackFormat>();
+        auto sf = tf->getReference<adm::AudioStreamFormat>();
+        auto cf = sf->getReference<adm::AudioChannelFormat>();
+        channels.push_back(ADMChannel{obj, cf, pf, uid});
+    }
+
+    auto track = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
+    ON_CALL(autoElement, takeChannels()).WillByDefault(Return(channels));
+    ON_CALL(autoElement, channel()).WillByDefault(Return(channels[0]));
+    ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    initProject(earSuite, api);
+    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+    earSuite.onDirectSpeakersAutomation(autoElement, api);
+
+    REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
+}
+
+TEST_CASE("HOA types create exactly one AudioObject track mapping entry regardless of channel count") {
+
+    auto expectedAoMapping = std::vector<uint32_t>(64, 0);
+    expectedAoMapping[0] = 0x1001;
+
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    NiceMock<MockHoaAutomation> autoElement;
+    initProject(earSuite, api);
+
+    std::vector<ADMChannel> channels;
+    auto doc = createAdmDocument();
+    auto obj = createElementsFromCommonDefinition(doc, "AP_00040003"); //3rd Order - nesting PFs
+    for(auto uid : obj->getReferences<adm::AudioTrackUid>()) {
+        auto pf = uid->getReference<adm::AudioPackFormat>();
+        auto tf = uid->getReference<adm::AudioTrackFormat>();
+        auto sf = tf->getReference<adm::AudioStreamFormat>();
+        auto cf = sf->getReference<adm::AudioChannelFormat>();
+        channels.push_back(ADMChannel{obj, cf, pf, uid});
+    }
+
+    auto track = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
+    ON_CALL(autoElement, takeChannels()).WillByDefault(Return(channels));
+    ON_CALL(autoElement, channel()).WillByDefault(Return(channels[0]));
+    ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    initProject(earSuite, api);
+    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+    earSuite.onHoaAutomation(autoElement, api);
+
+    REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
+}
