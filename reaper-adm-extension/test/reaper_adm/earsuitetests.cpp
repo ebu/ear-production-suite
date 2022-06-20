@@ -509,7 +509,6 @@ TEST_CASE("Object types create exactly one AudioObject track mapping entry") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     NiceMock<MockObjectAutomation> autoElement;
-    initProject(earSuite, api);
 
     auto doc = createAdmDocument();
     auto simpleObj = adm::createSimpleObject("Test");
@@ -539,7 +538,6 @@ TEST_CASE("DirectSpeakers types create exactly one AudioObject track mapping ent
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     NiceMock<MockDirectSpeakersAutomation> autoElement;
-    initProject(earSuite, api);
 
     std::vector<ADMChannel> channels;
     auto doc = createAdmDocument();
@@ -575,7 +573,6 @@ TEST_CASE("HOA types create exactly one AudioObject track mapping entry regardle
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     NiceMock<MockHoaAutomation> autoElement;
-    initProject(earSuite, api);
 
     std::vector<ADMChannel> channels;
     auto doc = createAdmDocument();
