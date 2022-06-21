@@ -599,3 +599,78 @@ TEST_CASE("HOA types create exactly one AudioObject track mapping entry regardle
 
     REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
 }
+
+TEST_CASE("A combination of AudioObject types creates exactly one AudioObject track mapping entry each") {
+
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    initProject(earSuite, api);
+    auto doc = createAdmDocument();
+
+    NiceMock<MockHoaAutomation> hoaAutoElement;
+    auto hoaAo = createElementsFromCommonDefinition(doc, "AP_00040003"); //3rd Order - nesting PFs
+    std::vector<ADMChannel> hoaChannels;
+    for(auto uid : hoaAo->getReferences<adm::AudioTrackUid>()) {
+        auto pf = uid->getReference<adm::AudioPackFormat>();
+        auto tf = uid->getReference<adm::AudioTrackFormat>();
+        auto sf = tf->getReference<adm::AudioStreamFormat>();
+        auto cf = sf->getReference<adm::AudioChannelFormat>();
+        hoaChannels.push_back(ADMChannel{hoaAo, cf, pf, uid});
+    }
+    auto hoaTrack = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(hoaAutoElement, getTrack()).WillByDefault(Return(hoaTrack));
+    ON_CALL(hoaAutoElement, takeChannels()).WillByDefault(Return(hoaChannels));
+    ON_CALL(hoaAutoElement, channel()).WillByDefault(Return(hoaChannels[0]));
+    ON_CALL(*hoaTrack, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*hoaTrack, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*hoaTrack, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    NiceMock<MockDirectSpeakersAutomation> dsAutoElement;
+    auto dsAo = createElementsFromCommonDefinition(doc, "AP_00010003");  //5.1
+    std::vector<ADMChannel> dsChannels;
+    for(auto uid : dsAo->getReferences<adm::AudioTrackUid>()) {
+        auto pf = uid->getReference<adm::AudioPackFormat>();
+        auto tf = uid->getReference<adm::AudioTrackFormat>();
+        auto sf = tf->getReference<adm::AudioStreamFormat>();
+        auto cf = sf->getReference<adm::AudioChannelFormat>();
+        dsChannels.push_back(ADMChannel{dsAo, cf, pf, uid});
+    }
+    auto dsTrack = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(dsAutoElement, getTrack()).WillByDefault(Return(dsTrack));
+    ON_CALL(dsAutoElement, takeChannels()).WillByDefault(Return(dsChannels));
+    ON_CALL(dsAutoElement, channel()).WillByDefault(Return(dsChannels[0]));
+    ON_CALL(*dsTrack, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*dsTrack, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*dsTrack, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    NiceMock<MockObjectAutomation> objAutoElement;
+    auto simpleObj = adm::createSimpleObject("Test");
+    doc->add(simpleObj.audioObject);
+    std::vector<ADMChannel> objChannels;
+    objChannels.push_back(ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid));
+    auto objTrack = std::make_shared<NiceMock<MockTrack>>();
+    ON_CALL(objAutoElement, getTrack()).WillByDefault(Return(objTrack));
+    ON_CALL(objAutoElement, takeChannels()).WillByDefault(Return(objChannels));
+    ON_CALL(objAutoElement, channel()).WillByDefault(Return(objChannels[0]));
+    ON_CALL(*objTrack, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+    ON_CALL(*objTrack, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+    ON_CALL(*objTrack, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+
+    initProject(earSuite, api);
+    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+    earSuite.onHoaAutomation(hoaAutoElement, api);
+    earSuite.onDirectSpeakersAutomation(dsAutoElement, api);
+    earSuite.onObjectAutomation(objAutoElement, api);
+
+    auto expectedAoMapping = std::vector<uint32_t>(64, 0);
+    int expIndex = 0;
+    expectedAoMapping[expIndex] = 0x1001;
+    expIndex += hoaChannels.size();
+    expectedAoMapping[expIndex] = 0x1002;
+    expIndex += dsChannels.size();
+    expectedAoMapping[expIndex] = 0x1003;
+    expIndex += objChannels.size();
+
+    REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
+}
+
