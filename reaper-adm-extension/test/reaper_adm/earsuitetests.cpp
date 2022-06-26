@@ -167,54 +167,51 @@ TEST_CASE("On first create project, bus and renderer tracks set to 64 channels")
     earSuite.onCreateProject(node, api);
 }
 
-/* TODO - Not sure why you'd expect the renderer not to route to master? It doesn't follow the pattern of any other plugin suite
+//TODO - Not sure why you'd expect the renderer not to route to master? It doesn't follow the pattern of any other plugin suite
+//TEST_CASE("On first create project, bus and renderer tracks have master send disabled") {
+//    EARPluginSuite earSuite;
+//    auto api = NiceMock<MockReaperAPI>{};
+//    auto project = std::make_shared<NiceMock<MockProjectElement>>();
+//    auto node = ProjectNode{project};
+//
+//    auto returnTrackWithPluginExpectations = createTrack([](MockTrack& track){
+//        EXPECT_CALL(track, disableMasterSend());
+//    });
+//
+//    ON_CALL(api, createTrack()).WillByDefault(returnTrackWithPluginExpectations);
+//    earSuite.onCreateProject(node, api);
+//}
 
-TEST_CASE("On first create project, bus and renderer tracks have master send disabled") {
-    EARPluginSuite earSuite;
-    auto api = NiceMock<MockReaperAPI>{};
-    auto project = std::make_shared<NiceMock<MockProjectElement>>();
-    auto node = ProjectNode{project};
+//std::unique_ptr<NiceMock<MockTrack>> getMockTrack(std::string) {
+//    auto track = std::make_unique<NiceMock<MockTrack>>();
+//    ON_CALL(*track, stillExists()).WillByDefault(Return(true)); // TODO: How to fix this? track is a unique_ptr so gets moved and "attempting to reference deleted function"
+//    return track;
+//};
+//
+//TEST_CASE("On subsequent create project, scene master and renderer not added") {
+//    EARPluginSuite earSuite;
+//    auto api = NiceMock<MockReaperAPI>{};
+//    auto project = std::make_shared<NiceMock<MockProjectElement>>();
+//    auto node = ProjectNode{project};
+//
+//    auto returnPersistentSceneMasterTrack = createTrack([](MockTrack& track){
+//        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+//        EXPECT_CALL(track, createPlugin(StrEq(SCENEMASTER_NAME)));
+//    });
+//
+//    auto returnPersistentRendererTrack = createTrack([](MockTrack& track){
+//        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+//        EXPECT_CALL(track, createPlugin(StrEq(RENDERER_NAME)));
+//    });
+//
+//
+//    EXPECT_CALL(api, firstTrackWithPluginNamed(StrEq(RENDERER_NAME))).WillOnce(Return(nullptr)).WillRepeatedly(getMockTrack);
+//
+//    EXPECT_CALL(api, createTrack()).Times(2).WillOnce(returnPersistentSceneMasterTrack).WillOnce(returnPersistentRendererTrack);
+//    earSuite.onCreateProject(node, api);
+//    earSuite.onCreateProject(node, api);
+//}
 
-    auto returnTrackWithPluginExpectations = createTrack([](MockTrack& track){
-        EXPECT_CALL(track, disableMasterSend());
-    });
-
-    ON_CALL(api, createTrack()).WillByDefault(returnTrackWithPluginExpectations);
-    earSuite.onCreateProject(node, api);
-}
-*/
-
-/*
-std::unique_ptr<NiceMock<MockTrack>> getMockTrack(std::string) {
-    auto track = std::make_unique<NiceMock<MockTrack>>();
-    ON_CALL(*track, stillExists()).WillByDefault(Return(true)); // TODO: How to fix this? track is a unique_ptr so gets moved and "attempting to reference deleted function"
-    return track;
-};
-
-TEST_CASE("On subsequent create project, scene master and renderer not added") {
-    EARPluginSuite earSuite;
-    auto api = NiceMock<MockReaperAPI>{};
-    auto project = std::make_shared<NiceMock<MockProjectElement>>();
-    auto node = ProjectNode{project};
-
-    auto returnPersistentSceneMasterTrack = createTrack([](MockTrack& track){
-        ON_CALL(track, stillExists()).WillByDefault(Return(true));
-        EXPECT_CALL(track, createPlugin(StrEq(SCENEMASTER_NAME)));
-    });
-
-    auto returnPersistentRendererTrack = createTrack([](MockTrack& track){
-        ON_CALL(track, stillExists()).WillByDefault(Return(true));
-        EXPECT_CALL(track, createPlugin(StrEq(RENDERER_NAME)));
-    });
-
-
-    EXPECT_CALL(api, firstTrackWithPluginNamed(StrEq(RENDERER_NAME))).WillOnce(Return(nullptr)).WillRepeatedly(getMockTrack);
-
-    EXPECT_CALL(api, createTrack()).Times(2).WillOnce(returnPersistentSceneMasterTrack).WillOnce(returnPersistentRendererTrack);
-    earSuite.onCreateProject(node, api);
-    earSuite.onCreateProject(node, api);
-}
-*/
 
 TEST_CASE("Bus and renderer tracks positioned") {
     EARPluginSuite earSuite;
@@ -292,33 +289,34 @@ TEST_CASE("Object track has object metadata plugin instantiated") {
     initProject(earSuite, api);
     earSuite.onCreateObjectTrack(trackElement, api);
 }
-/* TODO - mock UniqueValueAssigner for this to work
-TEST_CASE("Object tracks are routed to bus track") {
-    EARPluginSuite earSuite;
-    auto api = NiceMock<MockReaperAPI>{};
-    NiceMock<MockTrackElement> trackElement;
-    auto track = std::make_shared<NiceMock<MockTrack>>();
-    auto objectAuto = getMockObjectAutoElement();
-    ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
 
-    const int FIRST_INDEX = 0;
-    EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX));
-    EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-    initProject(earSuite, api);
+//TODO - mock UniqueValueAssigner for this to work
+//TEST_CASE("Object tracks are routed to bus track") {
+//    EARPluginSuite earSuite;
+//    auto api = NiceMock<MockReaperAPI>{};
+//    NiceMock<MockTrackElement> trackElement;
+//    auto track = std::make_shared<NiceMock<MockTrack>>();
+//    auto objectAuto = getMockObjectAutoElement();
+//    ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
+//    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
+//    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
+//
+//    const int FIRST_INDEX = 0;
+//    EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX));
+//    EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
+//    initProject(earSuite, api);
+//
+//    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+//    earSuite.onCreateObjectTrack(trackElement, api);
+//    earSuite.onObjectAutomation(*objectAuto, api);
+//
+//    SECTION("sequentially") {
+//      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
+//      earSuite.onCreateObjectTrack(trackElement, api);
+//      earSuite.onObjectAutomation(*objectAuto, api);
+//    }
+//}
 
-    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-    earSuite.onCreateObjectTrack(trackElement, api);
-    earSuite.onObjectAutomation(*objectAuto, api);
-
-    SECTION("sequentially") {
-      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
-      earSuite.onCreateObjectTrack(trackElement, api);
-      earSuite.onObjectAutomation(*objectAuto, api);
-    }
-}
-*/
 TEST_CASE("Object tracks are not sent to master") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
