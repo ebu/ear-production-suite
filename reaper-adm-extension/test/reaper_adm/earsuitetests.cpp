@@ -82,6 +82,43 @@ std::shared_ptr<ADMMetaData> getGenericMetadata() {
     return genericMetadata;
 }
 
+auto createAdmDocument() {
+    auto doc = adm::Document::create();
+    adm::addCommonDefinitionsTo(doc);
+    return doc;
+}
+
+auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, const std::string &pfIdStr) {
+    auto helper = AdmCommonDefinitionHelper::getSingleton();
+    auto obj = adm::AudioObject::create(adm::AudioObjectName("AO"));
+    auto pfId = adm::parseAudioPackFormatId(pfIdStr);
+    doc->add(obj);
+    auto tdVal = std::stoi(pfIdStr.substr(3,4), nullptr, 16);
+    auto pfIdVal = std::stoi(pfIdStr.substr(7,4), nullptr, 16);
+    auto pf = doc->lookup(pfId);
+    obj->addReference(pf);
+    //Use helper to recurse all nested PFs
+    auto pfData = helper->getPackFormatData(tdVal, pfIdVal);
+    auto cfs = pf->getReferences<adm::AudioChannelFormat>();
+    for(auto relCf : pfData->relatedChannelFormats) {
+        // Need the doc instance of the CF, not the helpers
+        auto cfId = relCf->channelFormat->get<adm::AudioChannelFormatId>();
+        auto cf = doc->lookup(cfId);
+        // Need to find the trackformat for the CF
+        for(auto checkTf : doc->getElements<adm::AudioTrackFormat>()) {
+            auto checkSf = checkTf->getReference<adm::AudioStreamFormat>();
+            auto checkCf = checkSf->getReference<adm::AudioChannelFormat>();
+            if(checkCf == cf) {
+                auto uid = adm::AudioTrackUid::create();
+                uid->setReference(pf);
+                uid->setReference(checkTf);
+                obj->addReference(uid);
+                break;
+            }
+        }
+    }
+    return obj;
+}
 
 std::string SCENEMASTER_NAME{"EAR Scene"};
 std::string RENDERER_NAME{"EAR Monitoring 0+2+0"};
@@ -463,44 +500,6 @@ TEST_CASE("Tracks are routed sequentially") {
     earSuite.onObjectAutomation(*objectAuto, api);
 }
 
-auto createAdmDocument() {
-    auto doc = adm::Document::create();
-    adm::addCommonDefinitionsTo(doc);
-    return doc;
-}
-
-auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, const std::string &pfIdStr) {
-    auto helper = AdmCommonDefinitionHelper::getSingleton();
-    auto obj = adm::AudioObject::create(adm::AudioObjectName("AO"));
-    auto pfId = adm::parseAudioPackFormatId(pfIdStr);
-    doc->add(obj);
-    auto tdVal = std::stoi(pfIdStr.substr(3,4), nullptr, 16);
-    auto pfIdVal = std::stoi(pfIdStr.substr(7,4), nullptr, 16);
-    auto pf = doc->lookup(pfId);
-    obj->addReference(pf);
-    //Use helper to recurse all nested PFs
-    auto pfData = helper->getPackFormatData(tdVal, pfIdVal);
-    auto cfs = pf->getReferences<adm::AudioChannelFormat>();
-    for(auto relCf : pfData->relatedChannelFormats) {
-        // Need the doc instance of the CF, not the helpers
-        auto cfId = relCf->channelFormat->get<adm::AudioChannelFormatId>();
-        auto cf = doc->lookup(cfId);
-        // Need to find the trackformat for the CF
-        for(auto checkTf : doc->getElements<adm::AudioTrackFormat>()) {
-            auto checkSf = checkTf->getReference<adm::AudioStreamFormat>();
-            auto checkCf = checkSf->getReference<adm::AudioChannelFormat>();
-            if(checkCf == cf) {
-                auto uid = adm::AudioTrackUid::create();
-                uid->setReference(pf);
-                uid->setReference(checkTf);
-                obj->addReference(uid);
-                break;
-            }
-        }
-    }
-    return obj;
-}
-
 TEST_CASE("Object types create exactly one AudioObject track mapping entry") {
 
     auto expectedAoMapping = std::vector<uint32_t>(64, 0);
@@ -673,6 +672,7 @@ TEST_CASE("A combination of AudioObject types creates exactly one AudioObject tr
 
     REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
 }
+
 TEST_CASE("An Object type AudioObject creates one AudioObject track mapping entry for each AudioTrackUid") {
 
     EARPluginSuite earSuite;
