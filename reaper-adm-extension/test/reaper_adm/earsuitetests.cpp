@@ -673,4 +673,68 @@ TEST_CASE("A combination of AudioObject types creates exactly one AudioObject tr
 
     REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
 }
+TEST_CASE("An Object type AudioObject creates one AudioObject track mapping entry for each AudioTrackUid") {
 
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    initProject(earSuite, api);
+    auto doc = createAdmDocument();
+
+    const int uidCount = 3;
+
+    auto audioObject = adm::AudioObject::create(adm::AudioObjectName("Test"));
+    auto audioPackFormat = adm::AudioPackFormat::create(adm::AudioPackFormatName("Test"),
+                                                        adm::TypeDefinition::OBJECTS);
+    audioObject->addReference(audioPackFormat);
+    doc->add(audioObject);
+
+    std::vector<ADMChannel> objChannels;
+    std::vector<std::shared_ptr<NiceMock<MockObjectAutomation>>> objAutoElements;
+    std::vector<std::shared_ptr<NiceMock<MockTrack>>> objTracks;
+
+    for(int i = 0; i < uidCount; i++) {
+        std::string name{ "Test-" };
+        name += std::to_string(i);
+        auto audioStreamFormat = adm::AudioStreamFormat::create(
+            adm::AudioStreamFormatName(name), adm::FormatDefinition::PCM);
+        auto audioTrackFormat = adm::AudioTrackFormat::create(
+            adm::AudioTrackFormatName(name), adm::FormatDefinition::PCM);
+        auto audioChannelFormat = adm::AudioChannelFormat::create(
+            adm::AudioChannelFormatName(name), adm::TypeDefinition::OBJECTS);
+        auto audioTrackUid = adm::AudioTrackUid::create();
+        audioPackFormat->addReference(audioChannelFormat);
+        audioStreamFormat->setReference(audioChannelFormat);
+        audioTrackFormat->setReference(audioStreamFormat);
+        audioObject->addReference(audioTrackUid);
+        audioTrackUid->setReference(audioTrackFormat);
+        audioTrackUid->setReference(audioPackFormat);
+
+        objChannels.push_back(ADMChannel(audioObject, audioChannelFormat, audioPackFormat, audioTrackUid));
+
+        auto objAutoElement = std::make_shared<NiceMock<MockObjectAutomation>>();
+        auto objTrack = std::make_shared<NiceMock<MockTrack>>();
+        objAutoElements.push_back(objAutoElement);
+        objTracks.push_back(objTrack);
+
+        ON_CALL(*objAutoElement, getTrack()).WillByDefault(Return(objTrack));
+        ON_CALL(*objAutoElement, takeChannels()).WillByDefault(Return(objChannels));
+        ON_CALL(*objAutoElement, channel()).WillByDefault(Return(objChannels[i]));
+        ON_CALL(*objTrack, createPlugin(An<std::string>())).WillByDefault(createPlugin);
+        ON_CALL(*objTrack, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
+        ON_CALL(*objTrack, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
+    }
+
+    initProject(earSuite, api);
+    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+    for(int i = 0; i < uidCount; i++) {
+        earSuite.onObjectAutomation(*objAutoElements[i], api);
+    }
+
+    auto expectedAoMapping = std::vector<uint32_t>(64, 0);
+    int expIndex = 0;
+    for(int i = 0; i < uidCount; i++) {
+        expectedAoMapping[i] = 0x1001;
+    }
+
+    REQUIRE(earSuite.getTrackMappingToAo() == expectedAoMapping);
+}
