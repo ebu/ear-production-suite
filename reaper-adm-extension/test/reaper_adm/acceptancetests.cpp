@@ -11,6 +11,7 @@
 #include "pluginregistry.h"
 #include "pluginsuite.h"
 #include "pluginsuite_fb360.h"
+#include "pluginsuite_ear.h"
 #include "mocks/pluginsuite.h"
 #include "fakeptr.h"
 #include <track.h>
@@ -46,6 +47,9 @@ namespace {
     int constexpr ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX{ 6 };
     int constexpr ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX{ 7 };
     auto constexpr ADM_VST_PLUGIN_NAME{ "ADM Export Source" };
+    auto constexpr EAR_SCENE_PLUGIN_NAME{ "EAR Scene" };
+    auto constexpr EAR_OBJECT_PLUGIN_NAME{ "EAR Object" };
+    auto constexpr EAR_DEFAULT_MONITORING_PLUGIN_NAME{ "EAR Monitoring 0+2+0" };
 
     struct FakeTracks {
         explicit FakeTracks(FakePtrFactory& fakePtr) :
@@ -108,6 +112,9 @@ namespace {
         ON_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).WillByDefault(Return(true));
         ON_CALL(api, CreateTrackSend(_, _)).WillByDefault(Return(fake.sendIndex));
         //EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).Times(AnyNumber()).WillRepeatedly(Return(fake.fxIndex++));
+        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_SCENE_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, _)).WillByDefault(Return(1));
         ON_CALL(api, TrackFX_GetByName(_, _, _)).WillByDefault(Return(fake.fxIndex));
@@ -264,6 +271,67 @@ namespace {
       importer.extractAudio();
       importer.buildProject();
     }
+
+    void setEarObjectImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedTracks) {
+        ON_CALL(api, createTrack()).WillByDefault([&api](){
+            return std::make_unique<TrackInstance>(api.createTrackAtIndex(0, false), api);
+        });
+
+        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
+        WillOnce(Return(fake.trackFor.submix)).
+        WillOnce(Return(fake.trackFor.renderer)).
+        WillRepeatedly(Return(fake.trackFor.objects));
+
+        SECTION("Creates a scene bus, monitoring bus and expected number of object tracks") {
+            if (expectedTracks > 0) {
+                EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2 + expectedTracks).
+                    WillOnce(Return(fake.trackFor.submix)).
+                    WillOnce(Return(fake.trackFor.renderer)).
+                    WillRepeatedly(Return(fake.trackFor.objects));
+            }
+            else {
+                EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2).
+                    WillOnce(Return(fake.trackFor.submix)).
+                    WillOnce(Return(fake.trackFor.renderer));
+            }
+        }
+
+        SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
+            EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
+            EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::CreateIfMissing)).Times(AnyNumber());
+            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.objects, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedTracks);
+            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.submix, StrEq(EAR_SCENE_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
+            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
+        }
+
+        SECTION("Sets the number of track channels to 64, disables object and scene track master sends") {
+        EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 64)).Times(1);
+        EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 64)).Times(1);
+        EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.objects)).Times(expectedTracks);
+        EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
+        }
+
+        SECTION("Adds a send from the object track to the scene, and to the monitoring") {
+        EXPECT_CALL(api, RouteTrackToTrack(_,_,_,_,_,_,_)).Times(AnyNumber());
+        EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.objects,_,fake.trackFor.submix,_,_,_,_)).Times(expectedTracks);
+        EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.submix,_,fake.trackFor.renderer,_,64,_,_)).Times(1);
+        }
+
+        SECTION("Adds audio to the track") {
+        EXPECT_CALL(api, AddMediaItemToTrack(fake.trackFor.objects)).Times(expectedTracks);
+        EXPECT_CALL(api, AddTakeToMediaItem(fake.mediaItem)).Times(expectedTracks);
+        EXPECT_CALL(api, SetMediaItemLength(fake.mediaItem, _, _)).Times(expectedTracks);
+        if (expectedTracks > 0) {
+        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(expectedTracks).WillRepeatedly(Return(fake.source));
+        }
+        else {
+        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(0);
+        }
+        EXPECT_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).Times(expectedTracks);
+        }
+
+    }
+
 }
 
 TEST_CASE("Check required plug-ins are available") {
