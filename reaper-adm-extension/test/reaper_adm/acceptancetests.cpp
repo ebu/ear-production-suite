@@ -794,3 +794,15 @@ TEST_CASE("On import of three AudioObjects with shared TrackUIDs, creates one tr
 
     doImport<EARPluginSuite>("data/three_ao-one_atu.wav", api);
 }
+
+TEST_CASE("On import of three AudioObjects with shared TrackUIDs and some orphaned, still creates one track per AudioObject", "[ear]") {
+    NiceMock<MockReaperAPI> api;
+    FakeReaperObjects fake;
+
+    setApiDefaults(api, fake);
+    ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
+    ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
+    setEarObjectImportExpectations(api, fake, 3, 1);
+
+    doImport<EARPluginSuite>("data/aos_sharing_atu-some_without_parent.wav", api);
+}
