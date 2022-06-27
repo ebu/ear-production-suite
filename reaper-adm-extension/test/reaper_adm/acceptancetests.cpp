@@ -243,8 +243,9 @@ namespace {
             WillRepeatedly(Return(fake.trackFor.objects));
     }
 
+    template<typename T>
     void doImport(std::string fileName, MockReaperAPI const& api) {
-      auto fakePluginSuite = std::make_shared<Facebook360PluginSuite>();
+      auto fakePluginSuite = std::make_shared<T>();
       test::TempDir dir;
       auto tempPath = dir.path();
       {
@@ -330,7 +331,7 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
         EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(AnyNumber());
     }
 
-    doImport("data/panned_noise_adm.wav", api);
+    doImport<Facebook360PluginSuite>("data/panned_noise_adm.wav", api);
 }
 
 TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nesting]") {
@@ -358,7 +359,7 @@ TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nest
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting1-1ao_with_1pf_reffing_1pf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting1-1ao_with_1pf_reffing_1pf.wav", api);
 }
 
 TEST_CASE("Import of audioobject referencing multiple pack formats of object type", "[objects][FB360][invalid]") {
@@ -397,7 +398,7 @@ TEST_CASE("Import of audioobject referencing multiple pack formats of object typ
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(0);
     }
 
-    doImport("data/nesting2-1ao_with_2pf_each_with_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting2-1ao_with_2pf_each_with_1cf.wav", api);
 }
 
 TEST_CASE("Import of nested audioobjects referencing object type packs", "[objects][FB360][nesting]") {
@@ -426,7 +427,7 @@ TEST_CASE("Import of nested audioobjects referencing object type packs", "[objec
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting3-1ao_reffing_2ao_each_with_1pf_with_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting3-1ao_reffing_2ao_each_with_1pf_with_1cf.wav", api);
 }
 
 TEST_CASE("On import of two audioobjects of object type, one which references the other, ADMImporter") {
@@ -455,7 +456,7 @@ TEST_CASE("On import of two audioobjects of object type, one which references th
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting4-1ao_reffing_1ao_both_with_1pf_with_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting4-1ao_reffing_1ao_both_with_1pf_with_1cf.wav", api);
 }
 
 TEST_CASE("Import object packformat with multiple channelformats", "[objects][FB360][nesting]") {
@@ -483,9 +484,8 @@ TEST_CASE("Import object packformat with multiple channelformats", "[objects][FB
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting5-1ao_with_1pf_with_2cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting5-1ao_with_1pf_with_2cf.wav", api);
 }
-
 
 TEST_CASE("Importing audioobject with shared child object", "[objects][FB360]") {
     NiceMock<MockReaperAPI> api;
@@ -515,7 +515,7 @@ TEST_CASE("Importing audioobject with shared child object", "[objects][FB360]") 
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(1);
     }
 
-    doImport("data/nesting6-2ao_both_reffing_1ao_with_1pf_with_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting6-2ao_both_reffing_1ao_with_1pf_with_1cf.wav", api);
 }
 
 TEST_CASE("Import of complex audioobject nesting: nesting6b-2ao_parents_1ao_child_shared_and_1ao_child_with_one_parent.wav", "[objects][FB360][nesting]") {
@@ -547,7 +547,7 @@ TEST_CASE("Import of complex audioobject nesting: nesting6b-2ao_parents_1ao_chil
     }
 
 
-    doImport("data/nesting6b-2ao_parents_1ao_child_shared_and_1ao_child_with_one_parent.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting6b-2ao_parents_1ao_child_shared_and_1ao_child_with_one_parent.wav", api);
 }
 
 TEST_CASE("Import of file with objects referencing different packs but common channelformat", "[objects][FB360][nesting]") {
@@ -576,7 +576,7 @@ TEST_CASE("Import of file with objects referencing different packs but common ch
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting7-2ao_with_1pf_each_reffing_same_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting7-2ao_with_1pf_each_reffing_same_1cf.wav", api);
 }
 
 TEST_CASE("On import of nesting example: nesting8-2ao_reffing_same_1pf_with_1cf.wav, ADMImporter") {
@@ -605,7 +605,7 @@ TEST_CASE("On import of nesting example: nesting8-2ao_reffing_same_1pf_with_1cf.
         EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
-    doImport("data/nesting8-2ao_reffing_same_1pf_with_1cf.wav", api);
+    doImport<Facebook360PluginSuite>("data/nesting8-2ao_reffing_same_1pf_with_1cf.wav", api);
 }
 
 TEST_CASE("Importing mono directspeaker file to FB360 plugin suite", "[directspeaker][FB360]") {
@@ -627,7 +627,7 @@ TEST_CASE("Importing mono directspeaker file to FB360 plugin suite", "[directspe
 //        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
 //        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Main"))).Times(1);
 //    }
-    doImport("data/channels_mono_adm.wav", api);
+    doImport<Facebook360PluginSuite>("data/channels_mono_adm.wav", api);
 }
 
 TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[.][directspeaker][FB360]") {
@@ -648,7 +648,7 @@ TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[.][dire
 //        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
 //        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Main"))).Times(1);
 //    }
-    doImport("data/channels_stereo_adm.wav", api);
+    doImport<Facebook360PluginSuite>("data/channels_stereo_adm.wav", api);
 }
 
 //TEST_CASE("On import of directspeakers file with nested pack formats", "[.][directspeaker][FB360][nesting]") {
@@ -700,5 +700,5 @@ TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360
     char* isNothing = "";
     EXPECT_CALL(api, TrackFX_GetPreset(_, 1, _, _)).WillOnce(DoAll(SetArgumentPointee<2>(*isNothing), Return(true))).WillRepeatedly(DoAll(SetArgumentPointee<2>(*notNothing), Return(true)));
     EXPECT_CALL(api, TrackFX_SetPreset(_, _, _)).Times(1);
-    doImport("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
+    doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
