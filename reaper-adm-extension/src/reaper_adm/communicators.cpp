@@ -11,14 +11,18 @@ CommunicatorBase::~CommunicatorBase()
 }
 
 void CommunicatorBase::startSocket() {
-    auto resOpen = commandSocket.open();
-    assert(resOpen == 0);
-    auto resDial = commandSocket.dial(commandPort);
-    assert(resDial == 0);
-    resOpen = samplesSocket.open();
-    assert(resOpen == 0);
-    resDial = samplesSocket.dial(samplesPort);
-    assert(resDial == 0);
+    if(commandPort > 0) {
+        auto resOpen = commandSocket.open();
+        assert(resOpen == 0);
+        auto resDial = commandSocket.dial(commandPort);
+        assert(resDial == 0);
+    }
+    if(samplesPort > 0) {
+        auto resOpen = samplesSocket.open();
+        assert(resOpen == 0);
+        auto resDial = samplesSocket.dial(samplesPort);
+        assert(resDial == 0);
+    }
 }
 
 void CommunicatorBase::endSocket() {
