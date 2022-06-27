@@ -102,11 +102,23 @@ namespace {
 
   template <typename ExistingT, typename NewT>
   std::vector<std::shared_ptr<NewT const>> getElementsIfNo(std::shared_ptr<adm::Document const> doc) {
-      if(doc->getElements<ExistingT>().size() != 0) {
-          return std::vector<std::shared_ptr<NewT const>>{};
-      }
-      auto elementRange = doc->getElements<NewT>();
-      return std::vector<std::shared_ptr<NewT const>>(elementRange.begin(), elementRange.end());
+      auto possibleParents = doc->getElements<ExistingT>();
+      auto possibleElements = doc->getElements<NewT>();
+      std::vector<std::shared_ptr<NewT const>> orphanedElements(possibleElements.size());
+
+      auto it = std::copy_if(possibleElements.begin(), possibleElements.end(), orphanedElements.begin(),
+                  [&possibleParents](auto e) {
+                      for(auto p : possibleParents) {
+                          auto children = p->getReferences<NewT>();
+                          for(auto c : children) {
+                              if(c == e) return false;
+                          }
+                      }
+                      return true;
+                  });
+      orphanedElements.resize(std::distance(orphanedElements.begin(), it));
+
+      return orphanedElements;
   }
 
   void applyRoute(adm::Route const& route, ProjectTree& project) {
