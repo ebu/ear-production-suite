@@ -272,7 +272,7 @@ namespace {
       importer.buildProject();
     }
 
-    void setEarObjectImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedTracks) {
+    void setEarObjectImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedTracks, int expectedPCMSources) {
         ON_CALL(api, createTrack()).WillByDefault([&api](){
             return std::make_unique<TrackInstance>(api.createTrackAtIndex(0, false), api);
         });
@@ -321,8 +321,8 @@ namespace {
         EXPECT_CALL(api, AddMediaItemToTrack(fake.trackFor.objects)).Times(expectedTracks);
         EXPECT_CALL(api, AddTakeToMediaItem(fake.mediaItem)).Times(expectedTracks);
         EXPECT_CALL(api, SetMediaItemLength(fake.mediaItem, _, _)).Times(expectedTracks);
-        if (expectedTracks > 0) {
-        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(expectedTracks).WillRepeatedly(Return(fake.source));
+        if (expectedPCMSources > 0) {
+        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(expectedPCMSources).WillRepeatedly(Return(fake.source));
         }
         else {
         EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(0);
@@ -778,7 +778,19 @@ TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track p
     setApiDefaults(api, fake);
     ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
     ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
-    setEarObjectImportExpectations(api, fake, 3);
+    setEarObjectImportExpectations(api, fake, 3, 3);
 
     doImport<EARPluginSuite>("data/one_ao-multiple_uid.wav", api);
+}
+
+TEST_CASE("On import of three AudioObjects with shared TrackUIDs, creates one track per AudioObject", "[ear]") {
+    NiceMock<MockReaperAPI> api;
+    FakeReaperObjects fake;
+
+    setApiDefaults(api, fake);
+    ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
+    ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
+    setEarObjectImportExpectations(api, fake, 3, 1);
+
+    doImport<EARPluginSuite>("data/three_ao-one_atu.wav", api);
 }
