@@ -770,3 +770,15 @@ TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360
     EXPECT_CALL(api, TrackFX_SetPreset(_, _, _)).Times(1);
     doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
+
+TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track per TrackUID", "[ear]") {
+    NiceMock<MockReaperAPI> api;
+    FakeReaperObjects fake;
+
+    setApiDefaults(api, fake);
+    ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
+    ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
+    setEarObjectImportExpectations(api, fake, 3);
+
+    doImport<EARPluginSuite>("data/one_ao-multiple_uid.wav", api);
+}
