@@ -852,7 +852,9 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
 
 void EarVstCommunicator::sendAdmAndMappings(std::string originalAdmStr, std::vector<uint32_t> trackMappingToAtu, std::vector<uint32_t> trackMappingToAo)
 {
-    auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, trackMappingToAtu, trackMappingToAo);
+    if(commandSocket.isSocketOpen()) {
+        auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, trackMappingToAtu, trackMappingToAo);
+    }
 }
 
 void EarVstCommunicator::infoExchange()
