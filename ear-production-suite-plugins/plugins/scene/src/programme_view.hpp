@@ -148,7 +148,7 @@ class ProgrammeView : public Component {
 
     area.removeFromTop(10);
     elementsContainer_->setBounds(
-        area.removeFromLeft(getWidth() / 2).withTrimmedRight(50));
+        area.removeFromLeft(getWidth() / 2).withTrimmedRight(20));
     elementOverview_->setBounds(area.withTrimmedLeft(50));
   }
 
