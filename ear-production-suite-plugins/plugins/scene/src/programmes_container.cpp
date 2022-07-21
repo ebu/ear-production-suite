@@ -270,7 +270,10 @@ void ear::plugin::ui::ProgrammesContainer::updateMeter(const proto::InputItemMet
        oldItem.routing() != item.routing() ||
        oldItem.ds_metadata().layout() != item.ds_metadata().layout()) {
       updateRequired = true;
-      channelCount = static_cast<int>(SPEAKER_SETUPS.at(item.ds_metadata().layout()).speakers.size());
+      auto ssIndex = item.ds_metadata().layout();
+      if(ssIndex >= 0 && ssIndex < SPEAKER_SETUPS.size()) {
+        channelCount = static_cast<int>(SPEAKER_SETUPS.at(ssIndex).speakers.size());
+      }
     }
   }
 
