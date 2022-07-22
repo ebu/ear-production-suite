@@ -191,14 +191,14 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
             }
         }
 
-        if((*admElements).audioObject) {
-            auto mediaTrack = pluginInst->getTrackInstance().get();
-            auto bounds = api.getTrackAudioBounds(mediaTrack, true); // True = ignore before zero - we don't do sub-zero bounds
-            if(bounds.has_value()) {
-                start = toNs((*bounds).first);
-                duration = toNs((*bounds).second - (*bounds).first);
-                (*admElements).audioObject->set(adm::Start{ start });
-                (*admElements).audioObject->set(adm::Duration{ duration });
+        auto mediaTrack = pluginInst->getTrackInstance().get();
+        auto bounds = api.getTrackAudioBounds(mediaTrack, true); // True = ignore before zero - we don't do sub-zero bounds
+        if(bounds.has_value()) {
+            start = toNs((*bounds).first);
+            duration = toNs((*bounds).second - (*bounds).first);
+            for(auto const& audioObject : admElements->audioObjects){
+                audioObject->set(adm::Start{ start });
+                audioObject->set(adm::Duration{ duration });
             }
         }
 
@@ -279,7 +279,7 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
 void EarVstExportSources::updateAdmElementsForAudioTrackUidValueMap()
 {
     admElementsForAudioTrackUidValue.clear();
-    auto audioObjects = admDocument->getElements<adm::AudioObject>();
+    auto docAudioObjects = admDocument->getElements<adm::AudioObject>();
 
     for(auto &channelMapping : chosenCandidateForExport->getChannelMappings()) {
         std::string audioTrackUidStr = "ATU_";
@@ -329,17 +329,16 @@ void EarVstExportSources::updateAdmElementsForAudioTrackUidValueMap()
             continue;
         }
 
-        std::shared_ptr<adm::AudioObject> audioObject = nullptr;
-        for(auto checkAudioObject : audioObjects) {
+        std::vector<std::shared_ptr<adm::AudioObject>> audioObjects;
+        for(auto checkAudioObject : docAudioObjects) {
             auto audioTrackUids = checkAudioObject->getReferences<adm::AudioTrackUid>();
             for(auto checkAudioTrackUid : audioTrackUids) {
                 if(checkAudioTrackUid == audioTrackUid) {
-                    assert(audioObject == nullptr); // should only be one match due to way EAR plugins structure ADM
-                    audioObject = checkAudioObject;
+                    audioObjects.push_back(checkAudioObject);
                 }
             }
         }
-        assert(audioObject != nullptr); // should be a match due to way EAR plugins structure ADM
+        assert(audioObjects.size() > 0); // should be a match due to way EAR plugins structure ADM
 
         auto audioChannelFormatId = audioChannelFormat->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
         bool isCommonDefinition = (audioChannelFormatId <= COMMONDEFINITIONS_MAX_ID);
@@ -355,7 +354,7 @@ void EarVstExportSources::updateAdmElementsForAudioTrackUidValueMap()
                 audioTrackFormat,
                 audioPackFormat,
                 audioChannelFormat,
-                audioObject
+                audioObjects
         } });
     }
 }
