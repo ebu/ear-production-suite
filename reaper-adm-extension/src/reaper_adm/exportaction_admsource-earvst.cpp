@@ -143,9 +143,9 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
         assert(admElements.has_value());
 
         audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
-                                         formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
-                                         formatId((*admElements).audioTrackFormat->get<AudioTrackFormatId>()),
-                                         formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
+                                         formatId(admElements->audioTrackUid->get<AudioTrackUidId>()),
+                                         formatId(admElements->audioTrackFormat->get<AudioTrackFormatId>()),
+                                         formatId(admElements->audioPackFormat->get<AudioPackFormatId>())
         ));
     }
 
@@ -194,8 +194,8 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
         auto mediaTrack = pluginInst->getTrackInstance().get();
         auto bounds = api.getTrackAudioBounds(mediaTrack, true); // True = ignore before zero - we don't do sub-zero bounds
         if(bounds.has_value()) {
-            start = toNs((*bounds).first);
-            duration = toNs((*bounds).second - (*bounds).first);
+            start = toNs(bounds->first);
+            duration = toNs(bounds->second - bounds->first);
             for(auto const& audioObject : admElements->audioObjects){
                 audioObject->set(adm::Start{ start });
                 audioObject->set(adm::Duration{ duration });
@@ -236,23 +236,23 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 }
             }
 
-            if((*admElements).typeDescriptor == adm::TypeDefinition::OBJECTS) {
+            if(admElements->typeDescriptor == adm::TypeDefinition::OBJECTS) {
                 auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst.get(), api);
-                for(auto& block : *blocks) (*admElements).audioChannelFormat->add(*block);
+                for(auto& block : *blocks) admElements->audioChannelFormat->add(*block);
             }
-            else if((*admElements).typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
+            else if(admElements->typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
                 //TODO
                 warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
             }
-            else if((*admElements).typeDescriptor == adm::TypeDefinition::HOA) {
+            else if(admElements->typeDescriptor == adm::TypeDefinition::HOA) {
                 //TODO
                 warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
             }
-            else if((*admElements).typeDescriptor == adm::TypeDefinition::BINAURAL) {
+            else if(admElements->typeDescriptor == adm::TypeDefinition::BINAURAL) {
                 //TODO
                 warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
             }
-            else if((*admElements).typeDescriptor == adm::TypeDefinition::MATRIX) {
+            else if(admElements->typeDescriptor == adm::TypeDefinition::MATRIX) {
                 //TODO
                 warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
             }
