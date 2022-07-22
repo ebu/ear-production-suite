@@ -204,7 +204,7 @@ private:
 		std::shared_ptr<adm::AudioTrackFormat> audioTrackFormat;
 		std::shared_ptr<adm::AudioPackFormat> audioPackFormat;
 		std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
-		std::shared_ptr<adm::AudioObject> audioObject;
+		std::vector<std::shared_ptr<adm::AudioObject>> audioObjects;
 	};
 	std::map<uint32_t, AdmElements> admElementsForAudioTrackUidValue;
 	std::optional<AdmElements> getAdmElementsFor(uint32_t audioTrackUidValue);
