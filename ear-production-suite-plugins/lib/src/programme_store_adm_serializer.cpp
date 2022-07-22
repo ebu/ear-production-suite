@@ -327,69 +327,71 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       auto packFormat =
           doc->lookup(adm::parseAudioPackFormatId(packFormatIdStr));
 
-      auto hoaAudioObject =
+      if(packFormat) {
+        auto hoaAudioObject =
           adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
-      hoaAudioObject->addReference(packFormat);
+        hoaAudioObject->addReference(packFormat);
 
-      content.addReference(hoaAudioObject);
-      setInteractivity(*hoaAudioObject, object);
+        content.addReference(hoaAudioObject);
+        setInteractivity(*hoaAudioObject, object);
 
-      auto channelFormats =
+        auto channelFormats =
           admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
-              ->relatedChannelFormats;
-      // The AudioTrackIUD needs to reference the track format
-      // To get the correct track format we go through all track formats and
-      // find the one that references the correct channel format
-      auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
+          ->relatedChannelFormats;
+  // The AudioTrackIUD needs to reference the track format
+  // To get the correct track format we go through all track formats and
+  // find the one that references the correct channel format
+        auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
 
-      // For each channel format create a AudioTrackUid that references the pack
-      // format The audio object also needs to reference the track uid
-      for (int i(0); i < channelFormats.size(); i++) {
-        auto audioTrackUid = adm::AudioTrackUid::create();
-        hoaAudioObject->addReference(audioTrackUid);
-        audioTrackUid->setReference(packFormat);
+        // For each channel format create a AudioTrackUid that references the pack
+        // format The audio object also needs to reference the track uid
+        for(int i(0); i < channelFormats.size(); i++) {
+          auto audioTrackUid = adm::AudioTrackUid::create();
+          hoaAudioObject->addReference(audioTrackUid);
+          audioTrackUid->setReference(packFormat);
 
-        // The channel format is converted into string format
-        // From the ID we can look up the channel format object from the doc
-        auto channelFormatId = adm::AudioChannelFormatId(
+          // The channel format is converted into string format
+          // From the ID we can look up the channel format object from the doc
+          auto channelFormatId = adm::AudioChannelFormatId(
             adm::TypeDefinition::HOA,
             adm::AudioChannelFormatIdValue(channelFormats[i]->id));
-        auto channelFormat = doc->lookup(channelFormatId);
+          auto channelFormat = doc->lookup(channelFormatId);
 
-        for (auto trackFormat : allTrackFormats) {
-          // For every possible track format in the list, check whether the
-          // channel format it references matches the actual channel format If it
-          // does then save that track format. It can now be references by
-          // audioTrackUid
-          auto streamFormat =
+          for(auto trackFormat : allTrackFormats) {
+            // For every possible track format in the list, check whether the
+            // channel format it references matches the actual channel format If it
+            // does then save that track format. It can now be references by
+            // audioTrackUid
+            auto streamFormat =
               trackFormat->getReference<adm::AudioStreamFormat>();
-          if (streamFormat) {
-            auto channelFormatCheck =
+            if(streamFormat) {
+              auto channelFormatCheck =
                 streamFormat->getReference<adm::AudioChannelFormat>();
-            if (channelFormatCheck == channelFormat) {
-              audioTrackUid->setReference(trackFormat);
+              if(channelFormatCheck == channelFormat) {
+                audioTrackUid->setReference(trackFormat);
 
-              // For each channel add the audioTrackUid, trackFormatId and
-              // packFormatId to an audioId and add it to CHNA CHNA will keep
-              // track of which audio is needed on each track
-              auto audioTrackUidIdStr =
+                // For each channel add the audioTrackUid, trackFormatId and
+                // packFormatId to an audioId and add it to CHNA CHNA will keep
+                // track of which audio is needed on each track
+                auto audioTrackUidIdStr =
                   formatId(audioTrackUid->get<adm::AudioTrackUidId>());
-              auto trackFormatIdStr =
+                auto trackFormatIdStr =
                   formatId(trackFormat->get<adm::AudioTrackFormatId>());
 
-              chna.addAudioId(bw64::AudioId{
-                  static_cast<uint16_t>(metadata.routing() + i + 1),
-                  audioTrackUidIdStr, trackFormatIdStr, packFormatIdStr});
-              break;
+                chna.addAudioId(bw64::AudioId{
+                    static_cast<uint16_t>(metadata.routing() + i + 1),
+                    audioTrackUidIdStr, trackFormatIdStr, packFormatIdStr });
+                break;
+              }
             }
           }
         }
+        serializedObjects[connectionId] = hoaAudioObject;
       }
-      serializedObjects[connectionId] = hoaAudioObject;
 
     } else if (metadata.has_ds_metadata()) {
       auto layoutIndex = metadata.ds_metadata().layout();
-      if (layoutIndex >= 0) {
+      if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
         std::vector<std::string> speakerLabels;
         std::vector<adm::AudioTrackFormatId> trackFormatIds;
         auto& speakerSetup = SPEAKER_SETUPS.at(layoutIndex);
