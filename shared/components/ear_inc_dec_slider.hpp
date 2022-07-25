@@ -18,16 +18,23 @@ class EarIncDecSlider : public Component, MouseListener  {
       slider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
       addAndMakeVisible(slider);
 
-      dec_.setButtonText(String::fromUTF8("–"));
       dec_.setButtonText("-");
       dec_.onClick = [this]() {
-          slider.setValue(slider.getValue() - 1);
+          if(wrapAround && slider.getValue() == slider.getRange().getStart()) {
+              slider.setValue(slider.getRange().getEnd());
+          } else {
+              slider.setValue(slider.getValue() - 1);
+          }
       };
       addAndMakeVisible(dec_);
 
       inc_.setButtonText("+");
       inc_.onClick = [this]() {
-          slider.setValue(slider.getValue() + 1);
+          if(wrapAround && slider.getValue() == slider.getRange().getEnd()) {
+              slider.setValue(slider.getRange().getStart());
+          } else {
+              slider.setValue(slider.getValue() + 1);
+          }
       };
       addAndMakeVisible(inc_);
 
@@ -59,6 +66,7 @@ class EarIncDecSlider : public Component, MouseListener  {
   }
 
   EarSlider slider;
+  bool wrapAround{ false };
 
  private:
   SliderLookAndFeel earSliderLookAndFeel_;
