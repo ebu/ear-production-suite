@@ -42,6 +42,7 @@ class ProgrammeStoreAdmSerializer {
       serializedIds;
   std::map<std::string, std::shared_ptr<adm::AudioObject>> serializedObjects;
   void setInteractivity(adm::AudioObject& object, const proto::Object& object1);
+  void setImportance(adm::AudioObject& object, const proto::Object& object1);
   bool isSerializedWithDifferentObjectSettings(const proto::Object& object);
 
   AdmCommonDefinitionHelper admCommonDefinitionHelper;

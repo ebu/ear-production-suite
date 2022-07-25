@@ -31,6 +31,15 @@ void setPositionInteraction(proto::Object* object,
 void setOnOffInteraction(proto::Object* object,
                          const AudioObjectInteraction& admInteraction);
 
+void setImportance(proto::Object* object,
+                      adm::AudioObject const& admObject) {
+  if(admObject.has<adm::Importance>()) {
+    object->set_importance(admObject.get<adm::Importance>().get());
+  } else {
+    object->clear_importance();
+  }
+}
+
 void setInteractivity(proto::Object* object,
                       adm::AudioObject const& admObject) {
   if (admObject.has<adm::Interact>() && admObject.get<adm::Interact>().get()) {
@@ -164,6 +173,7 @@ void ProgrammeStoreAdmPopulator::operator()(
         if(found == programmeElementTrackLookup.end()) {
           auto element = currentProgramme->add_element();
           setInteractivity(element->mutable_object(), *admObject);
+          setImportance(element->mutable_object(), *admObject);
           programmeElementTrackLookup[location] = element;
         }
       }

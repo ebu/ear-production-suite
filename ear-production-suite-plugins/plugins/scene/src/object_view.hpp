@@ -96,6 +96,7 @@ class ObjectView : public ElementView,
     importanceSlider_->slider.setMouseDragSensitivity(10);
     importanceSlider_->slider.setDoubleClickReturnValue(true, 11);
     importanceSlider_->slider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_AutoDirection);
+    importanceSlider_->slider.addListener(this);
     addAndMakeVisible(importanceSlider_.get());
 
     settingsButton_->setButtonText("Settings");
@@ -231,6 +232,20 @@ class ObjectView : public ElementView,
         int cfCount = pfData->relatedChannelFormats.size();
         int order = std::sqrt(cfCount) - 1;
         metadataLabelText = "HOA order " + String(order);
+      }
+    }
+
+    if(!data_.object.has_importance()) {
+      // >10 = not set
+      if(importanceSlider_->slider.getValue() <= 10) {
+        importanceSlider_->slider.setValue(11);
+        changes = true;
+      }
+
+    } else {
+      if(data_.object.importance() != importanceSlider_->slider.getValue()) {
+        importanceSlider_->slider.setValue(data_.object.importance());
+        changes = true;
       }
     }
 
@@ -376,6 +391,17 @@ class ObjectView : public ElementView,
     if (slider == positionInteractionSettings_->distanceMaxSlider.get()) {
       auto value = positionInteractionSettings_->distanceMaxSlider->getValue();
       data_.object.mutable_interactive_position()->set_max_r(value);
+      notifyDataChange();
+    }
+    // importance
+    if (slider == &importanceSlider_->slider) {
+      int value = importanceSlider_->slider.getValue();
+      if(value < 1 || value > 10) {
+        // Out of range == Not set
+        data_.object.clear_importance();
+      } else {
+        data_.object.set_importance(value);
+      }
       notifyDataChange();
     }
   }
