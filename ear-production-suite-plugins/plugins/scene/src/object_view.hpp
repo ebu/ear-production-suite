@@ -75,10 +75,26 @@ class ObjectView : public ElementView,
     importanceLabel_->setJustificationType(Justification::centredLeft);
     addAndMakeVisible(importanceLabel_.get());
 
-    importanceSlider_->slider.setRange(1, 10);
+    importanceSlider_->slider.valueFromTextFunction = [](const juce::String& text) {
+      double val = text.getDoubleValue(); // Returns 0.0 for non-numeric
+      if(val < 1.0 || val > 10.0) {
+        return 11.0;
+      } else {
+        return val;
+      }
+    };
+    importanceSlider_->slider.textFromValueFunction = [](double val) {
+      if(val < 1.0 || val > 10.0) {
+        return juce::String("---");
+      } else {
+        return juce::String(std::to_string(int(val)));
+      }
+    };
+    importanceSlider_->wrapAround = true;
+    importanceSlider_->slider.setRange(1, 11);
     importanceSlider_->slider.setNumDecimalPlacesToDisplay(0);
     importanceSlider_->slider.setMouseDragSensitivity(10);
-    importanceSlider_->slider.setDoubleClickReturnValue(true, 10);
+    importanceSlider_->slider.setDoubleClickReturnValue(true, 11);
     importanceSlider_->slider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_AutoDirection);
     addAndMakeVisible(importanceSlider_.get());
 
