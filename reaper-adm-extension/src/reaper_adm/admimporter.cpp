@@ -177,7 +177,8 @@ void ADMImporter::parse() {
         programmes = std::vector<std::shared_ptr<adm::AudioProgramme const>>(admDoc->getElements<adm::AudioProgramme>().begin(), admDoc->getElements<adm::AudioProgramme>().end());
         contents = getElementsIfNo<adm::AudioProgramme, adm::AudioContent>(admDoc);
         objects = getElementsIfNo<adm::AudioContent, adm::AudioObject>(admDoc);
-        uids = getElementsIfNo<adm::AudioObject, adm::AudioTrackUid>(admDoc);
+        // TODO - We don't do anything with this at the moment. Intention was to import in to session anyway but without an AudioObject plugin.
+        //uids = getElementsIfNo<adm::AudioObject, adm::AudioTrackUid>(admDoc);
         auto tracer = adm::detail::GenericRouteTracer<adm::Route, FullDepthViaUIDStrategy>();
         sourceCreator = std::make_shared<PCMSourceCreator>(std::make_unique<PCMGroupRegistry>(),
                                                            std::make_unique<Bw64PCMReader>(fileName),
@@ -189,6 +190,7 @@ void ADMImporter::parse() {
         applyRoutes(programmes, tracer, *project);
         applyRoutes(contents, tracer, *project);
         applyRoutes(objects, tracer, *project);
+        //applyRoutes(uids, tracer, *project);
     } catch (std::runtime_error const& e) {
         broadcast.error(e);
     }
