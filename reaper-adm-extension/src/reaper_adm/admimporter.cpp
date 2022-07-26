@@ -108,9 +108,9 @@ namespace {
 
       auto it = std::copy_if(possibleElements.begin(), possibleElements.end(), orphanedElements.begin(),
                   [&possibleParents](auto e) {
-                      for(auto p : possibleParents) {
+                      for(auto const& p : possibleParents) {
                           auto children = p->template getReferences<NewT>();
-                          for(auto c : children) {
+                          for(auto const& c : children) {
                               if(c == e) return false;
                           }
                       }
