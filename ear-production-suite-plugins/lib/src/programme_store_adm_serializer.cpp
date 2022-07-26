@@ -476,8 +476,11 @@ void ear::plugin::ProgrammeStoreAdmSerializer::setImportance(adm::AudioObject & 
   if(object.has_importance()) {
     admObject.set(adm::Importance(object.importance()));
   } else {
-    // TODO - temporarily always write an importance value to meet bare-bones profile
+#ifdef BAREBONESPROFILE
     admObject.set(adm::Importance(10));
+#else
+    admObject.unset<adm::Importance>();
+#endif
   }
 }
 

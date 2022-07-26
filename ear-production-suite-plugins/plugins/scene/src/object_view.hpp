@@ -90,11 +90,16 @@ class ObjectView : public ElementView,
         return juce::String(std::to_string(int(val)));
       }
     };
+#ifdef BAREBONESPROFILE
+    importanceSlider_->slider.setRange(1, 10);
+    importanceSlider_->slider.setDoubleClickReturnValue(true, 10);
+#else
     importanceSlider_->wrapAround = true;
     importanceSlider_->slider.setRange(1, 11);
+    importanceSlider_->slider.setDoubleClickReturnValue(true, 11);
+#endif
     importanceSlider_->slider.setNumDecimalPlacesToDisplay(0);
     importanceSlider_->slider.setMouseDragSensitivity(10);
-    importanceSlider_->slider.setDoubleClickReturnValue(true, 11);
     importanceSlider_->slider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_AutoDirection);
     importanceSlider_->slider.addListener(this);
     addAndMakeVisible(importanceSlider_.get());
