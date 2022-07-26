@@ -143,6 +143,7 @@ void ProjectTree::resetRoot()
 void ProjectTree::operator()(std::shared_ptr<const adm::AudioProgramme> programme)
 {
     state.currentProgramme = programme;
+    //Grouping
     if (!moveToChildWithElement(programme)) {
         if (shouldCreateGroup(*programme)) {
             moveToNewGroupNode(programme);
@@ -153,6 +154,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioProgramme> programm
 void ProjectTree::operator()(std::shared_ptr<const adm::AudioContent> content)
 {
     state.currentContent = content;
+    //Grouping
     if (!moveToChildWithElement(content)) {
         if (shouldCreateGroup(*content)) {
             moveToNewGroupNode(content);
@@ -163,14 +165,33 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioContent> content)
 void ProjectTree::operator()(std::shared_ptr<const adm::AudioObject> object)
 {
     state.currentObject = object;
+    //Grouping
     if (!moveToTrackNodeWithElement(object)) {
         if (shouldCreateGroup(*object)) {
             moveToNewGroupNode(object);
         }
     }
-    if (object->getReferences<adm::AudioPackFormat>().size() == 1) {
-        (*this)(object->getReferences<adm::AudioPackFormat>().front());
+
+    // Visit Root PackFormat
+    auto pfs = object->getReferences<adm::AudioPackFormat>();
+    if (pfs.size() == 1) {
+        (*this)(pfs.front());
     }
+
+    // Visit TrackUIDs
+    auto uids = object->getReferences<adm::AudioTrackUid>();
+    for(auto uid : uids) {
+        (*this)(uid);
+        // Visit ChannelFormats
+        if(auto tf = uid->getReference<adm::AudioTrackFormat>()) {
+            if(auto sf = tf->getReference<adm::AudioStreamFormat>()) {
+                if(auto cf = sf->getReference<adm::AudioChannelFormat>()) {
+                    (*this)(cf);
+                }
+            }
+        }
+    }
+
 }
 
 void ProjectTree::operator()(std::shared_ptr<const adm::AudioTrackUid> trackUid)

@@ -48,6 +48,7 @@ namespace {
           return true;
       }
 
+      /*
       bool shouldRecurse(std::shared_ptr<const adm::AudioObject> a,
                          std::shared_ptr<const adm::AudioTrackUid> b) {
         return true;
@@ -64,7 +65,11 @@ namespace {
                          std::shared_ptr<const adm::AudioChannelFormat> b) {
           return true;
       }
-
+      */
+      bool shouldRecurse(std::shared_ptr<const adm::AudioObject> a,
+                         std::shared_ptr<const adm::AudioPackFormat> b) {
+          return true;
+      }
 
 
       template <typename Element>
@@ -81,22 +86,27 @@ namespace {
       bool shouldAdd(std::shared_ptr<adm::AudioObject const>) {
           return true;
       }
+      /*
       bool shouldAdd(std::shared_ptr<adm::AudioTrackUid const>) {
           return true;
       }
       bool shouldAdd(std::shared_ptr<adm::AudioChannelFormat const>) {
           return true;
       }
-
+      */
 
 
       template <typename Element>
       bool isEndOfRoute(std::shared_ptr<Element> e) {
         return false;
       }
-
+      /*
       bool isEndOfRoute(std::shared_ptr<const adm::AudioChannelFormat>) {
         return true;
+      }
+      */
+      bool isEndOfRoute(std::shared_ptr<const adm::AudioPackFormat>) {
+          return true;
       }
 
     };
