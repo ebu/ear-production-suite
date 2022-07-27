@@ -431,39 +431,30 @@ TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nest
 }
 
 TEST_CASE("Import of audioobject referencing multiple pack formats of object type", "[objects][FB360][invalid]") {
-    // This is valid ADM but not compliant with EBU 3392 cue to multiple packs from an object.
-    // We expect the software to ignore this invalid audioObject
+    // This is valid ADM but not compliant with EBU 3392 due to multiple packs referenced from an object.
+
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
     setApiDefaults(api, fake);
-    setObjectImportExpectations(api, fake, 0, 0);
+    setObjectImportExpectations(api, fake, 0, 2);
 
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(2);
     }
 
-    SECTION("Adds no automation envelopes for object azimuth, elevation distance and volume") {
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, GetTrackEnvelopeByName(fake.trackFor.objects, StrEq("Volume"))).Times(0);
-    }
-
-    SECTION("Adds no automation points to the envelopes") {
-        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.azimuth, _, _, _, _, _, _)).Times(0);
-        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.elevation, _, _, _, _, _, _)).Times(0);
-        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.distance, _, _, _, _, _, _)).Times(0);
-        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.volume, _, _, _, _, _, _)).Times(0);
-    }
-
-    SECTION("Sets no parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(0);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(0);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(0);
+    SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(0);
+        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
     }
 
     doImport<Facebook360PluginSuite>("data/nesting2-1ao_with_2pf_each_with_1cf.wav", api);
@@ -499,6 +490,8 @@ TEST_CASE("Import of nested audioobjects referencing object type packs", "[objec
 }
 
 TEST_CASE("On import of two audioobjects of object type, one which references the other, ADMImporter") {
+    // This is valid ADM but not compliant with EBU 3392 due to both pack and object referenced from an object.
+
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
