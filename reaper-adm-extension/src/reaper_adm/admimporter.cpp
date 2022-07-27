@@ -21,6 +21,7 @@
 #include "progress/importlistener.h"
 #include <WDL/swell/swell.h>
 #include <exception>
+#include <helper/container_helpers.hpp>
 
 using namespace admplug;
 
@@ -176,7 +177,14 @@ void ADMImporter::parse() {
         auto admDoc = metadata->adm();
         programmes = std::vector<std::shared_ptr<adm::AudioProgramme const>>(admDoc->getElements<adm::AudioProgramme>().begin(), admDoc->getElements<adm::AudioProgramme>().end());
         contents = getElementsIfNo<adm::AudioProgramme, adm::AudioContent>(admDoc);
-        objects = getElementsIfNo<adm::AudioContent, adm::AudioObject>(admDoc);
+        auto objectsWithNoParentContent = getElementsIfNo<adm::AudioContent, adm::AudioObject>(admDoc);
+        auto objectsWithNoParentObject = getElementsIfNo<adm::AudioObject, adm::AudioObject>(admDoc);
+        objects.clear();
+        for(auto object : objectsWithNoParentContent) {
+            if(contains(objectsWithNoParentObject, object)) {
+                objects.push_back(object);
+            }
+        }
         // TODO - We don't do anything with this at the moment. Intention was to import in to session anyway but without an AudioObject plugin.
         //uids = getElementsIfNo<adm::AudioObject, adm::AudioTrackUid>(admDoc);
         auto tracer = adm::detail::GenericRouteTracer<adm::Route, FullDepthViaUIDStrategy>();
