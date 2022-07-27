@@ -159,6 +159,7 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
             }
             SECTION("With multiple tuid & one pack references") {
                 auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf"), adm::TypeDefinition::OBJECTS);
@@ -190,6 +191,7 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
             }
         }
     }
@@ -347,6 +349,7 @@ TEST_CASE("Project tree", "") {
                 expectNodes(0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentUid == atuid);
@@ -371,6 +374,7 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentPack == apf);
@@ -399,6 +403,7 @@ TEST_CASE("Project tree", "") {
                 expectNodes(0, 0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentUid == atuid);
@@ -423,6 +428,7 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
+                tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentPack == apf);
@@ -470,6 +476,7 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao_child1);
+            tree(apf_child1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child1);
                 REQUIRE(tree.getState().currentUid == atuid_child1);
@@ -479,6 +486,7 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao_child2);
+            tree(apf_child2); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child2);
                 REQUIRE(tree.getState().currentUid == atuid_child2);
@@ -519,6 +527,7 @@ TEST_CASE("Project tree", "") {
             tree(ac);
             tree(ao_parent1);
             tree(ao);
+            tree(apf); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
@@ -531,6 +540,7 @@ TEST_CASE("Project tree", "") {
             tree(ac);
             tree(ao_parent2);
             tree(ao);
+            tree(apf); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
@@ -575,6 +585,7 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao);
+            tree(apf_1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
                 REQUIRE(tree.getState().rootPack == apf_1);
@@ -615,7 +626,7 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao);
-
+            tree(apf_1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
                 REQUIRE(tree.getState().rootPack == apf_1);
