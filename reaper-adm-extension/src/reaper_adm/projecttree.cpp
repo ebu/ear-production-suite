@@ -8,6 +8,7 @@
 #include "nodefactory.h"
 #include "admchannel.h"
 #include "importaction.h"
+#include <helper/container_helpers.hpp>
 
 using namespace admplug;
 
@@ -107,6 +108,14 @@ bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementCo
     return std::dynamic_pointer_cast<TrackElement>(node.getProjectElement()) && node.getProjectElement()->hasAdmElements(elements);
 }
 
+bool isDescendantOf(std::shared_ptr<const adm::AudioChannelFormat> cf, std::shared_ptr<const adm::AudioPackFormat> pf) {
+    if(contains(pf->getReferences<adm::AudioChannelFormat>(), cf)) return true;
+    for(auto childPf : pf->getReferences<adm::AudioPackFormat>()) {
+        if(isDescendantOf(cf, childPf)) return true;
+    }
+    return false;
+}
+
 }
 
 
@@ -186,11 +195,14 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
     for(auto uid : uids) {
         state = cachedState;
         (*this)(uid);
-        // Visit ChannelFormats
+        // Visit associated ChannelFormat
         if(auto tf = uid->getReference<adm::AudioTrackFormat>()) {
             if(auto sf = tf->getReference<adm::AudioStreamFormat>()) {
                 if(auto cf = sf->getReference<adm::AudioChannelFormat>()) {
-                    (*this)(cf);
+                    // Ensure there's actually a relationship between the cf and pf
+                    if(isDescendantOf(cf, packFormat)) {
+                        (*this)(cf);
+                    }
                 }
             }
         }
