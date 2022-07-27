@@ -86,6 +86,11 @@ namespace {
       bool shouldAdd(std::shared_ptr<adm::AudioObject const>) {
           return true;
       }
+      bool shouldAdd(std::shared_ptr<adm::AudioPackFormat const>) {
+          // Using PackFormat as an indicator that we have reach the end of this "Content Part" route
+          // (we can not rely on hitting an object, since the object may have child objects so not actually end of route)
+          return true;
+      }
       /*
       bool shouldAdd(std::shared_ptr<adm::AudioTrackUid const>) {
           return true;
