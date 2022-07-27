@@ -155,7 +155,7 @@ TEST_CASE("Project tree", "") {
                 atuid->setReference(atf);
                 atuid->setReference(apf);
 
-                expectNodes(0, 0, 0, 0);
+                expectNodes(0, 1, 1, 1);
 
                 tree.resetRoot();
                 tree(ao);
@@ -186,14 +186,13 @@ TEST_CASE("Project tree", "") {
                 atuid_2->setReference(atf_2);
                 atuid_2->setReference(apf);
 
-                expectNodes(0, 0, 0, 0);
+                expectNodes(1, 2, 2, 2);
 
                 tree.resetRoot();
                 tree(ao);
             }
         }
     }
-    
     SECTION("Given a project tree with programme visited") {
         ProjectTree tree(std::move(fakeCreator),
                          std::make_unique<ProjectNode>(rootElement),
@@ -305,7 +304,7 @@ TEST_CASE("Project tree", "") {
             }
         }
     }
-    
+
     SECTION("Given a project tree where a child of the current node has an element") {
         auto trackElement = std::make_unique<NiceMock<MockTrackElement>>();
         auto trackPtr = trackElement.get();
@@ -348,8 +347,6 @@ TEST_CASE("Project tree", "") {
                 expectNodes(0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
-                tree(atuid);
-                tree(acf);
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentUid == atuid);
@@ -374,22 +371,8 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
-                tree(atuid);
-                tree(acf);
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == atuid);
-                    REQUIRE(tree.getState().currentPack == apf);
-                    REQUIRE(tree.getState().rootPack == apf);
-                }
-
-                tree.resetRoot();
-                tree(ao);
-                tree(secondTuid);
-                tree(secondCF);
-                SECTION("the the trees state is correctly updated") {
-                    REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == secondTuid);
                     REQUIRE(tree.getState().currentPack == apf);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
@@ -416,8 +399,6 @@ TEST_CASE("Project tree", "") {
                 expectNodes(0, 0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
-                tree(atuid);
-                tree(acf);
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
                     REQUIRE(tree.getState().currentUid == atuid);
@@ -442,22 +423,8 @@ TEST_CASE("Project tree", "") {
 
                 tree.resetRoot();
                 tree(ao);
-                tree(atuid);
-                tree(acf);
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == atuid);
-                    REQUIRE(tree.getState().currentPack == apf);
-                    REQUIRE(tree.getState().rootPack == apf);
-                }
-
-                tree.resetRoot();
-                tree(ao);
-                tree(secondTuid);
-                tree(secondCF);
-                SECTION("the the trees state is correctly updated") {
-                    REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == secondTuid);
                     REQUIRE(tree.getState().currentPack == apf);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
@@ -503,8 +470,6 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao_child1);
-            tree(atuid_child1);
-            tree(acf_child1);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child1);
                 REQUIRE(tree.getState().currentUid == atuid_child1);
@@ -514,8 +479,6 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao_child2);
-            tree(atuid_child2);
-            tree(acf_child2);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child2);
                 REQUIRE(tree.getState().currentUid == atuid_child2);
@@ -556,8 +519,6 @@ TEST_CASE("Project tree", "") {
             tree(ac);
             tree(ao_parent1);
             tree(ao);
-            tree(atuid);
-            tree(acf);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
@@ -570,8 +531,6 @@ TEST_CASE("Project tree", "") {
             tree(ac);
             tree(ao_parent2);
             tree(ao);
-            tree(atuid);
-            tree(acf);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
@@ -613,34 +572,16 @@ TEST_CASE("Project tree", "") {
             atuid_2->setReference(apf_2);
 
             expectNodes(1, 2, 2, 2);
-            
-            tree.resetRoot();
-            tree(ao);
-            tree(atuid_1);
-            tree(acf_1);
-            SECTION("the the trees state is correctly updated") {
-                REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid_1);
-                REQUIRE(tree.getState().currentPack == apf_1);
-                REQUIRE(tree.getState().rootPack == apf_1);
-            }
 
             tree.resetRoot();
             tree(ao);
-            tree(atuid_2);
-            tree(acf_2);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid_2);
-                REQUIRE(tree.getState().currentPack == apf_2);
                 REQUIRE(tree.getState().rootPack == apf_1);
             }
         }
 
         SECTION("When an audioObject references a nested pack structure NOT of type 'objects'") {
-
-
-
             auto ao = adm::AudioObject::create(adm::AudioObjectName("ao"));
             auto apf_1 = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf_1"), adm::TypeDefinition::DIRECT_SPEAKERS);
             auto apf_2 = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf_2"), adm::TypeDefinition::DIRECT_SPEAKERS);
@@ -674,27 +615,12 @@ TEST_CASE("Project tree", "") {
 
             tree.resetRoot();
             tree(ao);
-            tree(atuid_1);
-            tree(acf_1);
-            SECTION("the the trees state is correctly updated") {
-                REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid_1);
-                REQUIRE(tree.getState().currentPack == apf_1);
-                REQUIRE(tree.getState().rootPack == apf_1);
-            }
 
-            tree.resetRoot();
-            tree(ao);
-            tree(atuid_2);
-            tree(acf_2);
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid_2);
-                REQUIRE(tree.getState().currentPack == apf_2);
                 REQUIRE(tree.getState().rootPack == apf_1);
             }
         }
-
     }
 
     SECTION("Given a project tree state with an object-type parent object and trackuid") {
@@ -737,7 +663,7 @@ TEST_CASE("Project tree", "") {
         state.currentNode = std::make_shared<ProjectNode>(std::move(takeElement));
         state.packRepresentation = PackRepresentation::SingleMultichannelTrack;
         tree.setState(state);
-        
+
         // non-object type automation not yet implemented
 //        SECTION("it adds an automation node") {
 //            EXPECT_CALL(fakeCreatorRef, createAutomationNode(_, _)).Times(1);
