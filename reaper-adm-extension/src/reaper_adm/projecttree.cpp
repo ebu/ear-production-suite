@@ -179,8 +179,10 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioObject> object)
     }
 
     // Visit TrackUIDs
+    auto cachedState = state;
     auto uids = object->getReferences<adm::AudioTrackUid>();
     for(auto uid : uids) {
+        state = cachedState;
         (*this)(uid);
         // Visit ChannelFormats
         if(auto tf = uid->getReference<adm::AudioTrackFormat>()) {
