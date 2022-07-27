@@ -171,16 +171,18 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioObject> object)
             moveToNewGroupNode(object);
         }
     }
+}
 
-    // Visit Root PackFormat
-    auto pfs = object->getReferences<adm::AudioPackFormat>();
-    if (pfs.size() == 1) {
-        (*this)(pfs.front());
-    }
+void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFormat)
+{
+    // PackFormat is end of route - collate whatever data we need from here.
+
+    state.rootPack = packFormat;
+    state.packRepresentation = getPackRepresentation(*state.rootPack);
 
     // Visit TrackUIDs
     auto cachedState = state;
-    auto uids = object->getReferences<adm::AudioTrackUid>();
+    auto uids = state.currentObject->getReferences<adm::AudioTrackUid>();
     for(auto uid : uids) {
         state = cachedState;
         (*this)(uid);
@@ -193,7 +195,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioObject> object)
             }
         }
     }
-
 }
 
 void ProjectTree::operator()(std::shared_ptr<const adm::AudioTrackUid> trackUid)
@@ -244,13 +245,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioChannelFormat> chan
         }
     }
 }
-
-void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFormat)
-{
-    state.rootPack = packFormat;
-    state.packRepresentation = getPackRepresentation(*state.rootPack);
-}
-
 
 TreeState ProjectTree::getState()
 {
