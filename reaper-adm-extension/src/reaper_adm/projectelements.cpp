@@ -30,6 +30,19 @@ bool admplug::ProjectElement::hasAdmElements(std::vector<adm::ElementConstVarian
     return true;
 }
 
+bool admplug::ProjectElement::followsAdmElementSequence(std::vector<adm::ElementConstVariant> elements) const
+{
+    auto currentElements = getAdmElements();
+    if(currentElements.size() > elements.size()) return false;
+    ElementComparator elementComparator;
+    for(int i = 0; i < currentElements.size(); i++) {
+        if (!boost::apply_visitor(elementComparator, elements[i], currentElements[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool admplug::ProjectElement::addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement)
 {
     // Elements without an override can't add additional parents - false return by default
