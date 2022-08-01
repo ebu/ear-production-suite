@@ -31,8 +31,8 @@ struct TreeState {
     std::shared_ptr<adm::AudioContent const> currentContent;
     std::shared_ptr<adm::AudioObject const> currentObject;
     std::shared_ptr<adm::AudioPackFormat const> rootPack;
-    std::shared_ptr<adm::AudioPackFormat const> currentPack;
-    std::shared_ptr<adm::AudioTrackUid const> currentUid;
+    std::vector<std::shared_ptr<adm::AudioTrackUid const>> audioTrackUids;
+    std::vector<std::shared_ptr<adm::AudioChannelFormat const>> audioChannelFormats;
 
     PackRepresentation packRepresentation; // TODO - does this really belong here??
 };
@@ -46,8 +46,6 @@ public:
     void operator()(std::shared_ptr<adm::AudioProgramme const> programme);
     void operator()(std::shared_ptr<adm::AudioContent const> content);
     void operator()(std::shared_ptr<adm::AudioObject const> object);
-    void operator()(std::shared_ptr<adm::AudioTrackUid const> trackUid);
-    void operator()(std::shared_ptr<adm::AudioChannelFormat const> channelFormat);
     void operator()(std::shared_ptr<adm::AudioPackFormat const> packFormat);
     template <typename T>
     void operator()(std::shared_ptr<T const>) {}
@@ -58,24 +56,28 @@ public:
                 ReaperAPI const& api);
 private:
     void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object, std::shared_ptr<const adm::AudioTrackUid> trackUid);
+    void moveToNewTrackNode(adm::TypeDescriptor td, std::vector<adm::ElementConstVariant> elements);
     void moveToNewObjectTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewDirectTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewHoaTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewGroupNode(adm::ElementConstVariant element);
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
-    void moveToNewAutomationNode(ADMChannel channel);
+    //void moveToNewAutomationNode(ADMChannel channel);
+    void addAutomationNodes();
     bool moveToChildWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements);
+    bool moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<adm::ElementConstVariant> elements);
     void moveToNewChild(std::shared_ptr<ProjectNode> child);
     std::shared_ptr<ProjectNode> getChildWithElement(adm::ElementConstVariant element);
     std::shared_ptr<ProjectNode> getTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
+    std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
 
     std::unique_ptr<NodeFactory> nodeFactory;
     std::shared_ptr<ProjectNode> rootNode;
     std::shared_ptr<ImportListener> broadcast;
     TreeState state;
-    void moveToNewTrackAndTakeNode(ADMChannel channel, std::vector<adm::ElementConstVariant> relatedAdmElements);
+    //void moveToNewTrackAndTakeNode(ADMChannel channel, std::vector<adm::ElementConstVariant> relatedAdmElements);
 };
 
 }
