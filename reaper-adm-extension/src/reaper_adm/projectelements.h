@@ -27,6 +27,7 @@ public:
     virtual void createProjectElements(PluginSuite& pluginSuite, ReaperAPI const& api) = 0;
     virtual bool hasAdmElement(adm::ElementConstVariant element) const;
     virtual bool hasAdmElements(std::vector<adm::ElementConstVariant> elements) const;
+    virtual bool followsAdmElementSequence(std::vector<adm::ElementConstVariant> elements) const;
     virtual bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement);
 
 private:
