@@ -20,6 +20,8 @@ public:
     std::vector<std::shared_ptr<ProjectNode>> children() const;
     std::shared_ptr<ProjectElement> getProjectElement() const;
     std::shared_ptr<ProjectNode> getChildWithElement(adm::ElementConstVariant element) const;
+    template <typename T>
+    void createProjectElementsByType(PluginSuite &pluginSuite, const ReaperAPI &api, admplug::ImportListener &broadcast);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api, admplug::ImportListener &broadcast);
 private:
     std::shared_ptr<ProjectElement> projectElement;
