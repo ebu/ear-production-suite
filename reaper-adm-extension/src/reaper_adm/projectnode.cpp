@@ -41,16 +41,32 @@ std::shared_ptr<ProjectNode> ProjectNode::getChildWithElement(adm::ElementConstV
     return nullptr;
 }
 
-void ProjectNode::createProjectElements(PluginSuite &pluginSuite,
+void ProjectNode::createProjectElements(PluginSuite & pluginSuite,
+                                        const ReaperAPI & api,
+                                        ImportListener & broadcast)
+{
+    // Breadth-first-like approach to ensure all tracks are ready before doing the take and automation
+    createProjectElementsByType<TrackElement>(pluginSuite, api, broadcast);
+    createProjectElementsByType<TakeElement>(pluginSuite, api, broadcast);
+    createProjectElementsByType<AutomationElement>(pluginSuite, api, broadcast);
+}
+
+template <typename T>
+void ProjectNode::createProjectElementsByType(PluginSuite &pluginSuite,
                                         const ReaperAPI &api,
                                         ImportListener& broadcast)
 {
-    if (createProjectElementsCalled) return;
-    createProjectElementsCalled = true;
 
-    projectElement->createProjectElements(pluginSuite, api);
-    broadcast.elementCreated();
-    for(auto const& child : childNodes) child->createProjectElements(pluginSuite, api, broadcast);
+    auto castProjectElement = std::dynamic_pointer_cast<T>(projectElement);
+    if(castProjectElement) {
+        if (createProjectElementsCalled) return;
+        createProjectElementsCalled = true;
+        projectElement->createProjectElements(pluginSuite, api);
+        broadcast.elementCreated();
+    }
+    for(auto const& child : childNodes) {
+        child->createProjectElementsByType<T>(pluginSuite, api, broadcast);
+    }
 }
 
 
