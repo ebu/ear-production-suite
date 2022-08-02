@@ -59,10 +59,12 @@ std::optional<AutomationPoint> getPoint(Parameter const& param, adm::AudioBlockF
 }
 
 ObjectAutomationElement::ObjectAutomationElement(ADMChannel admChannel,
-                                                std::shared_ptr<TakeElement> parentTake) :
+                                                std::shared_ptr<TrackElement> track,
+                                                std::shared_ptr<TakeElement> take) :
     admChannel{std::move(admChannel)}
 {
-    parent = parentTake;
+    parentTake_ = take;
+    parentTrack_ = track;
 }
 
 void ObjectAutomationElement::createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api)
@@ -78,12 +80,12 @@ adm::BlockFormatsConstRange<adm::AudioBlockFormatObjects> ObjectAutomationElemen
 
 double ObjectAutomationElement::startTime() const
 {
-    return parent->startTime();
+    return parentTake_->startTime();
 }
 
 std::shared_ptr<Track> ObjectAutomationElement::getTrack() const
 {
-    return parent->parentTrack()->getTrack();
+    return parentTrack_->getTrack();
 }
 
 ADMChannel ObjectAutomationElement::channel() const

@@ -45,9 +45,9 @@ public:
  * On creation, the take will have length and position derived from the supplied object
  */
   virtual std::shared_ptr<ProjectNode> createTakeNode(std::shared_ptr<const adm::AudioObject> object,
-                                                    std::shared_ptr<TrackElement> parentTrack,
-                                                    std::shared_ptr<adm::AudioTrackUid const> trackUid) = 0;
+                                                    std::shared_ptr<TrackElement> parentTrack) = 0;
   virtual std::shared_ptr<ProjectNode> createAutomationNode(ADMChannel channel,
+                                                    std::shared_ptr<TrackElement> parentTrack,
                                                     std::shared_ptr<TakeElement> parentTake) = 0;
 };
 
@@ -61,9 +61,9 @@ public:
     std::shared_ptr<ProjectNode> createHoaTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
     std::shared_ptr<ProjectNode> createGroupNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
     std::shared_ptr<ProjectNode> createTakeNode(std::shared_ptr<const adm::AudioObject> parentObject,
-                                                std::shared_ptr<TrackElement> parentTrack,
-                                                std::shared_ptr<adm::AudioTrackUid const> trackUid) override;
+                                                std::shared_ptr<TrackElement> parentTrack) override;
     std::shared_ptr<ProjectNode> createAutomationNode(ADMChannel channel,
+                                                      std::shared_ptr<TrackElement> parentTrack,
                                                       std::shared_ptr<TakeElement> parentTake) override;
     std::unique_ptr<RootElement> createRootElement(MediaItem *fromMediaItem);
 private:

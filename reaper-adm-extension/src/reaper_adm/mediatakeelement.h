@@ -21,22 +21,22 @@ public:
     void setChannels(std::vector<ADMChannel> channels) override;
     double startTime() const override;
 private:
+    bool hasMediaItem(ReaperAPI const& api, TrackElement& track);
+
     std::shared_ptr<adm::AudioObject const> object;
     std::array<char, 4096> takeNameBuffer;
     std::vector<ADMChannel> admChannels;
     MediaItem* referenceItem;
-    MediaItem* mediaItem{nullptr};
-    MediaItem_Take* mediaItemTake{nullptr};
     PCM_source* pcmSource{nullptr};
     double position{0.0};
-    void createMediaItem(const ReaperAPI &api);
-    void nameTakeFromElementName(admplug::ReaperAPI const & api);
-    void setMediaItemPosition(const ReaperAPI &api);
+    MediaItem* createMediaItem(const ReaperAPI &api, TrackElement& track);
+    void nameTakeFromElementName(admplug::ReaperAPI const & api, MediaItem_Take* take);
+    void setMediaItemPosition(const ReaperAPI &api, MediaItem* item);
     double getOriginalMediaItemStartOffset(const ReaperAPI &api) const;
-    void setMediaItemDuration(const ReaperAPI &api);
-    void setMediaItemLengthFromDurationProperty(const ReaperAPI &api);
-    void setMediaItemLengthFromSourceLength(const ReaperAPI &api);
-    void createTake(const ReaperAPI &api);
+    void setMediaItemDuration(const ReaperAPI &api, MediaItem* item);
+    void setMediaItemLengthFromDurationProperty(const ReaperAPI &api, MediaItem* item);
+    void setMediaItemLengthFromSourceLength(const ReaperAPI &api, MediaItem* item);
+    MediaItem_Take* createTake(const ReaperAPI &api, MediaItem* item);
     std::vector<adm::ElementConstVariant> getAdmElements() const override;
 };
 

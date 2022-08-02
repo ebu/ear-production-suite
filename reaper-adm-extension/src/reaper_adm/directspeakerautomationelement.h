@@ -9,7 +9,7 @@ class Parameter;
 class DirectSpeakersAutomationElement : public DirectSpeakersAutomation
 {
 public:
-    DirectSpeakersAutomationElement(ADMChannel admChannel, std::shared_ptr<TakeElement> parentTake = nullptr);
+    DirectSpeakersAutomationElement(ADMChannel admChannel, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<TakeElement> parentTake = nullptr);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api) override;
     adm::BlockFormatsConstRange<adm::AudioBlockFormatDirectSpeakers> blocks() const override;
     double startTime() const override;

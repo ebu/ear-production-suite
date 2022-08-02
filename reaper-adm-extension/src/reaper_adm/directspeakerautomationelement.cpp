@@ -34,10 +34,11 @@ std::optional<AutomationPoint> getPoint(Parameter const& param, adm::AudioBlockF
 }
 }
 
-DirectSpeakersAutomationElement::DirectSpeakersAutomationElement(ADMChannel channel, std::shared_ptr<TakeElement> parentTake) :
-    admChannel{std::move(channel)}
+DirectSpeakersAutomationElement::DirectSpeakersAutomationElement(ADMChannel channel, std::shared_ptr<TrackElement> track, std::shared_ptr<TakeElement> take) :
+    admChannel{ std::move(channel) }
 {
-    parent = parentTake;
+    parentTake_ = take;
+    parentTrack_ = track;
 }
 
 void DirectSpeakersAutomationElement::createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api)
@@ -53,17 +54,17 @@ adm::BlockFormatsConstRange<adm::AudioBlockFormatDirectSpeakers> DirectSpeakersA
 
 double DirectSpeakersAutomationElement::startTime() const
 {
-    return parent->startTime();
+    return parentTake_->startTime();
 }
 
 std::shared_ptr<Track> DirectSpeakersAutomationElement::getTrack() const
 {
-    return parent->parentTrack()->getTrack();
+    return parentTrack_->getTrack();
 }
 
 std::vector<ADMChannel> DirectSpeakersAutomationElement::takeChannels() const
 {
-    return parentTake()->channels();
+    return parentTake_->channels();
 }
 
 int DirectSpeakersAutomationElement::channelIndex() const

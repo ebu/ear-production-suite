@@ -13,7 +13,7 @@ class Track;
 
 class ObjectAutomationElement : public ObjectAutomation {
 public:
-    ObjectAutomationElement(ADMChannel channel, std::shared_ptr<TakeElement> parentTake = nullptr);
+    ObjectAutomationElement(ADMChannel channel, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<TakeElement> parentTake = nullptr);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api) override;
     adm::BlockFormatsConstRange<adm::AudioBlockFormatObjects> blocks() const override;
     double startTime() const override;

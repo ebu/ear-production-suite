@@ -10,7 +10,7 @@ class Parameter;
 
 class HoaAutomationElement : public HoaAutomation {
 public:
-    HoaAutomationElement(ADMChannel admChannel, std::shared_ptr<TakeElement> parentTake = nullptr);
+    HoaAutomationElement(ADMChannel admChannel, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<TakeElement> parentTake = nullptr);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api) override;
     adm::BlockFormatsConstRange<adm::AudioBlockFormatHoa> blocks() const override;
     double startTime() const override;
@@ -27,7 +27,7 @@ private:
     std::shared_ptr<TakeElement> parent;
     std::vector<AutomationPoint> pointsFor(const Parameter &parameter) const;
     ADMChannel admChannel;
-    int getBlockOrder() const;
+    //int getBlockOrder() const;
 };
 
 }

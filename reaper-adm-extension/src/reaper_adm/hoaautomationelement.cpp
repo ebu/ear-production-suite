@@ -14,10 +14,11 @@ std::optional<AutomationPoint> getPoint(Parameter const& param, adm::AudioBlockF
 }
 }
 
-HoaAutomationElement::HoaAutomationElement(ADMChannel channel, std::shared_ptr<TakeElement> parentTake) : admChannel{std::move(channel)}
+HoaAutomationElement::HoaAutomationElement(ADMChannel channel, std::shared_ptr<TrackElement> track, std::shared_ptr<TakeElement> take) : admChannel{std::move(channel)}
 
 {
-    parent = parentTake;
+    parentTake_ = take;
+    parentTrack_ = track;
 }
 
 void HoaAutomationElement::createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api){
@@ -25,11 +26,11 @@ void HoaAutomationElement::createProjectElements(PluginSuite &pluginSuite, const
 }
 
 double HoaAutomationElement::startTime() const {
-    return parent->startTime();
+    return parentTake_->startTime();
 }
 
 std::shared_ptr<Track> HoaAutomationElement::getTrack() const {
-    return parent->parentTrack()->getTrack();
+    return parentTrack_->getTrack();
 }
 
 ADMChannel HoaAutomationElement::channel() const {

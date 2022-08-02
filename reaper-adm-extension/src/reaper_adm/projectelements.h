@@ -68,14 +68,14 @@ public:
     virtual ~TakeElement() = default;
     virtual void setSource(PCM_source*) = 0;
     virtual double startTime() const = 0;
-    std::shared_ptr<TrackElement const> parentTrack() const { return parent; }
+   // std::shared_ptr<TrackElement const> parentTrack() const { return parent; }
     virtual void addChannel(ADMChannel channel) = 0;
     virtual bool hasChannel(ADMChannel channel) = 0;
     virtual std::vector<ADMChannel> channels() const = 0;
     virtual void setChannels(std::vector<ADMChannel> channels) = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
 protected:
-    std::shared_ptr<TrackElement> parent;
+    std::vector<std::shared_ptr<TrackElement>> parents;
 };
 
 class AutomationElement : public ProjectElement {
@@ -83,12 +83,14 @@ public:
     virtual ~AutomationElement() = default;
     virtual double startTime() const = 0;
     virtual std::shared_ptr<Track> getTrack() const = 0;
-    virtual std::shared_ptr<TakeElement const> parentTake() const { return parent; }
+    virtual std::shared_ptr<TakeElement const> parentTake() const { return parentTake_; }
+    virtual std::shared_ptr<TrackElement const> parentTrack() const { return parentTrack_; }
     virtual ADMChannel channel() const = 0;
     virtual void apply(PluginParameter const& parameter, Plugin const& plugin) const = 0;
     virtual void apply(TrackParameter const& parameter, Track const& track) const = 0;
 protected:
-    std::shared_ptr<TakeElement> parent;
+    std::shared_ptr<TakeElement> parentTake_;
+    std::shared_ptr<TrackElement> parentTrack_;
 };
 
 class ObjectAutomation : public AutomationElement {
