@@ -31,11 +31,11 @@ TEST_CASE("MediaTakeElement") {
 
     NiceMock<MockPluginSuite> fakePluginSuite{};
     auto mediaTakeElement = std::make_shared<MediaTakeElement>(audioObjectWithDuration, mediaTrackElement);
-
+    /*
     SECTION("parentTrack() returns TrackElement used during construction") {
         REQUIRE(mediaTakeElement->parentTrack().get() == mediaTrackElement.get());
     }
-
+    */
     SECTION("on createProjectElements()") {
         NiceMock<MockReaperAPI> api;
         int fakeItemVal{ 2 };

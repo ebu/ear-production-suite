@@ -55,7 +55,8 @@ public:
     void create(PluginSuite &pluginSet,
                 ReaperAPI const& api);
 private:
-    void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object, std::shared_ptr<const adm::AudioTrackUid> trackUid);
+    void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object);
+    void moveToTakeNode();
     void moveToNewTrackNode(adm::TypeDescriptor td, std::vector<adm::ElementConstVariant> elements);
     void moveToNewObjectTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewDirectTrackNode(std::vector<adm::ElementConstVariant> elements);
@@ -63,15 +64,15 @@ private:
     void moveToNewGroupNode(adm::ElementConstVariant element);
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
     //void moveToNewAutomationNode(ADMChannel channel);
-    void addAutomationNodes();
+    void addAutomationNodes(std::shared_ptr<ProjectNode> trackNode);
     bool moveToChildWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements);
-    bool moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<adm::ElementConstVariant> elements);
+    bool moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements);
     void moveToNewChild(std::shared_ptr<ProjectNode> child);
     std::shared_ptr<ProjectNode> getChildWithElement(adm::ElementConstVariant element);
     std::shared_ptr<ProjectNode> getTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
-    std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
+    std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
 
     std::unique_ptr<NodeFactory> nodeFactory;
     std::shared_ptr<ProjectNode> rootNode;

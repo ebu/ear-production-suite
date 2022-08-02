@@ -42,7 +42,7 @@ std::shared_ptr<ProjectNode> admplug::NodeCreator::createGroupNode(std::vector<a
     return std::make_shared<ProjectNode>(std::move(track));
 }
 
-std::shared_ptr<ProjectNode> NodeCreator::createTakeNode(std::shared_ptr<const adm::AudioObject> parentObject, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<const adm::AudioTrackUid> trackUid)
+std::shared_ptr<ProjectNode> NodeCreator::createTakeNode(std::shared_ptr<const adm::AudioObject> parentObject, std::shared_ptr<TrackElement> parentTrack)
 {
     auto projectElement = std::make_shared<MediaTakeElement>(parentObject, parentTrack, originalMediaItem);
     pcmCreator->addTake(projectElement);
@@ -50,19 +50,19 @@ std::shared_ptr<ProjectNode> NodeCreator::createTakeNode(std::shared_ptr<const a
     return projectNode;
 }
 
-std::shared_ptr<ProjectNode> admplug::NodeCreator::createAutomationNode(ADMChannel channel, std::shared_ptr<TakeElement> parentTake)
+std::shared_ptr<ProjectNode> admplug::NodeCreator::createAutomationNode(ADMChannel channel, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<TakeElement> parentTake)
 {
     auto channelFormat = channel.channelFormat();
     if(channelFormat) {
         if(!channelFormat->getElements<adm::AudioBlockFormatDirectSpeakers>().empty()) {
-            return std::make_shared<ProjectNode>(std::make_unique<DirectSpeakersAutomationElement>(channel, parentTake));
+            return std::make_shared<ProjectNode>(std::make_unique<DirectSpeakersAutomationElement>(channel, parentTrack, parentTake));
         }
         if(!channelFormat->getElements<adm::AudioBlockFormatHoa>().empty()) {
-            return std::make_shared<ProjectNode>(std::make_unique<HoaAutomationElement>(channel, parentTake));
+            return std::make_shared<ProjectNode>(std::make_unique<HoaAutomationElement>(channel, parentTrack, parentTake));
         }
     }
 
     // if no blocks default to object track
-    return std::make_shared<ProjectNode>(std::make_unique<ObjectAutomationElement>(channel, parentTake));
+    return std::make_shared<ProjectNode>(std::make_unique<ObjectAutomationElement>(channel, parentTrack, parentTake));
 
 }

@@ -1,6 +1,7 @@
 #include "projectelements.h"
 #include "elementcomparator.h"
 #include "color.h"
+#include <helper/container_helpers.hpp>
 
 namespace {
     std::vector<Color>rgbColorScheme{ {51,34,136}, {136, 204, 238}, {68, 170, 153}, {17, 119, 51}, {153, 153, 51}, {221, 204, 119}, {204, 102, 119}, {136, 34, 85}, {170, 68, 153} };
@@ -67,12 +68,8 @@ bool admplug::TakeElement::addParentProjectElement(std::shared_ptr<ProjectElemen
     // We can only add TrackElements as parents
     auto parentTrackElement = std::dynamic_pointer_cast<TrackElement>(newParentElement);
     if (!parentTrackElement) return false;
-    if (parent == parentTrackElement) return true;
-
-    // Can not set a parent if we already have one
-    if (parent) return false;
-
-    parent = parentTrackElement;
+    if (contains(parents, parentTrackElement)) return true;
+    parents.push_back(parentTrackElement);
     return true;
 }
 
@@ -96,12 +93,12 @@ bool admplug::ObjectAutomation::addParentProjectElement(std::shared_ptr<ProjectE
     // We can only add TakeElements as parents
     auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
     if (!parentTakeElement) return false;
-    if (parent == parentTakeElement) return true;
+    if (parentTake_ == parentTakeElement) return true;
 
     // Can not set a parent if we already have one
-    if (parent) return false;
+    if (parentTake_) return false;
 
-    parent = parentTakeElement;
+    parentTake_ = parentTakeElement;
     return true;
 }
 
@@ -110,12 +107,12 @@ bool admplug::DirectSpeakersAutomation::addParentProjectElement(std::shared_ptr<
     // We can only add TakeElements as parents
     auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
     if (!parentTakeElement) return false;
-    if (parent == parentTakeElement) return true;
+    if (parentTake_ == parentTakeElement) return true;
 
     // Can not set a parent if we already have one
-    if (parent) return false;
+    if (parentTake_) return false;
 
-    parent = parentTakeElement;
+    parentTake_ = parentTakeElement;
     return true;
 }
 
@@ -123,12 +120,12 @@ bool admplug::HoaAutomation::addParentProjectElement(std::shared_ptr<ProjectElem
     // We can only add TakeElements as parents
     auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
     if (!parentTakeElement) return false;
-    if (parent == parentTakeElement) return true;
+    if (parentTake_ == parentTakeElement) return true;
 
     // Can not set a parent if we already have one
-    if (parent) return false;
+    if (parentTake_) return false;
 
-    parent = parentTakeElement;
+    parentTake_ = parentTakeElement;
     return true;
     //TODO: Why not put in ProjectElement to prevent code repetition?
 }
