@@ -83,8 +83,7 @@ TEST_CASE("With a node creator and a simple object") {
             ON_CALL(pcmCreator, addTake(_)).WillByDefault(Invoke(saveTake));
 
             auto takeNode = creator.createTakeNode(simpleObject.audioObject,
-                trackElement,
-                nullptr);
+                trackElement);
             SECTION("It is not null") {
                 REQUIRE(takeNode);
             }
@@ -98,19 +97,17 @@ TEST_CASE("With a node creator and a simple object") {
         SECTION("If created without a uid the node creator adds a take to the source creator") {
             EXPECT_CALL(pcmCreator, addTake(_)).Times(1);
             auto takeElement = creator.createTakeNode(simpleObject.audioObject,
-                trackElement,
-                nullptr);
+                trackElement);
         }
 
         SECTION("If created with a uid the node creator adds a take to the source creator") {
             EXPECT_CALL(pcmCreator, addTake(_)).Times(1);
             auto takeElement = creator.createTakeNode(simpleObject.audioObject,
-                trackElement,
-                simpleObject.audioTrackUid);
+                trackElement);
         }
         SECTION("When an automation node is created") {
             auto takeElement = std::make_shared<NiceMock<MockTakeElement>>();
-            auto node = creator.createAutomationNode(ADMChannel{simpleObject.audioObject, simpleObject.audioChannelFormat, simpleObject.audioPackFormat, simpleObject.audioTrackUid}, takeElement);
+            auto node = creator.createAutomationNode(ADMChannel{simpleObject.audioObject, simpleObject.audioChannelFormat, simpleObject.audioPackFormat, simpleObject.audioTrackUid}, trackElement, takeElement);
             SECTION("It is not null") {
                 REQUIRE(node);
             }
