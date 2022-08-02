@@ -121,6 +121,15 @@ bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::vector<std::
     return true;
 }
 
+bool takeHasTrackUid(std::shared_ptr<TakeElement> take, std::shared_ptr<adm::AudioTrackUid const> trackUid) {
+    for(auto const& channel : take->channels()) {
+        if(channel.trackUid() == trackUid) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool isDescendantOf(std::shared_ptr<const adm::AudioChannelFormat> cf, std::shared_ptr<const adm::AudioPackFormat> pf) {
     if(contains(pf->getReferences<adm::AudioChannelFormat>(), cf)) return true;
     for(auto childPf : pf->getReferences<adm::AudioPackFormat>()) {
@@ -372,7 +381,7 @@ void admplug::ProjectTree::moveToTakeNode()
     // Add any additional channels
     for(int i = 0; i < state.audioChannelFormats.size(); i++) {
         auto channel = ADMChannel{state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i]};
-        if(!take->hasChannel(channel)) {
+        if(!takeHasTrackUid(take, channel.trackUid())) {
             take->addChannel(channel);
         }
     }
