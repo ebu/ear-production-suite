@@ -40,7 +40,7 @@ inline bool operator> (IPCMGroup const& lhs, IPCMGroup const& rhs) {
 class PCMGroup : public IPCMGroup
 {
 public:
-    PCMGroup(const IChannelIndexer &indexer, std::vector<ADMChannel> channels);
+    PCMGroup(const IChannelIndexer &indexer, std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids);
     PCMGroup(const IPCMGroup& other);
     PCMGroup& operator=(IPCMGroup const& other);
     std::vector<int> const& trackIndices() const override;

@@ -68,11 +68,10 @@ public:
     virtual ~TakeElement() = default;
     virtual void setSource(PCM_source*) = 0;
     virtual double startTime() const = 0;
-   // std::shared_ptr<TrackElement const> parentTrack() const { return parent; }
-    virtual void addChannel(ADMChannel channel) = 0;
-    virtual bool hasChannel(ADMChannel channel) = 0;
-    virtual std::vector<ADMChannel> channels() const = 0;
-    virtual void setChannels(std::vector<ADMChannel> channels) = 0;
+    virtual void addTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) = 0;
+    virtual bool hasTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) = 0;
+    virtual std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids() const = 0;
+    virtual int trackUidCount() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
 protected:
     std::vector<std::shared_ptr<TrackElement>> parents;
@@ -104,7 +103,6 @@ class DirectSpeakersAutomation : public AutomationElement {
 public:
     virtual ~DirectSpeakersAutomation() = default;
     virtual adm::BlockFormatsConstRange<adm::AudioBlockFormatDirectSpeakers> blocks() const = 0;
-    virtual std::vector<ADMChannel> takeChannels() const = 0;
     virtual int channelIndex() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
 };
@@ -113,7 +111,6 @@ class HoaAutomation : public AutomationElement {
 public:
     virtual ~HoaAutomation() = default;
     virtual adm::BlockFormatsConstRange<adm::AudioBlockFormatHoa> blocks() const = 0;
-    virtual std::vector<ADMChannel> takeChannels() const = 0;
     virtual int channelIndex() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
 };

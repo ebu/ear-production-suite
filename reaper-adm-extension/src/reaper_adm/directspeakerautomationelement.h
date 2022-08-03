@@ -14,7 +14,6 @@ public:
     adm::BlockFormatsConstRange<adm::AudioBlockFormatDirectSpeakers> blocks() const override;
     double startTime() const override;
     std::shared_ptr<Track> getTrack() const override;
-    std::vector<ADMChannel> takeChannels() const override;
     ADMChannel channel() const override;
     int channelIndex() const override;
     void apply(const PluginParameter &parameter, const Plugin &plugin) const override;

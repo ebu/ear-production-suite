@@ -4,6 +4,38 @@
 #include <cmath>
 #include <algorithm>
 
+namespace {
+int getHoaOrder(std::vector<admplug::ADMChannel> const &channels){
+    auto hoaOrder = 0;
+    for(size_t i = 0; i < channels.size(); i = i + 1 ){
+        auto cf = channels[i].channelFormat();
+        if(cf) {
+            auto blocks = cf->getElements<adm::AudioBlockFormatHoa>();
+            if(blocks.size() > 0) {
+                auto tempOrder = blocks.front().get<adm::Order>().get();
+                if(tempOrder > hoaOrder) {
+                    hoaOrder = tempOrder;
+                }
+            }
+        }
+        auto pf = channels[i].packFormat();
+        if(pf) {
+            auto cfs = pf->getReferences<adm::AudioChannelFormat>();
+            for (auto cf : cfs){
+                auto blocks = cf->getElements<adm::AudioBlockFormatHoa>();
+                if(blocks.size() > 0) {
+                    auto tempOrder = blocks.front().get<adm::Order>().get();
+                    if(tempOrder > hoaOrder) {
+                        hoaOrder = tempOrder;
+                    }
+                }
+
+            }
+        }
+    }
+    return hoaOrder;
+}
+}
 
 admplug::UniqueValueAssigner::UniqueValueAssigner(UniqueValueAssigner::SearchCandidate searchCriteria, int minVal, int maxVal, const ReaperAPI & api) :
     UniqueValueAssigner(std::vector<UniqueValueAssigner::SearchCandidate>{searchCriteria}, minVal, maxVal, api)
@@ -89,38 +121,6 @@ std::optional<std::size_t> admplug::UniqueValueAssigner::indexFromVal(int realVa
     }
     return {};
 }
-
-int admplug::PluginSuite::getHoaOrder(std::vector<admplug::ADMChannel> const &channels){
-    auto hoaOrder = 0;
-    for(size_t i = 0; i < channels.size(); i = i + 1 ){
-        auto cf = channels[i].channelFormat();
-        if(cf) {
-            auto blocks = cf->getElements<adm::AudioBlockFormatHoa>();
-            if(blocks.size() > 0) {
-                auto tempOrder = blocks.front().get<adm::Order>().get();
-                if(tempOrder > hoaOrder) {
-                    hoaOrder = tempOrder;
-                }
-            }
-        }
-        auto pf = channels[i].packFormat();
-        if(pf) {
-            auto cfs = pf->getReferences<adm::AudioChannelFormat>();
-            for (auto cf : cfs){
-                auto blocks = cf->getElements<adm::AudioBlockFormatHoa>();
-                if(blocks.size() > 0) {
-                    auto tempOrder = blocks.front().get<adm::Order>().get();
-                    if(tempOrder > hoaOrder) {
-                        hoaOrder = tempOrder;
-                    }
-                }
-
-            }
-        }
-    }
-    return hoaOrder;
-}
-
 
 std::vector<admplug::ADMChannel> admplug::PluginSuite::reorderAndFilter(std::vector<ADMChannel> const& channels, ReaperAPI const & api)
 {

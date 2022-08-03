@@ -34,7 +34,6 @@ std::shared_ptr<Track> HoaAutomationElement::getTrack() const {
 }
 
 ADMChannel HoaAutomationElement::channel() const {
-    //TODO: Check
     return admChannel;
 }
 
@@ -76,17 +75,11 @@ std::vector<adm::ElementConstVariant> HoaAutomationElement::getAdmElements() con
     return std::vector<adm::ElementConstVariant>(1, admChannel.channelFormat());
 }
 
-std::vector<ADMChannel> HoaAutomationElement::takeChannels() const
-{
-    //Copy-pasted from DirectSpeakersAutomationElement
-    return parentTake()->channels();
-}
-
 int HoaAutomationElement::channelIndex() const
 {
     //Copy-pasted from DirectSpeakersAutomationElement
-    auto chans = takeChannels();
-    auto location = std::find(chans.cbegin(), chans.cend(), admChannel);
+    auto chans = parentTake_->trackUids();
+    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.trackUid());
     if(location == chans.cend()) return -1;
     return static_cast<int>(location - chans.cbegin());
 }

@@ -62,15 +62,10 @@ std::shared_ptr<Track> DirectSpeakersAutomationElement::getTrack() const
     return parentTrack_->getTrack();
 }
 
-std::vector<ADMChannel> DirectSpeakersAutomationElement::takeChannels() const
-{
-    return parentTake_->channels();
-}
-
 int DirectSpeakersAutomationElement::channelIndex() const
 {
-    auto chans = takeChannels();
-    auto location = std::find(chans.cbegin(), chans.cend(), admChannel);
+    auto chans = parentTake_->trackUids();
+    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.trackUid());
     if(location == chans.cend()) return -1;
     return static_cast<int>(location - chans.cbegin());
 }
@@ -106,7 +101,5 @@ std::vector<AutomationPoint> DirectSpeakersAutomationElement::pointsFor(Paramete
 
 ADMChannel admplug::DirectSpeakersAutomationElement::channel() const
 {
-    auto index = channelIndex();
-    if(index < 0)  return ADMChannel{ nullptr, nullptr, takeChannels().at(0).packFormat(), nullptr };
-    return takeChannels().at(static_cast<std::size_t>(index));
+    return admChannel;
 }
