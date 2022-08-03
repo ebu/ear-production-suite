@@ -54,9 +54,6 @@ namespace admplug {
 
         std::optional<std::string> getSpatialisationPluginNameFor(adm::TypeDescriptor typeDescriptor);
 
-    protected:
-        int getHoaOrder(std::vector<admplug::ADMChannel> const& channels);
-
     };
 
     // PluginSuite Helpers

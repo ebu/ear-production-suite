@@ -15,11 +15,9 @@ public:
     adm::BlockFormatsConstRange<adm::AudioBlockFormatHoa> blocks() const override;
     double startTime() const override;
     std::shared_ptr<Track> getTrack() const override;
-    //std::shared_ptr<TakeElement const> parentTake() const { return parent; }
     ADMChannel channel() const override;
     void apply(PluginParameter const& parameter, Plugin const& plugin) const override;
     void apply(TrackParameter const& parameter, Track const& track) const override;
-    std::vector<ADMChannel> takeChannels() const override;
     int channelIndex() const override;
 
 private:
@@ -27,7 +25,6 @@ private:
     std::shared_ptr<TakeElement> parent;
     std::vector<AutomationPoint> pointsFor(const Parameter &parameter) const;
     ADMChannel admChannel;
-    //int getBlockOrder() const;
 };
 
 }

@@ -341,8 +341,8 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
 
         if(speakerLayoutIndex >= 0) {
             plugin = track->createPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
-            auto takeChannels = automationElement.takeChannels();
-            auto channelCountTake = static_cast<int>(takeChannels.size());
+            auto take = automationElement.parentTake();
+            auto channelCountTake = static_cast<int>(take->trackUidCount());
             auto channelCountPackFormat = packFormat->getReferences<adm::AudioChannelFormat>().size();
             assert(channelCountTake == channelCountPackFormat); // Possibly not the same? Need to figure out how to deal with this
             auto channelCount = channelCountTake;
@@ -364,8 +364,8 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
                 // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
                 auto trackNumber = *trackMapping;
                 trackMappingToAo[trackNumber] = audioObjectIdVal;
-                for(auto &takeChannel : takeChannels) {
-                    auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+                for(auto const& trackUid : take->trackUids()) {
+                    auto trackUidVal = getIdValueAsInt(*trackUid);
                     trackMappingToAtu[trackNumber] = trackUidVal;
                     trackNumber++;
                 }
@@ -400,8 +400,6 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 		track->setChannelCount(channelCount);
 		plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
 
-		auto takeChannels = automationElement.takeChannels();
-
 		assert(trackMappingAssigner);
 		auto trackMapping = trackMappingAssigner->getNextAvailableValue(channelCount);
 		if (trackMapping.has_value()) {
@@ -415,9 +413,10 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 
 			// Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
 			auto trackNumber = *trackMapping;
+            auto take = automationElement.parentTake();
 			trackMappingToAo[trackNumber] = audioObjectIdVal;
-			for (auto& takeChannel : takeChannels) {
-				auto trackUidVal = takeChannel.trackUid() ? getIdValueAsInt(*(takeChannel.trackUid())) : 0;
+            for(auto const& trackUid : take->trackUids()) {
+				auto trackUidVal = getIdValueAsInt(*trackUid);
 				trackMappingToAtu[trackNumber] = trackUidVal;
 				trackNumber++;
 			}

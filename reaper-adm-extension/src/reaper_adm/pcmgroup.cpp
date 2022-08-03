@@ -6,20 +6,18 @@ using namespace admplug;
 using adm::AudioObject;
 using adm::AudioTrackUid;
 
-PCMGroup::PCMGroup(const IChannelIndexer &indexer, std::vector<ADMChannel> channels)
+PCMGroup::PCMGroup(const IChannelIndexer &indexer, std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids)
 {
-    assert(!channels.empty());
+    assert(!trackUids.empty());
 
     fileName = "Unknown_UID";
-    for(auto& channel : channels) {
-        if(channel.trackUid()) {
-            fileName = adm::formatId(channel.trackUid()->get<adm::AudioTrackUidId>());
-            break;
-        }
+    for(auto const& trackUid : trackUids) {
+        fileName = adm::formatId(trackUid->get<adm::AudioTrackUidId>());
+        break;
     }
 
-    for(auto& channel : channels) {
-        int index = indexer.indexOf(channel.trackUid()); //returns -1 for missing from indexer... i.e, null or not found UID
+    for(auto const& trackUid : trackUids) {
+        int index = indexer.indexOf(trackUid); //returns -1 for missing from indexer... i.e, null or not found UID
         indices.push_back(index);
     }
 }

@@ -16,6 +16,7 @@
 #include "admtraits.h"
 #include "commontrackpool.h"
 #include "admvstcontrol.h"
+#include "mediatrackelement.h"
 
 #include <memory>
 #include <stdexcept>
@@ -96,6 +97,26 @@ namespace {
             vst.setAdmChannelFormat(ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID);
         }
     }
+
+    int getHoaOrder(std::shared_ptr<adm::AudioPackFormat const> packFormat) {
+        int maxOrder = -1;
+        for(auto const& pf : packFormat->getReferences<adm::AudioPackFormat>()) {
+            int pfMaxOrder = getHoaOrder(pf);
+            if(pfMaxOrder > maxOrder) maxOrder = pfMaxOrder;
+        }
+        for(auto const& cf : packFormat->getReferences<adm::AudioChannelFormat>()) {
+            for(auto const& bf : cf->getElements<adm::AudioBlockFormatHoa>()) {
+                if(bf.has<adm::Order>()) {
+                    int bfOrder = bf.get<adm::Order>().get();
+                    if(bfOrder > maxOrder) maxOrder = bfOrder;
+                }
+
+
+            }
+        }
+        return maxOrder;
+    }
+
 }
 const char* Facebook360PluginSuite::OBJECT_METADATA_PLUGIN_NAME = "FB360 Spatialiser (ambiX)";
 const char* Facebook360PluginSuite::RENDERER_PLUGIN_NAME = "FB360 Control (ambiX)";
@@ -253,7 +274,8 @@ void Facebook360PluginSuite::onObjectAutomation(const ObjectAutomation &automati
 void Facebook360PluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation & directAutomation, const ReaperAPI &api)
 {
     auto track = directAutomation.getTrack();
-    auto trackWidth = static_cast<int>(directAutomation.takeChannels().size());
+    auto take = directAutomation.parentTake();
+    auto trackWidth = static_cast<int>(take->trackUidCount());
     track->setChannelCount(trackWidth);
 
     auto firstBlock = directAutomation.blocks().front();
@@ -303,8 +325,7 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
 
             // Find an appropriate common definition - FB360 does not upmix (even after adjusting pitch/yaw/roll), so use order according to incoming channel count;
             // PackIdValues 1 to 6 are SN3D ACN - matches FB360 plug-in output (intermediate format)
-            auto channels = hoaAutomation.takeChannels();
-            auto hoaOrder = getHoaOrder(channels);
+            int hoaOrder = getHoaOrder(hoaAutomation.channel().packFormat());
             if(hoaOrder < 1) hoaOrder = 1;
             if(hoaOrder > 3) hoaOrder = 3;
             configureAdmExportVst(hoaAutomation, *track, api, hoaOrder); // Creates a new instance
@@ -373,8 +394,7 @@ std::unique_ptr<Track> Facebook360PluginSuite::getControlTrack(const ReaperAPI &
 
 bool Facebook360PluginSuite::applyFXPreset(const HoaAutomation & hoaAutomation, const ReaperAPI &api){
     auto track = hoaAutomation.getTrack();
-    auto channels = hoaAutomation.takeChannels();
-    auto hoaOrder = getHoaOrder(channels);
+    auto hoaOrder = getHoaOrder(hoaAutomation.channel().packFormat());
     auto channelFormat = hoaAutomation.channel().channelFormat();
     if(!channelFormat) return false;
     auto blocks = channelFormat->getElements<adm::AudioBlockFormatHoa>();

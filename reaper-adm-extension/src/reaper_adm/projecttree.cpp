@@ -112,22 +112,13 @@ bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementCo
 bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements) {
     auto take = std::dynamic_pointer_cast<TakeElement>(node.getProjectElement());
     if(!take) return false;
-    int lim = std::min(take->channels().size(), elements.size());
+    int lim = std::min(take->trackUids().size(), elements.size());
     for(int i = 0; i < lim; i++) {
-        if(elements[i] != take->channels()[i].trackUid()) {
+        if(elements[i] != take->trackUids()[i]) {
             return false;
         }
     }
     return true;
-}
-
-bool takeHasTrackUid(std::shared_ptr<TakeElement> take, std::shared_ptr<adm::AudioTrackUid const> trackUid) {
-    for(auto const& channel : take->channels()) {
-        if(channel.trackUid() == trackUid) {
-            return true;
-        }
-    }
-    return false;
 }
 
 bool isDescendantOf(std::shared_ptr<const adm::AudioChannelFormat> cf, std::shared_ptr<const adm::AudioPackFormat> pf) {
@@ -381,8 +372,8 @@ void admplug::ProjectTree::moveToTakeNode()
     // Add any additional channels
     for(int i = 0; i < state.audioChannelFormats.size(); i++) {
         auto channel = ADMChannel{state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i]};
-        if(!takeHasTrackUid(take, channel.trackUid())) {
-            take->addChannel(channel);
+        if(!take->hasTrackUid(channel.trackUid())) {
+            take->addTrackUid(channel.trackUid());
         }
     }
 }
