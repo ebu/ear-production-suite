@@ -15,17 +15,17 @@ public:
                      MediaItem* referenceItem = nullptr);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api) override;
     void setSource(PCM_source * source) override;
-    void addChannel(ADMChannel channel) override;
-    bool hasChannel(ADMChannel channel) override;
-    std::vector<ADMChannel> channels() const override;
-    void setChannels(std::vector<ADMChannel> channels) override;
+    void addTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) override;
+    bool hasTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) override;
+    int trackUidCount() const override;
+    std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids() const override;
     double startTime() const override;
 private:
     bool hasMediaItem(ReaperAPI const& api, TrackElement& track);
 
     std::shared_ptr<adm::AudioObject const> object;
     std::array<char, 4096> takeNameBuffer;
-    std::vector<ADMChannel> admChannels;
+    std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids_;
     MediaItem* referenceItem;
     PCM_source* pcmSource{nullptr};
     double position{0.0};

@@ -58,7 +58,7 @@ auto getMockObjectAutoElement() {
     auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid);
     auto channels = std::vector<ADMChannel>{ channel };
     ON_CALL(*element, channel()).WillByDefault(Return(channel));
-    ON_CALL(*take, channels()).WillByDefault(Return(channels));
+    //ON_CALL(*take, channels()).WillByDefault(Return(channels));
     return element;
 }
 
