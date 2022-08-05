@@ -29,13 +29,13 @@ namespace admplug {
 
         virtual void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI &api) {}
         virtual void onCreateProject(const ProjectNode &rootNode, const ReaperAPI &api) {}//TODO = 0;
-        virtual void onCreateObjectTrack(TrackElement const&, ReaperAPI const& api) {}//TODO = 0;
-        virtual void onCreateDirectTrack(TrackElement const&, ReaperAPI const& api) {}//TODO = 0;
-        virtual void onCreateGroup(TrackElement const&, ReaperAPI const& api) {}//TODO = 0;
+        virtual void onCreateObjectTrack(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
+        virtual void onCreateDirectTrack(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
+        virtual void onCreateGroup(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
         virtual void onObjectAutomation(ObjectAutomation const&, ReaperAPI const& api) {}//TODO = 0;
         virtual void onDirectSpeakersAutomation(DirectSpeakersAutomation const&, ReaperAPI const& api) {}//TODO = 0;
         virtual void onHoaAutomation(HoaAutomation const&, ReaperAPI const& api) {}//TODO = 0;
-        virtual void onCreateHoaTrack(TrackElement const&, ReaperAPI const& api) {}//TODO = 0;
+        virtual void onCreateHoaTrack(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
         virtual void onProjectBuildComplete(const ReaperAPI &api) {}
         virtual bool pluginSuiteUsable(ReaperAPI const& api) { return false;  } // Use this method to return true or false as to whether the pluginsuite can be used (i.e, all required VSTs are present)
         virtual bool representAdmStructureWithGroups(ReaperAPI const& api) { return true;  } // Use this method to return true or false as to whether the pluginsuite requires groups to represent higher-level ADM elements

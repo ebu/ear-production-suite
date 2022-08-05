@@ -106,7 +106,7 @@ ObjectTrack::ObjectTrack(std::vector<adm::ElementConstVariant> admElements, std:
 {
 }
 
-void ObjectTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api) const
+void ObjectTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
     pluginSuite.onCreateObjectTrack(*this, api);
 }
@@ -116,7 +116,7 @@ DirectTrack::DirectTrack(std::vector<adm::ElementConstVariant> admElements, std:
 
 }
 
-void DirectTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api) const
+void DirectTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
     pluginSuite.onCreateDirectTrack(*this, api);
 }
@@ -126,7 +126,7 @@ HoaTrack::HoaTrack(std::vector<adm::ElementConstVariant> admElements, std::share
 
 }
 
-void HoaTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api) const
+void HoaTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
     pluginSuite.onCreateHoaTrack(*this, api);
 }
@@ -139,7 +139,7 @@ GroupTrack::GroupTrack(std::vector<adm::ElementConstVariant> admElements, std::s
 
 }
 
-void GroupTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api) const
+void GroupTrack::firePluginSuiteCallback(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
     pluginSuite.onCreateGroup(*this, api);
 }

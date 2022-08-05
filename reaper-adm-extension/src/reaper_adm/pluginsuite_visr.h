@@ -19,10 +19,10 @@ namespace admplug {
         ~VisrPluginSuite();
 
         void onCreateProject(const ProjectNode &rootNode, const ReaperAPI &api) override;
-        void onCreateObjectTrack(const TrackElement &trackNode, const ReaperAPI &api) override;
-        void onCreateDirectTrack(const TrackElement &trackNode, const ReaperAPI &api) override;
-        void onCreateHoaTrack(const TrackElement &trackNode, const ReaperAPI &api) override;
-        void onCreateGroup(const TrackElement &trackNode, const ReaperAPI &api) override;
+        void onCreateObjectTrack(TrackElement &trackNode, const ReaperAPI &api) override;
+        void onCreateDirectTrack(TrackElement &trackNode, const ReaperAPI &api) override;
+        void onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api) override;
+        void onCreateGroup(TrackElement &trackNode, const ReaperAPI &api) override;
         void onObjectAutomation(ObjectAutomation const&, ReaperAPI const& api) override;
         void onDirectSpeakersAutomation(DirectSpeakersAutomation const&, ReaperAPI const& api) override;
         void onHoaAutomation(HoaAutomation const&, ReaperAPI const& api) override;
