@@ -10,7 +10,6 @@ class MediaTrackElement : public TrackElement {
 public:
     MediaTrackElement(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack = nullptr, std::unique_ptr<TrackGroup> = nullptr);
     virtual void createProjectElements(PluginSuite& pluginSuite, ReaperAPI const& api) override;
-    virtual std::shared_ptr<Track> getTrack() const override;
     MediaItem* addMediaItem(ReaperAPI const& api) override;
     std::vector<TrackGroup> slaveOfGroups() const override;
     TrackGroup masterOfGroup() const override;
@@ -19,7 +18,6 @@ protected:
     std::vector<adm::ElementConstVariant> getAdmElements() const override;
     void nameTrackFromElementName();
     std::vector<adm::ElementConstVariant> elements;
-    std::shared_ptr<Track> track;
     std::unique_ptr<TrackGroup> groupMaster;
 };
 
