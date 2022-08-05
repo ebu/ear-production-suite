@@ -51,6 +51,9 @@ private:
     int idNum{0};
 };
 
+class AutomationElement;
+class TakeElement;
+
 class TrackElement : public ProjectElement {
 public:
     virtual ~TrackElement() = default;
@@ -59,8 +62,22 @@ public:
     virtual std::vector<TrackGroup> slaveOfGroups() const = 0;
     virtual TrackGroup masterOfGroup() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
+    std::shared_ptr<TakeElement> getTakeElement() {
+        return takeElement;
+    }
+    void setTakeElement(std::shared_ptr<TakeElement> take) {
+        takeElement = take;
+    }
+    std::vector<std::shared_ptr<AutomationElement>> getAutomationElements() {
+        return automationElements;
+    }
+    void addAutomationElement(std::shared_ptr<AutomationElement> automation) {
+        automationElements.push_back(automation);
+    }
 protected:
     std::vector<std::shared_ptr<TrackElement>> parentElements;
+    std::shared_ptr<TakeElement> takeElement;
+    std::vector<std::shared_ptr<AutomationElement>> automationElements;
 };
 
 class TakeElement : public ProjectElement {
