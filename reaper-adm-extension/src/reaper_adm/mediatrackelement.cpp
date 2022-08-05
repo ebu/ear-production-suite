@@ -47,7 +47,6 @@ using namespace admplug;
 
 MediaTrackElement::MediaTrackElement(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack, std::unique_ptr<TrackGroup> masterOfGroup) :
     elements{admElements},
-    track{nullptr},
     groupMaster{std::move(masterOfGroup)}
 {
     addParentProjectElement(parentTrack);
@@ -66,12 +65,6 @@ void MediaTrackElement::createProjectElements(PluginSuite &pluginSuite, ReaperAP
 std::vector<adm::ElementConstVariant> MediaTrackElement::getAdmElements() const
 {
     return elements;
-}
-
-std::shared_ptr<Track> MediaTrackElement::getTrack() const
-{
-    assert(track);
-    return track;
 }
 
 MediaItem *MediaTrackElement::addMediaItem(ReaperAPI const& api)
