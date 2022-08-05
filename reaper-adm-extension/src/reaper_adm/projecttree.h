@@ -57,6 +57,7 @@ public:
 private:
     void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object);
     void moveToTakeNode();
+    void addTake();
     void moveToNewTrackNode(adm::TypeDescriptor td, std::vector<adm::ElementConstVariant> elements);
     void moveToNewObjectTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewDirectTrackNode(std::vector<adm::ElementConstVariant> elements);
@@ -65,6 +66,7 @@ private:
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
     //void moveToNewAutomationNode(ADMChannel channel);
     void addAutomationNodes(std::shared_ptr<ProjectNode> trackNode);
+    void addAutomation();
     bool moveToChildWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements);
