@@ -28,6 +28,12 @@ Value* getValuePointerFromMap(std::map<Key, Value>& targetMap, Key key) {
 }
 
 template <typename Key, typename Value>
+Value getValueFromMap(std::map<Key, Value>& targetMap, Key key) {
+    auto it = targetMap.find(key);
+    return it->second;
+}
+
+template <typename Key, typename Value>
 Value* setInMap(std::map<Key, Value>& targetMap, Key key, Value value) {
     auto ins = targetMap.insert_or_assign(key, value);
     return &(ins.first->second);

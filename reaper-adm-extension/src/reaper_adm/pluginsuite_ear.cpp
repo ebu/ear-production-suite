@@ -17,6 +17,7 @@
 #include <bw64/bw64.hpp>
 #include <speaker_setups.hpp>
 #include <helper/common_definition_helper.h>
+#include <helper/container_helpers.hpp>
 
 using namespace admplug;
 
@@ -194,6 +195,8 @@ void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> 
 	adm::writeXml(xmlStream, metadata->adm());
 	originalAdmDocument = xmlStream.str();
 
+    takesOnTracks.clear();
+
 	sceneMasterAlreadyExisted = false;
 }
 
@@ -272,14 +275,71 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
 
 void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const ReaperAPI & api)
 {
-    auto mediaTrack = api.createTrackAtIndex(0, true);
-    assert(mediaTrack);
-    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
-    trackElement.setTrack(track);
-    //nameTrackFromElementName();
-	track->disableMasterSend();
+    auto take = trackElement.getTakeElement();
+    TrackInfo trackInfo;
+    auto channelCount = static_cast<int>(take->trackUidCount());
 
-	// Can't configure plugin or routing just yet because we need the channel count for the pack format in onDirectSpeakersAutomation
+    if(mapHasKey(takesOnTracks, take)) {
+        trackInfo = getValueFromMap(takesOnTracks, take);
+        trackElement.setTrack(trackInfo.track);
+    } else {
+        auto mediaTrack = api.createTrackAtIndex(0, true);
+        assert(mediaTrack);
+        trackInfo.track = std::make_shared<TrackInstance>(mediaTrack, api);
+        assert(trackMappingAssigner);
+        trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
+        if(!trackInfo.routingStartChannel) {
+            //TODO: Need to warn user no channels available
+        }
+        setInMap(takesOnTracks, take, trackInfo);
+        trackElement.setTrack(trackInfo.track);
+        //nameTrackFromElementName(); // TODO - PROBLEM!! This might be shared!!!
+        trackInfo.track->disableMasterSend();
+        trackInfo.track->setChannelCount(channelCount);
+    }
+
+
+    auto automationElements = trackElement.getAutomationElements();
+    if(automationElements.size() > 0) {
+        auto channel = automationElements.front()->channel();
+        auto packFormat = channel.packFormat();
+        auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatId(adm::formatId(packFormat->get<adm::AudioPackFormatId>()));
+
+        if(speakerLayoutIndex < 0) {
+            auto cartLayout = getCartLayout(*packFormat);
+            if(cartLayout) {
+                speakerLayoutIndex = ear::plugin::getIndexFromPackFormatId(getMappedCommonPackId(*cartLayout));
+            }
+        }
+
+        if(speakerLayoutIndex >= 0) {
+            auto plugin = trackInfo.track->createPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
+            auto packFormatIdValue = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].packFormatIdValue;
+            plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(packFormatIdValue));
+
+            if(trackInfo.routingStartChannel.has_value()) {
+                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
+                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
+
+                uint32_t audioObjectIdVal = 0;
+                if(auto ao = channel.object()) {
+                    audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+                }
+
+                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
+                auto trackNumber = *trackInfo.routingStartChannel;
+                trackMappingToAo[trackNumber] = audioObjectIdVal;
+                for(auto const& trackUid : take->trackUids()) {
+                    auto trackUidVal = getIdValueAsInt(*trackUid);
+                    trackMappingToAtu[trackNumber] = trackUidVal;
+                    trackNumber++;
+                }
+            }
+
+        } else {
+            // TODO - warn user - can't support this directspeaker pack format
+        }
+    }
 }
 
 void EARPluginSuite::onCreateGroup(TrackElement & trackElement, const ReaperAPI&)
@@ -331,6 +391,7 @@ void EARPluginSuite::onObjectAutomation(const ObjectAutomation & automationEleme
 
 void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation & automationElement, const ReaperAPI&)
 {
+    /*
     // Can only do this in onDirectSpeakersAutomation because we need the packformat and a channelformats first blockformat
     // NOTE: This will run for every leg, so don't duplicate effort!
     auto track = automationElement.getTrack();
@@ -386,6 +447,7 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
             // TODO - warn user - can't support this directspeaker pack format
         }
     }
+    */
 }
 
 void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI & api) {
