@@ -260,20 +260,20 @@ void EARPluginSuite::setTrackInsertionIndexFromSelectedMedia(ReaperAPI const& ap
 	}
 }
 
-void admplug::EARPluginSuite::onCreateObjectTrack(const admplug::TrackElement & trackElement, const admplug::ReaperAPI&)
+void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackElement, const admplug::ReaperAPI&)
 {
 	auto track = trackElement.getTrack();
 	track->disableMasterSend();
 }
 
-void EARPluginSuite::onCreateDirectTrack(const TrackElement & trackElement, const ReaperAPI & api)
+void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const ReaperAPI & api)
 {
 	// Can't configure plugin or routing just yet because we need the channel count for the pack format in onDirectSpeakersAutomation
 	auto track = trackElement.getTrack();
 	track->disableMasterSend();
 }
 
-void EARPluginSuite::onCreateGroup(const TrackElement & trackElement, const ReaperAPI&)
+void EARPluginSuite::onCreateGroup(TrackElement & trackElement, const ReaperAPI&)
 {
 	assert(false); // This should never be called, because we've said we don't require groups for this plugin suite!
 }
@@ -427,7 +427,7 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 	}
 }
 
-void EARPluginSuite::onCreateHoaTrack(const TrackElement &trackNode, const ReaperAPI &api){
+void EARPluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
     auto track = trackNode.getTrack();
     track->disableMasterSend();
 }

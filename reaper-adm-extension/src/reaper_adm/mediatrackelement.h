@@ -13,7 +13,7 @@ public:
     MediaItem* addMediaItem(ReaperAPI const& api) override;
     std::vector<TrackGroup> slaveOfGroups() const override;
     TrackGroup masterOfGroup() const override;
-    virtual void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) const = 0;
+    virtual void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) = 0;
 protected:
     std::vector<adm::ElementConstVariant> getAdmElements() const override;
     void nameTrackFromElementName();
@@ -24,28 +24,28 @@ protected:
 class ObjectTrack : public MediaTrackElement {
 public:
     ObjectTrack(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack);
-    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) const override;
+    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) override;
 private:
 };
 
 class DirectTrack : public MediaTrackElement {
 public:
     DirectTrack(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack);
-    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) const override;
+    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) override;
 private:
 };
 
 class HoaTrack : public MediaTrackElement {
 public:
     HoaTrack(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack);
-    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) const override;
+    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) override;
 private:
 };
 
 class GroupTrack : public MediaTrackElement {
 public:
     GroupTrack(std::vector<adm::ElementConstVariant> admElements, std::shared_ptr<TrackElement> parentTrack, std::unique_ptr<TrackGroup> group);
-    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) const override;
+    void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) override;
     void createProjectElements(PluginSuite& pluginSuite, ReaperAPI const& api) override;
 private:
     TrackGroup trackGroup;

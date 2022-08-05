@@ -178,7 +178,7 @@ void VisrPluginSuite::setupTrackWithMetadataPlugin(Track& track, ReaperAPI const
 
 }
 
-void VisrPluginSuite::onCreateObjectTrack(const TrackElement &trackNode, ReaperAPI const& api)
+void VisrPluginSuite::onCreateObjectTrack(TrackElement &trackNode, ReaperAPI const& api)
 {
     auto& track = *trackNode.getTrack();
     AdmVst(track.get(), api); // Creates ADM VST before spatialiser
@@ -190,7 +190,7 @@ void VisrPluginSuite::onCreateObjectTrack(const TrackElement &trackNode, ReaperA
     }
 }
 
-void VisrPluginSuite::onCreateDirectTrack(const TrackElement &trackNode, const ReaperAPI &)
+void VisrPluginSuite::onCreateDirectTrack(TrackElement &trackNode, const ReaperAPI &)
 {
     auto track = trackNode.getTrack();
     track->moveToBefore(trackInsertionIndex++);
@@ -207,7 +207,7 @@ void VisrPluginSuite::doGenericTrackSetup(Track& track)
     track.disableMasterSend();
 }
 
-void VisrPluginSuite::onCreateGroup(const TrackElement &trackNode, const ReaperAPI &)
+void VisrPluginSuite::onCreateGroup(TrackElement &trackNode, const ReaperAPI &)
 {
     auto& track = *trackNode.getTrack();
     doGenericTrackSetup(track);
@@ -303,7 +303,7 @@ void VisrPluginSuite::onHoaAutomation(const HoaAutomation &, const ReaperAPI &ap
 
 }
 
-void VisrPluginSuite::onCreateHoaTrack(const TrackElement &trackNode, const ReaperAPI &api){
+void VisrPluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
     auto track = trackNode.getTrack();
     track->moveToBefore(trackInsertionIndex++);
     track->disableMasterSend();

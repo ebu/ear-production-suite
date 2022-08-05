@@ -18,10 +18,10 @@ public:
 
 	void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI& api) override;
 	void onCreateProject(const ProjectNode& rootNode, const ReaperAPI& api) override;
-	void onCreateObjectTrack(const TrackElement&, const ReaperAPI& api) override;
-	void onCreateDirectTrack(const TrackElement&, const ReaperAPI& api) override;
-	void onCreateHoaTrack(const TrackElement&, const ReaperAPI& api) override;
-	void onCreateGroup(const TrackElement&, const ReaperAPI& api) override;
+	void onCreateObjectTrack(TrackElement&, const ReaperAPI& api) override;
+	void onCreateDirectTrack(TrackElement&, const ReaperAPI& api) override;
+	void onCreateHoaTrack(TrackElement&, const ReaperAPI& api) override;
+	void onCreateGroup(TrackElement&, const ReaperAPI& api) override;
 	void onObjectAutomation(const ObjectAutomation&, const ReaperAPI& api) override;
 	void onDirectSpeakersAutomation(const DirectSpeakersAutomation&, const ReaperAPI& api) override;
 	void onHoaAutomation(const HoaAutomation&, const ReaperAPI& api) override;

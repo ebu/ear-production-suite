@@ -138,7 +138,7 @@ bool Facebook360PluginSuite::pluginSuiteUsable(ReaperAPI const& api)
     return PluginRegistry::getInstance()->checkPluginsAvailable(requiredPlugins, api);
 }
 
-void Facebook360PluginSuite::onCreateObjectTrack(const TrackElement & trackNode, ReaperAPI const& api)
+void Facebook360PluginSuite::onCreateObjectTrack(TrackElement & trackNode, ReaperAPI const& api)
 {
    auto& track = *trackNode.getTrack();
    doGenericTrackSetup(track);
@@ -213,7 +213,7 @@ void Facebook360PluginSuite::doGenericTrackSetup(Track& track) {
     track.disableMasterSend();
 }
 
-void Facebook360PluginSuite::onCreateDirectTrack(const TrackElement &trackNode, const ReaperAPI &)
+void Facebook360PluginSuite::onCreateDirectTrack(TrackElement &trackNode, const ReaperAPI &)
 {
     auto& track = *trackNode.getTrack();
     track.moveToBefore(trackInsertionIndex++);
@@ -221,7 +221,7 @@ void Facebook360PluginSuite::onCreateDirectTrack(const TrackElement &trackNode, 
     setAsGroupsSlave(trackNode, track);
 }
 
-void Facebook360PluginSuite::onCreateGroup(const TrackElement &trackNode, const ReaperAPI &)
+void Facebook360PluginSuite::onCreateGroup(TrackElement &trackNode, const ReaperAPI &)
 {
     auto& track = *trackNode.getTrack();
     doGenericTrackSetup(track);
@@ -342,7 +342,7 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
     }
 }
 
-void Facebook360PluginSuite::onCreateHoaTrack(const TrackElement &trackNode, const ReaperAPI &api){
+void Facebook360PluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
     auto& track = *trackNode.getTrack();
     doGenericTrackSetup(track);
     AdmVst(track.get(), api); // Creates ADM VST before spatialiser
