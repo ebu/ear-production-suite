@@ -90,42 +90,42 @@ bool admplug::TrackElement::addParentProjectElement(std::shared_ptr<ProjectEleme
 
 bool admplug::ObjectAutomation::addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement)
 {
-    // We can only add TakeElements as parents
-    auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
-    if (!parentTakeElement) return false;
-    if (parentTake_ == parentTakeElement) return true;
+    // We can only add TrackElements as parents
+    auto parentTrackElement = std::dynamic_pointer_cast<TrackElement>(newParentElement);
+    if (!parentTrackElement) return false;
+    if (parentTrack_ == parentTrackElement) return true;
 
     // Can not set a parent if we already have one
-    if (parentTake_) return false;
+    if (parentTrack_) return false;
 
-    parentTake_ = parentTakeElement;
+    parentTrack_ = parentTrackElement;
     return true;
 }
 
 bool admplug::DirectSpeakersAutomation::addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement)
 {
-    // We can only add TakeElements as parents
-    auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
-    if (!parentTakeElement) return false;
-    if (parentTake_ == parentTakeElement) return true;
+    // We can only add TrackElements as parents
+    auto parentTrackElement = std::dynamic_pointer_cast<TrackElement>(newParentElement);
+    if (!parentTrackElement) return false;
+    if (parentTrack_ == parentTrackElement) return true;
 
     // Can not set a parent if we already have one
-    if (parentTake_) return false;
+    if (parentTrack_) return false;
 
-    parentTake_ = parentTakeElement;
+    parentTrack_ = parentTrackElement;
     return true;
 }
 
 bool admplug::HoaAutomation::addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) {
-    // We can only add TakeElements as parents
-    auto parentTakeElement = std::dynamic_pointer_cast<TakeElement>(newParentElement);
-    if (!parentTakeElement) return false;
-    if (parentTake_ == parentTakeElement) return true;
+    // We can only add TrackElements as parents
+    auto parentTrackElement = std::dynamic_pointer_cast<TrackElement>(newParentElement);
+    if (!parentTrackElement) return false;
+    if (parentTrack_ == parentTrackElement) return true;
 
     // Can not set a parent if we already have one
-    if (parentTake_) return false;
+    if (parentTrack_) return false;
 
-    parentTake_ = parentTakeElement;
+    parentTrack_ = parentTrackElement;
     return true;
     //TODO: Why not put in ProjectElement to prevent code repetition?
 }

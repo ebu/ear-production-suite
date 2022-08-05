@@ -257,9 +257,13 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
         if(!moveToTrackNodeWithElements(relatedAdmElements)) {
             moveToNewTrackNode(td, relatedAdmElements);
+            addTake();
+            addAutomation();
+            /*
             auto trackNode = state.currentNode;
             moveToTakeNode();
             addAutomationNodes(trackNode);
+            */
         }
 
     }
@@ -277,9 +281,13 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             relatedAdmElements = { state.currentObject, state.rootPack, state.audioTrackUids[i] };
             if(!moveToTrackNodeWithElements(relatedAdmElements)) {
                 moveToNewTrackNode(td, relatedAdmElements);
+                addTake();
+                addAutomation();
+                /*
                 auto trackNode = state.currentNode;
                 moveToTakeNode();
                 addAutomationNodes(trackNode);
+                */
             }
         }
 
@@ -290,9 +298,13 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack, state.audioTrackUids[0] };
         if (!moveToTrackNodeWithElements(relatedAdmElements)) {
             moveToNewTrackNode(td, relatedAdmElements);
+            addTake();
+            addAutomation();
+            /*
             auto trackNode = state.currentNode;
             moveToTakeNode();
             addAutomationNodes(trackNode);
+            */
         }
     }
 }
@@ -378,6 +390,32 @@ void admplug::ProjectTree::moveToTakeNode()
     }
 }
 
+void admplug::ProjectTree::addTake()
+{
+    std::vector<adm::ElementConstVariant> relatedAdmElements;
+    std::for_each(state.audioTrackUids.begin(), state.audioTrackUids.end(),
+                  [&relatedAdmElements](std::shared_ptr<adm::AudioTrackUid const> elm) {
+        relatedAdmElements.push_back(elm);
+    });
+    auto trackNode = state.currentNode;
+    auto trackElement = std::dynamic_pointer_cast<TrackElement>(trackNode->getProjectElement());
+    if(!moveToCompatibleTakeNode(state.currentObject, state.audioTrackUids)) {
+        moveToNewTakeNode(state.currentObject);
+    }
+    auto takeElement = std::dynamic_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
+    if(trackElement && takeElement) {
+        trackElement->setTakeElement(takeElement);
+    }
+    // Add any additional channels
+    for(int i = 0; i < state.audioChannelFormats.size(); i++) {
+        auto channel = ADMChannel{state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i]};
+        if(!takeElement->hasTrackUid(channel.trackUid())) {
+            takeElement->addTrackUid(channel.trackUid());
+        }
+    }
+    state.currentNode = trackNode; // Reset pos as this is an add operation, not a move
+}
+
 void ProjectTree::moveToNewObjectTrackNode(std::vector<adm::ElementConstVariant> elements)
 {
     auto parentTrack = std::dynamic_pointer_cast<TrackElement>(state.currentNode->getProjectElement());
@@ -429,6 +467,22 @@ void admplug::ProjectTree::addAutomationNodes(std::shared_ptr<ProjectNode> track
     auto parentTrack = std::static_pointer_cast<TrackElement>(trackNode->getProjectElement());
     assert(std::dynamic_pointer_cast<TrackElement>(parentTrack)); // Has to have parent
     auto parentTake = std::static_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
+    assert(std::dynamic_pointer_cast<TakeElement>(parentTake)); // Has to have parent
+    for(int i = 0; i < state.audioChannelFormats.size(); i++) {
+        ADMChannel channel{ state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i] };
+        auto autoNode = nodeFactory->createAutomationNode(channel, parentTrack, parentTake);
+        assert(autoNode);
+        broadcast->elementAdded();
+        auto success = state.currentNode->addChildNode(autoNode);
+        assert(success);
+    }
+}
+
+void admplug::ProjectTree::addAutomation()
+{
+    auto parentTrack = std::static_pointer_cast<TrackElement>(state.currentNode->getProjectElement());
+    assert(std::dynamic_pointer_cast<TrackElement>(parentTrack)); // Has to have parent
+    auto parentTake = std::static_pointer_cast<TakeElement>(parentTrack->getTakeElement());
     assert(std::dynamic_pointer_cast<TakeElement>(parentTake)); // Has to have parent
     for(int i = 0; i < state.audioChannelFormats.size(); i++) {
         ADMChannel channel{ state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i] };
