@@ -260,17 +260,26 @@ void EARPluginSuite::setTrackInsertionIndexFromSelectedMedia(ReaperAPI const& ap
 	}
 }
 
-void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackElement, const admplug::ReaperAPI&)
+void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackElement, const admplug::ReaperAPI& api)
 {
-	auto track = trackElement.getTrack();
-	track->disableMasterSend();
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    //nameTrackFromElementName();
+    track->disableMasterSend();
 }
 
 void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const ReaperAPI & api)
 {
-	// Can't configure plugin or routing just yet because we need the channel count for the pack format in onDirectSpeakersAutomation
-	auto track = trackElement.getTrack();
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    //nameTrackFromElementName();
 	track->disableMasterSend();
+
+	// Can't configure plugin or routing just yet because we need the channel count for the pack format in onDirectSpeakersAutomation
 }
 
 void EARPluginSuite::onCreateGroup(TrackElement & trackElement, const ReaperAPI&)
@@ -427,8 +436,12 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 	}
 }
 
-void EARPluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
-    auto track = trackNode.getTrack();
+void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAPI &api){
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    //nameTrackFromElementName();
     track->disableMasterSend();
 }
 

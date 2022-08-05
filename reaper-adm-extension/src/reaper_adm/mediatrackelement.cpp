@@ -54,11 +54,12 @@ MediaTrackElement::MediaTrackElement(std::vector<adm::ElementConstVariant> admEl
 
 void MediaTrackElement::createProjectElements(PluginSuite &pluginSuite, ReaperAPI const& api)
 {
+    /*
     auto mediaTrack = api.createTrackAtIndex(0, true);
     assert(mediaTrack);
     track = std::make_shared<TrackInstance>(mediaTrack, api);
     nameTrackFromElementName();
-
+    */
     firePluginSuiteCallback(pluginSuite, api);
 }
 
