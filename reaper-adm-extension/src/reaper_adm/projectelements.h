@@ -57,7 +57,12 @@ class TakeElement;
 class TrackElement : public ProjectElement {
 public:
     virtual ~TrackElement() = default;
-    virtual std::shared_ptr<Track> getTrack() const = 0; // try and get rid?
+    void setTrack(std::shared_ptr<Track> trk) {
+        track = trk;
+    }
+    std::shared_ptr<Track> getTrack() const {
+        return track;
+    }
     virtual MediaItem* addMediaItem(ReaperAPI const& api) = 0;
     virtual std::vector<TrackGroup> slaveOfGroups() const = 0;
     virtual TrackGroup masterOfGroup() const = 0;
@@ -75,6 +80,7 @@ public:
         automationElements.push_back(automation);
     }
 protected:
+    std::shared_ptr<Track> track;
     std::vector<std::shared_ptr<TrackElement>> parentElements;
     std::shared_ptr<TakeElement> takeElement;
     std::vector<std::shared_ptr<AutomationElement>> automationElements;
