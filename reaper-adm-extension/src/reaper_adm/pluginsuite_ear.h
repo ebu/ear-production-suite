@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <map>
 #include "pluginsuite.h"
 #include "projectelements.h"
 
@@ -50,6 +51,12 @@ private:
 	std::shared_ptr<PluginParameter> hoaTrackMappingParameter;
 	std::shared_ptr<PluginParameter> hoaPackFormatIdValueParameter;
 	std::unique_ptr<UniqueValueAssigner> trackMappingAssigner;
+
+    struct TrackInfo {
+        std::shared_ptr<TrackInstance> track;
+        std::optional<int> routingStartChannel;
+    };
+    std::map<std::shared_ptr<TakeElement>, TrackInfo> takesOnTracks;
 
 	std::unique_ptr<Track> createBusTrack(std::string pluginName, const ReaperAPI& api);
 	std::unique_ptr<Track> sceneMasterTrack;
