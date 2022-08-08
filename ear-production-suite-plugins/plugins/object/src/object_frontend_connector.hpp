@@ -128,6 +128,9 @@ class ObjectsJuceFrontendConnector
   // Button::Listener
   void buttonClicked(Button*) override;
 
+  //TextEditor::Listener
+  void textEditorTextChanged(TextEditor&) override;
+
  private:
 
   void dispatchSliderAction(Slider*, SliderAction action);
