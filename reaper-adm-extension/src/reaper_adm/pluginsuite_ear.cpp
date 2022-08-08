@@ -205,15 +205,14 @@ void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 	assert(trackMappingToAtu.size() == 64);
 	assert(trackMappingToAo.size() == 64);
 	assert(originalAdmDocument.length() > 0);
-    /*//TODO - temp comment out for overlap crash
 	if (!sceneMasterAlreadyExisted) {
 		auto sceneMaster = EarSceneMasterVst(sceneMasterTrack->get(), api);
 		auto samplesPort = sceneMaster.getSamplesSocketPort();
 		auto commandPort = sceneMaster.getCommandSocketPort();
 		auto communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
-		communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
+        //TODO - temp comment out for overlap crash -
+		//communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
 	}
-    */
 }
 
 void EARPluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI & api)
@@ -245,7 +244,7 @@ std::unique_ptr<Track> EARPluginSuite::createBusTrack(std::string pluginName, Re
 	auto track = api.createTrack();
 	track->moveToBefore(trackInsertionIndex++);
 	track->hideFromTrackControlPanel();
-	//TODO - temp comment out for overlap crash - track->createPlugin(pluginName);
+	track->createPlugin(pluginName);
 	track->setChannelCount(MAX_CHANNEL_COUNT);
 	return track;
 }
