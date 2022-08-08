@@ -744,8 +744,17 @@ void ObjectsJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
 {
   if (auto nameTextEditor = lockIfSame(nameTextEditor_, &textEditor)) {
     setName(nameTextEditor->getText().toStdString());
+    // Normally we'd set a processor parameter which in turn calls
+    //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
+    //   which in turns fires notifyParameterChanged.
+    // Instead, we must do that directly (name state not held by a parameter)
     notifyParameterChanged(ParameterId::NAME, cachedName_);
   }
+}
+
+std::string ObjectsJuceFrontendConnector::getActiveName()
+{
+  return cachedName_;
 }
 
 }  // namespace ui
