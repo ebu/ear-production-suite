@@ -171,12 +171,8 @@ void ObjectsAudioProcessor::setStateInformation(const void* data,
       *divergence_ = xmlState->getBoolAttribute("divergence", false);
       *factor_ = xmlState->getDoubleAttribute("factor", 0.0);
       *range_ = xmlState->getDoubleAttribute("range", 0.0);
-      if(xmlState->hasAttribute("use_track_name")) {
-        *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
-      }
-      if(xmlState->hasAttribute("name")) {
-        connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
-      }
+      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
     }
   }
 }
