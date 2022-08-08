@@ -85,6 +85,9 @@ ObjectsJuceFrontendConnector::~ObjectsJuceFrontendConnector() {
   if (auto button = divergenceButton_.lock()) {
     button->removeListener(this);
   }
+  if (auto button = useTrackNameCheckbox_.lock()) {
+    button->removeListener(this);
+  }
   if (auto panner = pannerTopView_.lock()) {
     panner->removeListener(this);
   }
@@ -114,6 +117,13 @@ void ObjectsJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+}
+
+void ObjectsJuceFrontendConnector::setUseTrackNameCheckbox(
+    std::shared_ptr<ToggleButton> useTrackNameCheckbox){
+  useTrackNameCheckbox->addListener(this);
+  useTrackNameCheckbox_ = useTrackNameCheckbox;
+  setUseTrackName(cachedUseTrackName_);
 }
 
 void ObjectsJuceFrontendConnector::setColourComboBox(
@@ -264,6 +274,25 @@ void ObjectsJuceFrontendConnector::setName(const std::string& name) {
     nameTextEditorLocked->setText(name);
   }
   cachedName_ = name;
+}
+
+void ObjectsJuceFrontendConnector::setUseTrackName(bool useTrackName)
+{
+  auto useTrackNameCheckboxLocked = useTrackNameCheckbox_.lock();
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+
+  if (useTrackNameCheckboxLocked && nameTextEditorLocked) {
+    useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
+    if (useTrackName) {
+      nameTextEditorLocked->setText(lastReceivedTrackName_);
+      nameTextEditorLocked->setEnabled(false);
+      nameTextEditorLocked->setAlpha(0.38f);
+    } else {
+      nameTextEditorLocked->setEnabled(true);
+      nameTextEditorLocked->setAlpha(1.f);
+    }
+  }
+  cachedUseTrackName_ = useTrackName;
 }
 
 void ObjectsJuceFrontendConnector::setColour(Colour colour) {
@@ -538,6 +567,9 @@ void ObjectsJuceFrontendConnector::parameterValueChanged(int parameterIndex,
         notifyParameterChanged(ParameterId::RANGE, p_->getRange()->get());
         setRange(p_->getRange()->get());
         break;
+      case 15:
+        setUseTrackName(p_->getUseTrackName()->get());
+        break;
     }
   });
 }
@@ -547,8 +579,11 @@ void ObjectsJuceFrontendConnector::trackPropertiesChanged(
   // It is unclear if this will be called from the message thread so to be sure
   // we call the following async using the MessageManager
   updater_.callOnMessageThread([properties, this]() {
-    this->setName(properties.name.toStdString());
-    notifyParameterChanged(ParameterId::NAME, properties.name.toStdString());
+    this->lastReceivedTrackName_ = properties.name.toStdString();
+    if(this->cachedUseTrackName_) {
+      this->setName(this->lastReceivedTrackName_);
+      notifyParameterChanged(ParameterId::NAME, this->lastReceivedTrackName_);
+    }
     if (properties.colour.isTransparent()) {
       this->setColour(EarColours::PrimaryVariant);
       notifyParameterChanged(ParameterId::COLOUR,
@@ -696,9 +731,11 @@ void ObjectsJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
 void ObjectsJuceFrontendConnector::buttonClicked(Button* button) {
   if (auto divergenceButton = lockIfSame(divergenceButton_, button)) {
     // note: getToggleState still has the old value when this is called
-    *(p_->getDivergence()) = !button->getToggleState();
+    *(p_->getDivergence()) = !divergenceButton->getToggleState();
   } else if (auto linkSizeButton = lockIfSame(linkSizeButton_, button)) {
-    *(p_->getLinkSize()) = !button->getToggleState();
+    *(p_->getLinkSize()) = !linkSizeButton->getToggleState();
+  }  else if (auto useTrackNameCheckbox = lockIfSame(useTrackNameCheckbox_, button)) {
+    *(p_->getUseTrackName()) = !useTrackNameCheckbox->getToggleState();
   }
 }
 

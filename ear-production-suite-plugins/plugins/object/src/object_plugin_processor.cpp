@@ -29,6 +29,7 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   addParameter(factor_ = new AudioParameterFloat("factor", "Factor", 0.f, 1.f, 0.f));
   addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
+  addParameter(useTrackName_ = new AudioParameterBool("useTrackName", "Use Track Name", true));
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
@@ -52,6 +53,7 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   connector_->parameterValueChanged(11, divergence_->get());
   connector_->parameterValueChanged(12, factor_->get());
   connector_->parameterValueChanged(13, range_->get());
+  connector_->parameterValueChanged(14, useTrackName_->get());
 }
 
 ObjectsAudioProcessor::~ObjectsAudioProcessor() {}
@@ -139,6 +141,7 @@ void ObjectsAudioProcessor::getStateInformation(MemoryBlock& destData) {
   xml->setAttribute("divergence", (bool)*divergence_);
   xml->setAttribute("factor", (double)*factor_);
   xml->setAttribute("range", (double)*range_);
+  xml->setAttribute("use_track_name", (bool)*useTrackName_);
   copyXmlToBinary(*xml, destData);
 }
 
@@ -167,6 +170,7 @@ void ObjectsAudioProcessor::setStateInformation(const void* data,
       *divergence_ = xmlState->getBoolAttribute("divergence", false);
       *factor_ = xmlState->getDoubleAttribute("factor", 0.0);
       *range_ = xmlState->getDoubleAttribute("range", 0.0);
+      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
     }
   }
 }

@@ -50,6 +50,7 @@ class ObjectsJuceFrontendConnector
   // Main Value Box
   void setStatusBarLabel(std::shared_ptr<Label> statusBarLabel);
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> nameTextEditor);
+  void setUseTrackNameCheckbox(std::shared_ptr<ToggleButton> useTrackNameCheckbox);
   void setColourComboBox(std::shared_ptr<EarComboBox> colourComboBox);
   void setRoutingComboBox(std::shared_ptr<EarComboBox> routingComboBox);
 
@@ -82,6 +83,7 @@ class ObjectsJuceFrontendConnector
 
   // Value setter
   void setName(const std::string& name);
+  void setUseTrackName(bool value);
   void setColour(Colour colour);
   void setRouting(int routing);
   void setGain(float gain);
@@ -136,6 +138,7 @@ class ObjectsJuceFrontendConnector
   std::weak_ptr<EarComboBox> colourComboBox_;
   std::weak_ptr<EarComboBox> routingComboBox_;
   std::weak_ptr<EarNameTextEditor> nameTextEditor_;
+  std::weak_ptr<ToggleButton> useTrackNameCheckbox_;
 
   // Panning Value Box
   std::weak_ptr<EarSlider> gainSlider_;
@@ -172,6 +175,8 @@ class ObjectsJuceFrontendConnector
   Colour cachedColour_{ juce::Colours::transparentBlack };
   int cachedRouting_{ -1 };
   std::string cachedName_{};
+  std::string lastReceivedTrackName_{};
+  bool cachedUseTrackName_{ true };
   float cachedGain_{ 1.f };
   float cachedAzimuth_{ 0.f };
   float cachedElevation_{ 0.f };

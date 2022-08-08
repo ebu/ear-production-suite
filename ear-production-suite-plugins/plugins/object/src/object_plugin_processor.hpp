@@ -62,6 +62,7 @@ class ObjectsAudioProcessor : public AudioProcessor {
   AudioParameterBool* getDivergence() { return divergence_; }
   AudioParameterFloat* getFactor() { return factor_; }
   AudioParameterFloat* getRange() { return range_; }
+  AudioParameterBool* getUseTrackName() { return useTrackName_; }
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -93,6 +94,7 @@ class ObjectsAudioProcessor : public AudioProcessor {
   AudioParameterFloat* factor_;
   AudioParameterFloat* range_;
   AudioParameterBool* bypass_;
+  AudioParameterBool* useTrackName_;
 
   std::unique_ptr<ear::plugin::ui::ObjectsJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::ObjectBackend> backend_;
