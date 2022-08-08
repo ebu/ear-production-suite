@@ -115,6 +115,7 @@ void ObjectsJuceFrontendConnector::doSetStatusBarText(const std::string& text) {
 
 void ObjectsJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
+  textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
 }
@@ -284,9 +285,9 @@ void ObjectsJuceFrontendConnector::setUseTrackName(bool useTrackName)
   if (useTrackNameCheckboxLocked && nameTextEditorLocked) {
     useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
     if (useTrackName) {
-      nameTextEditorLocked->setText(lastReceivedTrackName_);
       nameTextEditorLocked->setEnabled(false);
       nameTextEditorLocked->setAlpha(0.38f);
+      setName(lastReceivedTrackName_);
     } else {
       nameTextEditorLocked->setEnabled(true);
       nameTextEditorLocked->setAlpha(1.f);
@@ -736,6 +737,14 @@ void ObjectsJuceFrontendConnector::buttonClicked(Button* button) {
     *(p_->getLinkSize()) = !linkSizeButton->getToggleState();
   }  else if (auto useTrackNameCheckbox = lockIfSame(useTrackNameCheckbox_, button)) {
     *(p_->getUseTrackName()) = !useTrackNameCheckbox->getToggleState();
+  }
+}
+
+void ObjectsJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
+{
+  if (auto nameTextEditor = lockIfSame(nameTextEditor_, &textEditor)) {
+    setName(nameTextEditor->getText().toStdString());
+    notifyParameterChanged(ParameterId::NAME, cachedName_);
   }
 }
 
