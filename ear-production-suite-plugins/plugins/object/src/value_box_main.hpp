@@ -28,6 +28,7 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(name_.get());
 
     useTrackNameCheckbox_->setButtonText("Use track name");
+    useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
     addAndMakeVisible(useTrackNameCheckbox_.get());
 
     routingLabel_->setFont(EarFonts::Label);
