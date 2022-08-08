@@ -142,6 +142,7 @@ void ObjectsAudioProcessor::getStateInformation(MemoryBlock& destData) {
   xml->setAttribute("factor", (double)*factor_);
   xml->setAttribute("range", (double)*range_);
   xml->setAttribute("use_track_name", (bool)*useTrackName_);
+  xml->setAttribute("name", connector_->getActiveName());
   copyXmlToBinary(*xml, destData);
 }
 
@@ -170,7 +171,12 @@ void ObjectsAudioProcessor::setStateInformation(const void* data,
       *divergence_ = xmlState->getBoolAttribute("divergence", false);
       *factor_ = xmlState->getDoubleAttribute("factor", 0.0);
       *range_ = xmlState->getDoubleAttribute("range", 0.0);
-      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      if(xmlState->hasAttribute("use_track_name")) {
+        *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      }
+      if(xmlState->hasAttribute("name")) {
+        connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
+      }
     }
   }
 }

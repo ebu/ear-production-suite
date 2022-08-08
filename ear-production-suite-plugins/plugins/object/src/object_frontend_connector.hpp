@@ -102,6 +102,8 @@ class ObjectsJuceFrontendConnector
   void setFactor(float value);
   void setRange(float value);
 
+  std::string getActiveName();
+
  protected:
   // Slider::Listener
   void sliderValueChanged(Slider* slider) override;
