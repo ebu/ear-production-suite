@@ -19,6 +19,17 @@ class EarNameTextEditor : public TextEditor {
     setMultiLine(false);
     setJustification(Justification::topLeft);
     setBorder(BorderSize<int>(0, textIndent, 0, textIndent));
+    onReturnKey = [this]() {
+        this->lastAcceptedText = this->TextEditor::getText();
+        this->unfocusAllComponents();
+    };
+    onEscapeKey = [this]() {
+        this->setText(this->lastAcceptedText);
+        this->unfocusAllComponents();
+    };
+    onFocusLost = [this]() {
+        this->lastAcceptedText = this->TextEditor::getText();
+    };
   }
 
   void setLabelText(const String& l) {
@@ -35,6 +46,7 @@ class EarNameTextEditor : public TextEditor {
 
   void setText(const String& text, bool sendTextChangeMessage = true) {
     TextEditor::setText(text, sendTextChangeMessage);
+    lastAcceptedText = text;
     scrollToMakeSureCursorIsVisible();
   }
 
@@ -45,6 +57,7 @@ class EarNameTextEditor : public TextEditor {
   // --
 
   ear::plugin::ui::NameTextEditorLookAndFeel earNameTextEditorLookAndFeel_;
+  juce::String lastAcceptedText;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarNameTextEditor)
 };
