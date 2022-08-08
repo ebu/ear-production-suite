@@ -42,6 +42,7 @@ class EAR_PLUGIN_BASE_EXPORT ObjectsFrontendBackendConnector {
     DIFFUSE,
     FACTOR,
     RANGE,
+    USE_TRACK_NAME,
   };
 
   using ParameterChangedCallback =
