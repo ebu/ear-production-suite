@@ -127,7 +127,7 @@ class ObjectsComponent : public Component,
     auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
 
     // left column
-    mainValueBox->setBounds(leftColumn.removeFromTop(161).reduced(5, 5));
+    mainValueBox->setBounds(leftColumn.removeFromTop(187).reduced(5, 5));
     gainValueBox->setBounds(leftColumn.removeFromTop(103).reduced(5, 5));
     // TODO - panningValueBox original position - reinstate when metadata implemented
     //panningValueBox->setBounds(leftColumn.removeFromTop(219).reduced(5, 5));
