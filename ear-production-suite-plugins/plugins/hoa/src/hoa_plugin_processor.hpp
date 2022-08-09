@@ -53,6 +53,7 @@ class HoaAudioProcessor : public AudioProcessor {
 
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
+  AudioParameterBool* getUseTrackName() { return useTrackName_; }
 
   AudioProcessorParameter* getBypassParameter() { return bypass_; }
 
@@ -70,6 +71,7 @@ class HoaAudioProcessor : public AudioProcessor {
   AudioParameterInt* routing_;
   AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
+  AudioParameterBool* useTrackName_;
 
   std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::HoaBackend> backend_;

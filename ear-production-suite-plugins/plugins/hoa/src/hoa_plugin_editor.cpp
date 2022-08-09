@@ -7,7 +7,7 @@
 
 namespace {
 const int desiredWidth{800};
-const int desiredHeight{650};
+const int desiredHeight{677};
 }  // namespace
 
 using namespace ear::plugin::ui;
@@ -17,9 +17,12 @@ HoaAudioProcessorEditor::HoaAudioProcessorEditor(HoaAudioProcessor* p)
       p_(p),
       content_(std::make_unique<HoaComponent>(p)),
       viewport_(std::make_unique<Viewport>()) {
-  p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
+  p->getFrontendConnector()->setStatusBarLabel(
+      content_->statusBarLabel);
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
+  p->getFrontendConnector()->setUseTrackNameCheckbox(
+      content_->mainValueBox->getUseTrackNameCheckbox());
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(
