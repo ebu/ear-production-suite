@@ -283,14 +283,22 @@ void ObjectsJuceFrontendConnector::setUseTrackName(bool useTrackName)
   auto nameTextEditorLocked = nameTextEditor_.lock();
 
   if (useTrackNameCheckboxLocked && nameTextEditorLocked) {
-    useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
-    if (useTrackName) {
-      nameTextEditorLocked->setEnabled(false);
-      nameTextEditorLocked->setAlpha(0.38f);
-      setName(lastReceivedTrackName_);
-    } else {
-      nameTextEditorLocked->setEnabled(true);
-      nameTextEditorLocked->setAlpha(1.f);
+    auto oldState = useTrackNameCheckboxLocked->getToggleState();
+    if(oldState != useTrackName) {
+      useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
+      if(useTrackName) {
+        lastKnownCustomName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(false);
+        nameTextEditorLocked->setAlpha(0.38f);
+        setName(lastKnownTrackName_);
+      } else {
+        lastKnownTrackName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(true);
+        nameTextEditorLocked->setAlpha(1.f);
+        if(!lastKnownCustomName_.empty()) {
+          setName(lastKnownCustomName_);
+        }
+      }
     }
   }
   cachedUseTrackName_ = useTrackName;
@@ -580,10 +588,10 @@ void ObjectsJuceFrontendConnector::trackPropertiesChanged(
   // It is unclear if this will be called from the message thread so to be sure
   // we call the following async using the MessageManager
   updater_.callOnMessageThread([properties, this]() {
-    this->lastReceivedTrackName_ = properties.name.toStdString();
+    this->lastKnownTrackName_ = properties.name.toStdString();
     if(this->cachedUseTrackName_) {
-      this->setName(this->lastReceivedTrackName_);
-      notifyParameterChanged(ParameterId::NAME, this->lastReceivedTrackName_);
+      this->setName(this->lastKnownTrackName_);
+      notifyParameterChanged(ParameterId::NAME, this->lastKnownTrackName_);
     }
     if (properties.colour.isTransparent()) {
       this->setColour(EarColours::PrimaryVariant);

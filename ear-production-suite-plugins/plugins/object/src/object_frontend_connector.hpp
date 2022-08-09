@@ -180,7 +180,8 @@ class ObjectsJuceFrontendConnector
   Colour cachedColour_{ juce::Colours::transparentBlack };
   int cachedRouting_{ -1 };
   std::string cachedName_{};
-  std::string lastReceivedTrackName_{};
+  std::string lastKnownTrackName_{};
+  std::string lastKnownCustomName_{};
   bool cachedUseTrackName_{ true };
   float cachedGain_{ 1.f };
   float cachedAzimuth_{ 0.f };
