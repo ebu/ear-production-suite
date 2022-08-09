@@ -95,13 +95,11 @@ class HoaComponent : public Component,
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
 
-    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);
-    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
-    auto orderDisplayArea = area.withTrimmedTop(197);
-
-    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
-
-    orderDisplayValueBox->setBounds(orderDisplayArea.reduced(5, 5));
+    auto topArea = area.removeFromTop(223);
+    auto leftColumn = topArea.withTrimmedRight(area.getWidth() / 2);
+    auto rightColumn = topArea.withTrimmedLeft(area.getWidth() / 2);
+    mainValueBox->setBounds(leftColumn.reduced(5, 5));
+    orderDisplayValueBox->setBounds(area.reduced(5, 5));
   }
 
   std::unique_ptr<EarHeader> header;

@@ -15,6 +15,7 @@ class ValueBoxMain : public Component {
   ValueBoxMain()
       : colourComboBox_(std::make_shared<EarComboBox>()),
         name_(std::make_shared<EarNameTextEditor>()),
+        useTrackNameCheckbox_(std::make_shared<ToggleButton>()),
         hoaTypeLabel_(std::make_unique<Label>()),
         hoaTypeComboBox_(std::make_shared<EarComboBox>()),
         routingLabel_(std::make_unique<Label>()),
@@ -27,11 +28,15 @@ class ValueBoxMain : public Component {
     routingLabel_->setName("Label (ValueBoxMain::routingLabel_)");
     routingComboBox_->setName("EarComboBox (ValueBoxMain::routingComboBox_)");
 
-    name_->setLabelText("Name");
+    name_->setLabelText("Object Name");
     name_->setText("HOA_1");
     name_->setEnabled(false);
     name_->setAlpha(0.38f);
     addAndMakeVisible(name_.get());
+
+    useTrackNameCheckbox_->setButtonText("Use track name");
+    useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
+    addAndMakeVisible(useTrackNameCheckbox_.get());
 
     routingLabel_->setFont(EarFonts::Label);
     routingLabel_->setText("Routing",
@@ -84,12 +89,12 @@ class ValueBoxMain : public Component {
 
     area.removeFromTop(marginBig_);
 
-    auto descArea = area.removeFromTop(63);
+    auto descArea = area.removeFromTop(90);
     auto colourArea = descArea.withWidth(labelWidth_);
-    colourComboBox_->setBounds(colourArea);
-    auto nameArea = descArea.withTrimmedLeft(labelWidth_ + marginBig_)
-                        .reduced(0, marginSmall_);
-    name_->setBounds(nameArea);
+    colourComboBox_->setBounds(colourArea.removeFromTop(63));
+    auto nameArea = descArea.withTrimmedLeft(labelWidth_ + marginBig_);
+    name_->setBounds(nameArea.removeFromTop(63).reduced(0, marginSmall_));
+    useTrackNameCheckbox_->setBounds(nameArea);
 
     area.removeFromTop(15.f);
 
@@ -114,6 +119,7 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
   std::shared_ptr<EarComboBox> getHoaTypeComboBox() { return hoaTypeComboBox_; }
+  std::shared_ptr<ToggleButton> getUseTrackNameCheckbox() { return useTrackNameCheckbox_; }
 
  private:
   const float labelWidth_ = 110.f;
@@ -123,6 +129,7 @@ class ValueBoxMain : public Component {
 
   std::shared_ptr<EarComboBox> colourComboBox_;
   std::shared_ptr<EarNameTextEditor> name_;
+  std::shared_ptr<ToggleButton> useTrackNameCheckbox_;
 
   std::unique_ptr<Label> hoaTypeLabel_;
   std::shared_ptr<EarComboBox> hoaTypeComboBox_;

@@ -52,6 +52,9 @@ HoaJuceFrontendConnector::~HoaJuceFrontendConnector() {
   if (auto comboBox = hoaTypeComboBox_.lock()) {
     comboBox->removeListener(this);
   }
+  if (auto button = useTrackNameCheckbox_.lock()) {
+    button->removeListener(this);
+  }
 }
 
 void HoaJuceFrontendConnector::setStatusBarLabel(
@@ -75,8 +78,16 @@ void HoaJuceFrontendConnector::doSetStatusBarText(const std::string& text) {
 
 void HoaJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
+  textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+}
+
+void HoaJuceFrontendConnector::setUseTrackNameCheckbox(
+  std::shared_ptr<ToggleButton> useTrackNameCheckbox){
+  useTrackNameCheckbox->addListener(this);
+  useTrackNameCheckbox_ = useTrackNameCheckbox;
+  setUseTrackName(cachedUseTrackName_);
 }
 
 void HoaJuceFrontendConnector::setName(const std::string& name) {
@@ -84,6 +95,33 @@ void HoaJuceFrontendConnector::setName(const std::string& name) {
     nameTextEditorLocked->setText(name);
   }
   cachedName_ = name;
+}
+
+void HoaJuceFrontendConnector::setUseTrackName(bool useTrackName)
+{
+  auto useTrackNameCheckboxLocked = useTrackNameCheckbox_.lock();
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+
+  if (useTrackNameCheckboxLocked && nameTextEditorLocked) {
+    auto oldState = useTrackNameCheckboxLocked->getToggleState();
+    if(oldState != useTrackName) {
+      useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
+      if(useTrackName) {
+        lastKnownCustomName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(false);
+        nameTextEditorLocked->setAlpha(0.38f);
+        setName(lastKnownTrackName_);
+      } else {
+        lastKnownTrackName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(true);
+        nameTextEditorLocked->setAlpha(1.f);
+        if(!lastKnownCustomName_.empty()) {
+          setName(lastKnownCustomName_);
+        }
+      }
+    }
+  }
+  cachedUseTrackName_ = useTrackName;
 }
 
 void HoaJuceFrontendConnector::setColourComboBox(
@@ -174,6 +212,9 @@ void HoaJuceFrontendConnector::parameterValueChanged(int parameterIndex,
       updater_.callOnMessageThread(
           [this]() { setHoaType(p_->getPackFormatIdValue()->get()); });
       break;
+    case 3:
+      setUseTrackName(p_->getUseTrackName()->get());
+      break;
   }
 }
 
@@ -182,8 +223,11 @@ void HoaJuceFrontendConnector::trackPropertiesChanged(
   // It is unclear if this will be called from the message thread so to be sure
   // we call the following async using the MessageManager
   updater_.callOnMessageThread([properties, this]() {
-    this->setName(properties.name.toStdString());
-    notifyParameterChanged(ParameterId::NAME, properties.name.toStdString());
+    this->lastKnownTrackName_ = properties.name.toStdString();
+    if(this->cachedUseTrackName_) {
+      this->setName(this->lastKnownTrackName_);
+      notifyParameterChanged(ParameterId::NAME, this->lastKnownTrackName_);
+    }
     if (properties.colour.isTransparent()) {
       this->setColour(EarColours::PrimaryVariant);
       notifyParameterChanged(ParameterId::COLOUR,
@@ -206,6 +250,29 @@ void HoaJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
   if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
     *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
   }
+}
+
+void HoaJuceFrontendConnector::buttonClicked(Button* button) {
+  if (auto useTrackNameCheckbox = lockIfSame(useTrackNameCheckbox_, button)) {
+    *(p_->getUseTrackName()) = !useTrackNameCheckbox->getToggleState();
+  }
+}
+
+void HoaJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
+{
+  if (auto nameTextEditor = lockIfSame(nameTextEditor_, &textEditor)) {
+    setName(nameTextEditor->getText().toStdString());
+    // Normally we'd set a processor parameter which in turn calls
+    //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
+    //   which in turns fires notifyParameterChanged.
+    // Instead, we must do that directly (name state not held by a parameter)
+    notifyParameterChanged(ParameterId::NAME, cachedName_);
+  }
+}
+
+std::string HoaJuceFrontendConnector::getActiveName()
+{
+  return cachedName_;
 }
 
 }  // namespace ui

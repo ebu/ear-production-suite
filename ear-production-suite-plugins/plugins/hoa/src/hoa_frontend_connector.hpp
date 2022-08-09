@@ -18,6 +18,8 @@ class ValueBoxOrderDisplay;
 class HoaJuceFrontendConnector
     : public ear::plugin::ui::HoaFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
+      TextEditor::Listener,
+      Button::Listener,
       ear::plugin::ui::EarComboBox::Listener {
  public:
   /**
@@ -37,20 +39,30 @@ class HoaJuceFrontendConnector
   void setStatusBarLabel(std::shared_ptr<Label> label);
   void setColourComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> textEditor);
+  void setUseTrackNameCheckbox(std::shared_ptr<ToggleButton> useTrackNameCheckbox);
   void setRoutingComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setHoaTypeComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setOrderDisplayValueBox(std::shared_ptr<ValueBoxOrderDisplay> gains);
 
   void setName(const std::string& name);
   void setColour(Colour colour);
+  void setUseTrackName(bool value);
   void setRouting(int routing);
   void setHoaType(int hoaType);
+
+  std::string getActiveName();
 
  protected:
   void doSetStatusBarText(const std::string& text) override;
 
   void comboBoxChanged(
       ear::plugin::ui::EarComboBox* comboBoxThatHasChanged) override;
+
+  // Button::Listener
+  void buttonClicked(Button*) override;
+
+  //TextEditor::Listener
+  void textEditorTextChanged(TextEditor&) override;
 
  private:
   HoaAudioProcessor* p_;
@@ -63,7 +75,11 @@ class HoaJuceFrontendConnector
   std::string cachedStatusBarText_;
 
   std::weak_ptr<EarNameTextEditor> nameTextEditor_;
+  std::weak_ptr<ToggleButton> useTrackNameCheckbox_;
   std::string cachedName_;
+  std::string lastKnownTrackName_{};
+  std::string lastKnownCustomName_{};
+  bool cachedUseTrackName_{ true };
   std::weak_ptr<EarComboBox> colourComboBox_;
   Colour cachedColour_;
   std::weak_ptr<EarComboBox> routingComboBox_;

@@ -81,6 +81,7 @@ set(EAR_BASE_HEADERS
 	include/detail/named_type.hpp
 	include/detail/spdl_nng_sink.hpp
 	include/direct_speakers_backend.hpp
+	include/hoa_backend.hpp
 	include/helper/eps_to_ear_metadata_converter.hpp
 	include/helper/move.hpp
 	include/helper/weak_ptr.hpp
@@ -125,6 +126,7 @@ set(EAR_BASE_HEADERS
 	include/scene_gains_calculator.hpp
 	include/ui/binaural_monitoring_frontend_backend_connector.hpp
 	include/ui/direct_speakers_frontend_backend_connector.hpp
+	include/ui/hoa_frontend_backend_connector.hpp
 	include/ui/item_colour.hpp
 	include/ui/object_frontend_backend_connector.hpp
 	include/variable_block_adapter.hpp
