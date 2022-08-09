@@ -24,8 +24,10 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packFormatIdValue", "PackFormat ID Value",
       0x0, 0xFFFF, 0));
-
-  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
+  addParameter(bypass_ =
+    new AudioParameterBool("byps", "Bypass", false));
+  addParameter(useTrackName_ =
+    new AudioParameterBool("useTrackName", "Use Track Name", true));
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
@@ -41,6 +43,7 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, packFormatIdValue_->get());
+  connector_->parameterValueChanged(3, useTrackName_->get());
 }
 
 DirectSpeakersAudioProcessor::~DirectSpeakersAudioProcessor() {}
@@ -113,6 +116,8 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
   xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);
+  xml->setAttribute("use_track_name", (bool)*useTrackName_);
+  xml->setAttribute("name", connector_->getActiveName());
   copyXmlToBinary(*xml, destData);
 }
 
@@ -143,6 +148,9 @@ void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
           *packFormatIdValue_ = 0;
         }
       }
+
+      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
     }
 }
 
