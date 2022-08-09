@@ -25,7 +25,10 @@ HoaAudioProcessor::HoaAudioProcessor()
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packformat_id_value", "PackFormat ID Value",
       0, 0xFFFF, 0));
-  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
+  addParameter(bypass_ =
+    new AudioParameterBool("byps", "Bypass", false));
+  addParameter(useTrackName_ =
+    new AudioParameterBool("useTrackName", "Use Track Name", true));
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)
@@ -46,6 +49,7 @@ HoaAudioProcessor::HoaAudioProcessor()
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, packFormatIdValue_->get());
+  connector_->parameterValueChanged(3, useTrackName_->get());
 }
 
 HoaAudioProcessor::~HoaAudioProcessor() {}
@@ -110,7 +114,8 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
   xml->setAttribute("connection_id", connectionId_.string());
   xml->setAttribute("routing", (int)*routing_);
   xml->setAttribute("packformat_id_value", (int)*packFormatIdValue_);
-
+  xml->setAttribute("use_track_name", (bool)*useTrackName_);
+  xml->setAttribute("name", connector_->getActiveName());
   copyXmlToBinary(*xml, destData);
 }
 
@@ -127,6 +132,8 @@ void HoaAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
       auto con_id = connectionId_;
       *routing_ = xmlState->getIntAttribute("routing", -1);
       *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
+      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
     }
 }
 
