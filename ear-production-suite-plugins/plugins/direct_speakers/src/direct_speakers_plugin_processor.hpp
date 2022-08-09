@@ -51,6 +51,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
 
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
+  AudioParameterBool* getUseTrackName() { return useTrackName_; }
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -70,6 +71,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
   AudioParameterInt* routing_;
   AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
+  AudioParameterBool* useTrackName_;
 
   std::unique_ptr<ear::plugin::ui::DirectSpeakersJuceFrontendConnector>
       connector_;

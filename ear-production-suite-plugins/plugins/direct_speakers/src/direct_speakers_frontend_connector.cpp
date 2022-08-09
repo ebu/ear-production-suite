@@ -20,6 +20,8 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
+using detail::lockIfSame;
+
 inline bool clipToBool(float value) { return value < 0.5 ? false : true; }
 
 DirectSpeakersJuceFrontendConnector::DirectSpeakersJuceFrontendConnector(
@@ -55,6 +57,9 @@ DirectSpeakersJuceFrontendConnector::~DirectSpeakersJuceFrontendConnector() {
   if (auto comboBox = speakerSetupsComboBox_.lock()) {
     comboBox->removeListener(this);
   }
+  if (auto button = useTrackNameCheckbox_.lock()) {
+    button->removeListener(this);
+  }
 }
 
 void DirectSpeakersJuceFrontendConnector::setStatusBarLabel(
@@ -79,8 +84,16 @@ void DirectSpeakersJuceFrontendConnector::doSetStatusBarText(
 
 void DirectSpeakersJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
+  textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+}
+
+void DirectSpeakersJuceFrontendConnector::setUseTrackNameCheckbox(
+  std::shared_ptr<ToggleButton> useTrackNameCheckbox){
+  useTrackNameCheckbox->addListener(this);
+  useTrackNameCheckbox_ = useTrackNameCheckbox;
+  setUseTrackName(cachedUseTrackName_);
 }
 
 void DirectSpeakersJuceFrontendConnector::setName(const std::string& name) {
@@ -88,6 +101,33 @@ void DirectSpeakersJuceFrontendConnector::setName(const std::string& name) {
     nameTextEditorLocked->setText(name);
   }
   cachedName_ = name;
+}
+
+void DirectSpeakersJuceFrontendConnector::setUseTrackName(bool useTrackName)
+{
+  auto useTrackNameCheckboxLocked = useTrackNameCheckbox_.lock();
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+
+  if (useTrackNameCheckboxLocked && nameTextEditorLocked) {
+    auto oldState = useTrackNameCheckboxLocked->getToggleState();
+    if(oldState != useTrackName) {
+      useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
+      if(useTrackName) {
+        lastKnownCustomName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(false);
+        nameTextEditorLocked->setAlpha(0.38f);
+        setName(lastKnownTrackName_);
+      } else {
+        lastKnownTrackName_ = cachedName_;
+        nameTextEditorLocked->setEnabled(true);
+        nameTextEditorLocked->setAlpha(1.f);
+        if(!lastKnownCustomName_.empty()) {
+          setName(lastKnownCustomName_);
+        }
+      }
+    }
+  }
+  cachedUseTrackName_ = useTrackName;
 }
 
 void DirectSpeakersJuceFrontendConnector::setColourComboBox(
@@ -212,6 +252,9 @@ void DirectSpeakersJuceFrontendConnector::parameterValueChanged(
         setSpeakerSetup(speakerSetupIndex);
       });
       break;
+    case 3:
+      setUseTrackName(p_->getUseTrackName()->get());
+      break;
   }
 }
 
@@ -220,8 +263,11 @@ void DirectSpeakersJuceFrontendConnector::trackPropertiesChanged(
   // It is unclear if this will be called from the message thread so to be sure
   // we call the following async using the MessageManager
   updater_.callOnMessageThread([properties, this]() {
-    this->setName(properties.name.toStdString());
-    notifyParameterChanged(ParameterId::NAME, properties.name.toStdString());
+    this->lastKnownTrackName_ = properties.name.toStdString();
+    if(this->cachedUseTrackName_) {
+      this->setName(this->lastKnownTrackName_);
+      notifyParameterChanged(ParameterId::NAME, this->lastKnownTrackName_);
+    }
     if (properties.colour.isTransparent()) {
       this->setColour(EarColours::PrimaryVariant);
       notifyParameterChanged(ParameterId::COLOUR,
@@ -239,12 +285,35 @@ void DirectSpeakersJuceFrontendConnector::sliderDragEnded(Slider* slider) {}
 
 void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
-  if (auto speakerSetupsComboBox = detail::lockIfSame(speakerSetupsComboBox_, comboBox)) {
+  if (auto speakerSetupsComboBox = lockIfSame(speakerSetupsComboBox_, comboBox)) {
     *(p_->getPackFormatIdValue()) = speakerSetupByIndex(speakerSetupsComboBox->getSelectedEntryIndex()).packFormatIdValue;
   }
-  if (auto routingComboBox = detail::lockIfSame(routingComboBox_, comboBox)) {
+  if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
     *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
   }
+}
+
+void DirectSpeakersJuceFrontendConnector::buttonClicked(Button* button) {
+  if (auto useTrackNameCheckbox = lockIfSame(useTrackNameCheckbox_, button)) {
+    *(p_->getUseTrackName()) = !useTrackNameCheckbox->getToggleState();
+  }
+}
+
+void DirectSpeakersJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
+{
+  if (auto nameTextEditor = lockIfSame(nameTextEditor_, &textEditor)) {
+    setName(nameTextEditor->getText().toStdString());
+    // Normally we'd set a processor parameter which in turn calls
+    //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
+    //   which in turns fires notifyParameterChanged.
+    // Instead, we must do that directly (name state not held by a parameter)
+    notifyParameterChanged(ParameterId::NAME, cachedName_);
+  }
+}
+
+std::string DirectSpeakersJuceFrontendConnector::getActiveName()
+{
+  return cachedName_;
 }
 
 }  // namespace ui

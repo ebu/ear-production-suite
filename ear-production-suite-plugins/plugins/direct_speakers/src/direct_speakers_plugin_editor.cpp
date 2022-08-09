@@ -22,6 +22,8 @@ DirectSpeakersAudioProcessorEditor::DirectSpeakersAudioProcessorEditor(
   p->getFrontendConnector()->setStatusBarLabel(content_->statusBarLabel);
   p->getFrontendConnector()->setNameTextEditor(
       content_->mainValueBox->getNameTextEditor());
+  p->getFrontendConnector()->setUseTrackNameCheckbox(
+      content_->mainValueBox->getUseTrackNameCheckbox());
   p->getFrontendConnector()->setColourComboBox(
       content_->mainValueBox->getColourComboBox());
   p->getFrontendConnector()->setRoutingComboBox(

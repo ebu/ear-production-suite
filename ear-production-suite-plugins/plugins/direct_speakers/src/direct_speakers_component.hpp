@@ -114,7 +114,7 @@ class DirectSpeakersComponent : public Component,
     auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
 
     // left column
-    mainValueBox->setBounds(leftColumn.removeFromTop(197).reduced(5, 5));
+    mainValueBox->setBounds(leftColumn.removeFromTop(223).reduced(5, 5));
     channelMetersBox->setBounds(leftColumn.reduced(5, 5));
 
     // right column
