@@ -18,6 +18,8 @@ class DirectSpeakersJuceFrontendConnector
     : public ear::plugin::ui::DirectSpeakersFrontendBackendConnector,
       private AudioProcessorParameter::Listener,
       Slider::Listener,
+      TextEditor::Listener,
+      Button::Listener,
       ear::plugin::ui::EarComboBox::Listener {
  public:
   /**
@@ -38,6 +40,7 @@ class DirectSpeakersJuceFrontendConnector
   void setStatusBarLabel(std::shared_ptr<Label> label);
   void setColourComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setNameTextEditor(std::shared_ptr<EarNameTextEditor> textEditor);
+  void setUseTrackNameCheckbox(std::shared_ptr<ToggleButton> useTrackNameCheckbox);
   void setRoutingComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setSpeakerSetupsComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setUpperLayerValueBox(std::shared_ptr<ValueBoxSpeakerLayer> layer);
@@ -46,10 +49,12 @@ class DirectSpeakersJuceFrontendConnector
 
   void setName(const std::string& name);
   void setColour(Colour colour);
-
+  void setUseTrackName(bool value);
   void setRouting(int routing);
   void setSpeakerSetup(int speakerSetupIndex);
   void setChannelGainsValueBox(std::shared_ptr<ChannelMeterLayout> gains);
+
+  std::string getActiveName();
 
  protected:
   // ear::plugin::ui::InputFrontendBackendConnector
@@ -64,6 +69,12 @@ class DirectSpeakersJuceFrontendConnector
   void comboBoxChanged(
       ear::plugin::ui::EarComboBox* comboBoxThatHasChanged) override;
 
+  // Button::Listener
+  void buttonClicked(Button*) override;
+
+  //TextEditor::Listener
+  void textEditorTextChanged(TextEditor&) override;
+
  private:
   void speakerSetupChanged(int index);
 
@@ -76,7 +87,11 @@ class DirectSpeakersJuceFrontendConnector
   std::weak_ptr<Label> statusBarLabel_;
   std::string cachedStatusBarText_;
   std::weak_ptr<EarNameTextEditor> nameTextEditor_;
+  std::weak_ptr<ToggleButton> useTrackNameCheckbox_;
   std::string cachedName_{};
+  std::string lastKnownTrackName_{};
+  std::string lastKnownCustomName_{};
+  bool cachedUseTrackName_{ true };
   std::weak_ptr<EarComboBox> colourComboBox_;
   Colour cachedColour_{ juce::Colours::transparentBlack };
   std::weak_ptr<EarComboBox> routingComboBox_;
