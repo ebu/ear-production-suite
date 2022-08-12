@@ -76,7 +76,7 @@ class DirectSpeakersJuceFrontendConnector
   void textEditorTextChanged(TextEditor&) override;
 
  private:
-  void speakerSetupChanged(int index);
+  void updateNameTextEditorState();
 
   DirectSpeakersAudioProcessor* p_;
 

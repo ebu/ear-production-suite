@@ -134,6 +134,7 @@ class ObjectsJuceFrontendConnector
   void textEditorTextChanged(TextEditor&) override;
 
  private:
+  void updateNameTextEditorState();
 
   void dispatchSliderAction(Slider*, SliderAction action);
   ObjectsAudioProcessor* p_;

@@ -87,6 +87,7 @@ void DirectSpeakersJuceFrontendConnector::setNameTextEditor(
   textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+  updateNameTextEditorState();
 }
 
 void DirectSpeakersJuceFrontendConnector::setUseTrackNameCheckbox(
@@ -94,6 +95,7 @@ void DirectSpeakersJuceFrontendConnector::setUseTrackNameCheckbox(
   useTrackNameCheckbox->addListener(this);
   useTrackNameCheckbox_ = useTrackNameCheckbox;
   setUseTrackName(cachedUseTrackName_);
+  updateNameTextEditorState();
 }
 
 void DirectSpeakersJuceFrontendConnector::setName(const std::string& name) {
@@ -114,20 +116,13 @@ void DirectSpeakersJuceFrontendConnector::setUseTrackName(bool useTrackName)
       useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
       if(useTrackName) {
         lastKnownCustomName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(false);
-        nameTextEditorLocked->setAlpha(0.38f);
-        setName(lastKnownTrackName_);
       } else {
         lastKnownTrackName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(true);
-        nameTextEditorLocked->setAlpha(1.f);
-        if(!lastKnownCustomName_.empty()) {
-          setName(lastKnownCustomName_);
-        }
       }
     }
   }
   cachedUseTrackName_ = useTrackName;
+  updateNameTextEditorState();
 }
 
 void DirectSpeakersJuceFrontendConnector::setColourComboBox(
@@ -308,6 +303,24 @@ void DirectSpeakersJuceFrontendConnector::textEditorTextChanged(TextEditor& text
     //   which in turns fires notifyParameterChanged.
     // Instead, we must do that directly (name state not held by a parameter)
     notifyParameterChanged(ParameterId::NAME, cachedName_);
+  }
+}
+
+void DirectSpeakersJuceFrontendConnector::updateNameTextEditorState()
+{
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+  if(nameTextEditorLocked) {
+    if(cachedUseTrackName_) {
+      nameTextEditorLocked->setEnabled(false);
+      nameTextEditorLocked->setAlpha(0.38f);
+      setName(lastKnownTrackName_);
+    } else {
+      nameTextEditorLocked->setEnabled(true);
+      nameTextEditorLocked->setAlpha(1.f);
+      if(!lastKnownCustomName_.empty()) {
+        setName(lastKnownCustomName_);
+      }
+    }
   }
 }
 
