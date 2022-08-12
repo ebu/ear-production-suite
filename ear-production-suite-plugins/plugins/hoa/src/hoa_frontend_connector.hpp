@@ -65,6 +65,8 @@ class HoaJuceFrontendConnector
   void textEditorTextChanged(TextEditor&) override;
 
  private:
+  void updateNameTextEditorState();
+
   HoaAudioProcessor* p_;
 
   MultiAsyncUpdater updater_;
