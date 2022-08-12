@@ -5,6 +5,9 @@
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
+using MediaTrack = void;
+bool GetTrackName(MediaTrack* track, char* bufOut, int bufOut_sz);
+
 using namespace ear::plugin;
 
 DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
@@ -40,6 +43,8 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
 
   connector_ = std::make_unique<ui::DirectSpeakersJuceFrontendConnector>(this);
   backend_ = std::make_unique<DirectSpeakersBackend>(connector_.get());
+
+  useTrackName_->addListener(this);
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, packFormatIdValue_->get());
@@ -157,6 +162,34 @@ void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
 void DirectSpeakersAudioProcessor::updateTrackProperties(
     const TrackProperties& properties) {
   connector_->trackPropertiesChanged(properties);
+}
+
+void DirectSpeakersAudioProcessor::parameterValueChanged(int parameterIndex, float newValue)
+{
+  pullTrackName();
+}
+
+void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
+{
+    reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+    VST3ClientExtensions::setIHostApplication(unknown);
+    pullTrackName();
+}
+
+void DirectSpeakersAudioProcessor::pullTrackName()
+{
+  if(reaperHost) {
+    auto ptr = reaperHost->getReaperParent(1);
+    if(ptr) {
+      // cast it to the correct function pointer type and call it.
+      auto funptr = reaperHost->getReaperApi("GetTrackName");
+      auto fun = reinterpret_cast<decltype(&GetTrackName)>(funptr);
+      char name[30];
+      auto ret = fun(ptr, name, 30);
+      assert(ret);
+      connector_->setName(name);
+    }
+  }
 }
 
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
