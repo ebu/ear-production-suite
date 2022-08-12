@@ -4,6 +4,7 @@
 
 #include "direct_speakers_backend.hpp"
 #include "components/level_meter_calculator.hpp"
+#include "reaper_vst3_interfaces.h"
 
 #include <memory>
 
@@ -16,7 +17,7 @@ class DirectSpeakersBackend;
 }  // namespace plugin
 }  // namespace ear
 
-class DirectSpeakersAudioProcessor : public AudioProcessor {
+class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExtensions, AudioProcessorParameter::Listener {
  public:
   DirectSpeakersAudioProcessor();
   ~DirectSpeakersAudioProcessor();
@@ -65,7 +66,14 @@ class DirectSpeakersAudioProcessor : public AudioProcessor {
     return connector_.get();
   }
 
+  void parameterValueChanged (int parameterIndex, float newValue) override;
+  void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {}
+
+  void setIHostApplication(Steinberg::FUnknown *unknown) override;
+  void pullTrackName();
+
  private:
+  IReaperHostApplication* reaperHost{ nullptr };
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;
