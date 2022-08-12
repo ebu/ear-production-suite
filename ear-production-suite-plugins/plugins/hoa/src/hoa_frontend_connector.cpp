@@ -81,6 +81,7 @@ void HoaJuceFrontendConnector::setNameTextEditor(
   textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+  updateNameTextEditorState();
 }
 
 void HoaJuceFrontendConnector::setUseTrackNameCheckbox(
@@ -88,6 +89,7 @@ void HoaJuceFrontendConnector::setUseTrackNameCheckbox(
   useTrackNameCheckbox->addListener(this);
   useTrackNameCheckbox_ = useTrackNameCheckbox;
   setUseTrackName(cachedUseTrackName_);
+  updateNameTextEditorState();
 }
 
 void HoaJuceFrontendConnector::setName(const std::string& name) {
@@ -108,20 +110,13 @@ void HoaJuceFrontendConnector::setUseTrackName(bool useTrackName)
       useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
       if(useTrackName) {
         lastKnownCustomName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(false);
-        nameTextEditorLocked->setAlpha(0.38f);
-        setName(lastKnownTrackName_);
       } else {
         lastKnownTrackName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(true);
-        nameTextEditorLocked->setAlpha(1.f);
-        if(!lastKnownCustomName_.empty()) {
-          setName(lastKnownCustomName_);
-        }
       }
     }
   }
   cachedUseTrackName_ = useTrackName;
+  updateNameTextEditorState();
 }
 
 void HoaJuceFrontendConnector::setColourComboBox(
@@ -267,6 +262,24 @@ void HoaJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
     //   which in turns fires notifyParameterChanged.
     // Instead, we must do that directly (name state not held by a parameter)
     notifyParameterChanged(ParameterId::NAME, cachedName_);
+  }
+}
+
+void HoaJuceFrontendConnector::updateNameTextEditorState()
+{
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+  if(nameTextEditorLocked) {
+    if(cachedUseTrackName_) {
+      nameTextEditorLocked->setEnabled(false);
+      nameTextEditorLocked->setAlpha(0.38f);
+      setName(lastKnownTrackName_);
+    } else {
+      nameTextEditorLocked->setEnabled(true);
+      nameTextEditorLocked->setAlpha(1.f);
+      if(!lastKnownCustomName_.empty()) {
+        setName(lastKnownCustomName_);
+      }
+    }
   }
 }
 

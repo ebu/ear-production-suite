@@ -118,6 +118,7 @@ void ObjectsJuceFrontendConnector::setNameTextEditor(
   textEditor->addListener(this);
   nameTextEditor_ = textEditor;
   setName(cachedName_);
+  updateNameTextEditorState();
 }
 
 void ObjectsJuceFrontendConnector::setUseTrackNameCheckbox(
@@ -125,6 +126,7 @@ void ObjectsJuceFrontendConnector::setUseTrackNameCheckbox(
   useTrackNameCheckbox->addListener(this);
   useTrackNameCheckbox_ = useTrackNameCheckbox;
   setUseTrackName(cachedUseTrackName_);
+  updateNameTextEditorState();
 }
 
 void ObjectsJuceFrontendConnector::setColourComboBox(
@@ -288,20 +290,13 @@ void ObjectsJuceFrontendConnector::setUseTrackName(bool useTrackName)
       useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
       if(useTrackName) {
         lastKnownCustomName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(false);
-        nameTextEditorLocked->setAlpha(0.38f);
-        setName(lastKnownTrackName_);
       } else {
         lastKnownTrackName_ = cachedName_;
-        nameTextEditorLocked->setEnabled(true);
-        nameTextEditorLocked->setAlpha(1.f);
-        if(!lastKnownCustomName_.empty()) {
-          setName(lastKnownCustomName_);
-        }
       }
     }
   }
   cachedUseTrackName_ = useTrackName;
+  updateNameTextEditorState();
 }
 
 void ObjectsJuceFrontendConnector::setColour(Colour colour) {
@@ -635,6 +630,24 @@ void ObjectsJuceFrontendConnector::sliderDragStarted(Slider* slider) {
 
 void ObjectsJuceFrontendConnector::sliderDragEnded(Slider* slider) {
   dispatchSliderAction(slider, SliderAction::DRAG_END);
+}
+
+void ObjectsJuceFrontendConnector::updateNameTextEditorState()
+{
+  auto nameTextEditorLocked = nameTextEditor_.lock();
+  if(nameTextEditorLocked) {
+    if(cachedUseTrackName_) {
+      nameTextEditorLocked->setEnabled(false);
+      nameTextEditorLocked->setAlpha(0.38f);
+      setName(lastKnownTrackName_);
+    } else {
+      nameTextEditorLocked->setEnabled(true);
+      nameTextEditorLocked->setAlpha(1.f);
+      if(!lastKnownCustomName_.empty()) {
+        setName(lastKnownCustomName_);
+      }
+    }
+  }
 }
 
 void ObjectsJuceFrontendConnector::dispatchSliderAction(Slider* slider, SliderAction action) {
