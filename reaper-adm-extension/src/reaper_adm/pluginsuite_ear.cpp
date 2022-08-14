@@ -3,6 +3,8 @@
 
 #include <cassert>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
 #include "reaperapi.h"
 #include "plugin.h"
@@ -623,4 +625,57 @@ EARPluginSuite::reorderAndFilter(const std::vector<ADMChannel> &channels,
 	}
 
 	return PluginSuite::reorderAndFilter(modifiedChannels, api);
+}
+
+std::shared_ptr<EARPluginCallbackHandler> admplug::EARPluginCallbackHandler::getInstance()
+{
+    static auto instance = std::make_shared<EARPluginCallbackHandler>();
+    return instance;
+}
+
+void admplug::EARPluginCallbackHandler::reset()
+{
+    std::lock_guard<std::mutex> lock(activeCallbackMutex);
+    activeCallback.reset();
+}
+
+bool admplug::EARPluginCallbackHandler::waitForPluginResponse(uint16_t maxMs)
+{
+    std::chrono::milliseconds dur(maxMs);
+    auto start = std::chrono::system_clock::now();
+    auto end = start + dur;
+    const std::chrono::milliseconds intervalMs(10);
+
+    while((std::chrono::system_clock::now() + intervalMs) < end) {
+        std::this_thread::sleep_for(intervalMs);
+        std::lock_guard<std::mutex> lock(activeCallbackMutex);
+        if(activeCallback.has_value()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool admplug::EARPluginCallbackHandler::sendData(std::string const & xmlState)
+{
+    std::lock_guard<std::mutex> lock(activeCallbackMutex);
+    if(activeCallback.has_value()) {
+        activeCallback.value()(xmlState);
+        return true;
+    }
+    return false;
+}
+
+void admplug::EARPluginCallbackHandler::setPluginCallback(std::function<void(std::string const&)> callback)
+{
+    std::lock_guard<std::mutex> lock(activeCallbackMutex);
+    activeCallback = callback;
+}
+
+admplug::EARPluginCallbackHandler::EARPluginCallbackHandler()
+{
+}
+
+admplug::EARPluginCallbackHandler::~EARPluginCallbackHandler()
+{
 }
