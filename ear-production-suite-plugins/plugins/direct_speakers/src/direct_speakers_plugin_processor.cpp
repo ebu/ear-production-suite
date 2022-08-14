@@ -5,8 +5,7 @@
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
-using MediaTrack = void;
-bool GetTrackName(MediaTrack* track, char* bufOut, int bufOut_sz);
+void registerPluginLoadSig(std::function<void(std::string const&)>);
 
 using namespace ear::plugin;
 
@@ -43,8 +42,6 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
 
   connector_ = std::make_unique<ui::DirectSpeakersJuceFrontendConnector>(this);
   backend_ = std::make_unique<DirectSpeakersBackend>(connector_.get());
-
-  useTrackName_->addListener(this);
 
   connector_->parameterValueChanged(0, routing_->get());
   connector_->parameterValueChanged(1, packFormatIdValue_->get());
@@ -129,16 +126,26 @@ void DirectSpeakersAudioProcessor::getStateInformation(MemoryBlock& destData) {
 void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
                                                        int sizeInBytes) {
   std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+  if(xmlState) setStateInformation(xmlState.get());
 
-  if (xmlState.get() != nullptr)
+}
+
+void DirectSpeakersAudioProcessor::setStateInformation(XmlElement * xmlState, bool useDefaultsIfUnspecified)
+{
     if (xmlState->hasTagName("DirectSpeakersPlugin")) {
-      connectionId_ = communication::ConnectionId{
-          xmlState
-              ->getStringAttribute("connection_id",
-                                   "00000000-0000-0000-0000-000000000000")
-              .toStdString()};
-      backend_->setConnectionId(connectionId_);
-      *routing_ = xmlState->getIntAttribute("routing", -1);
+
+      if(useDefaultsIfUnspecified || xmlState->hasAttribute("connection_id")) {
+        connectionId_ = communication::ConnectionId{
+            xmlState
+                ->getStringAttribute("connection_id",
+                                     "00000000-0000-0000-0000-000000000000")
+                .toStdString() };
+        backend_->setConnectionId(connectionId_);
+      }
+
+      if(useDefaultsIfUnspecified || xmlState->hasAttribute("routing")) {
+        *routing_ = xmlState->getIntAttribute("routing", -1);
+      }
 
       if(xmlState->hasAttribute("packformat_id_value")) {
         *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
@@ -154,8 +161,13 @@ void DirectSpeakersAudioProcessor::setStateInformation(const void* data,
         }
       }
 
-      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
-      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
+      if(useDefaultsIfUnspecified || xmlState->hasAttribute("use_track_name")) {
+        *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+      }
+
+      if(useDefaultsIfUnspecified || xmlState->hasAttribute("name")) {
+        connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
+      }
     }
 }
 
@@ -164,32 +176,24 @@ void DirectSpeakersAudioProcessor::updateTrackProperties(
   connector_->trackPropertiesChanged(properties);
 }
 
-void DirectSpeakersAudioProcessor::parameterValueChanged(int parameterIndex, float newValue)
-{
-  pullTrackName();
-}
-
 void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
     reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
     VST3ClientExtensions::setIHostApplication(unknown);
-    pullTrackName();
+    auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+    if(registerPluginLoadPtr) {
+      auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+      registerPluginLoad([this](std::string const& xmlState) {
+        this->extensionSetState(xmlState);
+      });
+    }
 }
 
-void DirectSpeakersAudioProcessor::pullTrackName()
+void DirectSpeakersAudioProcessor::extensionSetState(std::string const & xmlStateStr)
 {
-  if(reaperHost) {
-    auto ptr = reaperHost->getReaperParent(1);
-    if(ptr) {
-      // cast it to the correct function pointer type and call it.
-      auto funptr = reaperHost->getReaperApi("GetTrackName");
-      auto fun = reinterpret_cast<decltype(&GetTrackName)>(funptr);
-      char name[30];
-      auto ret = fun(ptr, name, 30);
-      assert(ret);
-      connector_->setName(name);
-    }
-  }
+  auto doc = XmlDocument(xmlStateStr);
+  auto xmlState = doc.getDocumentElement();
+  setStateInformation(xmlState.get(), false);
 }
 
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {

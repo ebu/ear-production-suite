@@ -17,7 +17,7 @@ class DirectSpeakersBackend;
 }  // namespace plugin
 }  // namespace ear
 
-class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExtensions, AudioProcessorParameter::Listener {
+class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
  public:
   DirectSpeakersAudioProcessor();
   ~DirectSpeakersAudioProcessor();
@@ -47,6 +47,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
 
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
+  void setStateInformation(XmlElement* xmlState, bool useDefaultsIfUnspecified = true);
 
   void updateTrackProperties(const TrackProperties& properties) override;
 
@@ -66,11 +67,8 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
     return connector_.get();
   }
 
-  void parameterValueChanged (int parameterIndex, float newValue) override;
-  void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {}
-
   void setIHostApplication(Steinberg::FUnknown *unknown) override;
-  void pullTrackName();
+  void extensionSetState(std::string const& xmlState);
 
  private:
   IReaperHostApplication* reaperHost{ nullptr };
