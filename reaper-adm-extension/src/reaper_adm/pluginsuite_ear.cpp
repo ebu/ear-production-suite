@@ -166,47 +166,47 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	return usedValues;
 }
 
-void applyPluginName(TrackInstance* track, Plugin* plugin, TrackElement* trackElement) {
-    if(trackElement->getAutomationElements().size() > 1) {
-        // Multiple plugins on this track so we need to name them seperately.
-        /// Store current track name
-        auto origName = track->getName();
-        /// Ensure "Use track name is active" in plugin
-        auto param = createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::USE_TRACK_NAME), { 0, 1 });
-        //plugin->setParameter(*param, 1.0);
-        /// Apply the track name
-        auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
-        mte->nameTrackFromElementName();
-        /// Disable "Use track name"
-        plugin->setParameter(*param, 0.0);
-        /// Restore original track name
-        track->setName(origName);
-    } else {
-        // Leave plugin name after track
-    }
-}
+std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, TrackInstance* track, TrackElement* trackElement) {
+    auto cbh = EARPluginCallbackHandler::getInstance();
+    auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
 
-std::unique_ptr<Plugin> createAndNamePlugin(TrackInstance* track, TrackElement* trackElement) {
     if(trackElement->getAutomationElements().size() > 1) {
         // Multiple plugins on this track so we need to name them seperately.
-        /// Store current track name
-        auto origName = track->getName();
-        /// Ensure "Use track name is active" in plugin
-        auto param = createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::USE_TRACK_NAME), { 0, 1 });
-        //plugin->setParameter(*param, 1.0);
-        /// Apply the track name
-        auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
-        mte->nameTrackFromElementName();
-        /// Disable "Use track name"
-        auto plugin = track->createPlugin("EAR DirectSpeakers");
-        plugin->setParameter(*param, 0.0);
-        /// Restore original track name
-        track->setName(origName);
+
+        auto name = mte->getAppropriateName();
+        std::string xmlElementName;
+        if(pluginName == EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME) xmlElementName = "ObjectsPlugin";
+        if(pluginName == EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME) xmlElementName = "DirectSpeakersPlugin";
+        if(pluginName == EARPluginSuite::HOA_METADATA_PLUGIN_NAME) xmlElementName = "HoaPlugin";
+        assert(!pluginName.empty());
+        std::string xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?> <");
+        xml += xmlElementName;
+        xml.append(" use_track_name = \"0\" name=\"");
+        xml += name;
+        xml.append("\"/>");
+
+        cbh->reset();
+        auto plugin = track->createPlugin(pluginName);
+        if(cbh->waitForPluginResponse(1000)) {
+            cbh->sendData(xml);
+        }
+        cbh->reset();
+
+        auto trackName = track->getName();
+        if(name != trackName) {
+            track->setName("Multiple Objects");
+        }
+
         return std::move(plugin);
     } else {
         // Leave plugin name after track
+
+        cbh->reset();
+        auto plugin = track->createPlugin(pluginName);
+        cbh->reset();
+
+        return std::move(plugin);
     }
-    return nullptr;
 }
 
 }
@@ -341,7 +341,8 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         }
         setInMap(takesOnTracks, take, trackInfo);
         trackElement.setTrack(trackInfo.track);
-        //nameTrackFromElementName(); // TODO - PROBLEM!! This might be shared!!!
+        auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+        mte->nameTrackFromElementName();
         trackInfo.track->disableMasterSend();
         trackInfo.track->setChannelCount(channelCount);
     }
@@ -361,8 +362,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         }
 
         if(speakerLayoutIndex >= 0) {
-            //auto plugin = trackInfo.track->createPlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME);
-            auto plugin = createAndNamePlugin(trackInfo.track.get(), &trackElement);
+            auto plugin = createAndNamePlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
 
             auto packFormatIdValue = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].packFormatIdValue;
             plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(packFormatIdValue));
