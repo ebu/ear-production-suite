@@ -90,16 +90,22 @@ TrackGroup admplug::MediaTrackElement::masterOfGroup() const
 
 void MediaTrackElement::nameTrackFromElementName()
 {
-    auto prefix = boost::apply_visitor(TrackNameOriginIdentifier(), elements[0]);
-    auto name = boost::apply_visitor(AdmNameReader(), elements[0]);
-    if(prefix.length() > 0) {
-        name = prefix + " " + name;
-    }
+    auto name = getAppropriateName();
     std::array<char, 33> trackNameBuffer;
     auto nameLength = std::min<std::size_t>(trackNameBuffer.size() - 1, name.size());
     name.copy(trackNameBuffer.data(), nameLength);
     trackNameBuffer[nameLength] = '\0';
     track->setName(trackNameBuffer.data());
+}
+
+std::string admplug::MediaTrackElement::getAppropriateName()
+{
+    auto prefix = boost::apply_visitor(TrackNameOriginIdentifier(), elements[0]);
+    auto name = boost::apply_visitor(AdmNameReader(), elements[0]);
+    if(prefix.length() > 0) {
+        name = prefix + " " + name;
+    }
+    return name;
 }
 
 

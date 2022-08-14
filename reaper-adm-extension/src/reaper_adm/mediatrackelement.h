@@ -15,6 +15,7 @@ public:
     TrackGroup masterOfGroup() const override;
     virtual void firePluginSuiteCallback(PluginSuite& pluginSuite, ReaperAPI const& api) = 0;
     void nameTrackFromElementName();
+    std::string getAppropriateName();
 protected:
     std::vector<adm::ElementConstVariant> getAdmElements() const override;
     std::vector<adm::ElementConstVariant> elements;
