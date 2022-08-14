@@ -3,12 +3,36 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <optional>
+#include <mutex>
+#include <functional>
 #include "pluginsuite.h"
 #include "projectelements.h"
 
 namespace admplug {
 class Track;
 class PluginParameter;
+
+class EARPluginCallbackHandler
+{
+public:
+    EARPluginCallbackHandler();
+    ~EARPluginCallbackHandler();
+    static std::shared_ptr<EARPluginCallbackHandler> getInstance();
+
+    // Called by EARPluginSuite
+    void reset();
+    bool waitForPluginResponse(uint16_t maxMs);
+    bool sendData(std::string const &xmlState);
+
+    // Called via API
+    void setPluginCallback(std::function<void(std::string const&)> callback);
+
+private:
+
+    std::mutex activeCallbackMutex;
+    std::optional<std::function<void(std::string const&)>> activeCallback;
+};
 
 class EARPluginSuite : public PluginSuite
 {

@@ -12,6 +12,7 @@
 #include "exportaction.h"
 #include "pluginsuite.h"
 #include "pluginregistry.h"
+#include "pluginsuite_ear.h"
 #include <version/eps_version.h>
 
 #ifdef WIN32
@@ -77,6 +78,11 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 #endif
 
 extern "C" {
+  void registerPluginLoad(std::function<void(std::string const&)> callback) {
+      auto cbh = EARPluginCallbackHandler::getInstance();
+      cbh->setPluginCallback(callback);
+  }
+
   int REAPER_PLUGIN_DLL_EXPORT REAPER_PLUGIN_ENTRYPOINT(REAPER_PLUGIN_HINSTANCE hInstance, reaper_plugin_info_t *rec)
   {
     using namespace admplug;
@@ -113,6 +119,9 @@ extern "C" {
         // unload plugin
         return 0;
     }
+
+    auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
+    rec->Register("API_registerPluginLoad", &registerPluginLoad);
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
