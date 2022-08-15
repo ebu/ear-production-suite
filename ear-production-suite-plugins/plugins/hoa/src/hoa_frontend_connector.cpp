@@ -97,6 +97,11 @@ void HoaJuceFrontendConnector::setName(const std::string& name) {
     nameTextEditorLocked->setText(name);
   }
   cachedName_ = name;
+  // Normally we'd set a processor parameter which in turn calls
+  //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
+  //   which in turns fires notifyParameterChanged.
+  // Instead, we must do that directly (name state not held by a parameter)
+  notifyParameterChanged(ParameterId::NAME, cachedName_);
 }
 
 void HoaJuceFrontendConnector::setUseTrackName(bool useTrackName)
@@ -257,11 +262,6 @@ void HoaJuceFrontendConnector::textEditorTextChanged(TextEditor& textEditor)
 {
   if (auto nameTextEditor = lockIfSame(nameTextEditor_, &textEditor)) {
     setName(nameTextEditor->getText().toStdString());
-    // Normally we'd set a processor parameter which in turn calls
-    //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
-    //   which in turns fires notifyParameterChanged.
-    // Instead, we must do that directly (name state not held by a parameter)
-    notifyParameterChanged(ParameterId::NAME, cachedName_);
   }
 }
 
