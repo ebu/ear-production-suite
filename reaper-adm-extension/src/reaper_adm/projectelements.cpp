@@ -73,6 +73,11 @@ bool admplug::TakeElement::addParentProjectElement(std::shared_ptr<ProjectElemen
     return true;
 }
 
+int admplug::TakeElement::countParentElements()
+{
+    return parents.size();
+}
+
 bool admplug::TrackElement::addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement)
 {
     // We can only add TrackElements as parents
