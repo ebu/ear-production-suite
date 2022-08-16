@@ -5,6 +5,8 @@
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
 
+void registerPluginLoadSig(std::function<void(std::string const&)>);
+
 using namespace ear::plugin;
 
 ObjectsAudioProcessor::ObjectsAudioProcessor()
@@ -149,37 +151,95 @@ void ObjectsAudioProcessor::getStateInformation(MemoryBlock& destData) {
 void ObjectsAudioProcessor::setStateInformation(const void* data,
                                                 int sizeInBytes) {
   std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-  if (xmlState.get() != nullptr) {
-    if (xmlState->hasTagName("ObjectsPlugin")) {
+  if(xmlState) setStateInformation(xmlState.get());
+}
+
+void ObjectsAudioProcessor::setStateInformation(XmlElement * xmlState, bool useDefaultsIfUnspecified)
+{
+  if (xmlState->hasTagName("ObjectsPlugin")) {
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("connection_id")) {
       connectionId_ = communication::ConnectionId{
-          xmlState
-              ->getStringAttribute("connection_id",
-                                   "00000000-0000-0000-0000-000000000000")
-              .toStdString()};
+        xmlState
+        ->getStringAttribute("connection_id",
+                             "00000000-0000-0000-0000-000000000000")
+        .toStdString() };
       backend_->setConnectionId(connectionId_);
-      *routing_ = xmlState->getIntAttribute("routing", -1);
-      *gain_ = xmlState->getDoubleAttribute("gain", 0.0);
-      *azimuth_ = xmlState->getDoubleAttribute("azimuth", 0.0);
-      *elevation_ = xmlState->getDoubleAttribute("elevation", 0.0);
-      *distance_ = xmlState->getDoubleAttribute("distance", 1.0);
-      *linkSize_ = xmlState->getBoolAttribute("link_size", true);
-      *size_ = xmlState->getDoubleAttribute("size", 0.0);
-      *width_ = xmlState->getDoubleAttribute("width", 0.0);
-      *height_ = xmlState->getDoubleAttribute("height", 0.0);
-      *depth_ = xmlState->getDoubleAttribute("depth", 0.0);
-      *diffuse_ = xmlState->getDoubleAttribute("diffuse", 0.0);
-      *divergence_ = xmlState->getBoolAttribute("divergence", false);
-      *factor_ = xmlState->getDoubleAttribute("factor", 0.0);
-      *range_ = xmlState->getDoubleAttribute("range", 0.0);
-      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
-      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
     }
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("routing"))
+      *routing_ = xmlState->getIntAttribute("routing", -1);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("gain"))
+      *gain_ = xmlState->getDoubleAttribute("gain", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("azimuth"))
+      *azimuth_ = xmlState->getDoubleAttribute("azimuth", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("elevation"))
+      *elevation_ = xmlState->getDoubleAttribute("elevation", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("distance"))
+      *distance_ = xmlState->getDoubleAttribute("distance", 1.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("link_size"))
+      *linkSize_ = xmlState->getBoolAttribute("link_size", true);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("size"))
+      *size_ = xmlState->getDoubleAttribute("size", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("width"))
+      *width_ = xmlState->getDoubleAttribute("width", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("height"))
+      *height_ = xmlState->getDoubleAttribute("height", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("depth"))
+      *depth_ = xmlState->getDoubleAttribute("depth", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("diffuse"))
+      *diffuse_ = xmlState->getDoubleAttribute("diffuse", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("divergence"))
+      *divergence_ = xmlState->getBoolAttribute("divergence", false);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("factor"))
+      *factor_ = xmlState->getDoubleAttribute("factor", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("range"))
+      *range_ = xmlState->getDoubleAttribute("range", 0.0);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("use_track_name"))
+      *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("name"))
+      connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
+
   }
 }
 
 void ObjectsAudioProcessor::updateTrackProperties(
     const TrackProperties& properties) {
   connector_->trackPropertiesChanged(properties);
+}
+
+void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
+{
+  reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+  VST3ClientExtensions::setIHostApplication(unknown);
+  auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+  if(registerPluginLoadPtr) {
+    auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+    registerPluginLoad([this](std::string const& xmlState) {
+      this->extensionSetState(xmlState);
+    });
+  }
+}
+
+void ObjectsAudioProcessor::extensionSetState(std::string const & xmlStateStr)
+{
+  auto doc = XmlDocument(xmlStateStr);
+  auto xmlState = doc.getDocumentElement();
+  setStateInformation(xmlState.get(), false);
 }
 
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
