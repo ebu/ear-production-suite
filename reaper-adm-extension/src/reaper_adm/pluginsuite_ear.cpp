@@ -389,7 +389,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         trackInfo.track = std::make_shared<TrackInstance>(mediaTrack, api);
         assert(trackMappingAssigner);
         trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
-        if(!trackInfo.routingStartChannel) {
+        if(!trackInfo.routingStartChannel.has_value()) {
             //TODO: Need to warn user no channels available
         }
         setInMap(takesOnTracks, take, trackInfo);
