@@ -46,6 +46,8 @@ enum class EarObjectParameters {
     DIVERGENCE, // Since the next 2 params are not supported by libadm yet, this is irrelevant
     DIVERGENCE_FACTOR, // Not supported by libadm yet
     DIVERGENCE_RANGE, // Not supported by libadm yet
+    BYPASS,
+    USE_TRACK_NAME,
     NUM_PARAMETERS
 };
 
@@ -313,12 +315,63 @@ void EARPluginSuite::setTrackInsertionIndexFromSelectedMedia(ReaperAPI const& ap
 
 void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackElement, const admplug::ReaperAPI& api)
 {
-    auto mediaTrack = api.createTrackAtIndex(0, true);
-    assert(mediaTrack);
-    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
-    trackElement.setTrack(track);
-    //nameTrackFromElementName();
-    track->disableMasterSend();
+    auto take = trackElement.getTakeElement();
+    TrackInfo trackInfo;
+    auto channelCount = static_cast<int>(take->trackUidCount());
+
+    if(mapHasKey(takesOnTracks, take)) {
+        trackInfo = getValueFromMap(takesOnTracks, take);
+        trackElement.setTrack(trackInfo.track);
+    } else {
+        auto mediaTrack = api.createTrackAtIndex(0, true);
+        assert(mediaTrack);
+        trackInfo.track = std::make_shared<TrackInstance>(mediaTrack, api);
+        assert(trackMappingAssigner);
+        trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
+        if(!trackInfo.routingStartChannel.has_value()) {
+            //TODO: Need to warn user no channels available
+        } else {
+            assert(sceneMasterTrack);
+            trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
+        }
+        setInMap(takesOnTracks, take, trackInfo);
+        trackElement.setTrack(trackInfo.track);
+        auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+        mte->nameTrackFromElementName();
+        trackInfo.track->disableMasterSend();
+        trackInfo.track->setChannelCount(channelCount);
+    }
+
+    auto automationElements = trackElement.getAutomationElements();
+    auto takeTrackUids = take->trackUids();
+    for(auto const& automationElement : automationElements) {
+        auto autoTrackUid = automationElement->channel().trackUid();
+        for(int chOffset = 0; chOffset < takeTrackUids.size(); chOffset++) {
+            if(takeTrackUids[chOffset] == autoTrackUid) {
+
+                auto plugin = createAndNamePlugin(OBJECT_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
+
+                for (auto& parameter : automatedObjectPluginParameters()) {
+                    automationElement->apply(*parameter, *plugin);
+                }
+
+                if(trackInfo.routingStartChannel.has_value()) {
+                    auto uidChannel = *trackInfo.routingStartChannel + chOffset;
+                    plugin->setParameter(*objectTrackMappingParameter, objectTrackMappingParameter->forwardMap(uidChannel));
+
+                    uint32_t audioObjectIdVal = 0;
+                    if(auto ao = automationElement->channel().object()) {
+                        audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+                    }
+                    auto trackUidVal = autoTrackUid ? getIdValueAsInt(*autoTrackUid) : 0;
+                    trackMappingToAtu[uidChannel] = trackUidVal;
+                    trackMappingToAo[uidChannel] = audioObjectIdVal;
+                }
+
+                break;
+            }
+        }
+    }
 }
 
 void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const ReaperAPI & api)
@@ -399,6 +452,7 @@ void EARPluginSuite::onCreateGroup(TrackElement & trackElement, const ReaperAPI&
 
 void EARPluginSuite::onObjectAutomation(const ObjectAutomation & automationElement, const ReaperAPI&)
 {
+    /*
 	auto track = automationElement.getTrack();
 	auto channelName = automationElement.channel().name();
 	if (!channelName.empty()) {
@@ -437,6 +491,7 @@ void EARPluginSuite::onObjectAutomation(const ObjectAutomation & automationEleme
 			//TODO - need to tell user - no free channels
 		}
 	}
+    */
 }
 
 void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation & automationElement, const ReaperAPI&)
