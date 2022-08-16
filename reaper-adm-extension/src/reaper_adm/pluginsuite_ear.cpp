@@ -101,11 +101,6 @@ std::vector<std::unique_ptr<PluginParameter>> createAutomatedObjectPluginParamet
     return parameters;
 }
 
-std::vector<std::unique_ptr<TrackParameter>> createTrackParameters() {
-    std::vector<std::unique_ptr<TrackParameter>> parameters;
-    return parameters;
-}
-
 std::vector<int> determineUsedObjectTrackMappingValues(PluginInstance& plugin) {
 	auto param = createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), { TRACK_MAPPING_MIN, TRACK_MAPPING_MAX });
 	auto trackMapping = plugin.getParameterWithConvertToInt(*(param.get()));
@@ -634,11 +629,6 @@ bool admplug::EARPluginSuite::representAdmStructureWithGroups(ReaperAPI const& a
 std::vector<std::unique_ptr<PluginParameter>> const& EARPluginSuite::automatedObjectPluginParameters()
 {
 	auto static parameters = createAutomatedObjectPluginParameters();
-	return parameters;
-}
-
-std::vector<std::unique_ptr<TrackParameter>> const& EARPluginSuite::trackParameters() {
-	auto static parameters = createTrackParameters();
 	return parameters;
 }
 
