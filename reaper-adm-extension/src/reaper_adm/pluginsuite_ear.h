@@ -68,7 +68,6 @@ public:
 
 private:
 	std::vector<std::unique_ptr<PluginParameter>> const& automatedObjectPluginParameters();
-	std::vector<std::unique_ptr<TrackParameter>> const& trackParameters();
 	std::shared_ptr<PluginParameter> objectTrackMappingParameter;
 	std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;
 	std::shared_ptr<PluginParameter> directPackFormatIdValueParameter;
