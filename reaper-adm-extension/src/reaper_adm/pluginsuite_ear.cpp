@@ -170,7 +170,7 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
     auto cbh = EARPluginCallbackHandler::getInstance();
     auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
 
-    if(trackElement->getAutomationElements().size() > 1) {
+    if(trackElement->getTakeElement()->countParentElements() > 1) {
         // Multiple plugins on this track so we need to name them seperately.
 
         auto name = mte->getAppropriateName();

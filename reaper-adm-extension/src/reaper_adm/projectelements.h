@@ -96,6 +96,7 @@ public:
     virtual std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids() const = 0;
     virtual int trackUidCount() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
+    int countParentElements();
 protected:
     std::vector<std::shared_ptr<TrackElement>> parents;
 };
