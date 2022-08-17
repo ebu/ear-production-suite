@@ -138,13 +138,18 @@ bool Facebook360PluginSuite::pluginSuiteUsable(ReaperAPI const& api)
     return PluginRegistry::getInstance()->checkPluginsAvailable(requiredPlugins, api);
 }
 
-void Facebook360PluginSuite::onCreateObjectTrack(TrackElement & trackNode, ReaperAPI const& api)
+void Facebook360PluginSuite::onCreateObjectTrack(TrackElement &trackElement, ReaperAPI const& api)
 {
-   auto& track = *trackNode.getTrack();
-   doGenericTrackSetup(track);
-   AdmVst(track.get(), api); // Creates ADM VST before spatialiser
-   setupMetadataPlugin(track, api);
-   setAsGroupsSlave(trackNode, track);
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+    doGenericTrackSetup(*track);
+    AdmVst(mediaTrack, api); // Creates ADM VST before spatialiser
+    setupMetadataPlugin(*track, api);
+    setAsGroupsSlave(trackElement, *track);
 }
 
 void Facebook360PluginSuite::setupMetadataPlugin(Track& track, ReaperAPI const& api)
@@ -213,21 +218,31 @@ void Facebook360PluginSuite::doGenericTrackSetup(Track& track) {
     track.disableMasterSend();
 }
 
-void Facebook360PluginSuite::onCreateDirectTrack(TrackElement &trackNode, const ReaperAPI &)
+void Facebook360PluginSuite::onCreateDirectTrack(TrackElement &trackElement, const ReaperAPI &api)
 {
-    auto& track = *trackNode.getTrack();
-    track.moveToBefore(trackInsertionIndex++);
-    track.disableMasterSend();
-    setAsGroupsSlave(trackNode, track);
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+    track->moveToBefore(trackInsertionIndex++);
+    track->disableMasterSend();
+    setAsGroupsSlave(trackElement, *track);
 }
 
-void Facebook360PluginSuite::onCreateGroup(TrackElement &trackNode, const ReaperAPI &)
+void Facebook360PluginSuite::onCreateGroup(TrackElement &trackElement, const ReaperAPI &api)
 {
-    auto& track = *trackNode.getTrack();
-    doGenericTrackSetup(track);
-    setAsGroupsSlave(trackNode, track);
-    track.setAsVCAMaster(trackNode.masterOfGroup());
-    track.setColor(trackNode.masterOfGroup().color());
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+    doGenericTrackSetup(*track);
+    setAsGroupsSlave(trackElement, *track);
+    track->setAsVCAMaster(trackElement.masterOfGroup());
+    track->setColor(trackElement.masterOfGroup().color());
 }
 
 void Facebook360PluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI &api)
@@ -342,13 +357,20 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
     }
 }
 
-void Facebook360PluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
-    auto& track = *trackNode.getTrack();
-    doGenericTrackSetup(track);
-    AdmVst(track.get(), api); // Creates ADM VST before spatialiser
-    setupMetadataPlugin(track, api);
-    setAsGroupsSlave(trackNode, track);
+void Facebook360PluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAPI &api)
+{
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+    doGenericTrackSetup(*track);
+    AdmVst(mediaTrack, api); // Creates ADM VST before spatialiser
+    setupMetadataPlugin(*track, api);
+    setAsGroupsSlave(trackElement, *track);
 }
+
 void Facebook360PluginSuite::applyParameters(ObjectAutomation const& element,
                                              Track const& track,
                                              Plugin const& plugin) const {
