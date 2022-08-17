@@ -5,6 +5,8 @@
 #include "hoa_frontend_connector.hpp"
 #include "components/level_meter_calculator.hpp"
 
+void registerPluginLoadSig(std::function<void(std::string const&)>);
+
 using namespace ear::plugin;
 
 HoaAudioProcessor::HoaAudioProcessor()
@@ -121,25 +123,62 @@ void HoaAudioProcessor::getStateInformation(MemoryBlock& destData) {
 
 void HoaAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
   std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-  if (xmlState.get() != nullptr)
-    if (xmlState->hasTagName("HoaPlugin")) {
+  if(xmlState) setStateInformation(xmlState.get());
+}
+
+void HoaAudioProcessor::setStateInformation(XmlElement * xmlState, bool useDefaultsIfUnspecified)
+{
+  if (xmlState->hasTagName("HoaPlugin")) {
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("connection_id")) {
       connectionId_ = communication::ConnectionId{
           xmlState
               ->getStringAttribute("connection_id",
-                                   "00000000-0000-0000-0000-000000000000")
-              .toStdString()};
+                                    "00000000-0000-0000-0000-000000000000")
+              .toStdString() };
       backend_->setConnectionId(connectionId_);
-      auto con_id = connectionId_;
+    }
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("routing")) {
       *routing_ = xmlState->getIntAttribute("routing", -1);
+    }
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("packformat_id_value")) {
       *packFormatIdValue_ = xmlState->getIntAttribute("packformat_id_value", 0);
+    }
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("use_track_name")) {
       *useTrackName_ = xmlState->getBoolAttribute("use_track_name", true);
+    }
+
+    if(useDefaultsIfUnspecified || xmlState->hasAttribute("name")) {
       connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
     }
+  }
 }
 
 void HoaAudioProcessor::updateTrackProperties(
     const TrackProperties& properties) {
   connector_->trackPropertiesChanged(properties);
+}
+
+void HoaAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
+{
+  reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+  VST3ClientExtensions::setIHostApplication(unknown);
+  auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+  if(registerPluginLoadPtr) {
+    auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+    registerPluginLoad([this](std::string const& xmlState) {
+      this->extensionSetState(xmlState);
+    });
+  }
+}
+
+void HoaAudioProcessor::extensionSetState(std::string const & xmlStateStr)
+{
+  auto doc = XmlDocument(xmlStateStr);
+  auto xmlState = doc.getDocumentElement();
+  setStateInformation(xmlState.get(), false);
 }
 
 AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
