@@ -4,6 +4,7 @@
 
 #include "hoa_backend.hpp"
 #include "helper/common_definition_helper.h"
+#include "reaper_vst3_interfaces.h"
 
 namespace ear {
 namespace plugin {
@@ -16,7 +17,7 @@ class LevelMeterCalculator;
 }  // namespace plugin
 }  // namespace ear
 
-class HoaAudioProcessor : public AudioProcessor {
+class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
  public:
   HoaAudioProcessor();
   ~HoaAudioProcessor();
@@ -46,6 +47,7 @@ class HoaAudioProcessor : public AudioProcessor {
 
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
+  void setStateInformation(XmlElement* xmlState, bool useDefaultsIfUnspecified = true);
 
   void updateTrackProperties(const TrackProperties& properties) override;
 
@@ -65,7 +67,11 @@ class HoaAudioProcessor : public AudioProcessor {
     return connector_.get();
   }
 
+  void setIHostApplication(Steinberg::FUnknown *unknown) override;
+  void extensionSetState(std::string const& xmlState);
+
  private:
+  IReaperHostApplication* reaperHost{ nullptr };
   ear::plugin::communication::ConnectionId connectionId_;
 
   AudioParameterInt* routing_;

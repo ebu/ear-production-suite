@@ -62,6 +62,8 @@ enum class EarDirectSpeakersParameters {
 enum class EarHoaParameters {
     TRACK_MAPPING = 0,
     PACKFORMAT_ID_VALUE,
+    BYPASS,
+    USE_TRACK_NAME,
     NUM_PARAMETERS
 };
 
@@ -551,6 +553,7 @@ void EARPluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAutomation &
 }
 
 void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, const ReaperAPI & api) {
+    /*
 	// Can only do this in onHoaAutomation because we need the packformat and a channelformats first blockformat
 	// NOTE: This will run for every leg, so don't duplicate effort!
 	auto track = automationElement.getTrack();
@@ -596,15 +599,70 @@ void EARPluginSuite::onHoaAutomation(const HoaAutomation & automationElement, co
 			//TODO - need to tell user - no free track mappings
 		}
 	}
+    */
 }
 
-void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAPI &api){
-    auto mediaTrack = api.createTrackAtIndex(0, true);
-    assert(mediaTrack);
-    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
-    trackElement.setTrack(track);
-    //nameTrackFromElementName();
-    track->disableMasterSend();
+void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAPI &api)
+{
+    auto take = trackElement.getTakeElement();
+    TrackInfo trackInfo;
+    auto channelCount = static_cast<int>(take->trackUidCount());
+
+    if(mapHasKey(takesOnTracks, take)) {
+        trackInfo = getValueFromMap(takesOnTracks, take);
+        trackElement.setTrack(trackInfo.track);
+    } else {
+        auto mediaTrack = api.createTrackAtIndex(0, true);
+        assert(mediaTrack);
+        trackInfo.track = std::make_shared<TrackInstance>(mediaTrack, api);
+        assert(trackMappingAssigner);
+        trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
+        if(!trackInfo.routingStartChannel.has_value()) {
+            //TODO: Need to warn user no channels available
+        }
+        setInMap(takesOnTracks, take, trackInfo);
+        trackElement.setTrack(trackInfo.track);
+        auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+        mte->nameTrackFromElementName();
+        trackInfo.track->disableMasterSend();
+        trackInfo.track->setChannelCount(channelCount);
+    }
+
+    auto automationElements = trackElement.getAutomationElements();
+    if(automationElements.size() > 0) {
+        auto channel = automationElements.front()->channel();
+        auto packFormat = channel.packFormat();
+        assert(packFormat);
+
+        if(packFormat) {
+            auto packFormatId = std::stoi(adm::formatId(packFormat->get<adm::AudioPackFormatId>()).substr(7, 4));
+
+            auto plugin = createAndNamePlugin(HOA_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
+            plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
+
+            if(trackInfo.routingStartChannel.has_value()) {
+                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
+                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
+
+                uint32_t audioObjectIdVal = 0;
+                if(auto ao = channel.object()) {
+                    audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+                }
+
+                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
+                auto trackNumber = *trackInfo.routingStartChannel;
+                trackMappingToAo[trackNumber] = audioObjectIdVal;
+                for(auto const& trackUid : take->trackUids()) {
+                    auto trackUidVal = getIdValueAsInt(*trackUid);
+                    trackMappingToAtu[trackNumber] = trackUidVal;
+                    trackNumber++;
+                }
+            }
+
+        } else {
+            // TODO - warn user - can't support this hoa pack format
+        }
+    }
 }
 
 bool EARPluginSuite::pluginSuiteUsable(const ReaperAPI &api)
