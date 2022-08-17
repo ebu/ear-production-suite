@@ -83,20 +83,23 @@ std::shared_ptr<ADMMetaData> admplug::ImportAction::getAdmMetaData(const ReaperA
     return std::shared_ptr<ADMMetaData>();
 }
 
-bool admplug::ImportAction::canMediaExplode_QuickCheck(const ReaperAPI & api, MediaItem * mediaItem)
+bool admplug::ImportAction::canMediaExplode_QuickCheck(const ReaperAPI & api, MediaItem * mediaItem, std::string* errOut)
 {
-    return canMediaExplode_QuickCheck(api, getFilenameFromMediaItem(mediaItem, api));
+    return canMediaExplode_QuickCheck(api, getFilenameFromMediaItem(mediaItem, api), errOut);
 }
 
-bool admplug::ImportAction::canMediaExplode_QuickCheck(const ReaperAPI & api, std::string mediaFile)
+bool admplug::ImportAction::canMediaExplode_QuickCheck(const ReaperAPI & api, std::string mediaFile, std::string* errOut)
 {
     try {
         auto bw64File = bw64::readFile(mediaFile);
         if (!bw64File->chnaChunk()) return false;
         if (!bw64File->axmlChunk()) return false;
     }
-    catch (const std::runtime_error&) {
+    catch (const std::runtime_error& e) {
         // Probably not RIFF/BW64/RF64 or not WAVE.
+        if(errOut) {
+            *errOut = e.what();
+        }
         return false;
     }
     return true;

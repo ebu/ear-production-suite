@@ -250,10 +250,13 @@ extern "C" {
                 memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
                 if(api.GetUserFileNameForRead(filename, "ADM BW64 File to Open", "wav")) {
                     filenameStr = std::string(filename);
-                    if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
+                    std::string errOut;
+                    if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr, &errOut)) {
                         importer.import(filenameStr, api);
                     } else {
-                        api.ShowMessageBox("Error: This file can not be imported.", "ADM Open", 0);
+                        std::string errMsg{ "Error: This file can not be imported.\n\nResponse: " };
+                        errMsg += errOut;
+                        api.ShowMessageBox(errMsg.c_str(), "ADM Open", 0);
                     }
                 }
             }
@@ -299,10 +302,13 @@ extern "C" {
             memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
             if (api.GetUserFileNameForRead(filename, "ADM BW64 File to Import", "wav")) {
                 filenameStr = std::string(filename);
-                if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr)) {
+                std::string errOut;
+                if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr), &errOut) {
                     importer.import(filenameStr, api);
                 } else {
-                    api.ShowMessageBox("Error: This file can not be imported.", "ADM Import", 0);
+                    std::string errMsg{ "Error: This file can not be imported.\n\nResponse: " };
+                    errMsg += errOut;
+                    api.ShowMessageBox(errMsg.c_str(), "ADM Import", 0);
                 }
             }
         });
