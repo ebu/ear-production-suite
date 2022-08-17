@@ -19,8 +19,8 @@ public:
     void import(std::string importFile, const ReaperAPI& api);
     void import(MediaItem* source, const ReaperAPI& api);
 
-    static bool canMediaExplode_QuickCheck(const ReaperAPI& api, MediaItem* mediaItem);
-    static bool canMediaExplode_QuickCheck(const ReaperAPI& api, std::string mediaFile);
+    static bool canMediaExplode_QuickCheck(const ReaperAPI& api, MediaItem* mediaItem, std::string* errOut = nullptr);
+    static bool canMediaExplode_QuickCheck(const ReaperAPI& api, std::string mediaFile, std::string* errOut = nullptr);
 
 private:
     std::shared_ptr<PluginSuite> pluginSuite;
