@@ -34,7 +34,7 @@ struct TreeState {
     std::vector<std::shared_ptr<adm::AudioTrackUid const>> audioTrackUids;
     std::vector<std::shared_ptr<adm::AudioChannelFormat const>> audioChannelFormats;
 
-    PackRepresentation packRepresentation; // TODO - does this really belong here??
+    PackRepresentation packRepresentation;
 };
 
 class ProjectTree : boost::static_visitor<>
@@ -64,7 +64,6 @@ private:
     void moveToNewHoaTrackNode(std::vector<adm::ElementConstVariant> elements);
     void moveToNewGroupNode(adm::ElementConstVariant element);
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
-    //void moveToNewAutomationNode(ADMChannel channel);
     void addAutomationNodes(std::shared_ptr<ProjectNode> trackNode);
     void addAutomation();
     bool moveToChildWithElement(adm::ElementConstVariant element);
@@ -80,7 +79,6 @@ private:
     std::shared_ptr<ProjectNode> rootNode;
     std::shared_ptr<ImportListener> broadcast;
     TreeState state;
-    //void moveToNewTrackAndTakeNode(ADMChannel channel, std::vector<adm::ElementConstVariant> relatedAdmElements);
 };
 
 }
