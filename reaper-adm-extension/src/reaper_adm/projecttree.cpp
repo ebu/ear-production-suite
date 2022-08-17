@@ -259,11 +259,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             moveToNewTrackNode(td, relatedAdmElements);
             addTake();
             addAutomation();
-            /*
-            auto trackNode = state.currentNode;
-            moveToTakeNode();
-            addAutomationNodes(trackNode);
-            */
         }
 
     }
@@ -283,11 +278,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
                 moveToNewTrackNode(td, relatedAdmElements);
                 addTake();
                 addAutomation();
-                /*
-                auto trackNode = state.currentNode;
-                moveToTakeNode();
-                addAutomationNodes(trackNode);
-                */
             }
         }
 
@@ -300,11 +290,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             moveToNewTrackNode(td, relatedAdmElements);
             addTake();
             addAutomation();
-            /*
-            auto trackNode = state.currentNode;
-            moveToTakeNode();
-            addAutomationNodes(trackNode);
-            */
         }
     }
 }
@@ -332,23 +317,7 @@ void ProjectTree::create(PluginSuite& pluginSet,
 
     api.UpdateArrangeForAutomation();
 }
-/*
-void ProjectTree::moveToNewTrackAndTakeNode(ADMChannel channel,
-                                            std::vector<adm::ElementConstVariant> relatedAdmElements) {
-    auto channelFormat = channel.channelFormat();
 
-    if(channelFormat) {
-        auto td = channelFormat->get<adm::TypeDescriptor>();
-        moveToNewTrackNode(td, relatedAdmElements);
-
-        moveToNewTakeNode(state.currentObject, state.currentUid);
-        auto take = std::static_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
-        if(take && !take->hasChannel(channel)) { // We may have traversed to this via different routes, so check!
-            take->addChannel(channel);
-        }
-    }
-}
-*/
 void admplug::ProjectTree::moveToNewTrackNode(adm::TypeDescriptor td, std::vector<adm::ElementConstVariant> relatedAdmElements)
 {
     if(td == adm::TypeDefinition::OBJECTS) {
@@ -451,17 +420,7 @@ void ProjectTree::moveToNewGroupNode(std::vector<adm::ElementConstVariant> eleme
     broadcast->elementAdded();
     moveToNewChild(trackNode);
 }
-/*
-void ProjectTree::moveToNewAutomationNode(ADMChannel channel)
-{
-    auto parentTake = std::static_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
-    assert(std::dynamic_pointer_cast<TakeElement>(parentTake)); // Has to have parent
-    auto autoNode = nodeFactory->createAutomationNode(channel, parentTake);
-    assert(autoNode);
-    broadcast->elementAdded();
-    moveToNewChild(autoNode);
-}
-*/
+
 void admplug::ProjectTree::addAutomationNodes(std::shared_ptr<ProjectNode> trackNode)
 {
     auto parentTrack = std::static_pointer_cast<TrackElement>(trackNode->getProjectElement());
@@ -532,12 +491,10 @@ std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::sh
     }
     auto children = startingNode->children();
     for (auto child : children) {
-        //if (std::dynamic_pointer_cast<TakeElement>(child->getProjectElement())) { // Only process child if take node
-            auto matchingNode = getCompatibleTakeNode(object, elements, child);
-            if (matchingNode) {
-                return matchingNode;
-            }
-        //}
+        auto matchingNode = getCompatibleTakeNode(object, elements, child);
+        if (matchingNode) {
+            return matchingNode;
+        }
     }
     return nullptr;
 }
