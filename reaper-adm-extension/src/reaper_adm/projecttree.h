@@ -14,7 +14,7 @@ namespace admplug {
 
 class ImportListener;
 class NodeFactory;
-class IChannelIndexer;
+class IPCMSourceCreator;
 class ReaperAPI;
 
 enum PackRepresentation {
@@ -41,6 +41,7 @@ class ProjectTree : boost::static_visitor<>
 {
 public:
     ProjectTree(std::unique_ptr<NodeFactory> nodeFactory,
+                std::shared_ptr<IPCMSourceCreator> sourceCreator,
                 std::shared_ptr<ProjectNode> root,
                 std::shared_ptr<ImportListener> broadcast);
     void operator()(std::shared_ptr<adm::AudioProgramme const> programme);
@@ -76,6 +77,7 @@ private:
     std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
 
     std::unique_ptr<NodeFactory> nodeFactory;
+    std::shared_ptr<IPCMSourceCreator> sourceCreator;
     std::shared_ptr<ProjectNode> rootNode;
     std::shared_ptr<ImportListener> broadcast;
     TreeState state;

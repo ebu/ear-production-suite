@@ -208,6 +208,7 @@ void ADMImporter::parse() {
                                                            std::make_unique<RoutingWriterFactory>(),
                                                            *metadata);
         project = std::make_unique<ProjectTree>(std::make_unique<NodeCreator>(sourceCreator, originalMediaItem),
+                                                sourceCreator,
                                                 std::make_unique<ProjectNode>(std::make_unique<ImportElement>(originalMediaItem)),
                                                 this->context.broadcast);
         applyRoutes(programmes, tracer, *project);

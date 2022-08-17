@@ -8,6 +8,7 @@
 #include "nodefactory.h"
 #include "admchannel.h"
 #include "importaction.h"
+#include "pcmsourcecreator.h"
 #include <helper/container_helpers.hpp>
 #include <helper/common_definition_helper.h>
 
@@ -109,12 +110,14 @@ bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementCo
     return std::dynamic_pointer_cast<TrackElement>(node.getProjectElement()) && node.getProjectElement()->hasAdmElements(elements);
 }
 
-bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements) {
+bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::shared_ptr<IPCMSourceCreator> sourceCreator, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements) {
     auto take = std::dynamic_pointer_cast<TakeElement>(node.getProjectElement());
     if(!take) return false;
     int lim = std::min(take->trackUids().size(), elements.size());
     for(int i = 0; i < lim; i++) {
-        if(elements[i] != take->trackUids()[i]) {
+        auto existingTakeUidChannel = sourceCreator->channelForTrackUid(take->trackUids()[i]);
+        auto currentUidChannel = sourceCreator->channelForTrackUid(elements[i]);
+        if(currentUidChannel != existingTakeUidChannel) {
             return false;
         }
     }
@@ -166,9 +169,11 @@ void sortToVectorsByChannelFormatOrder(const std::map<std::shared_ptr<const adm:
 
 
 ProjectTree::ProjectTree(std::unique_ptr<NodeFactory> nodeFactory,
+                         std::shared_ptr<IPCMSourceCreator> sourceCreator,
                          std::shared_ptr<ProjectNode> root,
                          std::shared_ptr<ImportListener> broadcast) : nodeFactory{ std::move(nodeFactory) },
     rootNode{ std::move(root) },
+    sourceCreator{ std::move(sourceCreator) },
     broadcast{ std::move(broadcast) }
 {
     resetRoot();
@@ -376,11 +381,8 @@ void admplug::ProjectTree::addTake()
         trackElement->setTakeElement(takeElement);
     }
     // Add any additional channels
-    for(int i = 0; i < state.audioChannelFormats.size(); i++) {
-        auto channel = ADMChannel{state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i]};
-        if(!takeElement->hasTrackUid(channel.trackUid())) {
-            takeElement->addTrackUid(channel.trackUid());
-        }
+    for(int i = takeElement->trackUidCount(); i < state.audioTrackUids.size(); i++) {
+        takeElement->addTrackUid(state.audioTrackUids[i]);
     }
     state.currentNode = trackNode; // Reset pos as this is an add operation, not a move
 }
@@ -485,7 +487,7 @@ std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::sh
     if (!startingNode) {
         startingNode = rootNode;
     }
-    if (nodeIsTakeWithCompatibleElements(*startingNode, elements)) {
+    if (nodeIsTakeWithCompatibleElements(*startingNode, sourceCreator, elements)) {
         //////TODO - MUST CHECK START TIME AND DURATION AGAINST object!!
         return startingNode;
     }
