@@ -60,6 +60,11 @@ void PCMSourceCreator::extractSources(std::string outputDir, const ImportContext
     fileNames = createSourceFiles(outputDir, *context.broadcast, *context.import);
 }
 
+int admplug::PCMSourceCreator::channelForTrackUid(std::shared_ptr<const adm::AudioTrackUid> trackUid)
+{
+    return indexer->indexOf(trackUid);
+}
+
 std::vector<std::string> PCMSourceCreator::createSourceFiles(std::string outputDir,
                                                              ImportListener &broadcast,
                                                              ImportReporter const &import)
