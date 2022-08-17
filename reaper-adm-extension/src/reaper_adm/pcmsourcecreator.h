@@ -26,6 +26,7 @@ public:
     virtual void addTake(std::shared_ptr<TakeElement> take) = 0;
     virtual void linkSources(ReaperAPI const&) = 0;
     virtual void extractSources(std::string outputDir, ImportContext const& context) = 0;
+    virtual int channelForTrackUid(std::shared_ptr<const adm::AudioTrackUid> trackUid) = 0;
 };
 
 class PCMSourceCreator : public IPCMSourceCreator
@@ -39,6 +40,7 @@ public:
     virtual void addTake(std::shared_ptr<TakeElement> take) override;
     void linkSources(ReaperAPI const&) override;
     void extractSources(std::string outputDir, ImportContext const& context) override;
+    int channelForTrackUid(std::shared_ptr<const adm::AudioTrackUid> trackUid) override;
 private:
     std::vector<std::string> fileNames;
     std::vector<std::string> createSourceFiles(std::string outputDir,

@@ -27,6 +27,7 @@ using namespace admplug;
 TEST_CASE("Project tree", "") {
     auto rootElement = std::make_shared< NiceMock<MockRootElement>>();
     auto fakeCreator = std::make_unique<NiceMock<MockNodeFactory>>();
+    auto fakePcmSourceCreator = std::make_unique<NiceMock<MockIPCMSourceCreator>>();
     fakeCreator->delegateToFake();
     auto& fakeCreatorRef = *fakeCreator;
     NiceMock<MockPluginSuite> fakePluginSuite{};
@@ -63,6 +64,7 @@ TEST_CASE("Project tree", "") {
 
     SECTION("Given a project tree in initial state") {
         ProjectTree tree(std::move(fakeCreator),
+                         std::move(fakePcmSourceCreator),
                          std::make_unique<ProjectNode>(rootElement),
                          fakeListener);
         auto doc = adm::Document::create();
@@ -197,6 +199,7 @@ TEST_CASE("Project tree", "") {
     }
     SECTION("Given a project tree with programme visited") {
         ProjectTree tree(std::move(fakeCreator),
+                         std::move(fakePcmSourceCreator),
                          std::make_unique<ProjectNode>(rootElement),
                          fakeListener);
         TreeState state;
@@ -314,6 +317,7 @@ TEST_CASE("Project tree", "") {
 
         auto rootNode = std::make_unique<ProjectNode>(std::move(trackElement));
         ProjectTree tree(std::move(fakeCreator),
+                         std::move(fakePcmSourceCreator),
                          std::move(rootNode),
                          fakeListener);
         auto doc = adm::Document::create();
