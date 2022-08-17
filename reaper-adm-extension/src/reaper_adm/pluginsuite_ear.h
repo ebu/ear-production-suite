@@ -47,9 +47,6 @@ public:
 	void onCreateDirectTrack(TrackElement&, const ReaperAPI& api) override;
 	void onCreateHoaTrack(TrackElement&, const ReaperAPI& api) override;
 	void onCreateGroup(TrackElement&, const ReaperAPI& api) override;
-	void onObjectAutomation(const ObjectAutomation&, const ReaperAPI& api) override;
-	void onDirectSpeakersAutomation(const DirectSpeakersAutomation&, const ReaperAPI& api) override;
-	void onHoaAutomation(const HoaAutomation&, const ReaperAPI& api) override;
 	void onProjectBuildComplete(const ReaperAPI& api) override;
 	bool pluginSuiteUsable(const ReaperAPI& api) override;
 	bool representAdmStructureWithGroups(ReaperAPI const& api) override;
