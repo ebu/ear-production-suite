@@ -9,6 +9,7 @@
 #include "admtraits.h"
 #include "commontrackpool.h"
 #include "admvstcontrol.h"
+#include "mediatrackelement.h"
 
 using namespace admplug;
 
@@ -178,24 +179,36 @@ void VisrPluginSuite::setupTrackWithMetadataPlugin(Track& track, ReaperAPI const
 
 }
 
-void VisrPluginSuite::onCreateObjectTrack(TrackElement &trackNode, ReaperAPI const& api)
+void VisrPluginSuite::onCreateObjectTrack(TrackElement &trackElement, ReaperAPI const& api)
 {
-    auto& track = *trackNode.getTrack();
-    AdmVst(track.get(), api); // Creates ADM VST before spatialiser
-    setupTrackWithMetadataPlugin(track, api);
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+    AdmVst(mediaTrack, api); // Creates ADM VST before spatialiser
+    setupTrackWithMetadataPlugin(*track, api);
 
-    auto groups = trackNode.slaveOfGroups();
+    auto groups = trackElement.slaveOfGroups();
     for(auto& group : groups) {
-        track.setAsVCASlave(group);
+        track->setAsVCASlave(group);
     }
 }
 
-void VisrPluginSuite::onCreateDirectTrack(TrackElement &trackNode, const ReaperAPI &)
+void VisrPluginSuite::onCreateDirectTrack(TrackElement &trackElement, const ReaperAPI &api)
 {
-    auto track = trackNode.getTrack();
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
     track->moveToBefore(trackInsertionIndex++);
     track->disableMasterSend();
-    for(auto group : trackNode.slaveOfGroups()) {
+
+    auto groups = trackElement.slaveOfGroups();
+    for(auto& group : groups) {
         track->setAsVCASlave(group);
     }
 }
@@ -207,15 +220,21 @@ void VisrPluginSuite::doGenericTrackSetup(Track& track)
     track.disableMasterSend();
 }
 
-void VisrPluginSuite::onCreateGroup(TrackElement &trackNode, const ReaperAPI &)
+void VisrPluginSuite::onCreateGroup(TrackElement &trackElement, const ReaperAPI &api)
 {
-    auto& track = *trackNode.getTrack();
-    doGenericTrackSetup(track);
-    auto groups = trackNode.slaveOfGroups();
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
+
+    doGenericTrackSetup(*track);
+    auto groups = trackElement.slaveOfGroups();
     for (auto& group : groups) {
-        track.setAsVCASlave(group);
+        track->setAsVCASlave(group);
     }
-    track.setAsVCAMaster(trackNode.masterOfGroup());
+    track->setAsVCAMaster(trackElement.masterOfGroup());
 }
 
 void VisrPluginSuite::onCreateProject(const ProjectNode &, const ReaperAPI &api)
@@ -303,11 +322,18 @@ void VisrPluginSuite::onHoaAutomation(const HoaAutomation &, const ReaperAPI &ap
 
 }
 
-void VisrPluginSuite::onCreateHoaTrack(TrackElement &trackNode, const ReaperAPI &api){
-    auto track = trackNode.getTrack();
+void VisrPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAPI &api){
+    auto mediaTrack = api.createTrackAtIndex(0, true);
+    assert(mediaTrack);
+    auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+    trackElement.setTrack(track);
+    auto mte = dynamic_cast<MediaTrackElement*>(&trackElement);
+    mte->nameTrackFromElementName();
     track->moveToBefore(trackInsertionIndex++);
     track->disableMasterSend();
-    for(auto group : trackNode.slaveOfGroups()) {
+
+    auto groups = trackElement.slaveOfGroups();
+    for(auto& group : groups) {
         track->setAsVCASlave(group);
     }
 }
