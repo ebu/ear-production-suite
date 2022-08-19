@@ -214,6 +214,10 @@ void ObjectsAudioProcessor::setStateInformation(XmlElement * xmlState, bool useD
     if(useDefaultsIfUnspecified || xmlState->hasAttribute("name"))
       connector_->setName(xmlState->getStringAttribute("name", "No Name").toStdString());
 
+    if(xmlState->hasAttribute("imported_id")) {
+      backend_->setImportedId(xmlState->getIntAttribute("imported_id", 0));
+    }
+
   }
 }
 
