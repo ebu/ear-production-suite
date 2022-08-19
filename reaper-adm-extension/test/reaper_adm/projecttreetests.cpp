@@ -43,12 +43,12 @@ TEST_CASE("Project tree", "") {
 
         sectionName = "it adds " + std::to_string(numObjectTracks) + " object track node(s)";
         SECTION(sectionName) {
-            EXPECT_CALL(fakeCreatorRef, createObjectTrackNode(_, _)).Times(numObjectTracks);
+            EXPECT_CALL(fakeCreatorRef, createObjectTrackNode(_, _, _)).Times(numObjectTracks);
         }
 
         sectionName = "it adds " + std::to_string(numDirectTracks) + " direct track node(s)";
         SECTION(sectionName) {
-            EXPECT_CALL(fakeCreatorRef, createDirectTrackNode(_, _)).Times(numDirectTracks);
+            EXPECT_CALL(fakeCreatorRef, createDirectTrackNode(_, _, _)).Times(numDirectTracks);
         }
 
         sectionName = "it adds " + std::to_string(numTakes) + " take node(s)";
