@@ -79,11 +79,18 @@ public:
     void addAutomationElement(std::shared_ptr<AutomationElement> automation) {
         automationElements.push_back(automation);
     }
+    void setRepresentedAudioObject(std::shared_ptr<const adm::AudioObject> audioObject) {
+        representedAudioObject = audioObject;
+    }
+    std::shared_ptr<const adm::AudioObject> getRepresentedAudioObject() {
+        return representedAudioObject;
+    }
 protected:
     std::shared_ptr<Track> track;
     std::vector<std::shared_ptr<TrackElement>> parentElements;
     std::shared_ptr<TakeElement> takeElement;
     std::vector<std::shared_ptr<AutomationElement>> automationElements;
+    std::shared_ptr<const adm::AudioObject> representedAudioObject;
 };
 
 class TakeElement : public ProjectElement {
