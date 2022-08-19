@@ -51,6 +51,11 @@ void HoaBackend::setConnectionId(communication::ConnectionId id) {
 
 void HoaBackend::triggerMetadataSend() { metadataSender_.triggerSend(); }
 
+EAR_PLUGIN_BASE_EXPORT void HoaBackend::setImportedId(uint32_t id)
+{
+  metadataSender_.importedId(id);
+}
+
 void HoaBackend::onConnection(communication::ConnectionId connectionId,
                               const std::string& streamEndpoint) {
   std::lock_guard<std::mutex> lock(mutex_);
