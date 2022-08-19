@@ -21,6 +21,7 @@ class DirectSpeakersMetadataSender {
 
   void routing(int32_t value);
   void name(const std::string& value);
+  void importedId(int value);
   void colour(int value);
   void speakerSetupIndex(int value);
 
