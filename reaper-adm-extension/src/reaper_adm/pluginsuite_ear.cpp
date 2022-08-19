@@ -168,21 +168,40 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, TrackInstance* track, TrackElement* trackElement) {
     auto cbh = EARPluginCallbackHandler::getInstance();
     auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
+    auto audioObject = mte->getRepresentedAudioObject();
 
+    std::optional<unsigned int> importedId;
+    if(audioObject) {
+        importedId = audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+    }
+
+    std::string customName;
     if(trackElement->getTakeElement()->countParentElements() > 1) {
         // Multiple plugins on this track so we need to name them seperately.
+        customName = mte->getAppropriateName();
+    }
 
-        auto name = mte->getAppropriateName();
+    if(importedId.has_value() || !customName.empty()) {
+        // Need to send a state as XML
         std::string xmlElementName;
         if(pluginName == EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME) xmlElementName = "ObjectsPlugin";
         if(pluginName == EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME) xmlElementName = "DirectSpeakersPlugin";
         if(pluginName == EARPluginSuite::HOA_METADATA_PLUGIN_NAME) xmlElementName = "HoaPlugin";
         assert(!pluginName.empty());
+
         std::string xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?> <");
         xml += xmlElementName;
-        xml.append(" use_track_name = \"0\" name=\"");
-        xml += name;
-        xml.append("\"/>");
+        if(!customName.empty()) {
+            xml.append(" use_track_name=\"0\" name=\"");
+            xml += customName;
+            xml.append("\"");
+        }
+        if(importedId.has_value()) {
+            xml.append(" imported_id=\"");
+            xml += std::to_string(importedId.value());
+            xml.append("\"");
+        }
+        xml.append(" />");
 
         cbh->reset();
         auto plugin = track->createPlugin(pluginName);
@@ -191,12 +210,15 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
         }
         cbh->reset();
 
-        auto trackName = track->getName();
-        if(name != trackName) {
-            track->setName("Multiple Objects");
+        if(!customName.empty()) {
+            auto trackName = track->getName();
+            if(customName != trackName) {
+                track->setName("Multiple Objects");
+            }
         }
 
         return std::move(plugin);
+
     } else {
         // Leave plugin name after track
 
@@ -205,6 +227,7 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
         cbh->reset();
 
         return std::move(plugin);
+
     }
 }
 
