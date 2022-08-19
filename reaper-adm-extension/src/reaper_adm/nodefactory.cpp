@@ -20,19 +20,25 @@ std::unique_ptr<RootElement> admplug::NodeCreator::createRootElement(MediaItem* 
     return std::make_unique<ImportElement>(fromMediaItem);
 }
 
-std::shared_ptr<ProjectNode> admplug::NodeCreator::createObjectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroup)
+std::shared_ptr<ProjectNode> admplug::NodeCreator::createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
 {
-    return std::make_shared<ProjectNode>(std::make_unique<ObjectTrack>(elements, parentGroup));
+    auto track = std::make_shared<ObjectTrack>(elements, parentGroupTrack);
+    track->setRepresentedAudioObject(representedAudioObject);
+    return std::make_shared<ProjectNode>(track);
 }
 
-std::shared_ptr<ProjectNode> NodeCreator::createDirectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
+std::shared_ptr<ProjectNode> NodeCreator::createDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
 {
-    return std::make_shared<ProjectNode>(std::make_unique<DirectTrack>(elements, parentGroupTrack));
+    auto track = std::make_shared<DirectTrack>(elements, parentGroupTrack);
+    track->setRepresentedAudioObject(representedAudioObject);
+    return std::make_shared<ProjectNode>(track);
 }
 
-std::shared_ptr<ProjectNode> NodeCreator::createHoaTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
+std::shared_ptr<ProjectNode> NodeCreator::createHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
 {
-    return std::make_shared<ProjectNode>(std::make_unique<HoaTrack>(elements, parentGroupTrack));
+    auto track = std::make_shared<HoaTrack>(elements, parentGroupTrack);
+    track->setRepresentedAudioObject(representedAudioObject);
+    return std::make_shared<ProjectNode>(track);
 }
 
 std::shared_ptr<ProjectNode> admplug::NodeCreator::createGroupNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)

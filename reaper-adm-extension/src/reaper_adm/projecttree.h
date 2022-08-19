@@ -59,10 +59,10 @@ private:
     void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object);
     void moveToTakeNode();
     void addTake();
-    void moveToNewTrackNode(adm::TypeDescriptor td, std::vector<adm::ElementConstVariant> elements);
-    void moveToNewObjectTrackNode(std::vector<adm::ElementConstVariant> elements);
-    void moveToNewDirectTrackNode(std::vector<adm::ElementConstVariant> elements);
-    void moveToNewHoaTrackNode(std::vector<adm::ElementConstVariant> elements);
+    void moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
+    void moveToNewObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
+    void moveToNewDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
+    void moveToNewHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewGroupNode(adm::ElementConstVariant element);
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
     void addAutomationNodes(std::shared_ptr<ProjectNode> trackNode);
