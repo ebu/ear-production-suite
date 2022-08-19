@@ -33,6 +33,10 @@ void ObjectMetadataSender::triggerSend() { sender_.triggerSend(); }
 void ObjectMetadataSender::name(const std::string& value) {
   setData([value](auto data) { data->set_name(value); });
 }
+void ObjectMetadataSender::importedId(int value)
+{
+  setData([&value](auto data) { data->set_imported_id(value); });
+}
 void ObjectMetadataSender::colour(int value) {
   setData([value](auto data) { data->set_colour(value); });
 }

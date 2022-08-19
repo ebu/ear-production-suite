@@ -54,6 +54,11 @@ void ObjectBackend::setConnectionId(communication::ConnectionId id) {
 
 void ObjectBackend::triggerMetadataSend() { metadataSender_.triggerSend(); }
 
+EAR_PLUGIN_BASE_EXPORT void ObjectBackend::setImportedId(uint32_t id)
+{
+  metadataSender_.importedId(id);
+}
+
 void ObjectBackend::onConnection(communication::ConnectionId connectionId,
                                  const std::string& streamEndpoint) {
   std::lock_guard<std::mutex> lock(mutex_);
