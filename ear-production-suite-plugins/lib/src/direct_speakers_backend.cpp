@@ -56,6 +56,11 @@ void DirectSpeakersBackend::triggerMetadataSend() {
   metadataSender_.triggerSend();
 }
 
+EAR_PLUGIN_BASE_EXPORT void DirectSpeakersBackend::setImportedId(uint32_t id)
+{
+  metadataSender_.importedId(id);
+}
+
 void DirectSpeakersBackend::onConnection(
     communication::ConnectionId connectionId,
     const std::string& streamEndpoint) {

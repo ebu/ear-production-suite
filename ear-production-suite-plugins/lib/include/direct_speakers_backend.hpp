@@ -28,6 +28,9 @@ class DirectSpeakersBackend {
     return controlConnection_.getConnectionId();
   }
 
+  // This is the ID originally assigned to this object according to imported ADM
+  EAR_PLUGIN_BASE_EXPORT void setImportedId(uint32_t id);
+
  private:
   void onConnection(communication::ConnectionId connectionId,
                     const std::string& streamEndpoint);
