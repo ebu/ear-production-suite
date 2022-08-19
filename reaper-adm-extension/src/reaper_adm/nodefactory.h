@@ -29,9 +29,9 @@ public:
  * Creates and returns a new TrackNode, which represents a Reaper MediaTrack.
  * On creation, the track will be named after the supplied element.
  */
-  virtual std::shared_ptr<ProjectNode> createObjectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
-  virtual std::shared_ptr<ProjectNode> createDirectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
-  virtual std::shared_ptr<ProjectNode> createHoaTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
+  virtual std::shared_ptr<ProjectNode> createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
+  virtual std::shared_ptr<ProjectNode> createDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
+  virtual std::shared_ptr<ProjectNode> createHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
   virtual std::shared_ptr<ProjectNode> createGroupNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) = 0;
 /**
  * @brief NodeFactory::createTakeNode
@@ -56,9 +56,9 @@ public:
     NodeCreator(std::shared_ptr<IPCMSourceCreator> pcmCreator, MediaItem* fromMediaItem = nullptr);
     NodeCreator(NodeFactory const& other) = delete;
     NodeCreator& operator=(NodeFactory const& other) = delete;
-    std::shared_ptr<ProjectNode> createObjectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
-    std::shared_ptr<ProjectNode> createDirectTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
-    std::shared_ptr<ProjectNode> createHoaTrackNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
+    std::shared_ptr<ProjectNode> createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
+    std::shared_ptr<ProjectNode> createDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
+    std::shared_ptr<ProjectNode> createHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
     std::shared_ptr<ProjectNode> createGroupNode(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack) override;
     std::shared_ptr<ProjectNode> createTakeNode(std::shared_ptr<const adm::AudioObject> parentObject,
                                                 std::shared_ptr<TrackElement> parentTrack) override;
