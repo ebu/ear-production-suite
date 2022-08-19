@@ -28,6 +28,10 @@ void HoaMetadataSender::routing(int32_t value) {
 void HoaMetadataSender::name(const std::string& value) {
   setData([&value](auto data) { data->set_name(value); });
 }
+void HoaMetadataSender::importedId(int value)
+{
+  setData([&value](auto data) { data->set_imported_id(value); });
+}
 void HoaMetadataSender::colour(int value) {
   setData([value](auto data) { data->set_colour(value); });
 }
