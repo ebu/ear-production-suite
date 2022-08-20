@@ -280,8 +280,7 @@ void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 		auto samplesPort = sceneMaster.getSamplesSocketPort();
 		auto commandPort = sceneMaster.getCommandSocketPort();
 		auto communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
-        //TODO - temp comment out for overlap crash -
-		//communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
+		communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
 	}
 }
 
