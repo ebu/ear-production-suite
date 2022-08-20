@@ -42,8 +42,9 @@ MediaTakeElement::MediaTakeElement(std::shared_ptr<const adm::AudioObject> obj,
 void MediaTakeElement::createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
     for(auto parent : parents) {
-        if(!hasMediaItem(api, *parent.get())) {
-            auto mediaItem = createMediaItem(api, *parent.get());
+        auto trackEl = parent.get();
+        if(trackEl && trackEl->getTrack() && !hasMediaItem(api, *trackEl)) {
+            auto mediaItem = createMediaItem(api, *trackEl);
             createTake(api, mediaItem);
         }
     }
