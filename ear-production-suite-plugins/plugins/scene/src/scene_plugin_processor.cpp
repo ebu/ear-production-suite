@@ -234,8 +234,7 @@ void SceneAudioProcessor::sendAdmMetadata() {
 void SceneAudioProcessor::recvAdmMetadata(std::string admStr,
                                           std::vector<uint32_t> mappings) {
     pendingStore_ = std::make_shared<ear::plugin::PendingStore>(metadata_,
-                                                                std::move(admStr),
-                                                                std::move(mappings));
+                                                                std::move(admStr));
     metadata_.addBackendListener(pendingStore_);
 }
 
