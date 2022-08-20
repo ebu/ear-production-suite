@@ -150,15 +150,11 @@ void ProgrammeStoreAdmPopulator::operator()(
   std::shared_ptr<const AudioObject> admObject) {
   auto aoId = admObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
 
-  for(int ch = 0; ch < audioObjectMaps.size(); ch++) {
-    if(audioObjectMaps[ch] == aoId) {
-      auto found = programmeElementTrackLookup.find(ch);
-      if(found == programmeElementTrackLookup.end()) {
-        auto element = currentProgramme->add_element();
-        setInteractivity(element->mutable_object(), *admObject);
-        programmeElementTrackLookup[ch] = element;
-      }
-    }
+  auto found = programmeElementImportedAudioObjectIdLookup.find(aoId) != programmeElementImportedAudioObjectIdLookup.end();
+  if(!found) {
+    auto element = currentProgramme->add_element();
+    setInteractivity(element->mutable_object(), *admObject);
+    programmeElementImportedAudioObjectIdLookup[aoId] = element;
   }
 
 }
@@ -172,12 +168,12 @@ void ProgrammeStoreAdmPopulator::operator()(
 }
 
 void ProgrammeStoreAdmPopulator::startRoute() {
-  programmeElementTrackLookup.clear();
+  programmeElementImportedAudioObjectIdLookup.clear();
 }
 
 void ProgrammeStoreAdmPopulator::endRoute() {
-  elementTrackLookup.insert(programmeElementTrackLookup.begin(),
-                            programmeElementTrackLookup.end());
+  elementImportedAudioObjectIdLookup.insert(programmeElementImportedAudioObjectIdLookup.begin(),
+                            programmeElementImportedAudioObjectIdLookup.end());
 }
 
 std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
@@ -204,7 +200,7 @@ std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
     store.set_auto_mode(false);
 
     store.set_selected_programme_internal_id(store.programme(0).programme_internal_id());
-    return populator.getTrackLookup();
+    return populator.getImportedAudioObjectIdLookup();
   }
   return {};
 }
