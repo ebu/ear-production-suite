@@ -88,12 +88,12 @@ struct StopAtChannel {
     void startRoute();
     void endRoute();
 
-    std::multimap<int, proto::ProgrammeElement*> getTrackLookup() { return elementTrackLookup; }
+    std::multimap<int, proto::ProgrammeElement*> getImportedAudioObjectIdLookup() { return elementImportedAudioObjectIdLookup; }
    private:
     proto::ProgrammeStore* store;
     std::vector<uint32_t> audioObjectMaps;
-    std::map<int, proto::ProgrammeElement*> programmeElementTrackLookup;
-    std::multimap<int, proto::ProgrammeElement*> elementTrackLookup;
+    std::map<int, proto::ProgrammeElement*> programmeElementImportedAudioObjectIdLookup;
+    std::multimap<int, proto::ProgrammeElement*> elementImportedAudioObjectIdLookup;
     std::map<std::shared_ptr<adm::AudioProgramme const>, proto::Programme*> importedProgrammes;
     proto::Programme* currentProgramme;
   };
