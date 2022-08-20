@@ -35,7 +35,8 @@ namespace ear {
         void PendingStore::checkAgainstPendingElements(InputItem const & item)
         {
           if(!finished) {
-            auto range = pendingElements_.equal_range(item.data.routing());
+
+            auto range = pendingElements_.equal_range(item.data.imported_id());
             if (range.first != range.second) {
               for (auto el = range.first; el != range.second; ++el) {
                 el->second->mutable_object()->set_connection_id(item.data.connection_id());
