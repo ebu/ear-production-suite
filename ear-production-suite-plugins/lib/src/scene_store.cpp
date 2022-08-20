@@ -200,13 +200,13 @@ void SceneStore::addToggle(const proto::ProgrammeElement &element) {
 void SceneStore::sendUpdate() {
   auto& mutableMonitoringItemMetadata = *store_.mutable_monitoring_items();
   for(auto& item : mutableMonitoringItemMetadata) {
-    if(contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
+    if(!item.changed() && contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
       item.set_changed(true);
     }
   }
   auto& mutableInputItemMetadata = *store_.mutable_all_available_items();
   for(auto& item : mutableInputItemMetadata) {
-    if(contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
+    if(!item.changed() && contains(itemsChangedSinceLastSend, communication::ConnectionId(item.connection_id()))) {
       item.set_changed(true);
     }
   }
@@ -249,10 +249,17 @@ void SceneStore::exporting(bool isExporting) {
 }
 
 void SceneStore::flagOverlaps() {
+  // Keep it simple - for any routing/monitoring mix changes
+  // Set changed on all items
+  for(auto& item : store_.all_available_items()) {
+    itemsChangedSinceLastSend.insert(item.connection_id());
+  }
+
+  /*
     auto overlaps = getOverlapIds(store_);
     if (overlappingIds_ != overlaps) {
         flagChangedOverlaps(overlappingIds_, overlaps, store_);
     }
     overlappingIds_ = overlaps;
-
+    */
 }
