@@ -11,9 +11,8 @@ namespace ear::plugin {
     class PendingStore : public MetadataListener {
     public:
         PendingStore(Metadata& metadata,
-                     std::string admStr,
-                     std::vector<uint32_t> mappings);
-        void populateFromAdm(std::string const& admStr, std::vector<uint32_t> const& mappings);
+                     std::string admStr);
+        void populateFromAdm(std::string const& admStr);
 
     private:
         void inputAdded(InputItem const& item, bool autoModeState) override;

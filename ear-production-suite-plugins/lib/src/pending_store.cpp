@@ -11,15 +11,14 @@
 namespace ear {
     namespace plugin {
         PendingStore::PendingStore(Metadata &metadata,
-                                   std::string admStr,
-                                   std::vector<uint32_t> mappings) : data_(metadata) {
-            populateFromAdm(admStr, mappings);
+                                   std::string admStr) : data_(metadata) {
+            populateFromAdm(admStr);
         }
 
-        void PendingStore::populateFromAdm(const std::string &admStr, const std::vector<uint32_t> &mappings) {
+        void PendingStore::populateFromAdm(const std::string &admStr) {
             auto iss = std::istringstream{std::move(admStr)};
             auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
-            pendingElements_ = populateStoreFromAdm(*doc, pendingStore_, mappings);
+            pendingElements_ = populateStoreFromAdm(*doc, pendingStore_);
         }
 
         void PendingStore::inputAdded(InputItem const & item, bool autoModeState)
