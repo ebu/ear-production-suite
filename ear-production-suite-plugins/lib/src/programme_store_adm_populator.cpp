@@ -177,11 +177,10 @@ void ProgrammeStoreAdmPopulator::endRoute() {
 }
 
 std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
-    const Document& doc, proto::ProgrammeStore& store,
-    const std::vector<uint32_t>& audioObjectMaps) {
+    const Document& doc, proto::ProgrammeStore& store) {
   auto tracer = adm::detail::GenericRouteTracer<adm::Route, StopAtChannel>{};
   store = proto::ProgrammeStore{};
-  ProgrammeStoreAdmPopulator populator(&store, audioObjectMaps);
+  ProgrammeStoreAdmPopulator populator(&store);
 
   for (auto& programme : doc.getElements<adm::AudioProgramme>()) {
     populator.startRoute();
