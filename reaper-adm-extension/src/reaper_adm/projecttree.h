@@ -59,7 +59,7 @@ private:
     void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object);
     void moveToTakeNode();
     void addTake();
-    void moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
+    bool moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
