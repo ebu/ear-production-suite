@@ -261,9 +261,10 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
         if(!moveToTrackNodeWithElements(relatedAdmElements)) {
-            moveToNewTrackNode(td, state.currentObject, relatedAdmElements);
-            addTake();
-            addAutomation();
+            if(moveToNewTrackNode(td, state.currentObject, relatedAdmElements)) {
+                addTake();
+                addAutomation();
+            }
         }
 
     }
@@ -280,9 +281,10 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             state = cachedState;
             relatedAdmElements = { state.currentObject, state.rootPack, state.audioTrackUids[i] };
             if(!moveToTrackNodeWithElements(relatedAdmElements)) {
-                moveToNewTrackNode(td, state.currentObject, relatedAdmElements);
-                addTake();
-                addAutomation();
+                if(moveToNewTrackNode(td, state.currentObject, relatedAdmElements)) {
+                    addTake();
+                    addAutomation();
+                }
             }
         }
 
@@ -292,9 +294,10 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack, state.audioTrackUids[0] };
         if (!moveToTrackNodeWithElements(relatedAdmElements)) {
-            moveToNewTrackNode(td, state.currentObject, relatedAdmElements);
-            addTake();
-            addAutomation();
+            if(moveToNewTrackNode(td, state.currentObject, relatedAdmElements)) {
+                addTake();
+                addAutomation();
+            }
         }
     }
 }
@@ -323,7 +326,7 @@ void ProjectTree::create(PluginSuite& pluginSet,
     api.UpdateArrangeForAutomation();
 }
 
-void admplug::ProjectTree::moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> relatedAdmElements)
+bool admplug::ProjectTree::moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> relatedAdmElements)
 {
     if(td == adm::TypeDefinition::OBJECTS) {
         moveToNewObjectTrackNode(representedAudioObject, relatedAdmElements);
@@ -331,7 +334,10 @@ void admplug::ProjectTree::moveToNewTrackNode(adm::TypeDescriptor td, std::share
         moveToNewHoaTrackNode(representedAudioObject, relatedAdmElements);
     } else if(td == adm::TypeDefinition::DIRECT_SPEAKERS){
         moveToNewDirectTrackNode(representedAudioObject, relatedAdmElements);
+    } else {
+        return false;
     }
+    return true;
 }
 
 void ProjectTree::moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> admObjectElement)
