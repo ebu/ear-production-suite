@@ -7,22 +7,34 @@
 #include <map>
 #include "metadata_listener.hpp"
 
+#include <thread>
+#include <mutex>
+#include <atomic>
+
 namespace ear::plugin {
     class PendingStore : public MetadataListener {
     public:
         PendingStore(Metadata& metadata,
                      std::string admStr);
+        ~PendingStore();
         void populateFromAdm(std::string const& admStr);
 
     private:
         void inputAdded(InputItem const& item, bool autoModeState) override;
         void inputUpdated(InputItem const& item, proto::InputItemMetadata const& oldItem) override;
 
-        bool finished{false};
+        void timeout(int msLimit);
+        std::thread timeoutThread;
+        std::atomic_bool killThread{ false };
+
+        std::mutex finisher;
+        std::atomic_bool finished{false};
+
         Metadata& data_;
         std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
         ear::plugin::proto::ProgrammeStore pendingStore_;
         void checkAgainstPendingElements(InputItem const& item);
+        void finishPendingElementsSearch();
     };
 } // ear::plugin
 

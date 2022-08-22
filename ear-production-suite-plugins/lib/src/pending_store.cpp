@@ -1,6 +1,4 @@
-//
-// Created by Richard Bailey on 08/04/2022.
-//
+#include <chrono>
 
 #include "metadata.hpp"
 #include "store_metadata.hpp"
@@ -13,6 +11,29 @@ namespace ear {
         PendingStore::PendingStore(Metadata &metadata,
                                    std::string admStr) : data_(metadata) {
             populateFromAdm(admStr);
+            timeoutThread = std::thread(&PendingStore::timeout, this, 3000);
+
+        }
+
+        PendingStore::~PendingStore()
+        {
+          killThread = true;
+          timeoutThread.join(); // Wait for it to die
+        }
+
+        void PendingStore::timeout(int msLimit)
+        {
+          const int msCheckInterval = 10;
+          int msWaited = 0;
+          while(msWaited < msLimit) {
+            if(killThread) return;
+            std::this_thread::sleep_for(std::chrono::milliseconds(msCheckInterval));
+            // Not as accurate as comparing against a start time,
+            // but this methodology used intentionally to perform same iterations even with debug/breaks
+            msWaited += msCheckInterval;
+            if(killThread) return;
+          }
+          finishPendingElementsSearch();
         }
 
         void PendingStore::populateFromAdm(const std::string &admStr) {
@@ -43,10 +64,19 @@ namespace ear {
               pendingElements_.erase(range.first, range.second);
 
               if (pendingElements_.empty()) {
-                data_.setStore(pendingStore_);
-                finished = true;
+                killThread = true;
+                finishPendingElementsSearch();
               }
             }
+          }
+        }
+
+        void PendingStore::finishPendingElementsSearch()
+        {
+          std::lock_guard lock(finisher);
+          if(!finished) {
+            finished = true;
+            data_.setStore(pendingStore_);
           }
         }
 
