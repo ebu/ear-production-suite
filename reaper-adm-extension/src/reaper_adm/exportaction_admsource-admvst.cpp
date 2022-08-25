@@ -652,15 +652,17 @@ std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInst
 		std::shared_ptr<admplug::PluginSuite> pluginSuite = it->second;
 		auto spatialisationPluginNameForType = pluginSuite->getSpatialisationPluginNameFor(typeDef);
 
-		auto pluginMatches = admExportVst->getTrackInstance().getPlugins(*spatialisationPluginNameForType);
-		for (auto& plugin : pluginMatches) {
-			if (auto pluginInst = dynamic_cast<PluginInstance*>(plugin.get())) {
-				int index = pluginInst->getPluginIndex();
-				bool shouldIgnore = ignorePlugins ? (ignorePlugins->find(index) != ignorePlugins->end()) : false;
-				if (!shouldIgnore) {
-					auto pluginInstShare = std::make_shared<PluginInstance>(pluginInst->getTrackInstance().get(), pluginInst->getPluginIndex(), api);
-					auto suitePluginPair = std::make_pair(pluginSuite, pluginInstShare);
-					pluginIndices.insert(std::make_pair(index, suitePluginPair));
+		if (spatialisationPluginNameForType.has_value()) {
+			auto pluginMatches = admExportVst->getTrackInstance().getPlugins(*spatialisationPluginNameForType);
+			for (auto& plugin : pluginMatches) {
+				if (auto pluginInst = dynamic_cast<PluginInstance*>(plugin.get())) {
+					int index = pluginInst->getPluginIndex();
+					bool shouldIgnore = ignorePlugins ? (ignorePlugins->find(index) != ignorePlugins->end()) : false;
+					if (!shouldIgnore) {
+						auto pluginInstShare = std::make_shared<PluginInstance>(pluginInst->getTrackInstance().get(), pluginInst->getPluginIndex(), api);
+						auto suitePluginPair = std::make_pair(pluginSuite, pluginInstShare);
+						pluginIndices.insert(std::make_pair(index, suitePluginPair));
+					}
 				}
 			}
 		}
