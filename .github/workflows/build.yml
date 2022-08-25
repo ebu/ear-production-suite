@@ -133,7 +133,7 @@ jobs:
         run: git status
         
       - name: 'Configure with CMake, vcpkg and ccmake.'
-        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -CMAKE_VERBOSE_MAKEFILE:BOOL=ON
         env:
           # See https://vcpkg.io/en/docs/users/binarycaching.html for syntax of this variable. We want to clear out
           # the default locations and both restore from and save to our custom .vcpkg directory.
@@ -149,7 +149,7 @@ jobs:
         run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
 
       - name: 'Build using CMake and Ninja via CMake preset.'
-        run: cmake --build --preset ${{ matrix.config.cmake_preset }}
+        run: cmake --build --preset ${{ matrix.config.cmake_preset }} -v
 
       - name: 'Print ccache stats.'
         run: ccache -s
