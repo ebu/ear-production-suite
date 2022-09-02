@@ -9,6 +9,7 @@
 #include "admchannel.h"
 #include "importaction.h"
 #include "pcmsourcecreator.h"
+#include "mediatakeelement.h"
 #include <helper/container_helpers.hpp>
 #include <helper/common_definition_helper.h>
 
@@ -110,9 +111,21 @@ bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementCo
     return std::dynamic_pointer_cast<TrackElement>(node.getProjectElement()) && node.getProjectElement()->hasAdmElements(elements);
 }
 
-bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::shared_ptr<IPCMSourceCreator> sourceCreator, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements) {
-    auto take = std::dynamic_pointer_cast<TakeElement>(node.getProjectElement());
+bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::shared_ptr<IPCMSourceCreator> sourceCreator, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<const adm::AudioObject> object) {
+    auto take = std::dynamic_pointer_cast<MediaTakeElement>(node.getProjectElement());
     if(!take) return false;
+    // Check start and duration
+    if(object->has<adm::Start>() != take->getAudioObject()->has<adm::Start>()) {
+        return false;
+    } else if(object->has<adm::Start>() && object->get<adm::Start>().get() != take->getAudioObject()->get<adm::Start>().get()) {
+        return false;
+    }
+    if(object->has<adm::Duration>() != take->getAudioObject()->has<adm::Duration>()) {
+        return false;
+    } else if(object->has<adm::Duration>() && object->get<adm::Duration>().get() != take->getAudioObject()->get<adm::Duration>().get()) {
+        return false;
+    }
+    // Check channels
     int lim = std::min(take->trackUids().size(), elements.size());
     for(int i = 0; i < lim; i++) {
         auto existingTakeUidChannel = sourceCreator->channelForTrackUid(take->trackUids()[i]);
@@ -493,7 +506,7 @@ std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::sh
     if (!startingNode) {
         startingNode = rootNode;
     }
-    if (nodeIsTakeWithCompatibleElements(*startingNode, sourceCreator, elements)) {
+    if (nodeIsTakeWithCompatibleElements(*startingNode, sourceCreator, elements, object)) {
         //////TODO - MUST CHECK START TIME AND DURATION AGAINST object!!
         return startingNode;
     }
