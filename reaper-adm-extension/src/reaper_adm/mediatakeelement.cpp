@@ -83,6 +83,11 @@ double MediaTakeElement::startTime() const
     return position;
 }
 
+std::shared_ptr<adm::AudioObject const> admplug::MediaTakeElement::getAudioObject()
+{
+    return object;
+}
+
 
 
 ///////////// PRIVATE /////////////////////
