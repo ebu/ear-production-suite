@@ -231,8 +231,7 @@ void SceneAudioProcessor::sendAdmMetadata() {
   commandSocket->sendAdmAndMappings(ss.str(), std::move(channelMapping));
 }
 
-void SceneAudioProcessor::recvAdmMetadata(std::string admStr,
-                                          std::vector<uint32_t> mappings) {
+void SceneAudioProcessor::recvAdmMetadata(std::string admStr) {
     pendingStore_ = std::make_shared<ear::plugin::PendingStore>(metadata_,
                                                                 std::move(admStr));
     metadata_.addBackendListener(pendingStore_);
@@ -260,22 +259,15 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     uint32_t sampleRate = samplerate_;
     commandSocket->sendInfo(numChannels, samplerate_);
 
-  } else if (cmd == commandSocket->Command::SetAdmAndMappings) {
-    uint32_t mapSz = (64 * 4);
-    uint32_t admSz = msg->getSize() - mapSz - mapSz - 1;
-    std::vector<uint32_t> trackUidMappings(64, 0x00000000);
-    std::vector<uint32_t> objectMappings(64, 0x00000000);
+  } else if (cmd == commandSocket->Command::SetAdm) {
+    uint32_t admSz = msg->getSize() - sizeof(uint8_t);
     std::string admStr(admSz, 0);
     char* bufPtr = (char*)msg->getBufferPointer();
-    int bufOffset = 1;  // Skip first "command" byte
-    memcpy(trackUidMappings.data(), bufPtr + bufOffset, mapSz);
-    bufOffset += mapSz;
-    memcpy(objectMappings.data(), bufPtr + bufOffset, mapSz);
-    bufOffset += mapSz;
+    int bufOffset = sizeof(uint8_t);  // Skip first "command" byte
     memcpy(admStr.data(), bufPtr + bufOffset, admSz);
 
-    auto future = std::async(std::launch::async, [this, admStr, trackUidMappings, objectMappings]() {
-      recvAdmMetadata(admStr, objectMappings);
+    auto future = std::async(std::launch::async, [this, admStr]() {
+      recvAdmMetadata(admStr);
     });
     future.get();
     commandSocket->sendResp(cmd);

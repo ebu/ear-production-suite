@@ -288,7 +288,7 @@ protected:
 
 class CommandCommon {
 public:
-    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings, SetAdmAndMappings };
+    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings, SetAdm };
 };
 
 class CommandReceiver : public SocketBaseForListeners, public CommandCommon {
@@ -485,28 +485,20 @@ public:
         return std::move(nngMsg);
     }
 
-    std::shared_ptr<NngMsg> sendAdmAndMappings(std::string admStr, std::vector<uint32_t> channelToAtuMapping, std::vector<uint32_t> channelToAoMapping) {
-        assert(channelToAtuMapping.size() == 64);
-        assert(channelToAoMapping.size() == 64);
+    std::shared_ptr<NngMsg> sendAdm(std::string admStr) {
         nng_msg* msg;
 
-        uint8_t cmdInt = (uint8_t)Command::SetAdmAndMappings;
+        uint8_t cmdInt = (uint8_t)Command::SetAdm;
         uint32_t admSz = admStr.size();
-        uint32_t mapSz = (64 * 4);
-        uint32_t totSz = 1 + mapSz + mapSz + admSz;
+        uint32_t totSz = sizeof(uint8_t) + admSz;
         nng_msg_alloc(&msg, totSz);
 
         char* bufPtr = (char*)nng_msg_body(msg);
         int bufOffset = 0;
         memcpy(bufPtr + bufOffset, &cmdInt, 1);
         bufOffset += 1;
-        memcpy(bufPtr + bufOffset, channelToAtuMapping.data(), mapSz);
-        bufOffset += mapSz;
-        memcpy(bufPtr + bufOffset, channelToAoMapping.data(), mapSz);
-        bufOffset += mapSz;
         memcpy(bufPtr + bufOffset, admStr.data(), admSz);
         bufOffset += admSz;
-
         assert(totSz == bufOffset);
 
         auto resMsg = nng_sendmsg(socket, msg, 0);
