@@ -20,6 +20,8 @@ public:
     int trackUidCount() const override;
     std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids() const override;
     double startTime() const override;
+    std::shared_ptr<adm::AudioObject const> getAudioObject();
+
 private:
     bool hasMediaItem(ReaperAPI const& api, TrackElement& track);
 
