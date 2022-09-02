@@ -55,8 +55,6 @@ public:
 	Parameter* getParameterFor(AdmParameter admParameter) override;
 	std::vector<ADMChannel> reorderAndFilter(std::vector<ADMChannel> const& channels, ReaperAPI const& api) override;
 
-    std::vector<uint32_t> getTrackMappingToAo() { return trackMappingToAo; }
-
 	static const char* OBJECT_METADATA_PLUGIN_NAME;
 	static const char* DIRECTSPEAKERS_METADATA_PLUGIN_NAME;
 	static const char* HOA_METADATA_PLUGIN_NAME;
@@ -86,8 +84,6 @@ private:
 	void setTrackInsertionIndexFromSelectedMedia(const ReaperAPI& api);
 
 	std::string originalAdmDocument;
-	std::vector<uint32_t> trackMappingToAtu;
-	std::vector<uint32_t> trackMappingToAo;
 	bool sceneMasterAlreadyExisted{ false };
 
 	static const int MAX_CHANNEL_COUNT;

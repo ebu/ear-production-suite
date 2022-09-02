@@ -35,7 +35,7 @@ public:
 	std::string getAdmTemplateStr() { return admStr; }
 	std::vector<ChannelMapping> getChannelMappings() { return channelMappings; }
 
-	void sendAdmAndMappings(std::string originalAdmStr, std::vector<uint32_t> trackMappingToAtu, std::vector<uint32_t> trackMappingToAo);
+	void sendAdm(std::string originalAdmStr);
 
 private:
 	void infoExchange();

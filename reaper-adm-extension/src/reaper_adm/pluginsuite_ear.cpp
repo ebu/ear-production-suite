@@ -255,10 +255,6 @@ EARPluginSuite::~EARPluginSuite() = default;
 
 void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI&)
 {
-	// Prepare trackMapping vectors for population
-	trackMappingToAtu = std::vector<uint32_t>(MAX_CHANNEL_COUNT, 0x00000000); // ATUID of 0x00000000 = not used
-	trackMappingToAo = std::vector<uint32_t>(MAX_CHANNEL_COUNT, 0x00000000);
-
 	// Store ADM document ready for transmitting to EAR Scene
 	assert(metadata);
 	std::stringstream xmlStream;
@@ -272,15 +268,13 @@ void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> 
 
 void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 {
-	assert(trackMappingToAtu.size() == 64);
-	assert(trackMappingToAo.size() == 64);
 	assert(originalAdmDocument.length() > 0);
 	if (!sceneMasterAlreadyExisted) {
 		auto sceneMaster = EarSceneMasterVst(sceneMasterTrack->get(), api);
 		auto samplesPort = sceneMaster.getSamplesSocketPort();
 		auto commandPort = sceneMaster.getCommandSocketPort();
 		auto communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
-		communicator->sendAdmAndMappings(originalAdmDocument, trackMappingToAtu, trackMappingToAo);
+		communicator->sendAdm(originalAdmDocument);
 	}
 }
 
@@ -377,14 +371,6 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
                 if(trackInfo.routingStartChannel.has_value()) {
                     auto uidChannel = *trackInfo.routingStartChannel + chOffset;
                     plugin->setParameter(*objectTrackMappingParameter, objectTrackMappingParameter->forwardMap(uidChannel));
-
-                    uint32_t audioObjectIdVal = 0;
-                    if(auto ao = automationElement->channel().object()) {
-                        audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-                    }
-                    auto trackUidVal = autoTrackUid ? getIdValueAsInt(*autoTrackUid) : 0;
-                    trackMappingToAtu[uidChannel] = trackUidVal;
-                    trackMappingToAo[uidChannel] = audioObjectIdVal;
                 }
 
                 break;
@@ -442,20 +428,6 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
             if(trackInfo.routingStartChannel.has_value()) {
                 plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
                 trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
-
-                uint32_t audioObjectIdVal = 0;
-                if(auto ao = channel.object()) {
-                    audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-                }
-
-                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
-                auto trackNumber = *trackInfo.routingStartChannel;
-                trackMappingToAo[trackNumber] = audioObjectIdVal;
-                for(auto const& trackUid : take->trackUids()) {
-                    auto trackUidVal = getIdValueAsInt(*trackUid);
-                    trackMappingToAtu[trackNumber] = trackUidVal;
-                    trackNumber++;
-                }
             }
 
         } else {
@@ -510,20 +482,6 @@ void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAP
             if(trackInfo.routingStartChannel.has_value()) {
                 plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
                 trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
-
-                uint32_t audioObjectIdVal = 0;
-                if(auto ao = channel.object()) {
-                    audioObjectIdVal = ao->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-                }
-
-                // Store mapping to send to EAR Scene - these should be ordered, so we can assume we just step through them
-                auto trackNumber = *trackInfo.routingStartChannel;
-                trackMappingToAo[trackNumber] = audioObjectIdVal;
-                for(auto const& trackUid : take->trackUids()) {
-                    auto trackUidVal = getIdValueAsInt(*trackUid);
-                    trackMappingToAtu[trackNumber] = trackUidVal;
-                    trackNumber++;
-                }
             }
 
         } else {

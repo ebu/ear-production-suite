@@ -849,10 +849,10 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
     return successful;
 }
 
-void EarVstCommunicator::sendAdmAndMappings(std::string originalAdmStr, std::vector<uint32_t> trackMappingToAtu, std::vector<uint32_t> trackMappingToAo)
+void EarVstCommunicator::sendAdm(std::string originalAdmStr)
 {
     if(commandSocket.isSocketOpen()) {
-        auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, trackMappingToAtu, trackMappingToAo);
+        auto resp = commandSocket.sendAdm(originalAdmStr);
     }
 }
 
