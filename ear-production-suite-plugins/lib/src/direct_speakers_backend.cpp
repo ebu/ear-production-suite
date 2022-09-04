@@ -56,9 +56,14 @@ void DirectSpeakersBackend::triggerMetadataSend() {
   metadataSender_.triggerSend();
 }
 
-EAR_PLUGIN_BASE_EXPORT void DirectSpeakersBackend::setImportedId(uint32_t id)
+void DirectSpeakersBackend::setImportedAudioObjectId(uint32_t id)
 {
-  metadataSender_.importedId(id);
+  metadataSender_.importedAudioObjectId(id);
+}
+
+void DirectSpeakersBackend::setImportedAudioTrackUidId(uint32_t id)
+{
+  metadataSender_.importedAudioTrackUidId(id);
 }
 
 void DirectSpeakersBackend::onConnection(
