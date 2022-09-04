@@ -57,14 +57,14 @@ public:
                 ReaperAPI const& api);
 private:
     void moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> object);
-    void addTake();
+    void addTake(int specificAtuIndex = -1);
     bool moveToNewTrackNode(adm::TypeDescriptor td, std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewDirectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewHoaTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements);
     void moveToNewGroupNode(adm::ElementConstVariant element);
     void moveToNewGroupNode(std::vector<adm::ElementConstVariant> elements);
-    void addAutomation();
+    void addAutomation(int specificAtuAcfIndex = -1);
     bool moveToChildWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements);
