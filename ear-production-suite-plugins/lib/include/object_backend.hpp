@@ -29,7 +29,8 @@ class ObjectBackend {
   }
 
   // This is the ID originally assigned to this object according to imported ADM
-  EAR_PLUGIN_BASE_EXPORT void setImportedId(uint32_t id);
+  EAR_PLUGIN_BASE_EXPORT void setImportedAudioObjectId(uint32_t id);
+  EAR_PLUGIN_BASE_EXPORT void setImportedAudioTrackUidId(uint32_t id);
 
  private:
   void onConnection(communication::ConnectionId connectionId,
