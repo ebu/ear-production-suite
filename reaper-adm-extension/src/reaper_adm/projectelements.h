@@ -85,12 +85,19 @@ public:
     std::shared_ptr<const adm::AudioObject> getRepresentedAudioObject() {
         return representedAudioObject;
     }
+    void setRepresentedAudioTrackUid(std::shared_ptr<const adm::AudioTrackUid> audioTrackUid) {
+        representedAudioTrackUid = audioTrackUid;
+    }
+    std::shared_ptr<const adm::AudioTrackUid> getRepresentedAudioTrackUid() {
+        return representedAudioTrackUid;
+    }
 protected:
     std::shared_ptr<Track> track;
     std::vector<std::shared_ptr<TrackElement>> parentElements;
     std::shared_ptr<TakeElement> takeElement;
     std::vector<std::shared_ptr<AutomationElement>> automationElements;
     std::shared_ptr<const adm::AudioObject> representedAudioObject;
+    std::shared_ptr<const adm::AudioTrackUid> representedAudioTrackUid;
 };
 
 class TakeElement : public ProjectElement {

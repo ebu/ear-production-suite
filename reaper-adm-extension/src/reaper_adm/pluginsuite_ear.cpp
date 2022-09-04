@@ -169,10 +169,15 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
     auto cbh = EARPluginCallbackHandler::getInstance();
     auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
     auto audioObject = mte->getRepresentedAudioObject();
+    auto audioTrackUid = mte->getRepresentedAudioTrackUid();
 
-    std::optional<unsigned int> importedId;
+    std::optional<unsigned int> importedAudioObjectId;
+    std::optional<unsigned int> importedAudioTrackUidId;
     if(audioObject) {
-        importedId = audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+        importedAudioObjectId = audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+    }
+    if(importedAudioTrackUidId) {
+        importedAudioTrackUidId = audioTrackUid->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get();
     }
 
     std::string customName;
@@ -181,7 +186,7 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
         customName = mte->getAppropriateName();
     }
 
-    if(importedId.has_value() || !customName.empty()) {
+    if(importedAudioObjectId.has_value() || importedAudioTrackUidId.has_value() || !customName.empty()) {
         // Need to send a state as XML
         std::string xmlElementName;
         if(pluginName == EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME) xmlElementName = "ObjectsPlugin";
@@ -196,9 +201,14 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
             xml += customName;
             xml.append("\"");
         }
-        if(importedId.has_value()) {
-            xml.append(" imported_id=\"");
-            xml += std::to_string(importedId.value());
+        if(importedAudioObjectId.has_value()) {
+            xml.append(" imported_ao_id=\"");
+            xml += std::to_string(importedAudioObjectId.value());
+            xml.append("\"");
+        }
+        if(importedAudioTrackUidId.has_value()) {
+            xml.append(" imported_atu_id=\"");
+            xml += std::to_string(importedAudioTrackUidId.value());
             xml.append("\"");
         }
         xml.append(" />");
