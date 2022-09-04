@@ -363,26 +363,8 @@ void ProjectTree::moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> admO
     moveToNewChild(takeNode);
 }
 
-void admplug::ProjectTree::moveToTakeNode()
 {
-    std::vector<adm::ElementConstVariant> relatedAdmElements;
-    std::for_each(state.audioTrackUids.begin(), state.audioTrackUids.end(),
-                  [&relatedAdmElements](std::shared_ptr<adm::AudioTrackUid const> elm) {
-        relatedAdmElements.push_back(elm);
-    });
-    if(!moveToCompatibleTakeNode(state.currentObject, state.audioTrackUids)) {
-        moveToNewTakeNode(state.currentObject);
     }
-    auto take = std::dynamic_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
-    // Add any additional channels
-    for(int i = 0; i < state.audioChannelFormats.size(); i++) {
-        auto channel = ADMChannel{state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i]};
-        if(!take->hasTrackUid(channel.trackUid())) {
-            take->addTrackUid(channel.trackUid());
-        }
-    }
-}
-
 void admplug::ProjectTree::addTake()
 {
     std::vector<adm::ElementConstVariant> relatedAdmElements;
@@ -440,22 +422,6 @@ void ProjectTree::moveToNewGroupNode(std::vector<adm::ElementConstVariant> eleme
     assert(trackNode);
     broadcast->elementAdded();
     moveToNewChild(trackNode);
-}
-
-void admplug::ProjectTree::addAutomationNodes(std::shared_ptr<ProjectNode> trackNode)
-{
-    auto parentTrack = std::static_pointer_cast<TrackElement>(trackNode->getProjectElement());
-    assert(std::dynamic_pointer_cast<TrackElement>(parentTrack)); // Has to have parent
-    auto parentTake = std::static_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
-    assert(std::dynamic_pointer_cast<TakeElement>(parentTake)); // Has to have parent
-    for(int i = 0; i < state.audioChannelFormats.size(); i++) {
-        ADMChannel channel{ state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i] };
-        auto autoNode = nodeFactory->createAutomationNode(channel, parentTrack, parentTake);
-        assert(autoNode);
-        broadcast->elementAdded();
-        auto success = state.currentNode->addChildNode(autoNode);
-        assert(success);
-    }
 }
 
 void admplug::ProjectTree::addAutomation()
