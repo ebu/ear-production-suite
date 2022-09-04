@@ -9,13 +9,13 @@ class MockPluginSuite : public PluginSuite {
   MOCK_METHOD2(onCreateProject,
       void(const ProjectNode &rootNode, const ReaperAPI &api));
   MOCK_METHOD2(onCreateObjectTrack,
-      void(TrackElement const&, ReaperAPI const& api));
+      void(TrackElement&, ReaperAPI const& api));
   MOCK_METHOD2(onCreateDirectTrack,
-      void(TrackElement const&, ReaperAPI const& api));
+      void(TrackElement&, ReaperAPI const& api));
   MOCK_METHOD2(onCreateHoaTrack,
-      void(TrackElement const&, ReaperAPI const& api));
+      void(TrackElement&, ReaperAPI const& api));
   MOCK_METHOD2(onCreateGroup,
-      void(TrackElement const&, ReaperAPI const& api));
+      void(TrackElement&, ReaperAPI const& api));
   MOCK_METHOD2(onObjectAutomation,
       void(ObjectAutomation const&, ReaperAPI const& api));
   MOCK_METHOD2(onDirectSpeakersAutomation,
