@@ -51,9 +51,14 @@ void HoaBackend::setConnectionId(communication::ConnectionId id) {
 
 void HoaBackend::triggerMetadataSend() { metadataSender_.triggerSend(); }
 
-EAR_PLUGIN_BASE_EXPORT void HoaBackend::setImportedId(uint32_t id)
+void HoaBackend::setImportedAudioObjectId(uint32_t id)
 {
-  metadataSender_.importedId(id);
+  metadataSender_.importedAudioObjectId(id);
+}
+
+void HoaBackend::setImportedAudioTrackUidId(uint32_t id)
+{
+  metadataSender_.importedAudioTrackUidId(id);
 }
 
 void HoaBackend::onConnection(communication::ConnectionId connectionId,
