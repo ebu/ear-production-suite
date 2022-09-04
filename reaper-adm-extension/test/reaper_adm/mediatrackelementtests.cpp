@@ -84,27 +84,21 @@ TEST_CASE("Given a MediaTrackElement") {
             ON_CALL(api, createTrackAtIndex(_, _)).WillByDefault(Return(trackPtr));
             EXPECT_CALL(api, GetSetMediaTrackInfo_String(_, _, _, _)).Times(AnyNumber());
 
-            SECTION("A new track is added to start of project") {
-                EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(1);
+            SECTION("The supplied PluginSuite is notified to create the track") {
+                EXPECT_CALL(fakePluginSuite, onCreateObjectTrack(Ref(*mediaTrackElement), Ref(api))).Times(1);
                 mediaTrackElement->createProjectElements(fakePluginSuite, api);
             }
 
-            SECTION("The track name is set from audio object name") {
-                EXPECT_CALL(api, setTrackName(trackPtr, StrEq(audioObjectName))).Times(1);
-                mediaTrackElement->createProjectElements(fakePluginSuite, api);
-            }
-
-            SECTION("The track name is truncated to 32 characters") {
+            SECTION("nameTrackFromElementName will apply the audioObject Name, truncated to 32 chars") {
                 auto longObject = adm::createSimpleObject("012345678901234567890123456789012").audioObject;
                 auto truncatedName = std::string{ "01234567890123456789012345678901" };
                 auto truncatedTrackElement = std::make_unique<ObjectTrack>(std::vector<adm::ElementConstVariant>(1, longObject), nullptr);
-                EXPECT_CALL(api, setTrackName(trackPtr, StrEq(truncatedName))).Times(1);
                 truncatedTrackElement->createProjectElements(fakePluginSuite, api);
-            }
-
-            SECTION("The supplied PluginSuite is notified of track creation") {
-                EXPECT_CALL(fakePluginSuite, onCreateObjectTrack(Ref(*mediaTrackElement), Ref(api))).Times(1);
-                mediaTrackElement->createProjectElements(fakePluginSuite, api);
+                auto mediaTrack = api.createTrackAtIndex(0, true);
+                auto track = std::make_shared<TrackInstance>(mediaTrack, api);
+                truncatedTrackElement->setTrack(track);
+                EXPECT_CALL(api, setTrackName(trackPtr, StrEq(truncatedName))).Times(1);
+                truncatedTrackElement->nameTrackFromElementName();
             }
         }
     }
