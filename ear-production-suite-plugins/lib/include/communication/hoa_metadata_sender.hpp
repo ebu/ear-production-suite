@@ -21,7 +21,8 @@ class HoaMetadataSender {
 
   void routing(int32_t value);
   void name(const std::string& value);
-  void importedId(int value);
+  void importedAudioObjectId(int value);
+  void importedAudioTrackUidId(int value);
   void colour(int value);
   void packFormatIdValue(int value);
 
