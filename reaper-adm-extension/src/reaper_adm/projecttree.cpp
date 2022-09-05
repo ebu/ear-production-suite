@@ -292,7 +292,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
         auto cachedState = state;
         for(int i = 0; i < state.audioChannelFormats.size(); i++) {
             state = cachedState;
-            relatedAdmElements = { state.currentObject, state.rootPack, state.audioTrackUids[i] };
+            relatedAdmElements = { state.audioChannelFormats[i], state.currentObject, state.rootPack};
             if(!moveToTrackNodeWithElements(relatedAdmElements)) {
                 if(moveToNewTrackNode(td, state.currentObject, state.audioTrackUids[i], relatedAdmElements)) {
                     addTake(i);
@@ -305,7 +305,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
     else if (state.packRepresentation == PackRepresentation::SingleMonoTrack) {
         // Mono DS or Object
 
-        std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack, state.audioTrackUids[0] };
+        std::vector<adm::ElementConstVariant> relatedAdmElements{ state.audioChannelFormats[0], state.currentObject, state.rootPack };
         if (!moveToTrackNodeWithElements(relatedAdmElements)) {
             if(moveToNewTrackNode(td, state.currentObject, nullptr, relatedAdmElements)) {
                 addTake();

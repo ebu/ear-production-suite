@@ -100,12 +100,17 @@ void MediaTrackElement::nameTrackFromElementName()
 
 std::string admplug::MediaTrackElement::getAppropriateName()
 {
-    auto prefix = boost::apply_visitor(TrackNameOriginIdentifier(), elements[0]);
-    auto name = boost::apply_visitor(AdmNameReader(), elements[0]);
-    if(prefix.length() > 0) {
-        name = prefix + " " + name;
+    for(auto const& elm : elements) {
+        auto name = boost::apply_visitor(AdmNameReader(), elm);
+        if(name.size() > 0) {
+            auto prefix = boost::apply_visitor(TrackNameOriginIdentifier(), elm);
+            if(prefix.length() > 0) {
+                name = prefix + " " + name;
+            }
+            return name;
+        }
     }
-    return name;
+    return "No Name";
 }
 
 
