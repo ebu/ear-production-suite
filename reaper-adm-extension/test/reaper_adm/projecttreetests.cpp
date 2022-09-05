@@ -10,6 +10,7 @@
 #include "mocks/nodefactory.h"
 #include "mocks/importlistener.h"
 #include "projecttree.h"
+#include <map>
 
 using ::testing::AnyNumber;
 using ::testing::Invoke;
@@ -24,10 +25,28 @@ using ::testing::ByMove;
 using ::testing::ResultOf;
 using namespace admplug;
 
+namespace {
+void setChannelForTrackUidExpectations(NiceMock<MockIPCMSourceCreator> *fakePcmSourceCreator, std::map<std::shared_ptr<const adm::AudioTrackUid>, int> mappings, int defaultVal = 99) {
+    ON_CALL(*fakePcmSourceCreator, channelForTrackUid(_)).WillByDefault(Return(defaultVal));
+    for(auto const& pr : mappings) {
+        EXPECT_CALL(*fakePcmSourceCreator, channelForTrackUid(pr.first)).WillRepeatedly(Return(pr.second));
+    }
+}
+void setUniqueChannelForTrackUidExpectations(NiceMock<MockIPCMSourceCreator> *fakePcmSourceCreator) {
+    uint32_t callCount = 0;
+    ON_CALL(*fakePcmSourceCreator, channelForTrackUid(_))
+        .WillByDefault(testing::Invoke(
+            [&callCount]() -> int {
+        return ++callCount;
+    }
+    ));
+}
+}
+
 TEST_CASE("Project tree", "") {
     auto rootElement = std::make_shared< NiceMock<MockRootElement>>();
     auto fakeCreator = std::make_unique<NiceMock<MockNodeFactory>>();
-    auto fakePcmSourceCreator = std::make_unique<NiceMock<MockIPCMSourceCreator>>();
+    auto fakePcmSourceCreator = std::make_shared<NiceMock<MockIPCMSourceCreator>>();
     fakeCreator->delegateToFake();
     auto& fakeCreatorRef = *fakeCreator;
     NiceMock<MockPluginSuite> fakePluginSuite{};
@@ -43,7 +62,7 @@ TEST_CASE("Project tree", "") {
 
         sectionName = "it adds " + std::to_string(numObjectTracks) + " object track node(s)";
         SECTION(sectionName) {
-            EXPECT_CALL(fakeCreatorRef, createObjectTrackNode(_, _, _)).Times(numObjectTracks);
+            EXPECT_CALL(fakeCreatorRef, createObjectTrackNode(_, _, _, _)).Times(numObjectTracks);
         }
 
         sectionName = "it adds " + std::to_string(numDirectTracks) + " direct track node(s)";
@@ -64,10 +83,12 @@ TEST_CASE("Project tree", "") {
 
     SECTION("Given a project tree in initial state") {
         ProjectTree tree(std::move(fakeCreator),
-                         std::move(fakePcmSourceCreator),
+                         fakePcmSourceCreator,
                          std::make_unique<ProjectNode>(rootElement),
                          fakeListener);
         auto doc = adm::Document::create();
+
+        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
 
         SECTION("When it receives an audioProgramme") {
             auto programme = adm::AudioProgramme::create(adm::AudioProgrammeName{ "Test Prog" });
@@ -100,7 +121,6 @@ TEST_CASE("Project tree", "") {
                 tree(programme);
             }
         }
-
         SECTION("When it receives an audioContent") {
             auto content = adm::AudioContent::create(adm::AudioContentName{ "Test Content" });
             doc->add(content);
@@ -163,6 +183,7 @@ TEST_CASE("Project tree", "") {
                 tree(ao);
                 tree(apf); // end of tracer route
             }
+
             SECTION("With multiple tuid & one pack references") {
                 auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf"), adm::TypeDefinition::OBJECTS);
                 ao->addReference(apf);
@@ -195,11 +216,13 @@ TEST_CASE("Project tree", "") {
                 tree(ao);
                 tree(apf); // end of tracer route
             }
+
         }
     }
+
     SECTION("Given a project tree with programme visited") {
         ProjectTree tree(std::move(fakeCreator),
-                         std::move(fakePcmSourceCreator),
+                         fakePcmSourceCreator,
                          std::make_unique<ProjectNode>(rootElement),
                          fakeListener);
         TreeState state;
@@ -208,6 +231,8 @@ TEST_CASE("Project tree", "") {
         auto programme = adm::AudioProgramme::create(adm::AudioProgrammeName{ "Test Prog" });
         doc->add(programme);
         state.currentProgramme = programme;
+
+        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
 
         SECTION("When it receives a single audioContent") {
             auto content = adm::AudioContent::create(adm::AudioContentName{ "Test Content" });
@@ -317,7 +342,7 @@ TEST_CASE("Project tree", "") {
 
         auto rootNode = std::make_unique<ProjectNode>(std::move(trackElement));
         ProjectTree tree(std::move(fakeCreator),
-                         std::move(fakePcmSourceCreator),
+                         fakePcmSourceCreator,
                          std::move(rootNode),
                          fakeListener);
         auto doc = adm::Document::create();
@@ -325,7 +350,7 @@ TEST_CASE("Project tree", "") {
         SECTION("When the tree receives that element") {
             auto obj = adm::AudioObject::create(adm::AudioObjectName{ "test" });
             doc->add(obj);
-
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
             expectNodes(0, 0, 0, 0);
             tree(obj);
             SECTION("it moves the tree to that child") {
@@ -333,9 +358,10 @@ TEST_CASE("Project tree", "") {
             }
         }
     }
-    /*
+
     SECTION("Given a project tree in initial state") {
         ProjectTree tree(std::move(fakeCreator),
+                         fakePcmSourceCreator,
                          std::make_unique<ProjectNode>(std::move(rootElement)),
                          fakeListener);
         auto doc = adm::Document::create();
@@ -350,19 +376,20 @@ TEST_CASE("Project tree", "") {
             auto atuid = object.audioTrackUid;
 
             SECTION("When it receives an object followed by a referenced tuid and channel format") {
+                setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
                 expectNodes(0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
                 tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == atuid);
-                    REQUIRE(tree.getState().currentPack == apf);
+                    REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                    REQUIRE(tree.getState().audioTrackUids[0] == atuid);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
             }
 
-            SECTION("When it receives an object followed by two referenced tuids and channel formats") {
+            SECTION("When it receives an object followed by two referenced tuids and channel formats which point to unique tracks of audio") {
                 auto secondTuid = adm::AudioTrackUid::create();
                 auto secondTF = adm::AudioTrackFormat::create(adm::AudioTrackFormatName{ "secondTF" }, adm::FormatDefinition::PCM);
                 auto secondSF = adm::AudioStreamFormat::create(adm::AudioStreamFormatName{ "secondSF" }, adm::FormatDefinition::PCM);
@@ -374,6 +401,7 @@ TEST_CASE("Project tree", "") {
                 secondSF->setReference(secondCF);
                 apf->addReference(secondCF);
 
+                setChannelForTrackUidExpectations(fakePcmSourceCreator.get(), { {atuid, 1}, {secondTuid, 2} });
                 expectNodes(1, 2, 2, 2);
 
                 tree.resetRoot();
@@ -381,7 +409,36 @@ TEST_CASE("Project tree", "") {
                 tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentPack == apf);
+                    REQUIRE(tree.getState().audioTrackUids.size() == 2);
+                    REQUIRE(tree.getState().audioTrackUids[0] == atuid);
+                    REQUIRE(tree.getState().audioTrackUids[1] == secondTuid);
+                    REQUIRE(tree.getState().rootPack == apf);
+                }
+            }
+
+            SECTION("When it receives an object followed by two referenced tuids and channel formats which point to the same track of audio") {
+                auto secondTuid = adm::AudioTrackUid::create();
+                auto secondTF = adm::AudioTrackFormat::create(adm::AudioTrackFormatName{ "secondTF" }, adm::FormatDefinition::PCM);
+                auto secondSF = adm::AudioStreamFormat::create(adm::AudioStreamFormatName{ "secondSF" }, adm::FormatDefinition::PCM);
+                auto secondCF = adm::AudioChannelFormat::create(adm::AudioChannelFormatName{ "secondCF" }, adm::TypeDefinition::OBJECTS);
+                ao->addReference(secondTuid);
+                secondTuid->setReference(apf);
+                secondTuid->setReference(secondTF);
+                secondTF->setReference(secondSF);
+                secondSF->setReference(secondCF);
+                apf->addReference(secondCF);
+
+                setChannelForTrackUidExpectations(fakePcmSourceCreator.get(), { {atuid, 1}, {secondTuid, 1} });
+                expectNodes(1, 2, 1, 2);
+
+                tree.resetRoot();
+                tree(ao);
+                tree(apf); // end of tracer route
+                SECTION("the the trees state is correctly updated") {
+                    REQUIRE(tree.getState().currentObject == ao);
+                    REQUIRE(tree.getState().audioTrackUids.size() == 2);
+                    REQUIRE(tree.getState().audioTrackUids[0] == atuid);
+                    REQUIRE(tree.getState().audioTrackUids[1] == secondTuid);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
             }
@@ -403,6 +460,8 @@ TEST_CASE("Project tree", "") {
             atuid->setReference(atf);
             atuid->setReference(apf);
 
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+
             SECTION("When it receives an object followed by a referenced tuid and channel format") {
                 expectNodes(0, 0, 1, 1, 1);
                 tree.resetRoot();
@@ -410,8 +469,8 @@ TEST_CASE("Project tree", "") {
                 tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentUid == atuid);
-                    REQUIRE(tree.getState().currentPack == apf);
+                    REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                    REQUIRE(tree.getState().audioTrackUids[0] == atuid);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
             }
@@ -435,7 +494,9 @@ TEST_CASE("Project tree", "") {
                 tree(apf); // end of tracer route
                 SECTION("the the trees state is correctly updated") {
                     REQUIRE(tree.getState().currentObject == ao);
-                    REQUIRE(tree.getState().currentPack == apf);
+                    REQUIRE(tree.getState().audioTrackUids.size() == 2);
+                    REQUIRE(tree.getState().audioTrackUids[0] == atuid);
+                    REQUIRE(tree.getState().audioTrackUids[1] == secondTuid);
                     REQUIRE(tree.getState().rootPack == apf);
                 }
             }
@@ -476,6 +537,7 @@ TEST_CASE("Project tree", "") {
             atuid_child2->setReference(atf_child2);
             atuid_child2->setReference(apf_child2);
 
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
             expectNodes(0, 2, 2, 2);
 
             tree.resetRoot();
@@ -483,8 +545,8 @@ TEST_CASE("Project tree", "") {
             tree(apf_child1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child1);
-                REQUIRE(tree.getState().currentUid == atuid_child1);
-                REQUIRE(tree.getState().currentPack == apf_child1);
+                REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid_child1);
                 REQUIRE(tree.getState().rootPack == apf_child1);
             }
 
@@ -493,8 +555,8 @@ TEST_CASE("Project tree", "") {
             tree(apf_child2); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao_child2);
-                REQUIRE(tree.getState().currentUid == atuid_child2);
-                REQUIRE(tree.getState().currentPack == apf_child2);
+                REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid_child2);
                 REQUIRE(tree.getState().rootPack == apf_child2);
             }
         }
@@ -525,6 +587,7 @@ TEST_CASE("Project tree", "") {
             atuid->setReference(atf);
             atuid->setReference(apf);
 
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
             expectNodes(2, 1, 1, 1);
 
             tree.resetRoot();
@@ -535,8 +598,8 @@ TEST_CASE("Project tree", "") {
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid);
-                REQUIRE(tree.getState().currentPack == apf);
+                REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid);
                 REQUIRE(tree.getState().rootPack == apf);
             }
 
@@ -548,8 +611,8 @@ TEST_CASE("Project tree", "") {
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentContent == ac);
                 REQUIRE(tree.getState().currentObject == ao);
-                REQUIRE(tree.getState().currentUid == atuid);
-                REQUIRE(tree.getState().currentPack == apf);
+                REQUIRE(tree.getState().audioTrackUids.size() == 1);
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid);
                 REQUIRE(tree.getState().rootPack == apf);
             }
 
@@ -585,6 +648,7 @@ TEST_CASE("Project tree", "") {
             atuid_2->setReference(atf_2);
             atuid_2->setReference(apf_2);
 
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
             expectNodes(1, 2, 2, 2);
 
             tree.resetRoot();
@@ -592,6 +656,10 @@ TEST_CASE("Project tree", "") {
             tree(apf_1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
+                REQUIRE(tree.getState().audioTrackUids.size() == 2);
+                // Note order of ATUs - CFs are ordered from deepest pack format first (intentially to correctly order channels for things like nested HOA packs)
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid_2);
+                REQUIRE(tree.getState().audioTrackUids[1] == atuid_1);
                 REQUIRE(tree.getState().rootPack == apf_1);
             }
         }
@@ -626,6 +694,7 @@ TEST_CASE("Project tree", "") {
             atuid_2->setReference(atf_2);
             atuid_2->setReference(apf_2);
 
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
             expectNodes(0, 0, 1, 2, 1);
 
             tree.resetRoot();
@@ -633,65 +702,19 @@ TEST_CASE("Project tree", "") {
             tree(apf_1); // end of tracer route
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
+                REQUIRE(tree.getState().audioTrackUids.size() == 2);
+                // Note order of ATUs - CFs are ordered from deepest pack format first (intentially to correctly order channels for things like nested HOA packs)
+                REQUIRE(tree.getState().audioTrackUids[0] == atuid_2);
+                REQUIRE(tree.getState().audioTrackUids[1] == atuid_1);
                 REQUIRE(tree.getState().rootPack == apf_1);
             }
         }
     }
 
-    SECTION("Given a project tree state with an object-type parent object and trackuid") {
-        auto node = std::make_shared<ProjectNode>(rootElement);
-        ProjectTree tree(std::move(fakeCreator),
-                         node,
-                         fakeListener);
-        TreeState state;
-
-        auto object = adm::createSimpleObject("Test object");
-        state.currentObject = object.audioObject;
-        state.currentUid = object.audioTrackUid;
-        state.currentNode = node;
-        state.packRepresentation = PackRepresentation::SingleMonoTrack;
-        tree.setState(state);
-
-        SECTION("when it receives an audioChannelFormat") {
-            expectNodes(0, 1, 1, 1);
-            tree(object.audioChannelFormat);
-        }
-    }
-
-    SECTION("Given a project tree with a non object-type parent object and a track node") {
-        auto node = std::make_shared<ProjectNode>(rootElement);
-        ProjectTree tree(std::move(fakeCreator),
-                         node,
-                         fakeListener);
-        TreeState state;
-        auto takeElement = std::make_unique<NiceMock<MockTakeElement>>();
-        auto audioObject = adm::AudioObject::create(adm::AudioObjectName{ "Test" });
-        auto channelFormat = adm::AudioChannelFormat::create(adm::AudioChannelFormatName{ "Channel" }, adm::TypeDefinition::DIRECT_SPEAKERS);
-        auto pack = adm::AudioPackFormat::create(adm::AudioPackFormatName{ "TestPack" }, adm::TypeDefinition::DIRECT_SPEAKERS);
-        auto uid = adm::AudioTrackUid::create();
-        pack->addReference(channelFormat);
-        audioObject->addReference(pack);
-        audioObject->addReference(uid);
-
-        state.currentObject = audioObject;
-        state.currentUid = uid;
-        state.currentNode = std::make_shared<ProjectNode>(std::move(takeElement));
-        state.packRepresentation = PackRepresentation::SingleMultichannelTrack;
-        tree.setState(state);
-
-        // non-object type automation not yet implemented
-//        SECTION("it adds an automation node") {
-//            EXPECT_CALL(fakeCreatorRef, createAutomationNode(_, _)).Times(1);
-//        }
-//        tree(channelFormat);
-//        SECTION("it sets its current node to the automation node") {
-//            REQUIRE(tree.getState().currentNode->element().get() == automationPtr);
-//        }
-    }
-
     SECTION("Given a project tree that is not at the project root") {
         auto rootNode = std::make_shared<ProjectNode>(rootElement);
         ProjectTree tree(std::move(fakeCreator),
+                         fakePcmSourceCreator,
                          rootNode,
                          fakeListener);
         TreeState state;
@@ -703,7 +726,6 @@ TEST_CASE("Project tree", "") {
         state.currentProgramme = adm::AudioProgramme::create(adm::AudioProgrammeName("ap"));
         state.currentContent = adm::AudioContent::create(adm::AudioContentName("ac"));
         state.currentObject = adm::AudioObject::create(adm::AudioObjectName("ao"));
-        state.currentPack = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf"), adm::TypeDefinition::OBJECTS);
         state.rootPack = adm::AudioPackFormat::create(adm::AudioPackFormatName("apf_root"), adm::TypeDefinition::OBJECTS);
 
         tree.setState(state);
@@ -722,9 +744,6 @@ TEST_CASE("Project tree", "") {
             SECTION("The current object is reset") {
                 REQUIRE(tree.getState().currentObject == nullptr);
             }
-            SECTION("The current pack is reset") {
-                REQUIRE(tree.getState().currentPack == nullptr);
-            }
             SECTION("The root pack is reset") {
                 REQUIRE(tree.getState().rootPack == nullptr);
             }
@@ -735,17 +754,15 @@ TEST_CASE("Project tree", "") {
         auto fakeElement = std::make_shared<NiceMock<MockProjectElement>>();
         auto rootNode = std::make_shared<ProjectNode>(fakeElement);
         ProjectTree tree{std::move(fakeCreator),
+                         fakePcmSourceCreator,
                          rootNode,
                          fakeListener};
         NiceMock<MockReaperAPI> api;
 
-        SECTION("Creation request is forwarded to root element") {
-            EXPECT_CALL(*fakeElement, createProjectElements(Ref(fakePluginSuite), Ref(api)));
-            SECTION("Arrage view is updated") {
-                EXPECT_CALL(api, UpdateArrangeForAutomation()).Times(1);
-                SECTION("Waveform peaks are rebuilt") {
-                    EXPECT_CALL(api, Main_OnCommandEx(ReaperAPI::BUILD_MISSING_PEAKS, _, _)).Times(1);
-                }
+        SECTION("Arrange view is updated") {
+            EXPECT_CALL(api, UpdateArrangeForAutomation()).Times(1);
+            SECTION("Waveform peaks are rebuilt") {
+                EXPECT_CALL(api, Main_OnCommandEx(ReaperAPI::BUILD_MISSING_PEAKS, _, _)).Times(1);
             }
         }
         SECTION("PluginSuite is notified of project creation") {
@@ -754,37 +771,4 @@ TEST_CASE("Project tree", "") {
         tree.create(fakePluginSuite, api);
     }
 
-    SECTION("Given a tree processing a multichannel track") {
-        auto fakeElement = std::make_shared<NiceMock<MockProjectElement>>();
-        auto rootNode = std::make_shared<ProjectNode>(fakeElement);
-        auto takeElement = std::make_shared<NiceMock<MockTakeElement>>();
-        auto trackElement = std::make_shared<NiceMock<MockTrackElement>>();
-        ON_CALL(*trackElement, addParentProjectElement(_)).WillByDefault(Return(true));
-        ON_CALL(*takeElement, addParentProjectElement(_)).WillByDefault(Return(true));
-        auto takeNode = std::make_shared<ProjectNode>(takeElement);
-        auto trackNode = std::make_shared<ProjectNode>(trackElement);
-        ON_CALL(*fakeCreator, createTakeNode(_, _, _)).WillByDefault(Return(takeNode));
-        ON_CALL(*fakeCreator, createObjectTrackNode(_, _)).WillByDefault(Return(trackNode));
-        auto simple = adm::createSimpleObject("Test");
-        ProjectTree tree{std::move(fakeCreator),
-                         rootNode,
-                         fakeListener};
-        tree.setState(TreeState{rootNode,
-                                nullptr,
-                                nullptr,
-                                simple.audioObject,
-                                simple.audioPackFormat,
-                                simple.audioPackFormat,
-                                simple.audioTrackUid,
-                                SingleMultichannelTrack});
-
-        SECTION("that receives and audioChannelFormat") {
-            SECTION("a channel is added to the current take") {
-                EXPECT_CALL(*takeElement, addChannel(_)).Times(1);
-                tree(simple.audioChannelFormat);
-            }
-            // TODO investigate possible memory leak to do with parent elements
-
-        }
-    }*/
 }
