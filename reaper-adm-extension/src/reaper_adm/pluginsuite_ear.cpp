@@ -176,7 +176,7 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
     if(audioObject) {
         importedAudioObjectId = audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
     }
-    if(importedAudioTrackUidId) {
+    if(audioTrackUid) {
         importedAudioTrackUidId = audioTrackUid->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get();
     }
 
