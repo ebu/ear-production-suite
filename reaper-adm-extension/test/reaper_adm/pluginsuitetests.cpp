@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <adm/elements.hpp>
 #include "pluginsuite.h"
+#include "mediatrackelement.h"
 #include "projectnode.h"
 #include "blockbuilders.h"
 #include "mocks/reaperapi.h"
@@ -35,41 +36,15 @@ TEST_CASE("Facebook360 plugin suite") {
     Facebook360PluginSuite pluginSuite;
     NiceMock<MockReaperAPI> api;
 
-    SECTION("onTrackCreate()") {
-        NiceMock<MockTrackElement> fakeElement;
-        auto fakeTrack = std::make_shared<NiceMock<MockTrack>>();
-        auto fakeTrackPtrVal{34};
-        auto fakeTrackPtr = reinterpret_cast<MediaTrack*>(&fakeTrackPtrVal);
-        static GUID guid{ 0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
-        ON_CALL(api, GetTrackGUID(_)).WillByDefault(Return(&guid));
-        ON_CALL(api, TrackFX_GetFXGUID(_, _)).WillByDefault(Return(&guid));
-        ON_CALL(api, ValidatePtr(_, _)).WillByDefault(Return(true));
-        ON_CALL(fakeElement, getTrack()).WillByDefault(Return(fakeTrack));
-        ON_CALL(*fakeTrack, get()).WillByDefault(Return(fakeTrackPtr));
-
-
-        SECTION("suite sets track channel count to 16") {
-            EXPECT_CALL(*fakeTrack, setChannelCount(16));
-            SECTION("and track master send disabled") {
-                EXPECT_CALL(*fakeTrack, disableMasterSend());
-            }
-        }
-        SECTION("suite instatiates spatializer plugin") {
-            EXPECT_CALL(*fakeTrack, createPlugin(StrEq("FB360 Spatialiser (ambiX)")));
-        }
-//        SECTION("suite activates track volume envelope") {
-//            EXPECT_CALL(api, activateAndShowTrackVolumeEnvelope(fakeTrackPtr));
-//        }
-        pluginSuite.onCreateObjectTrack(fakeElement, api);
-    }
+    auto fakeRootElement = std::make_shared< NiceMock<MockRootElement>>();
+    auto mockControlTrackPtr = std::make_unique<NiceMock<MockTrack>>();
+    auto& mockControlTrack = *mockControlTrackPtr;
+    auto mockSubmixTrackPtr = std::make_unique<NiceMock<MockTrack>>();
+    auto& mockSubmixTrack = *mockSubmixTrackPtr;
 
     SECTION("onProjectInit()") {
-        auto fakeRootElement = std::make_shared< NiceMock<MockRootElement>>();
-        auto mockControlTrackPtr = std::make_unique<NiceMock<MockTrack>>();
-        auto& mockControlTrack = *mockControlTrackPtr;
-        auto mockSubmixTrackPtr = std::make_unique<NiceMock<MockTrack>>();
-        auto& mockSubmixTrack = *mockSubmixTrackPtr;
-        EXPECT_CALL(api, createTrack()).Times(2).WillOnce(Return(ByMove(std::move(mockControlTrackPtr)))).
+        EXPECT_CALL(api, createTrack()).Times(2).
+            WillOnce(Return(ByMove(std::move(mockControlTrackPtr)))).
             WillOnce(Return(ByMove(std::move(mockSubmixTrackPtr))));
 
         SECTION("3D Mix bus setup") {
@@ -88,6 +63,47 @@ TEST_CASE("Facebook360 plugin suite") {
         }
 
         pluginSuite.onCreateProject(ProjectNode{ fakeRootElement }, api);
+    }
+
+    SECTION("onTrackCreate()") {
+        auto fakeParentElement = std::make_shared<NiceMock<MockTrackElement>>();
+        std::vector<adm::ElementConstVariant> admElements;
+        auto trackElement = ObjectTrack(admElements, fakeParentElement);
+        auto fakeTrackPtrVal{34};
+        auto fakeTrackPtr = reinterpret_cast<MediaTrack*>(&fakeTrackPtrVal);
+        static GUID guid{ 0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
+        ON_CALL(api, GetTrackGUID(_)).WillByDefault(Return(&guid));
+        ON_CALL(api, TrackFX_GetFXGUID(_, _)).WillByDefault(Return(&guid));
+        ON_CALL(api, ValidatePtr(_, _)).WillByDefault(Return(true));
+        ON_CALL(api, createTrackAtIndex(_, _)).WillByDefault(Return(fakeTrackPtr));
+        ON_CALL(*fakeParentElement, masterOfGroup).WillByDefault(Return(TrackGroup(0)));
+
+        EXPECT_CALL(api, createTrack()).Times(2).
+            WillOnce(Return(ByMove(std::move(mockControlTrackPtr)))).
+            WillOnce(Return(ByMove(std::move(mockSubmixTrackPtr))));
+
+        pluginSuite.onCreateProject(ProjectNode{ fakeRootElement }, api);
+
+        SECTION("suite creates a track") {
+            EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+            pluginSuite.onCreateObjectTrack(trackElement, api);
+            REQUIRE(trackElement.getTrack().get() != nullptr);
+        }
+        SECTION("suite sets track channel count to 16") {
+            EXPECT_CALL(api, setTrackChannelCount(_, 16));
+            SECTION("and track master send disabled") {
+                EXPECT_CALL(api, disableTrackMasterSend(_));
+            }
+            pluginSuite.onCreateObjectTrack(trackElement, api);
+        }
+        SECTION("suite instatiates spatializer plugin and adm plugin") {
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 16, PostFaderPostFx, _));
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("FB360 Spatialiser (ambiX)"), false, _));
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("ADM Export Source"), false, _));
+            pluginSuite.onCreateObjectTrack(trackElement, api);
+        }
+
+
     }
 
     SECTION("onObjectAutomation()") {
