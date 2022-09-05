@@ -56,7 +56,10 @@ namespace ear {
         {
           if(!finished) {
 
-            auto range = pendingElements_.equal_range(item.data.imported_id());
+            auto ids = std::make_pair(
+              adm::AudioObjectId(adm::AudioObjectIdValue(item.data.imported_ao_id())),
+              adm::AudioTrackUidId(adm::AudioTrackUidIdValue(item.data.imported_atu_id())));
+            auto range = pendingElements_.equal_range(ids);
             if (range.first != range.second) {
               for (auto el = range.first; el != range.second; ++el) {
                 el->second->mutable_object()->set_connection_id(item.data.connection_id());

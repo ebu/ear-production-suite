@@ -6,6 +6,7 @@
 #define EAR_PRODUCTION_SUITE_PENDING_STORE_HPP
 #include <map>
 #include "metadata_listener.hpp"
+#include <adm/adm.hpp>
 
 #include <thread>
 #include <mutex>
@@ -31,7 +32,7 @@ namespace ear::plugin {
         std::atomic_bool finished{false};
 
         Metadata& data_;
-        std::multimap<int, ear::plugin::proto::ProgrammeElement*> pendingElements_;
+        std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, ear::plugin::proto::ProgrammeElement*> pendingElements_;
         ear::plugin::proto::ProgrammeStore pendingStore_;
         void checkAgainstPendingElements(InputItem const& item);
         void finishPendingElementsSearch();
