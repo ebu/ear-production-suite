@@ -31,6 +31,7 @@ public:
       void(PluginSuite&, ReaperAPI const& api));
   MOCK_CONST_METHOD0(getTrack,
                      std::shared_ptr<Track>());
+  MOCK_METHOD1(setTrack, void(std::shared_ptr<Track>));
   MOCK_CONST_METHOD1(hasAdmElement, bool(adm::ElementConstVariant));
   MOCK_CONST_METHOD1(hasAdmElements, bool(std::vector<adm::ElementConstVariant>));
   MOCK_METHOD1(addParentTrack, void(std::shared_ptr<TrackElement> parentTrack));
