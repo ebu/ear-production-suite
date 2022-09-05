@@ -27,15 +27,16 @@ TEST_CASE("MediaTakeElement") {
     std::shared_ptr<adm::AudioObject const> audioObjectWithDuration{ tempObject };
 
     auto mediaTrackElement = std::make_shared<NiceMock<MockTrackElement>>();
-
+    auto track = std::make_shared<NiceMock<MockTrack>>();
+    mediaTrackElement->setTrack(track);
 
     NiceMock<MockPluginSuite> fakePluginSuite{};
     auto mediaTakeElement = std::make_shared<MediaTakeElement>(audioObjectWithDuration, mediaTrackElement);
-    /*
-    SECTION("parentTrack() returns TrackElement used during construction") {
-        REQUIRE(mediaTakeElement->parentTrack().get() == mediaTrackElement.get());
+
+    SECTION("has parent element from construction") {
+        REQUIRE(mediaTakeElement->countParentElements() == 1);
     }
-    */
+
     SECTION("on createProjectElements()") {
         NiceMock<MockReaperAPI> api;
         int fakeItemVal{ 2 };
@@ -48,7 +49,6 @@ TEST_CASE("MediaTakeElement") {
         EXPECT_CALL(*mediaTrackElement, addMediaItem(_)).Times(AnyNumber()).WillRepeatedly(Return(mediaItem));
         EXPECT_CALL(api, AddTakeToMediaItem(_)).Times(AnyNumber()).WillRepeatedly(Return(mediaTake));
         EXPECT_CALL(api, SetMediaItemTake_Source(_, _)).Times(AnyNumber()).WillRepeatedly(Return(true));
-
         SECTION("when source previously set") {
             int sourceVal{ 4 };
             auto pcmSource = reinterpret_cast<PCM_source*>(&sourceVal);
@@ -80,6 +80,8 @@ TEST_CASE("MediaTakeElement") {
 TEST_CASE("MediaTakeElement with durationless audioobject") {
     auto audioObject = testhelper::createAudioObject(1);
     auto mediaTrackElement = std::make_shared<NiceMock<MockTrackElement>>();
+    auto track = std::make_shared<NiceMock<MockTrack>>();
+    mediaTrackElement->setTrack(track);
     auto mediaTakeElement = std::make_unique<MediaTakeElement>(audioObject, mediaTrackElement);
     NiceMock<MockReaperAPI> api;
     NiceMock<MockPluginSuite> fakePluginSuite{};
@@ -109,7 +111,6 @@ namespace {
 auto channelFormatDirectSpeakers(std::string name) {
     return adm::AudioChannelFormat::create(adm::AudioChannelFormatName(name.c_str()), adm::TypeDefinition::DIRECT_SPEAKERS);
 }
-
 }
 
 TEST_CASE("MediaTakeElement returns channels in order added") {
