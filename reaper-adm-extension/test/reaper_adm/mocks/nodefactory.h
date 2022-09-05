@@ -13,10 +13,11 @@ using ::testing::Invoke;
 namespace admplug {
 class FakeCreator : public NodeFactory {
 public:
-std::shared_ptr<ProjectNode> createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> el, std::shared_ptr<TrackElement> parentTrack)
+std::shared_ptr<ProjectNode> createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::shared_ptr<const adm::AudioTrackUid> representedAudioTrackUid, std::vector<adm::ElementConstVariant> el, std::shared_ptr<TrackElement> parentTrack)
 {
     auto track = std::make_shared<ObjectTrack>(el, parentTrack);
     track->setRepresentedAudioObject(representedAudioObject);
+    track->setRepresentedAudioTrackUid(representedAudioTrackUid);
     return std::make_shared<ProjectNode>(track);
 }
 
@@ -55,8 +56,8 @@ std::shared_ptr<ProjectNode> createAutomationNode(ADMChannel channel,
 
 class MockNodeFactory : public NodeFactory {
 public:
-  MOCK_METHOD3(createObjectTrackNode,
-      std::shared_ptr<ProjectNode>(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentTrack));
+  MOCK_METHOD4(createObjectTrackNode,
+      std::shared_ptr<ProjectNode>(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::shared_ptr<const adm::AudioTrackUid> representedAudioTrackUid, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentTrack));
   MOCK_METHOD3(createDirectTrackNode,
       std::shared_ptr<ProjectNode>(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentTrack));
   MOCK_METHOD3(createHoaTrackNode,
@@ -68,7 +69,7 @@ public:
   MOCK_METHOD3(createAutomationNode,
       std::shared_ptr<ProjectNode>(ADMChannel channel, std::shared_ptr<TrackElement> parentTrack, std::shared_ptr<TakeElement> parentTake));
   void delegateToFake() {
-      ON_CALL(*this, createObjectTrackNode(_, _, _)).WillByDefault(Invoke(&fake, &FakeCreator::createObjectTrackNode));
+      ON_CALL(*this, createObjectTrackNode(_, _, _, _)).WillByDefault(Invoke(&fake, &FakeCreator::createObjectTrackNode));
       ON_CALL(*this, createDirectTrackNode(_, _, _)).WillByDefault(Invoke(&fake, &FakeCreator::createDirectTrackNode));
       ON_CALL(*this, createHoaTrackNode(_, _, _)).WillByDefault(Invoke(&fake, &FakeCreator::createHoaTrackNode));
       ON_CALL(*this, createGroupNode(_, _)).WillByDefault(Invoke(&fake, &FakeCreator::createGroupNode));
