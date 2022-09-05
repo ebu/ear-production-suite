@@ -20,10 +20,11 @@ std::unique_ptr<RootElement> admplug::NodeCreator::createRootElement(MediaItem* 
     return std::make_unique<ImportElement>(fromMediaItem);
 }
 
-std::shared_ptr<ProjectNode> admplug::NodeCreator::createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
+std::shared_ptr<ProjectNode> admplug::NodeCreator::createObjectTrackNode(std::shared_ptr<const adm::AudioObject> representedAudioObject, std::shared_ptr<const adm::AudioTrackUid> representedAudioTrackUid, std::vector<adm::ElementConstVariant> elements, std::shared_ptr<TrackElement> parentGroupTrack)
 {
     auto track = std::make_shared<ObjectTrack>(elements, parentGroupTrack);
     track->setRepresentedAudioObject(representedAudioObject);
+    track->setRepresentedAudioTrackUid(representedAudioTrackUid);
     return std::make_shared<ProjectNode>(track);
 }
 

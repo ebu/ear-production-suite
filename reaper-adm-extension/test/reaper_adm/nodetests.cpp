@@ -58,7 +58,7 @@ TEST_CASE("With a node creator and a simple object") {
     NodeCreator creator{ std::move(pcmSourceCreator) };
     auto simpleObject = adm::createSimpleObject("Test");
     SECTION("when a track node is created") {
-        auto trackNode = creator.createObjectTrackNode(simpleObject.audioObject, std::vector<adm::ElementConstVariant>(1, simpleObject.audioObject), nullptr);
+        auto trackNode = creator.createObjectTrackNode(simpleObject.audioObject, simpleObject.audioTrackUid, std::vector<adm::ElementConstVariant>(1, simpleObject.audioObject), nullptr);
         SECTION("The node is not null") {
             REQUIRE(trackNode);
             SECTION("and has the provided element") {
