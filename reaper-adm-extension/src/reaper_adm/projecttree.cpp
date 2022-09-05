@@ -477,7 +477,6 @@ std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::sh
         startingNode = rootNode;
     }
     if (nodeIsTakeWithCompatibleElements(*startingNode, sourceCreator, elements, object)) {
-        //////TODO - MUST CHECK START TIME AND DURATION AGAINST object!!
         return startingNode;
     }
     auto children = startingNode->children();
