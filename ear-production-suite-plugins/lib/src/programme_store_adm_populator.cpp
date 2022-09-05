@@ -148,13 +148,38 @@ void ProgrammeStoreAdmPopulator::operator()(
 
 void ProgrammeStoreAdmPopulator::operator()(
   std::shared_ptr<const AudioObject> admObject) {
-  auto aoId = admObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
 
-  auto found = programmeElementImportedAudioObjectIdLookup.find(aoId) != programmeElementImportedAudioObjectIdLookup.end();
-  if(!found) {
-    auto element = currentProgramme->add_element();
-    setInteractivity(element->mutable_object(), *admObject);
-    programmeElementImportedAudioObjectIdLookup[aoId] = element;
+  // Make sure it's a bottom-level audioObject
+  auto pfs = admObject->getReferences<adm::AudioPackFormat>();
+  if(pfs.size() != 0) {
+
+    auto aoId = admObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
+    auto ids = std::make_pair(admObject->get<adm::AudioObjectId>(),
+                              adm::AudioTrackUidId(adm::AudioTrackUidIdValue(0)));
+
+    auto td = pfs.front()->get<adm::TypeDescriptor>();
+    if(td == adm::TypeDefinition::OBJECTS) {
+      // Expect one plugin per trackuid
+      auto atus = admObject->getReferences<adm::AudioTrackUid>();
+      for(auto const& atu : atus) {
+        ids.second = atu->get<adm::AudioTrackUidId>();
+        auto found = programmeElementImportedIdsLookup.find(ids) != programmeElementImportedIdsLookup.end();
+        if(!found) {
+          auto element = currentProgramme->add_element();
+          setInteractivity(element->mutable_object(), *admObject);
+          programmeElementImportedIdsLookup[ids] = element;
+        }
+      }
+
+    } else {
+      // Expect one plugin for all trackuids
+      auto found = programmeElementImportedIdsLookup.find(ids) != programmeElementImportedIdsLookup.end();
+      if(!found) {
+        auto element = currentProgramme->add_element();
+          setInteractivity(element->mutable_object(), *admObject);
+          programmeElementImportedIdsLookup[ids] = element;
+      }
+    }
   }
 
 }
@@ -168,15 +193,15 @@ void ProgrammeStoreAdmPopulator::operator()(
 }
 
 void ProgrammeStoreAdmPopulator::startRoute() {
-  programmeElementImportedAudioObjectIdLookup.clear();
+  programmeElementImportedIdsLookup.clear();
 }
 
 void ProgrammeStoreAdmPopulator::endRoute() {
-  elementImportedAudioObjectIdLookup.insert(programmeElementImportedAudioObjectIdLookup.begin(),
-                            programmeElementImportedAudioObjectIdLookup.end());
+  elementImportedIdsLookup.insert(programmeElementImportedIdsLookup.begin(),
+                            programmeElementImportedIdsLookup.end());
 }
 
-std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
+std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
     const Document& doc, proto::ProgrammeStore& store) {
   auto tracer = adm::detail::GenericRouteTracer<adm::Route, StopAtChannel>{};
   store = proto::ProgrammeStore{};
@@ -199,7 +224,7 @@ std::multimap<int, proto::ProgrammeElement*> ear::plugin::populateStoreFromAdm(
     store.set_auto_mode(false);
 
     store.set_selected_programme_internal_id(store.programme(0).programme_internal_id());
-    return populator.getImportedAudioObjectIdLookup();
+    return populator.getImportedIdsLookup();
   }
   return {};
 }

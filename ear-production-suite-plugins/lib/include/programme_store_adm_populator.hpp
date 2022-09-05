@@ -86,16 +86,16 @@ struct StopAtChannel {
     void startRoute();
     void endRoute();
 
-    std::multimap<int, proto::ProgrammeElement*> getImportedAudioObjectIdLookup() { return elementImportedAudioObjectIdLookup; }
+    std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, proto::ProgrammeElement*> getImportedIdsLookup() { return elementImportedIdsLookup; }
    private:
     proto::ProgrammeStore* store;
-    std::map<int, proto::ProgrammeElement*> programmeElementImportedAudioObjectIdLookup;
-    std::multimap<int, proto::ProgrammeElement*> elementImportedAudioObjectIdLookup;
+    std::map<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, proto::ProgrammeElement*> programmeElementImportedIdsLookup;
+    std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, proto::ProgrammeElement*> elementImportedIdsLookup;
     std::map<std::shared_ptr<adm::AudioProgramme const>, proto::Programme*> importedProgrammes;
     proto::Programme* currentProgramme;
   };
 
-  std::multimap<int, proto::ProgrammeElement *> populateStoreFromAdm(
+  std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, proto::ProgrammeElement *> populateStoreFromAdm(
       adm::Document const& doc,
       proto::ProgrammeStore& store);
 }
