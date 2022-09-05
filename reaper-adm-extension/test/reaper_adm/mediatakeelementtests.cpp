@@ -28,7 +28,8 @@ TEST_CASE("MediaTakeElement") {
 
     auto mediaTrackElement = std::make_shared<NiceMock<MockTrackElement>>();
     auto track = std::make_shared<NiceMock<MockTrack>>();
-    mediaTrackElement->setTrack(track);
+    auto te = std::dynamic_pointer_cast<TrackElement>(mediaTrackElement);
+    te->setTrack(track);
 
     NiceMock<MockPluginSuite> fakePluginSuite{};
     auto mediaTakeElement = std::make_shared<MediaTakeElement>(audioObjectWithDuration, mediaTrackElement);
@@ -81,7 +82,8 @@ TEST_CASE("MediaTakeElement with durationless audioobject") {
     auto audioObject = testhelper::createAudioObject(1);
     auto mediaTrackElement = std::make_shared<NiceMock<MockTrackElement>>();
     auto track = std::make_shared<NiceMock<MockTrack>>();
-    mediaTrackElement->setTrack(track);
+    auto te = std::dynamic_pointer_cast<TrackElement>(mediaTrackElement);
+    te->setTrack(track);
     auto mediaTakeElement = std::make_unique<MediaTakeElement>(audioObject, mediaTrackElement);
     NiceMock<MockReaperAPI> api;
     NiceMock<MockPluginSuite> fakePluginSuite{};
