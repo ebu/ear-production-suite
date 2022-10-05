@@ -274,7 +274,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
         if(!moveToTrackNodeWithElements(relatedAdmElements)) {
-            if(moveToNewTrackNode(td, state.currentObject, nullptr, relatedAdmElements)) {
+            if(moveToNewTrackNode(td, state.currentObject, state.audioTrackUids[0], relatedAdmElements)) {
                 addTake();
                 addAutomation();
             }
@@ -307,7 +307,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.audioChannelFormats[0], state.currentObject, state.rootPack };
         if (!moveToTrackNodeWithElements(relatedAdmElements)) {
-            if(moveToNewTrackNode(td, state.currentObject, nullptr, relatedAdmElements)) {
+            if(moveToNewTrackNode(td, state.currentObject, state.audioTrackUids[0], relatedAdmElements)) {
                 addTake();
                 addAutomation();
             }
