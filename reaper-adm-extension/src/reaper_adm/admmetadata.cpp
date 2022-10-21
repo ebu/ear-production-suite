@@ -25,6 +25,7 @@ void setUidReference(adm::Document& doc,
     if(cf) {
         auto tf = adm::AudioTrackFormat::create(adm::AudioTrackFormatName("AudioTrackFormat"), adm::FormatDefinition::PCM);
         auto sf = adm::AudioStreamFormat::create(adm::AudioStreamFormatName("AudioStreamFormat"), adm::FormatDefinition::PCM);
+        uid.removeReference<adm::AudioChannelFormat>();
         uid.setReference(tf);
         tf->setReference(sf);
         sf->setReference(cf);
