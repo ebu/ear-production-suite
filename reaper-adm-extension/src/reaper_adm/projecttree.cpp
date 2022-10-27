@@ -94,17 +94,10 @@ int getFlattenedPackFormatChannelCount(adm::AudioPackFormat const& pack) {
 
 PackRepresentation getPackRepresentation(adm::AudioPackFormat const& pack)
 {
-    if (getFlattenedPackFormatChannelCount(pack) > 1) {
-        if (packFormatIsObjectType(pack)) {
-            return PackRepresentation::MultipleGroupedMonoTracks;
-        }
-        else {
-            return PackRepresentation::SingleMultichannelTrack;
-        }
+    if(packFormatIsObjectType(pack) && getFlattenedPackFormatChannelCount(pack) > 1) {
+        return PackRepresentation::MultipleGroupedTracks;
     }
-    else {
-        return PackRepresentation::SingleMonoTrack;
-    }
+    return PackRepresentation::SingleTrack;
 }
 
 bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementConstVariant> const& elements) {
@@ -247,9 +240,7 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
     auto td = packFormat->get<adm::TypeDescriptor>();
     state.packRepresentation = getPackRepresentation(*state.rootPack);
 
-    if(state.packRepresentation == PackRepresentation::Undefined) {
-        return;
-    }
+    if(state.packRepresentation == PackRepresentation::Undefined) return;
 
     // We need to collect the channel formats and match their ordering to that listed in their parent packformat(s)
     // (Important for matching Common Definitions ordering that the input plugins use for audio channel ordering)
@@ -266,11 +257,12 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             }
         }
     }
+
     if(channels.size() == 0) return;
     sortToVectorsByChannelFormatOrder(channels, state.audioChannelFormats, state.audioTrackUids, packFormat);
 
-    if (state.packRepresentation == PackRepresentation::SingleMultichannelTrack) {
-        // Non-mono DS or HOA
+    if (state.packRepresentation == PackRepresentation::SingleTrack) {
+        // DS, HOA, or single Object
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
         if(!moveToTrackNodeWithElements(relatedAdmElements)) {
@@ -281,8 +273,8 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
         }
 
     }
-    else if (state.packRepresentation == PackRepresentation::MultipleGroupedMonoTracks) {
-        // Object type with multiple channels
+    else if (state.packRepresentation == PackRepresentation::MultipleGroupedTracks) {
+        // Object type with multiple channels (sub-objects)
 
         std::vector<adm::ElementConstVariant> relatedAdmElements{ state.currentObject, state.rootPack };
         if (!moveToTrackNodeWithElements(relatedAdmElements)) {
@@ -301,17 +293,6 @@ void ProjectTree::operator()(std::shared_ptr<const adm::AudioPackFormat> packFor
             }
         }
 
-    }
-    else if (state.packRepresentation == PackRepresentation::SingleMonoTrack) {
-        // Mono DS or Object
-
-        std::vector<adm::ElementConstVariant> relatedAdmElements{ state.audioChannelFormats[0], state.currentObject, state.rootPack };
-        if (!moveToTrackNodeWithElements(relatedAdmElements)) {
-            if(moveToNewTrackNode(td, state.currentObject, state.audioTrackUids[0], relatedAdmElements)) {
-                addTake();
-                addAutomation();
-            }
-        }
     }
 }
 
