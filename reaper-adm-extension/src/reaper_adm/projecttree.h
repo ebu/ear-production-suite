@@ -19,9 +19,8 @@ class ReaperAPI;
 
 enum PackRepresentation {
     Undefined,
-    SingleMultichannelTrack,
-    SingleMonoTrack,
-    MultipleGroupedMonoTracks
+    SingleTrack,
+    MultipleGroupedTracks
 };
 
 struct TreeState {
