@@ -6,6 +6,7 @@
 #include <adm/common_definitions.hpp>
 #include <utility>
 #include <iomanip>
+#include <optional>
 
 using namespace ear::plugin;
 
@@ -162,13 +163,23 @@ bool interactionEqual(proto::Object const& object,
   return !admInteractionEnabled;
 }
 
+std::optional<int> determineImportanceValue(const proto::Object & object) {
+  if(object.has_importance()) {
+    return std::optional<int>(object.importance());
+  }
+#ifdef BAREBONESPROFILE
+  return std::optional<int>(10);
+#endif
+  return std::optional<int>();
+}
+
 bool importanceEqual(proto::Object const& object,
                      adm::AudioObject const& admObject) {
-  if(object.has_importance() == admObject.has<adm::Importance>()) {
-    if(object.has_importance()) {
-      auto objectImportance = object.importance();
+  auto importance = determineImportanceValue(object);
+  if(importance.has_value() == admObject.has<adm::Importance>()) {
+    if(importance.has_value()) {
       auto admObjectImportance = admObject.get<adm::Importance>().get();
-      return objectImportance == admObjectImportance;
+      return importance.value() == admObjectImportance;
     } else {
       return true;
     }
@@ -296,6 +307,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
   assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() ||
          metadata.has_hoa_metadata());
   const auto& connectionId = metadata.connection_id();
+
   if (isAlreadySerialized(object)) {
     // Already have serialized this object (in a different programme?)
     content.addReference(serializedObjects[connectionId]);
@@ -473,14 +485,11 @@ void ProgrammeStoreAdmSerializer::setInteractivity(
 
 void ear::plugin::ProgrammeStoreAdmSerializer::setImportance(adm::AudioObject & admObject, const proto::Object & object)
 {
-  if(object.has_importance()) {
-    admObject.set(adm::Importance(object.importance()));
+  auto importance = determineImportanceValue(object);
+  if(importance.has_value()) {
+    admObject.set(adm::Importance(importance.value()));
   } else {
-#ifdef BAREBONESPROFILE
-    admObject.set(adm::Importance(10));
-#else
     admObject.unset<adm::Importance>();
-#endif
   }
 }
 
