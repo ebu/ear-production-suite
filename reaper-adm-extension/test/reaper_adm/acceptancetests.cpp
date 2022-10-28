@@ -402,6 +402,7 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
     doImport<Facebook360PluginSuite>("data/panned_noise_adm.wav", api);
 }
 
+/*
 TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nesting]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
@@ -668,6 +669,7 @@ TEST_CASE("On import of nesting example: nesting8-2ao_reffing_same_1pf_with_1cf.
 
     doImport<Facebook360PluginSuite>("data/nesting8-2ao_reffing_same_1pf_with_1cf.wav", api);
 }
+*/
 
 TEST_CASE("Importing mono directspeaker file to FB360 plugin suite", "[directspeaker][FB360]") {
 
@@ -764,6 +766,7 @@ TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360
     doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
 
+/*
 TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track per TrackUID", "[ear]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
@@ -799,3 +802,4 @@ TEST_CASE("On import of three AudioObjects with shared TrackUIDs and some orphan
 
     doImport<EARPluginSuite>("data/aos_sharing_atu-some_without_parent.wav", api);
 }
+*/
