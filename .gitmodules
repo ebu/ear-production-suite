@@ -3,7 +3,8 @@
 	url = https://github.com/ebu/libadm.git
 [submodule "submodules/libbw64"]
 	path = submodules/libbw64
-	url = https://github.com/ebu/libbw64.git
+	url = https://github.com/firthm01/libbw64.git
+	branch = rf64-id-option-v2
 # Not required - BEAR will pull a version in
 # [submodule "submodules/libear"]
 # 	path = submodules/libear
