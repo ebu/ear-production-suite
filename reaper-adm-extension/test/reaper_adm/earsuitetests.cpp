@@ -242,6 +242,7 @@ TEST_CASE("Bus and renderer tracks positioned") {
     }
 }
 
+/*
 TEST_CASE("Object tracks positioned") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
@@ -289,6 +290,7 @@ TEST_CASE("Object track has object metadata plugin instantiated") {
     initProject(earSuite, api);
     earSuite.onCreateObjectTrack(trackElement, api);
 }
+*/
 
 //TODO - mock UniqueValueAssigner for this to work
 //TEST_CASE("Object tracks are routed to bus track") {
@@ -317,6 +319,7 @@ TEST_CASE("Object track has object metadata plugin instantiated") {
 //    }
 //}
 
+/*
 TEST_CASE("Object tracks are not sent to master") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
@@ -330,6 +333,7 @@ TEST_CASE("Object tracks are not sent to master") {
     initProject(earSuite, api);
     earSuite.onCreateObjectTrack(trackElement, api);
 }
+*/
 namespace {
   MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
   MATCHER_P(HasIndex, index, "")
@@ -338,6 +342,7 @@ namespace {
   }
   } // namespace
 
+/*
   TEST_CASE("Automation is applied for all Automatable Object plugin parameters")
   {
       std::vector<AdmParameter> supportedParameters{{AdmParameter::OBJECT_AZIMUTH,
@@ -358,6 +363,7 @@ namespace {
       for (auto parameter : supportedParameters) {
           EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
       }
+
       initProject(earSuite, api);
       earSuite.onProjectBuildBegin(getGenericMetadata(), api);
       earSuite.onObjectAutomation(*autoElement, api);
@@ -402,6 +408,7 @@ namespace {
       initProject(earSuite, api);
       earSuite.onCreateDirectTrack(trackElement, api);
   }
+*/
 
   TEST_CASE("Channels Metadata plugin added on first directspeakers automation")
   {
@@ -432,6 +439,7 @@ namespace {
       }
   }
 
+/*
 TEST_CASE("Track routed to bus on directspeakers automation") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
@@ -497,3 +505,4 @@ TEST_CASE("Tracks are routed sequentially") {
     //earSuite.onCreateObjectTrack(trackElement, api);
     earSuite.onObjectAutomation(*objectAuto, api);
 }
+*/
