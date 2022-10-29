@@ -121,7 +121,7 @@ extern "C" {
     }
 
     auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
-    rec->Register("API_registerPluginLoad", &registerPluginLoad);
+    rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
