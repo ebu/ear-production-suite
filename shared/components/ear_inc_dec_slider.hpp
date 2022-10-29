@@ -12,7 +12,7 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class EarIncDecSlider : public Component, MouseListener  {
+class EarIncDecSlider : public Component {
  public:
   EarIncDecSlider() {
       slider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
