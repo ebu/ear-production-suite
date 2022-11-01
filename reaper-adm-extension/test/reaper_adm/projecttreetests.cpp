@@ -32,12 +32,11 @@ void setChannelForTrackUidExpectations(NiceMock<MockIPCMSourceCreator> *fakePcmS
         EXPECT_CALL(*fakePcmSourceCreator, channelForTrackUid(pr.first)).WillRepeatedly(Return(pr.second));
     }
 }
-void setUniqueChannelForTrackUidExpectations(NiceMock<MockIPCMSourceCreator> *fakePcmSourceCreator) {
-    uint32_t callCount = 0;
+void setUniqueChannelForTrackUidExpectations(NiceMock<MockIPCMSourceCreator> *fakePcmSourceCreator, uint32_t *callCount) {
     ON_CALL(*fakePcmSourceCreator, channelForTrackUid(_))
         .WillByDefault(testing::Invoke(
-            [&callCount]() -> int {
-        return ++callCount;
+            [callCount]() -> int {
+        return ++*callCount;
     }
     ));
 }
@@ -88,7 +87,8 @@ TEST_CASE("Project tree", "") {
                          fakeListener);
         auto doc = adm::Document::create();
 
-        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+        uint32_t chCount = 0;
+        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
 
         SECTION("When it receives an audioProgramme") {
             auto programme = adm::AudioProgramme::create(adm::AudioProgrammeName{ "Test Prog" });
@@ -232,7 +232,8 @@ TEST_CASE("Project tree", "") {
         doc->add(programme);
         state.currentProgramme = programme;
 
-        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+        uint32_t chCount = 0;
+        setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
 
         SECTION("When it receives a single audioContent") {
             auto content = adm::AudioContent::create(adm::AudioContentName{ "Test Content" });
@@ -350,7 +351,8 @@ TEST_CASE("Project tree", "") {
         SECTION("When the tree receives that element") {
             auto obj = adm::AudioObject::create(adm::AudioObjectName{ "test" });
             doc->add(obj);
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
             expectNodes(0, 0, 0, 0);
             tree(obj);
             SECTION("it moves the tree to that child") {
@@ -376,7 +378,8 @@ TEST_CASE("Project tree", "") {
             auto atuid = object.audioTrackUid;
 
             SECTION("When it receives an object followed by a referenced tuid and channel format") {
-                setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+                uint32_t chCount = 0;
+                setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
                 expectNodes(0, 1, 1, 1);
                 tree.resetRoot();
                 tree(ao);
@@ -460,7 +463,8 @@ TEST_CASE("Project tree", "") {
             atuid->setReference(atf);
             atuid->setReference(apf);
 
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
 
             SECTION("When it receives an object followed by a referenced tuid and channel format") {
                 expectNodes(0, 0, 1, 1, 1);
@@ -537,7 +541,8 @@ TEST_CASE("Project tree", "") {
             atuid_child2->setReference(atf_child2);
             atuid_child2->setReference(apf_child2);
 
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
             expectNodes(0, 2, 2, 2);
 
             tree.resetRoot();
@@ -587,7 +592,8 @@ TEST_CASE("Project tree", "") {
             atuid->setReference(atf);
             atuid->setReference(apf);
 
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
             expectNodes(2, 1, 1, 1);
 
             tree.resetRoot();
@@ -648,12 +654,14 @@ TEST_CASE("Project tree", "") {
             atuid_2->setReference(atf_2);
             atuid_2->setReference(apf_2);
 
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
             expectNodes(1, 2, 2, 2);
 
             tree.resetRoot();
             tree(ao);
             tree(apf_1); // end of tracer route
+
             SECTION("the the trees state is correctly updated") {
                 REQUIRE(tree.getState().currentObject == ao);
                 REQUIRE(tree.getState().audioTrackUids.size() == 2);
@@ -694,7 +702,8 @@ TEST_CASE("Project tree", "") {
             atuid_2->setReference(atf_2);
             atuid_2->setReference(apf_2);
 
-            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get());
+            uint32_t chCount = 0;
+            setUniqueChannelForTrackUidExpectations(fakePcmSourceCreator.get(), &chCount);
             expectNodes(0, 0, 1, 2, 1);
 
             tree.resetRoot();
