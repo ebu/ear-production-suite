@@ -26,6 +26,11 @@ message(STATUS "----------------------------------------------------------------
 
 include(FeatureSummary)
 
+option(EPS_USE_BAREBONES_PROFILE "Use the bare-bones version of the EBU Production Profile" OFF)
+if(EPS_USE_BAREBONES_PROFILE)
+	add_compile_definitions(BAREBONESPROFILE)
+endif()
+
 include(eps_set_install_paths)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     eps_set_install_paths()

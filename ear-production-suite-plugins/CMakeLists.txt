@@ -14,11 +14,6 @@ set(IDE_FOLDER_TESTS "EPS-Plugins/tests")
 option(EAR_PLUGINS_UNIT_TESTS "Build units tests" ON)
 option(EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS "Build all monitoring plugins" ON)
 
-option(EPS_USE_BAREBONES_PROFILE "Use the bare-bones version of the EBU Production Profile" OFF)
-if(EPS_USE_BAREBONES_PROFILE)
-	add_compile_definitions(BAREBONESPROFILE)
-endif()
-
 option(JUCE_DISABLE_ASSERTIONS "Disable JUCE assertions (avoids discrete channels assert, but also others!!!)" ON)
 if(JUCE_DISABLE_ASSERTIONS)
 	add_compile_definitions(JUCE_DISABLE_ASSERTIONS)
