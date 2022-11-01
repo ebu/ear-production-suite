@@ -6,7 +6,11 @@ std::string const& eps::baseVersion() {
 }
 
 std::string const& eps::currentVersion() {
+#ifdef BAREBONESPROFILE
+    static std::string currentVersion("@DESCRIPTIVE_VERSION@[bb]");
+#else
     static std::string currentVersion("@DESCRIPTIVE_VERSION@");
+#endif
     return currentVersion;
 }
 
