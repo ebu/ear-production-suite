@@ -11,9 +11,11 @@
 #include <nng/protocol/pair0/pair.h>
 #include <assert.h>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 
 namespace NNGAddr {
     const std::string protocol {"ipc://"};
