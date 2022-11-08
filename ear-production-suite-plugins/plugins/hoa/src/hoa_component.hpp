@@ -68,7 +68,7 @@ class HoaComponent : public Component,
     addAndMakeVisible(mainValueBox.get());
     addAndMakeVisible(orderDisplayValueBox.get());
 
-    statusBarLabel->setFont(EarFonts::Measures);
+    statusBarLabel->setFont(EarFontsSingleton::instance().Measures);
     addAndMakeVisible(statusBarLabel.get());
 
     configureVersionLabel(versionLabel);

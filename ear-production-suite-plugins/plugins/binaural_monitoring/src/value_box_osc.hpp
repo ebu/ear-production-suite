@@ -131,7 +131,7 @@ public:
     tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
     tooltipWindow.setOpaque(false);
 
-    portLabel_->setFont(EarFonts::Values); //(EarFonts::Label);
+    portLabel_->setFont(EarFontsSingleton::instance().Values); //(EarFontsSingleton::instance().Label);
     portLabel_->setColour(Label::textColourId, EarColours::Label);
     portLabel_->setText("Port", juce::NotificationType::dontSendNotification);
     portLabel_->setJustificationType(Justification::left);
@@ -146,13 +146,13 @@ public:
     portControl_->setIncDecButtonsMode(juce::Slider::IncDecButtonMode::incDecButtonsNotDraggable);
     addAndMakeVisible(portControl_.get());
 
-    statusLabel_->setFont(EarFonts::Units);
+    statusLabel_->setFont(EarFontsSingleton::instance().Units);
     statusLabel_->setColour(Label::textColourId, EarColours::Label);
     statusLabel_->setText("Initialising...", juce::NotificationType::dontSendNotification);
     statusLabel_->setJustificationType(Justification::left);
     addAndMakeVisible(statusLabel_.get());
 
-    invertLabel_->setFont(EarFonts::Label);
+    invertLabel_->setFont(EarFontsSingleton::instance().Label);
     invertLabel_->setColour(Label::textColourId, EarColours::Label);
     invertLabel_->setText("Inversion", juce::NotificationType::dontSendNotification);
     invertLabel_->setJustificationType(Justification::left);

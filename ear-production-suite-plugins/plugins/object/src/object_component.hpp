@@ -79,7 +79,7 @@ class ObjectsComponent : public Component,
     metadataValueBox->setEnabled(false);
     metadataValueBox->setAlpha(0.38f);
 
-    statusBarLabel->setFont(EarFonts::Measures);
+    statusBarLabel->setFont(EarFontsSingleton::instance().Measures);
     addAndMakeVisible(statusBarLabel.get());
 
     configureVersionLabel(versionLabel);

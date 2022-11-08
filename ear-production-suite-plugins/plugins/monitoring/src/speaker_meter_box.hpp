@@ -14,7 +14,7 @@ class SpeakerMeterBox : public Component {
   SpeakerMeterBox(const String& labelText) : label_(std::make_unique<Label>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
-    label_->setFont(EarFonts::Label);
+    label_->setFont(EarFontsSingleton::instance().Label);
     label_->setColour(Label::textColourId,
                       EarColours::Text.withAlpha(Emphasis::high));
     label_->setText(labelText, dontSendNotification);

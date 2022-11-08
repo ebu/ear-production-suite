@@ -70,7 +70,7 @@ void EarTabButton::paint(Graphics& g) {
     g.fillAll(findColour(hoverColourId));
   }
   g.setColour(findColour(textColourId));
-  g.setFont(EarFonts::Items);
+  g.setFont(EarFontsSingleton::instance().Items);
   g.drawText(text_,
              area.withTrimmedLeft(paddingLeft_)
                  .withTrimmedRight(paddingRight_)

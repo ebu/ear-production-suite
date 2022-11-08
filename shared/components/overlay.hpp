@@ -84,7 +84,7 @@ class Overlay : public Component {
     g.fillAll(findColour(overlayBackgroundColourId));
     g.setColour(findColour(windowBorderColourId));
     g.fillRect(windowRect_);
-    g.setFont(EarFonts::Items);
+    g.setFont(EarFontsSingleton::instance().Items);
     g.setColour(findColour(headerTextColourId));
     g.drawText(headerText_, headerRect_, Justification::centredLeft);
     g.setColour(findColour(contentBackgroundColourId));

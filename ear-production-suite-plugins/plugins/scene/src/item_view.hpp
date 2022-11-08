@@ -51,7 +51,7 @@ class ItemView : public Component {
     g.fillRect(area.removeFromLeft(5));
     area.removeFromLeft(10);
     g.setColour(EarColours::Text);
-    g.setFont(EarFonts::Items);
+    g.setFont(EarFontsSingleton::instance().Items);
     g.drawText(data_.metadata.name(), area, Justification::left);
   }
 

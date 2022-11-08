@@ -7,7 +7,7 @@
 #include <version/eps_version.h>
 
 inline void configureVersionLabel(juce::Label& versionLabel) {
-    versionLabel.setFont(ear::plugin::ui::EarFonts::Version);
+    versionLabel.setFont(ear::plugin::ui::EarFontsSingleton::instance().Version);
     versionLabel.setColour(juce::Label::textColourId, ear::plugin::ui::EarColours::Version);
     versionLabel.setJustificationType(juce::Justification::right);
     versionLabel.setEditable(false);

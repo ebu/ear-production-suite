@@ -21,7 +21,7 @@ class ValueBoxGain : public Component {
     setColour(backgroundColourId, EarColours::Area01dp);
     addAndMakeVisible(levelMeter_.get());
 
-    gainLabel_->setFont(EarFonts::Label);
+    gainLabel_->setFont(EarFontsSingleton::instance().Label);
     gainLabel_->setColour(Label::textColourId, EarColours::Label);
     gainLabel_->setText("Gain", dontSendNotification);
     gainLabel_->setJustificationType(Justification::bottomRight);

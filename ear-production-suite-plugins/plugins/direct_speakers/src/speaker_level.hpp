@@ -18,7 +18,7 @@ class SpeakerLevel : public Component {
     addAndMakeVisible(levelMeter_.get());
 
     speakerLabel_->setText(name, dontSendNotification);
-    speakerLabel_->setFont(EarFonts::Items);
+    speakerLabel_->setFont(EarFontsSingleton::instance().Items);
     speakerLabel_->setColour(Label::textColourId, EarColours::Label);
     speakerLabel_->setJustificationType(Justification::centred);
     addAndMakeVisible(speakerLabel_.get());

@@ -21,11 +21,11 @@ class SpeakerMetersBox : public Component {
       area.reduce(20.f, 30.f);
 
       g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
-      g.setFont(EarFonts::Label);
+      g.setFont(EarFontsSingleton::instance().Label);
       g.drawText("Channel meters not available", area.removeFromTop(25.f),
                  Justification::left);
       g.setColour(EarColours::Text.withAlpha(Emphasis::high));
-      g.setFont(EarFonts::Heading);
+      g.setFont(EarFontsSingleton::instance().Heading);
       g.drawText("Please select a speaker layout first",
                  area.removeFromTop(25.f), Justification::left);
     }

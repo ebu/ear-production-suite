@@ -52,7 +52,7 @@ class ObjectView : public ElementView,
     colourIndicator_->setColour(EarColours::Item01);
     addAndMakeVisible(colourIndicator_.get());
 
-    nameLabel_->setFont(EarFonts::Items);
+    nameLabel_->setFont(EarFontsSingleton::instance().Items);
     nameLabel_->setBorderSize(BorderSize<int>{0});
     nameLabel_->setColour(Label::textColourId, EarColours::Text);
     nameLabel_->setMinimumHorizontalScale(1.f);
@@ -60,7 +60,7 @@ class ObjectView : public ElementView,
 
     addAndMakeVisible(levelMeter_.get());
 
-    metadataLabel_->setFont(EarFonts::Values);
+    metadataLabel_->setFont(EarFontsSingleton::instance().Values);
     metadataLabel_->setColour(Label::textColourId,
                               EarColours::Text.withAlpha(Emphasis::medium));
     addAndMakeVisible(metadataLabel_.get());

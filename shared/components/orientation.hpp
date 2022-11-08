@@ -130,14 +130,14 @@ class OrientationView : public Component,
 
     // labeling
     g.setColour(findColour(angleLabelColourId));
-    g.setFont(EarFonts::Measures);
+    g.setFont(EarFontsSingleton::instance().Measures);
     g.drawText(ccwTickLabelText_, ccwTickLabelRect_, Justification::centred);
     g.drawText(centreTickLabelText_, centreTickLabelRect_, Justification::centred);
     g.drawText(cwTickLabelText_, cwTickLabelRect_, Justification::centred);
     if(fullCircle) g.drawText(jointTickLabelText_, jointTickLabelRect_, Justification::centred);
 
     g.setColour(findColour(directionLabelColourId));
-    g.setFont(EarFonts::Values);
+    g.setFont(EarFontsSingleton::instance().Values);
     if(centreLabelText_.isNotEmpty()) g.drawText(centreLabelText_, centreLabelRect_, Justification::centred);
     if(fullCircle && jointLabelText_.isNotEmpty()) g.drawText(jointLabelText_, jointLabelRect_, Justification::centred);
   }
@@ -464,9 +464,9 @@ private:
   void setLabelsSizeAndPosition(float atRad, juce::Rectangle<float> &valLabelRect, juce::String &valLabelStr, juce::Rectangle<float> &txtLabelRect, juce::String &txtLabelStr) {
     atRad = unwrapRads(atRad);
 
-    float labelWidth = EarFonts::Measures.getStringWidthFloat(valLabelStr);
+    float labelWidth = EarFontsSingleton::instance().Measures.getStringWidthFloat(valLabelStr);
     if(txtLabelStr.isNotEmpty()) {
-      labelWidth = std::max(labelWidth, EarFonts::Values.getStringWidthFloat(txtLabelStr));
+      labelWidth = std::max(labelWidth, EarFontsSingleton::instance().Values.getStringWidthFloat(txtLabelStr));
     }
 
     valLabelRect.setSize(labelWidth, labelHeight_);

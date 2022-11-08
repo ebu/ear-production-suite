@@ -31,7 +31,7 @@ OrderBox::OrderBox(HoaAudioProcessor* p,
   addAndMakeVisible(levelMeter_.get());
 
   orderLabel_->setText(name, dontSendNotification);
-  orderLabel_->setFont(EarFonts::Items);
+  orderLabel_->setFont(EarFontsSingleton::instance().Items);
   orderLabel_->setColour(Label::textColourId, EarColours::Label);
   orderLabel_->setJustificationType(Justification::centred);
   addAndMakeVisible(orderLabel_.get());

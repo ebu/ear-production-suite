@@ -38,7 +38,7 @@ class PannerSideView : public Component,
 
     // tick labels
     g.setColour(findColour(angleLabelColourId));
-    g.setFont(EarFonts::Measures);
+    g.setFont(EarFontsSingleton::instance().Measures);
     g.drawText(String("+90"), topTickLabelRect_, Justification::right);
     g.drawText(String("0"), centreTickLabelRect_, Justification::right);
     g.drawText(String("-90"), bottomTickLabelRect_, Justification::right);
@@ -57,7 +57,7 @@ class PannerSideView : public Component,
 
     // labeling
     g.setColour(findColour(directionLabelColourId));
-    g.setFont(EarFonts::Values);
+    g.setFont(EarFontsSingleton::instance().Values);
     g.drawText(String("Top"), topLabelRect_, Justification::centredBottom);
     g.drawText(String("Bottom"), bottomLabelRect_, Justification::centredTop);
   }

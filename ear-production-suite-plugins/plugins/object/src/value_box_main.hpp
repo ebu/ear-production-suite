@@ -26,7 +26,7 @@ class ValueBoxMain : public Component {
     name_->setAlpha(0.38f);
     addAndMakeVisible(name_.get());
 
-    routingLabel_->setFont(EarFonts::Label);
+    routingLabel_->setFont(EarFontsSingleton::instance().Label);
     routingLabel_->setText("Routing",
                            juce::NotificationType::dontSendNotification);
     routingLabel_->setColour(Label::textColourId, EarColours::Label);
