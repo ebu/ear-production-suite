@@ -64,12 +64,22 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"Empty item", 2},
     {"Group", 4}};
 }
-#else
+#elif defined __APPLE__
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 1},
     {"&Insert", 4},
     {"&Help", 10},
     {"E&xtensions", 9},
+    {"Project &templates", 8},
+    {"Empty item", 2},
+    {"Group", 4}};
+}
+#else
+const std::map<const std::string, const int> defaultMenuPositions = {
+    {"&File", 0},
+    {"&Insert", 3},
+    {"&Help", 9},
+    {"E&xtensions", 8},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
