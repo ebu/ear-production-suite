@@ -112,8 +112,8 @@ class Overlay : public Component {
   std::function<void()> onClose;
 
  private:
-  int windowWidth_;
-  int windowHeight_;
+  int windowWidth_ = 0;
+  int windowHeight_ = 0;
   int borderWidth_ = 2;
   int headerHeight_ = 31;
   int headerPadding_ = 11;
