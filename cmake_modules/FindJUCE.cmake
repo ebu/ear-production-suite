@@ -75,31 +75,31 @@ find_package_handle_standard_args(JUCE
           ${OBJC}
           ${COREAUDIOKIT})
         target_compile_options(Juce::core INTERFACE -x objective-c++)
-      elseif(WIN32)
-        target_link_libraries(Juce::core INTERFACE
-          advapi32.lib
-          comdlg32.lib
-          gdi32.lib
-          GlU32.Lib
-          kernel32.lib
-          ole32.lib
-          OpenGL32.Lib
-          rpcrt4.lib
-          shell32.lib
-          user32.lib
-          vfw32.lib
-          wininet.lib
-          winmm.lib
-          ws2_32.lib
-        )
-      endif(APPLE)
+    elseif(WIN32)
+      target_link_libraries(Juce::core INTERFACE
+        advapi32.lib
+        comdlg32.lib
+        gdi32.lib
+        GlU32.Lib
+        kernel32.lib
+        ole32.lib
+        OpenGL32.Lib
+        rpcrt4.lib
+        shell32.lib
+        user32.lib
+        vfw32.lib
+        wininet.lib
+        winmm.lib
+        ws2_32.lib
+      )
+    endif(APPLE)
 
-      # VST3
-      ############
-      add_library(Juce::VST3 INTERFACE IMPORTED)
-      target_compile_definitions(Juce::VST3 INTERFACE JucePlugin_Build_VST3=1)
-      target_link_libraries(Juce::VST3 INTERFACE pluginterfaces sdk Juce::core)
-      target_sources(Juce::VST3 INTERFACE ${JUCE_GENERATED_SOURCES_VST3})
+    # VST3
+    ############
+    add_library(Juce::VST3 INTERFACE IMPORTED)
+    target_compile_definitions(Juce::VST3 INTERFACE JucePlugin_Build_VST3=1)
+    target_link_libraries(Juce::VST3 INTERFACE pluginterfaces sdk Juce::core)
+    target_sources(Juce::VST3 INTERFACE ${JUCE_GENERATED_SOURCES_VST3})
   endif()
 
 endif()
