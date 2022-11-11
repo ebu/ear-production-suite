@@ -92,6 +92,13 @@ find_package_handle_standard_args(JUCE
         winmm.lib
         ws2_32.lib
       )
+    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+      find_package(OpenGL REQUIRED)
+      find_package(Freetype REQUIRED)
+      target_link_libraries(Juce::core INTERFACE
+        OpenGL::GL
+        Freetype::Freetype
+      )
     endif(APPLE)
 
     # VST3
