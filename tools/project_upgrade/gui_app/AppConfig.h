@@ -18,6 +18,10 @@
 
 // (You can add your own code in this section, and the Projucer will not overwrite it)
 #define JUCE_MODAL_LOOPS_PERMITTED 1
+#define JUCE_WEB_BROWSER 0
+#define JUCE_ALSA 0
+#define JUCE_JACK 0
+#define JUCE_USE_CURL 0
 
 // [END_USER_CODE_SECTION]
 
