@@ -249,7 +249,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             }
         }
 
-        if (controlType == TEXT) {
+        if (controlType == TEXT || controlType == EDITABLECOMBO) {
             if (winStr == EXPECTED_CHANNEL_COUNT_LABEL_TEXT){
                 // This is the label for the channel count combobox - hide it
                 channelsLabelHwnd = hwnd;
