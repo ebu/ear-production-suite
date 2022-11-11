@@ -27,9 +27,7 @@ message(STATUS "----------------------------------------------------------------
 include(FeatureSummary)
 
 include(eps_set_install_paths)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    eps_set_install_paths()
-endif()
+eps_set_install_paths()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

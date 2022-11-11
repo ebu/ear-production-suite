@@ -126,8 +126,7 @@ The location of the installed REAPER extension will be
 If the defaults do not suit you, they can be customised with two CMake variables
 
 ```shell
-EPS_PLUGIN_INSTALL_PREFIX  # This specifies the directory containing the VST3 subdirectory
-                           # to which the plugins should be installed
+EPS_PLUGIN_INSTALL_PREFIX  # This specifies the directory to which the plugins should be installed
 ````
 ```shell
 EPS_EXTENSION_INSTALL_PREFIX  # This specifies the directory containing the REAPER plugins subdirectory

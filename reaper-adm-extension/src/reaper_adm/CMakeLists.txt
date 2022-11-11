@@ -237,7 +237,7 @@ endif()
 
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
-set(linux_install_dir "share/REAPER/UserPlugins")
+set(linux_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 
 install(TARGETS
     reaper_adm
