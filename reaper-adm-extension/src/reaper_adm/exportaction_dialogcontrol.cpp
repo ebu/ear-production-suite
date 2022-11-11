@@ -38,7 +38,22 @@ RenderDialogState::ControlType RenderDialogState::getControlType(HWND hwnd){
 
     if (!hwnd || !IsWindow(hwnd)) return UNKNOWN;
 
-#ifdef __APPLE__
+#ifdef WIN32
+    char szClassName[9];
+    GetClassName(hwnd, szClassName, 9);
+    if(strcmp(szClassName, "Edit") == 0) return TEXT;
+    if(strcmp(szClassName, "Static") == 0) return TEXT;
+    if(strcmp(szClassName, "Button") == 0) return BUTTON;
+
+    if(strcmp(szClassName, "ComboBox") == 0) {
+        COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
+        GetComboBoxInfo(hwnd, &info);
+        auto editBoxText = getWindowText(info.hwndItem);
+        bool editable = SetWindowText(info.hwndItem, "TEST");
+        SetWindowText(info.hwndItem, editBoxText.c_str());
+        return editable ? EDITABLECOMBO : COMBOBOX;
+    }
+#else
     if(SWELL_IsButton(hwnd)) return BUTTON;
 
     if(SWELL_IsStaticText(hwnd)){
@@ -56,23 +71,6 @@ RenderDialogState::ControlType RenderDialogState::getControlType(HWND hwnd){
     } catch(...){}
 #endif
 
-#ifdef WIN32
-    char szClassName[9];
-    GetClassName(hwnd, szClassName, 9);
-    if(strcmp(szClassName, "Edit") == 0) return TEXT;
-    if(strcmp(szClassName, "Static") == 0) return TEXT;
-    if(strcmp(szClassName, "Button") == 0) return BUTTON;
-
-    if(strcmp(szClassName, "ComboBox") == 0) {
-        COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
-        GetComboBoxInfo(hwnd, &info);
-        auto editBoxText = getWindowText(info.hwndItem);
-        bool editable = SetWindowText(info.hwndItem, "TEST");
-        SetWindowText(info.hwndItem, editBoxText.c_str());
-        return editable ? EDITABLECOMBO : COMBOBOX;
-    }
-#endif
-
     return UNKNOWN;
 }
 
@@ -81,14 +79,12 @@ HWND RenderDialogState::getComboBoxEdit(HWND hwnd){
     if(controlType == COMBOBOX) return hwnd;
     if(controlType != EDITABLECOMBO) return HWND();
 
-#ifdef __APPLE__
-    return hwnd; //Same thing on OSX - editable bit IS the combobox
-#endif
-
 #ifdef WIN32
     COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
     GetComboBoxInfo(hwnd, &info);
     return info.hwndItem;
+#else
+    return hwnd; //Same thing on OSX - editable bit IS the combobox
 #endif
 
     return HWND();
