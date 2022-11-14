@@ -95,9 +95,12 @@ find_package_handle_standard_args(JUCE
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
       find_package(OpenGL REQUIRED)
       find_package(Freetype REQUIRED)
+      find_package(Threads REQUIRED)
       target_link_libraries(Juce::core INTERFACE
         OpenGL::GL
         Freetype::Freetype
+        Threads::Threads
+        ${CMAKE_DL_LIBS}
       )
     endif(APPLE)
 
