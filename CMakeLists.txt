@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(EPS_VERSION_BASE 0.7.3) # This is used as fallback if getting from git fails. Must be only numeric.
 # NOTE: also update hard-coded version number in
