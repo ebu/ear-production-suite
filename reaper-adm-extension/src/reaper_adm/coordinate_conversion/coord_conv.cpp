@@ -159,8 +159,8 @@ namespace {
 
     std::pair<double, double> calcZ_r_xy(Polar const& polar, ElevationSpec const& elSpec) {
         double z{}, r_xy{};
-        if (abs(polar.el) > elSpec.top) {
-            auto el_tilde = elSpec.top_tilde + (90.0 - elSpec.top_tilde) * (abs(polar.el) - elSpec.top) / (90.0 - elSpec.top);
+        if (std::abs(polar.el) > elSpec.top) {
+            auto el_tilde = elSpec.top_tilde + (90.0 - elSpec.top_tilde) * (std::abs(polar.el) - elSpec.top) / (90.0 - elSpec.top);
             z = std::copysign(polar.d, polar.el);
             r_xy = polar.d * std::tan(radians(90.0 - el_tilde));
         } else {
