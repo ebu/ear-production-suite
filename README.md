@@ -121,6 +121,48 @@ The location of the installed REAPER extension will be
 ~\AppData\Roaming\REAPER\UserPlugins\
 ```
 
+### Linux
+
+These instructions are for Ubuntu 20.04, but other distributions should be similar.
+
+Presets are currently only defined for x86_64; other architectures are untested but can probably be built manually or with a modified CMakePresets.json file.
+
+##### Build environment
+
+To get an up-to-date version of cmake, follow the instructions on the [Kitware APT repository](https://apt.kitware.com/).
+
+For the rest of the dependencies, run:
+
+```shell
+# tools for vcpkg
+sudo apt-get install build-essential curl zip unzip tar git cmake ninja-build pkg-config
+# graphics libraries
+sudo apt-get install libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
+```
+
+#### Building
+```shell
+git clone --recursive https://github.com/ebu/ear-production-suite.git
+cd ear-production-suite
+./submodules/vcpkg/bootstrap-vcpkg.sh     # ensures vcpkg is set up
+cmake --preset linux-default-x64          # configures project, downloads & builds dependencies
+cmake --build --preset linux-default-x64  # builds project
+```
+
+#### Installing
+```shell
+cmake --build --preset linux-default-x64 --target install
+```
+
+The location of the installed VST3 plugins will be
+```shell
+~/.vst3
+```
+The location of the installed REAPER extension will be
+```shell
+~/.config/REAPER/UserPlugins/
+```
+
 ### Customising installation location
 
 If the defaults do not suit you, they can be customised with two CMake variables
