@@ -49,6 +49,12 @@ jobs:
             cmake_preset: "macos-arm64-packaging-release"
             vcpkg_triplet: arm64-osx-11_0
             test: false
+          - name: "Ubuntu 20.04"
+            os: ubuntu-20.04
+            package: true
+            cmake_preset: "linux-packaging-release"
+            vcpkg_triplet: x64-linux
+            test: true
     steps:
       - name: 'Checkout repo recursively.'
         uses: actions/checkout@v2
@@ -90,6 +96,11 @@ jobs:
         if: matrix.config.os == 'macos-latest'
         run: |
           brew install ccache
+
+      - name: 'linux: Install dependencies.'
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          sudo apt-get install -y ccache libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
 
       - name: 'Prepare ccache timestamp.'
         id: ccache_cache_timestamp
@@ -164,12 +175,12 @@ jobs:
           cmake -E make_directory "${{ steps.cmake_install_prefix.outputs.install_prefix }}"
           cmake --build --preset ${{ matrix.config.cmake_preset }} --target install
 
-      - name: 'macOS: Tar output dir.'
-        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+      - name: 'unix: Tar output dir.'
+        if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
         run: tar -cvf ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar -C ${{ steps.cmake_install_prefix.outputs.install_prefix }} .
                   
-      - name: 'macOS: Upload Tar as build artifact.'
-        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+      - name: 'unix: Upload Tar as build artifact.'
+        if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
