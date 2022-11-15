@@ -21,7 +21,7 @@ jobs:
       CCACHE_MAXSIZE: '500M'
       CCACHE_BASEDIR: '${{ github.workspace }}'
       VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      VCPKG_CACHE_LOCATION: '${{ github.workspace }}/vcpkg_cache'
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
     strategy:
       matrix:
         config:
@@ -66,17 +66,22 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@v3
 
       - name: 'Create vcpkg cache dir.'
-        run: cmake -E make_directory ${{ env.VCPKG_CACHE_LOCATION }}
+        run: cmake -E make_directory ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
-      # See https://github.com/lukka/CppBuildTasks-Validation/blob/master/.github/workflows/hosted-pure-workflow.yml
-      # We use cache key from above, possibly redundant due to vcpkg's own hashing, but it doesn't hurt while we're
-      # still using a binary cache per repo/triplet rather than a global package repo.
+      - name: 'Prepare timestamp.'
+        id: cache_timestamp
+        shell: cmake -P {0}
+        run: |
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          message("::set-output name=timestamp::${current_date}")
+
       - name: 'Restore vcpkg and its artifacts.'
         uses: actions/cache@v2
         with:
-          path: ${{ env.VCPKG_CACHE_LOCATION }}
-          key: |
-            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}--${{ matrix.config.vcpkg_triplet }}-invalidate
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+              ${{ matrix.config.name }}-vcpkg-
 
       - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
@@ -102,18 +107,11 @@ jobs:
         run: |
           sudo apt-get install -y ccache libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
 
-      - name: 'Prepare ccache timestamp.'
-        id: ccache_cache_timestamp
-        shell: cmake -P {0}
-        run: |
-          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
-
       - name: 'Cache ccache files.'
         uses: actions/cache@v2
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-ccache-
 
@@ -146,9 +144,6 @@ jobs:
       - name: 'Configure with CMake, vcpkg and ccmake.'
         run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
         env:
-          # See https://vcpkg.io/en/docs/users/binarycaching.html for syntax of this variable. We want to clear out
-          # the default locations and both restore from and save to our custom .vcpkg directory.
-          VCPKG_BINARY_SOURCES: 'clear;files,${{ env.VCPKG_CACHE_LOCATION }},readwrite'
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
           CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
 
@@ -158,6 +153,9 @@ jobs:
         # This is for the windows relwithdebinfo build as otherwise we run out of disk space
       - name: 'Clean up vcpkg temporary files.'
         run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
+
+      - name: 'Prune the vcpkg cache'
+        run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
 
       - name: 'Build using CMake and Ninja via CMake preset.'
         run: cmake --build --preset ${{ matrix.config.cmake_preset }}
