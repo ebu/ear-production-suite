@@ -73,7 +73,7 @@ jobs:
         shell: cmake -P {0}
         run: |
           string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
       - name: 'Restore vcpkg and its artifacts.'
         uses: actions/cache@v2
@@ -131,8 +131,8 @@ jobs:
           file(TO_CMAKE_PATH "$ENV{RUNNER_WORKSPACE}" RUNNER_WORKSPACE)
           set(INSTALL_DIR "${NAME_NO_SPACES}")
           file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
-          message("::set-output name=install_prefix::${PREFIX}")
-          message("::set-output name=install_dir::${INSTALL_DIR}")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
 
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
