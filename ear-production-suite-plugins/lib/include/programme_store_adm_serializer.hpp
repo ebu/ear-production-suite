@@ -14,7 +14,14 @@ namespace plugin {
 
 class ProgrammeStoreAdmSerializer {
  public:
-  std::pair<std::shared_ptr<adm::Document>, bw64::ChnaChunk> serialize(
+   struct PluginMap {
+     uint32_t inputInstanceId;
+     int32_t routing;
+     std::shared_ptr<adm::AudioObject> audioObject;
+     std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
+   };
+
+  std::pair<std::shared_ptr<adm::Document>, std::vector<PluginMap>> serialize(
     std::pair<proto::ProgrammeStore, ItemMap> stores);
  private:
   void serializeToggle(std::shared_ptr<adm::AudioProgramme> programme,
@@ -37,9 +44,7 @@ class ProgrammeStoreAdmSerializer {
   proto::ProgrammeStore programmes_;
   std::map<communication::ConnectionId, proto::InputItemMetadata> items_;
   std::shared_ptr<adm::Document> doc;
-  bw64::ChnaChunk chna;
-  std::map<std::string, std::vector<std::shared_ptr<adm::AudioTrackUid>>>
-      serializedIds;
+  std::vector<PluginMap> pluginMap;
   std::map<std::string, std::shared_ptr<adm::AudioObject>> serializedObjects;
   void setInteractivity(adm::AudioObject& object, const proto::Object& object1);
   bool isSerializedWithDifferentObjectSettings(const proto::Object& object);

@@ -238,7 +238,7 @@ TEST_CASE("Programme parser tests") {
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
-    auto const chna = result.second;
+    auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
     REQUIRE(numberOf<adm::AudioObject>(doc) == 1);
     REQUIRE(numberOf<adm::AudioTrackUid>(doc) == 1);
@@ -246,10 +246,11 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
-
+    /*
     REQUIRE(chna.numUids() == 1);
     REQUIRE(chna.audioIds().size() == 1);
     REQUIRE(chna.numTracks() == 1);
+    */
   }
 
   programmeStore = programmeStore.withProgramme(ProgrammeBuilder{}
@@ -263,7 +264,7 @@ TEST_CASE("Programme parser tests") {
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
-    auto const chna = result.second;
+    auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
     REQUIRE(numberOf<adm::AudioObject>(doc) == 1);
     REQUIRE(numberOf<adm::AudioTrackUid>(doc) == 1);
@@ -272,9 +273,11 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
 
+    /*
     REQUIRE(chna.numUids() == 1);
     REQUIRE(chna.audioIds().size() == 1);
     REQUIRE(chna.numTracks() == 1);
+    */
   }
 }
 
@@ -299,7 +302,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
   ProgrammeStoreAdmSerializer serializer;
   auto result = serializer.serialize(metadata.stores());
   auto const& doc = *result.first;
-  auto chna = result.second;
+  auto pluginMap = result.second;
 
   using namespace adm;
   REQUIRE(numberOf<AudioProgramme>(doc) == 1);
@@ -309,9 +312,12 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
   REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 0);
   REQUIRE(numberOfUncommon<AudioChannelFormat>(doc) == 0);
   REQUIRE(numberOfUncommon<AudioPackFormat>(doc) == 0);
+
+  /*
   REQUIRE(chna.numUids() == 2);
   REQUIRE(chna.audioIds().size() == 2);
   REQUIRE(chna.numTracks() == 2);
+  */
 }
 
 namespace {
@@ -363,7 +369,7 @@ TEST_CASE("Toggle group with three members") {
   ProgrammeStoreAdmSerializer serializer;
   auto result = serializer.serialize(metadata.stores());
   auto const& doc = *result.first;
-  auto chna = result.second;
+  auto pluginMap = result.second;
 
   using namespace adm;
   SECTION("creates correct adm elements") {
@@ -374,9 +380,12 @@ TEST_CASE("Toggle group with three members") {
     REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 3);
     REQUIRE(numberOfUncommon<AudioChannelFormat>(doc) == 3);
     REQUIRE(numberOfUncommon<AudioPackFormat>(doc) == 3);
+
+    /*
     REQUIRE(chna.numUids() == 3);
     REQUIRE(chna.audioIds().size() == 3);
     REQUIRE(chna.numTracks() == 3);
+    */
   }
 
   SECTION("adm structure") {
