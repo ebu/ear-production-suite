@@ -53,7 +53,12 @@ We will still need something very lightweight like this for
 
 */
 
-
+struct PluginToAdmMap{
+    uint32_t audioObjectIdVal = 0;
+    uint32_t audioTrackUidVal = 0; // Use ATU_00000000 for UID's not to be stored in the file, as per BS.2076
+    uint32_t inputInstanceId = 0;
+    int32_t routing = -1;
+};
 
 class NngSelfRegister {
 public:
@@ -305,12 +310,12 @@ public:
         nng_aio_set_msg(aio, msg);
     }
 
-    void sendAdmAndMappings(std::string admStr, std::vector<uint32_t> channelToAtuMapping) {
+    void sendAdmAndMappings(std::string admStr, std::vector<PluginToAdmMap> channelToAtuMapping) {
         assert(channelToAtuMapping.size() == 64);
         nng_msg* msg;
 
         uint32_t admSz = admStr.size();
-        uint32_t mapSz = (64 * 4);
+        uint32_t mapSz = (64 * sizeof(PluginToAdmMap));
         uint32_t totSz = mapSz + admSz;
         nng_msg_alloc(&msg, totSz);
 
