@@ -215,19 +215,18 @@ void SceneAudioProcessor::sendAdmMetadata() {
   std::stringstream ss;
   adm::writeXml(ss, adm);
 
-  std::vector<PluginToAdmMap> channelMapping(64);
-  int channelMappingIndex = 0;
-  for (auto& pluginMap : pluginMaps) {
+  std::vector<PluginToAdmMap> channelMapping(64); // TODO: This should really be dynamically sized. We could have any number of input plugins even with channel count limitations due to sharing.
+  for(int i = 0; i < pluginMaps.size(); ++i) {
 
-    auto atuId = pluginMap.audioTrackUid->get<adm::AudioTrackUidId>();
+    auto atuId = pluginMaps[i].audioTrackUid->get<adm::AudioTrackUidId>();
     auto atuIdNumString = adm::formatId(atuId).substr(4, 8);
     auto atuIdNum = static_cast<uint32_t>(std::stoul(atuIdNumString, nullptr, 16));
 
-    auto aoId = pluginMap.audioObject->get<adm::AudioObjectId>();
+    auto aoId = pluginMaps[i].audioObject->get<adm::AudioObjectId>();
     auto aoIdNumString = adm::formatId(aoId).substr(3, 4);
     auto aoIdNum = static_cast<uint32_t>(std::stoul(aoIdNumString, nullptr, 16));
 
-    channelMapping.push_back({aoIdNum, atuIdNum, pluginMap.inputInstanceId, pluginMap.routing});
+    channelMapping[i] = PluginToAdmMap{aoIdNum, atuIdNum, pluginMaps[i].inputInstanceId, pluginMaps[i].routing};
   }
 
   commandSocket->sendAdmAndMappings(ss.str(), std::move(channelMapping));
