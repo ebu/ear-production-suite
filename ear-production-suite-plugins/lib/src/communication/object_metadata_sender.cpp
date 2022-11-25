@@ -41,6 +41,10 @@ void ObjectMetadataSender::importedAudioTrackUidId(int value)
 {
   setData([&value](auto data) { data->set_imported_atu_id(value); });
 }
+void ObjectMetadataSender::inputInstanceId(int value)
+{
+  setData([&value](auto data) { data->set_input_instance_id(value); });
+}
 void ObjectMetadataSender::colour(int value) {
   setData([value](auto data) { data->set_colour(value); });
 }

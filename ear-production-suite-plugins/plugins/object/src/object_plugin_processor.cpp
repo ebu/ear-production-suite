@@ -32,6 +32,8 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   addParameter(useTrackName_ = new AudioParameterBool("useTrackName", "Use Track Name", true));
+  addParameter(inputInstanceId_ = new ui::NonAutomatedParameter<AudioParameterInt>("inputInstanceId", "Automatically-set Input Instance ID to uniquely identify plugin", 0, 0xFFFF, 0));
+
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {

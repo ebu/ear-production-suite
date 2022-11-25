@@ -65,6 +65,7 @@ class ObjectsAudioProcessor : public AudioProcessor, public VST3ClientExtensions
   AudioParameterFloat* getFactor() { return factor_; }
   AudioParameterFloat* getRange() { return range_; }
   AudioParameterBool* getUseTrackName() { return useTrackName_; }
+  AudioParameterInt* getInputInstanceId() { return inputInstanceId_; }
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -101,6 +102,7 @@ class ObjectsAudioProcessor : public AudioProcessor, public VST3ClientExtensions
   AudioParameterFloat* range_;
   AudioParameterBool* bypass_;
   AudioParameterBool* useTrackName_;
+  AudioParameterInt* inputInstanceId_;
 
   std::unique_ptr<ear::plugin::ui::ObjectsJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::ObjectBackend> backend_;
