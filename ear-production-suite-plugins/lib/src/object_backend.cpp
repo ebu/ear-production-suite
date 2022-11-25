@@ -137,6 +137,10 @@ void ObjectBackend::onParameterChanged(
     auto extractedValue = boost::get<float>(value);
     EAR_LOGGER_DEBUG(logger_, "Range -> {}", extractedValue);
     metadataSender_.range(extractedValue);
+  } else if (parameter == ParameterId::INPUT_INSTANCE_ID) {
+    auto extractedValue = boost::get<int>(value);
+    EAR_LOGGER_DEBUG(logger_, "Input Instance ID -> {}", extractedValue);
+    metadataSender_.inputInstanceId(extractedValue);
   }
 }
 
