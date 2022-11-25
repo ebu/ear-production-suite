@@ -209,23 +209,25 @@ void SceneAudioProcessor::sendAdmMetadata() {
   // will overwrite the first) Need to change the way channelMapping is sent if
   // we want to handle that case
   ear::plugin::ProgrammeStoreAdmSerializer serializer{};
-  auto [adm, chna] =
+  auto [adm, pluginMaps] =
       serializer.serialize(metadata_.stores());
 
   std::stringstream ss;
   adm::writeXml(ss, adm);
 
-  // Use ATU_00000000 for UID's not to be stored in the file, as per BS.2076
-  std::vector<uint32_t> channelMapping(64u, 0u);
+  std::vector<PluginToAdmMap> channelMapping(64);
+  int channelMappingIndex = 0;
+  for (auto& pluginMap : pluginMaps) {
 
-  for (auto& id : chna.audioIds()) {
-    if (id.trackIndex() > 0) {
-      assert(id.uid().size() == 12);
-      auto idNumString = id.uid().substr(4, 8);
-      auto idNum = static_cast<uint32_t>(std::stoul(idNumString, nullptr, 16));
-      // chna track indices are 1-based, vector indices are 0-based
-      channelMapping.at(id.trackIndex() - 1) = idNum;
-    }
+    auto atuId = pluginMap.audioTrackUid->get<adm::AudioTrackUidId>();
+    auto atuIdNumString = adm::formatId(atuId).substr(4, 8);
+    auto atuIdNum = static_cast<uint32_t>(std::stoul(atuIdNumString, nullptr, 16));
+
+    auto aoId = pluginMap.audioObject->get<adm::AudioObjectId>();
+    auto aoIdNumString = adm::formatId(aoId).substr(3, 4);
+    auto aoIdNum = static_cast<uint32_t>(std::stoul(aoIdNumString, nullptr, 16));
+
+    channelMapping.push_back({aoIdNum, atuIdNum, pluginMap.inputInstanceId, pluginMap.routing});
   }
 
   commandSocket->sendAdmAndMappings(ss.str(), std::move(channelMapping));

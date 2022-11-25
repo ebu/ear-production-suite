@@ -180,17 +180,17 @@ bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
   return false;
 }
 
-std::pair<std::shared_ptr<adm::Document>, bw64::ChnaChunk>
+std::pair<std::shared_ptr<adm::Document>, std::vector<ProgrammeStoreAdmSerializer::PluginMap>>
 ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap> stores) {
   programmes_ = std::move(stores.first);
   items_ = std::move(stores.second);
   doc = adm::Document::create();
   addCommonDefinitionsTo(doc);
-  chna = bw64::ChnaChunk();
+  pluginMap.clear();
   for (auto& programme : programmes_.programme()) {
     serializeProgramme(*doc, programme);
   }
-  return {doc, chna};
+  return {doc, pluginMap};
 }
 
 void ProgrammeStoreAdmSerializer::serializeToggle(
@@ -299,22 +299,16 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       admObject->addReference(pack);
     }
     setInteractivity(*admObject, object);
+
   } else {
     // First time we've seen the input
     if (metadata.has_obj_metadata()) {
       auto objectHolder = adm::addSimpleObjectTo(doc, metadata.name());
       setInteractivity(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
-      serializedIds[connectionId] = {objectHolder.audioTrackUid};
-      auto uidid = objectHolder.audioTrackUid->get<adm::AudioTrackUidId>();
       assert(metadata.routing() <= std::numeric_limits<int16_t>::max());
-      chna.addAudioId(bw64::AudioId{
-          static_cast<uint16_t>(metadata.routing() + 1), adm::formatId(uidid),
-          adm::formatId(
-              objectHolder.audioTrackFormat->get<adm::AudioTrackFormatId>()),
-          adm::formatId(
-              objectHolder.audioPackFormat->get<adm::AudioPackFormatId>())});
       serializedObjects[connectionId] = objectHolder.audioObject;
+      pluginMap.push_back({ metadata.input_instance_id(), metadata.routing(), objectHolder.audioObject, objectHolder.audioTrackUid });
 
     } else if (metadata.has_hoa_metadata()) {
       // get the pack format Id from the metadata and from that create the full
@@ -338,14 +332,14 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
         auto channelFormats =
           admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
           ->relatedChannelFormats;
-  // The AudioTrackIUD needs to reference the track format
-  // To get the correct track format we go through all track formats and
-  // find the one that references the correct channel format
+        // The AudioTrackIUD needs to reference the track format
+        // To get the correct track format we go through all track formats and
+        // find the one that references the correct channel format
         auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
 
         // For each channel format create a AudioTrackUid that references the pack
         // format The audio object also needs to reference the track uid
-        for(int i(0); i < channelFormats.size(); i++) {
+        for(int i(0); i < channelFormats.size(); ++i) {
           auto audioTrackUid = adm::AudioTrackUid::create();
           hoaAudioObject->addReference(audioTrackUid);
           audioTrackUid->setReference(packFormat);
@@ -370,17 +364,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
               if(channelFormatCheck == channelFormat) {
                 audioTrackUid->setReference(trackFormat);
 
-                // For each channel add the audioTrackUid, trackFormatId and
-                // packFormatId to an audioId and add it to CHNA CHNA will keep
-                // track of which audio is needed on each track
-                auto audioTrackUidIdStr =
-                  formatId(audioTrackUid->get<adm::AudioTrackUidId>());
-                auto trackFormatIdStr =
-                  formatId(trackFormat->get<adm::AudioTrackFormatId>());
-
-                chna.addAudioId(bw64::AudioId{
-                    static_cast<uint16_t>(metadata.routing() + i + 1),
-                    audioTrackUidIdStr, trackFormatIdStr, packFormatIdStr });
+                pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, hoaAudioObject, audioTrackUid });
                 break;
               }
             }
@@ -407,15 +391,9 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
             trackFormatIds, speakerLabels);
         setInteractivity(*objectHolder.audioObject, object);
         content.addReference(objectHolder.audioObject);
-        for (auto i{0u}; i < objectHolder.audioTrackUids.size(); ++i) {
+        for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
           auto speakerLabel = speakerLabels.at(i);
-          auto audioTrackUidId =
-              formatId(objectHolder.audioTrackUids.at(speakerLabel)
-                           ->get<adm::AudioTrackUidId>());
-          chna.addAudioId(
-              bw64::AudioId{static_cast<uint16_t>(metadata.routing() + i + 1),
-                            audioTrackUidId, formatId(trackFormatIds.at(i)),
-                            speakerSetup.packFormatId});
+          pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids.at(speakerLabel) });
         }
         serializedObjects[connectionId] = objectHolder.audioObject;
       }
