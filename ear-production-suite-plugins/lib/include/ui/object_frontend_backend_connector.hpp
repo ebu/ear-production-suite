@@ -43,6 +43,7 @@ class EAR_PLUGIN_BASE_EXPORT ObjectsFrontendBackendConnector {
     FACTOR,
     RANGE,
     USE_TRACK_NAME,
+    INPUT_INSTANCE_ID,
   };
 
   using ParameterChangedCallback =
