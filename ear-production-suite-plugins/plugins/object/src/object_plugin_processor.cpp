@@ -33,7 +33,10 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
   addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
   addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
   addParameter(useTrackName_ = new AudioParameterBool("useTrackName", "Use Track Name", true));
-  addParameter(inputInstanceId_ = new ui::NonAutomatedParameter<AudioParameterInt>("inputInstanceId", "Automatically-set Input Instance ID to uniquely identify plugin", 0, 0xFFFF, 0));
+  addParameter(inputInstanceId_ = new ReadOnlyAudioParameterInt(
+    "inputInstanceId",  // parameter ID
+    "Auto-set ID to uniquely identify plugin",  // parameter name
+    0, 65535, 0));  // range and default value
 
   /* clang-format on */
 
@@ -241,7 +244,7 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
   if(requestInputInstanceIdPtr) {
     auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
     uint32_t inputInstanceId = requestInputInstanceId();
-    *inputInstanceId_ = inputInstanceId;
+    inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
   }
 
   auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
