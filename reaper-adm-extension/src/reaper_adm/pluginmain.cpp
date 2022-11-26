@@ -14,6 +14,7 @@
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
 #include <version/eps_version.h>
+#include <atomic>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -78,6 +79,12 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 #endif
 
 extern "C" {
+
+    std::atomic<uint32_t> inputInstanceIdCounter(1);
+    uint32_t requestInputInstanceId() {
+        return inputInstanceIdCounter++;
+    }
+
   void registerPluginLoad(std::function<void(std::string const&)> callback) {
       auto cbh = EARPluginCallbackHandler::getInstance();
       cbh->setPluginCallback(callback);
@@ -120,6 +127,7 @@ extern "C" {
         return 0;
     }
 
+    rec->Register("API_requestInputInstanceId", reinterpret_cast<void*>(&requestInputInstanceId));
     auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
     rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
