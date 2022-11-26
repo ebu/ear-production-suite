@@ -6,6 +6,7 @@
 #include "object_plugin_editor.hpp"
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
+uint32_t requestInputInstanceIdSig();
 
 using namespace ear::plugin;
 
@@ -235,6 +236,14 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
   reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
   VST3ClientExtensions::setIHostApplication(unknown);
+
+  auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
+  if(requestInputInstanceIdPtr) {
+    auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+    uint32_t inputInstanceId = requestInputInstanceId();
+    *inputInstanceId_ = inputInstanceId;
+  }
+
   auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
   if(registerPluginLoadPtr) {
     auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
