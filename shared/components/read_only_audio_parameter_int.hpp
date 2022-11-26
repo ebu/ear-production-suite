@@ -2,11 +2,7 @@
 
 #include "JuceHeader.h"
 
-namespace ear {
-namespace plugin {
-namespace ui {
-
-class ReadOnlyAudioParameterInt : public AudioParameterInt {
+class ReadOnlyAudioParameterInt : public AudioParameterInt, private Timer {
  public:
   ReadOnlyAudioParameterInt(
       const String& parameterID, const String& name, int minValue, int maxValue,
@@ -16,17 +12,26 @@ class ReadOnlyAudioParameterInt : public AudioParameterInt {
       std::function<int(const String& text)> intFromString = nullptr)
       : AudioParameterInt(parameterID, name, minValue, maxValue, defaultValue,
                           label, stringFromInt, intFromString) {
-    roResetting = false;
     roValue = convertTo0to1((float)defaultValue);
     roValueInt = defaultValue;
   }
 
-  bool isAutomatable() const override { return false; };
+  ~ReadOnlyAudioParameterInt() {
+      if(isTimerRunning()) {
+          stopTimer();
+      }
+  }
+
+  bool isAutomatable() const override {
+      return false;
+  }
 
   void internalSetIntAndNotifyHost(int newValue) {
     roValue = convertTo0to1((float)newValue);
     roValueInt = newValue;
+    beginChangeGesture();
     setValueNotifyingHost(roValue);
+    endChangeGesture();
   }
 
  private:
@@ -35,18 +40,18 @@ class ReadOnlyAudioParameterInt : public AudioParameterInt {
   // inaccessible (private in base class). Therefore, best we can do is to just
   // reset it if it is changed.
   void valueChanged(int newValue) override {
-    if (!roResetting && newValue != roValueInt) {
-      roResetting = true;
-      setValueNotifyingHost(roValue);
-      roResetting = false;
+    if (newValue != roValueInt) {
+        startTimer(1);
     }
+  }
+
+  void timerCallback() override {
+      stopTimer();
+      beginChangeGesture();
+      setValueNotifyingHost(roValue);
+      endChangeGesture();
   }
 
   float roValue;
   int roValueInt;
-  bool roResetting;
 };
-
-}  // namespace ui
-}  // namespace plugin
-}  // namespace ear

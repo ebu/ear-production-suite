@@ -77,8 +77,8 @@ class SceneAudioProcessor : public AudioProcessor {
   std::shared_ptr<ear::plugin::RestoredPendingStore> restoredStore_;
   std::shared_ptr<ear::plugin::AutoModeController> autoModeController_;
 
-  ear::plugin::ui::ReadOnlyAudioParameterInt* commandPort;
-  ear::plugin::ui::ReadOnlyAudioParameterInt* samplesPort;
+  ReadOnlyAudioParameterInt* commandPort;
+  ReadOnlyAudioParameterInt* samplesPort;
   CommandReceiver* commandSocket;
   SamplesSender* samplesSocket;
   bool sendSamplesToExtension{false};

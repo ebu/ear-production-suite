@@ -42,14 +42,14 @@ SceneAudioProcessor::SceneAudioProcessor()
   commandSocket->open();
   commandSocket->listen();
 
-  addParameter(commandPort = new ear::plugin::ui::ReadOnlyAudioParameterInt(
+  addParameter(commandPort = new ReadOnlyAudioParameterInt(
                    "commandPort",  // parameter ID
                    "Port that this plug-in is listening on for a COMMAND "
                    "connection",  // parameter name
                    0, 65535,
                    commandSocket->getPort()));  // range and default value
 
-  addParameter(samplesPort = new ear::plugin::ui::ReadOnlyAudioParameterInt(
+  addParameter(samplesPort = new ReadOnlyAudioParameterInt(
                    "samplesPort",  // parameter ID
                    "Port that this plug-in is listening on for a SAMPLES "
                    "connection",  // parameter name
