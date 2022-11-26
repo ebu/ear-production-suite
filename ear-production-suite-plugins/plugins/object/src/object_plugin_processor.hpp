@@ -6,6 +6,7 @@
 #include "components/level_meter_calculator.hpp"
 #include "communication/common_types.hpp"
 #include "reaper_vst3_interfaces.h"
+#include "components/read_only_audio_parameter_int.hpp"
 
 namespace ear {
 namespace plugin {
@@ -102,7 +103,7 @@ class ObjectsAudioProcessor : public AudioProcessor, public VST3ClientExtensions
   AudioParameterFloat* range_;
   AudioParameterBool* bypass_;
   AudioParameterBool* useTrackName_;
-  AudioParameterInt* inputInstanceId_;
+  ReadOnlyAudioParameterInt* inputInstanceId_;
 
   std::unique_ptr<ear::plugin::ui::ObjectsJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::ObjectBackend> backend_;
