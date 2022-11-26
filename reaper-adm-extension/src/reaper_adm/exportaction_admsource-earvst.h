@@ -61,6 +61,7 @@ public:
 
 	int getTrackMapping();
 	int getWidth();
+	int getInputInstanceId();
 
 	// Statics
 
@@ -96,6 +97,7 @@ private:
     std::unique_ptr<PluginParameter> paramTrackMapping{ createPluginParameter(0, { -1.0, 63.0 }) };
     std::unique_ptr<PluginParameter> paramDirectSpeakersPackFormatIdValue{ createPluginParameter(1, { 0x0, 0xFFFF }) };
     std::unique_ptr<PluginParameter> paramHoaPackFormatIdValue{ createPluginParameter(1, { 0x0, 0xFFFF }) };
+    std::unique_ptr<PluginParameter> paramObjectInstanceId{ createPluginParameter(16, { 0x0, 0xFFFF }) };
 
 	// Statics
 

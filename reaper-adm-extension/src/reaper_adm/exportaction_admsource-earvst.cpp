@@ -633,6 +633,16 @@ int EarInputVst::getWidth()
     return 0;
 }
 
+int EarInputVst::getInputInstanceId() {
+    if(isObjectPlugin(name)) {
+        assert(paramObjectInstanceId);
+        auto optVal = getParameterWithConvertToInt(*paramObjectInstanceId);
+        assert(optVal.has_value());
+        return *optVal;
+    }
+    throw std::runtime_error("No instance ID parameter for this plugin type");
+}
+
 // EarSceneMasterVst
 
 std::string EarSceneMasterVst::vstName = admplug::EARPluginSuite::SCENEMASTER_PLUGIN_NAME;
