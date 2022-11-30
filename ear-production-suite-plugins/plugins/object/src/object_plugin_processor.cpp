@@ -4,6 +4,7 @@
 #include "object_backend.hpp"
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
+#include <plugin_info.hpp>
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
@@ -16,28 +17,81 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
                          .withOutput("Output", AudioChannelSet::mono(), true)),
       samplerate_(48000),
       levelMeter_(std::make_shared<LevelMeterCalculator>(1, samplerate_)) {
-  /* clang-format off */
-  addParameter(routing_ = new ui::NonAutomatedParameter<AudioParameterInt>("routing", "Routing", -1, 63, -1));
-  addParameter(gain_ = new AudioParameterFloat("gain", "Gain", NormalisableRange<float>{-100.f, 6.f}, 0.f));
-  addParameter(azimuth_ = new AudioParameterFloat("azimuth", "Azimuth", NormalisableRange<float>{-180.f, 180.f}, 0.f));
-  addParameter(elevation_ = new AudioParameterFloat("elevation", "Elevation", NormalisableRange<float>{-90.f, 90.f}, 0.f));
-  addParameter(distance_ = new AudioParameterFloat("distance", "Distance", NormalisableRange<float>{0.f, 1.f}, 1.f));
-  addParameter(linkSize_ = new AudioParameterBool("linkSize", "Link Size", false));
-  addParameter(size_ = new AudioParameterFloat("size", "Size", 0.f, 1.f, 0.f));
-  addParameter(width_ = new AudioParameterFloat("width", "Width", 0.f, 1.f, 0.f));
-  addParameter(height_ = new AudioParameterFloat("height", "Height", 0.f, 1.f, 0.f));
-  addParameter(depth_ = new AudioParameterFloat("depth","Depth", 0.f, 1.f, 0.f));
-  addParameter(diffuse_ = new AudioParameterFloat("diffuse", "Diffuse", 0.f, 1.f, 0.f));
-  addParameter(divergence_ = new AudioParameterBool("divergence", "Divergence", false));
-  addParameter(factor_ = new AudioParameterFloat("factor", "Factor", 0.f, 1.f, 0.f));
-  addParameter(range_ = new AudioParameterFloat("range", "Range", 0.f, 180.f, 45.f));
-  addParameter(bypass_ = new AudioParameterBool("byps", "Bypass", false));
-  addParameter(useTrackName_ = new AudioParameterBool("useTrackName", "Use Track Name", true));
-  addParameter(inputInstanceId_ = new ReadOnlyAudioParameterInt(
-    "inputInstanceId",  // parameter ID
-    "Auto-set ID to uniquely identify plugin",  // parameter name
-    0, 65535, 0));  // range and default value
 
+  /* clang-format off */
+  auto pi = ObjectPluginInfo::pluginInfo();
+  assert(pi.parameterCount() == 17); // Simple check that we've implemented everything
+  // Ensure parameters are added in intended order
+  for(int i = 0; i < pi.parameterCount(); ++i) {
+    auto pn = pi.parameter(i)->name();
+    if(pn == "ROUTING") {
+      addParameter(routing_ = new ui::NonAutomatedParameter<AudioParameterInt>(
+        pi.routing()->name(), pi.routing()->niceName(),
+        pi.routing()->minVal(), pi.routing()->maxVal(), pi.routing()->defVal()));
+    } else if(pn == "GAIN") {
+      addParameter(gain_ = new AudioParameterFloat(
+        pi.gain()->name(), pi.gain()->niceName(),
+        NormalisableRange<float>{pi.gain()->minVal(), pi.gain()->maxVal()}, pi.gain()->defVal()));
+    } else if(pn == "AZIMUTH") {
+      addParameter(azimuth_ = new AudioParameterFloat(
+        pi.azimuth()->name(), pi.azimuth()->niceName(),
+        NormalisableRange<float>{pi.azimuth()->minVal(), pi.azimuth()->maxVal()}, pi.azimuth()->defVal()));
+    } else if(pn == "ELEVATION") {
+      addParameter(elevation_ = new AudioParameterFloat(
+        pi.elevation()->name(), pi.elevation()->niceName(),
+        NormalisableRange<float>{pi.elevation()->minVal(), pi.elevation()->maxVal()}, pi.elevation()->defVal()));
+    } else if(pn == "DISTANCE") {
+      addParameter(distance_ = new AudioParameterFloat(
+        pi.distance()->name(), pi.distance()->niceName(),
+        NormalisableRange<float>{pi.distance()->minVal(), pi.distance()->maxVal()}, pi.distance()->defVal()));
+    } else if(pn == "LINKSIZE") {
+      addParameter(linkSize_ = new AudioParameterBool(
+        pi.linkSize()->name(), pi.linkSize()->niceName(), pi.linkSize()->defVal()));
+    } else if(pn == "SIZE") {
+      addParameter(size_ = new AudioParameterFloat(
+        pi.size()->name(), pi.size()->niceName(),
+        pi.size()->minVal(), pi.size()->maxVal(), pi.size()->defVal()));
+    } else if(pn == "WIDTH") {
+      addParameter(width_ = new AudioParameterFloat(
+        pi.width()->name(), pi.width()->niceName(),
+        pi.width()->minVal(), pi.width()->maxVal(), pi.width()->defVal()));
+    } else if(pn == "HEIGHT") {
+      addParameter(height_ = new AudioParameterFloat(
+        pi.height()->name(), pi.height()->niceName(),
+        pi.height()->minVal(), pi.height()->maxVal(), pi.height()->defVal()));
+    } else if(pn == "DEPTH") {
+      addParameter(depth_ = new AudioParameterFloat(
+        pi.depth()->name(), pi.depth()->niceName(),
+        pi.depth()->minVal(), pi.depth()->maxVal(), pi.depth()->defVal()));
+    } else if(pn == "DIFFUSE") {
+      addParameter(diffuse_ = new AudioParameterFloat(
+        pi.diffuse()->name(), pi.diffuse()->niceName(),
+        pi.diffuse()->minVal(), pi.diffuse()->maxVal(), pi.diffuse()->defVal()));
+    } else if(pn == "DIVERGENCE") {
+      addParameter(divergence_ = new AudioParameterBool(
+        pi.divergence()->name(), pi.divergence()->niceName(), pi.divergence()->defVal()));
+    } else if(pn == "FACTOR") {
+      addParameter(factor_ = new AudioParameterFloat(
+        pi.factor()->name(), pi.factor()->niceName(),
+        pi.factor()->minVal(), pi.factor()->maxVal(), pi.factor()->defVal()));
+    } else if(pn == "RANGE") {
+      addParameter(range_ = new AudioParameterFloat(
+        pi.range()->name(), pi.range()->niceName(),
+        pi.range()->minVal(), pi.range()->maxVal(), pi.range()->defVal()));
+    } else if(pn == "BYPASS") {
+      addParameter(bypass_ = new AudioParameterBool(
+        pi.bypass()->name(), pi.bypass()->niceName(), pi.bypass()->defVal()));
+    } else if(pn == "USETRACKNAME") {
+      addParameter(useTrackName_ = new AudioParameterBool(
+        pi.useTrackName()->name(), pi.useTrackName()->niceName(), pi.useTrackName()->defVal()));
+    } else if(pn == "INPUTINSTANCEID") {
+      addParameter(inputInstanceId_ = new ReadOnlyAudioParameterInt(
+        pi.inputInstanceId()->name(), pi.inputInstanceId()->niceName(),
+        pi.inputInstanceId()->minVal(), pi.inputInstanceId()->maxVal(), pi.inputInstanceId()->defVal()));
+    } else {
+      assert(false); // Unimplemented parameter
+    }
+  }
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
