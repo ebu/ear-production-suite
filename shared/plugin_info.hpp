@@ -148,14 +148,30 @@ private:
 
 // Actual plugin definitions (as singletons)
 
-class ObjectPluginInfo : public PluginInfo {
-private:
-    ObjectPluginInfo() : PluginInfo("EAR Object")
-    {
+class InputPluginCommonInfo : public PluginInfo {
+public:
+    InputPluginCommonInfo(const char* name) : PluginInfo(name) {
         // Ordering sets expected order in plugin and hence parameter indices
         addParameter(ParameterInfoInt{
             "ROUTING", "Routing", "Receiving channel at Scene for this AudioObject",
             -1, 63, -1 });
+    }
+
+    // Only public methods are specific methods for each parameter (rather than using a generic lookup)
+    // Helps with IDE autocomplete and makes errors outside this file obvious at compile-time
+
+    std::shared_ptr<ParameterInfoInt> routing() {
+        return parameterInfo<ParameterInfoInt>("ROUTING");
+    }
+
+};
+
+class ObjectPluginInfo : public InputPluginCommonInfo {
+private:
+    ObjectPluginInfo() : InputPluginCommonInfo("EAR Object")
+    {
+        // Ordering sets expected order in plugin and hence parameter indices
+        // Note that base class will add the first parameters
         addParameter(ParameterInfoFloat{
             "GAIN", "Gain", "ADM Gain parameter for AudioBlockFormat",
             -100.f, 6.f, 0.f });
@@ -215,10 +231,6 @@ public:
 
     // Only public methods are specific methods for each parameter (rather than using a generic lookup)
     // Helps with IDE autocomplete and makes errors outside this file obvious at compile-time
-
-    std::shared_ptr<ParameterInfoInt> routing() {
-        return parameterInfo<ParameterInfoInt>("ROUTING");
-    }
 
     std::shared_ptr<ParameterInfoFloat> gain() {
         return parameterInfo<ParameterInfoFloat>("GAIN");
