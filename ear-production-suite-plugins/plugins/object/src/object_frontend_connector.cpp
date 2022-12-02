@@ -117,8 +117,7 @@ void ObjectsJuceFrontendConnector::setNameTextEditor(
     std::shared_ptr<EarNameTextEditor> textEditor) {
   textEditor->addListener(this);
   nameTextEditor_ = textEditor;
-  setName(cachedName_);
-  updateNameTextEditorState();
+  updateNameState();
 }
 
 void ObjectsJuceFrontendConnector::setUseTrackNameCheckbox(
@@ -126,7 +125,6 @@ void ObjectsJuceFrontendConnector::setUseTrackNameCheckbox(
   useTrackNameCheckbox->addListener(this);
   useTrackNameCheckbox_ = useTrackNameCheckbox;
   setUseTrackName(cachedUseTrackName_);
-  updateNameTextEditorState();
 }
 
 void ObjectsJuceFrontendConnector::setColourComboBox(
@@ -276,6 +274,9 @@ void ObjectsJuceFrontendConnector::setName(const std::string& name) {
   if (auto nameTextEditorLocked = nameTextEditor_.lock()) {
     nameTextEditorLocked->setText(name);
   }
+  if(!cachedUseTrackName_ || lastKnownCustomName_.empty()) {
+    lastKnownCustomName_ = name;
+  }
   cachedName_ = name;
   // Normally we'd set a processor parameter which in turn calls
   //   ObjectsJuceFrontendConnector::parameterValueChanged as a listener,
@@ -293,15 +294,10 @@ void ObjectsJuceFrontendConnector::setUseTrackName(bool useTrackName)
     auto oldState = useTrackNameCheckboxLocked->getToggleState();
     if(oldState != useTrackName) {
       useTrackNameCheckboxLocked->setToggleState(useTrackName, dontSendNotification);
-      if(useTrackName) {
-        lastKnownCustomName_ = cachedName_;
-      } else {
-        lastKnownTrackName_ = cachedName_;
-      }
     }
   }
   cachedUseTrackName_ = useTrackName;
-  updateNameTextEditorState();
+  updateNameState();
 }
 
 void ObjectsJuceFrontendConnector::setColour(Colour colour) {
@@ -637,21 +633,22 @@ void ObjectsJuceFrontendConnector::sliderDragEnded(Slider* slider) {
   dispatchSliderAction(slider, SliderAction::DRAG_END);
 }
 
-void ObjectsJuceFrontendConnector::updateNameTextEditorState()
+void ObjectsJuceFrontendConnector::updateNameState()
 {
   auto nameTextEditorLocked = nameTextEditor_.lock();
   if(nameTextEditorLocked) {
     if(cachedUseTrackName_) {
       nameTextEditorLocked->setEnabled(false);
       nameTextEditorLocked->setAlpha(0.38f);
-      setName(lastKnownTrackName_);
     } else {
       nameTextEditorLocked->setEnabled(true);
       nameTextEditorLocked->setAlpha(1.f);
-      if(!lastKnownCustomName_.empty()) {
-        setName(lastKnownCustomName_);
-      }
     }
+  }
+  if(cachedUseTrackName_ || lastKnownCustomName_.empty()) {
+    setName(lastKnownTrackName_);
+  } else {
+    setName(lastKnownCustomName_);
   }
 }
 
