@@ -7,6 +7,7 @@
 #include "exportaction_issues.h"
 #include "exportaction_parameterprocessing.h"
 
+#include <vector>
 #include <memory>
 
 #define COMMONDEFINITIONS_MAX_ID 0x0FFF
@@ -25,9 +26,9 @@ public:
 	bool copyNextFrame(float* buf, bool bypassAvailabilityCheck = false) override;
 
 	struct ChannelMapping {
-		uint8_t originalChannelNumber;
-		uint8_t writtenChannelNumber;
-		uint32_t audioTrackUidValue;
+        uint8_t originalChannelNumber;
+        uint8_t writtenChannelNumber;
+        std::vector<PluginToAdmMap> plugins;
 	};
 
 	int getReportedSampleRate() override { return sampleRate; }
@@ -206,11 +207,9 @@ private:
 		std::shared_ptr<adm::AudioTrackFormat> audioTrackFormat;
 		std::shared_ptr<adm::AudioPackFormat> audioPackFormat;
 		std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
-		std::vector<std::shared_ptr<adm::AudioObject>> audioObjects;
+		std::shared_ptr<adm::AudioObject> audioObject;
 	};
-	std::map<uint32_t, AdmElements> admElementsForAudioTrackUidValue;
-	std::optional<AdmElements> getAdmElementsFor(uint32_t audioTrackUidValue);
-	void updateAdmElementsForAudioTrackUidValueMap();
+	std::optional<AdmElements> getAdmElementsFor(const PluginToAdmMap& plugin);
 
 	std::shared_ptr<adm::Document> admDocument;
 	std::shared_ptr<bw64::ChnaChunk> chnaChunk;
@@ -223,7 +222,7 @@ private:
 	std::vector<std::string> warningStrings;
 
 	// New methods that might need a seperate handler
-	std::vector<std::shared_ptr<PluginInstance>> getEarInputPluginsWithTrackMapping(int trackMapping, ReaperAPI const& api);
+	std::vector<std::shared_ptr<PluginInstance>> getEarInputPluginsWithInputInstanceId(uint32_t inputInstanceId, ReaperAPI const& api);
 	TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api);
 	std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api);
 	bool getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api);
