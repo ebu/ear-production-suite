@@ -545,27 +545,6 @@ Parameter* admplug::EARPluginSuite::getParameterFor(AdmParameter admParameter)
 	return getPluginParameterFor(admParameter);
 }
 
-std::vector<ADMChannel>
-EARPluginSuite::reorderAndFilter(const std::vector<ADMChannel> &channels,
-	const ReaperAPI & api) {
-	auto pack = channels.front().packFormat();
-	auto modifiedChannels{ channels };
-
-	if (auto cartLayout = getCartLayout(*pack)) {
-		// e.g. 7.0 is not in common definition, but 7.1 is so
-		// add in an LFE channel filled with silence in these
-		// cases.
-		auto silentIndices = silentTrackIndicesFor(*cartLayout);
-		for (auto index : silentIndices) {
-			auto insertionPos = modifiedChannels.cbegin();
-			std::advance(insertionPos, index);
-			modifiedChannels.insert(insertionPos, ADMChannel{ nullptr, nullptr, nullptr, nullptr });
-		}
-	}
-
-	return PluginSuite::reorderAndFilter(modifiedChannels, api);
-}
-
 std::shared_ptr<EARPluginCallbackHandler> admplug::EARPluginCallbackHandler::getInstance()
 {
     static auto instance = std::make_shared<EARPluginCallbackHandler>();
