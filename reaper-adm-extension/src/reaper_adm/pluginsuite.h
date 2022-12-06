@@ -39,7 +39,6 @@ namespace admplug {
         virtual void onProjectBuildComplete(const ReaperAPI &api) {}
         virtual bool pluginSuiteUsable(ReaperAPI const& api) { return false;  } // Use this method to return true or false as to whether the pluginsuite can be used (i.e, all required VSTs are present)
         virtual bool representAdmStructureWithGroups(ReaperAPI const& api) { return true;  } // Use this method to return true or false as to whether the pluginsuite requires groups to represent higher-level ADM elements
-        virtual std::vector<ADMChannel> reorderAndFilter(std::vector<ADMChannel> const &channels, ReaperAPI const& api);
         virtual bool applyFXPreset(HoaAutomation const&, ReaperAPI const& api) = 0;
         virtual PluginParameter* getPluginParameterFor(AdmParameter admParameter) { return nullptr; }
         virtual TrackParameter* getTrackParameterFor(AdmParameter admParameter) { return nullptr; }

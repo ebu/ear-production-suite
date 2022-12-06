@@ -53,7 +53,6 @@ public:
 	bool applyFXPreset(const HoaAutomation&, const ReaperAPI& api) override;
 	PluginParameter* getPluginParameterFor(AdmParameter admParameter) override;
 	Parameter* getParameterFor(AdmParameter admParameter) override;
-	std::vector<ADMChannel> reorderAndFilter(std::vector<ADMChannel> const& channels, ReaperAPI const& api) override;
 
 	static const char* OBJECT_METADATA_PLUGIN_NAME;
 	static const char* DIRECTSPEAKERS_METADATA_PLUGIN_NAME;
