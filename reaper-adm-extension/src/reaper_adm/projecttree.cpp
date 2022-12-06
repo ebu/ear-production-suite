@@ -414,7 +414,7 @@ void admplug::ProjectTree::addAutomation(int specificAtuAcfIndex)
     int start = (specificAtuAcfIndex >= 0 && specificAtuAcfIndex < state.audioChannelFormats.size()) ? specificAtuAcfIndex : 0;
     int end = (specificAtuAcfIndex >= 0 && specificAtuAcfIndex < state.audioChannelFormats.size()) ? specificAtuAcfIndex + 1 : state.audioChannelFormats.size();
     for(int i = start; i < end; i++) {
-        ADMChannel channel{ state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i] };
+        ADMChannel channel{ state.currentObject, state.audioChannelFormats[i], state.rootPack, state.audioTrackUids[i], sourceCreator->channelForTrackUid(state.audioTrackUids[i]) };
         auto autoNode = nodeFactory->createAutomationNode(channel, parentTrack, parentTake);
         assert(autoNode);
         broadcast->elementAdded();
