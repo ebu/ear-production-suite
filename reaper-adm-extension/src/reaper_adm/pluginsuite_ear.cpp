@@ -48,6 +48,7 @@ enum class EarObjectParameters {
     DIVERGENCE_RANGE, // Not supported by libadm yet
     BYPASS,
     USE_TRACK_NAME,
+    INPUT_INSTANCE_ID,
     NUM_PARAMETERS
 };
 
