@@ -18,7 +18,8 @@ public:
     ADMChannel(std::shared_ptr<adm::AudioObject const> object,
                std::shared_ptr<adm::AudioChannelFormat const> channelFormat,
                std::shared_ptr<adm::AudioPackFormat const> packFormat,
-               std::shared_ptr<adm::AudioTrackUid const> uid);
+               std::shared_ptr<adm::AudioTrackUid const> uid,
+               int channelOfOriginal);
 
     friend inline bool operator== (ADMChannel const& lhs, ADMChannel const & rhs) {
         return (lhs.trackUid() == rhs.trackUid() && lhs.channelFormat() == rhs.channelFormat() && lhs.packFormat() == rhs.packFormat() && lhs.object() == rhs.object());
@@ -28,6 +29,7 @@ public:
     std::shared_ptr<const adm::AudioObject> object() const;
     std::shared_ptr<const adm::AudioChannelFormat> channelFormat() const;
     std::shared_ptr<const adm::AudioPackFormat> packFormat() const;
+    int channelOfOriginal() const;
     std::string name() const;
     std::string speakerLabel() const;
     std::string formatId() const;
@@ -36,7 +38,7 @@ private:
     std::shared_ptr<adm::AudioChannelFormat const> admChannelFormat;
     std::shared_ptr<adm::AudioPackFormat const> admPackFormat;
     std::shared_ptr<adm::AudioTrackUid const> uid;
-
+    int channelOfOriginal_;
 };
 
 }
