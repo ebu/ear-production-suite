@@ -32,7 +32,7 @@ class EAR_PLUGIN_BASE_EXPORT HoaFrontendBackendConnector {
     ROUTING,
     NAME,
     COLOUR,
-    PACKFORMAT_ID_FORMAT,
+    PACKFORMAT_ID_VALUE,
     USE_TRACK_NAME,
     INPUT_INSTANCE_ID,
   };
