@@ -251,6 +251,9 @@ void DirectSpeakersJuceFrontendConnector::parameterValueChanged(
     case 3:
       setUseTrackName(p_->getUseTrackName()->get());
       break;
+    case 4:
+      notifyParameterChanged(ParameterId::INPUT_INSTANCE_ID, p_->getInputInstanceId()->get());
+      break;
   }
 }
 

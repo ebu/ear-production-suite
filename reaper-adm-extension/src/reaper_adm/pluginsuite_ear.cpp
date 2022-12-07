@@ -57,6 +57,7 @@ enum class EarDirectSpeakersParameters {
     PACKFORMAT_ID_VALUE,
     BYPASS,
     USE_TRACK_NAME,
+    INPUT_INSTANCE_ID,
     NUM_PARAMETERS
 };
 

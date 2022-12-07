@@ -34,6 +34,7 @@ class EAR_PLUGIN_BASE_EXPORT DirectSpeakersFrontendBackendConnector {
     COLOUR,
     PACKFORMAT_ID_VALUE,
     USE_TRACK_NAME,
+    INPUT_INSTANCE_ID,
   };
 
   using ParameterChangedCallback =

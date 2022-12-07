@@ -5,6 +5,7 @@
 #include "direct_speakers_backend.hpp"
 #include "components/level_meter_calculator.hpp"
 #include "reaper_vst3_interfaces.h"
+#include "components/read_only_audio_parameter_int.hpp"
 
 #include <memory>
 
@@ -54,6 +55,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
   AudioParameterBool* getUseTrackName() { return useTrackName_; }
+  AudioParameterInt* getInputInstanceId() { return inputInstanceId_; }
 
   AudioProcessorParameter* getBypassParameter() {
     return bypass_;
@@ -78,6 +80,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
   AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
   AudioParameterBool* useTrackName_;
+  ReadOnlyAudioParameterInt* inputInstanceId_;
 
   std::unique_ptr<ear::plugin::ui::DirectSpeakersJuceFrontendConnector>
       connector_;
