@@ -6,6 +6,7 @@
 #include "direct_speakers_frontend_connector.hpp"
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
+uint32_t requestInputInstanceIdSig();
 
 using namespace ear::plugin;
 
@@ -30,6 +31,10 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
     new AudioParameterBool("byps", "Bypass", false));
   addParameter(useTrackName_ =
     new AudioParameterBool("useTrackName", "Use Track Name", true));
+  addParameter(inputInstanceId_ = new ReadOnlyAudioParameterInt(
+    "inputInstanceId",  // parameter ID
+    "Auto-set ID to uniquely identify plugin",  // parameter name
+    0, 65535, 0));  // range and default value
   /* clang-format on */
 
   static_cast<ui::NonAutomatedParameter<AudioParameterInt>*>(routing_)->markPluginStateAsDirty = [this]() {
@@ -188,6 +193,14 @@ void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unk
 {
     reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
     VST3ClientExtensions::setIHostApplication(unknown);
+
+    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
+    if(requestInputInstanceIdPtr) {
+      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+      uint32_t inputInstanceId = requestInputInstanceId();
+      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
+    }
+
     auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
     if(registerPluginLoadPtr) {
       auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);

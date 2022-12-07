@@ -40,6 +40,10 @@ void DirectSpeakersMetadataSender::importedAudioTrackUidId(int value)
 {
   setData([&value](auto data) { data->set_imported_atu_id(value); });
 }
+void DirectSpeakersMetadataSender::inputInstanceId(int value)
+{
+  setData([&value](auto data) { data->set_input_instance_id(value); });
+}
 void DirectSpeakersMetadataSender::colour(int value) {
   setData([value](auto data) { data->set_colour(value); });
 }
