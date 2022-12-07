@@ -291,7 +291,7 @@ void VisrPluginSuite::onObjectAutomation(const ObjectAutomation &automationNode,
 void VisrPluginSuite::onDirectSpeakersAutomation(DirectSpeakersAutomation const& automationNode, ReaperAPI const& api) {
     auto track = automationNode.getTrack();
     auto take = automationNode.parentTake();
-    auto trackWidth = static_cast<int>(take->trackUidCount());
+    auto trackWidth = static_cast<int>(take->channelCount());
     track->setChannelCount(trackWidth);
     configureAdmExportVst(automationNode, *track, api);
     auto firstBlock = automationNode.blocks().front();

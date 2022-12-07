@@ -341,7 +341,7 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
 {
     auto take = trackElement.getTakeElement();
     TrackInfo trackInfo;
-    auto channelCount = static_cast<int>(take->trackUidCount());
+    auto channelCount = static_cast<int>(take->channelCount());
 
     if(mapHasKey(takesOnTracks, take)) {
         trackInfo = getValueFromMap(takesOnTracks, take);
@@ -367,11 +367,11 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
     }
 
     auto automationElements = trackElement.getAutomationElements();
-    auto takeTrackUids = take->trackUids();
+    auto takeChannels = take->channelsOfOriginal();
     for(auto const& automationElement : automationElements) {
-        auto autoTrackUid = automationElement->channel().trackUid();
-        for(int chOffset = 0; chOffset < takeTrackUids.size(); chOffset++) {
-            if(takeTrackUids[chOffset] == autoTrackUid) {
+        auto aeChannelOfOriginal = automationElement->channel().channelOfOriginal();
+        for(int chOffset = 0; chOffset < takeChannels.size(); chOffset++) {
+            if(takeChannels[chOffset] == aeChannelOfOriginal) {
 
                 auto plugin = createAndNamePlugin(OBJECT_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
 
@@ -394,7 +394,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
 {
     auto take = trackElement.getTakeElement();
     TrackInfo trackInfo;
-    auto channelCount = static_cast<int>(take->trackUidCount());
+    auto channelCount = static_cast<int>(take->channelCount());
 
     if(mapHasKey(takesOnTracks, take)) {
         trackInfo = getValueFromMap(takesOnTracks, take);
@@ -456,7 +456,7 @@ void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAP
 {
     auto take = trackElement.getTakeElement();
     TrackInfo trackInfo;
-    auto channelCount = static_cast<int>(take->trackUidCount());
+    auto channelCount = static_cast<int>(take->channelCount());
 
     if(mapHasKey(takesOnTracks, take)) {
         trackInfo = getValueFromMap(takesOnTracks, take);

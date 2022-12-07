@@ -78,8 +78,8 @@ std::vector<adm::ElementConstVariant> HoaAutomationElement::getAdmElements() con
 int HoaAutomationElement::channelIndex() const
 {
     //Copy-pasted from DirectSpeakersAutomationElement
-    auto chans = parentTake_->trackUids();
-    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.trackUid());
+    auto chans = parentTake_->channelsOfOriginal();
+    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.channelOfOriginal());
     if(location == chans.cend()) return -1;
     return static_cast<int>(location - chans.cbegin());
 }

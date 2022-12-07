@@ -67,11 +67,11 @@ private:
     bool moveToChildWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElement(adm::ElementConstVariant element);
     bool moveToTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements);
-    bool moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements);
+    bool moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<uint32_t> const& channelsOfOriginal);
     void moveToNewChild(std::shared_ptr<ProjectNode> child);
     std::shared_ptr<ProjectNode> getChildWithElement(adm::ElementConstVariant element);
     std::shared_ptr<ProjectNode> getTrackNodeWithElements(std::vector<adm::ElementConstVariant> elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
-    std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<ProjectNode> startingNode = nullptr);
+    std::shared_ptr<ProjectNode> getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<uint32_t> const& channelsOfOriginal, std::shared_ptr<ProjectNode> startingNode = nullptr);
 
     std::unique_ptr<NodeFactory> nodeFactory;
     std::shared_ptr<IPCMSourceCreator> sourceCreator;

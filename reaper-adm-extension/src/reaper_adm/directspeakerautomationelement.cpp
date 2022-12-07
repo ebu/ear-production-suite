@@ -64,8 +64,8 @@ std::shared_ptr<Track> DirectSpeakersAutomationElement::getTrack() const
 
 int DirectSpeakersAutomationElement::channelIndex() const
 {
-    auto chans = parentTake_->trackUids();
-    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.trackUid());
+    auto chans = parentTake_->channelsOfOriginal();
+    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.channelOfOriginal());
     if(location == chans.cend()) return -1;
     return static_cast<int>(location - chans.cbegin());
 }

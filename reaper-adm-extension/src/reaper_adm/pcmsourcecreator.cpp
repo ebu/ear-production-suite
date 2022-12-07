@@ -48,13 +48,7 @@ void PCMSourceCreator::linkSources(const ReaperAPI& api) {
 void PCMSourceCreator::extractSources(std::string outputDir, const ImportContext &context)
 {
     for(auto take : takes) {
-        //auto channels = take->channels();
-        // We do this as part of project tree now
-        //channels = context.pluginSuite->reorderAndFilter(channels, context.api);
-        //take->setChannels(channels);
-
-        registry->add(take, PCMGroup{*indexer, take->trackUids()});
-
+        registry->add(take, PCMGroup{take->channelsOfOriginal()});
     }
 
     fileNames = createSourceFiles(outputDir, *context.broadcast, *context.import);
