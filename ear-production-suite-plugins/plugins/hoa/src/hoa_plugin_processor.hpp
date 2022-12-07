@@ -5,6 +5,7 @@
 #include "hoa_backend.hpp"
 #include "helper/common_definition_helper.h"
 #include "reaper_vst3_interfaces.h"
+#include "components/read_only_audio_parameter_int.hpp"
 
 namespace ear {
 namespace plugin {
@@ -56,6 +57,7 @@ class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
   AudioParameterBool* getUseTrackName() { return useTrackName_; }
+  AudioParameterInt* getInputInstanceId() { return inputInstanceId_; }
 
   AudioProcessorParameter* getBypassParameter() { return bypass_; }
 
@@ -78,6 +80,7 @@ class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
   AudioParameterInt* packFormatIdValue_;
   AudioParameterBool* bypass_;
   AudioParameterBool* useTrackName_;
+  ReadOnlyAudioParameterInt* inputInstanceId_;
 
   std::unique_ptr<ear::plugin::ui::HoaJuceFrontendConnector> connector_;
   std::unique_ptr<ear::plugin::HoaBackend> backend_;

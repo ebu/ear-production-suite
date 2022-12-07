@@ -23,6 +23,7 @@ class HoaMetadataSender {
   void name(const std::string& value);
   void importedAudioObjectId(int value);
   void importedAudioTrackUidId(int value);
+  void inputInstanceId(int value);
   void colour(int value);
   void packFormatIdValue(int value);
 
