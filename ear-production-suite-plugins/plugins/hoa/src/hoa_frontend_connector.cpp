@@ -203,7 +203,7 @@ void HoaJuceFrontendConnector::parameterValueChanged(int parameterIndex,
           [this]() { setRouting(p_->getRouting()->get()); });
       break;
     case 1:
-      notifyParameterChanged(ParameterId::PACKFORMAT_ID_FORMAT,
+      notifyParameterChanged(ParameterId::PACKFORMAT_ID_VALUE,
                              p_->getPackFormatIdValue()->get());  //(2.)
       updater_.callOnMessageThread(
           [this]() { setHoaType(p_->getPackFormatIdValue()->get()); });

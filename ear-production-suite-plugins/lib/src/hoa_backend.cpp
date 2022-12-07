@@ -94,7 +94,7 @@ void HoaBackend::onParameterChanged(
     auto extractedValue = boost::get<unsigned int>(value);
     EAR_LOGGER_DEBUG(logger_, "Colour -> {}", extractedValue);
     metadataSender_.colour(extractedValue);
-  } else if (parameter == ParameterId::PACKFORMAT_ID_FORMAT) {
+  } else if (parameter == ParameterId::PACKFORMAT_ID_VALUE) {
     auto extractedValue = boost::get<int>(value);
     EAR_LOGGER_DEBUG(logger_, "PackFormat ID Value -> {}", extractedValue);
     metadataSender_.packFormatIdValue(extractedValue);
