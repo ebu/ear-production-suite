@@ -46,7 +46,7 @@ std::vector<ADMChannel> getTestChannels(int count) {
                                 adm::AudioChannelFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
                               adm::AudioPackFormat::create(
                                 adm::AudioPackFormatName{"Test " + std::to_string(i)}, adm::TypeDefinition::OBJECTS),
-                               adm::AudioTrackUid::create());
+                               adm::AudioTrackUid::create(), i);
     }
     return channels;
 }
@@ -91,49 +91,41 @@ TEST_CASE("Stereo chna / doc returns 1 index for second channel") {
 }
 
 TEST_CASE("PCMGroup can be instantiated") {
-    auto mockIndexer = std::make_unique< NiceMock<MockIChannelIndexer const>>();
-    auto audioObject = testhelper::createAudioObject();
-    auto pcmGroup = std::make_unique<PCMGroup>(*mockIndexer, getTestAudioTrackUids(1));
+    std::vector<int> chans{ 1 };
+    auto pcmGroup = std::make_unique<PCMGroup>(chans);
 }
 
-TEST_CASE("PCMGroup returns name based on first channel UID") {
-    auto mockIndexer = std::make_unique<NiceMock<MockIChannelIndexer const>>();
-    auto tuids = getTestAudioTrackUids(2);
-    auto firstUid = tuids.front()->get<adm::AudioTrackUidId>();
-    auto uidName = adm::formatId(firstUid);
-
-    auto pcmGroup = PCMGroup(*mockIndexer, tuids);
-    REQUIRE(pcmGroup.name() == uidName);
+TEST_CASE("PCMGroup returns name based on single channel") {
+    std::string name("ch2");
+    auto pcmGroup = PCMGroup({ 2 });
+    REQUIRE(pcmGroup.name() == name);
 }
 
-TEST_CASE("AudioObject with single UId returns PCMGroup with single element from indexer") {
-    auto mockIndexer = std::make_unique< NiceMock<MockIChannelIndexer const>>();
-    EXPECT_CALL(*mockIndexer, indexOf(_)).Times(1).WillOnce(Return(0));
-    auto pcmGroup = std::make_unique<PCMGroup>(*mockIndexer, getTestAudioTrackUids(1));
-    REQUIRE(pcmGroup->trackIndices().size() == 1);
+TEST_CASE("PCMGroup returns name based on channel range") {
+    std::string name("ch2-ch5");
+    auto pcmGroup = PCMGroup({ 2,5 });
+    REQUIRE(pcmGroup.name() == name);
 }
 
-TEST_CASE("AudioObject with two UIds returns PCMGroup with two elements from indexer") {
-    auto mockIndexer = std::make_unique< NiceMock<MockIChannelIndexer const>>();
-    EXPECT_CALL(*mockIndexer, indexOf(_)).Times(2).WillOnce(Return(0)).WillOnce(Return(1));
-    auto pcmGroup = PCMGroup(*mockIndexer, getTestAudioTrackUids(2));
+TEST_CASE("AudioObject with single channel of audio returns PCMGroup with one channel") {
+    auto pcmGroup = PCMGroup({ 1 });
+    REQUIRE(pcmGroup.trackIndices().size() == 1);
+}
+
+TEST_CASE("AudioObject with two channels of audio returns PCMGroup with two channels") {
+    auto pcmGroup = PCMGroup({ 2, 5 });
     REQUIRE(pcmGroup.trackIndices().size() == 2);
 }
 
-TEST_CASE("PCMGroups with identical indices are equal") {
-    auto mockIndexer = testhelper::createMockIndexer(1);
-    auto channels = getTestAudioTrackUids(3);
-    auto pcmGroup = PCMGroup(*mockIndexer, channels);
-    auto pcmGroup2 = PCMGroup(*mockIndexer, channels);
+TEST_CASE("PCMGroups with identical channels of audio are equal") {
+    auto pcmGroup = PCMGroup({ 3,2,1 });
+    auto pcmGroup2 = PCMGroup({ 3,2,1 });
     REQUIRE(pcmGroup == pcmGroup2);
 }
 
-TEST_CASE("PCMGroups with different indices are not equal") {
-    auto mockIndexer = testhelper::createMockIndexer(0);
-    auto mockIndexer2 = testhelper::createMockIndexer(1);
-    auto channels = getTestAudioTrackUids(3);
-    auto pcmGroup = PCMGroup(*mockIndexer, channels);
-    auto pcmGroup2 = PCMGroup(*mockIndexer2, channels);
+TEST_CASE("PCMGroups with different channels of audio, or different ordering, are not equal") {
+    auto pcmGroup = PCMGroup({ 1,2,3 });
+    auto pcmGroup2 = PCMGroup({ 3,2,1 });
     REQUIRE(pcmGroup != pcmGroup2);
 }
 

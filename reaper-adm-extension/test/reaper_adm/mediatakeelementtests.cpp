@@ -119,18 +119,12 @@ TEST_CASE("MediaTakeElement returns channels in order added") {
     auto audioObject = testhelper::createAudioObject(1);
     auto mediaTrackElement = std::make_shared<NiceMock<MockTrackElement>>();
     auto mediaTakeElement = std::make_unique<MediaTakeElement>(audioObject, mediaTrackElement);
-    auto uid = adm::AudioTrackUid::create();
-    auto uid2 = adm::AudioTrackUid::create();
-    auto uid3 = adm::AudioTrackUid::create();
-    auto chanFormat = channelFormatDirectSpeakers("Ch1");
-    auto chanFormat2 = channelFormatDirectSpeakers("Ch2");
-    auto chanFormat3 = channelFormatDirectSpeakers("Ch3");
-    std::vector<std::shared_ptr<adm::AudioTrackUid const>> channels{uid, uid2, uid3};
-    std::vector<std::shared_ptr<adm::AudioTrackUid const>> channelsWrongOrder{uid, uid3, uid2};
+    std::vector<int> channels{1, 2, 3};
+    std::vector<int> channelsWrongOrder{3, 2, 1};
     for(auto channel : channels) {
-        mediaTakeElement->addTrackUid(channel);
+        mediaTakeElement->addChannelOfOriginal(channel);
     }
-    auto takeChannels = mediaTakeElement->trackUids();
+    auto takeChannels = mediaTakeElement->channelsOfOriginal();
     REQUIRE(channels == takeChannels);
     REQUIRE(channelsWrongOrder != takeChannels);
 }

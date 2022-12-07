@@ -51,10 +51,10 @@ public:
   MOCK_CONST_METHOD1(hasAdmElements, bool(std::vector<adm::ElementConstVariant>));
   MOCK_CONST_METHOD1(followsAdmElementSequence, bool(std::vector<adm::ElementConstVariant>));
   MOCK_METHOD1(setSource, void(PCM_source* source));
-  MOCK_METHOD1(addTrackUid, void(std::shared_ptr<adm::AudioTrackUid const> uid));
-  MOCK_METHOD1(hasTrackUid, bool(std::shared_ptr<adm::AudioTrackUid const> uid));
-  MOCK_CONST_METHOD0(trackUids, std::vector<std::shared_ptr<adm::AudioTrackUid const>>());
-  MOCK_CONST_METHOD0(trackUidCount, int());
+  MOCK_METHOD1(addChannelOfOriginal, void(int channelNum));
+  MOCK_METHOD1(hasChannelOfOriginal, bool(int channelNum));
+  MOCK_CONST_METHOD0(channelsOfOriginal, std::vector<int>());
+  MOCK_CONST_METHOD0(channelCount, int());
   MOCK_CONST_METHOD0(startTime, double());
   MOCK_CONST_METHOD0(getAdmElements, std::vector<adm::ElementConstVariant> ());
   MOCK_METHOD1(addParentProjectElement, bool(std::shared_ptr<ProjectElement> newParentElement));
