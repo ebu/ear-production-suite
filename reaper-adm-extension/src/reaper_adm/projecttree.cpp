@@ -104,7 +104,7 @@ bool nodeIsTrackWithElements(ProjectNode const& node, std::vector<adm::ElementCo
     return std::dynamic_pointer_cast<TrackElement>(node.getProjectElement()) && node.getProjectElement()->hasAdmElements(elements);
 }
 
-bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::shared_ptr<IPCMSourceCreator> sourceCreator, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<const adm::AudioObject> object) {
+bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::vector<uint32_t> const& channelsOfOriginal, std::shared_ptr<const adm::AudioObject> object) {
     auto take = std::dynamic_pointer_cast<MediaTakeElement>(node.getProjectElement());
     if(!take) return false;
     // Check start and duration
@@ -119,11 +119,9 @@ bool nodeIsTakeWithCompatibleElements(ProjectNode const& node, std::shared_ptr<I
         return false;
     }
     // Check channels
-    int lim = std::min(take->trackUids().size(), elements.size());
+    int lim = std::min(take->channelsOfOriginal().size(), channelsOfOriginal.size());
     for(int i = 0; i < lim; i++) {
-        auto existingTakeUidChannel = sourceCreator->channelForTrackUid(take->trackUids()[i]);
-        auto currentUidChannel = sourceCreator->channelForTrackUid(elements[i]);
-        if(currentUidChannel != existingTakeUidChannel) {
+        if(take->channelsOfOriginal()[i] != channelsOfOriginal[i]) {
             return false;
         }
     }
@@ -346,18 +344,21 @@ void ProjectTree::moveToNewTakeNode(std::shared_ptr<const adm::AudioObject> admO
 
 void admplug::ProjectTree::addTake(int specificAtuIndex)
 {
-    std::vector<std::shared_ptr<adm::AudioTrackUid const>> atuList;
+    std::vector<uint32_t> channelsOfOriginal;
     if(specificAtuIndex >= 0 && specificAtuIndex < state.audioTrackUids.size()) {
-        atuList.push_back(state.audioTrackUids[specificAtuIndex]);
+        auto channel = sourceCreator->channelForTrackUid(state.audioTrackUids[specificAtuIndex]);
+        channelsOfOriginal.push_back(channel);
     } else {
         std::for_each(state.audioTrackUids.begin(), state.audioTrackUids.end(),
-                      [&atuList](std::shared_ptr<adm::AudioTrackUid const> elm) {
-            atuList.push_back(elm);
+                      [&channelsOfOriginal, this](std::shared_ptr<adm::AudioTrackUid const> elm) {
+            auto channel = this->sourceCreator->channelForTrackUid(elm);
+            channelsOfOriginal.push_back(channel);
         });
     }
+
     auto trackNode = state.currentNode;
     auto trackElement = std::dynamic_pointer_cast<TrackElement>(trackNode->getProjectElement());
-    if(!moveToCompatibleTakeNode(state.currentObject, atuList)) {
+    if(!moveToCompatibleTakeNode(state.currentObject, channelsOfOriginal)) {
         moveToNewTakeNode(state.currentObject);
     }
     auto takeElement = std::dynamic_pointer_cast<TakeElement>(state.currentNode->getProjectElement());
@@ -365,8 +366,8 @@ void admplug::ProjectTree::addTake(int specificAtuIndex)
         trackElement->setTakeElement(takeElement);
     }
     // Add any additional channels
-    for(int i = takeElement->trackUidCount(); i < atuList.size(); i++) {
-        takeElement->addTrackUid(atuList[i]);
+    for(int i = takeElement->channelCount(); i < channelsOfOriginal.size(); i++) {
+        takeElement->addChannelOfOriginal(channelsOfOriginal[i]);
     }
     state.currentNode = trackNode; // Reset pos as this is an add operation, not a move
 }
@@ -452,17 +453,17 @@ std::shared_ptr<ProjectNode> admplug::ProjectTree::getTrackNodeWithElements(std:
     return nullptr;
 }
 
-std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements, std::shared_ptr<ProjectNode> startingNode)
+std::shared_ptr<ProjectNode> admplug::ProjectTree::getCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<uint32_t> const& channelsOfOriginal, std::shared_ptr<ProjectNode> startingNode)
 {
     if (!startingNode) {
         startingNode = rootNode;
     }
-    if (nodeIsTakeWithCompatibleElements(*startingNode, sourceCreator, elements, object)) {
+    if (nodeIsTakeWithCompatibleElements(*startingNode, channelsOfOriginal, object)) {
         return startingNode;
     }
     auto children = startingNode->children();
     for (auto child : children) {
-        auto matchingNode = getCompatibleTakeNode(object, elements, child);
+        auto matchingNode = getCompatibleTakeNode(object, channelsOfOriginal, child);
         if (matchingNode) {
             return matchingNode;
         }
@@ -494,9 +495,9 @@ bool admplug::ProjectTree::moveToTrackNodeWithElements(std::vector<adm::ElementC
     return false;
 }
 
-bool admplug::ProjectTree::moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<std::shared_ptr<adm::AudioTrackUid const>> const& elements)
+bool admplug::ProjectTree::moveToCompatibleTakeNode(std::shared_ptr<const adm::AudioObject> object, std::vector<uint32_t> const& channelsOfOriginal)
 {
-    auto existingNode = getCompatibleTakeNode(object, elements);
+    auto existingNode = getCompatibleTakeNode(object, channelsOfOriginal);
     if (existingNode) {
         moveToNewChild(existingNode);
         return true;

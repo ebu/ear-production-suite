@@ -105,10 +105,10 @@ public:
     virtual ~TakeElement() = default;
     virtual void setSource(PCM_source*) = 0;
     virtual double startTime() const = 0;
-    virtual void addTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) = 0;
-    virtual bool hasTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid) = 0;
-    virtual std::vector<std::shared_ptr<adm::AudioTrackUid const>> trackUids() const = 0;
-    virtual int trackUidCount() const = 0;
+    virtual void addChannelOfOriginal(int channelNum) = 0;
+    virtual bool hasChannelOfOriginal(int channelNum) = 0;
+    virtual int channelCount() const = 0;
+    virtual std::vector<int> channelsOfOriginal() const = 0;
     bool addParentProjectElement(std::shared_ptr<ProjectElement> newParentElement) override;
     int countParentElements();
 protected:

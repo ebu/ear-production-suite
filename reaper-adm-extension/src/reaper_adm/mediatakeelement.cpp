@@ -55,27 +55,27 @@ void MediaTakeElement::setSource(PCM_source * source)
     pcmSource = source;
 }
 
-void admplug::MediaTakeElement::addTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid)
+void admplug::MediaTakeElement::addChannelOfOriginal(int channelNum)
 {
-    trackUids_.push_back(uid);
+    channelsOfOriginal_.push_back(channelNum);
 }
 
-bool admplug::MediaTakeElement::hasTrackUid(std::shared_ptr<adm::AudioTrackUid const> uid)
+bool admplug::MediaTakeElement::hasChannelOfOriginal(int channelNum)
 {
-    for(auto& trackUid : trackUids_) {
-        if(uid == trackUid) return true;
+    for(auto& channel : channelsOfOriginal_) {
+        if(channel == channelNum) return true;
     }
     return false;
 }
 
-int admplug::MediaTakeElement::trackUidCount() const
+int admplug::MediaTakeElement::channelCount() const
 {
-    return trackUids_.size();
+    return channelsOfOriginal_.size();
 }
 
-std::vector<std::shared_ptr<adm::AudioTrackUid const>> admplug::MediaTakeElement::trackUids() const
+std::vector<int> admplug::MediaTakeElement::channelsOfOriginal() const
 {
-    return trackUids_;
+    return channelsOfOriginal_;
 }
 
 double MediaTakeElement::startTime() const

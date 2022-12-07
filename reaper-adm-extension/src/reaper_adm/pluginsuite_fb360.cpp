@@ -290,7 +290,7 @@ void Facebook360PluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAuto
 {
     auto track = directAutomation.getTrack();
     auto take = directAutomation.parentTake();
-    auto trackWidth = static_cast<int>(take->trackUidCount());
+    auto trackWidth = static_cast<int>(take->channelCount());
     track->setChannelCount(trackWidth);
 
     auto firstBlock = directAutomation.blocks().front();
