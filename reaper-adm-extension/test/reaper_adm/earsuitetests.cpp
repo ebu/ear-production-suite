@@ -55,7 +55,7 @@ auto getMockObjectAutoElement() {
     ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
     ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
     auto simpleObj = adm::createSimpleObject("Test");
-    auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid);
+    auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid, 0);
     auto channels = std::vector<ADMChannel>{ channel };
     ON_CALL(*element, channel()).WillByDefault(Return(channel));
     //ON_CALL(*take, channels()).WillByDefault(Return(channels));
@@ -419,7 +419,7 @@ namespace {
       auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010001"));
       auto cf = admCommonDef->lookup(adm::parseAudioChannelFormatId("AC_00010003"));
       auto atu = adm::AudioTrackUid::create();
-      std::vector<ADMChannel> channels{ ADMChannel(nullptr, cf, pf, atu) };
+      std::vector<ADMChannel> channels{ ADMChannel(nullptr, cf, pf, atu, 0) };
       auto track = std::make_shared<NiceMock<MockTrack>>();
       ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
       ON_CALL(autoElement, takeChannels()).WillByDefault(Return(channels));
