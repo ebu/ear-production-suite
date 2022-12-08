@@ -599,3 +599,62 @@ admplug::EARPluginCallbackHandler::EARPluginCallbackHandler()
 admplug::EARPluginCallbackHandler::~EARPluginCallbackHandler()
 {
 }
+
+admplug::EARPluginInstanceIdProvider::EARPluginInstanceIdProvider()
+{
+}
+
+admplug::EARPluginInstanceIdProvider::~EARPluginInstanceIdProvider()
+{
+}
+
+std::shared_ptr<EARPluginInstanceIdProvider> admplug::EARPluginInstanceIdProvider::getInstance()
+{
+    static auto instance = std::make_shared<EARPluginInstanceIdProvider>();
+    return instance;
+}
+
+void admplug::EARPluginInstanceIdProvider::expectRequest()
+{
+    awaitingRequest = true;
+}
+
+bool admplug::EARPluginInstanceIdProvider::waitForRequest(uint16_t maxMs)
+{
+    std::chrono::milliseconds dur(maxMs);
+    auto start = std::chrono::system_clock::now();
+    auto end = start + dur;
+    const std::chrono::milliseconds intervalMs(10);
+
+    while((std::chrono::system_clock::now() + intervalMs) < end) {
+        std::this_thread::sleep_for(intervalMs);
+        if(!awaitingRequest) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::optional<uint32_t> admplug::EARPluginInstanceIdProvider::getLastProvidedId()
+{
+    std::lock_guard<std::mutex> lock(lastProvidedIdMutex);
+    return lastProvidedId;
+}
+
+uint32_t admplug::EARPluginInstanceIdProvider::getNextAvailableId()
+{
+    std::lock_guard<std::mutex> lock(lastProvidedIdMutex);
+    if(lastProvidedId.has_value()) {
+        return lastProvidedId.value() + 1;
+    }
+    return 1; // Start at ID 1 - makes it easier to spot unset IDs (val would be 0)
+}
+
+uint32_t admplug::EARPluginInstanceIdProvider::provideId()
+{
+    auto id = getNextAvailableId();
+    std::lock_guard<std::mutex> lock(lastProvidedIdMutex);
+    lastProvidedId = id;
+    awaitingRequest = false;
+    return id;
+}

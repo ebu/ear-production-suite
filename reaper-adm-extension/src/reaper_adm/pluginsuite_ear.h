@@ -13,6 +13,30 @@ namespace admplug {
 class Track;
 class PluginParameter;
 
+class EARPluginInstanceIdProvider
+{
+public:
+    EARPluginInstanceIdProvider();
+    ~EARPluginInstanceIdProvider();
+    static std::shared_ptr<EARPluginInstanceIdProvider> getInstance();
+
+    // Called by EARPluginSuite
+    void expectRequest();
+    bool waitForRequest(uint16_t maxMs);
+    std::optional<uint32_t> getLastProvidedId();
+    uint32_t getNextAvailableId();
+
+    // Called via API
+    uint32_t provideId();
+
+private:
+
+    std::mutex lastProvidedIdMutex;
+    std::optional<uint32_t> lastProvidedId;
+    bool awaitingRequest{ false };
+
+};
+
 class EARPluginCallbackHandler
 {
 public:
