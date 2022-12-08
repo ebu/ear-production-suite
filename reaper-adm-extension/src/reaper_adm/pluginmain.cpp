@@ -80,10 +80,10 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 
 extern "C" {
 
-    std::atomic<uint32_t> inputInstanceIdCounter(1);
-    uint32_t requestInputInstanceId() {
-        return inputInstanceIdCounter++;
-    }
+  uint32_t requestInputInstanceId() {
+    auto iip = EARPluginInstanceIdProvider::getInstance();
+    return iip->provideId();
+  }
 
   void registerPluginLoad(std::function<void(std::string const&)> callback) {
       auto cbh = EARPluginCallbackHandler::getInstance();
