@@ -626,6 +626,18 @@ int EarInputVst::getInputInstanceId() {
         assert(optVal.has_value());
         return *optVal;
     }
+    if(isDirectSpeakersPlugin(name)) {
+        assert(paramDirectSpeakersInstanceId);
+        auto optVal = getParameterWithConvertToInt(*paramDirectSpeakersInstanceId);
+        assert(optVal.has_value());
+        return *optVal;
+    }
+    if(isHoaPlugin(name)) {
+        assert(paramHoaInstanceId);
+        auto optVal = getParameterWithConvertToInt(*paramHoaInstanceId);
+        assert(optVal.has_value());
+        return *optVal;
+    }
     throw std::runtime_error("No instance ID parameter for this plugin type");
 }
 
