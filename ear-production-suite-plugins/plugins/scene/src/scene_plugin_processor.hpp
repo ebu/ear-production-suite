@@ -67,7 +67,7 @@ class SceneAudioProcessor : public AudioProcessor {
  private:
   void doSampleRateChecks();
   void sendAdmMetadata();
-  void recvAdmMetadata(std::string admStr);
+  void recvAdmMetadata(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps);
   void startExport();
   void stopExport();
   ear::plugin::MetadataThread metadataThread_;

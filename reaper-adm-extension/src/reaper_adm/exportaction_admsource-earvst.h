@@ -6,6 +6,7 @@
 #include "parameter.h"
 #include "exportaction_issues.h"
 #include "exportaction_parameterprocessing.h"
+#include "helper/nng_wrappers.h"
 
 #include <vector>
 #include <memory>
@@ -36,7 +37,7 @@ public:
 	std::string getAdmTemplateStr() { return admStr; }
 	std::vector<ChannelMapping> getChannelMappings() { return channelMappings; }
 
-	void sendAdm(std::string originalAdmStr);
+	void sendAdm(std::string originalAdmStr, std::vector<PluginToAdmMap> pluginToAdmMaps);
 
 private:
 	void infoExchange();
