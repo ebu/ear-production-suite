@@ -332,6 +332,28 @@ public:
         nng_aio_set_msg(aio, msg);
     }
 
+    void decodeAdmAndMappingsMessage(std::shared_ptr<NngMsg> msg, std::string& admStr, std::vector<PluginToAdmMap>& pluginToAdmMaps) {
+        const size_t cmdSz = sizeof(uint8_t);
+        const size_t mapCountSz = sizeof(uint16_t);
+        char* bufPtr = (char*)msg->getBufferPointer();
+        int bufOffset = cmdSz;  // Skip first "command" byte
+
+        assert(msg->getSize() > cmdSz + mapCountSz);
+        uint16_t mapCount = 0;
+        memcpy(&mapCount, bufPtr + bufOffset, mapCountSz);
+        bufOffset += mapCountSz;
+
+        size_t mapSz = (mapCount * sizeof(PluginToAdmMap));
+        assert(msg->getSize() > cmdSz + mapCountSz + mapSz);
+        pluginToAdmMaps = std::vector<PluginToAdmMap>(mapCount);
+        memcpy(pluginToAdmMaps.data(), bufPtr + bufOffset, mapSz);
+        bufOffset += mapSz;
+
+        size_t admSz = msg->getSize() - (cmdSz + mapCountSz + mapSz); // i.e, remainder of msg
+        admStr = std::string(admSz, 0);
+        memcpy(admStr.data(), bufPtr + bufOffset, admSz);
+    }
+
     void sendInfo(uint8_t channels, uint32_t sampleRate,
                   uint16_t admTypeDefinition = 0, uint16_t admPackFormatId = 0,
                   uint16_t admChannelFormatId = 0) {
