@@ -21,8 +21,6 @@ class DirectSpeakersMetadataSender {
 
   void routing(int32_t value);
   void name(const std::string& value);
-  void importedAudioObjectId(int value);
-  void importedAudioTrackUidId(int value);
   void inputInstanceId(int value);
   void colour(int value);
   void speakerSetupIndex(int value);

@@ -33,14 +33,6 @@ void ObjectMetadataSender::triggerSend() { sender_.triggerSend(); }
 void ObjectMetadataSender::name(const std::string& value) {
   setData([value](auto data) { data->set_name(value); });
 }
-void ObjectMetadataSender::importedAudioObjectId(int value)
-{
-  setData([&value](auto data) { data->set_imported_ao_id(value); });
-}
-void ObjectMetadataSender::importedAudioTrackUidId(int value)
-{
-  setData([&value](auto data) { data->set_imported_atu_id(value); });
-}
 void ObjectMetadataSender::inputInstanceId(int value)
 {
   setData([&value](auto data) { data->set_input_instance_id(value); });

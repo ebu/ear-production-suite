@@ -20,7 +20,5 @@ message InputItemMetadata {
     HoaTypeMetadata hoa_metadata = 10;
     BinauralTypeMetadata bin_metadata = 11;
   }
-  optional uint32 imported_ao_id = 12 [default = 0];
-  optional uint32 imported_atu_id = 13 [default = 0];
-  optional uint32 input_instance_id = 14 [default = 0];
+  optional uint32 input_instance_id = 12 [default = 0];
 }

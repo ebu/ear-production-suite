@@ -28,14 +28,6 @@ void HoaMetadataSender::routing(int32_t value) {
 void HoaMetadataSender::name(const std::string& value) {
   setData([&value](auto data) { data->set_name(value); });
 }
-void HoaMetadataSender::importedAudioObjectId(int value)
-{
-  setData([&value](auto data) { data->set_imported_ao_id(value); });
-}
-void HoaMetadataSender::importedAudioTrackUidId(int value)
-{
-  setData([&value](auto data) { data->set_imported_atu_id(value); });
-}
 void HoaMetadataSender::inputInstanceId(int value)
 {
   setData([&value](auto data) { data->set_input_instance_id(value); });

@@ -32,14 +32,6 @@ void DirectSpeakersMetadataSender::routing(int32_t value) {
 void DirectSpeakersMetadataSender::name(const std::string& value) {
   setData([&value](auto data) { data->set_name(value); });
 }
-void DirectSpeakersMetadataSender::importedAudioObjectId(int value)
-{
-  setData([&value](auto data) { data->set_imported_ao_id(value); });
-}
-void DirectSpeakersMetadataSender::importedAudioTrackUidId(int value)
-{
-  setData([&value](auto data) { data->set_imported_atu_id(value); });
-}
 void DirectSpeakersMetadataSender::inputInstanceId(int value)
 {
   setData([&value](auto data) { data->set_input_instance_id(value); });

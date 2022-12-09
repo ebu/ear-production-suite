@@ -54,16 +54,6 @@ void ObjectBackend::setConnectionId(communication::ConnectionId id) {
 
 void ObjectBackend::triggerMetadataSend() { metadataSender_.triggerSend(); }
 
-void ObjectBackend::setImportedAudioObjectId(uint32_t id)
-{
-  metadataSender_.importedAudioObjectId(id);
-}
-
-void ObjectBackend::setImportedAudioTrackUidId(uint32_t id)
-{
-  metadataSender_.importedAudioTrackUidId(id);
-}
-
 void ObjectBackend::onConnection(communication::ConnectionId connectionId,
                                  const std::string& streamEndpoint) {
   std::lock_guard<std::mutex> lock(mutex_);
