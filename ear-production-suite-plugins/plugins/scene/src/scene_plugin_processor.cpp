@@ -260,26 +260,9 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     commandSocket->sendInfo(numChannels, samplerate_);
 
   } else if (cmd == commandSocket->Command::SetAdm) {
-
-    const size_t cmdSz = sizeof(uint8_t);
-    const size_t mapCountSz = sizeof(uint16_t);
-    char* bufPtr = (char*)msg->getBufferPointer();
-    int bufOffset = cmdSz;  // Skip first "command" byte
-
-    assert(msg->getSize() > cmdSz + mapCountSz);
-    uint16_t mapCount = 0;
-    memcpy(&mapCount, bufPtr + bufOffset, mapCountSz);
-    bufOffset += mapCountSz;
-
-    size_t mapSz = (mapCount * sizeof(PluginToAdmMap));
-    assert(msg->getSize() > cmdSz + mapCountSz + mapSz);
-    std::vector<PluginToAdmMap> pluginToAdmMaps(mapCount);
-    memcpy(pluginToAdmMaps.data(), bufPtr + bufOffset, mapSz);
-    bufOffset += mapSz;
-
-    size_t admSz = msg->getSize() - (cmdSz + mapCountSz + mapSz); // i.e, remainder of msg
-    std::string admStr(admSz, 0);
-    memcpy(admStr.data(), bufPtr + bufOffset, admSz);
+    std::vector<PluginToAdmMap> pluginToAdmMaps;
+    std::string admStr;
+    commandSocket->decodeAdmAndMappingsMessage(msg, admStr, pluginToAdmMaps);
 
     auto future = std::async(std::launch::async, [this, admStr, pluginToAdmMaps]() {
       recvAdmMetadata(admStr, pluginToAdmMaps);
