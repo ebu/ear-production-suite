@@ -100,6 +100,8 @@ private:
     std::unique_ptr<PluginParameter> paramDirectSpeakersPackFormatIdValue{ createPluginParameter(1, { 0x0, 0xFFFF }) };
     std::unique_ptr<PluginParameter> paramHoaPackFormatIdValue{ createPluginParameter(1, { 0x0, 0xFFFF }) };
     std::unique_ptr<PluginParameter> paramObjectInstanceId{ createPluginParameter(16, { 0x0, 0xFFFF }) };
+    std::unique_ptr<PluginParameter> paramDirectSpeakersInstanceId{ createPluginParameter(4, { 0x0, 0xFFFF }) };
+    std::unique_ptr<PluginParameter> paramHoaInstanceId{ createPluginParameter(4, { 0x0, 0xFFFF }) };
 
 	// Statics
 
