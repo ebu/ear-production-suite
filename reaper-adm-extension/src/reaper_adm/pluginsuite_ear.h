@@ -8,6 +8,7 @@
 #include <functional>
 #include "pluginsuite.h"
 #include "projectelements.h"
+#include "helper/nng_wrappers.h"
 
 namespace admplug {
 class Track;
@@ -105,6 +106,9 @@ private:
 	void checkForExistingTracks(const ReaperAPI& api);
 	int trackInsertionIndex{ -1 };
 	void setTrackInsertionIndexFromSelectedMedia(const ReaperAPI& api);
+    std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, TrackInstance* track, TrackElement* trackElement, int32_t routingToScene);
+
+    std::vector<PluginToAdmMap> pluginToAdmMaps;
 
 	std::string originalAdmDocument;
 	bool sceneMasterAlreadyExisted{ false };

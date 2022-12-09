@@ -168,8 +168,11 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	return usedValues;
 }
 
-std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, TrackInstance* track, TrackElement* trackElement) {
+}
+
+std::unique_ptr<Plugin> EARPluginSuite::createAndNamePlugin(std::string const& pluginName, TrackInstance* track, TrackElement* trackElement, int32_t routingToScene) {
     auto cbh = EARPluginCallbackHandler::getInstance();
+    auto iip = EARPluginInstanceIdProvider::getInstance();
     auto mte = dynamic_cast<MediaTrackElement*>(trackElement);
     auto audioObject = mte->getRepresentedAudioObject();
     auto audioTrackUid = mte->getRepresentedAudioTrackUid();
@@ -189,6 +192,8 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
         customName = mte->getAppropriateName();
     }
 
+    std::string xml; // Plugin Set State
+
     if(importedAudioObjectId.has_value() || importedAudioTrackUidId.has_value() || !customName.empty()) {
         // Need to send a state as XML
         std::string xmlElementName;
@@ -197,7 +202,7 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
         if(pluginName == EARPluginSuite::HOA_METADATA_PLUGIN_NAME) xmlElementName = "HoaPlugin";
         assert(!pluginName.empty());
 
-        std::string xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?> <");
+        xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <";
         xml += xmlElementName;
         if(!customName.empty()) {
             xml.append(" use_track_name=\"0\" name=\"");
@@ -215,34 +220,40 @@ std::unique_ptr<Plugin> createAndNamePlugin(std::string const& pluginName, Track
             xml.append("\"");
         }
         xml.append(" />");
+    }
 
-        cbh->reset();
-        auto plugin = track->createPlugin(pluginName);
+    cbh->reset();
+    iip->expectRequest();
+    uint32_t inputInstanceId = 0;
+    auto plugin = track->createPlugin(pluginName);
+    if(iip->waitForRequest(1000)) {
+        auto id = iip->getLastProvidedId();
+        if(id.has_value()) {
+            inputInstanceId = id.value();
+        }
+    }
+    if(!xml.empty()) {
         if(cbh->waitForPluginResponse(1000)) {
             cbh->sendData(xml);
         }
-        cbh->reset();
-
-        if(!customName.empty()) {
-            auto trackName = track->getName();
-            if(customName != trackName) {
-                track->setName("Multiple Objects");
-            }
-        }
-
-        return std::move(plugin);
-
-    } else {
-        // Leave plugin name after track
-
-        cbh->reset();
-        auto plugin = track->createPlugin(pluginName);
-        cbh->reset();
-
-        return std::move(plugin);
-
     }
-}
+    cbh->reset();
+
+    if(!customName.empty()) {
+        auto trackName = track->getName();
+        if(customName != trackName) {
+            track->setName("Multiple Objects");
+        }
+    }
+
+    pluginToAdmMaps.push_back(PluginToAdmMap{
+        audioObject ? audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get() : 0,
+        audioTrackUid ? audioTrackUid->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get() : 0,
+        inputInstanceId,
+        routingToScene
+    });
+
+    return std::move(plugin);
 
 }
 
@@ -275,6 +286,7 @@ void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> 
 	originalAdmDocument = xmlStream.str();
 
     takesOnTracks.clear();
+    pluginToAdmMaps.clear();
 
 	sceneMasterAlreadyExisted = false;
 }
@@ -375,15 +387,19 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
         for(int chOffset = 0; chOffset < takeChannels.size(); chOffset++) {
             if(takeChannels[chOffset] == aeChannelOfOriginal) {
 
-                auto plugin = createAndNamePlugin(OBJECT_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
+                int32_t routingToScene = -1;
+                if(trackInfo.routingStartChannel.has_value()) {
+                    routingToScene = *trackInfo.routingStartChannel + chOffset;
+                }
+
+                auto plugin = createAndNamePlugin(OBJECT_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement, routingToScene);
 
                 for (auto& parameter : automatedObjectPluginParameters()) {
                     automationElement->apply(*parameter, *plugin);
                 }
 
-                if(trackInfo.routingStartChannel.has_value()) {
-                    auto uidChannel = *trackInfo.routingStartChannel + chOffset;
-                    plugin->setParameter(*objectTrackMappingParameter, objectTrackMappingParameter->forwardMap(uidChannel));
+                if(routingToScene >= 0) {
+                    plugin->setParameter(*objectTrackMappingParameter, objectTrackMappingParameter->forwardMap(routingToScene));
                 }
 
                 break;
@@ -433,14 +449,20 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         }
 
         if(speakerLayoutIndex >= 0) {
-            auto plugin = createAndNamePlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
+
+            int32_t routingToScene = -1;
+            if(trackInfo.routingStartChannel.has_value()) {
+                routingToScene = *trackInfo.routingStartChannel;
+            }
+
+            auto plugin = createAndNamePlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement, routingToScene);
 
             auto packFormatIdValue = ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].packFormatIdValue;
             plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(packFormatIdValue));
 
-            if(trackInfo.routingStartChannel.has_value()) {
-                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
-                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
+            if(routingToScene >= 0) {
+                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(routingToScene));
+                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, routingToScene);
             }
 
         } else {
@@ -489,12 +511,17 @@ void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAP
         if(packFormat) {
             auto packFormatId = std::stoi(adm::formatId(packFormat->get<adm::AudioPackFormatId>()).substr(7, 4));
 
-            auto plugin = createAndNamePlugin(HOA_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement);
+            int32_t routingToScene = -1;
+            if(trackInfo.routingStartChannel.has_value()) {
+                routingToScene = *trackInfo.routingStartChannel;
+            }
+
+            auto plugin = createAndNamePlugin(HOA_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement, routingToScene);
             plugin->setParameter(*hoaPackFormatIdValueParameter, hoaPackFormatIdValueParameter->forwardMap(packFormatId));
 
-            if(trackInfo.routingStartChannel.has_value()) {
-                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(*trackInfo.routingStartChannel));
-                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
+            if(routingToScene >= 0) {
+                plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(routingToScene));
+                trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, routingToScene);
             }
 
         } else {
