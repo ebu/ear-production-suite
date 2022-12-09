@@ -177,15 +177,6 @@ std::unique_ptr<Plugin> EARPluginSuite::createAndNamePlugin(std::string const& p
     auto audioObject = mte->getRepresentedAudioObject();
     auto audioTrackUid = mte->getRepresentedAudioTrackUid();
 
-    std::optional<unsigned int> importedAudioObjectId;
-    std::optional<unsigned int> importedAudioTrackUidId;
-    if(audioObject) {
-        importedAudioObjectId = audioObject->get<adm::AudioObjectId>().get<adm::AudioObjectIdValue>().get();
-    }
-    if(audioTrackUid) {
-        importedAudioTrackUidId = audioTrackUid->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get();
-    }
-
     std::string customName;
     if(trackElement->getTakeElement()->countParentElements() > 1) {
         // Multiple plugins on this track so we need to name them seperately.
@@ -193,8 +184,7 @@ std::unique_ptr<Plugin> EARPluginSuite::createAndNamePlugin(std::string const& p
     }
 
     std::string xml; // Plugin Set State
-
-    if(importedAudioObjectId.has_value() || importedAudioTrackUidId.has_value() || !customName.empty()) {
+    if(!customName.empty()) {
         // Need to send a state as XML
         std::string xmlElementName;
         if(pluginName == EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME) xmlElementName = "ObjectsPlugin";
@@ -204,22 +194,9 @@ std::unique_ptr<Plugin> EARPluginSuite::createAndNamePlugin(std::string const& p
 
         xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <";
         xml += xmlElementName;
-        if(!customName.empty()) {
-            xml.append(" use_track_name=\"0\" name=\"");
-            xml += customName;
-            xml.append("\"");
-        }
-        if(importedAudioObjectId.has_value()) {
-            xml.append(" imported_ao_id=\"");
-            xml += std::to_string(importedAudioObjectId.value());
-            xml.append("\"");
-        }
-        if(importedAudioTrackUidId.has_value()) {
-            xml.append(" imported_atu_id=\"");
-            xml += std::to_string(importedAudioTrackUidId.value());
-            xml.append("\"");
-        }
-        xml.append(" />");
+        xml.append(" use_track_name=\"0\" name=\"");
+        xml += customName;
+        xml.append("\" />");
     }
 
     cbh->reset();

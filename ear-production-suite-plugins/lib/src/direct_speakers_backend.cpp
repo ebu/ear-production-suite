@@ -56,16 +56,6 @@ void DirectSpeakersBackend::triggerMetadataSend() {
   metadataSender_.triggerSend();
 }
 
-void DirectSpeakersBackend::setImportedAudioObjectId(uint32_t id)
-{
-  metadataSender_.importedAudioObjectId(id);
-}
-
-void DirectSpeakersBackend::setImportedAudioTrackUidId(uint32_t id)
-{
-  metadataSender_.importedAudioTrackUidId(id);
-}
-
 void DirectSpeakersBackend::onConnection(
     communication::ConnectionId connectionId,
     const std::string& streamEndpoint) {
