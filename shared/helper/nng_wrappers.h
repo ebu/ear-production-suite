@@ -490,18 +490,24 @@ public:
         return std::move(nngMsg);
     }
 
-    std::shared_ptr<NngMsg> sendAdm(std::string admStr) {
+    std::shared_ptr<NngMsg> sendAdm(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps) {
         nng_msg* msg;
 
         uint8_t cmdInt = (uint8_t)Command::SetAdm;
         uint32_t admSz = admStr.size();
-        uint32_t totSz = sizeof(uint8_t) + admSz;
+        uint16_t mapCount = pluginToAdmMaps.size();
+        uint32_t mapSz = (mapCount * sizeof(PluginToAdmMap));
+        uint32_t totSz = sizeof(uint8_t) + sizeof(uint16_t) + mapSz + admSz;
         nng_msg_alloc(&msg, totSz);
 
         char* bufPtr = (char*)nng_msg_body(msg);
         int bufOffset = 0;
-        memcpy(bufPtr + bufOffset, &cmdInt, 1);
-        bufOffset += 1;
+        memcpy(bufPtr + bufOffset, &cmdInt, sizeof(uint8_t));
+        bufOffset += sizeof(uint8_t);
+        memcpy(bufPtr + bufOffset, &mapCount, sizeof(uint16_t));
+        bufOffset += sizeof(uint16_t);
+        memcpy(bufPtr + bufOffset, pluginToAdmMaps.data(), mapSz);
+        bufOffset += mapSz;
         memcpy(bufPtr + bufOffset, admStr.data(), admSz);
         bufOffset += admSz;
         assert(totSz == bufOffset);

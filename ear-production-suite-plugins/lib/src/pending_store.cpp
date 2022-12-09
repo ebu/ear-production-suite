@@ -9,8 +9,9 @@
 namespace ear {
     namespace plugin {
         PendingStore::PendingStore(Metadata &metadata,
-                                   std::string admStr) : data_(metadata) {
-            populateFromAdm(admStr);
+                                   std::string admStr,
+                                   std::vector<PluginToAdmMap> pluginToAdmMaps) : data_(metadata) {
+            populateFromAdm(admStr, pluginToAdmMaps);
             timeoutThread = std::thread(&PendingStore::timeout, this, 3000);
 
         }
@@ -36,7 +37,7 @@ namespace ear {
           finishPendingElementsSearch();
         }
 
-        void PendingStore::populateFromAdm(const std::string &admStr) {
+        void PendingStore::populateFromAdm(const std::string &admStr, const std::vector<PluginToAdmMap> &pluginToAdmMaps) {
             auto iss = std::istringstream{std::move(admStr)};
             auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
             pendingElements_ = populateStoreFromAdm(*doc, pendingStore_);

@@ -299,7 +299,7 @@ void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 		auto samplesPort = sceneMaster.getSamplesSocketPort();
 		auto commandPort = sceneMaster.getCommandSocketPort();
 		auto communicator = CommunicatorRegistry::getCommunicator<EarVstCommunicator>(samplesPort, commandPort);
-		communicator->sendAdm(originalAdmDocument);
+		communicator->sendAdm(originalAdmDocument, pluginToAdmMaps);
 	}
 }
 

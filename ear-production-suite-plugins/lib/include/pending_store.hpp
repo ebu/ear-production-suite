@@ -7,18 +7,21 @@
 #include <map>
 #include "metadata_listener.hpp"
 #include <adm/adm.hpp>
+#include "helper/nng_wrappers.h"
 
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <vector>
 
 namespace ear::plugin {
     class PendingStore : public MetadataListener {
     public:
         PendingStore(Metadata& metadata,
-                     std::string admStr);
+                     std::string admStr,
+                     std::vector<PluginToAdmMap> pluginToAdmMaps);
         ~PendingStore();
-        void populateFromAdm(std::string const& admStr);
+        void populateFromAdm(std::string const& admStr, const std::vector<PluginToAdmMap> &pluginToAdmMaps);
 
     private:
         void inputAdded(InputItem const& item, bool autoModeState) override;

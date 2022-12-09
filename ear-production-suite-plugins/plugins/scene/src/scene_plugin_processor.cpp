@@ -232,9 +232,8 @@ void SceneAudioProcessor::sendAdmMetadata() {
   commandSocket->sendAdmAndMappings(ss.str(), std::move(channelMapping));
 }
 
-void SceneAudioProcessor::recvAdmMetadata(std::string admStr) {
-    pendingStore_ = std::make_shared<ear::plugin::PendingStore>(metadata_,
-                                                                std::move(admStr));
+void SceneAudioProcessor::recvAdmMetadata(std::string admStr,  std::vector<PluginToAdmMap> pluginToAdmMaps) {
+    pendingStore_ = std::make_shared<ear::plugin::PendingStore>(metadata_, std::move(admStr), pluginToAdmMaps);
     metadata_.addBackendListener(pendingStore_);
 }
 
@@ -261,14 +260,29 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     commandSocket->sendInfo(numChannels, samplerate_);
 
   } else if (cmd == commandSocket->Command::SetAdm) {
-    uint32_t admSz = msg->getSize() - sizeof(uint8_t);
-    std::string admStr(admSz, 0);
+
+    const size_t cmdSz = sizeof(uint8_t);
+    const size_t mapCountSz = sizeof(uint16_t);
     char* bufPtr = (char*)msg->getBufferPointer();
-    int bufOffset = sizeof(uint8_t);  // Skip first "command" byte
+    int bufOffset = cmdSz;  // Skip first "command" byte
+
+    assert(msg->getSize() > cmdSz + mapCountSz);
+    uint16_t mapCount = 0;
+    memcpy(&mapCount, bufPtr + bufOffset, mapCountSz);
+    bufOffset += mapCountSz;
+
+    size_t mapSz = (mapCount * sizeof(PluginToAdmMap));
+    assert(msg->getSize() > cmdSz + mapCountSz + mapSz);
+    std::vector<PluginToAdmMap> pluginToAdmMaps(mapCount);
+    memcpy(pluginToAdmMaps.data(), bufPtr + bufOffset, mapSz);
+    bufOffset += mapSz;
+
+    size_t admSz = msg->getSize() - (cmdSz + mapCountSz + mapSz); // i.e, remainder of msg
+    std::string admStr(admSz, 0);
     memcpy(admStr.data(), bufPtr + bufOffset, admSz);
 
-    auto future = std::async(std::launch::async, [this, admStr]() {
-      recvAdmMetadata(admStr);
+    auto future = std::async(std::launch::async, [this, admStr, pluginToAdmMaps]() {
+      recvAdmMetadata(admStr, pluginToAdmMaps);
     });
     future.get();
     commandSocket->sendResp(cmd);

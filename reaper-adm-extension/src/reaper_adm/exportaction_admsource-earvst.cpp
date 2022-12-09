@@ -845,10 +845,10 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
     return successful;
 }
 
-void EarVstCommunicator::sendAdm(std::string originalAdmStr)
+void EarVstCommunicator::sendAdm(std::string originalAdmStr, std::vector<PluginToAdmMap> pluginToAdmMaps)
 {
     if(commandSocket.isSocketOpen()) {
-        auto resp = commandSocket.sendAdm(originalAdmStr);
+        auto resp = commandSocket.sendAdm(originalAdmStr, pluginToAdmMaps);
     }
 }
 
