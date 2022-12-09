@@ -36,6 +36,7 @@ namespace ear::plugin {
 
         Metadata& data_;
         std::multimap<std::pair<adm::AudioObjectId, adm::AudioTrackUidId>, ear::plugin::proto::ProgrammeElement*> pendingElements_;
+        std::vector<PluginToAdmMap> pluginToAdmMaps_;
         ear::plugin::proto::ProgrammeStore pendingStore_;
         void checkAgainstPendingElements(InputItem const& item);
         void finishPendingElementsSearch();

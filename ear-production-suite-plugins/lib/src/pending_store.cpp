@@ -40,6 +40,7 @@ namespace ear {
         void PendingStore::populateFromAdm(const std::string &admStr, const std::vector<PluginToAdmMap> &pluginToAdmMaps) {
             auto iss = std::istringstream{std::move(admStr)};
             auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
+            pluginToAdmMaps_ = pluginToAdmMaps;
             pendingElements_ = populateStoreFromAdm(*doc, pendingStore_);
         }
 
@@ -57,20 +58,30 @@ namespace ear {
         {
           if(!finished) {
 
-            auto ids = std::make_pair(
-              adm::AudioObjectId(adm::AudioObjectIdValue(item.data.imported_ao_id())),
-              adm::AudioTrackUidId(adm::AudioTrackUidIdValue(item.data.imported_atu_id())));
-            auto range = pendingElements_.equal_range(ids);
-            auto matchCount = std::distance(range.first, range.second);
-            if (matchCount > 0) {
-              for (auto el = range.first; el != range.second; ++el) {
-                el->second->mutable_object()->set_connection_id(item.data.connection_id());
-              }
-              pendingElements_.erase(range.first, range.second);
+            auto instanceId = item.data.input_instance_id();
+            auto it = std::find_if(pluginToAdmMaps_.begin(), pluginToAdmMaps_.end(),
+                         [instanceId](PluginToAdmMap& pluginToAdmMap) {
+              if(pluginToAdmMap.inputInstanceId == 0) return false;
+              return pluginToAdmMap.inputInstanceId == instanceId;
+            });
 
-              if (pendingElements_.empty()) {
-                killThread = true;
-                finishPendingElementsSearch();
+            if(it != pluginToAdmMaps_.end()) {
+              auto ids = std::make_pair(
+                adm::AudioObjectId(adm::AudioObjectIdValue(it->audioObjectIdVal)),
+                adm::AudioTrackUidId(adm::AudioTrackUidIdValue(it->audioTrackUidVal))
+              );
+              auto range = pendingElements_.equal_range(ids);
+              auto matchCount = std::distance(range.first, range.second);
+              if(matchCount > 0) {
+                for(auto el = range.first; el != range.second; ++el) {
+                  el->second->mutable_object()->set_connection_id(item.data.connection_id());
+                }
+                pendingElements_.erase(range.first, range.second);
+
+                if(pendingElements_.empty()) {
+                  killThread = true;
+                  finishPendingElementsSearch();
+                }
               }
             }
           }
