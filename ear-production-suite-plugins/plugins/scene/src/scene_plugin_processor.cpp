@@ -205,9 +205,6 @@ void SceneAudioProcessor::doSampleRateChecks() {
 }
 
 void SceneAudioProcessor::sendAdmMetadata() {
-  // This is going to fail if two uids reference the same channel. (the second
-  // will overwrite the first) Need to change the way channelMapping is sent if
-  // we want to handle that case
   ear::plugin::ProgrammeStoreAdmSerializer serializer{};
   auto [adm, pluginMaps] =
       serializer.serialize(metadata_.stores());
@@ -215,7 +212,7 @@ void SceneAudioProcessor::sendAdmMetadata() {
   std::stringstream ss;
   adm::writeXml(ss, adm);
 
-  std::vector<PluginToAdmMap> channelMapping(64); // TODO: This should really be dynamically sized. We could have any number of input plugins even with channel count limitations due to sharing.
+  std::vector<PluginToAdmMap> pluginToAdmMaps;
   for(int i = 0; i < pluginMaps.size(); ++i) {
 
     auto atuId = pluginMaps[i].audioTrackUid->get<adm::AudioTrackUidId>();
@@ -226,10 +223,10 @@ void SceneAudioProcessor::sendAdmMetadata() {
     auto aoIdNumString = adm::formatId(aoId).substr(3, 4);
     auto aoIdNum = static_cast<uint32_t>(std::stoul(aoIdNumString, nullptr, 16));
 
-    channelMapping[i] = PluginToAdmMap{aoIdNum, atuIdNum, pluginMaps[i].inputInstanceId, pluginMaps[i].routing};
+    pluginToAdmMaps.push_back(PluginToAdmMap{aoIdNum, atuIdNum, pluginMaps[i].inputInstanceId, pluginMaps[i].routing});
   }
 
-  commandSocket->sendAdmAndMappings(ss.str(), std::move(channelMapping));
+  commandSocket->sendAdmAndMappings(ss.str(), std::move(pluginToAdmMaps));
 }
 
 void SceneAudioProcessor::recvAdmMetadata(std::string admStr,  std::vector<PluginToAdmMap> pluginToAdmMaps) {
@@ -259,7 +256,7 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     uint32_t sampleRate = samplerate_;
     commandSocket->sendInfo(numChannels, samplerate_);
 
-  } else if (cmd == commandSocket->Command::SetAdm) {
+  } else if (cmd == commandSocket->Command::SetAdmAndMappings) {
     std::vector<PluginToAdmMap> pluginToAdmMaps;
     std::string admStr;
     commandSocket->decodeAdmAndMappingsMessage(msg, admStr, pluginToAdmMaps);
@@ -268,7 +265,7 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
       recvAdmMetadata(admStr, pluginToAdmMaps);
     });
     future.get();
-    commandSocket->sendResp(cmd);
+    commandSocket->sendResp(commandSocket->Command::SetAdmAndMappingsResp);
 
   } else {
     assert(false);  // If we got here, we received an unsupported command. Just

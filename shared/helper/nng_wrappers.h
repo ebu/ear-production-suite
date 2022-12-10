@@ -293,43 +293,33 @@ protected:
 
 class CommandCommon {
 public:
-    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings, SetAdm };
-};
+    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings, GetAdmAndMappingsResp, SetAdmAndMappings, SetAdmAndMappingsResp };
 
-class CommandReceiver : public SocketBaseForListeners, public CommandCommon {
-public:
-    using callback = std::function<void(std::shared_ptr<NngMsg>)>;
-
-    CommandReceiver(callback commandHandler)
-        : SocketBaseForListeners(), commandHandler{commandHandler} {}
-    ~CommandReceiver() {}
-
-    void sendResp(uint8_t respCode) {
-        nng_msg* msg;
-        nng_msg_alloc(&msg, 1);
-        memcpy(nng_msg_body(msg), &respCode, 1);
-        nng_aio_set_msg(aio, msg);
-    }
-
-    void sendAdmAndMappings(std::string admStr, std::vector<PluginToAdmMap> channelToAtuMapping) {
-        assert(channelToAtuMapping.size() == 64);
+    nng_msg* encodeAdmAndMappingsMessage(Command cmd, std::string& admStr, std::vector<PluginToAdmMap>& pluginToAdmMaps) {
         nng_msg* msg;
 
-        uint32_t admSz = admStr.size();
-        uint32_t mapSz = (64 * sizeof(PluginToAdmMap));
-        uint32_t totSz = mapSz + admSz;
+        const size_t cmdSz = sizeof(uint8_t);
+        const size_t mapCountSz = sizeof(uint16_t);
+        uint8_t cmdInt = (uint8_t)cmd;
+        size_t admSz = admStr.size();
+        uint16_t mapCount = pluginToAdmMaps.size();
+        size_t mapSz = (mapCount * sizeof(PluginToAdmMap));
+        size_t totSz = cmdSz + mapCountSz + mapSz + admSz;
         nng_msg_alloc(&msg, totSz);
 
         char* bufPtr = (char*)nng_msg_body(msg);
         int bufOffset = 0;
-
-        memcpy(bufPtr + bufOffset, channelToAtuMapping.data(), mapSz);
+        memcpy(bufPtr + bufOffset, &cmdInt, cmdSz);
+        bufOffset += cmdSz;
+        memcpy(bufPtr + bufOffset, &mapCount, mapCountSz);
+        bufOffset += mapCountSz;
+        memcpy(bufPtr + bufOffset, pluginToAdmMaps.data(), mapSz);
         bufOffset += mapSz;
         memcpy(bufPtr + bufOffset, admStr.data(), admSz);
         bufOffset += admSz;
-
         assert(totSz == bufOffset);
-        nng_aio_set_msg(aio, msg);
+
+        return msg;
     }
 
     void decodeAdmAndMappingsMessage(std::shared_ptr<NngMsg> msg, std::string& admStr, std::vector<PluginToAdmMap>& pluginToAdmMaps) {
@@ -352,6 +342,28 @@ public:
         size_t admSz = msg->getSize() - (cmdSz + mapCountSz + mapSz); // i.e, remainder of msg
         admStr = std::string(admSz, 0);
         memcpy(admStr.data(), bufPtr + bufOffset, admSz);
+    }
+
+};
+
+class CommandReceiver : public SocketBaseForListeners, public CommandCommon {
+public:
+    using callback = std::function<void(std::shared_ptr<NngMsg>)>;
+
+    CommandReceiver(callback commandHandler)
+        : SocketBaseForListeners(), commandHandler{commandHandler} {}
+    ~CommandReceiver() {}
+
+    void sendResp(uint8_t respCode) {
+        nng_msg* msg;
+        nng_msg_alloc(&msg, 1);
+        memcpy(nng_msg_body(msg), &respCode, 1);
+        nng_aio_set_msg(aio, msg);
+    }
+
+    void sendAdmAndMappings(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps) {
+        auto msg = encodeAdmAndMappingsMessage(Command::GetAdmAndMappingsResp, admStr, pluginToAdmMaps);
+        nng_aio_set_msg(aio, msg);
     }
 
     void sendInfo(uint8_t channels, uint32_t sampleRate,
@@ -512,27 +524,8 @@ public:
         return std::move(nngMsg);
     }
 
-    std::shared_ptr<NngMsg> sendAdm(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps) {
-        nng_msg* msg;
-
-        uint8_t cmdInt = (uint8_t)Command::SetAdm;
-        uint32_t admSz = admStr.size();
-        uint16_t mapCount = pluginToAdmMaps.size();
-        uint32_t mapSz = (mapCount * sizeof(PluginToAdmMap));
-        uint32_t totSz = sizeof(uint8_t) + sizeof(uint16_t) + mapSz + admSz;
-        nng_msg_alloc(&msg, totSz);
-
-        char* bufPtr = (char*)nng_msg_body(msg);
-        int bufOffset = 0;
-        memcpy(bufPtr + bufOffset, &cmdInt, sizeof(uint8_t));
-        bufOffset += sizeof(uint8_t);
-        memcpy(bufPtr + bufOffset, &mapCount, sizeof(uint16_t));
-        bufOffset += sizeof(uint16_t);
-        memcpy(bufPtr + bufOffset, pluginToAdmMaps.data(), mapSz);
-        bufOffset += mapSz;
-        memcpy(bufPtr + bufOffset, admStr.data(), admSz);
-        bufOffset += admSz;
-        assert(totSz == bufOffset);
+    std::shared_ptr<NngMsg> sendAdmAndMappings(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps) {
+        auto msg = encodeAdmAndMappingsMessage(Command::SetAdmAndMappings, admStr, pluginToAdmMaps);
 
         auto resMsg = nng_sendmsg(socket, msg, 0);
         assert(resMsg == 0);
