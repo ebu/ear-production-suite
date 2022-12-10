@@ -860,7 +860,7 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
 void EarVstCommunicator::sendAdm(std::string originalAdmStr, std::vector<PluginToAdmMap> pluginToAdmMaps)
 {
     if(commandSocket.isSocketOpen()) {
-        auto resp = commandSocket.sendAdm(originalAdmStr, pluginToAdmMaps);
+        auto resp = commandSocket.sendAdmAndMappings(originalAdmStr, pluginToAdmMaps);
     }
 }
 
@@ -878,17 +878,11 @@ void EarVstCommunicator::admAndMappingExchange()
     auto resp = commandSocket.doCommand(commandSocket.Command::GetAdmAndMappings);
     assert(resp->success());
 
-    auto bufPtr = (char*)resp->getBufferPointer();
+    std::string admStrRecv;
+    std::vector<PluginToAdmMap> pluginToAdmMaps;
+    commandSocket.decodeAdmAndMappingsMessage(resp, admStrRecv, pluginToAdmMaps);
 
-    uint32_t mapSz = (64 * sizeof(PluginToAdmMap));
-    uint32_t admSz = resp->getSize() - mapSz;
-
-    std::vector<PluginToAdmMap> pluginToAdmMaps(64);
-    memcpy(pluginToAdmMaps.data(), bufPtr, mapSz);
-    auto admStrRecv = std::string(admSz, 0);
-    memcpy(admStrRecv.data(), bufPtr + mapSz, admSz);
-
-    // channelMappings must be sorted by originalChannel (which, in turn should be sorted for writtenChanelNumber too)
+    // channelMappings must be sorted by originalChannel (which, in turn should be sorted for writtenChannelNumber too)
     // This makes it faster for the copyNextFrame method to jump between channels
 
     std::vector<std::vector<PluginToAdmMap>>routingToPluginToAdmMaps(64);
