@@ -150,18 +150,39 @@ MediaItem_Take* MediaTakeElement::createTake(ReaperAPI const& api, MediaItem* me
    auto start = adm::getPropertyOr(object, adm::Start{nanoseconds::zero()});
    api.SetMediaItemTakeInfo_Value(mediaItemTake, "D_STARTOFFS", toSeconds(start));
 
-   nameTakeFromElementName(api, mediaItemTake);
+   nameTakeFromOriginalChannels(api, mediaItemTake);
    return mediaItemTake;
 }
 
-void MediaTakeElement::nameTakeFromElementName(admplug::ReaperAPI const & api, MediaItem_Take* mediaItemTake) {
-    adm::ElementConstVariant objECV = object;
-    auto name = boost::apply_visitor(AdmNameReader(), objECV);
-    // all but max profile limit length to 32
-    auto nameLength = std::min<std::size_t>(32, name.size());
-    name.copy(takeNameBuffer.data(), nameLength);
-    takeNameBuffer[nameLength] = '\0';
-    api.setTakeName(mediaItemTake, takeNameBuffer.data());
+void MediaTakeElement::nameTakeFromOriginalChannels(admplug::ReaperAPI const & api, MediaItem_Take* mediaItemTake) {
+    std::vector<std::pair<int, int>> nameParts;
+    int curChIndex = 0;
+    while(curChIndex < channelsOfOriginal_.size()) {
+        int startChIndex = curChIndex;
+        while((curChIndex + 1) < channelsOfOriginal_.size()) {
+            if(channelsOfOriginal_[curChIndex + 1] != channelsOfOriginal_[startChIndex] + (curChIndex - startChIndex) + 1) {
+                break;
+            }
+            curChIndex++;
+        }
+
+        nameParts.push_back(std::make_pair(channelsOfOriginal_[startChIndex], channelsOfOriginal_[curChIndex]));
+        curChIndex++;
+    }
+
+    std::string n("Import Ch: ");
+    for(int i = 0; i < nameParts.size(); ++i) {
+        n += std::to_string(nameParts[i].first);
+        if(nameParts[i].first != nameParts[i].second) {
+            n += "-";
+            n += std::to_string(nameParts[i].second);
+        }
+        if(i < nameParts.size() - 1) {
+            n += ", ";
+        }
+    }
+
+    api.setTakeName(mediaItemTake, n);
 }
 
 std::vector<adm::ElementConstVariant> admplug::MediaTakeElement::getAdmElements() const

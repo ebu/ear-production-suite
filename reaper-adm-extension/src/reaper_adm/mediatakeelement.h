@@ -26,13 +26,12 @@ private:
     bool hasMediaItem(ReaperAPI const& api, TrackElement& track);
 
     std::shared_ptr<adm::AudioObject const> object;
-    std::array<char, 4096> takeNameBuffer;
     std::vector<int> channelsOfOriginal_;
     MediaItem* referenceItem;
     PCM_source* pcmSource{nullptr};
     double position{0.0};
     MediaItem* createMediaItem(const ReaperAPI &api, TrackElement& track);
-    void nameTakeFromElementName(admplug::ReaperAPI const & api, MediaItem_Take* take);
+    void nameTakeFromOriginalChannels(admplug::ReaperAPI const & api, MediaItem_Take* take);
     void setMediaItemPosition(const ReaperAPI &api, MediaItem* item);
     double getOriginalMediaItemStartOffset(const ReaperAPI &api) const;
     void setMediaItemDuration(const ReaperAPI &api, MediaItem* item);
