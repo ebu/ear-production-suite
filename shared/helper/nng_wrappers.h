@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <memory>
 
 namespace NNGAddr {
     const std::string protocol {"ipc://"};
