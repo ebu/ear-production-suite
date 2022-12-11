@@ -373,10 +373,10 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
     }
 
     SECTION("Adds automation envelopes for object azimuth, elevation distance and volume") {
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(1)));
+        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(1)));
         // only 1 point so set directly
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times(0);
+        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times(0);
+        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times(0);
         EXPECT_CALL(api, GetTrackEnvelopeByName(fake.trackFor.objects, StrEq("Volume"))).Times(0);
     }
 
@@ -729,9 +729,9 @@ TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[.][dire
 //    }
 
 //    SECTION("Adds ??? automation envelopes for object azimuth, elevation distance and volume") {
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(0)));
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times((AtLeast(0)));
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times((AtLeast(0)));
+//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(0)));
+//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times((AtLeast(0)));
+//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times((AtLeast(0)));
 //        EXPECT_CALL(api, GetTrackEnvelopeByName(fake.trackFor.objects, StrEq("Volume"))).Times(AtLeast(0));
 //    }
 

@@ -38,7 +38,8 @@ admplug::PluginInstance::PluginInstance(MediaTrack* mediaTrack, const ReaperAPI 
 
 std::unique_ptr<AutomationEnvelope> PluginInstance::getEnvelope(const PluginParameter &parameter, EnvelopeCreator const& creator) const
 {
-    auto trackEnvelope = api.getPluginEnvelope(track.get(), name.c_str(), parameter.index());
+    auto trackEnvelope = api.getPluginEnvelope(track.get(), guid->get(), parameter.index());
+    assert(trackEnvelope);
     return creator.create(trackEnvelope, api);
 }
 

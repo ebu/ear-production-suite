@@ -125,7 +125,7 @@ public:
     void setTrackSendBusWidth(MediaTrack* track, int sendIndex, int busWidth) const override;
     int addPluginToTrack(MediaTrack* track, const char* pluginName) const override;
     MediaTrack* createTrackAtIndex(int index, bool fromEnd = false) const override;
-    TrackEnvelope* getPluginEnvelope(MediaTrack* track, const char* pluginName, int parameterIndex) const override;
+    TrackEnvelope* getPluginEnvelope(MediaTrack* track, GUID* pluginGuid, int parameterIndex) const override;
     void activateAndShowTrackVolumeEnvelope(MediaTrack* track) const override;
     int getTrackIndexOfSelectedMediaItem(int selIndex = 0) const override;
     void moveTrackToBeforeIndex(MediaTrack* trk, int index, TrackMoveMode moveMode = TrackMoveMode::Normal) const override;

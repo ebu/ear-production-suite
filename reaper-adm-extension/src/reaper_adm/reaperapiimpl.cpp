@@ -628,9 +628,15 @@ MediaTrack* ReaperAPIImpl::createTrackAtIndex(int index, bool fromEnd) const {
 }
 
 
-TrackEnvelope* ReaperAPIImpl::getPluginEnvelope(MediaTrack* track, const char* pluginName, int parameterIndex) const {
-    auto spatialiserIndex = TrackFX_GetByName(track, pluginName, false);
-    return GetFXEnvelope(track, spatialiserIndex, parameterIndex, true);
+TrackEnvelope* ReaperAPIImpl::getPluginEnvelope(MediaTrack* track, GUID* pluginGuid, int parameterIndex) const {
+    auto pluginCount = TrackFX_GetCount(track);
+    for(int i = 0; i < pluginCount; ++i) {
+        auto thisPluginGuid = TrackFX_GetFXGUID(track, i);
+        if(*thisPluginGuid == *pluginGuid) {
+            return GetFXEnvelope(track, i, parameterIndex, true);
+        }
+    }
+    return nullptr;
 }
 
 void ReaperAPIImpl::activateAndShowTrackVolumeEnvelope(MediaTrack* track) const {

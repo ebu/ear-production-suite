@@ -211,7 +211,7 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD2(createTrackAtIndex,
       MediaTrack*(int index, bool fromEnd));
   MOCK_CONST_METHOD3(getPluginEnvelope,
-      TrackEnvelope*(MediaTrack* track, const char* pluginName, int parameterIndex));
+      TrackEnvelope*(MediaTrack* track, GUID* pluginGuid, int parameterIndex));
   MOCK_CONST_METHOD1(activateAndShowTrackVolumeEnvelope,
       void(MediaTrack* track));
   MOCK_CONST_METHOD1(getTrackIndexOfSelectedMediaItem,
