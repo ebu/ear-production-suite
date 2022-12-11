@@ -173,7 +173,7 @@ class ReaperAPI {
     virtual void setTrackSendBusWidth(MediaTrack* track, int sendIndex, int busWidth) const = 0;
     virtual int addPluginToTrack(MediaTrack* track, const char* pluginName) const = 0;
     virtual MediaTrack* createTrackAtIndex(int index, bool fromEnd = false) const = 0;
-    virtual TrackEnvelope* getPluginEnvelope(MediaTrack* track, const char* pluginName, int parameterIndex) const = 0;
+    virtual TrackEnvelope* getPluginEnvelope(MediaTrack* track, GUID* pluginGuid, int parameterIndex) const = 0;
     virtual void activateAndShowTrackVolumeEnvelope(MediaTrack* track) const = 0;
     virtual int getTrackIndexOfSelectedMediaItem(int selIndex = 0) const = 0;
     virtual void moveTrackToBeforeIndex(MediaTrack* trk, int index, TrackMoveMode moveMode = TrackMoveMode::Normal) const = 0;
