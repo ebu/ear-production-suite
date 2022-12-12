@@ -3,6 +3,7 @@
 #include <bitset>
 #include <string>
 #include <sstream>
+#include <cstring>
 
 #include "reaperapiimpl.h"
 #include "reaperapivalues.h"
@@ -632,7 +633,8 @@ TrackEnvelope* ReaperAPIImpl::getPluginEnvelope(MediaTrack* track, GUID* pluginG
     auto pluginCount = TrackFX_GetCount(track);
     for(int i = 0; i < pluginCount; ++i) {
         auto thisPluginGuid = TrackFX_GetFXGUID(track, i);
-        if(*thisPluginGuid == *pluginGuid) {
+        if(memcmp(thisPluginGuid, pluginGuid, sizeof(GUID)) == 0) {
+            // GUIDs match
             return GetFXEnvelope(track, i, parameterIndex, true);
         }
     }
