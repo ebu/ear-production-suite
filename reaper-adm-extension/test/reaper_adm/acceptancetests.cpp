@@ -192,24 +192,38 @@ namespace {
         }
     }
 
-    void setDirectSpeakersImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedGroupTracks, int expectedDirectChannels) {
+    void setDirectSpeakersImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedDirectChannels) {
         ON_CALL(api, createTrack()).WillByDefault([&api](){
             return std::make_unique<TrackInstance>(api.createTrackAtIndex(0, false), api);
         });
 
-        SECTION("Creates a submix, 3D render bus and expected number of Group and Media Tracks") {
+        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
+            WillOnce(Return(fake.trackFor.renderer)).
+            WillOnce(Return(fake.trackFor.submix)).
+            WillOnce(Return(fake.trackFor.directSpeakers)).
+            WillRepeatedly(Return(fake.trackFor.directChannel));
 
-            EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(expectedDirectChannels).WillRepeatedly(Return(fake.trackFor.directChannel));
-            EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(1).WillOnce(Return(fake.trackFor.directSpeakers)).RetiresOnSaturation();
-//            EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(expectedGroupTracks).WillOnce(Return(fake.trackFor.objects)).RetiresOnSaturation();
-            EXPECT_CALL(api, createTrackAtIndex(0, _)).WillOnce(Return(fake.trackFor.submix)).RetiresOnSaturation();
-            EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(1).WillOnce(Return(fake.trackFor.renderer)).RetiresOnSaturation();
+        SECTION("Creates a submix, 3D render bus and expected number of Group and Media Tracks") {
+            if(expectedDirectChannels > 0) {
+                EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(3 + expectedDirectChannels).
+                    WillOnce(Return(fake.trackFor.renderer)).
+                    WillOnce(Return(fake.trackFor.submix)).
+                    WillOnce(Return(fake.trackFor.directSpeakers)).
+                    WillRepeatedly(Return(fake.trackFor.directChannel));
+            } else {
+                EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(3).
+                    WillOnce(Return(fake.trackFor.renderer)).
+                    WillOnce(Return(fake.trackFor.submix)).
+                    WillOnce(Return(fake.trackFor.directSpeakers));
+            }
         }
 
         SECTION("Instantiates a spatialiser plugin on the channel tracks and a control plugin on the render bus") {
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), false, TrackFXAddMode::QueryPresence)).WillOnce(Return(-1)).WillRepeatedly(Return(0));
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrNe(ADM_VST_PLUGIN_NAME), _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(1);
+            if(expectedDirectChannels > 0) {
+                EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), false, TrackFXAddMode::QueryPresence)).WillOnce(Return(-1)).WillRepeatedly(Return(0));
+                EXPECT_CALL(api, TrackFX_AddByName(_, StrNe(ADM_VST_PLUGIN_NAME), _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
+                EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(1);
+            }
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directChannel, StrEq(SPATIALISER_PLUGIN_NAME) ,_ ,AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedDirectChannels);
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
         }
@@ -217,11 +231,15 @@ namespace {
         SECTION("Sets the number of track channels to 16, disables directspeaker, common definition and submix track master sends") {
             EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 16)).Times(1);
             EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 16)).Times(1);
-            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directChannel, 16)).Times(expectedDirectChannels);
-            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directSpeakers, expectedDirectChannels)).Times(AtLeast(1));
+            if(expectedDirectChannels > 0) {
+                EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directSpeakers, expectedDirectChannels)).Times(AtLeast(1));
+                EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directChannel, 16)).Times(expectedDirectChannels);
+                EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.directChannel)).Times(expectedDirectChannels);
+            } else {
+                EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directSpeakers, _)).Times(AtLeast(1));
+            }
             EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.directSpeakers)).Times(1);
             EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
-            EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.directChannel)).Times(expectedDirectChannels);
         }
 
         SECTION("Sets sends from direct track to channels") {
@@ -402,7 +420,6 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
     doImport<Facebook360PluginSuite>("data/panned_noise_adm.wav", api);
 }
 
-/*
 TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nesting]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
@@ -413,7 +430,9 @@ TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nest
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(3);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd CF (child pack)"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st CF (parent pack)"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
@@ -531,7 +550,9 @@ TEST_CASE("Import object packformat with multiple channelformats", "[objects][FB
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(3);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st CF"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd CF"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
@@ -669,81 +690,56 @@ TEST_CASE("On import of nesting example: nesting8-2ao_reffing_same_1pf_with_1cf.
 
     doImport<Facebook360PluginSuite>("data/nesting8-2ao_reffing_same_1pf_with_1cf.wav", api);
 }
-*/
 
 TEST_CASE("Importing mono directspeaker file to FB360 plugin suite", "[directspeaker][FB360]") {
-
-    // TODO: This will need updating when directspeaker import is properly implemented
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
     setApiDefaults(api, fake);
-    EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
-        WillOnce(Return(fake.trackFor.renderer)).
-        WillOnce(Return(fake.trackFor.submix)).
-        WillOnce(Return(fake.trackFor.directSpeakers)).
-        WillRepeatedly(Return(fake.trackFor.directChannel));
-    setDirectSpeakersImportExpectations(api, fake, 0, 1);
+    setDirectSpeakersImportExpectations(api, fake, 1);
 
-//    SECTION("Names the render bus 3D MASTER and the MediaTrack after the AudioObject") {
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Main"))).Times(1);
-//    }
+    SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject and Speaker Channels") {
+        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directSpeakers, StrEq("Main"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontCentre"))).Times(1);
+   }
     doImport<Facebook360PluginSuite>("data/channels_mono_adm.wav", api);
 }
 
-TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[.][directspeaker][FB360]") {
-    // TODO: This will need updating when directspeaker import is properly implemented
+TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[directspeaker][FB360]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
     setApiDefaults(api, fake);
-    EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
-        WillOnce(Return(fake.trackFor.renderer)).
-        WillOnce(Return(fake.trackFor.submix)).
-        WillOnce(Return(fake.trackFor.directSpeakers)).
-        WillRepeatedly(Return(fake.trackFor.directChannel));
-    setDirectSpeakersImportExpectations(api, fake, 0, 2);
+    setDirectSpeakersImportExpectations(api, fake, 2);
 
-//    SECTION("Names the render bus 3D MASTER and the MediaTrack after the AudioObject") {
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Main"))).Times(1);
-//    }
+    SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject and Speaker Channels") {
+        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directSpeakers, StrEq("Main"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontLeft"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontRight"))).Times(1);
+    }
     doImport<Facebook360PluginSuite>("data/channels_stereo_adm.wav", api);
 }
 
-//TEST_CASE("On import of directspeakers file with nested pack formats", "[.][directspeaker][FB360][nesting]") {
-//    // TODO: This will need updating when directspeaker import is properly implemented
-//    NiceMock<MockReaperAPI> api;
-//    FakeReaperObjects fake;
+TEST_CASE("On import of directspeakers file with nested pack formats", "[directspeaker][FB360][nesting]") {
+    NiceMock<MockReaperAPI> api;
+    FakeReaperObjects fake;
 
-//    setApiDefaults(api, fake);
-//    setObjectImportExpectations(api, fake, 0, 1);
+    setApiDefaults(api, fake);
+    setDirectSpeakersImportExpectations(api, fake, 0); // Note that this is not a common def DS pack, so we don't support it! - I.e, 0 direct channel tracks
 
-//    SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-//        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(1);
-//    }
+    SECTION("Names the render bus 3D MASTER and the MediaTrack after the AudioObject. Does not create non-common-def Speaker Channels") {
+        EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.trackFor.directSpeakers, StrEq("audObj"))).Times(1);
+    }
+    doImport<Facebook360PluginSuite>("data/nesting1b-same_for_directspeakers.wav", api);
+}
 
-//    SECTION("Adds ??? automation envelopes for object azimuth, elevation distance and volume") {
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(0)));
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times((AtLeast(0)));
-//        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times((AtLeast(0)));
-//        EXPECT_CALL(api, GetTrackEnvelopeByName(fake.trackFor.objects, StrEq("Volume"))).Times(AtLeast(0));
-//    }
-
-//    SECTION("Adds ??? automation points to the envelopes") {
-//        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.azimuth, _, _, _, _, _, _)).Times(0);
-//        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.elevation, _, _, _, _, _, _)).Times(0);
-//        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.distance, _, _, _, _, _, _)).Times(0);
-//        EXPECT_CALL(api, InsertEnvelopePoint(fake.envelopeFor.volume, _, _, _, _, _, _)).Times(0);
-//    }
-//    doImport("data/nesting1b-same_for_directspeakers.wav", api);
-//}
-
+/*
 TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360]"){
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
@@ -766,7 +762,6 @@ TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360
     doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
 
-/*
 TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track per TrackUID", "[ear]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
