@@ -257,15 +257,24 @@ namespace {
         }
     }
 
-    void setHoaImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedGroupTracks, int expectedHoaChannels){
+    void setHoaImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedHoaObjects){
         ON_CALL(api, createTrack()).WillByDefault([&api](){
             return std::make_unique<TrackInstance>(api.createTrackAtIndex(0, false), api);
         });
 
-        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(expectedHoaChannels).
+        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(2 + expectedHoaObjects).
             WillOnce(Return(fake.trackFor.renderer)).
             WillOnce(Return(fake.trackFor.submix)).
-            WillRepeatedly(Return(fake.trackFor.objects));
+            WillRepeatedly(Return(fake.trackFor.hoaChannel));
+
+        EXPECT_CALL(api, GetResourcePath()).WillRepeatedly(Return("../../test/reaper_adm/data"));
+        EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).WillRepeatedly(Return(0));
+        EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), false, 0)).WillOnce(Return(1)).WillRepeatedly(Return(-1));
+        EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), false, 0)).WillOnce(Return(0)).WillRepeatedly(Return(-1));
+        char* notNothing = "not_nothing";
+        char* isNothing = "";
+        EXPECT_CALL(api, TrackFX_GetPreset(_, 1, _, _)).WillOnce(DoAll(SetArgumentPointee<2>(*isNothing), Return(true))).WillRepeatedly(DoAll(SetArgumentPointee<2>(*notNothing), Return(true)));
+        EXPECT_CALL(api, TrackFX_SetPreset(_, _, _)).Times(expectedHoaObjects);
     }
 
     template<typename T>
@@ -739,29 +748,18 @@ TEST_CASE("On import of directspeakers file with nested pack formats", "[directs
     doImport<Facebook360PluginSuite>("data/nesting1b-same_for_directspeakers.wav", api);
 }
 
-/*
 TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360]"){
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
     setApiDefaults(api, fake);
-//    EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
-//            WillOnce(Return(fake.trackFor.renderer)).
-//            WillOnce(Return(fake.trackFor.submix)).
-//            WillRepeatedly(Return(fake.trackFor.hoaChannel));
-    setHoaImportExpectations(api, fake, 0, 3);
-    EXPECT_CALL(api, GetResourcePath()).WillRepeatedly(Return("../../test/reaper_adm/data"));
-    EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).WillRepeatedly(Return(0));
-    EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), false, 0)).WillOnce(Return(1)).WillRepeatedly(Return(-1));
-    EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), false, 0)).WillOnce(Return(0)).WillRepeatedly(Return(-1));
+    setHoaImportExpectations(api, fake, 1);
     EXPECT_CALL(api, TrackFX_Delete(_, 0)).WillOnce(Return(true)); // We expect the export vst to be moved because it's not a common def
-    char* notNothing = "not_nothing";
-    char* isNothing = "";
-    EXPECT_CALL(api, TrackFX_GetPreset(_, 1, _, _)).WillOnce(DoAll(SetArgumentPointee<2>(*isNothing), Return(true))).WillRepeatedly(DoAll(SetArgumentPointee<2>(*notNothing), Return(true)));
-    EXPECT_CALL(api, TrackFX_SetPreset(_, _, _)).Times(1);
+
     doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
 
+/*
 TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track per TrackUID", "[ear]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
