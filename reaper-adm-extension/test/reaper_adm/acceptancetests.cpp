@@ -15,6 +15,7 @@
 #include "mocks/pluginsuite.h"
 #include "fakeptr.h"
 #include <track.h>
+#include <helper/container_helpers.hpp>
 
 using namespace admplug;
 using ::testing::_;
@@ -55,17 +56,12 @@ namespace {
         explicit FakeTracks(FakePtrFactory& fakePtr) :
             renderer{fakePtr.get<MediaTrack>()},
             submix{fakePtr.get<MediaTrack>()},
-            objects{fakePtr.get<MediaTrack>()},
-            directSpeakers{fakePtr.get<MediaTrack>()},
-            directChannel{fakePtr.get<MediaTrack>()},
-            hoaChannel{fakePtr.get<MediaTrack>()} {}
+            directSpeakers{fakePtr.get<MediaTrack>()} {}
 
         MediaTrack* renderer{};
         MediaTrack* submix{};
-        MediaTrack* objects{};
-        MediaTrack* directSpeakers{};
-        MediaTrack* directChannel{};
-        MediaTrack* hoaChannel{};
+
+        MediaTrack* directSpeakers{}; // Used as a bus of directspeakers channels by FB360
     };
 
     struct FakeEnvelopes {
@@ -97,21 +93,64 @@ namespace {
         FakeEnvelopes envelopeFor;
         int sendIndex{4};
         int fxIndex{0};
+        std::vector<MediaTrack*> tracksWithItems;
+        std::vector<MediaTrack*> generatedTracks{
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>(),
+            fakePtr.get<MediaTrack>()
+        };
+        int nextAvailableGeneratedTrack = 0;
+        MediaTrack* generateFakeTrack() {
+            return generatedTracks[nextAvailableGeneratedTrack++];
+        }
     };
 
     void setApiDefaults(MockReaperAPI& api, FakeReaperObjects& fake) {
 
         ON_CALL(api, GetResourcePath()).WillByDefault(Return("data"));
         ON_CALL(api, PCM_Source_CreateFromFile(_)).WillByDefault(Return(fake.source));
-        ON_CALL(api, AddMediaItemToTrack(fake.trackFor.objects)).WillByDefault(Return(fake.mediaItem));
-        ON_CALL(api, AddMediaItemToTrack(fake.trackFor.directSpeakers)).WillByDefault(Return(fake.mediaItem));
+        ON_CALL(api, AddMediaItemToTrack(_)).WillByDefault([&api, &fake](MediaTrack* tr){
+            fake.tracksWithItems.push_back(tr);
+            return fake.mediaItem;
+        });
+        ON_CALL(api, GetTrackNumMediaItems(_)).WillByDefault([&api, &fake](MediaTrack* tr){
+            return contains(fake.tracksWithItems, tr);
+        });
         ON_CALL(api, AddTakeToMediaItem(fake.mediaItem)).WillByDefault(Return(fake.take));
         ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.azimuth));
         ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.elevation));
         ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.distance));
         ON_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).WillByDefault(Return(true));
         ON_CALL(api, CreateTrackSend(_, _)).WillByDefault(Return(fake.sendIndex));
-        //EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).Times(AnyNumber()).WillRepeatedly(Return(fake.fxIndex++));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_SCENE_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
@@ -131,6 +170,8 @@ namespace {
         ON_CALL(api, ValidatePtr(_, _)).WillByDefault(Return(true));
         ON_CALL(api, TrackFX_SetPreset(_, _, _)).WillByDefault(Return(true));
         ON_CALL(api, forceAmplitudeScaling(_)).WillByDefault(Return(true));
+        ON_CALL(api, GetTrackName(_, _, _)).WillByDefault(Return(true));
+
     }
 
 
@@ -142,14 +183,18 @@ namespace {
         EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
             WillOnce(Return(fake.trackFor.renderer)).
             WillOnce(Return(fake.trackFor.submix)).
-            WillRepeatedly(Return(fake.trackFor.objects));
+            WillRepeatedly([&fake](int index, bool fromEnd) {
+            return fake.generateFakeTrack();
+        });
 
         SECTION("Creates a submix, 3D render bus and expected number of Group and Media Tracks") {
             if ((expectedGroupTracks + expectedTracks) > 0) {
                 EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2 + expectedGroupTracks + expectedTracks).
                     WillOnce(Return(fake.trackFor.submix)).
                     WillOnce(Return(fake.trackFor.renderer)).
-                    WillRepeatedly(Return(fake.trackFor.objects));
+                    WillRepeatedly([&fake](int index, bool fromEnd) {
+                    return fake.generateFakeTrack();
+                });
             }
             else {
                 EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2).
@@ -160,26 +205,28 @@ namespace {
 
         SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
             EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.objects, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks * 2); // Once via MediaTrackElement::addAdmExportVst, again via MediaTakeElement::createProjectElements
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.objects, StrEq(SPATIALISER_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks * 2); // Once via MediaTrackElement::addAdmExportVst, again via MediaTakeElement::createProjectElements
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks);
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
         }
 
         SECTION("Sets the number of track channels to 16, disables object and submix track master sends") {
             EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 16)).Times(1);
             EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 16)).Times(1);
-            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.objects, 16)).Times(expectedGroupTracks + expectedTracks);
-            EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.objects)).Times(expectedGroupTracks + expectedTracks);
+            for(int i = 0; i < (expectedGroupTracks + expectedTracks); ++i) {
+                EXPECT_CALL(api, setTrackChannelCount(fake.generatedTracks[i], 16)).Times(1);
+                EXPECT_CALL(api, disableTrackMasterSend(fake.generatedTracks[i])).Times(1);
+            }
             EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
         }
 
         SECTION("Adds a 16 channel send from the object track to the submix") {
             EXPECT_CALL(api, RouteTrackToTrack(_,_,_,_,_,_,_)).Times(AnyNumber());
-            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.objects,_,fake.trackFor.submix,_,16,_,_)).Times(expectedTracks);
+            EXPECT_CALL(api, RouteTrackToTrack(_,_,fake.trackFor.submix,_,16,_,_)).Times(expectedTracks);
         }
 
         SECTION("Adds audio to the track") {
-            EXPECT_CALL(api, AddMediaItemToTrack(fake.trackFor.objects)).Times(expectedTracks);
+            EXPECT_CALL(api, AddMediaItemToTrack(_)).Times(expectedTracks);
             EXPECT_CALL(api, AddTakeToMediaItem(fake.mediaItem)).Times(expectedTracks);
             EXPECT_CALL(api, SetMediaItemLength(fake.mediaItem, _, _)).Times(expectedTracks);
             if (expectedTracks > 0) {
@@ -201,15 +248,19 @@ namespace {
             WillOnce(Return(fake.trackFor.renderer)).
             WillOnce(Return(fake.trackFor.submix)).
             WillOnce(Return(fake.trackFor.directSpeakers)).
-            WillRepeatedly(Return(fake.trackFor.directChannel));
+            WillRepeatedly([&fake](int index, bool fromEnd) {
+            return fake.generateFakeTrack();
+        });
 
         SECTION("Creates a submix, 3D render bus and expected number of Group and Media Tracks") {
             if(expectedDirectChannels > 0) {
                 EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(3 + expectedDirectChannels).
-                    WillOnce(Return(fake.trackFor.renderer)).
                     WillOnce(Return(fake.trackFor.submix)).
+                    WillOnce(Return(fake.trackFor.renderer)).
                     WillOnce(Return(fake.trackFor.directSpeakers)).
-                    WillRepeatedly(Return(fake.trackFor.directChannel));
+                    WillRepeatedly([&fake](int index, bool fromEnd) {
+                    return fake.generateFakeTrack();
+                });
             } else {
                 EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(3).
                     WillOnce(Return(fake.trackFor.renderer)).
@@ -224,7 +275,7 @@ namespace {
                 EXPECT_CALL(api, TrackFX_AddByName(_, StrNe(ADM_VST_PLUGIN_NAME), _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
                 EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(1);
             }
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directChannel, StrEq(SPATIALISER_PLUGIN_NAME) ,_ ,AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedDirectChannels);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME) ,_ ,AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedDirectChannels);
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
         }
 
@@ -233,10 +284,12 @@ namespace {
             EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 16)).Times(1);
             if(expectedDirectChannels > 0) {
                 EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directSpeakers, expectedDirectChannels)).Times(AtLeast(1));
-                EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directChannel, 16)).Times(expectedDirectChannels);
-                EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.directChannel)).Times(expectedDirectChannels);
             } else {
                 EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.directSpeakers, _)).Times(AtLeast(1));
+            }
+            for(int i = 0; i < expectedDirectChannels; ++i) {
+                EXPECT_CALL(api, setTrackChannelCount(fake.generatedTracks[i], 16)).Times(1);
+                EXPECT_CALL(api, disableTrackMasterSend(fake.generatedTracks[i])).Times(1);
             }
             EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.directSpeakers)).Times(1);
             EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
@@ -244,8 +297,8 @@ namespace {
 
         SECTION("Sets sends from direct track to channels") {
             EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _,_)).Times(AnyNumber());
-            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.directSpeakers, _, fake.trackFor.directChannel, _, 1, _, _)).Times(expectedDirectChannels);
-            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.directChannel, _, fake.trackFor.submix, _, 16, _, _)).Times(expectedDirectChannels);
+            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.directSpeakers, _, _, _, 1, _, _)).Times(expectedDirectChannels);
+            EXPECT_CALL(api, RouteTrackToTrack(_, _, fake.trackFor.submix, _, 16, _, _)).Times(expectedDirectChannels);
         }
 
         SECTION("Adds audio to the track") {
@@ -265,7 +318,9 @@ namespace {
         EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(2 + expectedHoaObjects).
             WillOnce(Return(fake.trackFor.renderer)).
             WillOnce(Return(fake.trackFor.submix)).
-            WillRepeatedly(Return(fake.trackFor.hoaChannel));
+            WillRepeatedly([&fake](int index, bool fromEnd) {
+            return fake.generateFakeTrack();
+        });
 
         EXPECT_CALL(api, GetResourcePath()).WillRepeatedly(Return("../../test/reaper_adm/data"));
         EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).WillRepeatedly(Return(0));
@@ -299,7 +354,7 @@ namespace {
       importer.buildProject();
     }
 
-    void setEarObjectImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedTracks, int expectedPCMSources) {
+    void setEarObjectImportExpectations(MockReaperAPI& api, FakeReaperObjects& fake, int expectedTracks, int expectedPCMSources, int expectedObjectPlugins) {
         ON_CALL(api, createTrack()).WillByDefault([&api](){
             return std::make_unique<TrackInstance>(api.createTrackAtIndex(0, false), api);
         });
@@ -307,14 +362,18 @@ namespace {
         EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(AnyNumber()).
         WillOnce(Return(fake.trackFor.submix)).
         WillOnce(Return(fake.trackFor.renderer)).
-        WillRepeatedly(Return(fake.trackFor.objects));
+            WillRepeatedly([&fake](int index, bool fromEnd) {
+            return fake.generateFakeTrack();
+        });
 
         SECTION("Creates a scene bus, monitoring bus and expected number of object tracks") {
             if (expectedTracks > 0) {
                 EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2 + expectedTracks).
                     WillOnce(Return(fake.trackFor.submix)).
                     WillOnce(Return(fake.trackFor.renderer)).
-                    WillRepeatedly(Return(fake.trackFor.objects));
+                    WillRepeatedly([&fake](int index, bool fromEnd) {
+                    return fake.generateFakeTrack();
+                });
             }
             else {
                 EXPECT_CALL(api, createTrackAtIndex(0, _)).Times(2).
@@ -326,35 +385,42 @@ namespace {
         SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
             EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
             EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::CreateIfMissing)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.objects, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedTracks);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedObjectPlugins);
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.submix, StrEq(EAR_SCENE_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
             EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
         }
 
         SECTION("Sets the number of track channels to 64, disables object and scene track master sends") {
-        EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 64)).Times(1);
-        EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 64)).Times(1);
-        EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.objects)).Times(expectedTracks);
-        EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
+            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 64)).Times(1);
+            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 64)).Times(1);
+            for(int i = 0; i < expectedTracks; ++i) {
+                EXPECT_CALL(api, setTrackChannelCount(fake.generatedTracks[i], _)).Times(1);
+                EXPECT_CALL(api, disableTrackMasterSend(fake.generatedTracks[i])).Times(1);
+            }
+            EXPECT_CALL(api, disableTrackMasterSend(fake.trackFor.submix)).Times(1);
         }
 
         SECTION("Adds a send from the object track to the scene, and to the monitoring") {
-        EXPECT_CALL(api, RouteTrackToTrack(_,_,_,_,_,_,_)).Times(AnyNumber());
-        EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.objects,_,fake.trackFor.submix,_,_,_,_)).Times(expectedTracks);
-        EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.submix,_,fake.trackFor.renderer,_,64,_,_)).Times(1);
+            EXPECT_CALL(api, RouteTrackToTrack(_,_,_,_,_,_,_)).Times(AnyNumber());
+            for(int i = 0; i < expectedTracks; ++i) {
+                EXPECT_CALL(api, RouteTrackToTrack(fake.generatedTracks[i],_,fake.trackFor.submix,_,_,_,_)).Times(1);
+            }
+            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.submix,_,fake.trackFor.renderer,_,64,_,_)).Times(1);
         }
 
         SECTION("Adds audio to the track") {
-        EXPECT_CALL(api, AddMediaItemToTrack(fake.trackFor.objects)).Times(expectedTracks);
-        EXPECT_CALL(api, AddTakeToMediaItem(fake.mediaItem)).Times(expectedTracks);
-        EXPECT_CALL(api, SetMediaItemLength(fake.mediaItem, _, _)).Times(expectedTracks);
-        if (expectedPCMSources > 0) {
-        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(expectedPCMSources).WillRepeatedly(Return(fake.source));
-        }
-        else {
-        EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(0);
-        }
-        EXPECT_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).Times(expectedTracks);
+            for(int i = 0; i < expectedTracks; ++i) {
+                EXPECT_CALL(api, AddMediaItemToTrack(fake.generatedTracks[i])).Times(1);
+            }
+            EXPECT_CALL(api, AddTakeToMediaItem(fake.mediaItem)).Times(expectedTracks);
+            EXPECT_CALL(api, SetMediaItemLength(fake.mediaItem, _, _)).Times(expectedTracks);
+            if (expectedPCMSources > 0) {
+                EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(expectedPCMSources).WillRepeatedly(Return(fake.source));
+            }
+            else {
+                EXPECT_CALL(api, PCM_Source_CreateFromFile(_)).Times(0);
+            }
+            EXPECT_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).Times(expectedTracks);
         }
 
     }
@@ -396,15 +462,15 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
     SECTION("Names the render bus 3D MASTER and the MediaTrack after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Noise"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.generatedTracks[0], StrEq("Noise"))).Times(1);
     }
 
     SECTION("Adds automation envelopes for object azimuth, elevation distance and volume") {
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(1)));
+        EXPECT_CALL(api, getPluginEnvelope(fake.generatedTracks[0], _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).Times((AtLeast(1)));
         // only 1 point so set directly
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, getPluginEnvelope(fake.trackFor.objects, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times(0);
-        EXPECT_CALL(api, GetTrackEnvelopeByName(fake.trackFor.objects, StrEq("Volume"))).Times(0);
+        EXPECT_CALL(api, getPluginEnvelope(fake.generatedTracks[0], _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).Times(0);
+        EXPECT_CALL(api, getPluginEnvelope(fake.generatedTracks[0], _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).Times(0);
+        EXPECT_CALL(api, GetTrackEnvelopeByName(fake.generatedTracks[0], StrEq("Volume"))).Times(0);
     }
 
     SECTION("Adds automation points to the envelopes (24 direct, 1 for start of first block as it has non-zero duration, 1 for handling azimuth discontinuity)") {
@@ -417,13 +483,13 @@ TEST_CASE("Import object based panning noise using FB360 plugin suite", "[object
     }
 
     SECTION("Sets plugin values for azimuth elevation, distance and track volume") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(AtLeast(1));
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(AtLeast(1));
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(AtLeast(1));
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(AnyNumber());
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(AnyNumber());
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(AnyNumber());
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(AnyNumber());
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(AtLeast(1));
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(AtLeast(1));
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(AtLeast(1));
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(AnyNumber());
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(AnyNumber());
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(AnyNumber());
+        EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[0], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(AnyNumber());
     }
 
     doImport<Facebook360PluginSuite>("data/panned_noise_adm.wav", api);
@@ -439,21 +505,23 @@ TEST_CASE("Import of nested pack formats of object type", "[objects][FB360][nest
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd CF (child pack)"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st CF (parent pack)"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("audObj"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("2nd CF (child pack)"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("1st CF (parent pack)"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 1; i < 3; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting1-1ao_with_1pf_reffing_1pf.wav", api);
@@ -471,19 +539,22 @@ TEST_CASE("Import of audioobject referencing multiple pack formats of object typ
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(2);
+        EXPECT_CALL(api, setTrackName(fake.generatedTracks[0], StrEq("audObj"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.generatedTracks[1], StrEq("audObj"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 0; i < 2; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting2-1ao_with_2pf_each_with_1cf.wav", api);
@@ -499,20 +570,22 @@ TEST_CASE("Import of nested audioobjects referencing object type packs", "[objec
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObjects") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Child AO 1"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Child AO 2"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Child AO 1"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Child AO 2"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 0; i < 2; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting3-1ao_reffing_2ao_each_with_1pf_with_1cf.wav", api);
@@ -530,20 +603,22 @@ TEST_CASE("On import of two audioobjects of object type, one which references th
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObjects") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Parent AO"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Child AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Parent AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Child AO"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 0; i < 2; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting4-1ao_reffing_1ao_both_with_1pf_with_1cf.wav", api);
@@ -559,21 +634,23 @@ TEST_CASE("Import object packformat with multiple channelformats", "[objects][FB
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("audObj"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st CF"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd CF"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("audObj"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("1st CF"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("2nd CF"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 1; i < 3; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting5-1ao_with_1pf_with_2cf.wav", api);
@@ -589,22 +666,22 @@ TEST_CASE("Importing audioobject with shared child object", "[objects][FB360]") 
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Parent AO 1"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Parent AO 2"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Child AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Parent AO 1"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Parent AO 2"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Child AO"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
 
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(1);
+        EXPECT_CALL(api, SetMediaTrackInfo_Value(_, StrEq("D_VOL"), _)).Times(1);
     }
 
     doImport<Facebook360PluginSuite>("data/nesting6-2ao_both_reffing_1ao_with_1pf_with_1cf.wav", api);
@@ -620,24 +697,24 @@ TEST_CASE("Import of complex audioobject nesting: nesting6b-2ao_parents_1ao_chil
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Parent AO 1"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Parent AO 2"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Shared Child AO"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("Child of AO 2"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Parent AO 1"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Parent AO 2"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Shared Child AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("Child of AO 2"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
-    }
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
+        EXPECT_CALL(api, TrackFX_SetParam(_, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
 
+        EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
+        EXPECT_CALL(api, SetMediaTrackInfo_Value(_, StrEq("D_VOL"), _)).Times(2);
+    }
 
     doImport<Facebook360PluginSuite>("data/nesting6b-2ao_parents_1ao_child_shared_and_1ao_child_with_one_parent.wav", api);
 }
@@ -652,20 +729,22 @@ TEST_CASE("Import of file with objects referencing different packs but common ch
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st AO"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("1st AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("2nd AO"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 0; i < 2; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting7-2ao_with_1pf_each_reffing_same_1cf.wav", api);
@@ -681,20 +760,22 @@ TEST_CASE("On import of nesting example: nesting8-2ao_reffing_same_1pf_with_1cf.
     SECTION("Names the render bus 3D MASTER and the MediaTracks after the AudioObject") {
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("1st AO"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.objects, StrEq("2nd AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("1st AO"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("2nd AO"))).Times(1);
     }
 
     SECTION("Sets Azimuth, Elevation, distance and gain parameters") {
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(2);
-        EXPECT_CALL(api, TrackFX_SetParam(fake.trackFor.objects, 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(2);
         EXPECT_CALL(api, SetMediaTrackInfo_Value(_, _, _)).Times(AnyNumber());
-        EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.trackFor.objects, StrEq("D_VOL"), _)).Times(2);
+        for(int i = 0; i < 2; i++) {
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 1, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_INCLUDEINADM_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMTYPEDEFINITION_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMPACKFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_SetParam(fake.generatedTracks[i], 0, ADM_VST_ADMCHANNELFORMAT_PARAMETER_INDEX, _)).Times(1);
+            EXPECT_CALL(api, SetMediaTrackInfo_Value(fake.generatedTracks[i], StrEq("D_VOL"), _)).Times(1);
+        }
     }
 
     doImport<Facebook360PluginSuite>("data/nesting8-2ao_reffing_same_1pf_with_1cf.wav", api);
@@ -711,7 +792,7 @@ TEST_CASE("Importing mono directspeaker file to FB360 plugin suite", "[directspe
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.directSpeakers, StrEq("Main"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontCentre"))).Times(1);
+        EXPECT_CALL(api, setTrackName(fake.generatedTracks[0], StrEq("FrontCentre"))).Times(1);
    }
     doImport<Facebook360PluginSuite>("data/channels_mono_adm.wav", api);
 }
@@ -727,8 +808,8 @@ TEST_CASE("Importing stereo directspeaker file to FB360 plugin suite", "[directs
         EXPECT_CALL(api, setTrackName(fake.trackFor.renderer, StrEq("3D MASTER"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.submix, StrEq("3D Sub-Master"))).Times(1);
         EXPECT_CALL(api, setTrackName(fake.trackFor.directSpeakers, StrEq("Main"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontLeft"))).Times(1);
-        EXPECT_CALL(api, setTrackName(fake.trackFor.directChannel, StrEq("FrontRight"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("FrontLeft"))).Times(1);
+        EXPECT_CALL(api, setTrackName(_, StrEq("FrontRight"))).Times(1);
     }
     doImport<Facebook360PluginSuite>("data/channels_stereo_adm.wav", api);
 }
@@ -759,7 +840,6 @@ TEST_CASE("Importing ambix1stOrder HOA file to FB360 plugin suite", "[hoa][FB360
     doImport<Facebook360PluginSuite>("data/hoa_4ch_bwf_1stOrderAmbix.wav", api);
 }
 
-/*
 TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track per TrackUID", "[ear]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
@@ -767,19 +847,19 @@ TEST_CASE("On import of AudioObject with multiple TrackUIDs, creates one track p
     setApiDefaults(api, fake);
     ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
     ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
-    setEarObjectImportExpectations(api, fake, 3, 3);
+    setEarObjectImportExpectations(api, fake, 3, 3, 3);
 
     doImport<EARPluginSuite>("data/one_ao-multiple_uid.wav", api);
 }
 
-TEST_CASE("On import of three AudioObjects with shared TrackUIDs, creates one track per AudioObject", "[ear]") {
+TEST_CASE("On import of three AudioObjects with shared TrackUIDs, creates one track for all three AudioObjects", "[ear]") {
     NiceMock<MockReaperAPI> api;
     FakeReaperObjects fake;
 
     setApiDefaults(api, fake);
     ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
     ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
-    setEarObjectImportExpectations(api, fake, 3, 1);
+    setEarObjectImportExpectations(api, fake, 1, 1, 3);
 
     doImport<EARPluginSuite>("data/three_ao-one_atu.wav", api);
 }
@@ -791,8 +871,7 @@ TEST_CASE("On import of three AudioObjects with shared TrackUIDs and some orphan
     setApiDefaults(api, fake);
     ON_CALL(api, CountTracks(_)).WillByDefault(Return(0)); // EARs UniqueValueAssigner will attempt to iterate through existing tracks
     ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1));
-    setEarObjectImportExpectations(api, fake, 3, 1);
+    setEarObjectImportExpectations(api, fake, 1, 1, 3);
 
     doImport<EARPluginSuite>("data/aos_sharing_atu-some_without_parent.wav", api);
 }
-*/
