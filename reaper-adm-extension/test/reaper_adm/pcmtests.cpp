@@ -101,9 +101,15 @@ TEST_CASE("PCMGroup returns name based on single channel") {
     REQUIRE(pcmGroup.name() == name);
 }
 
-TEST_CASE("PCMGroup returns name based on channel range") {
-    std::string name("ch2-ch5");
+TEST_CASE("PCMGroup returns name based on channel range of 2") {
+    std::string name("ch2-5");
     auto pcmGroup = PCMGroup({ 2,5 });
+    REQUIRE(pcmGroup.name() == name);
+}
+
+TEST_CASE("PCMGroup returns name based on channel range of 5") {
+    std::string name("ch4-1-2-3-5");
+    auto pcmGroup = PCMGroup({ 4,1,2,3,5 });
     REQUIRE(pcmGroup.name() == name);
 }
 

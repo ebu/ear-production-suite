@@ -11,9 +11,9 @@ PCMGroup::PCMGroup(std::vector<int> channelsOfOriginal)
 
     fileName = "ch";
     fileName += std::to_string(channelsOfOriginal.front());
-    if(channelsOfOriginal.size() > 1) {
-        fileName = "-to-ch";
-        fileName += std::to_string(channelsOfOriginal.back());
+    for(int cooIndex = 1; cooIndex < channelsOfOriginal.size(); ++cooIndex) {
+        fileName += "-";
+        fileName += std::to_string(channelsOfOriginal[cooIndex]);
     }
 
     for(auto const& channelOfOriginal : channelsOfOriginal) {
