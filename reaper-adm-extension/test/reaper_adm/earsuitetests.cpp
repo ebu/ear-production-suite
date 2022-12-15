@@ -369,7 +369,6 @@ TEST_CASE("Object tracks created and plugin instantiated") {
     }
 }
 
-
 //TODO - mock UniqueValueAssigner for this to work
 //TEST_CASE("Object tracks are routed to bus track") {
 //    EARPluginSuite earSuite;
@@ -397,21 +396,29 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 //    }
 //}
 
-/*
 TEST_CASE("Object tracks are not sent to master") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
-    NiceMock<MockTrackElement> trackElement;
-    auto track = std::make_shared<NiceMock<MockTrack>>();
-    ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
-    EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-    EXPECT_CALL(*track, disableMasterSend());
+
+    auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
+    auto atu = adm::AudioTrackUid::create();
+
+    auto trackElement = std::make_shared<ObjectTrack>(std::vector<adm::ElementConstVariant>{ao, atu}, nullptr);
+    auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
+
+    takeElement->addChannelOfOriginal(0);
+    trackElement->setTakeElement(takeElement);
+    trackElement->setRepresentedAudioObject(ao);
+    trackElement->setRepresentedAudioTrackUid(atu);
+
     initProject(earSuite, api);
-    earSuite.onCreateObjectTrack(trackElement, api);
+
+    auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement, takeElement);
+    trackElement->addAutomationElement(autoElement);
+    EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+    earSuite.onCreateObjectTrack(*trackElement, api);
 }
-*/
+
 namespace {
   MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
   MATCHER_P(HasIndex, index, "")
