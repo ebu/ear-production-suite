@@ -12,6 +12,7 @@
 #include <adm/common_definitions.hpp>
 #include "fakeptr.h"
 #include "objectautomationelement.h"
+#include "directspeakerautomationelement.h"
 #include "mediatakeelement.h"
 #include "mediatrackelement.h"
 
@@ -64,7 +65,6 @@ auto getMockObjectAutoElement() {
     auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid, 0);
     auto channels = std::vector<ADMChannel>{ channel };
     ON_CALL(*element, channel()).WillByDefault(Return(channel));
-    //ON_CALL(*take, channels()).WillByDefault(Return(channels));
     return element;
 }
 
@@ -417,7 +417,7 @@ TEST_CASE("Object tracks are not sent to master") {
     auto node = initProject(earSuite, api);
     earSuite.onCreateProject(node, api);
 
-    auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement, takeElement);
+    auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ ao, nullptr, nullptr, atu, 0 }, trackElement, takeElement);
     trackElement->addAutomationElement(autoElement);
     EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
     earSuite.onCreateObjectTrack(*trackElement, api);
@@ -486,21 +486,36 @@ namespace {
       //      earSuite.onCreateObjectTrack(trackElement, api);
       //    }
   }
+*/
 
   TEST_CASE("Directspeaker tracks are not sent to master") {
       EARPluginSuite earSuite;
       auto api = NiceMock<MockReaperAPI>{};
-      NiceMock<MockTrackElement> trackElement;
-      auto track = std::make_shared<NiceMock<MockTrack>>();
-      ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-      ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-      ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
-      EXPECT_CALL(*track, disableMasterSend());
+
+      auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
+      auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("test"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
+      auto atu0 = adm::AudioTrackUid::create();
+      auto atu1 = adm::AudioTrackUid::create();
+
+      auto trackElement = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{ao}, nullptr);
+      auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
+
+      takeElement->addChannelOfOriginal(0);
+      takeElement->addChannelOfOriginal(1);
+      trackElement->setTakeElement(takeElement);
+      trackElement->setRepresentedAudioObject(ao);
+
       auto node = initProject(earSuite, api);
       earSuite.onCreateProject(node, api);
-      earSuite.onCreateDirectTrack(trackElement, api);
+
+      auto autoElement1 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu0, 0 }, trackElement, takeElement);
+      auto autoElement2 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 1 }, trackElement, takeElement);
+      trackElement->addAutomationElement(autoElement1);
+      trackElement->addAutomationElement(autoElement2);
+
+      EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+      earSuite.onCreateDirectTrack(*trackElement, api);
   }
-*/
 
   TEST_CASE("Channels Metadata plugin added on first directspeakers automation")
   {
