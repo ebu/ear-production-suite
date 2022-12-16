@@ -82,7 +82,7 @@ std::vector<GUID> fxGuids{
     GUID { 1, 0, 0, {0, 0, 0, 0, 0, 0, 0, 6}},
     GUID { 1, 0, 0, {0, 0, 0, 0, 0, 0, 0, 7}}
 };
-void initProject(EARPluginSuite& earSuite, MockReaperAPI const& api) {
+ProjectNode initProject(EARPluginSuite& earSuite, MockReaperAPI const& api) {
     adm::addCommonDefinitionsTo(admCommonDef);
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
@@ -99,7 +99,7 @@ void initProject(EARPluginSuite& earSuite, MockReaperAPI const& api) {
     ON_CALL(api, createTrackAtIndex(_, _)).WillByDefault([&api](int index, bool fromEnd) {
         return fakePtr.get<MediaTrack>();
     });
-    earSuite.onCreateProject(node, api);
+    return node;
 }
 
 std::shared_ptr<ADMMetaData> genericMetadata;
@@ -199,39 +199,48 @@ TEST_CASE("On first create project, bus track has master send disabled") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
-    initProject(earSuite, api); // calls earSuite.onCreateProject(node, api);
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
 }
 
-//std::unique_ptr<NiceMock<MockTrack>> getMockTrack(std::string) {
-//    auto track = std::make_unique<NiceMock<MockTrack>>();
-//    ON_CALL(*track, stillExists()).WillByDefault(Return(true)); // TODO: How to fix this? track is a unique_ptr so gets moved and "attempting to reference deleted function"
-//    return track;
-//};
-//
-//TEST_CASE("On subsequent create project, scene master and renderer not added") {
-//    EARPluginSuite earSuite;
-//    auto api = NiceMock<MockReaperAPI>{};
-//    auto project = std::make_shared<NiceMock<MockProjectElement>>();
-//    auto node = ProjectNode{project};
-//
-//    auto returnPersistentSceneMasterTrack = createTrack([](MockTrack& track){
-//        ON_CALL(track, stillExists()).WillByDefault(Return(true));
-//        EXPECT_CALL(track, createPlugin(StrEq(SCENEMASTER_NAME)));
-//    });
-//
-//    auto returnPersistentRendererTrack = createTrack([](MockTrack& track){
-//        ON_CALL(track, stillExists()).WillByDefault(Return(true));
-//        EXPECT_CALL(track, createPlugin(StrEq(RENDERER_NAME)));
-//    });
-//
-//
-//    EXPECT_CALL(api, firstTrackWithPluginNamed(StrEq(RENDERER_NAME))).WillOnce(Return(nullptr)).WillRepeatedly(getMockTrack);
-//
-//    EXPECT_CALL(api, createTrack()).Times(2).WillOnce(returnPersistentSceneMasterTrack).WillOnce(returnPersistentRendererTrack);
-//    earSuite.onCreateProject(node, api);
-//    earSuite.onCreateProject(node, api);
-//}
+TEST_CASE("On subsequent create project, scene master and renderer not added") {
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
 
+    auto smTrack = createTrack([](MockTrack& track){
+        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+        EXPECT_CALL(track, createPlugin(_)).Times(0);
+    });
+
+    auto smTrackExpectPluginCreate = createTrack([](MockTrack& track){
+        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+        EXPECT_CALL(track, createPlugin(StrEq(SCENEMASTER_NAME))).Times(1);
+    });
+
+    auto monTrack = createTrack([](MockTrack& track){
+        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+        EXPECT_CALL(track, createPlugin(_)).Times(0);
+    });
+
+    auto monTrackExpectPluginCreate = createTrack([](MockTrack& track){
+        ON_CALL(track, stillExists()).WillByDefault(Return(true));
+        EXPECT_CALL(track, createPlugin(StrEq(RENDERER_NAME))).Times(1);
+    });
+
+    auto node = initProject(earSuite, api);
+    EXPECT_CALL(api, firstTrackWithPluginNamed(StrEq(RENDERER_NAME))).Times(2)
+        .WillOnce(Return(ByMove(nullptr)))
+        .WillOnce(Return(ByMove(std::move(monTrack()))));
+    EXPECT_CALL(api, firstTrackWithPluginNamed(StrEq(SCENEMASTER_NAME))).Times(2)
+        .WillOnce(Return(ByMove(nullptr)))
+        .WillOnce(Return(ByMove(std::move(smTrack()))));
+    EXPECT_CALL(api, createTrack()).Times(2)
+        .WillOnce(Return(ByMove(std::move(smTrackExpectPluginCreate()))))
+        .WillOnce(Return(ByMove(std::move(monTrackExpectPluginCreate()))));
+
+    earSuite.onCreateProject(node, api);
+    earSuite.onCreateProject(node, api);
+}
 
 TEST_CASE("Bus and renderer tracks positioned") {
     EARPluginSuite earSuite;
@@ -277,7 +286,8 @@ TEST_CASE("Object tracks created and plugin instantiated") {
     trackElement->setRepresentedAudioObject(ao);
     trackElement->setRepresentedAudioTrackUid(atu);
 
-    initProject(earSuite, api);
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
 
     SECTION("A track element with no automation data does not create plugins") {
         EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(1);
@@ -375,7 +385,8 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 //    const int FIRST_INDEX = 0;
 //    EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX));
 //    EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-//    initProject(earSuite, api);
+//    auto node = initProject(earSuite, api);
+//    earSuite.onCreateProject(node, api);
 //
 //    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
 //    earSuite.onCreateObjectTrack(trackElement, api);
@@ -403,7 +414,8 @@ TEST_CASE("Object tracks are not sent to master") {
     trackElement->setRepresentedAudioObject(ao);
     trackElement->setRepresentedAudioTrackUid(atu);
 
-    initProject(earSuite, api);
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
 
     auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement, takeElement);
     trackElement->addAutomationElement(autoElement);
@@ -441,7 +453,8 @@ namespace {
           EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
       }
 
-      initProject(earSuite, api);
+      auto node = initProject(earSuite, api);
+      earSuite.onCreateProject(node, api);
       earSuite.onProjectBuildBegin(getGenericMetadata(), api);
       earSuite.onObjectAutomation(*autoElement, api);
   }
@@ -464,7 +477,8 @@ namespace {
           return plugin;
       };
       EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-      initProject(earSuite, api);
+      auto node = initProject(earSuite, api);
+      earSuite.onCreateProject(node, api);
       earSuite.onCreateObjectTrack(trackElement, api);
 
       //    SECTION("sequentially") {
@@ -482,7 +496,8 @@ namespace {
       ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
       ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
       EXPECT_CALL(*track, disableMasterSend());
-      initProject(earSuite, api);
+      auto node = initProject(earSuite, api);
+      earSuite.onCreateProject(node, api);
       earSuite.onCreateDirectTrack(trackElement, api);
   }
 */
@@ -492,7 +507,8 @@ namespace {
       EARPluginSuite earSuite;
       auto api = NiceMock<MockReaperAPI>{};
       NiceMock<MockDirectSpeakersAutomation> autoElement;
-      initProject(earSuite, api);
+      auto node = initProject(earSuite, api);
+      earSuite.onCreateProject(node, api);
       auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010001"));
       auto cf = admCommonDef->lookup(adm::parseAudioChannelFormatId("AC_00010003"));
       auto atu = adm::AudioTrackUid::create();
@@ -521,7 +537,8 @@ TEST_CASE("Track routed to bus on directspeakers automation") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     NiceMock<MockDirectSpeakersAutomation> autoElement;
-    initProject(earSuite, api);
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
     auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010001"));
     auto cf = admCommonDef->lookup(adm::parseAudioChannelFormatId("AC_00010003"));
     auto atu = adm::AudioTrackUid::create();
@@ -543,7 +560,8 @@ TEST_CASE("Tracks are routed sequentially") {
     NiceMock<MockDirectSpeakersAutomation> directAuto;
     auto objectAuto = getMockObjectAutoElement();
 
-    initProject(earSuite, api);
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
 
     auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010003"));
     std::vector<ADMChannel> directChannels;
