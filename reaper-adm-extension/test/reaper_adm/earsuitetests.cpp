@@ -195,20 +195,12 @@ TEST_CASE("On first create project, bus and renderer tracks set to 64 channels")
     earSuite.onCreateProject(node, api);
 }
 
-//TODO - Not sure why you'd expect the renderer not to route to master? It doesn't follow the pattern of any other plugin suite
-//TEST_CASE("On first create project, bus and renderer tracks have master send disabled") {
-//    EARPluginSuite earSuite;
-//    auto api = NiceMock<MockReaperAPI>{};
-//    auto project = std::make_shared<NiceMock<MockProjectElement>>();
-//    auto node = ProjectNode{project};
-//
-//    auto returnTrackWithPluginExpectations = createTrack([](MockTrack& track){
-//        EXPECT_CALL(track, disableMasterSend());
-//    });
-//
-//    ON_CALL(api, createTrack()).WillByDefault(returnTrackWithPluginExpectations);
-//    earSuite.onCreateProject(node, api);
-//}
+TEST_CASE("On first create project, bus track has master send disabled") {
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+    EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+    initProject(earSuite, api); // calls earSuite.onCreateProject(node, api);
+}
 
 //std::unique_ptr<NiceMock<MockTrack>> getMockTrack(std::string) {
 //    auto track = std::make_unique<NiceMock<MockTrack>>();
