@@ -488,7 +488,7 @@ namespace {
   }
 */
 
-  TEST_CASE("Directspeaker tracks are not sent to master") {
+  TEST_CASE("Directspeaker tracks are created and configured") {
       EARPluginSuite earSuite;
       auto api = NiceMock<MockReaperAPI>{};
 
@@ -513,61 +513,27 @@ namespace {
       trackElement->addAutomationElement(autoElement1);
       trackElement->addAutomationElement(autoElement2);
 
-      EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
-      earSuite.onCreateDirectTrack(*trackElement, api);
-  }
+      SECTION("Track is created") {
+          earSuite.onCreateProject(node, api);
+          EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+          earSuite.onCreateDirectTrack(*trackElement, api);
+      }
 
-  TEST_CASE("Channels Metadata plugin added on first directspeakers automation")
-  {
-      EARPluginSuite earSuite;
-      auto api = NiceMock<MockReaperAPI>{};
-      NiceMock<MockDirectSpeakersAutomation> autoElement;
-      auto node = initProject(earSuite, api);
-      earSuite.onCreateProject(node, api);
-      auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010001"));
-      auto cf = admCommonDef->lookup(adm::parseAudioChannelFormatId("AC_00010003"));
-      auto atu = adm::AudioTrackUid::create();
-      std::vector<ADMChannel> channels{ ADMChannel(nullptr, cf, pf, atu, 0) };
-      auto track = std::make_shared<NiceMock<MockTrack>>();
-      ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
-      ON_CALL(autoElement, takeChannels()).WillByDefault(Return(channels));
-      ON_CALL(autoElement, channel()).WillByDefault(Return(channels[0]));
-      ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(nullptr)));
-      ON_CALL(*track, getPlugin(An<int>())).WillByDefault(Return(ByMove(nullptr)));
-      EXPECT_CALL(*track, createPlugin(StrEq("EAR DirectSpeakers"))).WillRepeatedly(createPlugin);
-      earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-      earSuite.onDirectSpeakersAutomation(autoElement, api);
-      SECTION("But not if already present")
-      {
-          auto plugin = std::make_unique<NiceMock<MockPlugin>>();
-          ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(Return(ByMove(std::move(plugin))));
-          ON_CALL(*track, getPlugin(An<int>())).WillByDefault(Return(ByMove(std::move(plugin))));
-          EXPECT_CALL(*track, createPlugin(_)).Times(0);
-          earSuite.onDirectSpeakersAutomation(autoElement, api);
+      SECTION("Plugin is created") {
+          earSuite.onCreateProject(node, api);
+          EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
+          earSuite.onCreateDirectTrack(*trackElement, api);
+      }
+
+      SECTION("Track is routed to scene and not to master") {
+          earSuite.onCreateProject(node, api);
+          EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+          EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
+          earSuite.onCreateDirectTrack(*trackElement, api);
       }
   }
 
 /*
-TEST_CASE("Track routed to bus on directspeakers automation") {
-    EARPluginSuite earSuite;
-    auto api = NiceMock<MockReaperAPI>{};
-    NiceMock<MockDirectSpeakersAutomation> autoElement;
-    auto node = initProject(earSuite, api);
-    earSuite.onCreateProject(node, api);
-    auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010001"));
-    auto cf = admCommonDef->lookup(adm::parseAudioChannelFormatId("AC_00010003"));
-    auto atu = adm::AudioTrackUid::create();
-    std::vector<ADMChannel> channels{ ADMChannel(nullptr, cf, pf, atu) };
-    auto track = std::make_shared<NiceMock<MockTrack>>();
-    ON_CALL(autoElement, getTrack()).WillByDefault(Return(track));
-    ON_CALL(autoElement, takeChannels()).WillByDefault(Return(channels));
-    ON_CALL(autoElement, channel()).WillByDefault(Return(channels[0]));
-    ON_CALL(*track, createPlugin(StrEq("EAR DirectSpeakers"))).WillByDefault(createPlugin);
-    EXPECT_CALL(*track, route(_, _, _, _));
-    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-    earSuite.onDirectSpeakersAutomation(autoElement, api);
-}
-
 TEST_CASE("Tracks are routed sequentially") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
