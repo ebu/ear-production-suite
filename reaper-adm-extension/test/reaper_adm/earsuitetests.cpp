@@ -152,7 +152,6 @@ auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, cons
 std::string SCENEMASTER_NAME{"EAR Scene"};
 std::string RENDERER_NAME{"EAR Monitoring 0+2+0"};
 
-
 }
 
 TEST_CASE("On create project, two tracks are created") {
@@ -372,35 +371,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
     }
 }
 
-//TODO - mock UniqueValueAssigner for this to work
-//TEST_CASE("Object tracks are routed to bus track") {
-//    EARPluginSuite earSuite;
-//    auto api = NiceMock<MockReaperAPI>{};
-//    NiceMock<MockTrackElement> trackElement;
-//    auto track = std::make_shared<NiceMock<MockTrack>>();
-//    auto objectAuto = getMockObjectAutoElement();
-//    ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-//    ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-//    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
-//
-//    const int FIRST_INDEX = 0;
-//    EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX));
-//    EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-//    auto node = initProject(earSuite, api);
-//    earSuite.onCreateProject(node, api);
-//
-//    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-//    earSuite.onCreateObjectTrack(trackElement, api);
-//    earSuite.onObjectAutomation(*objectAuto, api);
-//
-//    SECTION("sequentially") {
-//      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
-//      earSuite.onCreateObjectTrack(trackElement, api);
-//      earSuite.onObjectAutomation(*objectAuto, api);
-//    }
-//}
-
-TEST_CASE("Object tracks are not sent to master") {
+TEST_CASE("Object tracks are routed to scene, and not sent to master") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
 
@@ -421,223 +392,223 @@ TEST_CASE("Object tracks are not sent to master") {
     auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ ao, nullptr, nullptr, atu, 0 }, trackElement, takeElement);
     trackElement->addAutomationElement(autoElement);
     EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+    EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
     earSuite.onCreateObjectTrack(*trackElement, api);
 }
 
+TEST_CASE("Directspeaker tracks are created and configured") {
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+
+    auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
+    auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("test"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
+    auto atu0 = adm::AudioTrackUid::create();
+    auto atu1 = adm::AudioTrackUid::create();
+
+    auto trackElement = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{ao}, nullptr);
+    auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
+
+    takeElement->addChannelOfOriginal(0);
+    takeElement->addChannelOfOriginal(1);
+    trackElement->setTakeElement(takeElement);
+    trackElement->setRepresentedAudioObject(ao);
+
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
+
+    auto autoElement1 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu0, 0 }, trackElement, takeElement);
+    auto autoElement2 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 1 }, trackElement, takeElement);
+    trackElement->addAutomationElement(autoElement1);
+    trackElement->addAutomationElement(autoElement2);
+
+    SECTION("Track is created") {
+        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+        earSuite.onCreateDirectTrack(*trackElement, api);
+    }
+
+    SECTION("Plugin is created") {
+        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
+        earSuite.onCreateDirectTrack(*trackElement, api);
+    }
+
+    SECTION("Track is routed to scene and not to master") {
+        EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+        EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
+        earSuite.onCreateDirectTrack(*trackElement, api);
+    }
+
+    SECTION("Additional Tracks are routed sequentially") {
+        auto aoEx = adm::AudioObject::create(adm::AudioObjectName("testEx"));
+        auto apfEx = adm::AudioPackFormat::create(adm::AudioPackFormatName("testEx"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
+        auto atu0Ex = adm::AudioTrackUid::create();
+        auto atu1Ex = adm::AudioTrackUid::create();
+
+        auto trackElementEx = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{aoEx}, nullptr);
+        auto takeElementEx = std::make_shared<MediaTakeElement>(aoEx, trackElementEx, nullptr);
+
+        takeElementEx->addChannelOfOriginal(2);
+        takeElementEx->addChannelOfOriginal(3);
+        trackElementEx->setTakeElement(takeElementEx);
+        trackElementEx->setRepresentedAudioObject(aoEx);
+
+        auto autoElement1Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu0Ex, 2 }, trackElementEx, takeElementEx);
+        auto autoElement2Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu1Ex, 3 }, trackElementEx, takeElementEx);
+        trackElementEx->addAutomationElement(autoElement1Ex);
+        trackElementEx->addAutomationElement(autoElement2Ex);
+
+        EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 2, _, _)).Times(1);
+        EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 2, 2, _, _)).Times(1);
+
+        earSuite.onCreateDirectTrack(*trackElement, api);
+        earSuite.onCreateDirectTrack(*trackElementEx, api);
+    }
+}
+
+TEST_CASE("HOA tracks are created and configured") {
+    EARPluginSuite earSuite;
+    auto api = NiceMock<MockReaperAPI>{};
+
+    auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
+    auto apf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00040001"));
+    auto atu0 = adm::AudioTrackUid::create();
+    auto atu1 = adm::AudioTrackUid::create();
+    auto atu2 = adm::AudioTrackUid::create();
+    auto atu3 = adm::AudioTrackUid::create();
+
+    auto trackElement = std::make_shared<HoaTrack>(std::vector<adm::ElementConstVariant>{ao}, nullptr);
+    auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
+
+    takeElement->addChannelOfOriginal(0);
+    takeElement->addChannelOfOriginal(1);
+    takeElement->addChannelOfOriginal(2);
+    takeElement->addChannelOfOriginal(3);
+    trackElement->setTakeElement(takeElement);
+    trackElement->setRepresentedAudioObject(ao);
+
+    auto node = initProject(earSuite, api);
+    earSuite.onCreateProject(node, api);
+
+    auto autoElement1 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu0, 0 }, trackElement, takeElement);
+    auto autoElement2 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 1 }, trackElement, takeElement);
+    auto autoElement3 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 2 }, trackElement, takeElement);
+    auto autoElement4 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 3 }, trackElement, takeElement);
+    trackElement->addAutomationElement(autoElement1);
+    trackElement->addAutomationElement(autoElement2);
+    trackElement->addAutomationElement(autoElement3);
+    trackElement->addAutomationElement(autoElement4);
+
+    SECTION("Track is created") {
+        EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+        earSuite.onCreateHoaTrack(*trackElement, api);
+    }
+
+    SECTION("Plugin is created") {
+        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR HOA"),_,_)).Times(1);
+        earSuite.onCreateHoaTrack(*trackElement, api);
+    }
+
+    SECTION("Track is routed to scene and not to master") {
+        EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
+        EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
+        earSuite.onCreateHoaTrack(*trackElement, api);
+    }
+
+    SECTION("Additional Tracks are routed sequentially") {
+        auto aoEx = adm::AudioObject::create(adm::AudioObjectName("testEx"));
+        auto apfEx = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00040001"));
+        auto atu0Ex = adm::AudioTrackUid::create();
+        auto atu1Ex = adm::AudioTrackUid::create();
+        auto atu2Ex = adm::AudioTrackUid::create();
+        auto atu3Ex = adm::AudioTrackUid::create();
+
+        auto trackElementEx = std::make_shared<HoaTrack>(std::vector<adm::ElementConstVariant>{aoEx}, nullptr);
+        auto takeElementEx = std::make_shared<MediaTakeElement>(aoEx, trackElementEx, nullptr);
+
+        takeElementEx->addChannelOfOriginal(4);
+        takeElementEx->addChannelOfOriginal(5);
+        takeElementEx->addChannelOfOriginal(6);
+        takeElementEx->addChannelOfOriginal(7);
+        trackElementEx->setTakeElement(takeElementEx);
+        trackElementEx->setRepresentedAudioObject(aoEx);
+
+        auto autoElement1Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu0Ex, 4 }, trackElementEx, takeElementEx);
+        auto autoElement2Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu1Ex, 5 }, trackElementEx, takeElementEx);
+        auto autoElement3Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu2Ex, 6 }, trackElementEx, takeElementEx);
+        auto autoElement4Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu3Ex, 7 }, trackElementEx, takeElementEx);
+        trackElementEx->addAutomationElement(autoElement1Ex);
+        trackElementEx->addAutomationElement(autoElement2Ex);
+        trackElementEx->addAutomationElement(autoElement3Ex);
+        trackElementEx->addAutomationElement(autoElement4Ex);
+
+        EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 4, _, _)).Times(1);
+        EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 4, 4, _, _)).Times(1);
+
+        earSuite.onCreateHoaTrack(*trackElement, api);
+        earSuite.onCreateHoaTrack(*trackElementEx, api);
+    }
+}
+
 namespace {
-  MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
-  MATCHER_P(HasIndex, index, "")
-  {
-      return (arg.index() == index);
-  }
-  } // namespace
+MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
+MATCHER_P(HasIndex, index, "")
+{
+    return (arg.index() == index);
+}
+} // namespace
 
 /*
-  TEST_CASE("Automation is applied for all Automatable Object plugin parameters")
-  {
-      std::vector<AdmParameter> supportedParameters{{AdmParameter::OBJECT_AZIMUTH,
-                                                     AdmParameter::OBJECT_DISTANCE,
-                                                     AdmParameter::OBJECT_ELEVATION,
-                                                     AdmParameter::OBJECT_GAIN,
-                                                     AdmParameter::OBJECT_HEIGHT,
-                                                     AdmParameter::OBJECT_WIDTH,
-                                                     AdmParameter::OBJECT_DEPTH,
-                                                     AdmParameter::OBJECT_DIFFUSE,
+TEST_CASE("Automation is applied for all Automatable Object plugin parameters")
+{
+std::vector<AdmParameter> supportedParameters{{AdmParameter::OBJECT_AZIMUTH,
+AdmParameter::OBJECT_DISTANCE,
+AdmParameter::OBJECT_ELEVATION,
+AdmParameter::OBJECT_GAIN,
+AdmParameter::OBJECT_HEIGHT,
+AdmParameter::OBJECT_WIDTH,
+AdmParameter::OBJECT_DEPTH,
+AdmParameter::OBJECT_DIFFUSE,
 //                                                     AdmParameter::OBJECT_DIVERGENCE,
 //                                                     AdmParameter::OBJECT_DIVERGENCE_AZIMUTH_RANGE
-      }};
+}};
 
-      EARPluginSuite earSuite;
-      auto api = NiceMock<MockReaperAPI>{};
-      auto autoElement = getMockObjectAutoElement();
-      for (auto parameter : supportedParameters) {
-          EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
-      }
+EARPluginSuite earSuite;
+auto api = NiceMock<MockReaperAPI>{};
+auto autoElement = getMockObjectAutoElement();
+for (auto parameter : supportedParameters) {
+EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
+}
 
-      auto node = initProject(earSuite, api);
-      earSuite.onCreateProject(node, api);
-      earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-      earSuite.onObjectAutomation(*autoElement, api);
-  }
+auto node = initProject(earSuite, api);
+earSuite.onCreateProject(node, api);
+earSuite.onProjectBuildBegin(getGenericMetadata(), api);
+earSuite.onObjectAutomation(*autoElement, api);
+}
 
-  TEST_CASE("Object tracks have trackmapping applied")
-  {
-      EARPluginSuite earSuite;
-      auto api = NiceMock<MockReaperAPI>{};
-      NiceMock<MockTrackElement> trackElement;
-      auto track = std::make_shared<NiceMock<MockTrack>>();
+TEST_CASE("Object tracks have trackmapping applied")
+{
+EARPluginSuite earSuite;
+auto api = NiceMock<MockReaperAPI>{};
+NiceMock<MockTrackElement> trackElement;
+auto track = std::make_shared<NiceMock<MockTrack>>();
 
-      ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
+ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
 
-      const double FIRST_INDEX = 1.0 / 64.0; // from 0 to 1 inclusive with 65 steps (-1 to 63), -1 == unmapped so first should be step after 0.
-      const int TRACK_MAPPING_PARAMETER = 0;
+const double FIRST_INDEX = 1.0 / 64.0; // from 0 to 1 inclusive with 65 steps (-1 to 63), -1 == unmapped so first should be step after 0.
+const int TRACK_MAPPING_PARAMETER = 0;
 
-      auto createPlugin = [=](std::string) {
-          auto plugin = std::make_unique<MockPlugin>();
-          EXPECT_CALL(*plugin, setParameter(HasIndex(TRACK_MAPPING_PARAMETER), FIRST_INDEX));
-          return plugin;
-      };
-      EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-      auto node = initProject(earSuite, api);
-      earSuite.onCreateProject(node, api);
-      earSuite.onCreateObjectTrack(trackElement, api);
+auto createPlugin = [=](std::string) {
+auto plugin = std::make_unique<MockPlugin>();
+EXPECT_CALL(*plugin, setParameter(HasIndex(TRACK_MAPPING_PARAMETER), FIRST_INDEX));
+return plugin;
+};
+EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
+auto node = initProject(earSuite, api);
+earSuite.onCreateProject(node, api);
+earSuite.onCreateObjectTrack(trackElement, api);
 
-      //    SECTION("sequentially") {
-      //      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
-      //      earSuite.onCreateObjectTrack(trackElement, api);
-      //    }
-  }
+//    SECTION("sequentially") {
+//      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
+//      earSuite.onCreateObjectTrack(trackElement, api);
+//    }
+}
 */
-
-  TEST_CASE("Directspeaker tracks are created and configured") {
-      EARPluginSuite earSuite;
-      auto api = NiceMock<MockReaperAPI>{};
-
-      auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
-      auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("test"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
-      auto atu0 = adm::AudioTrackUid::create();
-      auto atu1 = adm::AudioTrackUid::create();
-
-      auto trackElement = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{ao}, nullptr);
-      auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
-
-      takeElement->addChannelOfOriginal(0);
-      takeElement->addChannelOfOriginal(1);
-      trackElement->setTakeElement(takeElement);
-      trackElement->setRepresentedAudioObject(ao);
-
-      auto node = initProject(earSuite, api);
-      earSuite.onCreateProject(node, api);
-
-      auto autoElement1 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu0, 0 }, trackElement, takeElement);
-      auto autoElement2 = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 1 }, trackElement, takeElement);
-      trackElement->addAutomationElement(autoElement1);
-      trackElement->addAutomationElement(autoElement2);
-
-      SECTION("Track is created") {
-          EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
-          earSuite.onCreateDirectTrack(*trackElement, api);
-      }
-
-      SECTION("Plugin is created") {
-          EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
-          earSuite.onCreateDirectTrack(*trackElement, api);
-      }
-
-      SECTION("Track is routed to scene and not to master") {
-          EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
-          EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
-          earSuite.onCreateDirectTrack(*trackElement, api);
-      }
-
-      SECTION("Additional Tracks are routed sequentially") {
-          auto aoEx = adm::AudioObject::create(adm::AudioObjectName("testEx"));
-          auto apfEx = adm::AudioPackFormat::create(adm::AudioPackFormatName("testEx"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
-          auto atu0Ex = adm::AudioTrackUid::create();
-          auto atu1Ex = adm::AudioTrackUid::create();
-
-          auto trackElementEx = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{aoEx}, nullptr);
-          auto takeElementEx = std::make_shared<MediaTakeElement>(aoEx, trackElementEx, nullptr);
-
-          takeElementEx->addChannelOfOriginal(2);
-          takeElementEx->addChannelOfOriginal(3);
-          trackElementEx->setTakeElement(takeElementEx);
-          trackElementEx->setRepresentedAudioObject(aoEx);
-
-          auto autoElement1Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu0Ex, 2 }, trackElementEx, takeElementEx);
-          auto autoElement2Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu1Ex, 3 }, trackElementEx, takeElementEx);
-          trackElementEx->addAutomationElement(autoElement1Ex);
-          trackElementEx->addAutomationElement(autoElement2Ex);
-
-          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 2, _, _)).Times(1);
-          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 2, 2, _, _)).Times(1);
-
-          earSuite.onCreateDirectTrack(*trackElement, api);
-          earSuite.onCreateDirectTrack(*trackElementEx, api);
-      }
-  }
-
-  TEST_CASE("HOA tracks are created and configured") {
-      EARPluginSuite earSuite;
-      auto api = NiceMock<MockReaperAPI>{};
-
-      auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
-      auto apf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00040001"));
-      //auto apf = adm::AudioPackFormatHoa::create(adm::AudioPackFormatName("test"), adm::TypeDefinition::HOA, adm::parseAudioPackFormatId("AP_00040001"));
-      auto atu0 = adm::AudioTrackUid::create();
-      auto atu1 = adm::AudioTrackUid::create();
-      auto atu2 = adm::AudioTrackUid::create();
-      auto atu3 = adm::AudioTrackUid::create();
-
-      auto trackElement = std::make_shared<HoaTrack>(std::vector<adm::ElementConstVariant>{ao}, nullptr);
-      auto takeElement = std::make_shared<MediaTakeElement>(ao, trackElement, nullptr);
-
-      takeElement->addChannelOfOriginal(0);
-      takeElement->addChannelOfOriginal(1);
-      takeElement->addChannelOfOriginal(2);
-      takeElement->addChannelOfOriginal(3);
-      trackElement->setTakeElement(takeElement);
-      trackElement->setRepresentedAudioObject(ao);
-
-      auto node = initProject(earSuite, api);
-      earSuite.onCreateProject(node, api);
-
-      auto autoElement1 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu0, 0 }, trackElement, takeElement);
-      auto autoElement2 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 1 }, trackElement, takeElement);
-      auto autoElement3 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 2 }, trackElement, takeElement);
-      auto autoElement4 = std::make_shared<HoaAutomationElement>(ADMChannel{ ao, nullptr, apf, atu1, 3 }, trackElement, takeElement);
-      trackElement->addAutomationElement(autoElement1);
-      trackElement->addAutomationElement(autoElement2);
-      trackElement->addAutomationElement(autoElement3);
-      trackElement->addAutomationElement(autoElement4);
-
-      SECTION("Track is created") {
-          EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
-          earSuite.onCreateHoaTrack(*trackElement, api);
-      }
-
-      SECTION("Plugin is created") {
-          EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR HOA"),_,_)).Times(1);
-          earSuite.onCreateHoaTrack(*trackElement, api);
-      }
-
-      SECTION("Track is routed to scene and not to master") {
-          EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
-          EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
-          earSuite.onCreateHoaTrack(*trackElement, api);
-      }
-
-      SECTION("Additional Tracks are routed sequentially") {
-          auto aoEx = adm::AudioObject::create(adm::AudioObjectName("testEx"));
-          auto apfEx = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00040001"));
-          auto atu0Ex = adm::AudioTrackUid::create();
-          auto atu1Ex = adm::AudioTrackUid::create();
-          auto atu2Ex = adm::AudioTrackUid::create();
-          auto atu3Ex = adm::AudioTrackUid::create();
-
-          auto trackElementEx = std::make_shared<HoaTrack>(std::vector<adm::ElementConstVariant>{aoEx}, nullptr);
-          auto takeElementEx = std::make_shared<MediaTakeElement>(aoEx, trackElementEx, nullptr);
-
-          takeElementEx->addChannelOfOriginal(4);
-          takeElementEx->addChannelOfOriginal(5);
-          takeElementEx->addChannelOfOriginal(6);
-          takeElementEx->addChannelOfOriginal(7);
-          trackElementEx->setTakeElement(takeElementEx);
-          trackElementEx->setRepresentedAudioObject(aoEx);
-
-          auto autoElement1Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu0Ex, 4 }, trackElementEx, takeElementEx);
-          auto autoElement2Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu1Ex, 5 }, trackElementEx, takeElementEx);
-          auto autoElement3Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu2Ex, 6 }, trackElementEx, takeElementEx);
-          auto autoElement4Ex = std::make_shared<HoaAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu3Ex, 7 }, trackElementEx, takeElementEx);
-          trackElementEx->addAutomationElement(autoElement1Ex);
-          trackElementEx->addAutomationElement(autoElement2Ex);
-          trackElementEx->addAutomationElement(autoElement3Ex);
-          trackElementEx->addAutomationElement(autoElement4Ex);
-
-          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 4, _, _)).Times(1);
-          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 4, 4, _, _)).Times(1);
-
-          earSuite.onCreateHoaTrack(*trackElement, api);
-          earSuite.onCreateHoaTrack(*trackElementEx, api);
-      }
-  }
