@@ -514,71 +514,44 @@ namespace {
       trackElement->addAutomationElement(autoElement2);
 
       SECTION("Track is created") {
-          earSuite.onCreateProject(node, api);
           EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
           earSuite.onCreateDirectTrack(*trackElement, api);
       }
 
       SECTION("Plugin is created") {
-          earSuite.onCreateProject(node, api);
           EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
           earSuite.onCreateDirectTrack(*trackElement, api);
       }
 
       SECTION("Track is routed to scene and not to master") {
-          earSuite.onCreateProject(node, api);
           EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
           EXPECT_CALL(api, RouteTrackToTrack(_, _, _, _, _, _, _)).Times(1);
           earSuite.onCreateDirectTrack(*trackElement, api);
       }
+
+      SECTION("Additional Tracks are routed sequentially") {
+          auto aoEx = adm::AudioObject::create(adm::AudioObjectName("testEx"));
+          auto apfEx = adm::AudioPackFormat::create(adm::AudioPackFormatName("testEx"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
+          auto atu0Ex = adm::AudioTrackUid::create();
+          auto atu1Ex = adm::AudioTrackUid::create();
+
+          auto trackElementEx = std::make_shared<DirectTrack>(std::vector<adm::ElementConstVariant>{aoEx}, nullptr);
+          auto takeElementEx = std::make_shared<MediaTakeElement>(aoEx, trackElementEx, nullptr);
+
+          takeElementEx->addChannelOfOriginal(2);
+          takeElementEx->addChannelOfOriginal(3);
+          trackElementEx->setTakeElement(takeElementEx);
+          trackElementEx->setRepresentedAudioObject(aoEx);
+
+          auto autoElement1Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu0Ex, 2 }, trackElementEx, takeElementEx);
+          auto autoElement2Ex = std::make_shared<DirectSpeakersAutomationElement>(ADMChannel{ aoEx, nullptr, apfEx, atu1Ex, 3 }, trackElementEx, takeElementEx);
+          trackElementEx->addAutomationElement(autoElement1Ex);
+          trackElementEx->addAutomationElement(autoElement2Ex);
+
+          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 2, _, _)).Times(1);
+          EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 2, 2, _, _)).Times(1);
+
+          earSuite.onCreateDirectTrack(*trackElement, api);
+          earSuite.onCreateDirectTrack(*trackElementEx, api);
+      }
   }
-
-/*
-TEST_CASE("Tracks are routed sequentially") {
-    EARPluginSuite earSuite;
-    auto api = NiceMock<MockReaperAPI>{};
-
-    NiceMock<MockDirectSpeakersAutomation> directAuto;
-    auto objectAuto = getMockObjectAutoElement();
-
-    auto node = initProject(earSuite, api);
-    earSuite.onCreateProject(node, api);
-
-    auto pf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00010003"));
-    std::vector<ADMChannel> directChannels;
-    for(auto cf : pf->getReferences<adm::AudioChannelFormat>()) {
-        auto atu = adm::AudioTrackUid::create();
-        directChannels.push_back(ADMChannel(nullptr, cf, pf, atu));
-    }
-
-    auto simpleObj = adm::createSimpleObject("Test");
-    std::vector<ADMChannel> objectChannels{ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid)};
-
-    auto objectTrack = std::make_shared<NiceMock<MockTrack>>();
-    auto directTrack = std::make_shared<NiceMock<MockTrack>>();
-
-    int OBJECT_CHANNEL_COUNT = objectChannels.size();
-    int DIRECT_CHANNEL_COUNT = directChannels.size();
-
-    ON_CALL(directAuto, takeChannels()).WillByDefault(Return(directChannels));
-    ON_CALL(directAuto, getTrack()).WillByDefault(Return(directTrack));
-    ON_CALL(directAuto, channel()).WillByDefault(Return(directChannels[0]));
-    ON_CALL(*objectAuto, takeChannels()).WillByDefault(Return(objectChannels));
-    ON_CALL(*objectAuto, getTrack()).WillByDefault(Return(objectTrack));
-    ON_CALL(*objectAuto, channel()).WillByDefault(Return(objectChannels[0]));
-
-    ON_CALL(*objectTrack, createPlugin(StrEq("EAR Object"))).WillByDefault(createPlugin);
-    ON_CALL(*directTrack, createPlugin(StrEq("EAR DirectSpeakers"))).WillByDefault(createPlugin);
-
-    InSequence();
-    earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-    EXPECT_CALL(*objectTrack, route(_, _, _, 0));
-    //earSuite.onCreateObjectTrack(trackElement, api);
-    earSuite.onObjectAutomation(*objectAuto, api);
-    EXPECT_CALL(*directTrack, route(_, _, _, OBJECT_CHANNEL_COUNT));
-    earSuite.onDirectSpeakersAutomation(directAuto, api);
-    EXPECT_CALL(*objectTrack, route(_, _, _, OBJECT_CHANNEL_COUNT + DIRECT_CHANNEL_COUNT));
-    //earSuite.onCreateObjectTrack(trackElement, api);
-    earSuite.onObjectAutomation(*objectAuto, api);
-}
-*/
