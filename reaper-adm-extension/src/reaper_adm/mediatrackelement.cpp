@@ -78,7 +78,9 @@ std::vector<TrackGroup> admplug::MediaTrackElement::slaveOfGroups() const
 {
     std::vector<TrackGroup> groupMasters;
     for (auto parentTrack : parentElements) {
-        groupMasters.push_back(parentTrack->masterOfGroup());
+        if(auto lockParentTrack = parentTrack.lock()) {
+            groupMasters.push_back(lockParentTrack->masterOfGroup());
+        }
     }
     return groupMasters;
 }

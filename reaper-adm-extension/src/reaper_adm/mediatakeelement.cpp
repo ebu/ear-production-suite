@@ -31,21 +31,23 @@ double toSeconds(adm::detail::NamedType<adm::Time, Tag> const& time) {
 
 
 MediaTakeElement::MediaTakeElement(std::shared_ptr<const adm::AudioObject> obj,
-                                    std::shared_ptr<TrackElement> parentTrack,
+                                    std::weak_ptr<TrackElement> parentTrack,
                                     MediaItem* referenceItem) :
     object{obj},
     referenceItem{referenceItem}
 {
-    parents.push_back(parentTrack);
+    addParentProjectElement(parentTrack);
 }
 
 void MediaTakeElement::createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api)
 {
-    for(auto parent : parents) {
-        auto trackEl = parent.get();
-        if(trackEl && trackEl->getTrack() && !hasMediaItem(api, *trackEl)) {
-            auto mediaItem = createMediaItem(api, *trackEl);
-            createTake(api, mediaItem);
+    for(auto parentWeak : parents) {
+        if(auto parent = parentWeak.lock()) {
+            auto trackEl = parent.get();
+            if(trackEl && trackEl->getTrack() && !hasMediaItem(api, *trackEl)) {
+                auto mediaItem = createMediaItem(api, *trackEl);
+                createTake(api, mediaItem);
+            }
         }
     }
 }
