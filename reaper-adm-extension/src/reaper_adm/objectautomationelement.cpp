@@ -80,12 +80,22 @@ adm::BlockFormatsConstRange<adm::AudioBlockFormatObjects> ObjectAutomationElemen
 
 double ObjectAutomationElement::startTime() const
 {
-    return parentTake_->startTime();
+    auto lockParentTake = parentTake_.lock();
+    assert(lockParentTake);
+    if(lockParentTake) {
+        return lockParentTake->startTime();
+    }
+    return 0.0;
 }
 
 std::shared_ptr<Track> ObjectAutomationElement::getTrack() const
 {
-    return parentTrack_->getTrack();
+    auto lockParentTrack = parentTrack_.lock();
+    assert(lockParentTrack);
+    if(lockParentTrack) {
+        return lockParentTrack->getTrack();
+    }
+    return nullptr;
 }
 
 ADMChannel ObjectAutomationElement::channel() const

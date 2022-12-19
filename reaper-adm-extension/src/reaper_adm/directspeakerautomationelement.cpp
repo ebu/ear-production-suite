@@ -54,20 +54,35 @@ adm::BlockFormatsConstRange<adm::AudioBlockFormatDirectSpeakers> DirectSpeakersA
 
 double DirectSpeakersAutomationElement::startTime() const
 {
-    return parentTake_->startTime();
+    auto lockParentTake = parentTake_.lock();
+    assert(lockParentTake);
+    if(lockParentTake) {
+        return lockParentTake->startTime();
+    }
+    return 0.0;
 }
 
 std::shared_ptr<Track> DirectSpeakersAutomationElement::getTrack() const
 {
-    return parentTrack_->getTrack();
+    auto lockParentTrack = parentTrack_.lock();
+    assert(lockParentTrack);
+    if(lockParentTrack) {
+        return lockParentTrack->getTrack();
+    }
+    return nullptr;
 }
 
 int DirectSpeakersAutomationElement::channelIndex() const
 {
-    auto chans = parentTake_->channelsOfOriginal();
-    auto location = std::find(chans.cbegin(), chans.cend(), admChannel.channelOfOriginal());
-    if(location == chans.cend()) return -1;
-    return static_cast<int>(location - chans.cbegin());
+    auto lockParentTake = parentTake_.lock();
+    assert(lockParentTake);
+    if(lockParentTake) {
+        auto chans = lockParentTake->channelsOfOriginal();
+        auto location = std::find(chans.cbegin(), chans.cend(), admChannel.channelOfOriginal());
+        if(location == chans.cend()) return -1;
+        return static_cast<int>(location - chans.cbegin());
+    }
+    return -1;
 }
 
 void DirectSpeakersAutomationElement::apply(const PluginParameter &parameter, const Plugin &plugin) const

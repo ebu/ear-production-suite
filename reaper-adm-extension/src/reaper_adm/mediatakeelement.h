@@ -11,7 +11,7 @@ namespace admplug {
 class MediaTakeElement : public TakeElement {
 public:
     MediaTakeElement(std::shared_ptr<adm::AudioObject const> obj,
-                    std::shared_ptr<TrackElement> = nullptr,
+                    std::weak_ptr<TrackElement> = std::weak_ptr<TrackElement>(),
                      MediaItem* referenceItem = nullptr);
     void createProjectElements(PluginSuite &pluginSuite, const ReaperAPI &api) override;
     void setSource(PCM_source * source) override;
