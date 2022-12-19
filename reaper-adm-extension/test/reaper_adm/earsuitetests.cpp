@@ -152,6 +152,12 @@ auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, cons
 std::string SCENEMASTER_NAME{"EAR Scene"};
 std::string RENDERER_NAME{"EAR Monitoring 0+2+0"};
 
+MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
+MATCHER_P(HasIndex, index, "")
+{
+    return (arg.index() == index);
+}
+
 }
 
 TEST_CASE("On create project, two tracks are created") {
@@ -369,6 +375,57 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         earSuite.onCreateObjectTrack(*trackElement, api);
         earSuite.onCreateObjectTrack(*trackElement2, api);
     }
+
+    SECTION("Automation is applied for all Automatable Object plugin parameters") {
+        std::vector<AdmParameter> supportedParameters{
+            AdmParameter::OBJECT_AZIMUTH,
+            AdmParameter::OBJECT_DISTANCE,
+            AdmParameter::OBJECT_ELEVATION,
+            AdmParameter::OBJECT_GAIN,
+            AdmParameter::OBJECT_HEIGHT,
+            AdmParameter::OBJECT_WIDTH,
+            AdmParameter::OBJECT_DEPTH,
+            AdmParameter::OBJECT_DIFFUSE,
+            //AdmParameter::OBJECT_DIVERGENCE,
+            //AdmParameter::OBJECT_DIVERGENCE_AZIMUTH_RANGE
+        };
+
+        auto autoElement = getMockObjectAutoElement();
+        for(auto parameter : supportedParameters) {
+            EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
+        }
+        trackElement->addAutomationElement(std::shared_ptr<ObjectAutomation>(autoElement));
+        earSuite.onCreateObjectTrack(*trackElement, api);
+    }
+    /*
+    SECTION("Object tracks have trackmapping applied")
+    {
+        EARPluginSuite earSuite;
+        auto api = NiceMock<MockReaperAPI>{};
+        NiceMock<MockTrackElement> trackElement;
+        auto track = std::make_shared<NiceMock<MockTrack>>();
+
+        ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
+
+        const double FIRST_INDEX = 1.0 / 64.0; // from 0 to 1 inclusive with 65 steps (-1 to 63), -1 == unmapped so first should be step after 0.
+        const int TRACK_MAPPING_PARAMETER = 0;
+
+        auto createPlugin = [=](std::string) {
+            auto plugin = std::make_unique<MockPlugin>();
+            EXPECT_CALL(*plugin, setParameter(HasIndex(TRACK_MAPPING_PARAMETER), FIRST_INDEX));
+            return plugin;
+        };
+        EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
+        auto node = initProject(earSuite, api);
+        earSuite.onCreateProject(node, api);
+        earSuite.onCreateObjectTrack(trackElement, api);
+
+        //    SECTION("sequentially") {
+        //      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
+        //      earSuite.onCreateObjectTrack(trackElement, api);
+        //    }
+    }
+    */
 }
 
 TEST_CASE("Object tracks are routed to scene, and not sent to master") {
@@ -547,68 +604,3 @@ TEST_CASE("HOA tracks are created and configured") {
         earSuite.onCreateHoaTrack(*trackElementEx, api);
     }
 }
-
-namespace {
-MATCHER_P(HasParameter, param, "") { return (arg.admParameter() == param); }
-MATCHER_P(HasIndex, index, "")
-{
-    return (arg.index() == index);
-}
-} // namespace
-
-/*
-TEST_CASE("Automation is applied for all Automatable Object plugin parameters")
-{
-std::vector<AdmParameter> supportedParameters{{AdmParameter::OBJECT_AZIMUTH,
-AdmParameter::OBJECT_DISTANCE,
-AdmParameter::OBJECT_ELEVATION,
-AdmParameter::OBJECT_GAIN,
-AdmParameter::OBJECT_HEIGHT,
-AdmParameter::OBJECT_WIDTH,
-AdmParameter::OBJECT_DEPTH,
-AdmParameter::OBJECT_DIFFUSE,
-//                                                     AdmParameter::OBJECT_DIVERGENCE,
-//                                                     AdmParameter::OBJECT_DIVERGENCE_AZIMUTH_RANGE
-}};
-
-EARPluginSuite earSuite;
-auto api = NiceMock<MockReaperAPI>{};
-auto autoElement = getMockObjectAutoElement();
-for (auto parameter : supportedParameters) {
-EXPECT_CALL(*autoElement, apply(HasParameter(parameter), A<Plugin const &>()));
-}
-
-auto node = initProject(earSuite, api);
-earSuite.onCreateProject(node, api);
-earSuite.onProjectBuildBegin(getGenericMetadata(), api);
-earSuite.onObjectAutomation(*autoElement, api);
-}
-
-TEST_CASE("Object tracks have trackmapping applied")
-{
-EARPluginSuite earSuite;
-auto api = NiceMock<MockReaperAPI>{};
-NiceMock<MockTrackElement> trackElement;
-auto track = std::make_shared<NiceMock<MockTrack>>();
-
-ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-
-const double FIRST_INDEX = 1.0 / 64.0; // from 0 to 1 inclusive with 65 steps (-1 to 63), -1 == unmapped so first should be step after 0.
-const int TRACK_MAPPING_PARAMETER = 0;
-
-auto createPlugin = [=](std::string) {
-auto plugin = std::make_unique<MockPlugin>();
-EXPECT_CALL(*plugin, setParameter(HasIndex(TRACK_MAPPING_PARAMETER), FIRST_INDEX));
-return plugin;
-};
-EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-auto node = initProject(earSuite, api);
-earSuite.onCreateProject(node, api);
-earSuite.onCreateObjectTrack(trackElement, api);
-
-//    SECTION("sequentially") {
-//      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
-//      earSuite.onCreateObjectTrack(trackElement, api);
-//    }
-}
-*/
