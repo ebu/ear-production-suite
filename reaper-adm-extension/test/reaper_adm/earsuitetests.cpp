@@ -304,9 +304,11 @@ TEST_CASE("Object tracks created and plugin instantiated") {
     SECTION("Single Object") {
         auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement, takeElement);
         trackElement->addAutomationElement(autoElement);
-        EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(1);
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR Object"),_,_)).Times(1);
-        earSuite.onCreateObjectTrack(*trackElement, api);
+        SECTION("Creates track and plugins") {
+            EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(1);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+        }
     }
 
     SECTION("Multiple Objects (not sharing takes)") {
@@ -327,10 +329,12 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         auto autoElement2 = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 1 }, trackElement2, takeElement2);
         trackElement2->addAutomationElement(autoElement2);
 
-        EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(2);
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR Object"),_,_)).Times(2);
-        earSuite.onCreateObjectTrack(*trackElement, api);
-        earSuite.onCreateObjectTrack(*trackElement2, api);
+        SECTION("Creates 2 tracks and 2 plugins") {
+            EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(2);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
     }
 
     SECTION("Multiple Objects (sharing takes, same atu)") {
@@ -348,10 +352,12 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         auto autoElement2 = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement2, takeElement);
         trackElement2->addAutomationElement(autoElement2);
 
-        EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(1);
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR Object"),_,_)).Times(2);
-        earSuite.onCreateObjectTrack(*trackElement, api);
-        earSuite.onCreateObjectTrack(*trackElement2, api);
+        SECTION("Creates track and 2 plugins") {
+            EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
     }
 
     SECTION("Multiple Objects (sharing takes, different atu)") {
@@ -370,10 +376,12 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         auto autoElement2 = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement2, takeElement);
         trackElement2->addAutomationElement(autoElement2);
 
-        EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(1);
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR Object"),_,_)).Times(2);
-        earSuite.onCreateObjectTrack(*trackElement, api);
-        earSuite.onCreateObjectTrack(*trackElement2, api);
+        SECTION("Creates track and 2 plugins") {
+            EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
     }
 
     SECTION("Automation is applied for all Automatable Object plugin parameters") {
