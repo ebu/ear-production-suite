@@ -67,8 +67,6 @@ TEST_CASE("Catch library present") {
 
 TEST_CASE("GMock library correctly hooked in", "[!shouldfail] [.]") {
     auto api = std::make_unique< NiceMock<MockReaperAPI>>();
-    //TODO: Check pluginset correctly used
-    //auto pluginSet = std::make_unique< NiceMock<MockPluginSuite>>();
     EXPECT_CALL(*api, UpdateArrange()).Times(1);
 }
 

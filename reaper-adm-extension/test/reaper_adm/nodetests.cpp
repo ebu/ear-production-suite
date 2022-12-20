@@ -69,7 +69,6 @@ TEST_CASE("With a node creator and a simple object") {
 
     SECTION("With a track Element") {
         auto trackElement = std::make_shared<NiceMock<MockTrackElement>>();
-//        auto trackVal{ 2 };
         auto track = std::make_shared<NiceMock<MockTrack>>();
         NiceMock<MockReaperAPI> api;
         ON_CALL(*trackElement, getTrack()).WillByDefault(Return(track));
@@ -114,5 +113,3 @@ TEST_CASE("With a node creator and a simple object") {
         }
     }
 }
-
-
