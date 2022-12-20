@@ -304,9 +304,15 @@ TEST_CASE("Object tracks created and plugin instantiated") {
     SECTION("Single Object") {
         auto autoElement = std::make_shared<ObjectAutomationElement>(ADMChannel{ nullptr, nullptr, nullptr, nullptr, 0 }, trackElement, takeElement);
         trackElement->addAutomationElement(autoElement);
-        SECTION("Creates track and plugins") {
+
+        SECTION("Creates track and plugin") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
             EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(1);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+        }
+
+        SECTION("Creates route from track") {
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
             earSuite.onCreateObjectTrack(*trackElement, api);
         }
     }
@@ -335,6 +341,13 @@ TEST_CASE("Object tracks created and plugin instantiated") {
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
+
+        SECTION("Creates routes from tracks (sequentially)") {
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 1, 1, _, _)).Times(1);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
     }
 
     SECTION("Multiple Objects (sharing takes, same atu)") {
@@ -355,6 +368,12 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         SECTION("Creates track and 2 plugins") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
             EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
+
+        SECTION("Creates route from track") {
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -382,6 +401,12 @@ TEST_CASE("Object tracks created and plugin instantiated") {
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
+
+        SECTION("Creates route from track") {
+            EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
+            earSuite.onCreateObjectTrack(*trackElement, api);
+            earSuite.onCreateObjectTrack(*trackElement2, api);
+        }
     }
 
     SECTION("Automation is applied for all Automatable Object plugin parameters") {
@@ -405,35 +430,6 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         trackElement->addAutomationElement(std::shared_ptr<ObjectAutomation>(autoElement));
         earSuite.onCreateObjectTrack(*trackElement, api);
     }
-    /*
-    SECTION("Object tracks have trackmapping applied")
-    {
-        EARPluginSuite earSuite;
-        auto api = NiceMock<MockReaperAPI>{};
-        NiceMock<MockTrackElement> trackElement;
-        auto track = std::make_shared<NiceMock<MockTrack>>();
-
-        ON_CALL(trackElement, getTrack()).WillByDefault(Return(track));
-
-        const double FIRST_INDEX = 1.0 / 64.0; // from 0 to 1 inclusive with 65 steps (-1 to 63), -1 == unmapped so first should be step after 0.
-        const int TRACK_MAPPING_PARAMETER = 0;
-
-        auto createPlugin = [=](std::string) {
-            auto plugin = std::make_unique<MockPlugin>();
-            EXPECT_CALL(*plugin, setParameter(HasIndex(TRACK_MAPPING_PARAMETER), FIRST_INDEX));
-            return plugin;
-        };
-        EXPECT_CALL(*track, createPlugin(StrEq("EAR Object"))).WillRepeatedly(createPlugin);
-        auto node = initProject(earSuite, api);
-        earSuite.onCreateProject(node, api);
-        earSuite.onCreateObjectTrack(trackElement, api);
-
-        //    SECTION("sequentially") {
-        //      EXPECT_CALL(*track, route(_, 1, 0, FIRST_INDEX + 1));
-        //      earSuite.onCreateObjectTrack(trackElement, api);
-        //    }
-    }
-    */
 }
 
 TEST_CASE("Object tracks are routed to scene, and not sent to master") {
