@@ -17,6 +17,9 @@
 #include "mediatakeelement.h"
 #include "mediatrackelement.h"
 
+#define TRACK_MAPPING_PARAM_INDEX 0
+#define TRACK_MAPPING_PARAM_MAXVAL 64
+
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrEq;
@@ -28,7 +31,10 @@ using ::testing::InSequence;
 using ::testing::_;
 using ::testing::A;
 using ::testing::An;
+using ::testing::AtLeast;
+
 using namespace admplug;
+
 namespace {
 
 FakePtrFactory fakePtr;
@@ -313,6 +319,9 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates route from track") {
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
+            ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1)); // Needed by PluginInstance::getPluginIndex()
+            float trackMappingVal = 1.f / (float)TRACK_MAPPING_PARAM_MAXVAL;
+            EXPECT_CALL(api, TrackFX_SetParam(_, _, TRACK_MAPPING_PARAM_INDEX, trackMappingVal)).Times(1);
             earSuite.onCreateObjectTrack(*trackElement, api);
         }
     }
@@ -345,6 +354,11 @@ TEST_CASE("Object tracks created and plugin instantiated") {
         SECTION("Creates routes from tracks (sequentially)") {
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 1, 1, _, _)).Times(1);
+            ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1)); // Needed by PluginInstance::getPluginIndex()
+            float trackMappingVal = 1.f / (float)TRACK_MAPPING_PARAM_MAXVAL;
+            EXPECT_CALL(api, TrackFX_SetParam(_, _, TRACK_MAPPING_PARAM_INDEX, trackMappingVal)).Times(1);
+            trackMappingVal = 2.f / (float)TRACK_MAPPING_PARAM_MAXVAL;
+            EXPECT_CALL(api, TrackFX_SetParam(_, _, TRACK_MAPPING_PARAM_INDEX, trackMappingVal)).Times(1);
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -374,6 +388,9 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates route from track") {
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
+            ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1)); // Needed by PluginInstance::getPluginIndex()
+            float trackMappingVal = 1.f / (float)TRACK_MAPPING_PARAM_MAXVAL;
+            EXPECT_CALL(api, TrackFX_SetParam(_, _, TRACK_MAPPING_PARAM_INDEX, trackMappingVal)).Times(AtLeast(1));
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -404,6 +421,9 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates route from track") {
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 1, _, _)).Times(1);
+            ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(1)); // Needed by PluginInstance::getPluginIndex()
+            float trackMappingVal = 1.f / (float)TRACK_MAPPING_PARAM_MAXVAL;
+            EXPECT_CALL(api, TrackFX_SetParam(_, _, TRACK_MAPPING_PARAM_INDEX, trackMappingVal)).Times(AtLeast(1));
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
