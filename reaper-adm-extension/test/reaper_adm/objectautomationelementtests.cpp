@@ -66,43 +66,94 @@ TEST_CASE("ObjectAutomationElement") {
     }
 
 }
-/*
+
 TEST_CASE("Applying automation") {
     auto channelFormat = objectChannel();
     auto packFormat = objectPack();
     auto api = NiceMock<MockReaperAPI>{};
     using ns = std::chrono::nanoseconds;
+    auto parentTrack = std::make_shared<NiceMock<MockTrackElement>>();
     auto parentTake = std::make_shared<NiceMock<MockTakeElement>>();
-    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
     MockPlugin plugin;
     auto envelope = std::make_unique<MockAutomationEnvelope>();
     auto& envRef = *envelope;
 
-    MockPluginParameter parameter;
-    ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
-    EXPECT_CALL(parameter, admParameter()).Times(AnyNumber());
-    AutomationPoint point{ns::zero(), ns::zero(), 1.0};
-    ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
-    EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
-    ON_CALL(parameter, forwardMap(Matcher<double>(_))).WillByDefault(Return(point.value()));
-    EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).Times(AnyNumber());
-    ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
-
+    /*
     SECTION("Apply sets parameter directly rather than adding envelope when only one point") {
+        MockPluginParameter parameter;
+        ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
+        EXPECT_CALL(parameter, admParameter()).Times(AnyNumber());
+        AutomationPoint point{ns::zero(), ns::zero(), 1.0};
+        ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
+        EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
+        ON_CALL(parameter, forwardMap(Matcher<double>(_))).WillByDefault(Return(point.value()));
+        EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).Times(AnyNumber());
+        ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
+
         auto block = initialSphericalBlock();
         channelFormat->add(static_cast<adm::AudioBlockFormatObjects>(block));
         EXPECT_CALL(parameter, set(Ref(plugin), point.value()));
         EXPECT_CALL(parameter, getEnvelope(Ref(plugin))).Times(0);
         element->apply(parameter, plugin);
     }
-
+    */
     SECTION("When more than one point") {
+        MockPluginParameter parameter;
+        ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
+        EXPECT_CALL(parameter, admParameter()).Times(AnyNumber());
+        AutomationPoint point1{ns::zero(), ns(1000000000), 0.5};
+        AutomationPoint point2{ns(1000000000), ns::zero(), 1.0};
+        EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).WillOnce(Return(point1.value())).WillOnce(Return(point2.value()));
+        ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
+
+        auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock().withDuration(1.0)).followedBy(SphericalCoordBlock{}.withAzimuth(60.0));
+        for(auto& block : blockRange.asConstRange()) {
+            channelFormat->add(block);
+        }
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{ nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0 }, parentTrack, parentTake);
+
+        EXPECT_CALL(parameter, set(_, point1.value())).Times(AnyNumber());
+        EXPECT_CALL(parameter, set(_, point2.value())).Times(AnyNumber());
+        EXPECT_CALL(parameter, getEnvelope(_)).Times(AnyNumber());
+        EXPECT_CALL(envRef, createPoints(_)).Times(AnyNumber());
+        EXPECT_CALL(envRef, addPoint(_)).Times(AnyNumber());
+
+        SECTION("apply() sets parameter directly") {
+            EXPECT_CALL(parameter, set(Ref(plugin), point1.value())).Times(1);
+            element->apply(parameter, plugin);
+        }
+        SECTION("apply() creates envelope") {
+            EXPECT_CALL(parameter, getEnvelope(Ref(plugin))).Times(1);
+            element->apply(parameter, plugin);
+        }
+        SECTION("apply() adds 2 points") {
+            EXPECT_CALL(envRef, addPoint(_)).Times(2);
+            element->apply(parameter, plugin);
+        }
+        SECTION("apply() creates points") {
+            EXPECT_CALL(envRef, createPoints(_)).Times(1);
+            element->apply(parameter, plugin);
+        }
+    }
+
+    SECTION("When more than one point which simplify in to 1") {
+        MockPluginParameter parameter;
+        ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
+        EXPECT_CALL(parameter, admParameter()).Times(AnyNumber());
+        AutomationPoint point{ns::zero(), ns::zero(), 1.0};
+        ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
+        EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
+        ON_CALL(parameter, forwardMap(Matcher<double>(_))).WillByDefault(Return(point.value()));
+        EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).Times(AnyNumber());
+        ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
+
         auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock()).followedBy(SphericalCoordBlock{}.withAzimuth(60.0));
         for(auto& block : blockRange.asConstRange()) {
             channelFormat->add(block);
         }
-        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{ nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0 }, parentTrack, parentTake);
 
         EXPECT_CALL(parameter, set(_, point.value())).Times(AnyNumber());
         EXPECT_CALL(parameter, getEnvelope(_)).Times(AnyNumber());
@@ -110,25 +161,18 @@ TEST_CASE("Applying automation") {
         EXPECT_CALL(envRef, addPoint(_)).Times(AnyNumber());
 
         SECTION("apply() sets parameter directly") {
-          EXPECT_CALL(parameter, set(Ref(plugin), point.value()));
-          element->apply(parameter, plugin);
+            EXPECT_CALL(parameter, set(Ref(plugin), point.value())).Times(1);
+            element->apply(parameter, plugin);
         }
-        SECTION("apply() creates envelope") {
-          EXPECT_CALL(parameter, getEnvelope(Ref(plugin)));
-          element->apply(parameter, plugin);
-        }
-
-        SECTION("apply() adds 2 points") {
-          EXPECT_CALL(envRef, addPoint(_)).Times(2);
-          element->apply(parameter, plugin);
-        }
-
-        SECTION("apply() creates points") {
-          EXPECT_CALL(envRef, createPoints(_)).Times(1);
-          element->apply(parameter, plugin);
+        SECTION("apply() does not create envelope, because the automation points simplify to just one point") {
+            EXPECT_CALL(parameter, getEnvelope(Ref(plugin))).Times(0);
+            EXPECT_CALL(envRef, addPoint(_)).Times(0);
+            EXPECT_CALL(envRef, createPoints(_)).Times(0);
+            element->apply(parameter, plugin);
         }
     }
 }
+/*
 TEST_CASE("JumpPosition Insertion"){
 
     auto channelFormat = objectChannel();
