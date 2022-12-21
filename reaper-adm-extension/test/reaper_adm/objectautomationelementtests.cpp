@@ -74,7 +74,6 @@ TEST_CASE("Applying automation") {
     using ns = std::chrono::nanoseconds;
     auto parentTrack = std::make_shared<NiceMock<MockTrackElement>>();
     auto parentTake = std::make_shared<NiceMock<MockTakeElement>>();
-    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
     MockPlugin plugin;
     auto envelope = std::make_unique<MockAutomationEnvelope>();
@@ -95,6 +94,8 @@ TEST_CASE("Applying automation") {
         channelFormat->add(static_cast<adm::AudioBlockFormatObjects>(block));
         EXPECT_CALL(parameter, set(Ref(plugin), point.value()));
         EXPECT_CALL(parameter, getEnvelope(Ref(plugin))).Times(0);
+
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
         element->apply(parameter, plugin);
     }
 
@@ -180,7 +181,6 @@ TEST_CASE("JumpPosition Insertion"){
     using ns = std::chrono::nanoseconds;
     auto parentTrack = std::make_shared<NiceMock<MockTrackElement>>();
     auto parentTake = std::make_shared<NiceMock<MockTakeElement>>();
-    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
     MockPlugin plugin;
     auto envelope = std::make_unique<MockAutomationEnvelope>();
@@ -192,8 +192,6 @@ TEST_CASE("JumpPosition Insertion"){
     AutomationPoint point1{ns::zero(), ns(1000000000), 0.1};
     AutomationPoint point2{ns(1000000000), ns(1000000000), 0.2};
     AutomationPoint point3{ns(2000000000), ns(1000000000), 0.3};
-    //ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
-    //EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
     EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).WillOnce(Return(point1.value())).WillOnce(Return(point2.value())).WillOnce(Return(point3.value()));
     ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
 
