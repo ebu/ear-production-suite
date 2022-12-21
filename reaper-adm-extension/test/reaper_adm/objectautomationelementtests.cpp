@@ -291,7 +291,7 @@ TEST_CASE("JumpPosition Insertion"){
 
         REQUIRE(element->blocks().size() == 3);
     }
-/*
+
     SECTION("Jump Position Scenario 4: With jump position and zero length blocks"){
         auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock().withDistance(55.0).withJumpPosition(true).withDuration(0.0))
                 .followedBy(SphericalCoordBlock{}.withDistance(20.0).withJumpPosition(false).withDuration(1.0))
@@ -302,26 +302,34 @@ TEST_CASE("JumpPosition Insertion"){
         for(auto& block : blockRange.asConstRange()) {
             channelFormat->add(block);
         }
-        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
-        EXPECT_CALL(parameter, set(_, point.value())).Times(1);
+        // Expect jump position not to create any extra points, because none of them have an interpolation length, so actually just shift effective time by block duration
+        EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillRepeatedly([](AutomationPoint ap) {
+            if(ap.timeNs() == std::chrono::nanoseconds{0}           && ap.durationNs() == std::chrono::nanoseconds{0})          return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.1 };
+            if(ap.timeNs() == std::chrono::nanoseconds{0}           && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.2 };
+            if(ap.timeNs() == std::chrono::nanoseconds{1000000000}  && ap.durationNs() == std::chrono::nanoseconds{0})          return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
+            if(ap.timeNs() == std::chrono::nanoseconds{1000000000}  && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.4 };
+            if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{0})          return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.5 };
+            if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.6 };
+            return ap;
+        });
+
+        EXPECT_CALL(parameter, set(_, 0.1)).Times(1);
         EXPECT_CALL(parameter, getEnvelope(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, createPoints(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, addPoint(_)).Times(AnyNumber());
 
-        SECTION("apply() adds 5 points") {
-          EXPECT_CALL(envRef, addPoint(_)).Times(6);
-          element->apply(parameter, plugin);
+        SECTION("apply() adds 6 points") {
+            EXPECT_CALL(envRef, addPoint(_)).Times(6);
+            element->apply(parameter, plugin);
         }
-
 
         SECTION("apply() creates points") {
           EXPECT_CALL(envRef, createPoints(_)).Times(1);
           element->apply(parameter, plugin);
         }
 
-
         REQUIRE(element->blocks().size() == 6);
     }
-*/
 }
