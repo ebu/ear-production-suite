@@ -47,8 +47,8 @@ class Parameter
 {
 public:
     virtual ~Parameter() = default;
-    AutomationPoint forwardMap(AutomationPoint point) const;
-    AutomationPoint reverseMap(AutomationPoint point) const;
+    virtual AutomationPoint forwardMap(AutomationPoint point) const;
+    virtual AutomationPoint reverseMap(AutomationPoint point) const;
     virtual double forwardMap(double val) const = 0;
     virtual double reverseMap(double val) const = 0;
     virtual AdmParameter admParameter() const = 0;
