@@ -216,7 +216,6 @@ TEST_CASE("JumpPosition Insertion"){
 
     }
 
-/*
     SECTION("Jump Position Scenario 2: With jump position"){
         auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock().withDistance(20.0).withJumpPosition(true).withDuration(1.0))
                 .followedBy(SphericalCoordBlock{}.withDistance(55.0).withJumpPosition(true).withDuration(1.0))
@@ -224,15 +223,26 @@ TEST_CASE("JumpPosition Insertion"){
         for(auto& block : blockRange.asConstRange()) {
             channelFormat->add(block);
         }
-        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
-        EXPECT_CALL(parameter, set(_, point.value())).Times(1);
+        // Expect jump position to create extra points
+        EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillRepeatedly([](AutomationPoint ap) {
+            if(ap.time() == 0.0 && ap.duration() == 0.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.1 };
+            if(ap.time() == 0.0 && ap.duration() == 1.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.1 };
+            if(ap.time() == 1.0 && ap.duration() == 0.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.2 };
+            if(ap.time() == 1.0 && ap.duration() == 1.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.2 };
+            if(ap.time() == 2.0 && ap.duration() == 0.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
+            if(ap.time() == 2.0 && ap.duration() == 1.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
+            return ap;
+        });
+
+        EXPECT_CALL(parameter, set(_, 0.1)).Times(1);
         EXPECT_CALL(parameter, getEnvelope(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, createPoints(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, addPoint(_)).Times(AnyNumber());
 
-        SECTION("apply() adds 6 points") {
-          EXPECT_CALL(envRef, addPoint(_)).Times(6);
+        SECTION("apply() adds 5 points") { // Expect final point to be left out during simplify as redundant
+          EXPECT_CALL(envRef, addPoint(_)).Times(5);
           element->apply(parameter, plugin);
         }
 
@@ -243,8 +253,7 @@ TEST_CASE("JumpPosition Insertion"){
 
         REQUIRE(element->blocks().size() == 3);
     }
-
-
+/*
     SECTION("Jump Position Scenario 3: With jump position and interpolation"){
         auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock().withDistance(20.0).withJumpPosition(true, std::chrono::nanoseconds{300}).withDuration(1.0))
                 .followedBy(SphericalCoordBlock{}.withDistance(55.0).withJumpPosition(true, std::chrono::nanoseconds{300}).withDuration(1.0))
