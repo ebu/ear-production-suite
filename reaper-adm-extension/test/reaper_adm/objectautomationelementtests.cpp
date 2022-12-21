@@ -171,15 +171,16 @@ TEST_CASE("Applying automation") {
         }
     }
 }
-/*
+
 TEST_CASE("JumpPosition Insertion"){
 
     auto channelFormat = objectChannel();
     auto packFormat = objectPack();
     auto api = NiceMock<MockReaperAPI>{};
     using ns = std::chrono::nanoseconds;
+    auto parentTrack = std::make_shared<NiceMock<MockTrackElement>>();
     auto parentTake = std::make_shared<NiceMock<MockTakeElement>>();
-    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+    auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
     MockPlugin plugin;
     auto envelope = std::make_unique<MockAutomationEnvelope>();
@@ -188,11 +189,12 @@ TEST_CASE("JumpPosition Insertion"){
     MockPluginParameter parameter;
     ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
     EXPECT_CALL(parameter, admParameter()).Times(AnyNumber());
-    AutomationPoint point{ns::zero(), ns::zero(), 1.0};
-    ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
-    EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
-    ON_CALL(parameter, forwardMap(Matcher<double>(_))).WillByDefault(Return(point.value()));
-    EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).Times(AnyNumber());
+    AutomationPoint point1{ns::zero(), ns(1000000000), 0.1};
+    AutomationPoint point2{ns(1000000000), ns(1000000000), 0.2};
+    AutomationPoint point3{ns(2000000000), ns(1000000000), 0.3};
+    //ON_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).WillByDefault(Return(point));
+    //EXPECT_CALL(parameter, forwardMap(Matcher<AutomationPoint>(_))).Times(AnyNumber());
+    EXPECT_CALL(parameter, forwardMap(Matcher<double>(_))).WillOnce(Return(point1.value())).WillOnce(Return(point2.value())).WillOnce(Return(point3.value()));
     ON_CALL(parameter, getEnvelope(_)).WillByDefault(Return(ByMove(std::move(envelope))));
 
     SECTION("Jump Position Scenario 1: No jump position"){
@@ -202,9 +204,9 @@ TEST_CASE("JumpPosition Insertion"){
         for(auto& block : blockRange.asConstRange()) {
             channelFormat->add(block);
         }
-        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{channelFormat, packFormat, adm::AudioTrackUid::create()}, parentTake);
+        auto element = std::make_unique<ObjectAutomationElement>(ADMChannel{nullptr, channelFormat, packFormat, adm::AudioTrackUid::create(), 0}, parentTrack, parentTake);
 
-        EXPECT_CALL(parameter, set(_, point.value())).Times(1);
+        EXPECT_CALL(parameter, set(_, point1.value())).Times(1);
         EXPECT_CALL(parameter, getEnvelope(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, createPoints(_)).Times(AnyNumber());
         EXPECT_CALL(envRef, addPoint(_)).Times(AnyNumber());
@@ -223,6 +225,7 @@ TEST_CASE("JumpPosition Insertion"){
 
     }
 
+/*
     SECTION("Jump Position Scenario 2: With jump position"){
         auto blockRange = ObjectTypeBlockRange{}.with(initialSphericalBlock().withDistance(20.0).withJumpPosition(true).withDuration(1.0))
                 .followedBy(SphericalCoordBlock{}.withDistance(55.0).withJumpPosition(true).withDuration(1.0))
@@ -309,5 +312,5 @@ TEST_CASE("JumpPosition Insertion"){
 
         REQUIRE(element->blocks().size() == 6);
     }
-}
 */
+}
