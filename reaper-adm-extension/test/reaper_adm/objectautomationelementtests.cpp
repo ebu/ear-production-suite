@@ -80,7 +80,6 @@ TEST_CASE("Applying automation") {
     auto envelope = std::make_unique<MockAutomationEnvelope>();
     auto& envRef = *envelope;
 
-    /*
     SECTION("Apply sets parameter directly rather than adding envelope when only one point") {
         MockPluginParameter parameter;
         ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
@@ -98,7 +97,7 @@ TEST_CASE("Applying automation") {
         EXPECT_CALL(parameter, getEnvelope(Ref(plugin))).Times(0);
         element->apply(parameter, plugin);
     }
-    */
+
     SECTION("When more than one point") {
         MockPluginParameter parameter;
         ON_CALL(parameter, admParameter()).WillByDefault(Return(AdmParameter::OBJECT_AZIMUTH));
