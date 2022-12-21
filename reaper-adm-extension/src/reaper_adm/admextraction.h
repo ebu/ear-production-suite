@@ -271,18 +271,13 @@ void applyAutomation(std::vector<AutomationPoint> points,
                      const AutomatableT &automatable)
 {
     if(!points.empty()) {
-        parameter.set(automatable, points.front().value());
-    }
-    if(points.size() > 1) {
-
-        // This assumes the points are ordered by time!
-        std::sort(points.begin(), points.end(), pointsTimeSorter);
+        std::sort(points.begin(), points.end(), pointsTimeSorter); // fixEffectiveTimeOverlaps and simplify assumes the points are ordered by time, so do it
         fixEffectiveTimeOverlaps(points);
         points = simplify(points);
 
-        if(points.size() == 1) { // May have reduced to 1 during removal
-            parameter.set(automatable, points.front().value());
-        } else {
+        parameter.set(automatable, points.front().value());
+
+        if(points.size() > 1) {
             auto envelope = parameter.getEnvelope(automatable);
             for(auto& point : points) {
                 envelope->addPoint(point);
