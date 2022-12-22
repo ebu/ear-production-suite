@@ -30,6 +30,7 @@ namespace ear::plugin {
         void timeout(int msLimit);
         std::thread timeoutThread;
         std::atomic_bool killThread{ false };
+        std::atomic_int msSinceLastConnection{ 0 };
 
         std::mutex finisher;
         std::atomic_bool finished{false};

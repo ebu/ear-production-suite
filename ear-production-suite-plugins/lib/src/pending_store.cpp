@@ -25,13 +25,12 @@ namespace ear {
         void PendingStore::timeout(int msLimit)
         {
           const int msCheckInterval = 10;
-          int msWaited = 0;
-          while(msWaited < msLimit) {
+          while(msSinceLastConnection < msLimit) {
             if(killThread) return;
             std::this_thread::sleep_for(std::chrono::milliseconds(msCheckInterval));
             // Not as accurate as comparing against a start time,
             // but this methodology used intentionally to perform same iterations even with debug/breaks
-            msWaited += msCheckInterval;
+            msSinceLastConnection += msCheckInterval;
             if(killThread) return;
           }
           finishPendingElementsSearch();
@@ -73,6 +72,7 @@ namespace ear {
               auto range = pendingElements_.equal_range(ids);
               auto matchCount = std::distance(range.first, range.second);
               if(matchCount > 0) {
+                msSinceLastConnection = 0;
                 for(auto el = range.first; el != range.second; ++el) {
                   el->second->mutable_object()->set_connection_id(item.data.connection_id());
                 }
