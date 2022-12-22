@@ -233,6 +233,7 @@ TEST_CASE("JumpPosition Insertion"){
             if(ap.time() == 1.0 && ap.duration() == 1.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.2 };
             if(ap.time() == 2.0 && ap.duration() == 0.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
             if(ap.time() == 2.0 && ap.duration() == 1.0) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
+            ADD_FAILURE(); // Unexpected request to forwardMap - we were not expecting this point
             return ap;
         });
 
@@ -271,6 +272,7 @@ TEST_CASE("JumpPosition Insertion"){
             if(ap.timeNs() == std::chrono::nanoseconds{1000000300}  && ap.durationNs() == std::chrono::nanoseconds{999999700})  return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.2 };
             if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{300})        return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
             if(ap.timeNs() == std::chrono::nanoseconds{2000000300}  && ap.durationNs() == std::chrono::nanoseconds{999999700})  return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.3 };
+            ADD_FAILURE(); // Unexpected request to forwardMap - we were not expecting this point
             return ap;
         });
 
@@ -312,6 +314,7 @@ TEST_CASE("JumpPosition Insertion"){
             if(ap.timeNs() == std::chrono::nanoseconds{1000000000}  && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.4 };
             if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{0})          return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.5 };
             if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.6 };
+            ADD_FAILURE(); // Unexpected request to forwardMap - we were not expecting this point
             return ap;
         });
 
@@ -353,6 +356,7 @@ TEST_CASE("JumpPosition Insertion"){
             if(ap.timeNs() == std::chrono::nanoseconds{2000000000}  && ap.durationNs() == std::chrono::nanoseconds{300})        return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.4 };
             if(ap.timeNs() == std::chrono::nanoseconds{2000000300}  && ap.durationNs() == std::chrono::nanoseconds{999999700})  return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.4 };
             if(ap.timeNs() == std::chrono::nanoseconds{3000000000}  && ap.durationNs() == std::chrono::nanoseconds{1000000000}) return AutomationPoint{ ap.timeNs(), ap.durationNs(), 0.5 };
+            ADD_FAILURE(); // Unexpected request to forwardMap - we were not expecting this point
             return ap;
         });
 
