@@ -1,3 +1,17 @@
+Version 0.8.0
+
+* Support custom object names rather than using track names [#214](https://github.com/ebu/ear-production-suite/pull/214)
+* Support sharing of audio assets between objects (avoids asset duplication) [#223](https://github.com/ebu/ear-production-suite/pull/223) [#211](https://github.com/ebu/ear-production-suite/issues/211) [#207](https://github.com/ebu/ear-production-suite/issues/207)
+* Import process finds and imports orphaned AudioObjects [#208](https://github.com/ebu/ear-production-suite/issues/208)
+* Fix envelope point creation for blocks using jump position with rtime of 0 
+* Fix crash when adding DirectSpeakers objects to programmes before their speaker layout is set [#209](https://github.com/ebu/ear-production-suite/issues/209)
+* Fix rendering crash when using HOA without format set
+* Fix rendering crash when using ADM Export Source plugin with unsupported asset types for plugin suite
+* Update libadm to 0.14.0
+* Fix import of some 2076-2 ADM structures
+* Fix import of files with large individual audio assets
+* Fix Read-only plugin parameters after JUCE upgrade
+
 Version 0.7.3
 
 * Fix 'no name' items in Scene and associated issues through major refactor [#197](https://github.com/ebu/ear-production-suite/issues/197)
