@@ -1,4 +1,4 @@
-# EAR Production Suite (Beta @CMAKE_PROJECT_VERSION@ release)
+# EAR Production Suite (Beta 0.8.0 release)
 
 The latest builds are available under [Releases](https://github.com/ebu/ear-production-suite/releases).
 Please download the files from there. The EAR Production Suite (EPS) download bundle comprises of multiple components:
@@ -9,7 +9,9 @@ Please download the files from there. The EAR Production Suite (EPS) download bu
 - REAPER session template
 
 ## Release notes
-0.7.3 is a bug-fix release. Please see detailed changelog below.
+0.8.0 introduces support for sharing of audio assets between objects on import, during authoring, and in exports. Audio Objects which use the same underlying audio can be represented by simply placing multiple input plugins with matching "Routing" parameter settings on one track. Additionally, support for custom object names is provided, rather than always using the track name.
+
+0.8.0 also includes various bug fixes. Please see detailed changelog below.
 
 ### Known issues
 Please note that the EPS currently outputs ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
@@ -18,7 +20,7 @@ While the EPS can import files that have been authored using the [Dolby Atmos AD
 To fix a problem using the plugins with some hosts, the ID for all plugins changed with the 0.7.0 release.
 This change will break any projects that use the 0.6.0 plugins. See tools/upgrade_project to upgrade existing REAPER projects.
 
-For an up to date list of known issues, please refer to [GitHub](https://github.com/ebu/ear-production-suite/issues)
+For an up-to-date list of known issues, please refer to [GitHub](https://github.com/ebu/ear-production-suite/issues)
 
 ### Changes
 
