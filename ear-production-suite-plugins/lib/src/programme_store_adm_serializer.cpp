@@ -287,18 +287,26 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
     content.addReference(serializedObjects[connectionId]);
   } else if (isSerializedWithDifferentObjectSettings(object)) {
     // Have serialized this input but have different object level settings
-    auto& otherAdmObject =
-        *serializedObjects.find(object.connection_id())->second;
+    auto otherAdmObject =
+        serializedObjects.find(object.connection_id())->second;
     auto admObject =
         adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
     content.addReference(admObject);
-    for (auto& id : otherAdmObject.getReferences<adm::AudioTrackUid>()) {
-      admObject->addReference(id);
+    for (auto& atuid : otherAdmObject->getReferences<adm::AudioTrackUid>()) {
+      admObject->addReference(atuid);
     }
-    for (auto& pack : otherAdmObject.getReferences<adm::AudioPackFormat>()) {
+    for (auto& pack : otherAdmObject->getReferences<adm::AudioPackFormat>()) {
       admObject->addReference(pack);
     }
     setInteractivity(*admObject, object);
+
+    // Create plugin map entries for new AudioObject (copy other params from existing)
+    int existingPluginMapEntryCount = pluginMap.size();
+    for(int i = 0; i < existingPluginMapEntryCount; ++i) {
+      if(pluginMap[i].audioObject == otherAdmObject) {
+        pluginMap.push_back({ pluginMap[i].inputInstanceId, pluginMap[i].routing, admObject, pluginMap[i].audioTrackUid });
+      }
+    }
 
   } else {
     // First time we've seen the input
