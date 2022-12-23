@@ -78,14 +78,14 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 
 <div markdown="1" class="text_section">
 ## Download and Install
-Download the latest EAR Production Suite release (v0.7.3 Beta):
+Download the latest EAR Production Suite release (v0.8.0 Beta - 23rd Dec 2022):
   <div class="button-grid">
-    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.3-EPS-beta/EPS_0_7_3_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
-	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.7.3-EPS-beta/EPS_0_7_3_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
+    <a href="https://github.com/ebu/ear-production-suite/releases/download/v0.8.0-EPS-beta/EPS_0_8_0_windows.zip"><button class="c-btn">📦 Download Windows (x64)</button></a>
+	<a href="https://github.com/ebu/ear-production-suite/releases/download/v0.8.0-EPS-beta/EPS_0_8_0_macos_universal.dmg"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
   </div>
 <br />
 <p>
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.3-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.7.3-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
+The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
 </p>
 <br />
   <details>
