@@ -1,0 +1,19 @@
+Release Process:
+
+Merge all changes in to main
+Update ./CHANGELOG.md
+Update version in ./CMakeLists.txt and ./vcpkg.json
+Update ./packaging/README.md.in (version number and summary)
+Rerun Configure and Generate in CMake (forces recreation of README.md in build directory from template) 
+Regenerate PDFs by building target "generate-package-docs" (project files must have been generated with CMake variable EPS_BUILD_PACKAGE=ON)
+Commit all, and push
+Tag it with version (e.g, git tag -a v0.8.0-EPS-beta -m "v0.8.0 beta release")
+Push tag (e.g, git push origin v0.8.0-EPS-beta)
+Close all PRs and related issues
+Allow CI to build it
+Download MacOS "universal" artefact and Windows artefact
+For MacOS artefact: Sign it, Notorise it, and staple
+Create a release from the tag on GitHub - include change summary in notes
+Upload signed MacOS version as release asset
+Upload Windows version as release asset
+Update website + push
