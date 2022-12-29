@@ -69,7 +69,7 @@ class ObjectView : public ElementView,
                               EarColours::Text.withAlpha(Emphasis::medium));
     addAndMakeVisible(metadataLabel_.get());
 
-    importanceLabel_->setFont(EarFonts::Values);
+    importanceLabel_->setFont(EarFontsSingleton::instance().Values);
     importanceLabel_->setColour(Label::textColourId, EarColours::Label);
     importanceLabel_->setText("Importance", dontSendNotification);
     importanceLabel_->setJustificationType(Justification::centredLeft);
