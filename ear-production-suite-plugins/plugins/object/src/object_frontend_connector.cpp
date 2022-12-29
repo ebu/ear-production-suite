@@ -673,6 +673,7 @@ void ObjectsJuceFrontendConnector::dispatchSliderAction(Slider* slider, SliderAc
     return;
   }
   if(auto sizeSlider = lockIfSame(sizeSlider_, slider)) {
+    performSliderAction(p_->getSize(), sizeSlider, action);
     performSliderAction(p_->getHeight(), sizeSlider, action);
     performSliderAction(p_->getWidth(), sizeSlider, action);
     performSliderAction(p_->getDepth(), sizeSlider, action);
