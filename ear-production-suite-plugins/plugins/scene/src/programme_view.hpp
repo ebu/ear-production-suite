@@ -31,7 +31,7 @@ class ProgrammeView : public Component {
         elementOverview_(std::make_unique<ElementOverview>()),
         elementsContainer_(std::make_shared<ElementsContainer>()) {
     nameTextEditor_->setLabelText("Name");
-    nameTextEditor_->setFont(EarFonts::Label);
+    nameTextEditor_->setFont(EarFontsSingleton::instance().Label);
     nameTextEditor_->onTextChange = [this]() {
       Component::BailOutChecker checker(this);
       listeners_.callChecked(checker, [this](Listener& l) {
@@ -43,7 +43,7 @@ class ProgrammeView : public Component {
     };
     addAndMakeVisible(nameTextEditor_.get());
 
-    langLabel_->setFont(EarFonts::Label);
+    langLabel_->setFont(EarFontsSingleton::instance().Label);
     langLabel_->setText("Language",
                         juce::NotificationType::dontSendNotification);
     langLabel_->setJustificationType(Justification::right);

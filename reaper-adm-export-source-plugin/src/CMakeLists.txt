@@ -53,9 +53,9 @@ target_include_directories(adm_export_source_VST3
 target_compile_definitions(adm_export_source_VST3
     PUBLIC JUCE_DISABLE_ASSERTIONS)
 
-install_juce_vst3_plugin(adm_export_source "${EPS_PLUGIN_INSTALL_PREFIX}VST3")
+install_juce_vst3_plugin(adm_export_source "${EPS_PLUGIN_INSTALL_PREFIX}")
 
 include(DeployVST3)
 
 set(DEP_SEARCH_PATHS "${PROJECT_BINARY_DIR}/lib" "${PROJECT_BINARY_DIR}/VST3" "${PROJECT_BINARY_DIR}/lib/*" "${PROJECT_BINARY_DIR}/VST3/*")
-install_all_vst3_dependencies("${EPS_PLUGIN_INSTALL_PREFIX}VST3" "${DEP_SEARCH_PATHS}")
+install_all_vst3_dependencies("${EPS_PLUGIN_INSTALL_PREFIX}" "${DEP_SEARCH_PATHS}")

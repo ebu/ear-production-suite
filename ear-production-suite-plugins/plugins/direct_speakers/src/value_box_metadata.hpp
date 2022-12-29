@@ -19,14 +19,14 @@ class ValueBoxMetadata : public Component {
         langComboBox_(std::make_unique<EarComboBox>()),
         contentKindLabel_(std::make_unique<Label>()),
         contentKindComboBox_(std::make_unique<EarComboBox>()) {
-    headingLabel_->setFont(EarFonts::Heading);
+    headingLabel_->setFont(EarFontsSingleton::instance().Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Metadata",
                            juce::NotificationType::dontSendNotification);
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
 
-    langLabel_->setFont(EarFonts::Label);
+    langLabel_->setFont(EarFontsSingleton::instance().Label);
     langLabel_->setText("Language",
                         juce::NotificationType::dontSendNotification);
     langLabel_->setJustificationType(Justification::right);
@@ -40,7 +40,7 @@ class ValueBoxMetadata : public Component {
     langComboBox_->setDefaultText("select language");
     addAndMakeVisible(langComboBox_.get());
 
-    contentKindLabel_->setFont(EarFonts::Label);
+    contentKindLabel_->setFont(EarFontsSingleton::instance().Label);
     contentKindLabel_->setText("Content Kind",
                                juce::NotificationType::dontSendNotification);
     contentKindLabel_->setJustificationType(Justification::right);

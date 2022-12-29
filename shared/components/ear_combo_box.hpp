@@ -417,7 +417,7 @@ public:
 	void removeListener(Listener* l) { listeners_.remove(l); }
 
 private:
-	int currentSelectedIndex_;
+	int currentSelectedIndex_ = 0;
 	Value currentSelectedIndexValue_;
 	String defaultText_;
 	ListenerList<Listener> listeners_;

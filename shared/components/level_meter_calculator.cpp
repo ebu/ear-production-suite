@@ -65,7 +65,8 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
         blocksize_ = buffer.getNumSamples();
         blockPeriodLimitMs_ = ((static_cast<float>(blocksize_) / static_cast<float>(samplerate_)) * 1000.f) * BLOCK_PERIOD_MULTIPLIER;
     }
-    for(std::size_t c = 0; c < channels_; ++c) {
+    size_t channelsToProcess = std::min(static_cast<size_t>(buffer.getNumChannels()), channels_);
+    for(std::size_t c = 0; c < channelsToProcess; ++c) {
         bool hasSignal(false);
         bool hasClipped(false);
         for(std::size_t n = 0; n < buffer.getNumSamples(); ++n) {

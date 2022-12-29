@@ -19,7 +19,7 @@ class EarButton : public Button {
 
   explicit EarButton(const String& name)
       : Button(name),
-        font_(EarFonts::Items),
+        font_(EarFontsSingleton::instance().Items),
         justification_(Justification::centred),
         iconAlignment_(IconAlignment::centred),
         shape_(Shape::Rounded) {

@@ -16,7 +16,7 @@ class ValueBoxSpeakerLayer : public Component {
   ValueBoxSpeakerLayer(const String& headerText)
       : headingLabel_(std::make_unique<Label>()),
         layer_(std::make_unique<SpeakerLayer>()) {
-    headingLabel_->setFont(EarFonts::Label);
+    headingLabel_->setFont(EarFontsSingleton::instance().Label);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText(headerText,
                            juce::NotificationType::dontSendNotification);

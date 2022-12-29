@@ -85,7 +85,7 @@ void WrappingEnvelope::createPoints(double pointsOffset)
 }
 
 void WrappingEnvelope::addDiscontinuityPoints(AutomationPoint const& currentPoint) {
-    auto& previousPoint = automationEnvelope.getPoints().back();
+    auto previousPoint = automationEnvelope.getPoints().back();
     auto distance = fabs(currentPoint.value() - previousPoint.value());
 
     if(isTopToBottomWrap(currentPoint.value(), previousPoint.value())) {

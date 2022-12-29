@@ -31,19 +31,19 @@ class PositionInteractionSettings : public Component {
         distanceMinSlider(std::make_unique<EarSlider>()),
         distanceMaxLabel(std::make_unique<Label>()),
         distanceMaxSlider(std::make_unique<EarSlider>()) {
-    azimuthLabel->setFont(EarFonts::Label);
+    azimuthLabel->setFont(EarFontsSingleton::instance().Label);
     azimuthLabel->setColour(Label::textColourId, EarColours::Label);
     azimuthLabel->setText("Azimuth",
                           juce::NotificationType::dontSendNotification);
     azimuthLabel->setJustificationType(Justification::bottomRight);
     addAndMakeVisible(azimuthLabel.get());
-    elevationLabel->setFont(EarFonts::Label);
+    elevationLabel->setFont(EarFontsSingleton::instance().Label);
     elevationLabel->setColour(Label::textColourId, EarColours::Label);
     elevationLabel->setText("Elevation",
                             juce::NotificationType::dontSendNotification);
     elevationLabel->setJustificationType(Justification::bottomRight);
     addAndMakeVisible(elevationLabel.get());
-//    distanceLabel->setFont(EarFonts::Label);
+//    distanceLabel->setFont(EarFontsSingleton::instance().Label);
 //    distanceLabel->setColour(Label::textColourId, EarColours::Label);
 //    distanceLabel->setText("Distance",
 //                           juce::NotificationType::dontSendNotification);
@@ -61,7 +61,7 @@ class PositionInteractionSettings : public Component {
     azimuthSliderRange->setUpperDoubleClickReturnValue(10.f);
     addAndMakeVisible(azimuthSliderRange.get());
 
-    azimuthMinLabel->setFont(EarFonts::MinMaxLabel);
+    azimuthMinLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     azimuthMinLabel->setColour(Label::textColourId, EarColours::Label);
     azimuthMinLabel->setText("Min",
                              juce::NotificationType::dontSendNotification);
@@ -75,7 +75,7 @@ class PositionInteractionSettings : public Component {
     azimuthMinSlider->setDoubleClickReturnValue(true, 0.f);
     addAndMakeVisible(azimuthMinSlider.get());
 
-    azimuthMaxLabel->setFont(EarFonts::MinMaxLabel);
+    azimuthMaxLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     azimuthMaxLabel->setColour(Label::textColourId, EarColours::Label);
     azimuthMaxLabel->setText("Max",
                              juce::NotificationType::dontSendNotification);
@@ -105,7 +105,7 @@ class PositionInteractionSettings : public Component {
     elevationSliderRange->setUpperDoubleClickReturnValue(10.f);
     addAndMakeVisible(elevationSliderRange.get());
 
-    elevationMinLabel->setFont(EarFonts::MinMaxLabel);
+    elevationMinLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     elevationMinLabel->setColour(Label::textColourId, EarColours::Label);
     elevationMinLabel->setText("Min",
                                juce::NotificationType::dontSendNotification);
@@ -119,7 +119,7 @@ class PositionInteractionSettings : public Component {
     elevationMinSlider->setDoubleClickReturnValue(true, 0.f);
     addAndMakeVisible(elevationMinSlider.get());
 
-    elevationMaxLabel->setFont(EarFonts::MinMaxLabel);
+    elevationMaxLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     elevationMaxLabel->setColour(Label::textColourId, EarColours::Label);
     elevationMaxLabel->setText("Max",
                                juce::NotificationType::dontSendNotification);
@@ -150,7 +150,7 @@ class PositionInteractionSettings : public Component {
 //    distanceSliderRange->setLowerValue(0.f, dontSendNotification);
 //    distanceSliderRange->setUpperValue(0.f, dontSendNotification);
 //    addAndMakeVisible(distanceSliderRange.get());
-//    distanceMinLabel->setFont(EarFonts::MinMaxLabel);
+//    distanceMinLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
 //    distanceMinLabel->setColour(Label::textColourId, EarColours::Label);
 //    distanceMinLabel->setText("Min",
 //                              juce::NotificationType::dontSendNotification);
@@ -164,7 +164,7 @@ class PositionInteractionSettings : public Component {
 //    distanceMinSlider->setDoubleClickReturnValue(true, 0.f);
 //    addAndMakeVisible(distanceMinSlider.get());
 //
-//    distanceMaxLabel->setFont(EarFonts::MinMaxLabel);
+//    distanceMaxLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
 //    distanceMaxLabel->setColour(Label::textColourId, EarColours::Label);
 //    distanceMaxLabel->setText("Max",
 //                              juce::NotificationType::dontSendNotification);

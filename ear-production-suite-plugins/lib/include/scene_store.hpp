@@ -27,7 +27,7 @@ private:
       EXPORT_START,
       EXPORTING,
       EXPORT_END
-    } exportingSendState;
+    } exportingSendState = NOT_EXPORTING;
 
     // MetadataListener interface
     void exporting(bool isExporting) override;

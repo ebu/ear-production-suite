@@ -17,7 +17,7 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
 
     addAndMakeVisible(bgPanel);
 
-    headingLabel.setFont(EarFonts::HeroHeading);
+    headingLabel.setFont(EarFontsSingleton::instance().HeroHeading);
     headingLabel.setColour(Label::textColourId, EarColours::Text);
     headingLabel.setText("ADM Export Source", dontSendNotification);
     headingLabel.setEditable(false);
@@ -25,7 +25,7 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
 
     includeInAdmRenderLabel.setText(juce::String("Include in ADM Export (Render)"), juce::NotificationType::dontSendNotification);
     includeInAdmRenderLabel.setEditable(false);
-    includeInAdmRenderLabel.setFont(EarFonts::Label);
+    includeInAdmRenderLabel.setFont(EarFontsSingleton::instance().Label);
     includeInAdmRenderLabel.setColour(Label::textColourId, EarColours::Label);
     addAndMakeVisible(includeInAdmRenderLabel);
 
@@ -35,21 +35,21 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
 
     typeDefinitionLabel.setText(juce::String("Type Definition"), juce::NotificationType::dontSendNotification);
     typeDefinitionLabel.setEditable(false);
-    typeDefinitionLabel.setFont(EarFonts::Label);
+    typeDefinitionLabel.setFont(EarFontsSingleton::instance().Label);
     typeDefinitionLabel.setColour(Label::textColourId, EarColours::Label);
     typeDefinitionLabel.setJustificationType(Justification::right);
     addAndMakeVisible(typeDefinitionLabel);
 
     packFormatLabel.setText(juce::String("Pack Format"), juce::NotificationType::dontSendNotification);
     packFormatLabel.setEditable(false);
-    packFormatLabel.setFont(EarFonts::Label);
+    packFormatLabel.setFont(EarFontsSingleton::instance().Label);
     packFormatLabel.setColour(Label::textColourId, EarColours::Label);
     packFormatLabel.setJustificationType(Justification::right);
     addAndMakeVisible(packFormatLabel);
 
     channelFormatLabel.setText(juce::String("Channel Format"), juce::NotificationType::dontSendNotification);
     channelFormatLabel.setEditable(false);
-    channelFormatLabel.setFont(EarFonts::Label);
+    channelFormatLabel.setFont(EarFontsSingleton::instance().Label);
     channelFormatLabel.setColour(Label::textColourId, EarColours::Label);
     channelFormatLabel.setJustificationType(Justification::right);
     addAndMakeVisible(channelFormatLabel);

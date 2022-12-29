@@ -26,7 +26,7 @@ ValueBoxOrderDisplay::ValueBoxOrderDisplay(
   resetClippingButton_->setName(
       "EarButton (ValueBoxOrderDisplay::resetClippingButton_)");
 
-  headingLabel_->setFont(EarFonts::Heading);
+  headingLabel_->setFont(EarFontsSingleton::instance().Heading);
   headingLabel_->setColour(Label::textColourId, EarColours::Heading);
   headingLabel_->setText("HOA Order Display",
                          juce::NotificationType::dontSendNotification);

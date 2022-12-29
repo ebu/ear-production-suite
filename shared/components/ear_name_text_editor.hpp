@@ -15,7 +15,7 @@ class EarNameTextEditor : public TextEditor {
  public:
   EarNameTextEditor() : TextEditor() {
     setLookAndFeel(&earNameTextEditorLookAndFeel_);
-    setFont(EarFonts::Items);
+    setFont(EarFontsSingleton::instance().Items);
     setMultiLine(false);
     setJustification(Justification::topLeft);
     setBorder(BorderSize<int>(0, textIndent, 0, textIndent));

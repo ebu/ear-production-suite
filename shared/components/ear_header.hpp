@@ -23,7 +23,7 @@ class EarHeader : public Component {
 
   void setText(std::string const& text) {
     headerText_ = AttributedString(text);
-    headerText_.setFont(EarFonts::HeroHeading);
+    headerText_.setFont(EarFontsSingleton::instance().HeroHeading);
     headerText_.setColour(EarColours::Text);
     repaint();
   }

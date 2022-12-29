@@ -23,25 +23,25 @@ class ValueBoxPanning : public Component {
         distSlider_(std::make_shared<EarSlider>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
-    headingLabel_->setFont(EarFonts::Heading);
+    headingLabel_->setFont(EarFontsSingleton::instance().Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Panning",
                            juce::NotificationType::dontSendNotification);
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
 
-    azLabel_->setFont(EarFonts::Label);
+    azLabel_->setFont(EarFontsSingleton::instance().Label);
     azLabel_->setColour(Label::textColourId, EarColours::Label);
     azLabel_->setText("Azimuth", juce::NotificationType::dontSendNotification);
     azLabel_->setJustificationType(Justification::bottomRight);
     addAndMakeVisible(azLabel_.get());
-    elLabel_->setFont(EarFonts::Label);
+    elLabel_->setFont(EarFontsSingleton::instance().Label);
     elLabel_->setColour(Label::textColourId, EarColours::Label);
     elLabel_->setText("Elevation",
                       juce::NotificationType::dontSendNotification);
     elLabel_->setJustificationType(Justification::bottomRight);
     addAndMakeVisible(elLabel_.get());
-    distLabel_->setFont(EarFonts::Label);
+    distLabel_->setFont(EarFontsSingleton::instance().Label);
     distLabel_->setColour(Label::textColourId, EarColours::Label);
     distLabel_->setText("Distance",
                         juce::NotificationType::dontSendNotification);

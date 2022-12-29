@@ -25,7 +25,7 @@ class ChannelMeterLayout : public Component {
         channelMeterBox7to12_(std::make_unique<SpeakerMetersBox>()),
         channelMeterBox13to18_(std::make_unique<SpeakerMetersBox>()),
         channelMeterBox19to24_(std::make_unique<SpeakerMetersBox>()) {
-    headingLabel_->setFont(EarFonts::Heading);
+    headingLabel_->setFont(EarFontsSingleton::instance().Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Channel Meters",
                            juce::NotificationType::dontSendNotification);

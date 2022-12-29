@@ -123,6 +123,25 @@
       }
     },
     {
+      "name": "linux-base-x64",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_SYSTEM_PROCESSOR": {
+          "type": "STRING",
+          "value": "x86_64"
+        },
+        "CMAKE_SYSTEM_NAME": {
+          "type": "STRING",
+          "value": "Linux"
+        }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "packaging-base",
       "hidden": true,
       "inherits": [
@@ -187,6 +206,20 @@
       }
     },
     {
+      "name": "vcpkg-linux-x64",
+      "hidden": true,
+      "inherits": [
+        "vcpkg-base",
+        "linux-base-x64"
+      ],
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-linux"
+        }
+      }
+    },
+    {
       "name": "windows-default",
       "displayName": "Default windows build",
       "description": "Release build for windows using Ninja and vcpkg",
@@ -213,6 +246,16 @@
       "inherits": [
         "ninja-base",
         "vcpkg-macos-arm64",
+        "release-base"
+      ]
+    },
+    {
+      "name": "linux-default-x64",
+      "displayName": "Default Linux Release build",
+      "description": "Release build for Linux using Ninja and vcpkg",
+      "inherits": [
+        "ninja-base",
+        "vcpkg-linux-x64",
         "release-base"
       ]
     },
@@ -256,6 +299,27 @@
         "packaging-base",
         "release-base"
       ]
+    },
+    {
+      "name": "linux-packaging-release",
+      "displayName": "Linux x64 Release packaging configuration",
+      "description": "Packaging build for Linux using Ninja generator",
+      "inherits": [
+        "vcpkg-linux-x64",
+        "packaging-base",
+        "release-base"
+      ]
+    },
+    {
+      "name": "linux-packaging-relwithdebinfo",
+      "displayName": "Linux x64 packaging Release build with Debug symbols",
+      "description": "Packaging build for Linux with Debug symbols using Ninja generator",
+      "inherits": [
+        "vcpkg-linux-x64",
+        "packaging-base",
+        "relwithdebinfo-base",
+        "minimal-build-base"
+      ]
     }
   ],
   "buildPresets": [
@@ -278,6 +342,15 @@
       }
     },
     {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "windows-default",
       "configurePreset": "windows-default",
       "inherits": "windows"
@@ -291,6 +364,11 @@
       "name": "macos-default-arm64",
       "configurePreset": "macos-default-arm64",
       "inherits": "macos"
+    },
+    {
+      "name": "linux-default-x64",
+      "configurePreset": "linux-default-x64",
+      "inherits": "linux"
     },
     {
       "name": "windows-packaging-release",
@@ -311,6 +389,16 @@
       "name": "macos-arm64-packaging-release",
       "configurePreset": "macos-arm64-packaging-release",
       "inherits": "macos"
+    },
+    {
+      "name": "linux-packaging-release",
+      "configurePreset": "linux-packaging-release",
+      "inherits": "linux"
+    },
+    {
+      "name": "linux-packaging-relwithdebinfo",
+      "configurePreset": "linux-packaging-relwithdebinfo",
+      "inherits": "linux"
     }
   ],
   "testPresets": [
@@ -339,6 +427,15 @@
       }
     },
     {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "windows-default",
       "configurePreset": "windows-default",
       "inherits": ["windows", "test-config"]
@@ -354,6 +451,11 @@
       "inherits": ["macos", "test-config"]
     },
     {
+      "name": "linux-default-x64",
+      "configurePreset": "linux-default-x64",
+      "inherits": ["linux", "test-config"]
+    },
+    {
       "name": "windows-packaging-release",
       "configurePreset": "windows-packaging-release",
       "inherits": ["windows", "test-config"]
@@ -367,6 +469,16 @@
       "name": "macos-packaging-release",
       "configurePreset": "macos-packaging-release",
       "inherits": ["macos", "test-config"]
+    },
+    {
+      "name": "linux-packaging-release",
+      "configurePreset": "linux-packaging-release",
+      "inherits": ["linux", "test-config"]
+    },
+    {
+      "name": "linux-packaging-relwithdebinfo",
+      "configurePreset": "linux-packaging-relwithdebinfo",
+      "inherits": ["linux", "test-config"]
     }
   ]
 }

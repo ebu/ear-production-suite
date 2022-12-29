@@ -1,6 +1,7 @@
 add_executable(testreaper_adm "")
 
 add_dependencies(testreaper_adm reaper_adm reaper_adm_dependencies)
+target_compile_definitions(testreaper_adm PUBLIC SWELL_TESTING)
 
 target_sources(testreaper_adm
     PRIVATE
@@ -56,6 +57,7 @@ add_test(
 add_executable(testacceptreaper_adm "")
 
 add_dependencies(testacceptreaper_adm reaper_adm reaper_adm_dependencies)
+target_compile_definitions(testacceptreaper_adm PUBLIC SWELL_TESTING)
 
 target_sources(testacceptreaper_adm
     PRIVATE

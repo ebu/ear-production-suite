@@ -31,9 +31,9 @@ void OrderDisplayBox::paint(Graphics& g) {
     area.reduce(20.f, 30.f);
 
     g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
-    g.setFont(EarFonts::Label);
+    g.setFont(EarFontsSingleton::instance().Label);
     g.setColour(EarColours::Text.withAlpha(Emphasis::high));
-    g.setFont(EarFonts::Heading);
+    g.setFont(EarFontsSingleton::instance().Heading);
     g.drawText("Please select a Higher Order Ambisonics type first",
                area.removeFromTop(25.f), Justification::left);
   }

@@ -26,16 +26,16 @@ void MainComponent::paint (Graphics& g)
     auto topHalf = area.removeFromTop(getHeight() / 2);
     topHalf.removeFromTop(30); // margin
     g.setColour (EarColours::Heading);
-    g.setFont (EarFonts::HeroHeading);
+    g.setFont (EarFontsSingleton::instance().HeroHeading);
     g.drawText ("Project Upgrade Utility", topHalf.removeFromTop(topHalf.getHeight() / 2), Justification::centredBottom, true);
     g.setColour (EarColours::Label);
-    g.setFont (EarFonts::Label);
+    g.setFont (EarFontsSingleton::instance().Label);
     topHalf.removeFromTop(10); // margin
     g.drawText ("Updates REAPER projects to use the latest version of the EAR Production Suite", topHalf, Justification::centredTop, true);
 
     area.removeFromBottom(50); // version label space
     g.setColour (EarColours::Label);
-    g.setFont (EarFonts::Description.italicised());
+    g.setFont (EarFontsSingleton::instance().Description.italicised());
     if(processing) {
         g.drawText("Please wait. Processing...", area, Justification::centred, true);
     } else {

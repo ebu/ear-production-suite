@@ -46,20 +46,20 @@ ItemsContainer::ItemsContainer(Metadata& metadata)
   addAndMakeVisible(hoaViewport_.get());
 
   objectsLabel_->setText("Objects", dontSendNotification);
-  objectsLabel_->setFont(EarFonts::Label);
+  objectsLabel_->setFont(EarFontsSingleton::instance().Label);
   objectsLabel_->setColour(Label::backgroundColourId, EarColours::Area04dp);
   objectsLabel_->setColour(Label::textColourId, EarColours::Heading);
   addAndMakeVisible(objectsLabel_.get());
 
   directSpeakersLabel_->setText("Direct Speakers", dontSendNotification);
-  directSpeakersLabel_->setFont(EarFonts::Label);
+  directSpeakersLabel_->setFont(EarFontsSingleton::instance().Label);
   directSpeakersLabel_->setColour(Label::backgroundColourId,
                                   EarColours::Area04dp);
   directSpeakersLabel_->setColour(Label::textColourId, EarColours::Heading);
   addAndMakeVisible(directSpeakersLabel_.get());
 
   hoaLabel_->setText("Higher Order Ambisonics", dontSendNotification);
-  hoaLabel_->setFont(EarFonts::Label);
+  hoaLabel_->setFont(EarFontsSingleton::instance().Label);
   hoaLabel_->setColour(Label::backgroundColourId, EarColours::Area04dp);
   hoaLabel_->setColour(Label::textColourId, EarColours::Heading);
   addAndMakeVisible(hoaLabel_.get());

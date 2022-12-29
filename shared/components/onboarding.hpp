@@ -240,7 +240,7 @@ class Onboarding : public Component {
   void removeListener(Listener* l) { listeners_.remove(l); }
 
  private:
-  int index_;
+  int index_ = 0;
   std::vector<std::unique_ptr<Component>> tabs_;
   std::unique_ptr<SegmentProgressBar> progressBar_;
   std::unique_ptr<EarButton> nextButton_;

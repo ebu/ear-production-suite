@@ -14,7 +14,7 @@ class HeadphoneChannelMeterBox : public Component {
    HeadphoneChannelMeterBox(const String& labelText) : label_(std::make_unique<Label>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
-    label_->setFont(EarFonts::Heading);
+    label_->setFont(EarFontsSingleton::instance().Heading);
     label_->setColour(Label::textColourId,
                       EarColours::Text.withAlpha(Emphasis::high));
     label_->setText(labelText, dontSendNotification);

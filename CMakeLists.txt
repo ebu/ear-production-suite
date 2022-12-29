@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(EPS_VERSION_BASE 0.8.0) # This is used as fallback if getting from git fails. Must be only numeric.
 # NOTE: also update hard-coded version number in
@@ -27,9 +28,7 @@ message(STATUS "----------------------------------------------------------------
 include(FeatureSummary)
 
 include(eps_set_install_paths)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    eps_set_install_paths()
-endif()
+eps_set_install_paths()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

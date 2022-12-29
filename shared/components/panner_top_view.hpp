@@ -71,7 +71,7 @@ class PannerTopView : public Component,
 
     // labeling
     g.setColour(findColour(angleLabelColourId));
-    g.setFont(EarFonts::Measures);
+    g.setFont(EarFontsSingleton::instance().Measures);
     g.drawText(String::fromUTF8("0"), topTickLabelRect_,
                Justification::centredBottom);
     g.drawText(String::fromUTF8("180"), bottomTickLabelRect_,
@@ -82,7 +82,7 @@ class PannerTopView : public Component,
                Justification::left);
 
     g.setColour(findColour(directionLabelColourId));
-    g.setFont(EarFonts::Values);
+    g.setFont(EarFontsSingleton::instance().Values);
     g.drawText(String("Front"), frontLabelRect_, Justification::centredBottom);
     g.drawText(String("Back"), backLabelRect_, Justification::centredTop);
   }
@@ -218,12 +218,12 @@ class PannerTopView : public Component,
     frontLabelRect_ = juce::Rectangle<float>(
         getWidth() / 2.f - labelWidth_ / 2.f,
         getHeight() / 2.f - outerDiameter_ / 2.f - tickLength_ -
-            2.f * padding_ - EarFonts::Measures.getAscent() - labelHeight_,
+            2.f * padding_ - EarFontsSingleton::instance().Measures.getAscent() - labelHeight_,
         labelWidth_, labelHeight_);
     backLabelRect_ = juce::Rectangle<float>(
         getWidth() / 2.f - labelWidth_ / 2.f,
         getHeight() / 2.f + outerDiameter_ / 2.f + tickLength_ +
-            2.f * padding_ + EarFonts::Measures.getAscent(),
+            2.f * padding_ + EarFontsSingleton::instance().Measures.getAscent(),
         labelWidth_, labelHeight_);
   }
 

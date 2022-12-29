@@ -166,10 +166,7 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
   // interleaved by keeping the same state.
   if (processor_) {
     processor_->process(buffer, buffer, gains.direct, gains.diffuse);
-    // Check enough channels - prevents crash if track/buffer too narrow
-    if (buffer.getNumChannels() >= levelMeter_->channels()) {
-      levelMeter_->process(buffer);
-    }
+    levelMeter_->process(buffer);
   }
 }
 

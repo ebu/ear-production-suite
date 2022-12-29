@@ -173,8 +173,6 @@ source_group("Resources" FILES ${EXTENSION_RESOURCES})
 target_compile_definitions(reaper_adm_object
     PUBLIC $<TARGET_PROPERTY:WDL::swell,INTERFACE_COMPILE_DEFINITIONS>)
 
-set_target_properties(reaper_adm_object PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
 add_library(reaper_adm_dependencies INTERFACE)
 
 target_include_directories(reaper_adm_dependencies
@@ -237,7 +235,7 @@ endif()
 
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
-set(linux_install_dir "share/REAPER/UserPlugins")
+set(linux_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 
 install(TARGETS
     reaper_adm

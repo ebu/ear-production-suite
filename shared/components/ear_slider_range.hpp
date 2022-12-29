@@ -104,7 +104,7 @@ class EarSliderRange : public Component,
 
     // draw ticks + labels
     g.setColour(findColour(highlightColourId));
-    g.setFont(EarFonts::Measures);
+    g.setFont(EarFontsSingleton::instance().Measures);
     for (const auto tick : ticks_) {
       float tickPosX = getXPositionOfValue(tick.value);
       g.drawLine(tickPosX, tickPosStartY_, tickPosX, tickPosEndY_, tickWidth_);
