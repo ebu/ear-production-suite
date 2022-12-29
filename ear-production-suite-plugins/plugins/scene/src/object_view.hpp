@@ -10,6 +10,7 @@
 #include "components/ear_colour_indicator.hpp"
 #include "components/level_meter.hpp"
 #include "components/ear_slider_range.hpp"
+#include "components/ear_inc_dec_slider.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "metadata.hpp"
@@ -41,6 +42,8 @@ class ObjectView : public ElementView,
         nameLabel_(std::make_unique<Label>()),
         levelMeter_(std::make_unique<LevelMeter>()),
         metadataLabel_(std::make_unique<Label>()),
+        importanceLabel_(std::make_unique<Label>()),
+        importanceSlider_(std::make_unique<EarIncDecSlider>()),
         settingsButton_(std::make_unique<EarButton>()),
         onOffInteractionPanel_(std::make_unique<EarExpansionPanel>()),
         gainInteractionPanel_(std::make_unique<EarExpansionPanel>()),
@@ -61,9 +64,45 @@ class ObjectView : public ElementView,
     addAndMakeVisible(levelMeter_.get());
 
     metadataLabel_->setFont(EarFontsSingleton::instance().Values);
+    metadataLabel_->setJustificationType(Justification::centredLeft);
     metadataLabel_->setColour(Label::textColourId,
                               EarColours::Text.withAlpha(Emphasis::medium));
     addAndMakeVisible(metadataLabel_.get());
+
+    importanceLabel_->setFont(EarFonts::Values);
+    importanceLabel_->setColour(Label::textColourId, EarColours::Label);
+    importanceLabel_->setText("Importance", dontSendNotification);
+    importanceLabel_->setJustificationType(Justification::centredLeft);
+    addAndMakeVisible(importanceLabel_.get());
+
+    importanceSlider_->slider.valueFromTextFunction = [](const juce::String& text) {
+      double val = text.getDoubleValue(); // Returns 0.0 for non-numeric
+      if(val < 1.0 || val > 10.0) {
+        return 11.0;
+      } else {
+        return val;
+      }
+    };
+    importanceSlider_->slider.textFromValueFunction = [](double val) {
+      if(val < 1.0 || val > 10.0) {
+        return juce::String("---");
+      } else {
+        return juce::String(std::to_string(int(val)));
+      }
+    };
+#ifdef BAREBONESPROFILE
+    importanceSlider_->slider.setRange(1, 10);
+    importanceSlider_->slider.setDoubleClickReturnValue(true, 10);
+#else
+    importanceSlider_->wrapAround = true;
+    importanceSlider_->slider.setRange(1, 11);
+    importanceSlider_->slider.setDoubleClickReturnValue(true, 11);
+#endif
+    importanceSlider_->slider.setNumDecimalPlacesToDisplay(0);
+    importanceSlider_->slider.setMouseDragSensitivity(10);
+    importanceSlider_->slider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_AutoDirection);
+    importanceSlider_->slider.addListener(this);
+    addAndMakeVisible(importanceSlider_.get());
 
     settingsButton_->setButtonText("Settings");
     settingsButton_->setClickingTogglesState(true);
@@ -184,11 +223,13 @@ class ObjectView : public ElementView,
 
     juce::String metadataLabelText;
     if (data_.item.has_ds_metadata()) {
+      metadataLabelText = "DirectSpeakers";
       auto layoutIndex = data_.item.ds_metadata().layout();
       if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
         metadataLabelText = String(SPEAKER_SETUPS.at(layoutIndex).commonName);
       }
     } else if (data_.item.has_hoa_metadata()) {
+      metadataLabelText = "HOA";
       auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(
         4, data_.item.hoa_metadata().packformatidvalue());
@@ -196,8 +237,20 @@ class ObjectView : public ElementView,
         int cfCount = pfData->relatedChannelFormats.size();
         int order = std::sqrt(cfCount) - 1;
         metadataLabelText = "HOA order " + String(order);
-      } else {
-        metadataLabelText = "HOA";
+      }
+    }
+
+    if(!data_.object.has_importance()) {
+      // >10 = not set
+      if(importanceSlider_->slider.getValue() <= 10) {
+        importanceSlider_->slider.setValue(11);
+        changes = true;
+      }
+
+    } else {
+      if(data_.object.importance() != importanceSlider_->slider.getValue()) {
+        importanceSlider_->slider.setValue(data_.object.importance());
+        changes = true;
       }
     }
 
@@ -256,7 +309,13 @@ class ObjectView : public ElementView,
         mainArea.removeFromRight(55).withSizeKeepingCentre(24, 24));
     settingsButton_->setBounds(
         mainArea.removeFromRight(120).reduced(marginSmall_, 17));
-    metadataLabel_->setBounds(mainArea.removeFromRight(150).reduced(10, 5));
+
+    auto metadataArea = mainArea.removeFromRight(190);
+    metadataArea = metadataArea.withTrimmedRight(20).withTrimmedLeft(10); // padding
+    auto importanceArea = metadataArea.removeFromTop(38).reduced(0, 10);
+    importanceLabel_->setBounds(importanceArea.removeFromLeft(75));
+    importanceSlider_->setBounds(importanceArea);
+    metadataLabel_->setBounds(metadataArea.removeFromTop(13));
 
     auto nameMeterArea = mainArea;
     nameLabel_->setBounds(nameMeterArea.removeFromTop(38));
@@ -337,6 +396,17 @@ class ObjectView : public ElementView,
     if (slider == positionInteractionSettings_->distanceMaxSlider.get()) {
       auto value = positionInteractionSettings_->distanceMaxSlider->getValue();
       data_.object.mutable_interactive_position()->set_max_r(value);
+      notifyDataChange();
+    }
+    // importance
+    if (slider == &importanceSlider_->slider) {
+      int value = importanceSlider_->slider.getValue();
+      if(value < 1 || value > 10) {
+        // Out of range == Not set
+        data_.object.clear_importance();
+      } else {
+        data_.object.set_importance(value);
+      }
       notifyDataChange();
     }
   }
@@ -434,6 +504,8 @@ class ObjectView : public ElementView,
   std::unique_ptr<Label> nameLabel_;
   std::unique_ptr<LevelMeter> levelMeter_;
   std::unique_ptr<Label> metadataLabel_;
+  std::unique_ptr<Label> importanceLabel_;
+  std::unique_ptr<EarIncDecSlider> importanceSlider_;
   std::unique_ptr<EarButton> settingsButton_;
   std::unique_ptr<EarExpansionPanel> onOffInteractionPanel_;
   std::unique_ptr<EarExpansionPanel> gainInteractionPanel_;

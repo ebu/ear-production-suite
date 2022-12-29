@@ -6,6 +6,7 @@
 #include <adm/common_definitions.hpp>
 #include <utility>
 #include <iomanip>
+#include <optional>
 
 using namespace ear::plugin;
 
@@ -162,6 +163,30 @@ bool interactionEqual(proto::Object const& object,
   return !admInteractionEnabled;
 }
 
+std::optional<int> determineImportanceValue(const proto::Object & object) {
+  if(object.has_importance()) {
+    return std::optional<int>(object.importance());
+  }
+#ifdef BAREBONESPROFILE
+  return std::optional<int>(10);
+#endif
+  return std::optional<int>();
+}
+
+bool importanceEqual(proto::Object const& object,
+                     adm::AudioObject const& admObject) {
+  auto importance = determineImportanceValue(object);
+  if(importance.has_value() == admObject.has<adm::Importance>()) {
+    if(importance.has_value()) {
+      auto admObjectImportance = admObject.get<adm::Importance>().get();
+      return importance.value() == admObjectImportance;
+    } else {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool hasValidDefaultIndex(const proto::Toggle& toggle) {
   return toggle.has_default_element_index() &&
          toggle.default_element_index() >= 0 &&
@@ -175,7 +200,7 @@ bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
   auto objectIt = serializedObjects.find(connectionId);
   if (objectIt != serializedObjects.end()) {
     auto const& admObject = *(objectIt->second);
-    return interactionEqual(object, admObject);
+    return importanceEqual(object, admObject) && interactionEqual(object, admObject);
   }
   return false;
 }
@@ -282,6 +307,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
   assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() ||
          metadata.has_hoa_metadata());
   const auto& connectionId = metadata.connection_id();
+
   if (isAlreadySerialized(object)) {
     // Already have serialized this object (in a different programme?)
     content.addReference(serializedObjects[connectionId]);
@@ -299,6 +325,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       admObject->addReference(pack);
     }
     setInteractivity(*admObject, object);
+    setImportance(*admObject, object);
 
     // Create plugin map entries for new AudioObject (copy other params from existing)
     int existingPluginMapEntryCount = pluginMap.size();
@@ -313,6 +340,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
     if (metadata.has_obj_metadata()) {
       auto objectHolder = adm::addSimpleObjectTo(doc, metadata.name());
       setInteractivity(*objectHolder.audioObject, object);
+      setImportance(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
       assert(metadata.routing() <= std::numeric_limits<int16_t>::max());
       serializedObjects[connectionId] = objectHolder.audioObject;
@@ -333,9 +361,9 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
         auto hoaAudioObject =
           adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
         hoaAudioObject->addReference(packFormat);
-
         content.addReference(hoaAudioObject);
         setInteractivity(*hoaAudioObject, object);
+        setImportance(*hoaAudioObject, object);
 
         auto channelFormats =
           admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
@@ -398,6 +426,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
             adm::parseAudioPackFormatId(speakerSetup.packFormatId),
             trackFormatIds, speakerLabels);
         setInteractivity(*objectHolder.audioObject, object);
+        setImportance(*objectHolder.audioObject, object);
         content.addReference(objectHolder.audioObject);
         for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
           auto speakerLabel = speakerLabels.at(i);
@@ -439,6 +468,17 @@ void ProgrammeStoreAdmSerializer::setInteractivity(
     admObject.set(interaction);
   }
 }
+
+void ear::plugin::ProgrammeStoreAdmSerializer::setImportance(adm::AudioObject & admObject, const proto::Object & object)
+{
+  auto importance = determineImportanceValue(object);
+  if(importance.has_value()) {
+    admObject.set(adm::Importance(importance.value()));
+  } else {
+    admObject.unset<adm::Importance>();
+  }
+}
+
 bool ProgrammeStoreAdmSerializer::isSerializedWithDifferentObjectSettings(
     const proto::Object& object) {
   auto const& connectionId = object.connection_id();
