@@ -242,8 +242,8 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
     REQUIRE(numberOf<adm::AudioObject>(doc) == 1);
     REQUIRE(numberOf<adm::AudioTrackUid>(doc) == 1);
-    REQUIRE(numberOfUncommon<adm::AudioTrackFormat>(doc) == 1);
-    REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 1);
+    REQUIRE(numberOfUncommon<adm::AudioTrackFormat>(doc) == 0); // Using 2076-2-style structures
+    REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
     /*
@@ -268,8 +268,8 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
     REQUIRE(numberOf<adm::AudioObject>(doc) == 1);
     REQUIRE(numberOf<adm::AudioTrackUid>(doc) == 1);
-    REQUIRE(numberOfUncommon<adm::AudioTrackFormat>(doc) == 1);
-    REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 1);
+    REQUIRE(numberOfUncommon<adm::AudioTrackFormat>(doc) == 0); // Using 2076-2-style structures
+    REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
 
@@ -376,8 +376,8 @@ TEST_CASE("Toggle group with three members") {
     REQUIRE(numberOf<AudioProgramme>(doc) == 1);
     REQUIRE(numberOf<AudioObject>(doc) == 3);
     REQUIRE(numberOf<AudioTrackUid>(doc) == 3);  // stereo
-    REQUIRE(numberOfUncommon<AudioTrackFormat>(doc) == 3);
-    REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 3);
+    REQUIRE(numberOfUncommon<AudioTrackFormat>(doc) == 0); // Using 2076-2-style structures
+    REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<AudioChannelFormat>(doc) == 3);
     REQUIRE(numberOfUncommon<AudioPackFormat>(doc) == 3);
 
