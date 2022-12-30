@@ -142,16 +142,29 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
 
     // Create CHNA chunk
     std::vector<bw64::AudioId> audioIds;
+
     for(auto const& channelMapping : chosenCandidateForExport->getChannelMappings()) {
         for(auto const& plugin : channelMapping.plugins) {
             auto admElements = getAdmElementsFor(plugin);
             assert(admElements.has_value());
 
-            audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
-                                             formatId(admElements->audioTrackUid->get<AudioTrackUidId>()),
-                                             formatId(admElements->audioTrackFormat->get<AudioTrackFormatId>()),
-                                             formatId(admElements->audioPackFormat->get<AudioPackFormatId>())
-            ));
+            if(admElements->audioTrackFormat) {
+                // 2076-1 structure
+                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
+                                                 formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
+                                                 formatId((*admElements).audioTrackFormat->get<AudioTrackFormatId>()),
+                                                 formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
+                ));
+            } else {
+                // 2076-2 structure
+                std::string cfId = formatId(admElements->audioChannelFormat->get<AudioChannelFormatId>());
+                cfId += "_00";
+                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
+                                                 formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
+                                                 cfId,
+                                                 formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
+                ));
+            }
         }
     }
 
@@ -312,24 +325,27 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     }
 
     auto audioTrackFormat = audioTrackUid->getReference<adm::AudioTrackFormat>();
-    assert(audioTrackFormat);
-    if(!audioTrackFormat) {
-        warningStrings.push_back(std::string("No Track Format referenced from ") + adm::formatId(audioTrackUidId));
+    auto audioChannelFormat = audioTrackUid->getReference<adm::AudioChannelFormat>();
+    assert(audioTrackFormat || audioChannelFormat);
+    if(!audioTrackFormat && !audioChannelFormat) {
+        warningStrings.push_back(std::string("No Track Format or Channel Format referenced from ") + adm::formatId(audioTrackUidId));
         return std::optional<AdmElements>();
     }
 
-    auto audioStreamFormat = audioTrackFormat->getReference<adm::AudioStreamFormat>();
-    assert(audioStreamFormat);
-    if(!audioStreamFormat) {
-        warningStrings.push_back(std::string("No Stream Format referenced recursively from ") + adm::formatId(audioTrackUidId));
-        return std::optional<AdmElements>();
-    }
+    if(audioTrackFormat) {
+        auto audioStreamFormat = audioTrackFormat->getReference<adm::AudioStreamFormat>();
+        assert(audioStreamFormat);
+        if(!audioStreamFormat) {
+            warningStrings.push_back(std::string("No Stream Format referenced recursively from ") + adm::formatId(audioTrackUidId));
+            return std::optional<AdmElements>();
+        }
 
-    auto audioChannelFormat = audioStreamFormat->getReference<adm::AudioChannelFormat>();
-    assert(audioChannelFormat);
-    if(!audioChannelFormat) {
-        warningStrings.push_back(std::string("No Channel Format referenced recursively from ") + adm::formatId(audioTrackUidId));
-        return std::optional<AdmElements>();
+        audioChannelFormat = audioStreamFormat->getReference<adm::AudioChannelFormat>();
+        assert(audioChannelFormat);
+        if(!audioChannelFormat) {
+            warningStrings.push_back(std::string("No Channel Format referenced recursively from ") + adm::formatId(audioTrackUidId));
+            return std::optional<AdmElements>();
+        }
     }
 
     auto audioChannelFormatId = audioChannelFormat->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();

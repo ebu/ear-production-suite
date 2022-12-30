@@ -192,6 +192,31 @@ bool hasValidDefaultIndex(const proto::Toggle& toggle) {
          toggle.default_element_index() >= 0 &&
          toggle.default_element_index() < toggle.element_size();
 }
+
+adm::SimpleObjectHolder add2076v2SimpleObjectTo(std::shared_ptr<adm::Document> document,
+                                     const std::string& name) {
+  // create
+  adm::SimpleObjectHolder holder;
+  holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
+
+  holder.audioPackFormat = adm::AudioPackFormat::create(adm::AudioPackFormatName(name),
+                                                        adm::TypeDefinition::OBJECTS);
+  holder.audioChannelFormat = adm::AudioChannelFormat::create(
+    adm::AudioChannelFormatName(name), adm::TypeDefinition::OBJECTS);
+  holder.audioTrackUid = adm::AudioTrackUid::create();
+
+  // reference
+  holder.audioObject->addReference(holder.audioPackFormat);
+  holder.audioPackFormat->addReference(holder.audioChannelFormat);
+  holder.audioObject->addReference(holder.audioTrackUid);
+  holder.audioTrackUid->setReference(holder.audioChannelFormat);
+  holder.audioTrackUid->setReference(holder.audioPackFormat);
+
+  document->add(holder.audioObject);
+  return holder;
+}
+
+
 }  // namespace
 
 bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
@@ -338,7 +363,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
   } else {
     // First time we've seen the input
     if (metadata.has_obj_metadata()) {
-      auto objectHolder = adm::addSimpleObjectTo(doc, metadata.name());
+      auto objectHolder = add2076v2SimpleObjectTo(doc, metadata.name());
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
