@@ -246,11 +246,6 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
-    /*
-    REQUIRE(chna.numUids() == 1);
-    REQUIRE(chna.audioIds().size() == 1);
-    REQUIRE(chna.numTracks() == 1);
-    */
   }
 
   programmeStore = programmeStore.withProgramme(ProgrammeBuilder{}
@@ -272,12 +267,6 @@ TEST_CASE("Programme parser tests") {
     REQUIRE(numberOfUncommon<adm::AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<adm::AudioChannelFormat>(doc) == 1);
     REQUIRE(numberOfUncommon<adm::AudioPackFormat>(doc) == 1);
-
-    /*
-    REQUIRE(chna.numUids() == 1);
-    REQUIRE(chna.audioIds().size() == 1);
-    REQUIRE(chna.numTracks() == 1);
-    */
   }
 }
 
@@ -312,12 +301,6 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
   REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 0);
   REQUIRE(numberOfUncommon<AudioChannelFormat>(doc) == 0);
   REQUIRE(numberOfUncommon<AudioPackFormat>(doc) == 0);
-
-  /*
-  REQUIRE(chna.numUids() == 2);
-  REQUIRE(chna.audioIds().size() == 2);
-  REQUIRE(chna.numTracks() == 2);
-  */
 }
 
 namespace {
@@ -380,12 +363,6 @@ TEST_CASE("Toggle group with three members") {
     REQUIRE(numberOfUncommon<AudioStreamFormat>(doc) == 0); // Using 2076-2-style structures
     REQUIRE(numberOfUncommon<AudioChannelFormat>(doc) == 3);
     REQUIRE(numberOfUncommon<AudioPackFormat>(doc) == 3);
-
-    /*
-    REQUIRE(chna.numUids() == 3);
-    REQUIRE(chna.audioIds().size() == 3);
-    REQUIRE(chna.numTracks() == 3);
-    */
   }
 
   SECTION("adm structure") {
@@ -449,7 +426,6 @@ TEST_CASE("On_Off interactive") {
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
-    auto chna = result.second;
     REQUIRE(doc.getElements<AudioObject>().size() == 1);
     auto const& obj = *doc.getElements<AudioObject>().front();
     REQUIRE((obj.has<Interact>() && obj.get<Interact>().get()));
@@ -467,7 +443,6 @@ TEST_CASE("On_Off interactive") {
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
-    auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 1);
     auto interactiveObject = objects.front();
@@ -492,7 +467,6 @@ TEST_CASE("On_Off interactive") {
     ProgrammeStoreAdmSerializer serializer;
     auto result = serializer.serialize(metadata.stores());
     auto const& doc = *result.first;
-    auto chna = result.second;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 2);
     int interactiveCount = 0;
