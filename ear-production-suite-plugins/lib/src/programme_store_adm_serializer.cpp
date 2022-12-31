@@ -216,6 +216,43 @@ adm::SimpleObjectHolder add2076v2SimpleObjectTo(std::shared_ptr<adm::Document> d
   return holder;
 }
 
+adm::SimpleCommonDefinitionsObjectHolder add2076v2TailoredCommonDefinitionsObjectTo(
+  std::shared_ptr<adm::Document> document, const std::string& name,
+  const adm::AudioPackFormatId packFormatId,
+  const std::vector<adm::AudioChannelFormatId>& channelFormatIds,
+  const std::vector<std::string>& speakerLabels) {
+  adm::SimpleCommonDefinitionsObjectHolder holder;
+  holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
+  auto packFormat = document->lookup(packFormatId);
+  if (!packFormat) {
+    std::stringstream ss;
+    ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
+      << "\" not found. Are the common definitions added to the document?";
+    throw adm::error::AdmException(ss.str());
+  }
+  holder.audioObject->addReference(packFormat);
+  if (channelFormatIds.size() != speakerLabels.size()) {
+    throw adm::error::AdmException(
+      "Sizes of channelFormatIds and speakerLabels arguments do not match.");
+  }
+  for (size_t i = 0; i < channelFormatIds.size(); i++) {
+    auto cf = document->lookup(channelFormatIds.at(i));
+    if (!cf) {
+      std::stringstream ss;
+      ss << "AudioTrackFormatId \"" << adm::formatId(channelFormatIds.at(i))
+        << "\" not found. Id might be invalid.";
+      throw adm::error::AdmException(ss.str());
+    }
+    auto uid = adm::AudioTrackUid::create();
+    uid->setReference(packFormat);
+    uid->setReference(cf);
+    holder.audioObject->addReference(uid);
+    holder.audioTrackUids[speakerLabels.at(i)] = uid;
+  }
+  document->add(holder.audioObject);
+  return holder;
+}
+
 
 }  // namespace
 
@@ -399,37 +436,22 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
         auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
 
         // For each channel format create a AudioTrackUid that references the pack
-        // format The audio object also needs to reference the track uid
+        // format. The audio object also needs to reference the channel format.
         for(int i(0); i < channelFormats.size(); ++i) {
           auto audioTrackUid = adm::AudioTrackUid::create();
           hoaAudioObject->addReference(audioTrackUid);
           audioTrackUid->setReference(packFormat);
 
-          // The channel format is converted into string format
-          // From the ID we can look up the channel format object from the doc
+          // We need the channel format from our document,
+          // not the document admCommonDefinitionHelper is using!
           auto channelFormatId = adm::AudioChannelFormatId(
             adm::TypeDefinition::HOA,
             adm::AudioChannelFormatIdValue(channelFormats[i]->id));
           auto channelFormat = doc->lookup(channelFormatId);
+          assert(channelFormat);
 
-          for(auto trackFormat : allTrackFormats) {
-            // For every possible track format in the list, check whether the
-            // channel format it references matches the actual channel format If it
-            // does then save that track format. It can now be references by
-            // audioTrackUid
-            auto streamFormat =
-              trackFormat->getReference<adm::AudioStreamFormat>();
-            if(streamFormat) {
-              auto channelFormatCheck =
-                streamFormat->getReference<adm::AudioChannelFormat>();
-              if(channelFormatCheck == channelFormat) {
-                audioTrackUid->setReference(trackFormat);
-
-                pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, hoaAudioObject, audioTrackUid });
-                break;
-              }
-            }
-          }
+          audioTrackUid->setReference(channelFormat);
+          pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, hoaAudioObject, audioTrackUid });
         }
         serializedObjects[connectionId] = hoaAudioObject;
       }
@@ -438,18 +460,19 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       auto layoutIndex = metadata.ds_metadata().layout();
       if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
         std::vector<std::string> speakerLabels;
-        std::vector<adm::AudioTrackFormatId> trackFormatIds;
+        std::vector<adm::AudioChannelFormatId> channelFormatIds;
         auto& speakerSetup = SPEAKER_SETUPS.at(layoutIndex);
+
         for (auto& speaker : speakerSetup.speakers) {
           speakerLabels.push_back(speaker.label);
           auto channelFormatId = speaker.channelFormatId;
-          auto trackFormatId = channelFormatId.replace(0, 2, "AT") + "_01";
-          trackFormatIds.push_back(adm::parseAudioTrackFormatId(trackFormatId));
+          channelFormatIds.push_back(adm::parseAudioChannelFormatId(channelFormatId));
         }
-        auto objectHolder = addTailoredCommonDefinitionsObjectTo(
+        auto objectHolder = add2076v2TailoredCommonDefinitionsObjectTo(
             doc, metadata.name(),
             adm::parseAudioPackFormatId(speakerSetup.packFormatId),
-            trackFormatIds, speakerLabels);
+            channelFormatIds, speakerLabels);
+
         setInteractivity(*objectHolder.audioObject, object);
         setImportance(*objectHolder.audioObject, object);
         content.addReference(objectHolder.audioObject);
