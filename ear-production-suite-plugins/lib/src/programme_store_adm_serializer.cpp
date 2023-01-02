@@ -332,8 +332,10 @@ ProgrammeStoreAdmSerializer::serializeToggleElement(
 void ProgrammeStoreAdmSerializer::serializeProgramme(
     adm::Document& doc, const proto::Programme& programme) {
   auto prog = adm::AudioProgramme::create(
-      adm::AudioProgrammeName{programme.name()},
-      adm::AudioProgrammeLanguage{programme.language()});
+      adm::AudioProgrammeName{programme.name()});
+  if(programme.has_language() && !programme.language().empty()) {
+    prog->set(adm::AudioProgrammeLanguage{ programme.language() });
+  }
   auto defaultContent =
       adm::AudioContent::create(adm::AudioContentName{programme.name()});
   doc.add(prog);
