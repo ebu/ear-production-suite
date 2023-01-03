@@ -76,7 +76,7 @@ class Metadata {
   void removeElementFromAllProgrammes(communication::ConnectionId const& connId);
   void doRemoveElementFromProgramme(int programmeIndex, const communication::ConnectionId& connId);
 
-  void addProgrammeImpl(std::string const& name, std::string const& language);
+  void addProgrammeImpl(std::string const& name);
   void ensureDefaultProgrammePresent();
   proto::Object* addObject(proto::Programme* programme, const communication::ConnectionId& connId);
   void doSetElementOrder(int programmeIndex, std::vector<communication::ConnectionId> const& order);
