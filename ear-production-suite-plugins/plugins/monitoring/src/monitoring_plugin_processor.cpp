@@ -58,6 +58,7 @@ EarMonitoringAudioProcessor::_getBusProperties() {
   for (const std::string& name : layout().channelNames()) {
     ret = ret.withOutput(name, AudioChannelSet::mono(), true);
   }
+  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(64 - numOutputChannels_), true);
   return ret;
 }
 
@@ -125,7 +126,7 @@ void EarMonitoringAudioProcessor::releaseResources() {
 bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
   if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(layout().channelNames().size()) &&
+          AudioChannelSet::discreteChannels(64) &&
       layouts.getMainInputChannelSet() ==
           AudioChannelSet::discreteChannels(64)) {
     return true;
@@ -162,6 +163,12 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     processor_->process(buffer, buffer, gains.direct, gains.diffuse);
     levelMeter_->process(buffer);
   }
+
+  // Clear unused output channels
+  for(int outChn = numOutputChannels_; outChn < buffer.getNumChannels(); ++outChn) {
+    buffer.clear(outChn, 0, buffer.getNumSamples());
+  }
+
 }
 
 //==============================================================================
