@@ -52,7 +52,7 @@ ear::Layout const& layout() {
 
 juce::AudioProcessor::BusesProperties
 EarMonitoringAudioProcessor::_getBusProperties() {
-  channels_ = layout().channelNames().size();
+  numOutputChannels_ = layout().channelNames().size();
   auto ret = BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true);
   for (const std::string& name : layout().channelNames()) {
@@ -149,21 +149,15 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
         if(destChn < getTotalNumOutputChannels()) {
           buffer.copyFrom(destChn, 0, buffer.getReadPointer(0), buffer.getNumSamples());
         } else {
-          for(int sampleNum = 0; sampleNum < buffer.getNumSamples(); sampleNum++) {
-            buffer.setSample(destChn, sampleNum, 0.f);
-          }
+          buffer.clear(destChn, 0, buffer.getNumSamples());
         }
       }
     }
     return;
   }
 
+  // Do EAR render
   auto gains = backend_->currentGains();
-
-  // Make sure to reset the state if your inner loop is processing
-  // the samples and the outer loop is handling the channels.
-  // Alternatively, you can process the samples with the channels
-  // interleaved by keeping the same state.
   if (processor_) {
     processor_->process(buffer, buffer, gains.direct, gains.diffuse);
     levelMeter_->process(buffer);

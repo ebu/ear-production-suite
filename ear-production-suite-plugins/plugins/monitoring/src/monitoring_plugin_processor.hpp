@@ -78,7 +78,7 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
   std::unique_ptr<ear::plugin::MonitoringAudioProcessor> processor_;
 
   int samplerate_;
-  int channels_;
+  int numOutputChannels_;
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarMonitoringAudioProcessor)
