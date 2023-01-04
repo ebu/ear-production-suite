@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "exportaction_issues.h"
 #include "exportaction.h"
+#include <helper/char_encoding.hpp>
 
 #define TIMER_ID 1
 
@@ -13,6 +14,28 @@ namespace {
 int MakeWParam(int loWord, int hiWord)
 {
     return (loWord & 0xFFFF) + ((hiWord & 0xFFFF) << 16);
+}
+
+void localise(std::string &str, std::shared_ptr<ReaperAPI> api) {
+    if(std::stof(api->GetAppVersion()) >= 6.11f) {
+        auto loc = api->LocalizeString(str.c_str(), "render", 0);
+        std::string localised{ api->LocalizeString(str.c_str(),"render", 0) };
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+        localised = api->LocalizeString(str.c_str(), "DLG_506", 0);
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+        // Note that the above sections fall-through to common anyway, but for completeness...
+        localised = api->LocalizeString(str.c_str(), "common", 0);
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+    }
 }
 
 }
@@ -94,9 +117,14 @@ std::string RenderDialogState::getComboBoxItemText(HWND hwnd, int itemIndex)
 
 std::string RenderDialogState::getWindowText(HWND hwnd)
 {
+#ifdef WIN32
+    wchar_t wintxt[100];
+    GetWindowTextW(hwnd, wintxt, 100);
+#else
     char wintxt[100];
     GetWindowText(hwnd, wintxt, 100);
-    return std::string(wintxt);
+#endif
+    return bufferToString(wintxt);
 }
 
 HWND RenderDialogState::ShowConfig(const void *cfg, int cfg_l, HWND parent)
@@ -151,6 +179,20 @@ void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
 {
+    localise(EXPECTED_RENDER_DIALOG_WINDOW_TITLE, reaperApi);
+    localise(EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_SECOND_PASS_CHECKBOX_TEXT, reaperApi);
+    localise(EXPECTED_MONO2MONO_CHECKBOX_TEXT, reaperApi);
+    localise(EXPECTED_MULTI2MULTI_CHECKBOX_TEXT, reaperApi);
+    localise(REQUIRED_SOURCE_COMBO_OPTION, reaperApi);
+    localise(REQUIRED_BOUNDS_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_CHANNEL_COUNT_LABEL_TEXT, reaperApi);
+    localise(REQUIRED_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
+
     // Our dialog displayed - reset all vars (might not be the first time around)
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
