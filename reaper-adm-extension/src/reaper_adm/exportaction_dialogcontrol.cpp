@@ -225,15 +225,50 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
                                                                 // This will involve fixing some values and disabling those controls
 
     // MUST do source combo before bounds combo (it affects options)
+    // MUST also do channel count in first pass , as changing that re-enables the bounds checkbox!
     if (hwnd && IsWindow(hwnd))
     {
-        if (getControlType(hwnd) == COMBOBOX) {
+        auto controlType = getControlType(hwnd);
+
+        if (controlType == COMBOBOX) {
             // See if this is the 'Source' dropdown by setting it to the option we want - if successful, it was, and so disable it
             if (selectInComboBox(hwnd, REQUIRED_SOURCE_COMBO_OPTION) != CB_ERR) {
                 sourceControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
         }
+
+        if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
+            // NOTE: Sample Rate and Channels controls are;
+            //       EDITABLECOMBO in REAPER <=6.11
+            //       COMBOBOX in REAPER >=6.12
+
+            auto itemText = getComboBoxItemText(hwnd);
+            // See if this is the sample rate dropdown by seeing if the first item is EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION
+            if(itemText == EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION){
+                sampleRateControlHwnd = hwnd;
+                auto editControl = getComboBoxEdit(hwnd);
+                auto currentOption = getWindowText(editControl);
+                if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
+                    sampleRateLastOption = currentOption;
+                }
+                EnableWindow(editControl, false);
+                UpdateWindow(editControl);
+            }
+            // See if this is the channels dropdown by seeing if the first item is EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION
+            if(itemText ==  EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION){
+                channelsControlHwnd = hwnd;
+                auto editControl = getComboBoxEdit(hwnd);
+                auto currentOption = getWindowText(editControl);
+                if(channelsLastOption.length() == 0 && currentOption.length() > 0){
+                    channelsLastOption = currentOption;
+                }
+                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
+                UpdateWindow(editControl);
+                ShowWindow(hwnd, SW_HIDE);
+            }
+        }
+
     }
 
     return true; // MUST return true to continue iterating through controls
@@ -290,34 +325,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         }
 
         if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
-            // NOTE: Sample Rate and Channels controls are;
-            //       EDITABLECOMBO in REAPER <=6.11
-            //       COMBOBOX in REAPER >=6.12
-
             auto itemText = getComboBoxItemText(hwnd);
-            // See if this is the sample rate dropdown by seeing if the first item is EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION
-            if(itemText == EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION){
-                sampleRateControlHwnd = hwnd;
-                auto editControl = getComboBoxEdit(hwnd);
-                auto currentOption = getWindowText(editControl);
-                if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
-                    sampleRateLastOption = currentOption;
-                }
-                EnableWindow(editControl, false);
-                UpdateWindow(editControl);
-            }
-            // See if this is the channels dropdown by seeing if the first item is EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION
-            if(itemText ==  EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION){
-                channelsControlHwnd = hwnd;
-                auto editControl = getComboBoxEdit(hwnd);
-                auto currentOption = getWindowText(editControl);
-                if(channelsLastOption.length() == 0 && currentOption.length() > 0){
-                    channelsLastOption = currentOption;
-                }
-                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
-                UpdateWindow(editControl);
-                ShowWindow(hwnd, SW_HIDE);
-            }
             // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
             if(itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
                 resampleModeControlHwnd = hwnd;
