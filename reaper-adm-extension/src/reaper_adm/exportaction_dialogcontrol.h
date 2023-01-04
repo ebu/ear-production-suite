@@ -77,7 +77,8 @@ private:
     std::string EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION{ "8000" };
     std::string EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
     std::string EXPECTED_PRESETS_BUTTON_TEXT{ "Presets" };
-    std::string EXPECTED_NORMALIZE_BUTTON_TEXT{ "Normalize/Limit..." };
+    std::string EXPECTED_NORMALIZE_BUTTON_TEXT1{ "Normalize/Limit..." };
+    std::string EXPECTED_NORMALIZE_BUTTON_TEXT2{ "Normalize/Limit/Fade" }; // Changed to include fade at ~v6.64
     std::string EXPECTED_SECOND_PASS_CHECKBOX_TEXT{ "2nd pass render" };
     std::string EXPECTED_MONO2MONO_CHECKBOX_TEXT{ "Tracks with only mono media to mono files" };
     std::string EXPECTED_MULTI2MULTI_CHECKBOX_TEXT{ "Multichannel tracks to multichannel files" };

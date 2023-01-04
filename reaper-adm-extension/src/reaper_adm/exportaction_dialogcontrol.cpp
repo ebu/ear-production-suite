@@ -183,7 +183,8 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION, reaperApi);
     localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
     localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
-    localise(EXPECTED_NORMALIZE_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT1, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT2, reaperApi);
     localise(EXPECTED_SECOND_PASS_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MONO2MONO_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MULTI2MULTI_CHECKBOX_TEXT, reaperApi);
@@ -253,7 +254,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
-            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT){
+            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2){
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
