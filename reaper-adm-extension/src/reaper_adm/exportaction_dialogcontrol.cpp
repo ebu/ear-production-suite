@@ -6,26 +6,15 @@
 #include "exportaction_issues.h"
 #include "exportaction.h"
 
-// Lots of assumptions made here! May need more re-jigging if future versions differ
-#define EXPECTED_RENDER_DIALOG_WINDOW_TITLE "Render to File"
-#define EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION "8000"
-#define EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION "Mono"
-#define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
-#define EXPECTED_NORMALIZE_BUTTON_TEXT "Normalize/Limit..."
-#define EXPECTED_SECOND_PASS_CHECKBOX_TEXT "2nd pass render"
-#define EXPECTED_MONO2MONO_CHECKBOX_TEXT "Tracks with only mono media to mono files"
-#define EXPECTED_MULTI2MULTI_CHECKBOX_TEXT "Multichannel tracks to multichannel files"
-#define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
-#define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
-#define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
-#define REQUIRED_CHANNEL_COUNT_COMBO_OPTION "Mono"
-#define EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION "Point Sampling (lowest quality, retro)"
-
 #define TIMER_ID 1
+
+namespace {
 
 int MakeWParam(int loWord, int hiWord)
 {
     return (loWord & 0xFFFF) + ((hiWord & 0xFFFF) << 16);
+}
+
 }
 
 RenderDialogState::RenderDialogState(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst) : reaperApi{ api }, reaperInst{ *inst } {
