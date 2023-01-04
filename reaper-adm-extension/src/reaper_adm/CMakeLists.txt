@@ -76,6 +76,7 @@ set(EXTENSION_SOURCES
 set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/common_definition_helper.h
     ${EPS_SHARED_DIR}/helper/nng_wrappers.h
+    ${EPS_SHARED_DIR}/helper/char_encoding.hpp
 	
 	actionmanager.h
 	admchannel.h
