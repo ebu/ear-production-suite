@@ -252,6 +252,17 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
                 if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
                     sampleRateLastOption = currentOption;
                 }
+                if(admExportHandler && admExportHandler->getAdmExportSources()) {
+                    int sRate = admExportHandler->getAdmExportSources()->getSampleRate();
+                    if(sRate > 0) {
+                        auto sr = std::to_string(sRate);
+                        auto comboControl = *sampleRateControlHwnd;
+                        sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
+                        auto editControl = getComboBoxEdit(comboControl);
+                        sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
+                        UpdateWindow(editControl);
+                    }
+                }
                 EnableWindow(editControl, false);
                 UpdateWindow(editControl);
             }
@@ -438,27 +449,14 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 
         sampleRateControlSetError = false;
         channelsControlSetError = false;
+        
+        admExportHandler = std::make_shared<AdmExportHandler>();
+        admExportHandler->repopulate(*reaperApi);
+        
         EnumChildWindows(renderDialogHandle, RenderDialogControl::callback_PrepareRenderControl_pass1, 0);
         EnumChildWindows(renderDialogHandle, RenderDialogControl::callback_PrepareRenderControl_pass2, 0);
         UpdateWindow(renderDialogHandle);
         // By this point we should have handles to all controls we're taking over
-
-        admExportHandler = std::make_shared<AdmExportHandler>();
-        admExportHandler->repopulate(*reaperApi);
-        if(sampleRateControlHwnd.has_value()) {
-            int sRate = 0;
-            if(admExportHandler->getAdmExportSources()) {
-                sRate = admExportHandler->getAdmExportSources()->getSampleRate();
-            }
-            if(sRate > 0) {
-                auto sr = std::to_string(sRate);
-                auto comboControl = *sampleRateControlHwnd;
-                sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
-                auto editControl = getComboBoxEdit(comboControl);
-                sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
-                UpdateWindow(editControl);
-            }
-        }
 
         auto infoPaneText = getAdmExportVstsInfoString();
         // Note that some controls are not checked as they are not present in all versions of REAPER anyway, so it's OK for them to be missing
