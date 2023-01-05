@@ -3,7 +3,6 @@
 //
 
 #include "../include/scene_store.hpp"
-#include "routing_overlap.hpp"
 #include "programme_internal_id.hpp"
 #include "helper/container_helpers.hpp"
 #include <algorithm>
@@ -254,12 +253,4 @@ void SceneStore::flagOverlaps() {
   for(auto& item : store_.all_available_items()) {
     itemsChangedSinceLastSend.insert(item.connection_id());
   }
-
-  /*
-    auto overlaps = getOverlapIds(store_);
-    if (overlappingIds_ != overlaps) {
-        flagChangedOverlaps(overlappingIds_, overlaps, store_);
-    }
-    overlappingIds_ = overlaps;
-    */
 }
