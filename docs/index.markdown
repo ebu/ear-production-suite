@@ -85,7 +85,7 @@ Download the latest EAR Production Suite release (v0.8.0 Beta - 23rd Dec 2022):
   </div>
 <br />
 <p>
-The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
+The EPS is designed for REAPER 64-bit v6.18 or greater, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/LICENSE.pdf">GPL v3.0 license</a>. View the <a href="https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/README.pdf">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
 </p>
 <br />
   <details>
@@ -122,6 +122,12 @@ A discussion community for users of the EPS is available on the <a href="https:/
 
 <div markdown="1" class="text_section">
 ## Frequently Asked Questions (FAQ)
+  <details>
+    <summary>What version of REAPER is required to run the EAR Production Suite?</summary>
+      <div class="text_section">
+        <p>The current version of the EAR Production Suite requires REAPER 64-bit, version 6.18 or greater. </p>
+      </div>
+  </details>
   <details>
     <summary>Will my exported ADM BW64 files work with other tools, such as the Dolby Atmos Production Suite?</summary>
       <div class="text_section">
