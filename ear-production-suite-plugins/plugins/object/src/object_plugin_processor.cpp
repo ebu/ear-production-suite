@@ -107,10 +107,6 @@ void ObjectsAudioProcessor::releaseResources() {
 bool ObjectsAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
   // This is the place where you check if the layout is supported.
-  if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()) {
-    return false;
-  }
-
   if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet()) {
     return false;
   }
