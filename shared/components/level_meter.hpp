@@ -17,7 +17,7 @@ namespace ui {
 
 class LevelMeter : public Component, private Timer {
 public:
-	LevelMeter() : averageEnabled_(false) {
+	LevelMeter() {
 		setColour(backgroundColourId, EarColours::Transparent);
 		setColour(outlineColorId, EarColours::Area06dp);
 		setColour(highlightColourId, EarColours::Text.withAlpha(Emphasis::high));
@@ -87,9 +87,7 @@ public:
 			}
 		}
 
-		g.setColour(findColour(outlineColorId));
-
-		if (averageEnabled_) {
+		if (averageBarEnabled_) {
 			auto channelsInMeter = static_cast<float>(values_.size());
 			float averageValue = std::reduce(values_.begin(), values_.end()) / channelsInMeter;
 			float scalingFactorFromAverage = std::pow(clamp<float>(averageValue, 0.f, 1.f), 0.3);
@@ -102,7 +100,7 @@ public:
 	}
 
 	void enableAverage(bool averageEnabled) {
-		averageEnabled_ = averageEnabled;
+		averageBarEnabled_ = averageEnabled;
 		repaint();
 	}
 
@@ -120,7 +118,7 @@ private:
 	Orientation orientation_ = Orientation::horizontal;
 	float outlineWidth_ = 1.f;
 	std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator_;
-	bool averageEnabled_;
+    bool averageBarEnabled_{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
 };
