@@ -93,9 +93,11 @@ void ObjectsAudioProcessor::changeProgramName(int index,
 
 void ObjectsAudioProcessor::prepareToPlay(double samplerate,
                                           int samplesPerBlock) {
-  if (samplerate_ != static_cast<int>(samplerate)) {
+  auto channels = getTotalNumInputChannels();
+  if (samplerate_ != static_cast<int>(samplerate) || numPluginChannels_ != channels) {
     samplerate_ = static_cast<int>(samplerate);
-    levelMeter_->setup(1, samplerate_);
+    numPluginChannels_= channels;
+    levelMeter_->setup(numPluginChannels_, samplerate_);
   }
 }
 

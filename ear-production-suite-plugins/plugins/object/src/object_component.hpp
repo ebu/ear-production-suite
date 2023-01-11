@@ -21,6 +21,7 @@
 #include "value_box_panning_view.hpp"
 #include "components/version_label.hpp"
 #include <memory>
+#include <optional>
 
 namespace ear {
 namespace plugin {
@@ -92,15 +93,34 @@ class ObjectsComponent : public Component,
     panningViewValueBox->getPannerTopView()->setDistance(
         p->getDistance()->get(), dontSendNotification);
 
-    gainValueBox->getLevelMeter()->setMeter(p->getLevelMeter(), 0);
+    levelMeterSetup();
 
     mainValueBox->getRoutingComboBox()->grabKeyboardFocus();
   }
 
   ~ObjectsComponent() {}
 
+  void levelMeterSetup() {
+    auto levelMeter = p_->getLevelMeter().lock();
+    if(levelMeter){
+      auto channelCount = levelMeter->channels();
+      if(lastSetMeterChannelCount_ != channelCount ||
+         lastSetMeterStartingChannel_ != 0 ||
+         !lastSetMeterMode_.has_value() ||
+         lastSetMeterMode_.value() != LevelMeter::MeterMode::PeakChannel) {
+        std::vector<int> channelNums_(channelCount);
+        std::iota(std::begin(channelNums_), std::end(channelNums_), 0);
+        gainValueBox->getLevelMeter()->setMeterPeakChannel(levelMeter, channelNums_);
+        lastSetMeterMode_ = LevelMeter::MeterMode::PeakChannel;
+        lastSetMeterChannelCount_ = channelCount;
+        lastSetMeterStartingChannel_ = 0;
+      }
+    }
+  }
+
   void paint(Graphics& g) override {
     g.fillAll(EarColours::Background);
+    levelMeterSetup();
 
     Shadows::elevation04dp.drawForRectangle(g, mainValueBox->getBounds());
     //Shadows::elevation04dp.drawForRectangle(g, metadataValueBox->getBounds());
@@ -166,6 +186,10 @@ class ObjectsComponent : public Component,
 
   std::unique_ptr<InterProcessLock> propertiesFileLock;
   std::unique_ptr<PropertiesFile> propertiesFile;
+
+  std::optional<LevelMeter::MeterMode> lastSetMeterMode_;
+  int lastSetMeterStartingChannel_{ 0 };
+  int lastSetMeterChannelCount_{ 0 };
 
  private:
   ObjectsAudioProcessor* p_;
