@@ -183,8 +183,9 @@ void DirectSpeakersAudioProcessor::updateTrackProperties(
 
 void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
-    reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
-    VST3ClientExtensions::setIHostApplication(unknown);
+  reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+  VST3ClientExtensions::setIHostApplication(unknown);
+  if(reaperHost) {
 
     auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
     if(requestInputInstanceIdPtr) {
@@ -200,6 +201,7 @@ void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unk
         this->extensionSetState(xmlState);
       });
     }
+  }
 }
 
 void DirectSpeakersAudioProcessor::extensionSetState(std::string const & xmlStateStr)

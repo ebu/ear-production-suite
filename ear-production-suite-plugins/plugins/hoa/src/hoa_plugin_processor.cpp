@@ -170,20 +170,22 @@ void HoaAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
   reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
   VST3ClientExtensions::setIHostApplication(unknown);
+  if(reaperHost) {
 
-  auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
-  if(requestInputInstanceIdPtr) {
-    auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
-    uint32_t inputInstanceId = requestInputInstanceId();
-    inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
-  }
+    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
+    if(requestInputInstanceIdPtr) {
+      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+      uint32_t inputInstanceId = requestInputInstanceId();
+      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
+    }
 
-  auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
-  if(registerPluginLoadPtr) {
-    auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
-    registerPluginLoad([this](std::string const& xmlState) {
-      this->extensionSetState(xmlState);
-    });
+    auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+    if(registerPluginLoadPtr) {
+      auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+      registerPluginLoad([this](std::string const& xmlState) {
+        this->extensionSetState(xmlState);
+      });
+    }
   }
 }
 
