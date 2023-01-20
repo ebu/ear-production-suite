@@ -418,7 +418,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
   }
 
   // Meters
-  if (buffer.getNumChannels() >= levelMeter_->channels()) {
+  if (getActiveEditor() && buffer.getNumChannels() >= levelMeter_->channels()) {
     levelMeter_->process(buffer);
   }
 
@@ -431,6 +431,7 @@ bool EarBinauralMonitoringAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* EarBinauralMonitoringAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new EarBinauralMonitoringAudioProcessorEditor(this);
 }
 

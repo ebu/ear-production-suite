@@ -161,6 +161,9 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
   auto gains = backend_->currentGains();
   if (processor_) {
     processor_->process(buffer, buffer, gains.direct, gains.diffuse);
+  }
+
+  if(getActiveEditor()) {
     levelMeter_->process(buffer);
   }
 
@@ -177,6 +180,7 @@ bool EarMonitoringAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* EarMonitoringAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new EarMonitoringAudioProcessorEditor(this);
 }
 

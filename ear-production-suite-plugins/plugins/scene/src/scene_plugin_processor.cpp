@@ -136,7 +136,9 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
   doSampleRateChecks();
 
   if(!sendSamplesToExtension) {
-    levelMeter_->process(buffer);
+    if(getActiveEditor()) {
+      levelMeter_->process(buffer);
+    }
   } else {
     size_t sampleSize = sizeof(float);
     uint8_t numChannels = 64;
@@ -175,6 +177,7 @@ bool SceneAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* SceneAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new SceneAudioProcessorEditor(this);
 }
 
