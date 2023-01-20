@@ -351,62 +351,64 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     return;
   }
 
-  std::lock_guard<std::mutex> lock(processorMutex_);
-  processor_->setIsPlaying(true);
+  {
+    std::lock_guard<std::mutex> lock(processorMutex_);
+    processor_->setIsPlaying(true);
 
-  auto objIds = backend_->getActiveObjectIds();
-  auto dsIds = backend_->getActiveDirectSpeakersIds();
-  auto hoaIds = backend_->getActiveHoaIds();
+    auto objIds = backend_->getActiveObjectIds();
+    auto dsIds = backend_->getActiveDirectSpeakersIds();
+    auto hoaIds = backend_->getActiveHoaIds();
 
-  size_t numHoa = backend_->getTotalHoaChannels();
-  size_t numObj = backend_->getTotalObjectChannels();
-  size_t numDs = backend_->getTotalDirectSpeakersChannels();
+    size_t numHoa = backend_->getTotalHoaChannels();
+    size_t numObj = backend_->getTotalObjectChannels();
+    size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
-  // Ensure BEAR has enough channels configured and is not erroring
-  if (!processor_ || processor_->rendererError()) return;
-  if (!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
-    assert(false);
-    return;
-  }
-
-  // Listener Position
-
-  auto latestQuat = backend_->listenerOrientation->getQuaternion();
-  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
-                                     latestQuat.z);
-
-  // BEAR Metadata
-
-  for (auto& connId : objIds) {
-    auto md = backend_->getLatestObjectsTypeMetadata(connId);
-    if (md.has_value() && md->channel >= 0) {
-      processor_->pushBearMetadata(md->channel, &(md->earMetadata));
+    // Ensure BEAR has enough channels configured and is not erroring
+    if(!processor_ || processor_->rendererError()) return;
+    if(!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
+      assert(false);
+      return;
     }
-  }
 
-  for (auto& connId : dsIds) {
-    auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
-    if (md.has_value() && md->startingChannel >= 0) {
-      for (int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(
+    // Listener Position
+
+    auto latestQuat = backend_->listenerOrientation->getQuaternion();
+    processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
+                                       latestQuat.z);
+
+    // BEAR Metadata
+
+    for(auto& connId : objIds) {
+      auto md = backend_->getLatestObjectsTypeMetadata(connId);
+      if(md.has_value() && md->channel >= 0) {
+        processor_->pushBearMetadata(md->channel, &(md->earMetadata));
+      }
+    }
+
+    for(auto& connId : dsIds) {
+      auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
+      if(md.has_value() && md->startingChannel >= 0) {
+        for(int index = 0; index < md->earMetadata.size(); index++) {
+          processor_->pushBearMetadata(
             md->startingChannel + index,
             &(md->earMetadata[index]));  // earMetadata is a vector for DS but
                                          // not for obj or HOA
+        }
       }
     }
-  }
 
-  size_t streamIdentifier = 0;
-  for (auto& connId : hoaIds) {
-    auto md = backend_->getLatestHoaTypeMetadata(connId);
-    if (md.has_value() && md->startingChannel >= 0) {
-      processor_->pushBearMetadata(md->startingChannel, &(md->earMetadata),
-                                   streamIdentifier++);
+    size_t streamIdentifier = 0;
+    for(auto& connId : hoaIds) {
+      auto md = backend_->getLatestHoaTypeMetadata(connId);
+      if(md.has_value() && md->startingChannel >= 0) {
+        processor_->pushBearMetadata(md->startingChannel, &(md->earMetadata),
+                                     streamIdentifier++);
+      }
     }
-  }
 
-  // BEAR audio processing
-  processor_->process(buffer, buffer);
+    // BEAR audio processing
+    processor_->process(buffer, buffer);
+  }
 
   // Zero unused output channels - probably not necessary in most cases;
   // e.g, REAPER only takes the first n channels defined by the output bus width
