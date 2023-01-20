@@ -12,14 +12,31 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
+class InfoLogo : public Component {
+public:
+  InfoLogo() {
+    image_ = ImageFileFormat::loadFrom(binary_data::infologo_png, binary_data::infologo_pngSize);
+  }
+
+  void paint(Graphics& g) override {
+    g.drawImage(image_, { 0, 0, 13, 13 });
+  }
+
+private:
+  Image image_;
+};
+
 class ValueBoxGain : public Component {
  public:
   ValueBoxGain()
       : levelMeter_(std::make_shared<LevelMeter>()),
         gainLabel_(std::make_unique<Label>()),
+        levelInfoIcon_(std::make_unique<InfoLogo>()),
         gainSlider_(std::make_shared<EarSlider>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
     addAndMakeVisible(levelMeter_.get());
+    levelInfoIcon_->setAlpha(0.8);
+    addAndMakeVisible(levelInfoIcon_.get());
 
     gainLabel_->setFont(EarFontsSingleton::instance().Label);
     gainLabel_->setColour(Label::textColourId, EarColours::Label);
@@ -71,7 +88,14 @@ class ValueBoxGain : public Component {
   void resized() override {
     auto area = getLocalBounds();
     area.reduce(10, 5);
-    levelMeter_->setBounds(area.removeFromTop(33).reduced(0, 10));
+
+    auto levelMeterArea = area.removeFromTop(33).reduced(0, 10);
+    auto levelMeterInfoArea = levelMeterArea.removeFromRight(13);
+    levelInfoIcon_->setBounds(levelMeterInfoArea);
+    levelMeterArea.removeFromRight(5);
+    levelMeter_->setBounds(levelMeterArea);
+
+    area.removeFromTop(10);
 
     float sliderWidth = area.getWidth() - labelWidth_ - marginBig_;
 
@@ -88,10 +112,11 @@ class ValueBoxGain : public Component {
 
  private:
   std::shared_ptr<LevelMeter> levelMeter_;
+  std::shared_ptr<InfoLogo> levelInfoIcon_;
   std::unique_ptr<Label> gainLabel_;
   std::shared_ptr<EarSlider> gainSlider_;
 
-  const float labelWidth_ = 71.f;
+  const float labelWidth_ = 48.f;
   const float labelPaddingBottom_ = 0.f;
   const float sliderHeight_ = 40.f;
   const float marginSmall_ = 5.f;

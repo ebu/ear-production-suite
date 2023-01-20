@@ -148,7 +148,7 @@ class ObjectsComponent : public Component,
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(187).reduced(5, 5));
-    gainValueBox->setBounds(leftColumn.removeFromTop(103).reduced(5, 5));
+    gainValueBox->setBounds(leftColumn.removeFromTop(113).reduced(5, 5));
     // TODO - panningValueBox original position - reinstate when metadata implemented
     //panningValueBox->setBounds(leftColumn.removeFromTop(219).reduced(5, 5));
     // TODO - extent component reduced by 135px to hide divergence (currently not implemented)
