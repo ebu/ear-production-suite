@@ -52,7 +52,8 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
         samplerate_ = samplerate;
         setConstants();
     }
-    resetValues();
+    resetClipping();
+    resetLevels();
 }
 
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
@@ -153,20 +154,17 @@ void LevelMeterCalculator::decayIfNeeded() {
 
 void LevelMeterCalculator::resetClipping() {
     std::lock_guard<std::mutex> lock(mutex_);
-    for(std::size_t c = 0; c < channels_; ++c) {
-        lastLevelHasClipped_[c] = false;
-    }
-}
-
-void LevelMeterCalculator::resetValues()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    lastLevel_.clear();
-    lastLevel_.assign(channels_, 0.);
     lastLevelHasSignal_.clear();
     lastLevelHasSignal_.assign(channels_, false);
     lastLevelHasClipped_.clear();
     lastLevelHasClipped_.assign(channels_, false);
+}
+
+void LevelMeterCalculator::resetLevels()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    lastLevel_.clear();
+    lastLevel_.assign(channels_, 0.);
 }
 
 void LevelMeterCalculator::setConstants() {

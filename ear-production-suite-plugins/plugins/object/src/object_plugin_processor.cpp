@@ -128,7 +128,7 @@ void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool ObjectsAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* ObjectsAudioProcessor::createEditor() {
-  levelMeter_->resetValues();
+  levelMeter_->resetLevels();
   return new ObjectAudioProcessorEditor(this);
 }
 
