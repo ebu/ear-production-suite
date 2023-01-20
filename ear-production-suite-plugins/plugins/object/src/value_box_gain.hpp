@@ -12,29 +12,20 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-class InfoLogo : public Component {
-public:
-  InfoLogo() {
-    image_ = ImageFileFormat::loadFrom(binary_data::infologo_png, binary_data::infologo_pngSize);
-  }
-
-  void paint(Graphics& g) override {
-    g.drawImage(image_, { 0, 0, 13, 13 });
-  }
-
-private:
-  Image image_;
-};
-
 class ValueBoxGain : public Component {
  public:
   ValueBoxGain()
       : levelMeter_(std::make_shared<LevelMeter>()),
         gainLabel_(std::make_unique<Label>()),
-        levelInfoIcon_(std::make_unique<InfoLogo>()),
+        levelInfoIcon_(std::make_unique<ImageComponent>()),
         gainSlider_(std::make_shared<EarSlider>()) {
+
     setColour(backgroundColourId, EarColours::Area01dp);
+
     addAndMakeVisible(levelMeter_.get());
+
+    levelInfoIcon_->setImage(ImageFileFormat::loadFrom(binary_data::infologo_png, binary_data::infologo_pngSize));
+    levelInfoIcon_->setImagePlacement(RectanglePlacement::centred + RectanglePlacement::doNotResize);
     levelInfoIcon_->setAlpha(0.8);
     addAndMakeVisible(levelInfoIcon_.get());
 
@@ -112,7 +103,7 @@ class ValueBoxGain : public Component {
 
  private:
   std::shared_ptr<LevelMeter> levelMeter_;
-  std::shared_ptr<InfoLogo> levelInfoIcon_;
+  std::shared_ptr<ImageComponent> levelInfoIcon_;
   std::unique_ptr<Label> gainLabel_;
   std::shared_ptr<EarSlider> gainSlider_;
 
