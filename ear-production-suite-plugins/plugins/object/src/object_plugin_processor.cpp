@@ -117,8 +117,10 @@ bool ObjectsAudioProcessor::isBusesLayoutSupported(
 
 void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                          MidiBuffer& midiMessages) {
-  if(! bypass_->get()) {
-    levelMeter_->process(buffer);
+  if(!bypass_->get()) {
+    if(getActiveEditor()) {
+      levelMeter_->process(buffer);
+    }
     backend_->triggerMetadataSend();
   }
 }
@@ -126,6 +128,7 @@ void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool ObjectsAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* ObjectsAudioProcessor::createEditor() {
+  levelMeter_->resetValues();
   return new ObjectAudioProcessorEditor(this);
 }
 

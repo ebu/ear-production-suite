@@ -41,6 +41,7 @@ public:
     std::size_t channels() const { return channels_; }
 
     void resetClipping();
+    void resetValues();
 
 private:
     void processSample(float currentValue, std::size_t channel);
