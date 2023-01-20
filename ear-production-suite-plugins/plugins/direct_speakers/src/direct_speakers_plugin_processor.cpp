@@ -105,8 +105,10 @@ bool DirectSpeakersAudioProcessor::isBusesLayoutSupported(
 
 void DirectSpeakersAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                                 MidiBuffer& midiMessages) {
-  if(! bypass_->get()) {
-    levelMeter_->process(buffer);
+  if(!bypass_->get()) {
+    if(getActiveEditor()) {
+      levelMeter_->process(buffer);
+    }
     backend_->triggerMetadataSend();
   }
 }
@@ -114,6 +116,7 @@ void DirectSpeakersAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool DirectSpeakersAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* DirectSpeakersAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new DirectSpeakersAudioProcessorEditor(this);
 }
 
