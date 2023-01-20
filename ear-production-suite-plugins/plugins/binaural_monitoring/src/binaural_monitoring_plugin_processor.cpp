@@ -216,10 +216,12 @@ void EarBinauralMonitoringAudioProcessor::timerCallback() {
 //==============================================================================
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  return BusesProperties()
-      .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-      .withOutput("Left Ear", AudioChannelSet::mono(), true)
-      .withOutput("Right Ear", AudioChannelSet::mono(), true);
+  auto ret = BusesProperties().withInput(
+    "Input", AudioChannelSet::discreteChannels(64), true);
+  ret = ret.withOutput("Left Ear", AudioChannelSet::mono(), true);
+  ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
+  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(62), true);
+  return ret;
 }
 
 bool EarBinauralMonitoringAudioProcessor::readConfigFile()
@@ -410,13 +412,9 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     processor_->process(buffer, buffer);
   }
 
-  // Zero unused output channels - probably not necessary in most cases;
-  // e.g, REAPER only takes the first n channels defined by the output bus width
-  //   remaining are passed through.
-  auto buffMaxChns = buffer.getNumChannels();
-  auto buffSamples = buffer.getNumSamples();
-  for (int ch = 2; ch < buffMaxChns; ch++) {
-    buffer.clear(ch, 0, buffSamples);
+  // Clear unused output channels
+  for(int outChn = 2; outChn < buffer.getNumChannels(); ++outChn) {
+    buffer.clear(outChn, 0, buffer.getNumSamples());
   }
 
   // Meters
