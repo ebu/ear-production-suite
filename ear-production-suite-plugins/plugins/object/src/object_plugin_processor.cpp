@@ -11,9 +11,20 @@ uint32_t requestInputInstanceIdSig();
 using namespace ear::plugin;
 
 ObjectsAudioProcessor::ObjectsAudioProcessor()
+    // The 2 channels of input here is intentional.
+    /// 2ch is the narrowest track width REAPER will assign.
+    /// If we were to set 1ch input, the meter would only monitor the first channel of the track.
+    /// However, REAPERs default send behaviour is to send from the first 2 channels regardless of track width, and even if you are only sending to 1 channel.
+    /// Therefore it is more appropriate to be monitoring activity on the first 2 input channels.
+    /// The use of 2 buses rather than one 2 channel bus is also intentional. It avoids REAPER applying left and right labels to the inputs.
+    // The omission of an output bus is also intentional.
+    /// We do not actually manipulate audio here - only analyse it for level.
+    /// On a side-note; If we were to set mono output, REAPERs default pin-mapping causes the output to be passed to both output channels on a stereo track
+    /// This can cause dropping of the original audio for the second channel, which is problematic if the second channel is in fact used by an additional plugin.
+
     : AudioProcessor(BusesProperties()
-                         .withInput("Input", AudioChannelSet::mono(), true)
-                         .withOutput("Output", AudioChannelSet::mono(), true)),
+                     .withInput("Input", AudioChannelSet::discreteChannels(1), true)
+                     .withInput("Input", AudioChannelSet::discreteChannels(1), true)),
       samplerate_(48000),
       levelMeter_(std::make_shared<LevelMeterCalculator>(1, samplerate_)) {
   /* clang-format off */
@@ -108,10 +119,19 @@ void ObjectsAudioProcessor::releaseResources() {
 
 bool ObjectsAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  // This is the place where you check if the layout is supported.
-  if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet()) {
+
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 2)
     return false;
-  }
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(1))
+    return false;
+  if(layouts.inputBuses[1] != AudioChannelSet::discreteChannels(1))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
   return true;
 }
 

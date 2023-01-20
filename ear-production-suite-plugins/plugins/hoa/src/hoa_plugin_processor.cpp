@@ -12,10 +12,12 @@ using namespace ear::plugin;
 
 HoaAudioProcessor::HoaAudioProcessor()
     : AudioProcessor(
-          BusesProperties()
-              .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-              .withOutput("Output", AudioChannelSet::discreteChannels(64),
-                          true)),
+      // 49 channels of input supports the largest HOA order in common definitions.
+      /// Use of 49 Discrete Channels avoids REAPER applying potentially incorrect labels to the input channels.
+      /// Better to show just "Input #" rather than something potentially incorrect.
+      // The omission of an output bus is also intentional.
+      /// We do not actually manipulate audio here - only analyse it for level.
+      BusesProperties().withInput("Input", AudioChannelSet::discreteChannels(49), true)),
       samplerate_(48000),
       levelMeterCalculator_(
           std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
@@ -93,12 +95,17 @@ void HoaAudioProcessor::releaseResources() {}
 bool HoaAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
 
-  if(layouts.getMainInputChannelSet() == AudioChannelSet::discreteChannels(64) &&
-     layouts.getMainOutputChannelSet() == AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
+  // Must accept default config specified in ctor
 
-  return false;
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(49))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
+  return true;
 }
 
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,

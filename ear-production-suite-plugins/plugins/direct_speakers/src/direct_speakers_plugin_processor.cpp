@@ -12,10 +12,12 @@ using namespace ear::plugin;
 
 DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
     : AudioProcessor(
-          BusesProperties()
-              .withInput("Input", AudioChannelSet::discreteChannels(24), true)
-              .withOutput("Output", AudioChannelSet::discreteChannels(24),
-                          true)),
+      // 24 channels of input supports the largest DS layout in common definitions.
+      /// Use of 24 Discrete Channels avoids REAPER applying potentially incorrect labels to the input channels.
+      /// Better to show just "Input #" rather than something potentially incorrect.
+      // The omission of an output bus is also intentional.
+      /// We do not actually manipulate audio here - only analyse it for level.
+      BusesProperties().withInput("Input", AudioChannelSet::discreteChannels(24), true)),
       samplerate_(48000),
       levelMeter_(std::make_shared<LevelMeterCalculator>(24, samplerate_)) {
   /* clang-format off */
@@ -94,13 +96,18 @@ void DirectSpeakersAudioProcessor::releaseResources() {}
 
 bool DirectSpeakersAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(24) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(24)) {
-    return true;
-  }
-  return false;
+
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(24))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
+  return true;
 }
 
 void DirectSpeakersAudioProcessor::processBlock(AudioBuffer<float>& buffer,
