@@ -125,14 +125,26 @@ void EarMonitoringAudioProcessor::releaseResources() {
 
 bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(64) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
 
-  return false;
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+    return false;
+
+  auto outputBusCount = layouts.outputBuses.size();
+  auto expectedOutputBusCount = numOutputChannels_ + 1;
+  if(outputBusCount != expectedOutputBusCount)
+    return false;
+  for(int i = 0; i < numOutputChannels_; ++i) {
+    if(layouts.outputBuses[i] != AudioChannelSet::mono())
+      return false;
+  }
+  if(layouts.outputBuses[numOutputChannels_] != AudioChannelSet::discreteChannels(64 - numOutputChannels_))
+    return false;
+
+  return true;
 }
 
 void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,

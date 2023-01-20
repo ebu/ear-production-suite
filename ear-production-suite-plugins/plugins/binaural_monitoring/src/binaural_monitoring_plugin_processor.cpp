@@ -317,14 +317,24 @@ void EarBinauralMonitoringAudioProcessor::releaseResources() {
 
 bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(2) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
 
-  return false;
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+    return false;
+
+  if(layouts.outputBuses.size() != 3)
+    return false;
+  if(layouts.outputBuses[0] != AudioChannelSet::mono())
+    return false;
+  if(layouts.outputBuses[1] != AudioChannelSet::mono())
+    return false;
+  if(layouts.outputBuses[2] != AudioChannelSet::discreteChannels(62))
+    return false;
+
+  return true;
 }
 
 void EarBinauralMonitoringAudioProcessor::processBlock(
