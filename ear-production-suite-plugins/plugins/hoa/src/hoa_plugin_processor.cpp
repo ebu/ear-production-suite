@@ -92,12 +92,12 @@ void HoaAudioProcessor::releaseResources() {}
 
 bool HoaAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(24) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(24)) {
+
+  if(layouts.getMainInputChannelSet() == AudioChannelSet::discreteChannels(64) &&
+     layouts.getMainOutputChannelSet() == AudioChannelSet::discreteChannels(64)) {
     return true;
   }
+
   return false;
 }
 
