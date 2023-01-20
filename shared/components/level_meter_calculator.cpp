@@ -56,6 +56,24 @@ void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
     resetLevels();
 }
 
+void LevelMeterCalculator::processForClippingOnly(const AudioBuffer<float>& buffer) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    size_t channelsToProcess = std::min(static_cast<size_t>(buffer.getNumChannels()), channels_);
+    for(std::size_t c = 0; c < channelsToProcess; ++c) {
+        if(lastLevelHasClipped_[c]) {
+            break; // Already set - no need to check samples
+        }
+        for(std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
+            auto sample(buffer.getSample(c, n));
+            auto absSample = std::abs(sample);
+            if(absSample > SIGNAL_CLIPPED_THRESHOLD) {
+                lastLevelHasClipped_[c] = true;
+                break; // Found a sample which clips - no further checking required
+            }
+        }
+    }
+}
+
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
     std::lock_guard<std::mutex> lock(mutex_);
     lastMeasurement_ = juce::Time::currentTimeMillis();

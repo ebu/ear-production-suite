@@ -25,6 +25,7 @@ public:
      * @a input must have the correct channel count.
      */
     void process(const AudioBuffer<float>& buffer);
+    void processForClippingOnly(const AudioBuffer<float>& buffer);
 
     bool hasSignal(int channel);
     bool thisTrackHasClipped();

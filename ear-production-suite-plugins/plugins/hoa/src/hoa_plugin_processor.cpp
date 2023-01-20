@@ -103,8 +103,12 @@ bool HoaAudioProcessor::isBusesLayoutSupported(
 
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                      MidiBuffer& midiMessages) {
-  if (!bypass_->get()) {
-    levelMeterCalculator_->process(buffer);
+  if(!bypass_->get()) {
+    if(getActiveEditor()) {
+      levelMeterCalculator_->process(buffer);
+    } else {
+      levelMeterCalculator_->processForClippingOnly(buffer);
+    }
     backend_->triggerMetadataSend();
   }
 }
@@ -112,6 +116,7 @@ void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool HoaAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* HoaAudioProcessor::createEditor() {
+  levelMeterCalculator_->resetLevels();
   return new HoaAudioProcessorEditor(this);
 }
 
