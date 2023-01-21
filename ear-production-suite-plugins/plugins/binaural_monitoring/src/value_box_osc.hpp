@@ -6,53 +6,13 @@
 
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include "components/look_and_feel/tooltips.hpp"
 #include "components/ear_button.hpp"
 #include "components/ear_slider.hpp"
 
 namespace ear {
 namespace plugin {
 namespace ui {
-
-    class TooltipLookAndFeel : public LookAndFeel_V4
-    {
-    public:
-      TooltipLookAndFeel()
-      {
-        setColour(TooltipWindow::backgroundColourId, EarColours::Primary.darker());
-        setColour(TooltipWindow::textColourId, juce::Colours::white);
-      }
-
-      TextLayout layoutTooltipText (const String& text, Colour colour) noexcept
-      {
-        const float tooltipFontSize = 13.0f;
-        const int maxToolTipWidth = 400;
-
-        AttributedString s;
-        s.setJustification (Justification::centred);
-        s.append (text, Font (tooltipFontSize, Font::plain), colour);
-
-        TextLayout tl;
-        tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);
-        return tl;
-      }
-
-      void drawTooltip (Graphics& g, const String& text, int width, int height) override
-      {
-        Rectangle<int> bounds (width, height);
-        auto cornerSize = 5.0f;
-
-        g.setColour (findColour (TooltipWindow::backgroundColourId));
-        g.fillRoundedRectangle (bounds.toFloat(), cornerSize);
-
-        g.setColour (findColour (TooltipWindow::outlineColourId));
-        g.drawRoundedRectangle (bounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
-
-        layoutTooltipText (text, findColour (TooltipWindow::textColourId))
-          .draw (g, { static_cast<float> (width), static_cast<float> (height) });
-      }
-
-    };
-
 
 class ValueBoxOsc : public Component {
 public:

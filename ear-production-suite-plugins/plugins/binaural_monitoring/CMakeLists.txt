@@ -36,6 +36,7 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/tooltips.hpp
 	
 	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/helper/graphics.hpp

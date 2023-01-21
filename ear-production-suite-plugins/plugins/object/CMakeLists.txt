@@ -43,6 +43,7 @@ set(HEADERS_OBJECT_INPUT
 	${EPS_SHARED_DIR}/components/look_and_feel/roboto.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/tooltips.hpp
 	
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/iso_lang_codes.hpp
