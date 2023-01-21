@@ -7,6 +7,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/shadows.hpp"
+#include "components/look_and_feel/tooltips.hpp"
 #include "components/ear_combo_box.hpp"
 #include "components/onboarding.hpp"
 #include "components/overlay.hpp"
@@ -46,6 +47,10 @@ class ObjectsComponent : public Component,
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
         propertiesFile(getPropertiesFile(propertiesFileLock.get())) {
+
+    tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
+    tooltipWindow.setOpaque(false);
+
     header->setText(" Object");
     onBoardingButton->setButtonText("?");
     onBoardingButton->setShape(EarButton::Shape::Circular);
@@ -193,6 +198,9 @@ class ObjectsComponent : public Component,
 
  private:
   ObjectsAudioProcessor* p_;
+
+  TooltipWindow tooltipWindow{ this };
+  TooltipLookAndFeel tooltipLookAndFeel;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObjectsComponent)
 };

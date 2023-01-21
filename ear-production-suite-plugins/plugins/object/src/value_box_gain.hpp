@@ -27,6 +27,8 @@ class ValueBoxGain : public Component {
     levelInfoIcon_->setImage(ImageFileFormat::loadFrom(binary_data::infologo_png, binary_data::infologo_pngSize));
     levelInfoIcon_->setImagePlacement(RectanglePlacement::centred + RectanglePlacement::doNotResize);
     levelInfoIcon_->setAlpha(0.8);
+    levelInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
+    levelInfoIcon_->setTooltip ("Meter will display the max of the 2 plug-in input channels.\nIf this Object does not use the first 2 channels of audio on this track, the plug-in I/O pin mapping should be updated for relevant metering.");
     addAndMakeVisible(levelInfoIcon_.get());
 
     gainLabel_->setFont(EarFontsSingleton::instance().Label);
