@@ -231,7 +231,7 @@
     },
     {
       "name": "macos-default",
-      "displayName": "Default macOS Release build",
+      "displayName": "Default macOS x64 Release build",
       "description": "Release build for macOS using Ninja and vcpkg",
       "inherits": [
         "ninja-base",
@@ -241,7 +241,7 @@
     },
     {
       "name": "macos-default-arm64",
-      "displayName": "Default macOS Release build",
+      "displayName": "Default macOS arm64 Release build",
       "description": "Release build for macOS using Ninja and vcpkg",
       "inherits": [
         "ninja-base",
