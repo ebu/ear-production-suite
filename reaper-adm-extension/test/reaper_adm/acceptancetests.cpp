@@ -17,6 +17,7 @@
 #include "fakeptr.h"
 #include <track.h>
 #include <helper/container_helpers.hpp>
+#include <fstream>
 
 using namespace admplug;
 using ::testing::_;
