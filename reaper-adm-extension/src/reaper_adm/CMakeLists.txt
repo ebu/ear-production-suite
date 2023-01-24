@@ -223,17 +223,6 @@ target_link_libraries(reaper_adm
       reaper_adm_dependencies
       )
 
-if(CMAKE_GENERATOR STREQUAL Xcode)
-add_custom_command(
-    TARGET reaper_adm 
-    PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory        
-        ${CMAKE_CURRENT_BINARY_DIR}/ear-production-suite.build
-        ${CMAKE_CURRENT_BINARY_DIR}/reaper_adm.build
-)
-endif()
-
-
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(linux_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
