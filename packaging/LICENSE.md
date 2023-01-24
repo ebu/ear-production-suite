@@ -1,6 +1,6 @@
 The included software is
 
-- Copyright (C) 2019-2022 British Broadcasting Corporation (BBC)
+- Copyright (C) 2019-2023 British Broadcasting Corporation (BBC)
 - Copyright (C) 2020-2021 European Broadcasting Union (EBU)
 - Copyright (C) 2019-2021 Institut für Rundfunktechnik GmbH (IRT)
 
