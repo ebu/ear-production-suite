@@ -31,8 +31,12 @@ add_custom_target(generate-package-docs
             "${CMAKE_CURRENT_LIST_DIR}/LICENSE.pdf"
         )
 
+install(DIRECTORY 
+		Templates/ 
+		DESTINATION
+		./Templates/)
+
 install(FILES
-        EAR-Production-Suite_Session-Template.RPP
         README.pdf
         LICENSE.pdf
         DESTINATION
