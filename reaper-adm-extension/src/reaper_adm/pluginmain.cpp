@@ -232,11 +232,15 @@ extern "C" {
     }
 
     if(reaperExtMenu) {
+        auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
+
         auto infoActionId = reaper->addAction(infoAction);
         auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
-        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+        auto infoActionInserter = std::make_shared<EndOffset>(0);
+        epsMenu->insert(std::move(infoActionItem), infoActionInserter);
 
-        reaperExtMenu->insert(std::move(infoActionItem), admExtMenuInserter);
+        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+        reaperExtMenu->insert(std::move(epsMenu), admExtMenuInserter);
         reaperExtMenu->init();
     }
 
@@ -293,7 +297,7 @@ extern "C" {
       "&File", "common", defaultMenuPositions.at("&File"), *api);
     assert(reaperFileMenu);
   reaperFileMenu->insert(std::move(admFileMenu), admFileMenuInserter);
-    reaperFileMenu->init();
+  reaperFileMenu->init();
 
     // Insert menu
 
