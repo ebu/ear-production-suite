@@ -15,7 +15,13 @@
 #include "pluginsuite_ear.h"
 #include <version/eps_version.h>
 #include <atomic>
+
+#ifdef WIN32
 #include <filesystem>
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -89,37 +95,21 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 }
 #endif
 
-bool fileExists(const std::string& fileName) {
-    std::filesystem::path p(fileName);
-    if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
-        return true;
-    }
-    return false;
-}
-
 bool directoryExists(const std::string& directory) {
+#ifdef _WIN32
     std::filesystem::path p(directory);
     if (std::filesystem::exists(p) && std::filesystem::is_directory(p)) {
         return true;
     }
     return false;
-}
-
-bool runExecutable(const std::string& fileName) {
-    std::filesystem::path p(fileName);
-    if (fileExists(fileName)) {
-#ifdef _WIN32
-        // Don't use system() for win - blocks and shows cmd prompt
-        auto res = WinExec(fileName.c_str(), SW_NORMAL);
-        // If WinExec succeeds, the return value is greater than 31.
-        return res > 31;
 #else
-        // Apple and Linux
-        auto res = std::system(fileName.c_str());
-        return res == 0;
+    // Apple - filesystem lib not supported until MacOS 10.15 - use stat
+    // Fine for linux too
+    struct stat info;
+    if (stat(directory.c_str(), &info) != 0)
+        return false;
+    return (info.st_mode & S_IFDIR);
 #endif
-    }
-    return false;
 }
 
 bool openDirectory(const std::string& directoryPath) {
@@ -131,32 +121,22 @@ bool openDirectory(const std::string& directoryPath) {
         // If WinExec succeeds, the return value is greater than 31.
         return res > 31;
 #elif __APPLE__
-        std::string command = "open " + directoryPath;
+        std::string command = "open \"" + directoryPath + "\"";
 #else
-        std::string command = "xdg-open " + directoryPath;
+        std::string command = "xdg-open \"" + directoryPath + "\"";
 #endif
         return std::system(command.c_str()) == 0;
     }
     return false;
 }
 
-std::string getProjectUpgradeUtilityPath(ReaperAPI const& api) {
+std::string getToolsPath(ReaperAPI const& api) {
     std::string path(api.GetResourcePath());
 #ifdef _WIN32
-    return path + "\\UserPlugins\\project_upgrade_utility_gui.exe";
+    return path + "\\UserPlugins\\EAR Production Suite extras";
 #else
     // Apple and Linux
-    return path + "/UserPlugins/project_upgrade_utility_gui";
-#endif
-}
-
-std::string getProjectTemplatesPath(ReaperAPI const& api) {
-    std::string path(api.GetResourcePath());
-#ifdef _WIN32
-    return path + "\\UserPlugins\\EAR Production Suite templates";
-#else
-    // Apple and Linux
-    return path + "/UserPlugins/EAR Production Suite templates";
+    return path + "/UserPlugins/EAR Production Suite extras";
 #endif
 }
 
@@ -294,28 +274,15 @@ extern "C" {
       }
     );
 
-    std::string puuActionName("Launch Project Upgrade Utility...");
-    std::string puuActionStrId("ADM_PROJECT_UPGRADE");
-
-    auto puuAction = std::make_shared<SimpleAction>(
-        puuActionName.c_str(),
-        puuActionStrId.c_str(),
-        [](admplug::ReaperAPI& api) {
-            if (!runExecutable(getProjectUpgradeUtilityPath(api))) {
-                api.ShowMessageBox("Failed to launch application.", "Project Upgrade Utility", 0);
-            }
-        }
-    );
-
-    std::string btpActionName("Browse template projects...");
-    std::string btpActionStrId("ADM_BROWSE_TEMPLATES");
+    std::string btpActionName("Browse tools and templates...");
+    std::string btpActionStrId("ADM_EPS_BROWSE");
 
     auto btpAction = std::make_shared<SimpleAction>(
         btpActionName.c_str(),
         btpActionStrId.c_str(),
         [](admplug::ReaperAPI& api) {
-            if (!openDirectory(getProjectTemplatesPath(api))) {
-                api.ShowMessageBox("Failed to open directory.", "Browse Template Projects", 0);
+            if (!openDirectory(getToolsPath(api))) {
+                api.ShowMessageBox("Failed to open directory.", "Browse Tools and Templates", 0);
             }
         }
     );
@@ -335,18 +302,11 @@ extern "C" {
     if(reaperExtMenu) {
         auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
 
-        if (directoryExists(getProjectTemplatesPath(*api))) {
+        if (directoryExists(getToolsPath(*api))) {
             auto btpActionId = reaper->addAction(btpAction);
             auto btpActionItem = std::make_unique<MenuAction>(btpActionName.c_str(), btpActionId);
             auto btpActionInserter = std::make_shared<StartOffset>(0);
             epsMenu->insert(std::move(btpActionItem), btpActionInserter);
-        }
-
-        if (fileExists(getProjectUpgradeUtilityPath(*api))) {
-            auto puuActionId = reaper->addAction(puuAction);
-            auto puuActionItem = std::make_unique<MenuAction>(puuActionName.c_str(), puuActionId);
-            auto puuActionInserter = std::make_shared<StartOffset>(0);
-            epsMenu->insert(std::move(puuActionItem), puuActionInserter);
         }
 
         auto infoActionId = reaper->addAction(infoAction);
