@@ -15,6 +15,7 @@
 #include "pluginsuite_ear.h"
 #include <version/eps_version.h>
 #include <atomic>
+#include <filesystem>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -87,6 +88,77 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"Group", 4}};
 }
 #endif
+
+bool fileExists(const std::string& fileName) {
+    std::filesystem::path p(fileName);
+    if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
+        return true;
+    }
+    return false;
+}
+
+bool directoryExists(const std::string& directory) {
+    std::filesystem::path p(directory);
+    if (std::filesystem::exists(p) && std::filesystem::is_directory(p)) {
+        return true;
+    }
+    return false;
+}
+
+bool runExecutable(const std::string& fileName) {
+    std::filesystem::path p(fileName);
+    if (fileExists(fileName)) {
+#ifdef _WIN32
+        // Don't use system() for win - blocks and shows cmd prompt
+        auto res = WinExec(fileName.c_str(), SW_NORMAL);
+        // If WinExec succeeds, the return value is greater than 31.
+        return res > 31;
+#else
+        // Apple and Linux
+        auto res = std::system(fileName.c_str());
+        return res == 0;
+#endif
+    }
+    return false;
+}
+
+bool openDirectory(const std::string& directoryPath) {
+    if (directoryExists(directoryPath)) {
+#ifdef _WIN32
+        std::string command = "explorer \"" + directoryPath + "\"";
+        // Don't use system() for win - blocks and shows cmd prompt
+        auto res = WinExec(command.c_str(), SW_NORMAL);
+        // If WinExec succeeds, the return value is greater than 31.
+        return res > 31;
+#elif __APPLE__
+        std::string command = "open " + directoryPath;
+#else
+        std::string command = "xdg-open " + directoryPath;
+#endif
+        return std::system(command.c_str()) == 0;
+    }
+    return false;
+}
+
+std::string getProjectUpgradeUtilityPath(ReaperAPI const& api) {
+    std::string path(api.GetResourcePath());
+#ifdef _WIN32
+    return path + "\\UserPlugins\\project_upgrade_utility_gui.exe";
+#else
+    // Apple and Linux
+    return path + "/UserPlugins/project_upgrade_utility_gui";
+#endif
+}
+
+std::string getProjectTemplatesPath(ReaperAPI const& api) {
+    std::string path(api.GetResourcePath());
+#ifdef _WIN32
+    return path + "\\UserPlugins\\EAR Production Suite templates";
+#else
+    // Apple and Linux
+    return path + "/UserPlugins/EAR Production Suite templates";
+#endif
+}
 
 extern "C" {
 
@@ -198,12 +270,12 @@ extern "C" {
 
     // Extensions Menu
 
-    std::string actionName("About EAR Production Suite");
-    std::string actionSID("ADM_SHOW_EPS_INFO");
+    std::string infoActionName("About EAR Production Suite");
+    std::string infoActionStrId("ADM_SHOW_EPS_INFO");
 
     auto infoAction = std::make_shared<SimpleAction> (
-      actionName.c_str(),
-      actionSID.c_str(),
+      infoActionName.c_str(),
+      infoActionStrId.c_str(),
       [](admplug::ReaperAPI &api) {
         std::string title("EAR Production Suite");
         if(eps::versionInfoAvailable()) {
@@ -222,20 +294,63 @@ extern "C" {
       }
     );
 
+    std::string puuActionName("Launch Project Upgrade Utility...");
+    std::string puuActionStrId("ADM_PROJECT_UPGRADE");
+
+    auto puuAction = std::make_shared<SimpleAction>(
+        puuActionName.c_str(),
+        puuActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+            if (!runExecutable(getProjectUpgradeUtilityPath(api))) {
+                api.ShowMessageBox("Failed to launch application.", "Project Upgrade Utility", 0);
+            }
+        }
+    );
+
+    std::string btpActionName("Browse template projects...");
+    std::string btpActionStrId("ADM_BROWSE_TEMPLATES");
+
+    auto btpAction = std::make_shared<SimpleAction>(
+        btpActionName.c_str(),
+        btpActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+            if (!openDirectory(getProjectTemplatesPath(api))) {
+                api.ShowMessageBox("Failed to open directory.", "Browse Template Projects", 0);
+            }
+        }
+    );
+
+    // Make sure Extensions menu is added and then get it
     api->AddExtensionsMainMenu();
     auto reaperExtMenu = reaperMainMenu->getMenuByText(
         "E&xtensions", "common", -1 , *api);
 
     if(!reaperExtMenu) {
+        // Extensions menu didn't appear for some reason - let's just use help menu
         reaperExtMenu = reaperMainMenu->getMenuByText(
             "&Help", "common", -1, *api);
     }
 
+    // Populate menu
     if(reaperExtMenu) {
         auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
 
+        if (directoryExists(getProjectTemplatesPath(*api))) {
+            auto btpActionId = reaper->addAction(btpAction);
+            auto btpActionItem = std::make_unique<MenuAction>(btpActionName.c_str(), btpActionId);
+            auto btpActionInserter = std::make_shared<StartOffset>(0);
+            epsMenu->insert(std::move(btpActionItem), btpActionInserter);
+        }
+
+        if (fileExists(getProjectUpgradeUtilityPath(*api))) {
+            auto puuActionId = reaper->addAction(puuAction);
+            auto puuActionItem = std::make_unique<MenuAction>(puuActionName.c_str(), puuActionId);
+            auto puuActionInserter = std::make_shared<StartOffset>(0);
+            epsMenu->insert(std::move(puuActionItem), puuActionInserter);
+        }
+
         auto infoActionId = reaper->addAction(infoAction);
-        auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
+        auto infoActionItem = std::make_unique<MenuAction>(infoActionName.c_str(), infoActionId);
         auto infoActionInserter = std::make_shared<EndOffset>(0);
         epsMenu->insert(std::move(infoActionItem), infoActionInserter);
 
