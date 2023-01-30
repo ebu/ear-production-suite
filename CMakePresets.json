@@ -292,8 +292,8 @@
     },
     {
       "name": "macos-arm64-packaging-release",
-      "displayName": "macOS x64 packaging configuration",
       "description": "Packaging build for macOS arm64 10.14+ using Ninja generator",
+      "displayName": "macOS arm64 packaging configuration",
       "inherits": [
         "vcpkg-macos-arm64",
         "packaging-base",
