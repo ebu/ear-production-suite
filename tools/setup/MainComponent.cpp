@@ -10,6 +10,8 @@ MainComponent::MainComponent()
     configureVersionLabel(versionLabel);
     addAndMakeVisible(versionLabel);
     setSize (600, 400);
+
+    resetToBeginning();
 }
 
 MainComponent::~MainComponent()
@@ -23,6 +25,21 @@ void MainComponent::paint (Graphics& g)
 
 void MainComponent::resized()
 {
-    header.setBounds(getLocalBounds().removeFromTop(50));
-    versionLabel.setBounds(getLocalBounds().removeFromBottom(30));
+    auto area = getLocalBounds();
+    header.setBounds(area.removeFromTop(50));
+    versionLabel.setBounds(area.removeFromBottom(30));
+    if(windowBody)
+        windowBody->setBounds(area);
+}
+
+void MainComponent::resetToBeginning()
+{
+    if (windowBody) {
+        removeChildComponent(windowBody.get());
+        windowBody.reset();
+    }
+
+    windowBody = std::make_unique<WindowBody>();
+    addAndMakeVisible(windowBody.get());
+    resized();
 }

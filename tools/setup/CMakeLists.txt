@@ -12,11 +12,15 @@ add_executable(setup WIN32 MACOSX_BUNDLE)
 
 set(HEADERS_SETUP
 	MainComponent.h
+	WindowBody.h
+	install_phases/component_initial.h
 )
 
 set(SOURCES_SETUP
 	Main.cpp
 	MainComponent.cpp
+	WindowBody.cpp
+	install_phases/component_initial.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
 )
 

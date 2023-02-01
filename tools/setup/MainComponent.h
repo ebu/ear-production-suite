@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 #include <components/ear_header.hpp>
+#include "WindowBody.h"
+#include <memory>
 
 using namespace ear::plugin::ui;
 
@@ -17,7 +19,10 @@ public:
 private:
     Label versionLabel;
     EarHeader header;
-    bool processing{ false };
+
+    void resetToBeginning();
+
+    std::unique_ptr<WindowBody> windowBody;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
