@@ -15,10 +15,20 @@ InstallManifest::InstallManifest()
     File userPluginsDirectory;
 #ifdef WIN32
     osTag = "Windows";
-    userPluginsDirectory = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getChildFile("REAPER").getChildFile("UserPlugins");
-    vst3Directory = File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory).getChildFile("Common Files").getChildFile("VST3");
+    // C:\Users\(username)\AppData\Roaming + \REAPER + \UserPlugins
+    userPluginsDirectory = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
+        .getChildFile("REAPER").getChildFile("UserPlugins");
+    // C:\Program Files + \Common Files + \VST3
+    vst3Directory = File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory)
+        .getChildFile("Common Files").getChildFile("VST3");
 #elif APPLE
     osTag = "MacOS";
+    // ~/Library + /Application Support + /REAPER + /UserPlugins
+    userPluginsDirectory = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
+        .getChildFile("Application Support").getChildFile("REAPER").getChildFile("UserPlugins");
+    // ~/Library + /Audio + /Plug-Ins + /VST3
+    vst3Directory = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
+        .getChildFile("Audio").getChildFile("Plug-Ins").getChildFile("VST3");
 #endif
 
     for (auto* installItem : installList->getChildWithTagNameIterator("InstallItem")) {
