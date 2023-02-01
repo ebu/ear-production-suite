@@ -14,6 +14,7 @@ set(HEADERS_SETUP
 	MainComponent.h
 	WindowBody.h
 	install_phases/component_initial.h
+	helpers/manifests.h
 )
 
 set(SOURCES_SETUP
@@ -21,6 +22,7 @@ set(SOURCES_SETUP
 	MainComponent.cpp
 	WindowBody.cpp
 	install_phases/component_initial.cpp
+	helpers/manifests.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
 )
 
@@ -43,6 +45,10 @@ if(WIN32)
         OUTPUT_NAME "setup"
         WIN32_EXECUTABLE TRUE)
 endif()
+
+add_custom_command(TARGET setup POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/install_list.xml $<TARGET_FILE_DIR:setup>/install_list.xml
+)
 
 set_target_properties(setup PROPERTIES FOLDER tools)		
 target_link_libraries(setup PRIVATE Juce::core ear-version)
