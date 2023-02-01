@@ -1,5 +1,4 @@
 #include "manifests.h"
-#include "JuceHeader.h"
 
 InstallManifest::InstallManifest()
 {
@@ -7,9 +6,17 @@ InstallManifest::InstallManifest()
     XmlDocument xml(pathToExecutable.getChildFile("install_list.xml"));
     auto installList = xml.getDocumentElementIfTagMatches("InstallList");
 
+    const std::string vst3DirectorySymbol("[VST3-INSTALL-DIR]");
+    const std::string userPluginsDirectorySymbol("[USERPLUGINS-INSTALL-DIR]");
+
     std::string osTag("NONE");
+    File installFilesDirectory = pathToExecutable.getChildFile("InstallFiles");
+    File vst3Directory;
+    File userPluginsDirectory;
 #ifdef WIN32
     osTag = "Windows";
+    userPluginsDirectory = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getChildFile("REAPER").getChildFile("UserPlugins");
+    vst3Directory = File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory).getChildFile("Common Files").getChildFile("VST3");
 #elif APPLE
     osTag = "MacOS";
 #endif
@@ -20,24 +27,30 @@ InstallManifest::InstallManifest()
             for (auto* osSpecificItem : installItem->getChildWithTagNameIterator(osTag)) {
                 auto destination = osSpecificItem->getStringAttribute("Destination");
                 if (destination.isNotEmpty()) {
+                    if (destination.startsWith(vst3DirectorySymbol)) {
+                        destination = destination.replaceFirstOccurrenceOf(vst3DirectorySymbol, vst3Directory.getFullPathName());
+                    }
+                    else if (destination.startsWith(userPluginsDirectorySymbol)) {
+                        destination = destination.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, userPluginsDirectory.getFullPathName());
+                    }
                     // Test IsBundle first - a bundle is also a directory, but a directory not necessarily a bundle
                     if (osSpecificItem->getBoolAttribute("IsBundle", false)) {
                         installItems.push_back({
-                            source.toStdString(),
-                            destination.toStdString(),
+                            installFilesDirectory.getChildFile(source),
+                            File(destination),
                             ItemType::BUNDLE
                             });
                     } else if(osSpecificItem->getBoolAttribute("IsDirectory", false)) {
                         installItems.push_back({
-                            source.toStdString(),
-                            destination.toStdString(),
+                            installFilesDirectory.getChildFile(source),
+                            File(destination),
                             ItemType::DIRECTORY
                             });
                     }
                     else {
                         installItems.push_back({
-                            source.toStdString(),
-                            destination.toStdString(),
+                            installFilesDirectory.getChildFile(source),
+                            File(destination),
                             ItemType::FILE
                             });
                     }

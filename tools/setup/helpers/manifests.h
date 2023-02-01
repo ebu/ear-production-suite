@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "JuceHeader.h"
 
 /*
 * ItemType
@@ -21,8 +22,8 @@ enum class ItemType {
 };
 
 struct CopyItem {
-    std::string from;
-    std::string to;
+    juce::File from;
+    juce::File to;
     ItemType itemType;
 };
 
