@@ -9,7 +9,7 @@ MainComponent::MainComponent()
     addAndMakeVisible(header);
     configureVersionLabel(versionLabel);
     addAndMakeVisible(versionLabel);
-    setSize (600, 400);
+    setSize (900, 600);
 
     resetToBeginning();
 }
