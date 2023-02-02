@@ -34,7 +34,25 @@ InstallManifest::InstallManifest()
     for (auto* installItem : installList->getChildWithTagNameIterator("InstallItem")) {
         auto source = installItem->getStringAttribute("Source");
         if (source.isNotEmpty()) {
+            auto sourcePath = installFilesDirectory.getChildFile(source);
+
             for (auto* osSpecificItem : installItem->getChildWithTagNameIterator(osTag)) {
+
+                bool sourceValid = false;
+                ItemType itemType = ItemType::FILE;
+                // Test IsBundle first - a bundle is also a directory, but a directory not necessarily a bundle
+                if (osSpecificItem->getBoolAttribute("IsBundle", false)) {
+                    itemType = ItemType::BUNDLE;
+                    if (sourcePath.exists() && sourcePath.isDirectory()) sourceValid = true;
+                }
+                else if (osSpecificItem->getBoolAttribute("IsDirectory", false)) {
+                    itemType = ItemType::DIRECTORY;
+                    if (sourcePath.exists() && sourcePath.isDirectory()) sourceValid = true;
+                }
+                else {
+                    if (sourcePath.existsAsFile()) sourceValid = true;
+                }
+
                 auto destination = osSpecificItem->getStringAttribute("Destination");
                 if (destination.isNotEmpty()) {
                     if (destination.startsWith(vst3DirectorySymbol)) {
@@ -43,27 +61,13 @@ InstallManifest::InstallManifest()
                     else if (destination.startsWith(userPluginsDirectorySymbol)) {
                         destination = destination.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, userPluginsDirectory.getFullPathName());
                     }
-                    // Test IsBundle first - a bundle is also a directory, but a directory not necessarily a bundle
-                    if (osSpecificItem->getBoolAttribute("IsBundle", false)) {
-                        installItems.push_back({
-                            installFilesDirectory.getChildFile(source),
-                            File(destination),
-                            ItemType::BUNDLE
-                            });
-                    } else if(osSpecificItem->getBoolAttribute("IsDirectory", false)) {
-                        installItems.push_back({
-                            installFilesDirectory.getChildFile(source),
-                            File(destination),
-                            ItemType::DIRECTORY
-                            });
-                    }
-                    else {
-                        installItems.push_back({
-                            installFilesDirectory.getChildFile(source),
-                            File(destination),
-                            ItemType::FILE
-                            });
-                    }
+                   
+                    installItems.push_back({
+                        sourcePath,
+                        File(destination),
+                        itemType,
+                        sourceValid
+                        });
                 }
             }
         }

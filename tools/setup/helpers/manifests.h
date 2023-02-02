@@ -25,6 +25,7 @@ struct CopyItem {
     juce::File from;
     juce::File to;
     ItemType itemType;
+    bool fromValid;
 };
 
 class InstallManifest {
