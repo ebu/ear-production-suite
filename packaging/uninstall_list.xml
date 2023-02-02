@@ -74,6 +74,13 @@
     <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Object.vst3"/>
     <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
     <File Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/project_upgrade_utility_gui.exe"/>
+	<!-- Instructions for v0.6.0 incorrectly advised to install extension to REAPER program directory -->
+	<File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/reaper_adm.dll"/>
+	<File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
+	<Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360"/>
+    <Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets"/>
   </WindowsOnly>
   
   <MacOSOnly>

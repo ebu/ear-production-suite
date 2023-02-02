@@ -39,17 +39,36 @@ namespace {
 #endif
     }
 
+    juce::File getWinReaperProgramDirectory() {
+#ifdef WIN32
+        // Default install dir on Windows, which might not be correct if customised
+        // C:\Program Files + \REAPER (x64)
+        auto path = File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory).getChildFile("REAPER (x64)");
+        // Windows Registry might provide more accurate information for customised installs
+        const String key("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\REAPER\\InstallLocation");
+        if (WindowsRegistry::valueExists(key)) {
+            auto val = WindowsRegistry::getValue(key);
+            path = File(val);
+        }
+        return path;
+#else
+        throw std::runtime_error("Unsupported OS");
+#endif
+    }
+
     void replaceDirectorySymbols(juce::String& path) {
-        auto vst3Directory = getVst3Directory();
-        auto userPluginsDirectory = getUserPluginsDirectory();
         const String vst3DirectorySymbol("[VST3-INSTALL-DIR]");
         const String userPluginsDirectorySymbol("[USERPLUGINS-INSTALL-DIR]");
+        const String winReaperProgramDirectorySymbol("[REAPER-PROGRAM-DIR-WIN]");
 
         if (path.startsWith(vst3DirectorySymbol)) {
-            path = path.replaceFirstOccurrenceOf(vst3DirectorySymbol, vst3Directory.getFullPathName());
+            path = path.replaceFirstOccurrenceOf(vst3DirectorySymbol, getVst3Directory().getFullPathName());
         }
         else if (path.startsWith(userPluginsDirectorySymbol)) {
-            path = path.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, userPluginsDirectory.getFullPathName());
+            path = path.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, getUserPluginsDirectory().getFullPathName());
+        }
+        else if (path.startsWith(winReaperProgramDirectorySymbol)) {
+            path = path.replaceFirstOccurrenceOf(winReaperProgramDirectorySymbol, getWinReaperProgramDirectory().getFullPathName());
         }
     }
 }
