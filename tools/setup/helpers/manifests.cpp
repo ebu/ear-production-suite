@@ -40,7 +40,6 @@ namespace {
     }
 
     void replaceDirectorySymbols(juce::String& path) {
-
         auto vst3Directory = getVst3Directory();
         auto userPluginsDirectory = getUserPluginsDirectory();
         const String vst3DirectorySymbol("[VST3-INSTALL-DIR]");

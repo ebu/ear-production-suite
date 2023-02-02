@@ -49,37 +49,40 @@ void WindowBody::phaseUninstallConfirm()
 {
     removeAllChildren();
     // This might skip to "unnecessary" phase if no existing files found
-    //auto foundFiles = uninstallManifest.getFoundFiles();
-    //if (foundFiles.size() == 0) {
+    auto foundFiles = uninstallManifest.getFoundFiles();
+    if (foundFiles.size() == 0) {
         phaseUninstallUnnecessary();
-    //}
-    //else {
-        //cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
-        //addAndMakeVisible(cUninstallConfirm);
-    //}
+    }
+    else {
+        cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
+        addAndMakeVisible(cUninstallConfirm);
+    }
 }
 
 void WindowBody::phaseInstallCleanupSearch()
 {
     removeAllChildren();
     // This might skip to next phase if no existing files found
-    //auto foundFiles = uninstallManifest.getFoundFiles();
-    //if (foundFiles.size() == 0) {
+    auto foundFiles = uninstallManifest.getFoundFiles();
+    if (foundFiles.size() == 0) {
         //TODO: next phase
-    //}
-    //else {
+    }
+    else {
         // TODO: capture remove click
         // TODO: capture skip click
         cUninstallSearch.configureForInstallPhase();
-    //    cSourcesInvalid.setLog(foundFiles);
+        cUninstallSearch.setLog(foundFiles);
         addAndMakeVisible(cUninstallSearch);
-    //}
+    }
 }
 
 void WindowBody::phaseUninstallSearch()
 {
     removeAllChildren();
     cUninstallSearch.configureForUninstallPhase();
+    auto foundFiles = uninstallManifest.getFoundFiles();
+    cUninstallSearch.setLog(foundFiles);
+    // TODO: capture remove click
     addAndMakeVisible(cUninstallSearch);
 }
 

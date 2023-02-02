@@ -20,6 +20,7 @@ public:
 
 private:
     InstallManifest installManifest;
+    UninstallManifest uninstallManifest;
 
     ComponentInitial cInitial;
     ComponentSourcesInvalid cSourcesInvalid;
