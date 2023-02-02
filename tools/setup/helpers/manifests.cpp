@@ -2,15 +2,14 @@
 
 InstallManifest::InstallManifest()
 {
-    File pathToExecutable = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
-    XmlDocument xml(pathToExecutable.getChildFile("install_list.xml"));
+    File setupDirectory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
+    XmlDocument xml(setupDirectory.getChildFile("install_list.xml"));
     auto installList = xml.getDocumentElementIfTagMatches("InstallList");
 
     const std::string vst3DirectorySymbol("[VST3-INSTALL-DIR]");
     const std::string userPluginsDirectorySymbol("[USERPLUGINS-INSTALL-DIR]");
 
     std::string osTag("NONE");
-    File installFilesDirectory = pathToExecutable.getChildFile("InstallFiles");
 #ifdef WIN32
     osTag = "Windows";
     // C:\Users\(username)\AppData\Roaming + \REAPER + \UserPlugins
@@ -32,25 +31,9 @@ InstallManifest::InstallManifest()
     for (auto* installItem : installList->getChildWithTagNameIterator("InstallItem")) {
         auto source = installItem->getStringAttribute("Source");
         if (source.isNotEmpty()) {
-            auto sourcePath = installFilesDirectory.getChildFile(source);
+            auto sourcePath = setupDirectory.getChildFile(source);
 
             for (auto* osSpecificItem : installItem->getChildWithTagNameIterator(osTag)) {
-
-                bool sourceValid = false;
-                ItemType itemType = ItemType::FILE;
-                // Test IsBundle first - a bundle is also a directory, but a directory not necessarily a bundle
-                if (osSpecificItem->getBoolAttribute("IsBundle", false)) {
-                    itemType = ItemType::BUNDLE;
-                    if (sourcePath.exists() && sourcePath.isDirectory()) sourceValid = true;
-                }
-                else if (osSpecificItem->getBoolAttribute("IsDirectory", false)) {
-                    itemType = ItemType::DIRECTORY;
-                    if (sourcePath.exists() && sourcePath.isDirectory()) sourceValid = true;
-                }
-                else {
-                    if (sourcePath.existsAsFile()) sourceValid = true;
-                }
-
                 auto destination = osSpecificItem->getStringAttribute("Destination");
                 if (destination.isNotEmpty()) {
                     if (destination.startsWith(vst3DirectorySymbol)) {
@@ -63,8 +46,7 @@ InstallManifest::InstallManifest()
                     installItems.push_back({
                         sourcePath,
                         File(destination),
-                        itemType,
-                        sourceValid
+                        sourcePath.exists()
                         });
                 }
             }
