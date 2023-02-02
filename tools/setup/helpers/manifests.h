@@ -21,7 +21,7 @@ enum class ItemType {
     BUNDLE
 };
 
-struct CopyItem {
+struct InstallItem {
     juce::File source;
     juce::File destination;
     ItemType itemType;
@@ -39,7 +39,7 @@ public:
     std::vector<String> getInvalidSources();
 
 private:
-    std::vector<CopyItem> installItems;
+    std::vector<InstallItem> installItems;
     File vst3Directory;
     File userPluginsDirectory;
 };
