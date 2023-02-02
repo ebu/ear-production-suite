@@ -32,6 +32,12 @@ ComponentInitial::ComponentInitial()
     uninstallButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
     addAndMakeVisible(uninstallButton);
 
+    exitButton.setButtonText("Exit Setup");
+    exitButton.setToggleable(false);
+    exitButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Background);
+    exitButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
+    exitButton.onClick = []() {JUCEApplicationBase::quit(); };
+    addAndMakeVisible(exitButton);
 }
 
 ComponentInitial::~ComponentInitial()
@@ -51,7 +57,7 @@ void ComponentInitial::resized()
     welcomeTitle.setBounds(area.removeFromTop(sectionHeight));
     instructionLabel.setBounds(area.removeFromTop(sectionHeight));
 
-    auto buttonSectionWidth = area.getWidth() / 2;
+    auto buttonSectionWidth = area.getWidth() / 3;
     auto buttonHeight = std::min(area.getHeight(), 40);
     auto buttonWidth = std::min(buttonSectionWidth, 160);
     auto buttonSectionTrimTB = (area.getHeight() - buttonHeight) / 2;
@@ -61,8 +67,11 @@ void ComponentInitial::resized()
     leftButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
     installButton.setBounds(leftButtonArea);
 
-    auto rightButtonArea = area;
+    auto rightButtonArea = area.removeFromRight(buttonSectionWidth);;
     rightButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
-    uninstallButton.setBounds(rightButtonArea);
+    exitButton.setBounds(rightButtonArea);
+
+    area.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
+    uninstallButton.setBounds(area);
 
 }

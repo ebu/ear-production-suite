@@ -16,6 +16,7 @@ private:
     Label instructionLabel;
     TextButton installButton;
     TextButton uninstallButton;
+    TextButton exitButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentInitial)
 };
