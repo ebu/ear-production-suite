@@ -26,6 +26,8 @@ void WindowBody::resized()
     cSourcesInvalid.setBounds(area);
     cUninstallConfirm.setBounds(area);
     cUninstallSearch.setBounds(area);
+    cUninstallComplete.setBounds(area);
+    cUninstallUnnecessary.setBounds(area);
 
 }
 
@@ -46,8 +48,15 @@ void WindowBody::phaseSourcesInvalid()
 void WindowBody::phaseUninstallConfirm()
 {
     removeAllChildren();
-    cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
-    addAndMakeVisible(cUninstallConfirm);
+    // This might skip to "unnecessary" phase if no existing files found
+    //auto foundFiles = uninstallManifest.getFoundFiles();
+    //if (foundFiles.size() == 0) {
+        phaseUninstallUnnecessary();
+    //}
+    //else {
+        //cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
+        //addAndMakeVisible(cUninstallConfirm);
+    //}
 }
 
 void WindowBody::phaseInstallCleanupSearch()
@@ -70,15 +79,18 @@ void WindowBody::phaseInstallCleanupSearch()
 void WindowBody::phaseUninstallSearch()
 {
     removeAllChildren();
-    // This might skip to "Nothing to do" phase if no existing files found
-    //auto foundFiles = uninstallManifest.getFoundFiles();
-    //if (foundFiles.size() == 0) {
-        //TODO: next phase
-    //}
-    //else {
-        // TODO: capture remove click
     cUninstallSearch.configureForUninstallPhase();
-    //    cSourcesInvalid.setLog(foundFiles);
     addAndMakeVisible(cUninstallSearch);
-    //}
+}
+
+void WindowBody::phaseUninstallComplete()
+{
+    removeAllChildren();
+    addAndMakeVisible(cUninstallComplete);
+}
+
+void WindowBody::phaseUninstallUnnecessary()
+{
+    removeAllChildren();
+    addAndMakeVisible(cUninstallUnnecessary);
 }

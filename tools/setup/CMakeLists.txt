@@ -17,6 +17,8 @@ set(HEADERS_SETUP
 	install_phases/component_sources_invalid.h
 	install_phases/component_uninstall_confirm.h
 	install_phases/component_uninstall_search.h
+	install_phases/component_uninstall_complete.h
+	install_phases/component_uninstall_unnecessary.h
 	helpers/manifests.h
 )
 
@@ -28,6 +30,8 @@ set(SOURCES_SETUP
 	install_phases/component_sources_invalid.cpp
 	install_phases/component_uninstall_confirm.cpp
 	install_phases/component_uninstall_search.cpp
+	install_phases/component_uninstall_complete.cpp
+	install_phases/component_uninstall_unnecessary.cpp
 	helpers/manifests.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
 )
