@@ -75,3 +75,13 @@ void ComponentInitial::resized()
     uninstallButton.setBounds(area);
 
 }
+
+TextButton* ComponentInitial::getInstallButton()
+{
+    return &installButton;
+}
+
+TextButton* ComponentInitial::getUninstallButton()
+{
+    return &uninstallButton;
+}

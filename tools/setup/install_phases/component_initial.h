@@ -11,6 +11,9 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    TextButton* getInstallButton();
+    TextButton* getUninstallButton();
+
 private:
     Label welcomeTitle;
     Label instructionLabel;
