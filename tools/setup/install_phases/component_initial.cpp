@@ -67,7 +67,7 @@ void ComponentInitial::resized()
     leftButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
     installButton.setBounds(leftButtonArea);
 
-    auto rightButtonArea = area.removeFromRight(buttonSectionWidth);;
+    auto rightButtonArea = area.removeFromRight(buttonSectionWidth);
     rightButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
     exitButton.setBounds(rightButtonArea);
 
