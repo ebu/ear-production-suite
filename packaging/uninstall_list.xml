@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UninstallList>
+
+  <File Path=""/>
+  <Directory Path=""/>
+  <Bundle Path=""/>
+  
+  <WindowsOnly>
+    <File Path=""/>
+    <Directory Path=""/>
+  </WindowsOnly>
+  
+  <MacOSOnly>
+    <File Path=""/>
+    <Directory Path=""/>
+    <Bundle Path=""/>
+  </MacOSOnly>
+  
+</UninstallList>

@@ -59,6 +59,9 @@ endif()
 add_custom_command(TARGET setup POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/install_list.xml $<TARGET_FILE_DIR:setup>/install_list.xml
 )
+add_custom_command(TARGET setup POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/uninstall_list.xml $<TARGET_FILE_DIR:setup>/uninstall_list.xml
+)
 
 set_target_properties(setup PROPERTIES FOLDER tools)		
 target_link_libraries(setup PRIVATE Juce::core ear-version)

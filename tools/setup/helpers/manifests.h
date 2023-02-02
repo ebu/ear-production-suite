@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <vector>
+#include <optional>
 #include "JuceHeader.h"
 
 struct InstallItem {
@@ -10,18 +10,37 @@ struct InstallItem {
     bool sourceValid;
 };
 
+struct UninstallFile {
+    juce::File path;
+};
+
+struct UninstallDirectory {
+    juce::File path;
+    bool deleteAllContents;
+};
+
 class InstallManifest {
 public:
     InstallManifest();
     ~InstallManifest();
 
-    String getVst3Directory();
-    String getUserPluginsDirectory();
-
     std::vector<String> getInvalidSources();
 
 private:
     std::vector<InstallItem> installItems;
-    File vst3Directory;
-    File userPluginsDirectory;
+};
+
+class UninstallManifest {
+public:
+    UninstallManifest();
+    ~UninstallManifest();
+
+    std::vector<String> getFoundFiles();
+
+private:
+    void populateVectorsFromElement(juce::XmlElement* elm);
+    std::optional<juce::File> pathFromElement(juce::XmlElement* elm);
+
+    std::vector<UninstallFile> uninstallFiles;
+    std::vector<UninstallDirectory> uninstallDirectories;
 };
