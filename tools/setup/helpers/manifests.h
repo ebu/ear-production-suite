@@ -22,10 +22,10 @@ enum class ItemType {
 };
 
 struct CopyItem {
-    juce::File from;
-    juce::File to;
+    juce::File source;
+    juce::File destination;
     ItemType itemType;
-    bool fromValid;
+    bool sourceValid;
 };
 
 class InstallManifest {
@@ -35,6 +35,8 @@ public:
 
     String getVst3Directory();
     String getUserPluginsDirectory();
+
+    std::vector<String> getInvalidSources();
 
 private:
     std::vector<CopyItem> installItems;

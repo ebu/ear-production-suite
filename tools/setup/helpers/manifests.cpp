@@ -85,3 +85,14 @@ String InstallManifest::getUserPluginsDirectory()
 {
     return userPluginsDirectory.getFullPathName();
 }
+
+std::vector<String> InstallManifest::getInvalidSources()
+{
+    std::vector<String> paths;
+    for (auto const& item : installItems) {
+        if (!item.sourceValid) {
+            paths.push_back(item.source.getFullPathName());
+        }
+    }
+    return paths;
+}
