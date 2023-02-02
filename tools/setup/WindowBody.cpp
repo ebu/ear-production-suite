@@ -22,6 +22,7 @@ void WindowBody::resized()
     auto area = getLocalBounds();
 
     cInitial.setBounds(area);
+    cSourcesInvalid.setBounds(area);
 }
 
 void WindowBody::sourcesInvalidPhase()
