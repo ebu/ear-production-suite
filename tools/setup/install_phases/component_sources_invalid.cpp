@@ -26,6 +26,13 @@ ComponentSourcesInvalid::ComponentSourcesInvalid()
     exitButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
     exitButton.onClick = []() {JUCEApplicationBase::quit(); };
     addAndMakeVisible(exitButton);
+
+    log.setReadOnly(true);
+    log.setScrollbarsShown(true);
+    log.setMultiLine(true);
+    log.setColour(TextEditor::ColourIds::backgroundColourId, EarColours::Area06dp);
+    log.setColour(TextEditor::ColourIds::textColourId, EarColours::Text);
+    addAndMakeVisible(log);
 }
 
 ComponentSourcesInvalid::~ComponentSourcesInvalid()
@@ -52,5 +59,15 @@ void ComponentSourcesInvalid::resized()
     exitButton.setBounds(buttonArea);
 
     // Remaining area is flexible for textbox
+    log.setBounds(area.reduced(5));
+}
 
+void ComponentSourcesInvalid::setLog(std::vector<String> const& logItems)
+{
+    String logContent;
+    for (auto const& item : logItems) {
+        logContent += item;
+        logContent += "\n";
+    }
+    log.setText(logContent);
 }

@@ -34,6 +34,7 @@ void WindowBody::sourcesInvalidPhase()
         //GOTO next phase
     }
     else {
+        cSourcesInvalid.setLog(invalidSources);
         addAndMakeVisible(cSourcesInvalid);
     }
 }
