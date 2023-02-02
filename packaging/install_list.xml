@@ -96,11 +96,11 @@
   <InstallItem Source="InstallFiles/tools/Project Upgrade Utility GUI.app">
     <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Upgrade Utility GUI.app"/>
   </InstallItem>
-  <InstallItem Source="InstallFiles/LICENSE.pdf">
+  <InstallItem Source="LICENSE.pdf">
     <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/LICENSE.pdf"/>
     <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/LICENSE.pdf"/>
   </InstallItem>
-  <InstallItem Source="InstallFiles/README.pdf">
+  <InstallItem Source="README.pdf">
     <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/README.pdf"/>
     <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/README.pdf"/>
   </InstallItem>
