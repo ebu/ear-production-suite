@@ -11,8 +11,6 @@ InstallManifest::InstallManifest()
 
     std::string osTag("NONE");
     File installFilesDirectory = pathToExecutable.getChildFile("InstallFiles");
-    File vst3Directory;
-    File userPluginsDirectory;
 #ifdef WIN32
     osTag = "Windows";
     // C:\Users\(username)\AppData\Roaming + \REAPER + \UserPlugins
@@ -76,4 +74,14 @@ InstallManifest::InstallManifest()
 
 InstallManifest::~InstallManifest()
 {
+}
+
+String InstallManifest::getVst3Directory()
+{
+    return vst3Directory.getFullPathName();
+}
+
+String InstallManifest::getUserPluginsDirectory()
+{
+    return userPluginsDirectory.getFullPathName();
 }

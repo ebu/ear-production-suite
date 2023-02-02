@@ -33,6 +33,11 @@ public:
     InstallManifest();
     ~InstallManifest();
 
+    String getVst3Directory();
+    String getUserPluginsDirectory();
+
 private:
     std::vector<CopyItem> installItems;
+    File vst3Directory;
+    File userPluginsDirectory;
 };
