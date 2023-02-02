@@ -15,6 +15,7 @@ set(HEADERS_SETUP
 	WindowBody.h
 	install_phases/component_initial.h
 	install_phases/component_sources_invalid.h
+	install_phases/component_uninstall_confirm.h
 	helpers/manifests.h
 )
 
@@ -24,6 +25,7 @@ set(SOURCES_SETUP
 	WindowBody.cpp
 	install_phases/component_initial.cpp
 	install_phases/component_sources_invalid.cpp
+	install_phases/component_uninstall_confirm.cpp
 	helpers/manifests.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
 )

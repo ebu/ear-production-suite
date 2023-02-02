@@ -4,7 +4,8 @@
 
 WindowBody::WindowBody()
 {
-    cInitial.getInstallButton()->onClick = [this]() { sourcesInvalidPhase(); };
+    cInitial.getInstallButton()->onClick = [this]() { phaseSourcesInvalid(); };
+    cInitial.getUninstallButton()->onClick = [this]() { phaseUninstallConfirm(); };
     addAndMakeVisible(cInitial);
 }
 
@@ -23,18 +24,26 @@ void WindowBody::resized()
 
     cInitial.setBounds(area);
     cSourcesInvalid.setBounds(area);
+    cUninstallConfirm.setBounds(area);
 }
 
-void WindowBody::sourcesInvalidPhase()
+void WindowBody::phaseSourcesInvalid()
 {
     removeAllChildren();
     // This might skip to next phase if all sources are valid
     auto invalidSources = installManifest.getInvalidSources();
     if (invalidSources.size() == 0) {
-        //GOTO next phase
+        //TODO: next phase
     }
     else {
         cSourcesInvalid.setLog(invalidSources);
         addAndMakeVisible(cSourcesInvalid);
     }
+}
+
+void WindowBody::phaseUninstallConfirm()
+{
+    removeAllChildren();
+    //TODO: capture Confirm click to next phase
+    addAndMakeVisible(cUninstallConfirm);
 }
