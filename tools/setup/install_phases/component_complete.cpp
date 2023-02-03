@@ -57,6 +57,14 @@ void ComponentComplete::configureForUninstallPhase()
         juce::NotificationType::dontSendNotification);
 }
 
+void ComponentComplete::configureForUninstallUnnecessaryPhase()
+{
+    titleLabel.setText("Uninstall",
+        juce::NotificationType::dontSendNotification);
+    descriptionLabel.setText("Setup did not find any files relating to a previous installation.",
+        juce::NotificationType::dontSendNotification);
+}
+
 void ComponentComplete::configureForInstallPhase()
 {
     titleLabel.setText("Installation Complete",

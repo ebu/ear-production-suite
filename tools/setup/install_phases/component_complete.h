@@ -13,6 +13,7 @@ public:
 
     void configureForInstallPhase();
     void configureForUninstallPhase();
+    void configureForUninstallUnnecessaryPhase();
 
 private:
     Label titleLabel;
