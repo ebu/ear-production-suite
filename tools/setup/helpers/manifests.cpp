@@ -74,6 +74,16 @@ namespace {
     }
 }
 
+String Locations::getVst3Directory()
+{
+    return ::getVst3Directory().getFullPathName();
+}
+
+String Locations::getUserPluginsDirectory()
+{
+    return ::getUserPluginsDirectory().getFullPathName();
+}
+
 
 
 // ==========================================================================================================================

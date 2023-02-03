@@ -4,6 +4,11 @@
 #include <optional>
 #include "JuceHeader.h"
 
+namespace Locations {
+    String getVst3Directory();
+    String getUserPluginsDirectory();
+}
+
 struct InstallItem {
     juce::File source;
     juce::File destination;

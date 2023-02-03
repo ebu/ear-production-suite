@@ -28,6 +28,7 @@ void WindowBody::resized()
     cExistingSearch.setBounds(area);
     cComplete.setBounds(area);
     cProcessing.setBounds(area);
+    cInstallLocations.setBounds(area);
 
 }
 
@@ -53,10 +54,10 @@ void WindowBody::phaseInstallCleanupSearch()
     // This might skip to next phase if no existing files found
     auto foundFiles = uninstallManifest.getFoundFiles();
     if (foundFiles.size() == 0) {
-        //TODO: go to install process
+        phaseInstallLocations();
     }
     else {
-        cExistingSearch.getSkipButton()->onClick = [this]() { /* TODO: go to install process */ };
+        cExistingSearch.getSkipButton()->onClick = [this]() { phaseInstallLocations(); };
         cExistingSearch.getRemoveButton()->onClick = [this]() { phaseInstallCleanupProcess(); };
         cExistingSearch.configureForInstallPhase();
         cExistingSearch.setLog(foundFiles);
@@ -72,15 +73,23 @@ void WindowBody::phaseInstallCleanupProcess()
     uninstallManifest.doUninstall();
     auto errorLog = uninstallManifest.getUninstallErrors();
     if (errorLog.size() == 0) {
-        // TODO: go to install process
+        phaseInstallLocations();
     }
     else {
         removeAllChildren();
         cErrorLog.configureForInstallCleanUpPhase();
-        cErrorLog.getContinueButton()->onClick = [this]() { /* TODO: go to install process */ };
+        cErrorLog.getContinueButton()->onClick = [this]() { phaseInstallLocations(); };
         cErrorLog.setLog(errorLog);
         addAndMakeVisible(cErrorLog);
     }
+}
+
+void WindowBody::phaseInstallLocations()
+{
+    removeAllChildren();
+    cInstallLocations.setLocations(Locations::getVst3Directory(), Locations::getUserPluginsDirectory());
+    // TODO: hook Continue button
+    addAndMakeVisible(cInstallLocations);
 }
 
 void WindowBody::phaseUninstallConfirm()
