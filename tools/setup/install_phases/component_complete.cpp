@@ -1,10 +1,10 @@
-#include "component_uninstall_complete.h"
+#include "component_complete.h"
 #include <components/look_and_feel/colours.hpp>
 #include <components/look_and_feel/fonts.hpp>
 
 using namespace ear::plugin::ui;
 
-ComponentUninstallComplete::ComponentUninstallComplete()
+ComponentComplete::ComponentComplete()
 {
     titleLabel.setFont(EarFontsSingleton::instance().HeroHeading);
     titleLabel.setColour(Label::textColourId, EarColours::Heading);
@@ -28,16 +28,16 @@ ComponentUninstallComplete::ComponentUninstallComplete()
     addAndMakeVisible(exitButton);
 }
 
-ComponentUninstallComplete::~ComponentUninstallComplete()
+ComponentComplete::~ComponentComplete()
 {
 }
 
-void ComponentUninstallComplete::paint (Graphics& g)
+void ComponentComplete::paint (Graphics& g)
 {
 
 }
 
-void ComponentUninstallComplete::resized()
+void ComponentComplete::resized()
 {
     auto area = getLocalBounds();
     auto sectionHeight = area.getHeight() / 4;

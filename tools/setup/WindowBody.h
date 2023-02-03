@@ -5,7 +5,7 @@
 #include "install_phases/component_sources_invalid.h"
 #include "install_phases/component_uninstall_confirm.h"
 #include "install_phases/component_existing_search.h"
-#include "install_phases/component_uninstall_complete.h"
+#include "install_phases/component_complete.h"
 #include "install_phases/component_uninstall_unnecessary.h"
 #include "helpers/manifests.h"
 
@@ -26,7 +26,7 @@ private:
     ComponentSourcesInvalid cSourcesInvalid;
     ComponentUninstallConfirm cUninstallConfirm;
     ComponentExistingSearch cExistingSearch;
-    ComponentUninstallComplete cUninstallComplete;
+    ComponentComplete cComplete;
     ComponentUninstallUnnecessary cUninstallUnnecessary;
 
     void phaseSourcesInvalid();

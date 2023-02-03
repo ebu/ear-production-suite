@@ -26,7 +26,7 @@ void WindowBody::resized()
     cSourcesInvalid.setBounds(area);
     cUninstallConfirm.setBounds(area);
     cExistingSearch.setBounds(area);
-    cUninstallComplete.setBounds(area);
+    cComplete.setBounds(area);
     cUninstallUnnecessary.setBounds(area);
 
 }
@@ -89,7 +89,7 @@ void WindowBody::phaseUninstallSearch()
 void WindowBody::phaseUninstallComplete()
 {
     removeAllChildren();
-    addAndMakeVisible(cUninstallComplete);
+    addAndMakeVisible(cComplete);
 }
 
 void WindowBody::phaseUninstallUnnecessary()

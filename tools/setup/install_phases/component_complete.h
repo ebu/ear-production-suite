@@ -2,11 +2,11 @@
 
 #include "JuceHeader.h"
 
-class ComponentUninstallComplete : public Component
+class ComponentComplete : public Component
 {
 public:
-    ComponentUninstallComplete();
-    ~ComponentUninstallComplete();
+    ComponentComplete();
+    ~ComponentComplete();
 
     void paint (Graphics&) override;
     void resized() override;
@@ -16,5 +16,5 @@ private:
     Label descriptionLabel;
     TextButton exitButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentUninstallComplete)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentComplete)
 };
