@@ -23,7 +23,7 @@ void WindowBody::resized()
     auto area = getLocalBounds();
 
     cInitial.setBounds(area);
-    cSourcesInvalid.setBounds(area);
+    cErrorLog.setBounds(area);
     cUninstallConfirm.setBounds(area);
     cExistingSearch.setBounds(area);
     cComplete.setBounds(area);
@@ -40,8 +40,8 @@ void WindowBody::phaseSourcesInvalid()
         phaseInstallCleanupSearch();
     }
     else {
-        cSourcesInvalid.setLog(invalidSources);
-        addAndMakeVisible(cSourcesInvalid);
+        cErrorLog.setLog(invalidSources);
+        addAndMakeVisible(cErrorLog);
     }
 }
 

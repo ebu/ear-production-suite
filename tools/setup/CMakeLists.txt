@@ -14,7 +14,7 @@ set(HEADERS_SETUP
 	MainComponent.h
 	WindowBody.h
 	install_phases/component_initial.h
-	install_phases/component_sources_invalid.h
+	install_phases/component_error_log.h
 	install_phases/component_uninstall_confirm.h
 	install_phases/component_existing_search.h
 	install_phases/component_complete.h
@@ -27,7 +27,7 @@ set(SOURCES_SETUP
 	MainComponent.cpp
 	WindowBody.cpp
 	install_phases/component_initial.cpp
-	install_phases/component_sources_invalid.cpp
+	install_phases/component_error_log.cpp
 	install_phases/component_uninstall_confirm.cpp
 	install_phases/component_existing_search.cpp
 	install_phases/component_complete.cpp

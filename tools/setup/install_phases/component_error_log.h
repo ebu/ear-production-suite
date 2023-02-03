@@ -3,11 +3,11 @@
 #include "JuceHeader.h"
 #include <vector>
 
-class ComponentSourcesInvalid : public Component
+class ComponentErrorLog : public Component
 {
 public:
-    ComponentSourcesInvalid();
-    ~ComponentSourcesInvalid();
+    ComponentErrorLog();
+    ~ComponentErrorLog();
 
     void paint (Graphics&) override;
     void resized() override;
@@ -20,5 +20,5 @@ private:
     TextButton exitButton;
     TextEditor log;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentSourcesInvalid)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentErrorLog)
 };

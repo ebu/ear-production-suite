@@ -2,7 +2,7 @@
 
 #include "JuceHeader.h"
 #include "install_phases/component_initial.h"
-#include "install_phases/component_sources_invalid.h"
+#include "install_phases/component_error_log.h"
 #include "install_phases/component_uninstall_confirm.h"
 #include "install_phases/component_existing_search.h"
 #include "install_phases/component_complete.h"
@@ -23,7 +23,7 @@ private:
     UninstallManifest uninstallManifest;
 
     ComponentInitial cInitial;
-    ComponentSourcesInvalid cSourcesInvalid;
+    ComponentErrorLog cErrorLog;
     ComponentUninstallConfirm cUninstallConfirm;
     ComponentExistingSearch cExistingSearch;
     ComponentComplete cComplete;

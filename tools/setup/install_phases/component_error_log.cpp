@@ -1,10 +1,10 @@
-#include "component_sources_invalid.h"
+#include "component_error_log.h"
 #include <components/look_and_feel/colours.hpp>
 #include <components/look_and_feel/fonts.hpp>
 
 using namespace ear::plugin::ui;
 
-ComponentSourcesInvalid::ComponentSourcesInvalid()
+ComponentErrorLog::ComponentErrorLog()
 {
     title.setFont(EarFontsSingleton::instance().HeroHeading);
     title.setColour(Label::textColourId, EarColours::Heading);
@@ -35,16 +35,16 @@ ComponentSourcesInvalid::ComponentSourcesInvalid()
     addAndMakeVisible(log);
 }
 
-ComponentSourcesInvalid::~ComponentSourcesInvalid()
+ComponentErrorLog::~ComponentErrorLog()
 {
 }
 
-void ComponentSourcesInvalid::paint (Graphics& g)
+void ComponentErrorLog::paint (Graphics& g)
 {
 
 }
 
-void ComponentSourcesInvalid::resized()
+void ComponentErrorLog::resized()
 {
     auto area = getLocalBounds();
 
@@ -62,7 +62,7 @@ void ComponentSourcesInvalid::resized()
     log.setBounds(area.reduced(5));
 }
 
-void ComponentSourcesInvalid::setLog(std::vector<String> const& logItems)
+void ComponentErrorLog::setLog(std::vector<String> const& logItems)
 {
     String logContent;
     for (auto const& item : logItems) {
