@@ -145,14 +145,23 @@ void InstallManifest::doInstall()
             if (item.source.isDirectory()) {
                 installLog.push_back("Copy Directory: " + item.source.getFullPathName() + " --> " + item.destination.getFullPathName());
                 if (!item.source.copyDirectoryTo(item.destination)) {
-                    installErrors.push_back("Copy Directory Failed:\n    From: " + item.source.getFullPathName() + "\n    To:" + item.destination.getFullPathName());
+                    installErrors.push_back("Copy Directory Failed:\n    From: " + item.source.getFullPathName() + "\n    To: " + item.destination.getFullPathName());
                     installLog.push_back("!!! Failed last action");
                 }
             }
             else {
+                auto parentDir = item.destination.getParentDirectory();
+                if (!parentDir.exists()) {
+                    installLog.push_back("Create Directories: " + parentDir.getFullPathName());
+                    auto res = parentDir.createDirectory();
+                    if (res.failed()) {
+                        installErrors.push_back("Create Directories Failed - " + res.getErrorMessage() + ":\n    " + parentDir.getFullPathName());
+                        installLog.push_back("!!! Failed last action");
+                    }
+                }
                 installLog.push_back("Copy File: " + item.source.getFullPathName() + " --> " + item.destination.getFullPathName());
                 if (!item.source.copyFileTo(item.destination)) {
-                    installErrors.push_back("Copy File Failed:\n    From: " + item.source.getFullPathName() + "\n    To:" + item.destination.getFullPathName());
+                    installErrors.push_back("Copy File Failed:\n    From: " + item.source.getFullPathName() + "\n    To: " + item.destination.getFullPathName());
                     installLog.push_back("!!! Failed last action");
                 }
             }
