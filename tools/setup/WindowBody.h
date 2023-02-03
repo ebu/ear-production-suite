@@ -30,9 +30,9 @@ private:
     ComponentProcessing cProcessing;
 
     void phaseSourcesInvalid();
-    void phaseUninstallConfirm();
     void phaseInstallCleanupSearch();
     void phaseInstallCleanupProcess();
+    void phaseUninstallConfirm();
     void phaseUninstallSearch();
     void phaseUninstallProcess();
 

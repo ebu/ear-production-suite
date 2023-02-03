@@ -47,23 +47,6 @@ void WindowBody::phaseSourcesInvalid()
     }
 }
 
-void WindowBody::phaseUninstallConfirm()
-{
-    removeAllChildren();
-    // This might show "unnecessary" screen rather than confirmation if no existing files found
-    auto foundFiles = uninstallManifest.getFoundFiles();
-    if (foundFiles.size() == 0) {
-        removeAllChildren();
-        cComplete.configureForUninstallUnnecessaryPhase();
-        addAndMakeVisible(cComplete);
-        // END OF USER JOURNEY
-    }
-    else {
-        cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
-        addAndMakeVisible(cUninstallConfirm);
-    }
-}
-
 void WindowBody::phaseInstallCleanupSearch()
 {
     removeAllChildren();
@@ -97,6 +80,23 @@ void WindowBody::phaseInstallCleanupProcess()
         cErrorLog.getContinueButton()->onClick = [this]() { /* TODO: go to install process */ };
         cErrorLog.setLog(errorLog);
         addAndMakeVisible(cErrorLog);
+    }
+}
+
+void WindowBody::phaseUninstallConfirm()
+{
+    removeAllChildren();
+    // This might show "unnecessary" screen rather than confirmation if no existing files found
+    auto foundFiles = uninstallManifest.getFoundFiles();
+    if (foundFiles.size() == 0) {
+        removeAllChildren();
+        cComplete.configureForUninstallUnnecessaryPhase();
+        addAndMakeVisible(cComplete);
+        // END OF USER JOURNEY
+    }
+    else {
+        cUninstallConfirm.getConfirmButton()->onClick = [this]() { phaseUninstallSearch(); };
+        addAndMakeVisible(cUninstallConfirm);
     }
 }
 
