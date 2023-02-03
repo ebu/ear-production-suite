@@ -31,7 +31,7 @@ private:
     ComponentProcessing cProcessing;
     ComponentInstallLocations cInstallLocations;
 
-    void phaseSourcesInvalid();
+    void phaseSourcesCheck();
     void phaseInstallCleanupSearch();
     void phaseInstallCleanupProcess();
     void phaseInstallLocations();

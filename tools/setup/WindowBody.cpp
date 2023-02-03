@@ -4,7 +4,7 @@
 
 WindowBody::WindowBody()
 {
-    cInitial.getInstallButton()->onClick = [this]() { phaseSourcesInvalid(); };
+    cInitial.getInstallButton()->onClick = [this]() { phaseSourcesCheck(); };
     cInitial.getUninstallButton()->onClick = [this]() { phaseUninstallConfirm(); };
     addAndMakeVisible(cInitial);
 }
@@ -32,7 +32,7 @@ void WindowBody::resized()
 
 }
 
-void WindowBody::phaseSourcesInvalid()
+void WindowBody::phaseSourcesCheck()
 {
     removeAllChildren();
     // This might skip to next phase if all sources are valid
