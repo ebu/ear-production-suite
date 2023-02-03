@@ -56,6 +56,7 @@ if(WIN32)
 	set_target_properties(setup PROPERTIES
         OUTPUT_NAME "setup"
         WIN32_EXECUTABLE TRUE)
+	target_link_options(setup PRIVATE "/MANIFESTUAC:level='requireAdministrator'")
 endif()
 
 add_custom_command(TARGET setup POST_BUILD
