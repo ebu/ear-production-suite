@@ -35,7 +35,6 @@ private:
     void phaseUninstallConfirm();
     void phaseInstallCleanupSearch();
     void phaseUninstallSearch();
-    void phaseUninstallComplete();
     void phaseUninstallUnnecessary();
     void phaseUninstallProcess();
 

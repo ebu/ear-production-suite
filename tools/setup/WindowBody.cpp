@@ -44,6 +44,7 @@ void WindowBody::phaseSourcesInvalid()
         cErrorLog.configureForInstallSourcesPhase();
         cErrorLog.setLog(invalidSources);
         addAndMakeVisible(cErrorLog);
+        // END OF USER JOURNEY
     }
 }
 
@@ -88,22 +89,31 @@ void WindowBody::phaseUninstallSearch()
     addAndMakeVisible(cExistingSearch);
 }
 
-void WindowBody::phaseUninstallComplete()
-{
-    removeAllChildren();
-    cComplete.configureForUninstallPhase();
-    addAndMakeVisible(cComplete);
-}
-
 void WindowBody::phaseUninstallUnnecessary()
 {
     removeAllChildren();
     addAndMakeVisible(cUninstallUnnecessary);
+    // END OF USER JOURNEY
 }
 
 void WindowBody::phaseUninstallProcess()
 {
-    // TODO: Show screen
+    removeAllChildren();
+    cProcessing.configureForUninstallPhase();
+    addAndMakeVisible(cProcessing);
     uninstallManifest.doUninstall();
-    // TODO: Move on or show error
+    auto errorLog = uninstallManifest.getUninstallErrors();
+    if (errorLog.size() == 0) {
+        removeAllChildren();
+        cComplete.configureForUninstallPhase();
+        addAndMakeVisible(cComplete);
+        // END OF USER JOURNEY
+    }
+    else {
+        removeAllChildren();
+        cErrorLog.configureForUninstallPhase();
+        cErrorLog.setLog(errorLog);
+        addAndMakeVisible(cErrorLog);
+        // END OF USER JOURNEY
+    }
 }
