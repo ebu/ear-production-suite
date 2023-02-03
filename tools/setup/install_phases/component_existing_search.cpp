@@ -20,7 +20,7 @@ ComponentExistingSearch::ComponentExistingSearch()
     skipButton.setToggleable(false);
     skipButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Background);
     skipButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
-    addAndMakeVisible(removeButton);
+    addAndMakeVisible(skipButton);
 
     removeButton.setButtonText("Remove All");
     removeButton.setToggleable(false);
