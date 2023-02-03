@@ -28,6 +28,7 @@ void WindowBody::resized()
     cExistingSearch.setBounds(area);
     cComplete.setBounds(area);
     cUninstallUnnecessary.setBounds(area);
+    cProcessing.setBounds(area);
 
 }
 

@@ -17,6 +17,7 @@ set(HEADERS_SETUP
 	install_phases/component_error_log.h
 	install_phases/component_uninstall_confirm.h
 	install_phases/component_existing_search.h
+	install_phases/component_processing.h
 	install_phases/component_complete.h
 	install_phases/component_uninstall_unnecessary.h
 	helpers/manifests.h
@@ -30,6 +31,7 @@ set(SOURCES_SETUP
 	install_phases/component_error_log.cpp
 	install_phases/component_uninstall_confirm.cpp
 	install_phases/component_existing_search.cpp
+	install_phases/component_processing.cpp
 	install_phases/component_complete.cpp
 	install_phases/component_uninstall_unnecessary.cpp
 	helpers/manifests.cpp

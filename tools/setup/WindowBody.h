@@ -7,6 +7,7 @@
 #include "install_phases/component_existing_search.h"
 #include "install_phases/component_complete.h"
 #include "install_phases/component_uninstall_unnecessary.h"
+#include "install_phases/component_processing.h"
 #include "helpers/manifests.h"
 
 class WindowBody : public Component
@@ -28,6 +29,7 @@ private:
     ComponentExistingSearch cExistingSearch;
     ComponentComplete cComplete;
     ComponentUninstallUnnecessary cUninstallUnnecessary;
+    ComponentProcessing cProcessing;
 
     void phaseSourcesInvalid();
     void phaseUninstallConfirm();
