@@ -12,7 +12,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    void configureForInstallSourcesPhase();
+    void configureForInstallSourcesCheckPhase();
     void configureForInstallCleanUpPhase();
     void configureForUninstallPhase();
 

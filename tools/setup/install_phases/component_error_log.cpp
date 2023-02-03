@@ -73,7 +73,7 @@ void ComponentErrorLog::resized()
     log.setBounds(area.reduced(5));
 }
 
-void ComponentErrorLog::configureForInstallSourcesPhase()
+void ComponentErrorLog::configureForInstallSourcesCheckPhase()
 {
     continueButton.setVisible(false);
     title.setText("Invalid Resources",

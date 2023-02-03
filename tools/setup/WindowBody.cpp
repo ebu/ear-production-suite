@@ -41,7 +41,7 @@ void WindowBody::phaseSourcesInvalid()
         phaseInstallCleanupSearch();
     }
     else {
-        cErrorLog.configureForInstallSourcesPhase();
+        cErrorLog.configureForInstallSourcesCheckPhase();
         cErrorLog.setLog(invalidSources);
         addAndMakeVisible(cErrorLog);
         // END OF USER JOURNEY
