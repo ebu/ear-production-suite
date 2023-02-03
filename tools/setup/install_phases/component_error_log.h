@@ -18,6 +18,8 @@ public:
 
     void setLog(std::vector<String> const& logItems);
 
+    TextButton* getContinueButton();
+
 private:
     Label title;
     Label description;

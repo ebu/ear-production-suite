@@ -70,14 +70,33 @@ void WindowBody::phaseInstallCleanupSearch()
     // This might skip to next phase if no existing files found
     auto foundFiles = uninstallManifest.getFoundFiles();
     if (foundFiles.size() == 0) {
-        //TODO: next phase
+        //TODO: go to install process
     }
     else {
-        // TODO: capture remove click
-        // TODO: capture skip click
+        cExistingSearch.getSkipButton()->onClick = [this]() { /* TODO: go to install process */ };
+        cExistingSearch.getRemoveButton()->onClick = [this]() { phaseInstallCleanupProcess(); };
         cExistingSearch.configureForInstallPhase();
         cExistingSearch.setLog(foundFiles);
         addAndMakeVisible(cExistingSearch);
+    }
+}
+
+void WindowBody::phaseInstallCleanupProcess()
+{
+    removeAllChildren();
+    cProcessing.configureForInstallCleanUpPhase();
+    addAndMakeVisible(cProcessing);
+    uninstallManifest.doUninstall();
+    auto errorLog = uninstallManifest.getUninstallErrors();
+    if (errorLog.size() == 0) {
+        // TODO: go to install process
+    }
+    else {
+        removeAllChildren();
+        cErrorLog.configureForInstallCleanUpPhase();
+        cErrorLog.getContinueButton()->onClick = [this]() { /* TODO: go to install process */ };
+        cErrorLog.setLog(errorLog);
+        addAndMakeVisible(cErrorLog);
     }
 }
 

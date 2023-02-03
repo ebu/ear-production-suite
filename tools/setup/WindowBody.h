@@ -32,6 +32,7 @@ private:
     void phaseSourcesInvalid();
     void phaseUninstallConfirm();
     void phaseInstallCleanupSearch();
+    void phaseInstallCleanupProcess();
     void phaseUninstallSearch();
     void phaseUninstallProcess();
 

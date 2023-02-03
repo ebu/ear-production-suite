@@ -109,3 +109,8 @@ void ComponentErrorLog::setLog(std::vector<String> const& logItems)
     }
     log.setText(logContent);
 }
+
+TextButton* ComponentErrorLog::getContinueButton()
+{
+    return &continueButton;
+}
