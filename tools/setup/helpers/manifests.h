@@ -25,9 +25,13 @@ public:
     ~InstallManifest();
 
     std::vector<String> getInvalidSources();
+    void doInstall();
+    std::vector<String> getInstallErrors();
 
 private:
     std::vector<InstallItem> installItems;
+    std::vector<String> installErrors;
+    std::vector<String> installLog;
 };
 
 class UninstallManifest {
@@ -36,11 +40,16 @@ public:
     ~UninstallManifest();
 
     std::vector<String> getFoundFiles();
+    void doUninstall();
+    std::vector<String> getUninstallErrors();
 
 private:
     void populateVectorsFromElement(juce::XmlElement* elm);
     std::optional<juce::File> pathFromElement(juce::XmlElement* elm);
+    void sortDirectoriesDeepestFirst();
 
     std::vector<UninstallFile> uninstallFiles;
     std::vector<UninstallDirectory> uninstallDirectories;
+    std::vector<String> uninstallErrors;
+    std::vector<String> uninstallLog;
 };

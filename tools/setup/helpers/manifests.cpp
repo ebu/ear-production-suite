@@ -1,4 +1,5 @@
 #include "manifests.h"
+#include <algorithm>
 
 namespace {
     juce::String getOsStr() {
@@ -120,6 +121,40 @@ std::vector<String> InstallManifest::getInvalidSources()
     return paths;
 }
 
+void InstallManifest::doInstall()
+{
+    installLog.clear();
+    installErrors.clear();
+    for (auto const& item : installItems) {
+        if (!item.sourceValid) {
+            installErrors.push_back("Not Found:\n    " + item.source.getFullPathName());
+            installLog.push_back("Copy: " + item.source.getFullPathName() + " --> " + item.destination.getFullPathName());
+            installLog.push_back("!!! Failed last action");
+        }
+        else {
+            if (item.source.isDirectory()) {
+                installLog.push_back("Copy Directory: " + item.source.getFullPathName() + " --> " + item.destination.getFullPathName());
+                if (!item.source.copyDirectoryTo(item.destination)) {
+                    installErrors.push_back("Copy Directory Failed:\n    From: " + item.source.getFullPathName() + "\n    To:" + item.destination.getFullPathName());
+                    installLog.push_back("!!! Failed last action");
+                }
+            }
+            else {
+                installLog.push_back("Copy File: " + item.source.getFullPathName() + " --> " + item.destination.getFullPathName());
+                if (!item.source.copyFileTo(item.destination)) {
+                    installErrors.push_back("Copy File Failed:\n    From: " + item.source.getFullPathName() + "\n    To:" + item.destination.getFullPathName());
+                    installLog.push_back("!!! Failed last action");
+                }
+            }
+        }
+    }
+}
+
+std::vector<String> InstallManifest::getInstallErrors()
+{
+    return installErrors;
+}
+
 
 // ==========================================================================================================================
 
@@ -150,6 +185,47 @@ std::vector<String> UninstallManifest::getFoundFiles()
         paths.push_back(item.path.getFullPathName());
     }
     return paths;
+}
+
+void UninstallManifest::doUninstall()
+{
+    uninstallLog.clear();
+    uninstallErrors.clear();
+    // Work through files first
+    for (auto const& item : uninstallFiles) {
+        uninstallLog.push_back("Deleting File: " + item.path.getFullPathName());
+        if (!item.path.deleteFile()) {
+            uninstallErrors.push_back("Delete File Failed:\n    " + item.path.getFullPathName());
+            uninstallLog.push_back("!!! Failed last action");
+        }
+    }
+    // Now work through directories.
+    // We need to delete deepest first, otherwise subdirectories might cause failure if we attempt to delete the parent first.
+    sortDirectoriesDeepestFirst();
+    for (auto const& item : uninstallDirectories) {
+        if (item.deleteAllContents) {
+            uninstallLog.push_back("Deleting Directory Recursively: " + item.path.getFullPathName());
+            if (!item.path.deleteRecursively()) {
+                uninstallErrors.push_back("Delete Directory Recursively Failed:\n    " + item.path.getFullPathName());
+                uninstallLog.push_back("!!! Failed last action");
+            }
+        }
+        else {
+            uninstallLog.push_back("Deleting Directory: " + item.path.getFullPathName());
+            if (item.path.getNumberOfChildFiles(File::TypesOfFileToFind::findFilesAndDirectories) > 0) {
+                uninstallErrors.push_back("Delete Directory Failed - not empty:\n    " + item.path.getFullPathName());
+                uninstallLog.push_back("!!! Failed last action");
+            } else if(!item.path.deleteFile()) {
+                uninstallErrors.push_back("Delete Directory Failed:\n    " + item.path.getFullPathName());
+                uninstallLog.push_back("!!! Failed last action");
+            }
+        }
+    }
+}
+
+std::vector<String> UninstallManifest::getUninstallErrors()
+{
+    return uninstallErrors;
 }
 
 void UninstallManifest::populateVectorsFromElement(juce::XmlElement* elm)
@@ -186,4 +262,26 @@ std::optional<juce::File> UninstallManifest::pathFromElement(juce::XmlElement* e
         return File(pathStr);
     }
     return std::optional<juce::File>();
+}
+
+void UninstallManifest::sortDirectoriesDeepestFirst()
+{
+    std::sort(uninstallDirectories.begin(), uninstallDirectories.end(),
+        [](const UninstallDirectory& a, const UninstallDirectory& b)
+    {
+        auto sep = File::getSeparatorString();
+        auto aPath = a.path;
+        int aDepth = 0;
+        while (!aPath.isRoot()) {
+            aPath = aPath.getParentDirectory();
+            aDepth++;
+        }
+        auto bPath = b.path;
+        int bDepth = 0;
+        while (!bPath.isRoot()) {
+            bPath = bPath.getParentDirectory();
+            bDepth++;
+        }
+        return aDepth > bDepth;
+    });
 }
