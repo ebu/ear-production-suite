@@ -8,7 +8,7 @@ public:
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override       { return true; }
+    bool moreThanOneInstanceAllowed() override       { return false; }
 
     void initialise (const String& commandLine) override
     {
