@@ -84,7 +84,7 @@ void ComponentUninstallSearch::resized()
 void ComponentUninstallSearch::configureForInstallPhase()
 {
     skipButton.setVisible(true);
-    title.setText("Install",
+    title.setText("Pre-Install Clean-Up",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup found the following files and directories relating to a previous installation. These may conflict with the new installation.\nClick Remove All if you would like Setup to delete these. Note that Setup may overwrite these files during installation in any case.",
         juce::NotificationType::dontSendNotification);
