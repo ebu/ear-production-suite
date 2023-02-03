@@ -57,8 +57,8 @@ void ComponentErrorLog::resized()
     const int buttonWidth = 160;
     const int buttonPadding = 10;
     auto buttonRow = area.removeFromBottom(buttonPadding + buttonHeight + buttonPadding);
-    auto buttonSectionWidth = area.getWidth() / 2;
-    auto buttonSectionTrimTB = (area.getHeight() - buttonHeight) / 2;
+    auto buttonSectionWidth = buttonRow.getWidth() / 2;
+    auto buttonSectionTrimTB = (buttonRow.getHeight() - buttonHeight) / 2;
     auto buttonSectionTrimLR = (buttonSectionWidth - buttonWidth) / 2;
 
     auto leftButtonArea = buttonRow.removeFromLeft(buttonSectionWidth);
@@ -85,7 +85,7 @@ void ComponentErrorLog::configureForInstallSourcesPhase()
 void ComponentErrorLog::configureForInstallCleanUpPhase()
 {
     continueButton.setVisible(true);
-    title.setText("Pre-Install Clean-Up",
+    title.setText("Pre-Install Clean-Up Summary",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup encountered problems removing the following files and directories.\nSetup can attempt to continue with installation.",
         juce::NotificationType::dontSendNotification);
@@ -94,7 +94,7 @@ void ComponentErrorLog::configureForInstallCleanUpPhase()
 void ComponentErrorLog::configureForUninstallPhase()
 {
     continueButton.setVisible(false);
-    title.setText("Uninstall",
+    title.setText("Uninstall Summary",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup encountered problems removing the following files and directories.",
         juce::NotificationType::dontSendNotification);
