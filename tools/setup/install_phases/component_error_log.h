@@ -12,6 +12,10 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    void configureForInstallSourcesPhase();
+    void configureForInstallCleanUpPhase();
+    void configureForUninstallPhase();
+
     void setLog(std::vector<String> const& logItems);
 
 private:

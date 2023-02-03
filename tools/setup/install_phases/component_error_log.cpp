@@ -8,15 +8,11 @@ ComponentErrorLog::ComponentErrorLog()
 {
     title.setFont(EarFontsSingleton::instance().HeroHeading);
     title.setColour(Label::textColourId, EarColours::Heading);
-    title.setText("Invalid Resources",
-        juce::NotificationType::dontSendNotification);
     title.setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(title);
 
     description.setFont(EarFontsSingleton::instance().Label);
     description.setColour(Label::textColourId, EarColours::Label);
-    description.setText("Setup encountered problems locating the following installation resources.\nPlease try redownloading the latest release.",
-        juce::NotificationType::dontSendNotification);
     description.setJustificationType(Justification::centredLeft);
     addAndMakeVisible(description);
 
@@ -60,6 +56,30 @@ void ComponentErrorLog::resized()
 
     // Remaining area is flexible for textbox
     log.setBounds(area.reduced(5));
+}
+
+void ComponentErrorLog::configureForInstallSourcesPhase()
+{
+    title.setText("Invalid Resources",
+        juce::NotificationType::dontSendNotification);
+    description.setText("Setup encountered problems locating the following installation resources.\nPlease try redownloading the latest release.",
+        juce::NotificationType::dontSendNotification);
+}
+
+void ComponentErrorLog::configureForInstallCleanUpPhase()
+{
+    title.setText("Pre-Install Clean-Up",
+        juce::NotificationType::dontSendNotification);
+    description.setText("Setup encountered problems removing the following files and directories.\nSetup can attempt to continue with installation.",
+        juce::NotificationType::dontSendNotification);
+}
+
+void ComponentErrorLog::configureForUninstallPhase()
+{
+    title.setText("Uninstall",
+        juce::NotificationType::dontSendNotification);
+    description.setText("Setup encountered problems removing the following files and directories.",
+        juce::NotificationType::dontSendNotification);
 }
 
 void ComponentErrorLog::setLog(std::vector<String> const& logItems)
