@@ -89,6 +89,7 @@ void WindowBody::phaseUninstallSearch()
 void WindowBody::phaseUninstallComplete()
 {
     removeAllChildren();
+    cComplete.configureForUninstallPhase();
     addAndMakeVisible(cComplete);
 }
 

@@ -8,15 +8,11 @@ ComponentComplete::ComponentComplete()
 {
     titleLabel.setFont(EarFontsSingleton::instance().HeroHeading);
     titleLabel.setColour(Label::textColourId, EarColours::Heading);
-    titleLabel.setText("Uninstall Complete",
-        juce::NotificationType::dontSendNotification);
     titleLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(titleLabel);
 
     descriptionLabel.setFont(EarFontsSingleton::instance().Label);
     descriptionLabel.setColour(Label::textColourId, EarColours::Label);
-    descriptionLabel.setText("Uninstallation is complete.",
-        juce::NotificationType::dontSendNotification);
     descriptionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(descriptionLabel);
 
@@ -51,4 +47,20 @@ void ComponentComplete::resized()
     auto buttonSectionTrimTB = (area.getHeight() - buttonHeight) / 2;
     auto buttonSectionTrimLR = (buttonSectionWidth - buttonWidth) / 2;
     exitButton.setBounds(area.reduced(buttonSectionTrimLR, buttonSectionTrimTB));
+}
+
+void ComponentComplete::configureForInstallPhase()
+{
+    titleLabel.setText("Uninstall Complete",
+        juce::NotificationType::dontSendNotification);
+    descriptionLabel.setText("Uninstallation is complete.",
+        juce::NotificationType::dontSendNotification);
+}
+
+void ComponentComplete::configureForUninstallPhase()
+{
+    titleLabel.setText("Installation Complete",
+        juce::NotificationType::dontSendNotification);
+    descriptionLabel.setText("The EAR Production Suite has been installed.\nUse the software via the REAPER digital audio workstation.",
+        juce::NotificationType::dontSendNotification);
 }

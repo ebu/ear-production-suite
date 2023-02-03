@@ -11,6 +11,9 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    void configureForInstallPhase();
+    void configureForUninstallPhase();
+
 private:
     Label titleLabel;
     Label descriptionLabel;
