@@ -16,6 +16,12 @@ ComponentErrorLog::ComponentErrorLog()
     description.setJustificationType(Justification::centredLeft);
     addAndMakeVisible(description);
 
+    continueButton.setButtonText("Continue Anyway");
+    continueButton.setToggleable(false);
+    continueButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Primary);
+    continueButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
+    addAndMakeVisible(continueButton);
+
     exitButton.setButtonText("Exit Setup");
     exitButton.setToggleable(false);
     exitButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Background);
@@ -48,11 +54,20 @@ void ComponentErrorLog::resized()
     description.setBounds(area.removeFromTop(50));
 
     const int buttonHeight = 40;
-    const int  buttonWidth = 160;
-    const int  buttonPadding = 10;
+    const int buttonWidth = 160;
+    const int buttonPadding = 10;
     auto buttonRow = area.removeFromBottom(buttonPadding + buttonHeight + buttonPadding);
-    auto buttonArea = buttonRow.removeFromRight(buttonPadding + buttonWidth + buttonPadding).reduced(buttonPadding);
-    exitButton.setBounds(buttonArea);
+    auto buttonSectionWidth = area.getWidth() / 2;
+    auto buttonSectionTrimTB = (area.getHeight() - buttonHeight) / 2;
+    auto buttonSectionTrimLR = (buttonSectionWidth - buttonWidth) / 2;
+
+    auto leftButtonArea = buttonRow.removeFromLeft(buttonSectionWidth);
+    leftButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
+    continueButton.setBounds(leftButtonArea);
+
+    auto rightButtonArea = buttonRow;
+    rightButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
+    exitButton.setBounds(rightButtonArea);
 
     // Remaining area is flexible for textbox
     log.setBounds(area.reduced(5));
@@ -60,6 +75,7 @@ void ComponentErrorLog::resized()
 
 void ComponentErrorLog::configureForInstallSourcesPhase()
 {
+    continueButton.setVisible(false);
     title.setText("Invalid Resources",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup encountered problems locating the following installation resources.\nPlease try redownloading the latest release.",
@@ -68,6 +84,7 @@ void ComponentErrorLog::configureForInstallSourcesPhase()
 
 void ComponentErrorLog::configureForInstallCleanUpPhase()
 {
+    continueButton.setVisible(true);
     title.setText("Pre-Install Clean-Up",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup encountered problems removing the following files and directories.\nSetup can attempt to continue with installation.",
@@ -76,6 +93,7 @@ void ComponentErrorLog::configureForInstallCleanUpPhase()
 
 void ComponentErrorLog::configureForUninstallPhase()
 {
+    continueButton.setVisible(false);
     title.setText("Uninstall",
         juce::NotificationType::dontSendNotification);
     description.setText("Setup encountered problems removing the following files and directories.",

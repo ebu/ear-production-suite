@@ -21,6 +21,7 @@ public:
 private:
     Label title;
     Label description;
+    TextButton continueButton;
     TextButton exitButton;
     TextEditor log;
 
