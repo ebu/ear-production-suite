@@ -91,6 +91,15 @@ void ComponentErrorLog::configureForInstallCleanUpPhase()
         juce::NotificationType::dontSendNotification);
 }
 
+void ComponentErrorLog::configureForInstallPhase()
+{
+    continueButton.setVisible(false);
+    title.setText("Install Summary",
+        juce::NotificationType::dontSendNotification);
+    description.setText("Setup encountered problems installing the following files and directories.",
+        juce::NotificationType::dontSendNotification);
+}
+
 void ComponentErrorLog::configureForUninstallPhase()
 {
     continueButton.setVisible(false);

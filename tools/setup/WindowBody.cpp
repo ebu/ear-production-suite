@@ -88,8 +88,30 @@ void WindowBody::phaseInstallLocations()
 {
     removeAllChildren();
     cInstallLocations.setLocations(Locations::getVst3Directory(), Locations::getUserPluginsDirectory());
-    // TODO: hook Continue button
+    cInstallLocations.getContinueButton()->onClick = [this]() { phaseInstallProcess(); };
     addAndMakeVisible(cInstallLocations);
+}
+
+void WindowBody::phaseInstallProcess()
+{
+    removeAllChildren();
+    cProcessing.configureForInstallPhase();
+    addAndMakeVisible(cProcessing);
+    installManifest.doInstall();
+    auto errorLog = installManifest.getInstallErrors();
+    if (errorLog.size() == 0) {
+        removeAllChildren();
+        cComplete.configureForInstallPhase();
+        addAndMakeVisible(cComplete);
+        // END OF USER JOURNEY
+    }
+    else {
+        removeAllChildren();
+        cErrorLog.configureForInstallPhase();
+        cErrorLog.setLog(errorLog);
+        addAndMakeVisible(cErrorLog);
+        // END OF USER JOURNEY
+    }
 }
 
 void WindowBody::phaseUninstallConfirm()

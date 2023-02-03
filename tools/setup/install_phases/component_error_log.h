@@ -14,6 +14,7 @@ public:
 
     void configureForInstallSourcesCheckPhase();
     void configureForInstallCleanUpPhase();
+    void configureForInstallPhase();
     void configureForUninstallPhase();
 
     void setLog(std::vector<String> const& logItems);
