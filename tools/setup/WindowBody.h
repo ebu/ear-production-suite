@@ -35,6 +35,7 @@ private:
     void phaseUninstallSearch();
     void phaseUninstallComplete();
     void phaseUninstallUnnecessary();
+    void phaseUninstallProcess();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowBody)
 };

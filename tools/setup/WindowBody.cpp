@@ -82,7 +82,7 @@ void WindowBody::phaseUninstallSearch()
     cUninstallSearch.configureForUninstallPhase();
     auto foundFiles = uninstallManifest.getFoundFiles();
     cUninstallSearch.setLog(foundFiles);
-    // TODO: capture remove click
+    cUninstallSearch.getRemoveButton()->onClick = [this]() { phaseUninstallProcess(); };
     addAndMakeVisible(cUninstallSearch);
 }
 
@@ -96,4 +96,11 @@ void WindowBody::phaseUninstallUnnecessary()
 {
     removeAllChildren();
     addAndMakeVisible(cUninstallUnnecessary);
+}
+
+void WindowBody::phaseUninstallProcess()
+{
+    // TODO: Show screen
+    uninstallManifest.doUninstall();
+    // TODO: Move on or show error
 }

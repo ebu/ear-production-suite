@@ -101,12 +101,12 @@ void ComponentUninstallSearch::configureForUninstallPhase()
 
 TextButton* ComponentUninstallSearch::getRemoveButton()
 {
-    return nullptr;
+    return &removeButton;
 }
 
 TextButton* ComponentUninstallSearch::getSkipButton()
 {
-    return nullptr;
+    return &skipButton;
 }
 
 void ComponentUninstallSearch::setLog(std::vector<String> const& logItems)
