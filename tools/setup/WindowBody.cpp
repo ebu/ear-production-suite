@@ -25,7 +25,7 @@ void WindowBody::resized()
     cInitial.setBounds(area);
     cSourcesInvalid.setBounds(area);
     cUninstallConfirm.setBounds(area);
-    cUninstallSearch.setBounds(area);
+    cExistingSearch.setBounds(area);
     cUninstallComplete.setBounds(area);
     cUninstallUnnecessary.setBounds(area);
 
@@ -70,20 +70,20 @@ void WindowBody::phaseInstallCleanupSearch()
     else {
         // TODO: capture remove click
         // TODO: capture skip click
-        cUninstallSearch.configureForInstallPhase();
-        cUninstallSearch.setLog(foundFiles);
-        addAndMakeVisible(cUninstallSearch);
+        cExistingSearch.configureForInstallPhase();
+        cExistingSearch.setLog(foundFiles);
+        addAndMakeVisible(cExistingSearch);
     }
 }
 
 void WindowBody::phaseUninstallSearch()
 {
     removeAllChildren();
-    cUninstallSearch.configureForUninstallPhase();
+    cExistingSearch.configureForUninstallPhase();
     auto foundFiles = uninstallManifest.getFoundFiles();
-    cUninstallSearch.setLog(foundFiles);
-    cUninstallSearch.getRemoveButton()->onClick = [this]() { phaseUninstallProcess(); };
-    addAndMakeVisible(cUninstallSearch);
+    cExistingSearch.setLog(foundFiles);
+    cExistingSearch.getRemoveButton()->onClick = [this]() { phaseUninstallProcess(); };
+    addAndMakeVisible(cExistingSearch);
 }
 
 void WindowBody::phaseUninstallComplete()

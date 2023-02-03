@@ -3,11 +3,11 @@
 #include "JuceHeader.h"
 #include <vector>
 
-class ComponentUninstallSearch : public Component
+class ComponentExistingSearch : public Component
 {
 public:
-    ComponentUninstallSearch();
-    ~ComponentUninstallSearch();
+    ComponentExistingSearch();
+    ~ComponentExistingSearch();
 
     void paint (Graphics&) override;
     void resized() override;
@@ -28,5 +28,5 @@ private:
     TextButton exitButton;
     TextEditor log;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentUninstallSearch)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentExistingSearch)
 };

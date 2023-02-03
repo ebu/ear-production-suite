@@ -1,10 +1,10 @@
-#include "component_uninstall_search.h"
+#include "component_existing_search.h"
 #include <components/look_and_feel/colours.hpp>
 #include <components/look_and_feel/fonts.hpp>
 
 using namespace ear::plugin::ui;
 
-ComponentUninstallSearch::ComponentUninstallSearch()
+ComponentExistingSearch::ComponentExistingSearch()
 {
     title.setFont(EarFontsSingleton::instance().HeroHeading);
     title.setColour(Label::textColourId, EarColours::Heading);
@@ -43,16 +43,16 @@ ComponentUninstallSearch::ComponentUninstallSearch()
     addAndMakeVisible(log);
 }
 
-ComponentUninstallSearch::~ComponentUninstallSearch()
+ComponentExistingSearch::~ComponentExistingSearch()
 {
 }
 
-void ComponentUninstallSearch::paint (Graphics& g)
+void ComponentExistingSearch::paint (Graphics& g)
 {
 
 }
 
-void ComponentUninstallSearch::resized()
+void ComponentExistingSearch::resized()
 {
     auto area = getLocalBounds();
 
@@ -81,7 +81,7 @@ void ComponentUninstallSearch::resized()
     log.setBounds(area.reduced(5));
 }
 
-void ComponentUninstallSearch::configureForInstallPhase()
+void ComponentExistingSearch::configureForInstallPhase()
 {
     skipButton.setVisible(true);
     title.setText("Pre-Install Clean-Up",
@@ -90,7 +90,7 @@ void ComponentUninstallSearch::configureForInstallPhase()
         juce::NotificationType::dontSendNotification);
 }
 
-void ComponentUninstallSearch::configureForUninstallPhase()
+void ComponentExistingSearch::configureForUninstallPhase()
 {
     skipButton.setVisible(false);
     title.setText("Uninstall",
@@ -99,17 +99,17 @@ void ComponentUninstallSearch::configureForUninstallPhase()
         juce::NotificationType::dontSendNotification);
 }
 
-TextButton* ComponentUninstallSearch::getRemoveButton()
+TextButton* ComponentExistingSearch::getRemoveButton()
 {
     return &removeButton;
 }
 
-TextButton* ComponentUninstallSearch::getSkipButton()
+TextButton* ComponentExistingSearch::getSkipButton()
 {
     return &skipButton;
 }
 
-void ComponentUninstallSearch::setLog(std::vector<String> const& logItems)
+void ComponentExistingSearch::setLog(std::vector<String> const& logItems)
 {
     String logContent;
     for (auto const& item : logItems) {

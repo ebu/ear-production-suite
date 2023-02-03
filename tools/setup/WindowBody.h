@@ -4,7 +4,7 @@
 #include "install_phases/component_initial.h"
 #include "install_phases/component_sources_invalid.h"
 #include "install_phases/component_uninstall_confirm.h"
-#include "install_phases/component_uninstall_search.h"
+#include "install_phases/component_existing_search.h"
 #include "install_phases/component_uninstall_complete.h"
 #include "install_phases/component_uninstall_unnecessary.h"
 #include "helpers/manifests.h"
@@ -25,7 +25,7 @@ private:
     ComponentInitial cInitial;
     ComponentSourcesInvalid cSourcesInvalid;
     ComponentUninstallConfirm cUninstallConfirm;
-    ComponentUninstallSearch cUninstallSearch;
+    ComponentExistingSearch cExistingSearch;
     ComponentUninstallComplete cUninstallComplete;
     ComponentUninstallUnnecessary cUninstallUnnecessary;
 
