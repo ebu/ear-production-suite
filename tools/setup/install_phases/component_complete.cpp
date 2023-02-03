@@ -49,7 +49,7 @@ void ComponentComplete::resized()
     exitButton.setBounds(area.reduced(buttonSectionTrimLR, buttonSectionTrimTB));
 }
 
-void ComponentComplete::configureForInstallPhase()
+void ComponentComplete::configureForUninstallPhase()
 {
     titleLabel.setText("Uninstall Complete",
         juce::NotificationType::dontSendNotification);
@@ -57,7 +57,7 @@ void ComponentComplete::configureForInstallPhase()
         juce::NotificationType::dontSendNotification);
 }
 
-void ComponentComplete::configureForUninstallPhase()
+void ComponentComplete::configureForInstallPhase()
 {
     titleLabel.setText("Installation Complete",
         juce::NotificationType::dontSendNotification);
