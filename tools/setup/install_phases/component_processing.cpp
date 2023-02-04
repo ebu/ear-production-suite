@@ -8,8 +8,6 @@ ComponentProcessing::ComponentProcessing()
 {
     titleLabel.setFont(EarFontsSingleton::instance().HeroHeading);
     titleLabel.setColour(Label::textColourId, EarColours::Heading);
-    titleLabel.setText("Uninstall",
-        juce::NotificationType::dontSendNotification);
     titleLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(titleLabel);
 
@@ -37,7 +35,7 @@ void ComponentProcessing::resized()
     auto sectionHeight = area.getHeight() / 4;
 
     titleLabel.setBounds(area.removeFromTop(sectionHeight));
-    descriptionLabel.setBounds(area);
+    descriptionLabel.setBounds(area.removeFromTop(sectionHeight));
 
 }
 
@@ -49,7 +47,7 @@ void ComponentProcessing::configureForInstallPhase()
 
 void ComponentProcessing::configureForInstallCleanUpPhase()
 {
-    titleLabel.setText("Clean-Up",
+    titleLabel.setText("Pre-Install Clean-Up",
         juce::NotificationType::dontSendNotification);
 }
 
