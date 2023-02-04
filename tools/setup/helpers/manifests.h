@@ -42,13 +42,13 @@ private:
     std::vector<String> installLog;
 };
 
-class UninstallManifest {
+class UninstallManifest : private Thread {
 public:
     UninstallManifest();
-    ~UninstallManifest();
+    ~UninstallManifest() override;
 
     std::vector<String> getFoundFiles();
-    void doUninstall();
+    void doUninstall(std::function<void()> callbackWhenComplete);
     std::vector<String> getUninstallErrors();
 
 private:
@@ -56,6 +56,8 @@ private:
     std::optional<juce::File> pathFromElement(juce::XmlElement* elm);
     void sortDirectoriesDeepestFirst();
 
+    void run() override;
+    std::function<void()> callbackWhenUninstallComplete;
     std::vector<UninstallFile> uninstallFiles;
     std::vector<UninstallDirectory> uninstallDirectories;
     std::vector<String> uninstallErrors;

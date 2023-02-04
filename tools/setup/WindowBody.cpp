@@ -70,8 +70,7 @@ void WindowBody::phaseInstallCleanupProcessStart()
     removeAllChildren();
     cProcessing.configureForInstallCleanUpPhase();
     addAndMakeVisible(cProcessing);
-    uninstallManifest.doUninstall();
-    phaseInstallCleanupProcessFinished();
+    uninstallManifest.doUninstall([this]() { phaseInstallCleanupProcessFinished(); });
 }
 
 void WindowBody::phaseInstallCleanupProcessFinished()
@@ -155,8 +154,7 @@ void WindowBody::phaseUninstallProcessStart()
     removeAllChildren();
     cProcessing.configureForUninstallPhase();
     addAndMakeVisible(cProcessing);
-    uninstallManifest.doUninstall();
-    phaseUninstallProcessFinished();
+    uninstallManifest.doUninstall([this]() { phaseUninstallProcessFinished(); });
 }
 
 void WindowBody::phaseUninstallProcessFinished()

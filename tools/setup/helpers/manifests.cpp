@@ -203,7 +203,7 @@ std::vector<String> InstallManifest::getInstallErrors()
 // ==========================================================================================================================
 
 
-UninstallManifest::UninstallManifest()
+UninstallManifest::UninstallManifest() : Thread("UninstallManifest")
 {
     File setupDirectory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
     XmlDocument xml(setupDirectory.getChildFile("uninstall_list.xml"));
@@ -217,6 +217,7 @@ UninstallManifest::UninstallManifest()
 
 UninstallManifest::~UninstallManifest()
 {
+    stopThread(5000); // 5sec should be plenty of time to cleanly end the thread
 }
 
 std::vector<String> UninstallManifest::getFoundFiles()
@@ -231,8 +232,15 @@ std::vector<String> UninstallManifest::getFoundFiles()
     return paths;
 }
 
-void UninstallManifest::doUninstall()
+void UninstallManifest::doUninstall(std::function<void()> callbackWhenComplete)
 {
+    callbackWhenUninstallComplete = callbackWhenComplete;
+    startThread();
+}
+
+void UninstallManifest::run()
+{
+    auto start = std::chrono::high_resolution_clock::now();
     uninstallLog.clear();
     uninstallErrors.clear();
     // Work through files first
@@ -264,6 +272,21 @@ void UninstallManifest::doUninstall()
                 uninstallLog.push_back("!!! Failed last action");
             }
         }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // This will probably complete very quickly, barely showing the processing screen.
+    // To instill confidence in the user that the process has actually done something,
+    // we will delay to ensure at least 3 seconds have elapsed before we run the callback.
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    if (elapsed < 3000) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000 - elapsed));
+    }
+
+    if (callbackWhenUninstallComplete) {
+        MessageManager::callAsync([this]() {
+            callbackWhenUninstallComplete();
+        });
     }
 }
 
