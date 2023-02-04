@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <optional>
+#include <functional>
 #include "JuceHeader.h"
 
 namespace Locations {
@@ -24,16 +25,18 @@ struct UninstallDirectory {
     bool deleteAllContents;
 };
 
-class InstallManifest {
+class InstallManifest : private Thread {
 public:
     InstallManifest();
-    ~InstallManifest();
+    ~InstallManifest() override;
 
     std::vector<String> getInvalidSources();
-    void doInstall();
+    void doInstall(std::function<void()> callbackWhenComplete);
     std::vector<String> getInstallErrors();
 
 private:
+    void run() override;
+    std::function<void()> callbackWhenInstallComplete;
     std::vector<InstallItem> installItems;
     std::vector<String> installErrors;
     std::vector<String> installLog;

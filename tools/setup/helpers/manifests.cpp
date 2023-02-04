@@ -1,5 +1,7 @@
 #include "manifests.h"
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
 namespace {
     juce::String getOsStr() {
@@ -89,7 +91,7 @@ String Locations::getUserPluginsDirectory()
 // ==========================================================================================================================
 
 
-InstallManifest::InstallManifest()
+InstallManifest::InstallManifest() : Thread("InstallManifest")
 {
     File setupDirectory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
     XmlDocument xml(setupDirectory.getChildFile("install_list.xml"));
@@ -118,6 +120,7 @@ InstallManifest::InstallManifest()
 
 InstallManifest::~InstallManifest()
 {
+    stopThread(5000); // 5sec should be plenty of time to cleanly end the thread
 }
 
 std::vector<String> InstallManifest::getInvalidSources()
@@ -131,8 +134,15 @@ std::vector<String> InstallManifest::getInvalidSources()
     return paths;
 }
 
-void InstallManifest::doInstall()
+void InstallManifest::doInstall(std::function<void()> callbackWhenComplete)
 {
+    callbackWhenInstallComplete = callbackWhenComplete;
+    startThread();
+}
+
+void InstallManifest::run()
+{
+    auto start = std::chrono::high_resolution_clock::now();
     installLog.clear();
     installErrors.clear();
     for (auto const& item : installItems) {
@@ -166,6 +176,21 @@ void InstallManifest::doInstall()
                 }
             }
         }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // This will probably complete very quickly, barely showing the processing screen.
+    // To instill confidence in the user that the process has actually done something,
+    // we will delay to ensure at least 3 seconds have elapsed before we run the callback.
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    if (elapsed < 3000) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000 - elapsed));
+    }
+
+    if (callbackWhenInstallComplete) {
+        MessageManager::callAsync([this]() {
+            callbackWhenInstallComplete();
+        });
     }
 }
 

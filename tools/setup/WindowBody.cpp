@@ -102,8 +102,7 @@ void WindowBody::phaseInstallProcessStart()
     removeAllChildren();
     cProcessing.configureForInstallPhase();
     addAndMakeVisible(cProcessing);
-    installManifest.doInstall();
-    phaseInstallProcessFinished();
+    installManifest.doInstall([this]() { phaseInstallProcessFinished(); });
 }
 
 void WindowBody::phaseInstallProcessFinished()
