@@ -33,12 +33,15 @@ private:
 
     void phaseSourcesCheck();
     void phaseInstallCleanupSearch();
-    void phaseInstallCleanupProcess();
+    void phaseInstallCleanupProcessStart();
+    void phaseInstallCleanupProcessFinished();
     void phaseInstallLocations();
-    void phaseInstallProcess();
+    void phaseInstallProcessStart();
+    void phaseInstallProcessFinished();
     void phaseUninstallConfirm();
     void phaseUninstallSearch();
-    void phaseUninstallProcess();
+    void phaseUninstallProcessStart();
+    void phaseUninstallProcessFinished();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowBody)
 };

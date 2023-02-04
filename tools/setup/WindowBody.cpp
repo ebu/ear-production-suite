@@ -58,19 +58,24 @@ void WindowBody::phaseInstallCleanupSearch()
     }
     else {
         cExistingSearch.getSkipButton()->onClick = [this]() { phaseInstallLocations(); };
-        cExistingSearch.getRemoveButton()->onClick = [this]() { phaseInstallCleanupProcess(); };
+        cExistingSearch.getRemoveButton()->onClick = [this]() { phaseInstallCleanupProcessStart(); };
         cExistingSearch.configureForInstallPhase();
         cExistingSearch.setLog(foundFiles);
         addAndMakeVisible(cExistingSearch);
     }
 }
 
-void WindowBody::phaseInstallCleanupProcess()
+void WindowBody::phaseInstallCleanupProcessStart()
 {
     removeAllChildren();
     cProcessing.configureForInstallCleanUpPhase();
     addAndMakeVisible(cProcessing);
     uninstallManifest.doUninstall();
+    phaseInstallCleanupProcessFinished();
+}
+
+void WindowBody::phaseInstallCleanupProcessFinished()
+{
     auto errorLog = uninstallManifest.getUninstallErrors();
     if (errorLog.size() == 0) {
         phaseInstallLocations();
@@ -88,16 +93,21 @@ void WindowBody::phaseInstallLocations()
 {
     removeAllChildren();
     cInstallLocations.setLocations(Locations::getVst3Directory(), Locations::getUserPluginsDirectory());
-    cInstallLocations.getContinueButton()->onClick = [this]() { phaseInstallProcess(); };
+    cInstallLocations.getContinueButton()->onClick = [this]() { phaseInstallProcessStart(); };
     addAndMakeVisible(cInstallLocations);
 }
 
-void WindowBody::phaseInstallProcess()
+void WindowBody::phaseInstallProcessStart()
 {
     removeAllChildren();
     cProcessing.configureForInstallPhase();
     addAndMakeVisible(cProcessing);
     installManifest.doInstall();
+    phaseInstallProcessFinished();
+}
+
+void WindowBody::phaseInstallProcessFinished()
+{
     auto errorLog = installManifest.getInstallErrors();
     if (errorLog.size() == 0) {
         removeAllChildren();
@@ -137,16 +147,21 @@ void WindowBody::phaseUninstallSearch()
     cExistingSearch.configureForUninstallPhase();
     auto foundFiles = uninstallManifest.getFoundFiles();
     cExistingSearch.setLog(foundFiles);
-    cExistingSearch.getRemoveButton()->onClick = [this]() { phaseUninstallProcess(); };
+    cExistingSearch.getRemoveButton()->onClick = [this]() { phaseUninstallProcessStart(); };
     addAndMakeVisible(cExistingSearch);
 }
 
-void WindowBody::phaseUninstallProcess()
+void WindowBody::phaseUninstallProcessStart()
 {
     removeAllChildren();
     cProcessing.configureForUninstallPhase();
     addAndMakeVisible(cProcessing);
     uninstallManifest.doUninstall();
+    phaseUninstallProcessFinished();
+}
+
+void WindowBody::phaseUninstallProcessFinished()
+{
     auto errorLog = uninstallManifest.getUninstallErrors();
     if (errorLog.size() == 0) {
         removeAllChildren();
