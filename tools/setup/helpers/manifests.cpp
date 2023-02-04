@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <version/eps_version.h>
 
 namespace {
     juce::String getOsStr() {
@@ -73,6 +77,14 @@ namespace {
         else if (path.startsWith(winReaperProgramDirectorySymbol)) {
             path = path.replaceFirstOccurrenceOf(winReaperProgramDirectorySymbol, getWinReaperProgramDirectory().getFullPathName());
         }
+    }
+
+    std::string getFormattedTimestamp() {
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&in_time_t), "%d-%m-%y_%H-%M-%S");
+        return ss.str();
     }
 }
 
@@ -177,6 +189,7 @@ void InstallManifest::run()
             }
         }
     }
+    dumpLog();
     auto end = std::chrono::high_resolution_clock::now();
 
     // This will probably complete very quickly, barely showing the processing screen.
@@ -197,6 +210,29 @@ void InstallManifest::run()
 std::vector<String> InstallManifest::getInstallErrors()
 {
     return installErrors;
+}
+
+File InstallManifest::dumpLog()
+{
+    File logFile = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory()
+        .getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
+
+    FileOutputStream output(logFile);
+    if (output.openedOk())
+    {
+        if (eps::versionInfoAvailable()) {
+            output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+        }
+        else {
+            output.writeText("Version Information Unavailable\n", false, false, nullptr);
+        }
+        for (auto const& entry : installLog) {
+            output.writeText(entry + "\n", false, false, nullptr);
+        }
+        output.flush(); // (called explicitly to force an fsync on posix)
+    }
+
+    return logFile;
 }
 
 
@@ -273,6 +309,7 @@ void UninstallManifest::run()
             }
         }
     }
+    dumpLog();
     auto end = std::chrono::high_resolution_clock::now();
 
     // This will probably complete very quickly, barely showing the processing screen.
@@ -336,7 +373,6 @@ void UninstallManifest::sortDirectoriesDeepestFirst()
     std::sort(uninstallDirectories.begin(), uninstallDirectories.end(),
         [](const UninstallDirectory& a, const UninstallDirectory& b)
     {
-        auto sep = File::getSeparatorString();
         auto aPath = a.path;
         int aDepth = 0;
         while (!aPath.isRoot()) {
@@ -351,4 +387,27 @@ void UninstallManifest::sortDirectoriesDeepestFirst()
         }
         return aDepth > bDepth;
     });
+}
+
+File UninstallManifest::dumpLog()
+{
+    File logFile = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory()
+        .getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
+
+    FileOutputStream output(logFile);
+    if (output.openedOk())
+    {
+        if (eps::versionInfoAvailable()) {
+            output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+        }
+        else {
+            output.writeText("Version Information Unavailable\n", false, false, nullptr);
+        }
+        for (auto const& entry : uninstallLog) {
+            output.writeText(entry + "\n", false, false, nullptr);
+        }
+        output.flush(); // (called explicitly to force an fsync on posix)
+    }
+
+    return logFile;
 }

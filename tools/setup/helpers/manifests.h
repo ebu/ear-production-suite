@@ -35,6 +35,7 @@ public:
     std::vector<String> getInstallErrors();
 
 private:
+    File dumpLog();
     void run() override;
     std::function<void()> callbackWhenInstallComplete;
     std::vector<InstallItem> installItems;
@@ -55,7 +56,7 @@ private:
     void populateVectorsFromElement(juce::XmlElement* elm);
     std::optional<juce::File> pathFromElement(juce::XmlElement* elm);
     void sortDirectoriesDeepestFirst();
-
+    File dumpLog();
     void run() override;
     std::function<void()> callbackWhenUninstallComplete;
     std::vector<UninstallFile> uninstallFiles;
