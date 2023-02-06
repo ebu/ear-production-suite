@@ -37,7 +37,7 @@ ComponentExistingSearch::ComponentExistingSearch()
 
     log.setReadOnly(true);
     log.setScrollbarsShown(true);
-    log.setMultiLine(true);
+    log.setMultiLine(true, false);
     log.setColour(TextEditor::ColourIds::backgroundColourId, EarColours::Area06dp);
     log.setColour(TextEditor::ColourIds::textColourId, EarColours::Text);
     addAndMakeVisible(log);
