@@ -11,7 +11,7 @@ namespace {
     juce::String getOsStr() {
 #ifdef WIN32
         return "Windows";
-#elif APPLE
+#elif __APPLE__
         return "MacOS";
 #else
         throw std::runtime_error("Unsupported OS");
@@ -23,7 +23,7 @@ namespace {
         // C:\Program Files + \Common Files + \VST3
         return File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory)
             .getChildFile("Common Files").getChildFile("VST3");
-#elif APPLE
+#elif __APPLE__
         // ~/Library + /Audio + /Plug-Ins + /VST3
         return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("Audio").getChildFile("Plug-Ins").getChildFile("VST3");
@@ -37,7 +37,7 @@ namespace {
         // C:\Users\(username)\AppData\Roaming + \REAPER + \UserPlugins
         return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("REAPER").getChildFile("UserPlugins");
-#elif APPLE
+#elif __APPLE__
         // ~/Library + /Application Support + /REAPER + /UserPlugins
         return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("Application Support").getChildFile("REAPER").getChildFile("UserPlugins");
