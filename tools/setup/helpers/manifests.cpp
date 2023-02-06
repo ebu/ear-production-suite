@@ -343,10 +343,19 @@ void UninstallManifest::run()
         }
         else {
             uninstallLog.push_back("Deleting Directory: " + item.path.getFullPathName());
-            if (item.path.getNumberOfChildFiles(File::TypesOfFileToFind::findFilesAndDirectories) > 0) {
+            auto children = item.path.findChildFiles(File::TypesOfFileToFind::findFilesAndDirectories, false);
+            const juce::Array<juce::String> ignoreList{".DS_Store"};
+            int ignoreCount = 0;
+            for(auto const& child : children){
+                auto childName = child.getFileName();
+                if(ignoreList.contains(childName)){
+                    ignoreCount++;
+                }
+            }
+            if ((children.size() - ignoreCount) > 0) {
                 uninstallErrors.push_back("Delete Directory Failed - not empty:\n    " + item.path.getFullPathName());
                 uninstallLog.push_back("!!! Failed last action");
-            } else if(!item.path.deleteFile()) {
+            } else if(!item.path.deleteRecursively()) {
                 uninstallErrors.push_back("Delete Directory Failed:\n    " + item.path.getFullPathName());
                 uninstallLog.push_back("!!! Failed last action");
             }
