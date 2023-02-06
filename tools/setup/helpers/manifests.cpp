@@ -18,6 +18,43 @@ namespace {
 #endif
     }
 
+    juce::File getManifestsDirectory() {
+#ifdef WIN32
+        // Same as exe dir
+        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
+#elif __APPLE__
+        // "Resources" directory of bundles
+        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile)
+            .getChildFile("Contents").getChildFile("Resources");
+#else
+    throw std::runtime_error("Unsupported OS");
+#endif
+    }
+
+    juce::File getLogsDirectory() {
+#ifdef WIN32
+        // Same as exe dir
+        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
+#elif __APPLE__
+        // Same as dir containing bundle
+        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory();
+#else
+        throw std::runtime_error("Unsupported OS");
+#endif
+    }
+
+    juce::File getSetupDirectory() {
+#ifdef WIN32
+        // Same as exe dir
+        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
+#elif __APPLE__
+        // Same as dir containing bundle
+        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory();
+#else
+        throw std::runtime_error("Unsupported OS");
+#endif
+    }
+
     juce::File getVst3Directory() {
 #ifdef WIN32
         // C:\Program Files + \Common Files + \VST3
@@ -105,25 +142,27 @@ String Locations::getUserPluginsDirectory()
 
 InstallManifest::InstallManifest() : Thread("InstallManifest")
 {
-    File setupDirectory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
-    XmlDocument xml(setupDirectory.getChildFile("install_list.xml"));
-    auto installList = xml.getDocumentElementIfTagMatches("InstallList");
-
-    for (auto* installItem : installList->getChildWithTagNameIterator("InstallItem")) {
-        auto source = installItem->getStringAttribute("Source");
-        if (source.isNotEmpty()) {
-            auto sourcePath = setupDirectory.getChildFile(source);
-
-            for (auto* osSpecificItem : installItem->getChildWithTagNameIterator(getOsStr())) {
-                auto destination = osSpecificItem->getStringAttribute("Destination");
-                if (destination.isNotEmpty()) {
-                    replaceDirectorySymbols(destination);
-                   
-                    installItems.push_back({
-                        sourcePath,
-                        File(destination),
-                        sourcePath.exists()
+    File manifest = getManifestsDirectory().getChildFile("install_list.xml");
+    if(manifest.existsAsFile()){
+        XmlDocument xml(manifest);
+        auto installList = xml.getDocumentElementIfTagMatches("InstallList");
+        
+        for (auto* installItem : installList->getChildWithTagNameIterator("InstallItem")) {
+            auto source = installItem->getStringAttribute("Source");
+            if (source.isNotEmpty()) {
+                auto sourcePath = getSetupDirectory().getChildFile(source);
+                
+                for (auto* osSpecificItem : installItem->getChildWithTagNameIterator(getOsStr())) {
+                    auto destination = osSpecificItem->getStringAttribute("Destination");
+                    if (destination.isNotEmpty()) {
+                        replaceDirectorySymbols(destination);
+                        
+                        installItems.push_back({
+                            sourcePath,
+                            File(destination),
+                            sourcePath.exists()
                         });
+                    }
                 }
             }
         }
@@ -214,8 +253,7 @@ std::vector<String> InstallManifest::getInstallErrors()
 
 File InstallManifest::dumpLog()
 {
-    File logFile = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-        .getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
+    File logFile = getLogsDirectory().getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
 
     FileOutputStream output(logFile);
     if (output.openedOk())
@@ -241,13 +279,15 @@ File InstallManifest::dumpLog()
 
 UninstallManifest::UninstallManifest() : Thread("UninstallManifest")
 {
-    File setupDirectory = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
-    XmlDocument xml(setupDirectory.getChildFile("uninstall_list.xml"));
-    auto uninstallList = xml.getDocumentElementIfTagMatches("UninstallList");
-
-    populateVectorsFromElement(uninstallList.get());
-    for (auto* osSpecificSection : uninstallList->getChildWithTagNameIterator(getOsStr() + "Only")) {
-        populateVectorsFromElement(osSpecificSection);
+    File manifest = getManifestsDirectory().getChildFile("uninstall_list.xml");
+    if(manifest.existsAsFile()){
+        XmlDocument xml(manifest);
+        auto uninstallList = xml.getDocumentElementIfTagMatches("UninstallList");
+        
+        populateVectorsFromElement(uninstallList.get());
+        for (auto* osSpecificSection : uninstallList->getChildWithTagNameIterator(getOsStr() + "Only")) {
+            populateVectorsFromElement(osSpecificSection);
+        }
     }
 }
 
@@ -391,8 +431,7 @@ void UninstallManifest::sortDirectoriesDeepestFirst()
 
 File UninstallManifest::dumpLog()
 {
-    File logFile = File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-        .getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
+    File logFile = getLogsDirectory().getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
 
     FileOutputStream output(logFile);
     if (output.openedOk())
