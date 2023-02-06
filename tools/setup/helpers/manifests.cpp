@@ -31,18 +31,6 @@ namespace {
 #endif
     }
 
-    juce::File getLogsDirectory() {
-#ifdef WIN32
-        // Same as exe dir
-        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
-#elif __APPLE__
-        // Same as dir containing bundle
-        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory();
-#else
-        throw std::runtime_error("Unsupported OS");
-#endif
-    }
-
     juce::File getSetupDirectory() {
 #ifdef WIN32
         // Same as exe dir
@@ -98,6 +86,10 @@ namespace {
 #else
         throw std::runtime_error("Unsupported OS");
 #endif
+    }
+
+    juce::File getLogsDirectory() {
+        return ::getUserPluginsDirectory().getChildFile("EAR Production Suite logs");
     }
 
     void replaceDirectorySymbols(juce::String& path) {
@@ -253,21 +245,32 @@ std::vector<String> InstallManifest::getInstallErrors()
 
 File InstallManifest::dumpLog()
 {
-    File logFile = getLogsDirectory().getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
-
-    FileOutputStream output(logFile);
-    if (output.openedOk())
-    {
-        if (eps::versionInfoAvailable()) {
-            output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+    File logDir = getLogsDirectory();
+    File logFile = logDir.getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
+    
+    if(!logDir.exists()) {
+        auto res = logDir.createDirectory();
+        if (res.failed()) {
+            installErrors.push_back("Dump Log Failed - " + res.getErrorMessage() + ":\n    " + logFile.getFullPathName());
         }
-        else {
-            output.writeText("Version Information Unavailable\n", false, false, nullptr);
+    }
+    if(logDir.exists() && logDir.isDirectory()){
+        FileOutputStream output(logFile);
+        if (output.openedOk())
+        {
+            if (eps::versionInfoAvailable()) {
+                output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+            }
+            else {
+                output.writeText("Version Information Unavailable\n", false, false, nullptr);
+            }
+            for (auto const& entry : installLog) {
+                output.writeText(entry + "\n", false, false, nullptr);
+            }
+            output.flush(); // (called explicitly to force an fsync on posix)
+        } else {
+            installErrors.push_back("Dump Log Failed - file open fail:\n    " + logFile.getFullPathName());
         }
-        for (auto const& entry : installLog) {
-            output.writeText(entry + "\n", false, false, nullptr);
-        }
-        output.flush(); // (called explicitly to force an fsync on posix)
     }
 
     return logFile;
@@ -431,21 +434,32 @@ void UninstallManifest::sortDirectoriesDeepestFirst()
 
 File UninstallManifest::dumpLog()
 {
-    File logFile = getLogsDirectory().getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
-
-    FileOutputStream output(logFile);
-    if (output.openedOk())
-    {
-        if (eps::versionInfoAvailable()) {
-            output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+    File logDir = getLogsDirectory();
+    File logFile = logDir.getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
+    
+    if(!logDir.exists()) {
+        auto res = logDir.createDirectory();
+        if (res.failed()) {
+            uninstallErrors.push_back("Dump Log Failed - " + res.getErrorMessage() + ":\n    " + logFile.getFullPathName());
         }
-        else {
-            output.writeText("Version Information Unavailable\n", false, false, nullptr);
+    }
+    if(logDir.exists() && logDir.isDirectory()){
+        FileOutputStream output(logFile);
+        if (output.openedOk())
+        {
+            if (eps::versionInfoAvailable()) {
+                output.writeText("Version: " + eps::currentVersion() + "\n", false, false, nullptr);
+            }
+            else {
+                output.writeText("Version Information Unavailable\n", false, false, nullptr);
+            }
+            for (auto const& entry : uninstallLog) {
+                output.writeText(entry + "\n", false, false, nullptr);
+            }
+            output.flush(); // (called explicitly to force an fsync on posix)
+        } else {
+            uninstallErrors.push_back("Dump Log Failed - file open fail:\n    " + logFile.getFullPathName());
         }
-        for (auto const& entry : uninstallLog) {
-            output.writeText(entry + "\n", false, false, nullptr);
-        }
-        output.flush(); // (called explicitly to force an fsync on posix)
     }
 
     return logFile;
