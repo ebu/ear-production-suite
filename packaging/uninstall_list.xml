@@ -50,7 +50,6 @@
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template"/>
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates/EPS two objects, two stereo beds plus HOA template"/>
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates"/>
-  <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates"/>
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras"/>
   
   <WindowsOnly>
