@@ -20,10 +20,10 @@ namespace {
 
     juce::File getManifestsDirectory() {
 #ifdef WIN32
-        // Use copies from InstallFiles subdir in Setup dir
-        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile("InstallFiles");
+        // For win, these are in SetupFiles subdir in Setup dir
+        return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile("SetupFiles");
 #elif __APPLE__
-        // "Resources" directory of bundles
+        // For mac, these are in "Resources" directory of Setup bundle
         return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile)
             .getChildFile("Contents").getChildFile("Resources");
 #else

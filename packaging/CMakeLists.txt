@@ -43,12 +43,13 @@ install(FILES
         .)
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	install(FILES
-			install_list.xml
-			uninstall_list.xml
-			DESTINATION
-			./InstallFiles)
-
+	if(WIN32)
+		install(FILES
+				install_list.xml
+				uninstall_list.xml
+				DESTINATION
+				./SetupFiles)
+	endif()
 	install(TARGETS
 			setup
 			DESTINATION
