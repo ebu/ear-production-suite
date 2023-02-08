@@ -1,3 +1,19 @@
+Version 1.0.0
+
+* Setup Application included
+* Support for ADM "Importance" parameter
+* Fix bug in render dialog when using language packs [#215](https://github.com/ebu/ear-production-suite/issues/215)
+* Experimental Linux build [#222](https://github.com/ebu/ear-production-suite/pull/222)
+* Silence unused monitoring output channels (prevents pass-through of object audio) [#224](https://github.com/ebu/ear-production-suite/issues/224)
+* Fix alignment of monitoring meters [#206](https://github.com/ebu/ear-production-suite/issues/206)
+* Fix blank audioProgrammeLanguage on export [#213](https://github.com/ebu/ear-production-suite/issues/213)
+* Export uses 2076-2 structures (omitting AudioTrackFormat and AudioStreamFormat)
+* MacOS build fixes [#220](https://github.com/ebu/ear-production-suite/issues/220) [#221](https://github.com/ebu/ear-production-suite/issues/221)
+* Include additional project templates
+* Fix bus config when Input plug-ins on wide track [#228](https://github.com/ebu/ear-production-suite/issues/228)
+* Fix Size param not updating [#229](https://github.com/ebu/ear-production-suite/issues/229)
+* Fix plugin crash on other DAWs [#232](https://github.com/ebu/ear-production-suite/issues/232)
+
 Version 0.8.0
 
 * Support custom object names rather than using track names [#214](https://github.com/ebu/ear-production-suite/pull/214)

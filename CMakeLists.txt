@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(EPS_VERSION_BASE 0.8.0) # This is used as fallback if getting from git fails. Must be only numeric.
+set(EPS_VERSION_BASE 1.0.0) # This is used as fallback if getting from git fails. Must be only numeric.
 # NOTE: also update hard-coded version number in
 # - vcpkg.json
 
