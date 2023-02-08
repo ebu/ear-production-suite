@@ -64,10 +64,10 @@ if(WIN32)
         WIN32_EXECUTABLE TRUE)
 	target_link_options(setup PRIVATE "/MANIFESTUAC:level='requireAdministrator'")
 	add_custom_command(TARGET setup POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/install_list.xml $<TARGET_FILE_DIR:setup>/install_list.xml
+	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/install_list.xml $<TARGET_FILE_DIR:setup>/InstallFiles/install_list.xml
 	)
 	add_custom_command(TARGET setup POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/uninstall_list.xml $<TARGET_FILE_DIR:setup>/uninstall_list.xml
+	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/uninstall_list.xml $<TARGET_FILE_DIR:setup>/InstallFiles/uninstall_list.xml
 	)
 endif()
 
