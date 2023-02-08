@@ -1,26 +1,27 @@
-# EAR Production Suite (1.0.0 release)
+# EAR Production Suite (v1.0.0 release)
 
-The latest builds are available under [GitHub Releases](https://github.com/ebu/ear-production-suite/releases) or from the [EAR Production Suite website.](https://ear-production-suite.ebu.io/)
+The latest builds of the EAR Production Suite are available under [GitHub Releases](https://github.com/ebu/ear-production-suite/releases) or from the [EAR Production Suite website.](https://ear-production-suite.ebu.io/)
 Please download the files from there. The EAR Production Suite (EPS) download package comprises of multiple components:
 
-- EPS VST® Plugins
+- EPS VST® Plug-ins
 - EPS REAPER Extension
-- ADM Export Source VST® Plugin
+- ADM Export Source VST® Plug-in
 - REAPER project templates
-- Project Upgrade Utility for REAPER projects created with EPS v0.6.0 beta
+- Project Upgrade Utility (for REAPER projects created with EPS v0.6.0 beta)
 - Setup application
 
 ## Release notes
-1.0.0 is the first public non-beta release of the EAR Production Suite.
+v1.0.0 is the first public non-beta release of the EAR Production Suite.
+
 This release includes a Setup application for ease of installation/uninstallation and an experimental Linux build. It also includes various bug fixes. Please see detailed changelog below.
 
 ### Known issues
-Please note that the EPS exports ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
+The EPS exports ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
 It is very tolerant in the ADM it will import meaning it can import files that conform to other profiles.
 ADM authored using the [Dolby Atmos ADM](https://professionalsupport.dolby.com/s/article/Dolby-Atmos-ADM-Profile-specification?language=en_US) profile can be imported, but coordinates and directspeakers pack formats are converted on import and exported files will instead conform to the Production Profile.
-To import Production Profile ADM in to third-party tools which do not support this profile, the ADM must be converted. BBC R&D along with the EBU have developed the [EBU ADM Toolkit]() to assist with this task.  
+To import Production Profile ADM in to third-party tools which do not support this profile, the ADM must be converted. BBC R&D along with the EBU have developed the [EBU ADM Toolkit](https://github.com/ebu/ebu-adm-toolbox) to assist with this task.  
 
-To fix a problem using the plugins with some hosts, the ID for all plugins changed with the 0.7.0 release. This change will break any REAPER projects created using the 0.6.0 plugins. 
+To fix a problem using the plug-ins with some hosts, the ID for all plug-ins changed with the 0.7.0 release. This change will break any REAPER projects created using the 0.6.0 plug-ins. 
 Please use the Project Upgrade Utility to convert these. There is a command-line tool available in the `Tools` directory of the download package, and a GUI tool available either in the download package or via the `Extensions > Browse tools and templates...` menu option in REAPER once the EPS is installed.
 
 For an up-to-date list of known issues, please refer to [GitHub](https://github.com/ebu/ear-production-suite/issues)
@@ -40,7 +41,7 @@ The EPS is designed for REAPER 64-bit, on a 64-bit OS (macOS, Windows or Linux (
 
 For MacOS or Windows, the easiest way to install the software is to use the included Setup application.
 
-1. Install REAPER from https://www.reaper.fm/download.php if you don't already have it.
+1. Install [REAPER](https://www.reaper.fm/download.php) if you don't already have it.
 2. Extract the release package (Windows only - Mac will install directly from the DMG).
 3. Ensure REAPER is not running.
 4. Run the `Setup EAR Production Suite` application in the package and follow on-screen instructions.
@@ -49,65 +50,65 @@ For MacOS or Windows, the easiest way to install the software is to use the incl
 
 You may install the EPS manually if you prefer (note that this is the only option for Linux currently).
 
-1. Install REAPER from https://www.reaper.fm/download.php if you don't already have it.
+1. Install [REAPER](https://www.reaper.fm/download.php) if you don't already have it.
 2. Ensure REAPER is not running.
-3. From the release package, copy the **VST plugins** from the `VST` directory of the package into your common VST folder. 
+3. From the release package, copy the **VST plug-ins** from the `VST` directory of the package into your common VST folder. 
     - Windows: `C:\Program Files\Common Files\VST3\`
     - macOS: `~/Library/Audio/Plug-Ins/VST3/`
 	- Linux: `~/.vst3/`
-4. From the release package, copy the REAPER ADM **Extension** into the REAPER UserPlugins folder. Ensure you include the ADMPresets subdirectory.
-    - Windows: `C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins\`
-          Note: If you have a previous version of the REAPER Extension installed to `C:\Program Files\REAPER (x64)\Plugins\reaper_adm.dll`, then this should be deleted on installation of the latest version.
-    - macOS: `~/Library/Application Support/REAPER/UserPlugins/`
+4. From the release package, copy the REAPER ADM **Extension** into the REAPER UserPlug-ins folder. Ensure you include the ADMPresets subdirectory.
+    - Windows: `C:\Users\(username)\AppData\Roaming\REAPER\UserPlug-ins\`
+          Note: If you have a previous version of the REAPER Extension installed to `C:\Program Files\REAPER (x64)\Plug-ins\reaper_adm.dll`, then this should be deleted on installation of the latest version.
+    - macOS: `~/Library/Application Support/REAPER/UserPlug-ins/`
 	- Linux: `~/.config/REAPER/`
-5. (Optional) From the release package, copy the **Tools** and **Templates** directories of the package into an `EAR Production Suite extras` subfolder of your REAPER UserPlugins folder. This is the folder used by the "Browse tools and templates..." function of the EPS.
+5. (Optional) From the release package, copy the `Tools` and `Templates` directories of the package into an `EAR Production Suite extras` subfolder of your REAPER UserPlug-ins folder. This is the folder used by the "Browse tools and templates..." function of the EPS.
     - Windows: `C:\Users\(username)\AppData\Roaming\REAPER\EAR Production Suite extras\`
-    - macOS: `~/Library/Application Support/REAPER/UserPlugins/EAR Production Suite extras/`
+    - macOS: `~/Library/Application Support/REAPER/UserPlug-ins/EAR Production Suite extras/`
 	- Linux: `~/.config/REAPER/EAR Production Suite extras/`
 
-### Confirming Installation and Troubleshooting
+## Confirming Installation and Troubleshooting
 
-#### REAPER Extension
+### REAPER Extension
 
-Open REAPER and select "Extensions" from the menu bar. Under this menu should be a new option labelled "EAR Production Suite". This confirms that the extension was installed and loaded successfully. 
-Check the version number of the extension by going to "Extensions > EAR Production Suite > About EAR Production Suite".
+Open REAPER and select `Extensions` from the menu bar. Under this menu should be a new option labelled `EAR Production Suite`. This confirms that the extension was installed and loaded successfully. 
+Check the version number of the extension by going to `Extensions > EAR Production Suite > About EAR Production Suite`.
 
 If the extension is not present and you are using Windows, it might be necessary to download and install the [Visual C++ redistributable](https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads) ("vc_redist.x64.exe") from Microsoft.
 
-#### VST Plug-ins
+### VST Plug-ins
 
-Open REAPER and select a blank FX slot on a track to open the plugin selection dialog. The EAR Production Suite plugins should now be listed in the dialog. 
-For all plugins, the version number is stated in the bottom right-hand corner of the GUIs.
+Open REAPER and select a blank FX slot on a track to open the plug-in selection dialog. The EAR Production Suite plug-ins should now be listed in the dialog. 
+For all plug-ins, the version number is stated in the bottom right-hand corner of the GUIs.
 
-If any plugins are missing, you can force REAPER to update its plugin lists by going to "Options > Preferences > Plug-Ins > VST" and clicking "Rescan".
+If any plug-ins are missing, you can force REAPER to update its plug-in lists by going to `Options > Preferences > Plug-Ins > VST` and clicking `Rescan`.
 
 ## How to use (short version)
 ### Import ADM Files
-1. Select in the menu **File -> Create Project from ADM file -> Create from ADM using EAR**
-2. Wait while all ADM elements are being created as tracks and automation curves along with metadata input plugins for each object or channel bed. There will be also tracks and plugins created for the Scene and the Monitoring.
+1. From the REAPER menu bar, select `File > Create Project from ADM file > Create from ADM using EAR` and choose the file to import.
+2. Wait while all ADM elements are being created as tracks and automation curves along with metadata input plug-ins for each object or channel bed. There will be also tracks created with the "EAR Scene" plug-in and with a monitoring plug-in.
 3. Enjoy :)
 
 ### Create from scratch
-1. Add an "EAR Object" Plugin for each audio object track or an "EAR DirectSpeakers" Plugin for a channel bed. Disable Master Send on the track. Make sure to increase the track mapping parameter value +1 for each new audio object input plugin (or + the number of your channel bed). So the first audio object track in the REAPER project should be one, the next two, ...
-2. Create a new track for the "EAR Scene" plugin and add it there. Change the bus size to 64 and disable Master Send on the track.
+1. Add an "EAR Object" Plug-in for each audio object track or an "EAR DirectSpeakers" Plug-in for a channel bed. Disable Master Send on the track. Make sure to increase the track mapping parameter value +1 for each new audio object input plug-in (or + the number of your channel bed). So the first audio object track in the REAPER project should be one, the next two, ...
+2. Create a new track for the "EAR Scene" plug-in and add it there. Change the bus size to 64 and disable Master Send on the track.
 3. Connect all audio objects tracks to the "EAR Scene" track as "Receives" in the I/O option. Make sure to choose the correct bus size (i.e. Mono).
-4. Create a new track for the EAR Monitoring Plugin and add it there. Change the bus size to 64.
-5. Connect the Scene track to the Monitoring track as "Receives" in the I/O option.
+4. Create a new track for the EAR Monitoring Plug-in and add it there. Change the bus size to 64.
+5. Connect the Scene track to the Monitoring track as "Receives" in the I/O options.
 6. Add the hardware output for the Monitoring track in the I/O options or allow it to send via Master.
-7. Enter and author your ADM parameters in Object, DirectSpeakers and Scene Plugins. **Please note that the Scene Plugin is steering what you hear. So any items which are not added to a programme there, will not be rendered!**
+7. Enter and author your ADM parameters in Object, DirectSpeakers and Scene Plug-ins. **Please note that the Scene Plug-in is steering what you hear. So any items which are not added to a programme there, will not be rendered!**
 8. Enjoy :)
 
 ### Start with project template
 We have provided a project template and several example projects in the download package. To begin with the simple template;
 
 1. Open the templates in REAPER
-2. You will find a number of tracks with plugins for further usage
+2. You will find a number of tracks with plug-ins for further usage
     - Two object tracks
     - One channel-based track
     - One EAR Scene bus
     - Two EAR Monitoring buses, one for Stereo monitoring and one for 5.1
-3. The Scene Plugin has already two audio programmes, one called "English" and one "German"
-4. All metadata connections between the plugins and I/O routings are set. You can start by importing your audio files into the tracks.
+3. The Scene Plug-in has already two audio programmes, one called "English" and one "German"
+4. All metadata connections between the plug-ins and I/O routings are set. You can start by importing your audio files into the tracks.
 5. Switch between the different renderings by exclusive-soloing (CMD+Alt+Click (MacOS) / Ctrl+Alt+Click (Win)) the monitoring tracks.
 
 The other projects provide examples of a broader range of use cases and some test audio so you can try the example projects straight away.
@@ -116,11 +117,11 @@ The other projects provide examples of a broader range of use cases and some tes
 Have a look at this [video](https://youtu.be/u7P5mEFY76k) where these points are explained:
 
 - [Introduction](https://youtu.be/u7P5mEFY76k)
-- [Tutorial 1](https://youtu.be/u7P5mEFY76k?t=162): Understanding the EAR Production Suite Plugins
-- [Tutorial 2](https://youtu.be/u7P5mEFY76k?t=462): Creating an ADM Project from scratch with the EAR Production Suite Plugins
-- [Tutorial 3](https://youtu.be/u7P5mEFY76k?t=824): Using an Existing ADM File with the EAR Production Suite Plugins
-- [Tutorial 4](https://youtu.be/u7P5mEFY76k?t=1077): Using Third-Party Spatial Audio Plugins with the ADM Export Source Plugin
-- [Tutorial 5](https://youtu.be/u7P5mEFY76k?t=1418): Using Non-Object Audio with the ADM Export Source Plugin
+- [Tutorial 1](https://youtu.be/u7P5mEFY76k?t=162): Understanding the EAR Production Suite Plug-ins
+- [Tutorial 2](https://youtu.be/u7P5mEFY76k?t=462): Creating an ADM Project from scratch with the EAR Production Suite Plug-ins
+- [Tutorial 3](https://youtu.be/u7P5mEFY76k?t=824): Using an Existing ADM File with the EAR Production Suite Plug-ins
+- [Tutorial 4](https://youtu.be/u7P5mEFY76k?t=1077): Using Third-Party Spatial Audio Plug-ins with the ADM Export Source Plug-in
+- [Tutorial 5](https://youtu.be/u7P5mEFY76k?t=1418): Using Non-Object Audio with the ADM Export Source Plug-in
 
 [Watch the video](https://irt-a.akamaihd.net/EAR-Production-Suite/Intro_Beta-release.mp4)
 
@@ -151,7 +152,7 @@ The [nvsonic Head Tracker](https://github.com/trsonic/nvsonic-head-tracker) prov
 - Only currently supporting DirectSpeakers pack formats that are specified in the ADM common definitions.
 - No support for "nested" Objects - on import, ADM Programmes are currently flattened to a single tier of Objects.
 - Only one instance of EAR Scene should run on a machine at any time.
-- Re-opening and exporting from a saved project using the FB360 plugins may produce incorrect ADM. This is due to a bug in the FB360 plugins which has been reported. 
+- Re-opening and exporting from a saved project using the FB360 plug-ins may produce incorrect ADM. This is due to a bug in the FB360 plug-ins which has been reported. 
 - ...
 
 ## Issues
