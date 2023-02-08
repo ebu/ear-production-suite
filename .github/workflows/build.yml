@@ -242,6 +242,7 @@ jobs:
           LIBS=`find $intel_dir -name '*.dylib'`
           # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
           PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
+          APPS=`find $intel_dir -path '*app/Contents/MacOS/*' ! -name '*.*'`
           
           IFS=$'\n'
           for lib in $LIBS; do
@@ -252,6 +253,11 @@ jobs:
           for plugin in $PLUGINS; do
             echo "Making UB Plugin from: $plugin"
             make_ub "$plugin"
+          done
+          
+          for app in $APPS; do
+            echo "Making UB App from: $app"
+            make_ub "$app"
           done
           
       - name: 'dir listing'
