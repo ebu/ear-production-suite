@@ -243,8 +243,16 @@ jobs:
           # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
           PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
           APPS=`find $intel_dir -path '*app/Contents/MacOS/*' ! -name '*.*'`
+          # don't forget project upgrade command line util
+          EXES=`find $intel_dir -name 'project_upgrade'`
           
           IFS=$'\n'
+          
+          for exe in $EXES; do
+            echo "Making UB Exectuable from: $exe"
+            make_ub "$exe"
+          done
+
           for lib in $LIBS; do
             echo "Making UB Library from: $lib"
             make_ub "$lib"
