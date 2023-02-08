@@ -34,7 +34,7 @@ add_custom_target(generate-package-docs
 install(DIRECTORY 
 		Templates 
 		DESTINATION
-		./InstallFiles)
+		.)
 
 install(FILES
         README.pdf
@@ -57,7 +57,7 @@ install(TARGETS
         project_upgrade
         project_upgrade_gui
         DESTINATION
-        ./InstallFiles/tools)
+        ./Tools)
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_NAME "EAR Production Suite")
