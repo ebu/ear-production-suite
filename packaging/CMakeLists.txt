@@ -42,16 +42,18 @@ install(FILES
         DESTINATION
         .)
 
-install(FILES
-        install_list.xml
-        uninstall_list.xml
-        DESTINATION
-        ./InstallFiles)
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	install(FILES
+			install_list.xml
+			uninstall_list.xml
+			DESTINATION
+			./InstallFiles)
 
-install(TARGETS
-        setup
-        DESTINATION
-        .)
+	install(TARGETS
+			setup
+			DESTINATION
+			.)
+endif()
 
 install(TARGETS
         project_upgrade
