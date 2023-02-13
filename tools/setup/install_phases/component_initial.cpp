@@ -15,7 +15,9 @@ ComponentInitial::ComponentInitial()
 
     instructionLabel.setFont(EarFontsSingleton::instance().Label);
     instructionLabel.setColour(Label::textColourId, EarColours::Label);
-    instructionLabel.setText("Welcome to the EAR Production Suite Setup Application.\nPlease select an action:",
+    instructionLabel.setText("Welcome to the EAR Production Suite Setup Application.\n\n"
+        "Please ensure REAPER is not running before continuing.\n\n\n"
+        "Select an operation:",
         juce::NotificationType::dontSendNotification);
     instructionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(instructionLabel);
