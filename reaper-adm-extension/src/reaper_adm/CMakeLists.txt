@@ -67,6 +67,7 @@ set(EXTENSION_SOURCES
 	reaperguid.cpp
 	reaperhost.cpp
 	track.cpp
+	update_check.cpp
 	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
@@ -143,6 +144,7 @@ set(EXTENSION_HEADERS
 	reaper_plugin_functions.h
 	resource.h
 	track.h
+	update_check.h
 	win_mem_debug.h
 	win_nonblock_msg.h
 	coordinate_conversion/coord_conv.hpp
@@ -191,6 +193,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:nlohmann_json::nlohmann_json,INTERFACE_INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR}
     )
 
@@ -203,8 +206,9 @@ target_link_libraries(reaper_adm_dependencies
       Boost::filesystem
       nng::nng
       ear-version
+	  nlohmann_json::nlohmann_json
     )
-
+	
 add_dependencies(reaper_adm_dependencies reaper_adm_object)
 
 set_target_properties(reaper_adm

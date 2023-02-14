@@ -14,6 +14,18 @@ std::string const& eps::currentVersion() {
     return currentVersion;
 }
 
+int const eps::versionMajor() {
+	return @VERSION_MAJOR@;
+}
+
+int const eps::versionMinor() {
+	return @VERSION_MINOR@;
+}
+
+int const eps::versionRevision() {
+	return @VERSION_PATCH@;
+}
+
 bool const eps::versionInfoAvailable() {
     return @VERSION_INFO_AVAILABLE@;
 }
