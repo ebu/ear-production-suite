@@ -57,6 +57,11 @@ add_subdirectory(libbw64)
 add_library(IRT::bw64 INTERFACE IMPORTED GLOBAL)
 set_target_properties(IRT::bw64 PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libbw64/include>)
+		
+#json
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
+add_subdirectory(json)
 
 #googletest
 if(isTesting)
