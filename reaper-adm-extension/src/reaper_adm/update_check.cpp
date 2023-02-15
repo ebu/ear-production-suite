@@ -15,12 +15,22 @@ using json = nlohmann::json;
 #include <curl/curl.h>
 #endif
 
-UpdateChecker::UpdateChecker()
+#ifdef WIN32
+#include "win_nonblock_msg.h"
+#endif
+
+UpdateChecker::UpdateChecker(std::shared_ptr<admplug::ReaperAPI> reaperApi)
 {
+    assert(reaperApi);
+    api = reaperApi;
 }
 
 UpdateChecker::~UpdateChecker()
 {
+    if (updateCheckThread) {
+        // Wait for current instance to complete
+        updateCheckThread->join();
+    }
 }
 
 bool UpdateChecker::autoCheckEnabled()
@@ -30,7 +40,16 @@ bool UpdateChecker::autoCheckEnabled()
 
 void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
 {
-    // TODO: We should probably do this in a thread to prevent holding up load of REAPER
+    if (updateCheckThread) {
+        // Wait for current instance to complete
+        updateCheckThread->join();
+    }
+    updateCheckThread.reset();
+    updateCheckThread = std::make_unique<std::thread>([this, alwaysShowResult, failSilently] { this->doUpdateCheckTask(alwaysShowResult, failSilently); });
+}
+
+void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
+{
     std::string body;
     auto res = getHTTPResponseBody(versionJsonUrl, body);
     json j;
@@ -62,7 +81,7 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
         }
         return;
     }
-    
+
     int versionMajor = j["version_major"].get<int>();
     int versionMinor = j["version_minor"].get<int>();
     int versionRevision = j["version_revision"].get<int>();
@@ -83,16 +102,16 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
     }
 
     if (newAvailable) {
+        // TODO: if(we haven't mentioned this version before)
         std::string versionText;
-        if (j.find("version") != j.end() && j["version_major"].is_string()) {
-            versionText = j["version_major"].get<std::string>();
+        if (j.find("version") != j.end() && j["version"].is_string()) {
+            versionText = j["version"].get<std::string>();
         }
         displayUpdateAvailable(versionText);
     }
     else if (alwaysShowResult) {
         displayUpdateUnavailable();
     }
-
 }
 
 UpdateChecker::HTTPResult UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody)
@@ -150,7 +169,6 @@ UpdateChecker::HTTPResult UpdateChecker::getHTTPResponseBody(const std::string& 
 
 void UpdateChecker::displayHTTPError(HTTPResult res)
 {
-    // TODO
     switch (res) {
     case NO_INTERNET:
         //Error: Failed to open internet connection.
@@ -186,14 +204,13 @@ void UpdateChecker::displayJSONVariableError()
 
 void UpdateChecker::displayError(const std::string& errorText)
 {
-    // TODO
     std::string text{ "An error occurred whilst checking for updates:\n\n" };
     text += errorText;
+    displayMessageBox(messageBoxTitles, text, MB_ICONEXCLAMATION);
 }
 
 void UpdateChecker::displayUpdateAvailable(const std::string& versionText)
 {
-    // TODO
     std::string text;
     if (versionText.empty()) {
         text = "A new version of the EAR Production Suite is now available.";
@@ -203,10 +220,20 @@ void UpdateChecker::displayUpdateAvailable(const std::string& versionText)
     }
     text += "\n\nDownload from https://ear-production-suite.ebu.io/";
     text += "\n\nNo further notifications will appear for this version. You can disable all future notifications through the Extensions menu.";
+    displayMessageBox(messageBoxTitles, text, MB_ICONINFORMATION);
 }
 
 void UpdateChecker::displayUpdateUnavailable()
 {
-    // TODO
-    std::string text{ "No updates are currently available." };
+    displayMessageBox(messageBoxTitles, "No updates are currently available.", MB_ICONINFORMATION);
+}
+
+void UpdateChecker::displayMessageBox(const std::string& title, const std::string& text, long winIcon)
+{
+#ifdef WIN32
+    // Windows version of Reaper locks up if you try show a message box during splash
+    winhelpers::NonBlockingMessageBox(text, title, winIcon);
+#else
+    api->ShowMessageBox(text.c_str(), title.c_str(), 0);
+#endif
 }

@@ -194,15 +194,16 @@ extern "C" {
     auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
     rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
-    UpdateChecker updateChecker;
+    auto api = reaper->api();
+
+    UpdateChecker updateChecker(api);
     if (updateChecker.autoCheckEnabled()) {
-        updateChecker.doUpdateCheck();
+        updateChecker.doUpdateCheck(false, false);
     }
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
     auto pluginRegistry = PluginRegistry::getInstance();
-    auto api = reaper->api();
     int actionCounter = 0;
 
     // Item right-click menu
