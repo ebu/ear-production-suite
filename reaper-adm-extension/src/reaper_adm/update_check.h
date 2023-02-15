@@ -26,5 +26,8 @@ private:
     void displayHTTPError(HTTPResult res);
     void displayJSONParseError();
     void displayJSONVariableError();
+    void displayError(const std::string& errorText);
+    void displayUpdateAvailable(const std::string& versionText);
+    void displayUpdateUnavailable();
 
 };

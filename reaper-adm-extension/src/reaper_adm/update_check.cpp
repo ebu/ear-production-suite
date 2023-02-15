@@ -1,4 +1,5 @@
 #include "update_check.h"
+#include <version/eps_version.h>
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -66,24 +67,46 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
     int versionMinor = j["version_minor"].get<int>();
     int versionRevision = j["version_revision"].get<int>();
 
-    // TODO compare
+    bool newAvailable = false;
+    if (versionMajor > eps::versionMajor()) {
+        newAvailable = true;
+    }
+    else if (versionMajor == eps::versionMajor()) {
+        if (versionMinor > eps::versionMinor()) {
+            newAvailable = true;
+        }
+        else if (versionMinor == eps::versionMinor()) {
+            if (versionRevision > eps::versionRevision()) {
+                newAvailable = true;
+            }
+        }
+    }
+
+    if (newAvailable) {
+        std::string versionText;
+        if (j.find("version") != j.end() && j["version_major"].is_string()) {
+            versionText = j["version_major"].get<std::string>();
+        }
+        displayUpdateAvailable(versionText);
+    }
+    else if (alwaysShowResult) {
+        displayUpdateUnavailable();
+    }
 
 }
 
 UpdateChecker::HTTPResult UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody)
 {
 #ifdef _WIN32
-    HINTERNET internet = InternetOpenA("MyUserAgent", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+    HINTERNET internet = InternetOpenA("EPSUserAgent", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     if (internet == NULL)
     {
-        std::cerr << "Error: Failed to open internet connection." << std::endl;
         return NO_INTERNET;
     }
 
     HINTERNET httpRequest = InternetOpenUrlA(internet, url.c_str(), NULL, 0, INTERNET_FLAG_RELOAD, 0);
     if (httpRequest == NULL)
     {
-        std::cerr << "Error: Failed to open URL." << std::endl;
         InternetCloseHandle(internet);
         return URL_OPEN_FAIL;
     }
@@ -101,7 +124,6 @@ UpdateChecker::HTTPResult UpdateChecker::getHTTPResponseBody(const std::string& 
     CURL* curl = curl_easy_init();
     if (!curl)
     {
-        std::cerr << "Error: Failed to initialize cURL." << std::endl;
         return CURL_INIT_FAIL;
     }
 
@@ -117,7 +139,6 @@ UpdateChecker::HTTPResult UpdateChecker::getHTTPResponseBody(const std::string& 
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK)
     {
-        std::cerr << "Error: Failed to perform cURL request: " << curl_easy_strerror(res) << std::endl;
         curl_easy_cleanup(curl);
         return CURL_REQUEST_FAIL;
     }
@@ -132,24 +153,60 @@ void UpdateChecker::displayHTTPError(HTTPResult res)
     // TODO
     switch (res) {
     case NO_INTERNET:
+        //Error: Failed to open internet connection.
+        displayError("Failed to open internet connection.");
         break;
     case URL_OPEN_FAIL:
+        //Error: Failed to open URL.
+        displayError("Failed to open URL.");
         break;
     case CURL_INIT_FAIL:
+        //Error: Failed to initialize cURL.
+        displayError("Failed to initialize cURL.");
         break;
     case CURL_REQUEST_FAIL:
+        //Error: Failed to perform cURL request
+        displayError("Failed to perform cURL request.");
         break;
     default:
+        displayError("(Unknown Error)");
         break;
     }
 }
 
 void UpdateChecker::displayJSONParseError()
 {
-    // TODO
+    displayError("Failed to parse data.");
 }
 
 void UpdateChecker::displayJSONVariableError()
 {
+    displayError("Unexpected data.");
+}
+
+void UpdateChecker::displayError(const std::string& errorText)
+{
     // TODO
+    std::string text{ "An error occurred whilst checking for updates:\n\n" };
+    text += errorText;
+}
+
+void UpdateChecker::displayUpdateAvailable(const std::string& versionText)
+{
+    // TODO
+    std::string text;
+    if (versionText.empty()) {
+        text = "A new version of the EAR Production Suite is now available.";
+    }
+    else {
+        text = "EAR Production Suite " + versionText + " is now available.";
+    }
+    text += "\n\nDownload from https://ear-production-suite.ebu.io/";
+    text += "\n\nNo further notifications will appear for this version. You can disable all future notifications through the Extensions menu.";
+}
+
+void UpdateChecker::displayUpdateUnavailable()
+{
+    // TODO
+    std::string text{ "No updates are currently available." };
 }
