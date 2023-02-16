@@ -42,6 +42,7 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h
 	${EPS_SHARED_DIR}/helper/properties_file.hpp
+	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
 
 	src/binaural_monitoring_frontend_connector.hpp
 	src/binaural_monitoring_plugin_editor.hpp
