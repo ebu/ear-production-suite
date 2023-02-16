@@ -198,7 +198,7 @@ extern "C" {
 
     UpdateChecker updateChecker;
     if (updateChecker.getAutoCheckEnabled()) {
-        updateChecker.doUpdateCheck(false, false, 1000);
+        updateChecker.doUpdateCheck(false, 1000);
     }
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
@@ -294,6 +294,42 @@ extern "C" {
         }
     );
 
+    std::string ucDisableActionName("Disable update check on startup");
+    std::string ucDisableActionStrId("ADM_EPS_DISABLE_UPDATE_CHECK");
+
+    auto ucDisableAction = std::make_shared<SimpleAction>(
+        ucDisableActionName.c_str(),
+        ucDisableActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.setAutoCheckEnabled(false, true);
+    }
+    );
+
+    std::string ucEnableActionName("Enable update check on startup");
+    std::string ucEnableActionStrId("ADM_EPS_ENABLE_UPDATE_CHECK");
+
+    auto ucEnableAction = std::make_shared<SimpleAction>(
+        ucEnableActionName.c_str(),
+        ucEnableActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.setAutoCheckEnabled(true, true);
+    }
+    );
+
+    std::string ucActionName("Check for updates now...");
+    std::string ucActionStrId("ADM_EPS_UPDATE_CHECK");
+
+    auto ucAction = std::make_shared<SimpleAction>(
+        ucActionName.c_str(),
+        ucActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.doUpdateCheck(true, 3000);
+    }
+    );
+
     // Make sure Extensions menu is added and then get it
     api->AddExtensionsMainMenu();
     auto reaperExtMenu = reaperMainMenu->getMenuByText(
@@ -316,10 +352,21 @@ extern "C" {
             epsMenu->insert(std::move(btpActionItem), btpActionInserter);
         }
 
+        auto ucActionId = reaper->addAction(ucAction);
+        auto ucActionItem = std::make_unique<MenuAction>(ucActionName.c_str(), ucActionId);
+        epsMenu->insert(std::move(ucActionItem), std::make_shared<EndOffset>(0));
+
+        auto ucEnableActionId = reaper->addAction(ucEnableAction);
+        auto ucEnableActionItem = std::make_unique<MenuAction>(ucEnableActionName.c_str(), ucEnableActionId);
+        epsMenu->insert(std::move(ucEnableActionItem), std::make_shared<EndOffset>(0));
+
+        auto ucDisableActionId = reaper->addAction(ucDisableAction);
+        auto ucDisableActionItem = std::make_unique<MenuAction>(ucDisableActionName.c_str(), ucDisableActionId);
+        epsMenu->insert(std::move(ucDisableActionItem), std::make_shared<EndOffset>(0));
+
         auto infoActionId = reaper->addAction(infoAction);
         auto infoActionItem = std::make_unique<MenuAction>(infoActionName.c_str(), infoActionId);
-        auto infoActionInserter = std::make_shared<EndOffset>(0);
-        epsMenu->insert(std::move(infoActionItem), infoActionInserter);
+        epsMenu->insert(std::move(infoActionItem), std::make_shared<EndOffset>(0));
 
         auto admExtMenuInserter = std::make_shared<StartOffset>(0);
         reaperExtMenu->insert(std::move(epsMenu), admExtMenuInserter);

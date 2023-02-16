@@ -38,19 +38,33 @@ bool UpdateChecker::getAutoCheckEnabled()
     return settingAutoCheckEnabled;
 }
 
-bool UpdateChecker::setAutoCheckEnabled(bool enabled)
+bool UpdateChecker::setAutoCheckEnabled(bool enabled, bool displayConfirmation)
 {
     settingAutoCheckEnabled = enabled;
-    return saveSettings();
+    auto success = saveSettings();
+    if (displayConfirmation) {
+        if (success) {
+            if (enabled) {
+                displayMessageBox(messageBoxTitles, "Update check will now be performed each time REAPER is started.", MB_ICONINFORMATION);
+            }
+            else {
+                displayMessageBox(messageBoxTitles, "Update check will no longer be performed when REAPER is started.", MB_ICONINFORMATION);
+            }
+        }
+        else {
+            displayMessageBox(messageBoxTitles, "Error: Failed to save preferences.", MB_ICONEXCLAMATION);
+        }
+    }
+    return success;
 }
 
-void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int timeoutMs)
+void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
 {
     std::string body;
     auto getSuccess = getHTTPResponseBody(versionJsonUrl, body, timeoutMs);
     if (!getSuccess) {
-        if (alwaysShowResult || !failSilently) {
-            displayHTTPError();
+        if (manualCheck) {
+            displayError("Failed to get data.");
         }
         return;
     }
@@ -58,8 +72,8 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
     juce::var j;
     auto parseResult = juce::JSON::parse(body, j);
     if (parseResult.failed()) {
-        if (alwaysShowResult || !failSilently) {
-            displayJSONParseError();
+        if (manualCheck) {
+            displayError("Failed to parse data.");
         }
         return;
     }
@@ -71,8 +85,8 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
     if (!varVersionMajor.isInt() ||
         !varVersionMinor.isInt() ||
         !varVersionRevision.isInt()) {
-        if (alwaysShowResult || !failSilently) {
-            displayJSONVariableError();
+        if (manualCheck) {
+            displayError("Unexpected data.");
         }
         return;
     }
@@ -83,7 +97,7 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
         static_cast<int> (varVersionRevision));
 
     if (remoteVersion > currentVersion) {
-        if (alwaysShowResult || remoteVersion != settingLastReportedVersion) {
+        if (manualCheck || remoteVersion != settingLastReportedVersion) {
             // Haven't mentioned this version before or told to always show result
             settingLastReportedVersion = remoteVersion;
             saveSettings();
@@ -92,10 +106,10 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
             if (varVersionText.isString()) {
                 versionText = varVersionText.toString().toStdString();
             }
-            displayUpdateAvailable(versionText);
+            displayUpdateAvailable(versionText, manualCheck);
         }
     }
-    else if (alwaysShowResult) {
+    else if (manualCheck) {
         displayUpdateUnavailable();
     }
 }
@@ -115,21 +129,6 @@ bool UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& res
     return false;
 }
 
-void UpdateChecker::displayHTTPError()
-{
-    displayError("Failed to get data.");
-}
-
-void UpdateChecker::displayJSONParseError()
-{
-    displayError("Failed to parse data.");
-}
-
-void UpdateChecker::displayJSONVariableError()
-{
-    displayError("Unexpected data.");
-}
-
 void UpdateChecker::displayError(const std::string& errorText)
 {
     std::string text{ "An error occurred whilst checking for updates:\n\n" };
@@ -137,7 +136,7 @@ void UpdateChecker::displayError(const std::string& errorText)
     displayMessageBox(messageBoxTitles, text, MB_ICONEXCLAMATION);
 }
 
-void UpdateChecker::displayUpdateAvailable(const std::string& versionText)
+void UpdateChecker::displayUpdateAvailable(const std::string& versionText, bool instigatedManually)
 {
     std::string text;
     if (versionText.empty()) {
@@ -147,7 +146,9 @@ void UpdateChecker::displayUpdateAvailable(const std::string& versionText)
         text = "EAR Production Suite " + versionText + " is now available.";
     }
     text += "\n\nDownload from https://ear-production-suite.ebu.io/";
-    text += "\n\nNo further notifications will appear for this version. You can disable all future notifications through the Extensions menu.";
+    if (!instigatedManually) {
+        text += "\n\nNo further notifications will appear for this version. You can disable all future notifications through the Extensions menu.";
+    }
     displayMessageBox(messageBoxTitles, text, MB_ICONINFORMATION);
 }
 
