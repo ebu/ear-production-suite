@@ -166,7 +166,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
-  configFileOptions.folderName = ResourcePaths::getSettingsDirectory().getFullPathName();
+  configFileOptions.folderName = ResourcePaths::getSettingsDirectory(true).getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
   readConfigFile();
 }

@@ -197,7 +197,7 @@ std::vector<String> InstallManifest::getInstallErrors()
 
 File InstallManifest::dumpLog()
 {
-    File logDir = ResourcePaths::getLogsDirectory();
+    File logDir = ResourcePaths::getLogsDirectory(true);
     File logFile = logDir.getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
     
     if(!logDir.exists()) {
