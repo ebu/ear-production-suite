@@ -2,6 +2,7 @@
 #include <string>
 #include "reaperhost.h"
 #include "juce_modules.h"
+#include <helper/version.hpp>
 
 class UpdateChecker {
 public:
@@ -33,8 +34,8 @@ private:
     bool settingsFileExists();
 
     bool settingAutoCheckEnabled{ false };
-    int settingLastReportedVersionMajor{ 0 };
-    int settingLastReportedVersionMinor{ 0 };
-    int settingLastReportedVersionRevision{ 0 };
+    Version settingLastReportedVersion;
+
+    Version currentVersion;
 
 };
