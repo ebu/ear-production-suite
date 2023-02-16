@@ -17,7 +17,7 @@ UpdateChecker::UpdateChecker()
             eps::versionRevision());
     }
 
-    settingsFile = ResourcePaths::getSettingsDirectory().getChildFile("UpdateCheck.settings");
+    settingsFile = ResourcePaths::getSettingsDirectory(true).getChildFile("UpdateCheck.settings");
     if (!settingsFileExists()) {
         // No settings file - perhaps first run?
         if (saveSettings() && settingsFileExists()) {
