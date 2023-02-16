@@ -195,19 +195,19 @@ bool UpdateChecker::loadSettings()
 
 bool UpdateChecker::saveSettings()
 {
-    auto updateCheckElement = new juce::XmlElement("UpdateCheck");
+    auto updateCheckElement = juce::XmlElement("UpdateCheck");
 
     auto lastReportedElement = new juce::XmlElement("LastReportedVersion");
     lastReportedElement->setAttribute("VersionMajor", settingLastReportedVersion.major);
     lastReportedElement->setAttribute("VersionMinor", settingLastReportedVersion.minor);
     lastReportedElement->setAttribute("VersionRevision", settingLastReportedVersion.revision);
-    updateCheckElement->addChildElement(lastReportedElement);
+    updateCheckElement.addChildElement(lastReportedElement);
 
     auto autoCheckElement = new juce::XmlElement("AutoCheck");
     autoCheckElement->setAttribute("OnStartUp", settingAutoCheckEnabled);
-    updateCheckElement->addChildElement(autoCheckElement);
+    updateCheckElement.addChildElement(autoCheckElement);
 
-    return updateCheckElement->writeToFile(settingsFile, juce::StringRef{});
+    return updateCheckElement.writeTo(settingsFile);
 }
 
 bool UpdateChecker::settingsFileExists()
