@@ -3,24 +3,18 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <atomic>
+#include <thread>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
 #endif
 
-UpdateChecker::UpdateChecker(std::shared_ptr<admplug::ReaperAPI> reaperApi)
+UpdateChecker::UpdateChecker()
 {
-    assert(reaperApi);
-    api = reaperApi;
 }
 
 UpdateChecker::~UpdateChecker()
 {
-    if (updateCheckThread) {
-        // Wait for current instance to complete
-        updateCheckThread->join();
-    }
 }
 
 bool UpdateChecker::autoCheckEnabled()
@@ -30,18 +24,13 @@ bool UpdateChecker::autoCheckEnabled()
 
 void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
 {
-    if (updateCheckThread) {
-        // Wait for current instance to complete
-        updateCheckThread->join();
-    }
-
-    updateCheckThread.reset();
     completed = false;
     completionAction = nullptr;
-    updateCheckThread = std::make_unique<std::thread>([this, alwaysShowResult, failSilently] {
+    std::thread updateCheckThread([this, alwaysShowResult, failSilently] {
         this->doUpdateCheckTask(alwaysShowResult, failSilently);
         this->completed = true;
     });
+    updateCheckThread.detach();
 
     auto start = std::chrono::high_resolution_clock::now();
     while(!completed) {
@@ -182,6 +171,6 @@ void UpdateChecker::displayMessageBox(const std::string& title, const std::strin
     // Windows version of Reaper locks up if you try show a message box during splash
     winhelpers::NonBlockingMessageBox(text, title, winIcon);
 #else
-    api->ShowMessageBox(text.c_str(), title.c_str(), 0);
+    MessageBox(nullptr, text.c_str(), title.c_str(), MB_OK);
 #endif
 }

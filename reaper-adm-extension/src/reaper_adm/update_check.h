@@ -1,13 +1,13 @@
 #pragma once
 #include <string>
-#include <thread>
-#include <memory>
+#include <atomic>
+#include <functional>
 #include "reaperhost.h"
 #include "juce_modules.h"
 
 class UpdateChecker {
 public:
-    UpdateChecker(std::shared_ptr<admplug::ReaperAPI> reaperApi);
+    UpdateChecker();
     ~UpdateChecker();
 
     bool autoCheckEnabled();
@@ -17,10 +17,8 @@ public:
 private:
     const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" }; //TODO!!!!
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
-    std::shared_ptr<admplug::ReaperAPI> api;
 
     void doUpdateCheckTask(bool alwaysShowResult, bool failSilently);
-    std::unique_ptr<std::thread> updateCheckThread;
     std::atomic<bool> completed;
     std::function<void()> completionAction;
 
