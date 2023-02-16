@@ -118,10 +118,17 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
 bool UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody)
 {
     juce::URL jUrl{ url };
-    juce::MemoryBlock memoryBlock;
-    auto res = jUrl.readEntireBinaryStream(memoryBlock);
-    responseBody = memoryBlock.toString().toStdString();
-    return res;
+    //auto res = jUrl.readEntireBinaryStream(memoryBlock);
+    auto isOpt = juce::URL::InputStreamOptions(juce::URL::ParameterHandling::inAddress).withConnectionTimeoutMs(1000);
+    auto is = jUrl.createInputStream(isOpt);
+    if (is != nullptr)
+    {
+        juce::MemoryBlock memoryBlock;
+        is->readIntoMemoryBlock(memoryBlock);
+        responseBody = memoryBlock.toString().toStdString();
+        return true;
+    }
+    return false;
 }
 
 void UpdateChecker::displayHTTPError()
