@@ -21,6 +21,7 @@ set(HEADERS_SETUP
 	install_phases/component_processing.h
 	install_phases/component_complete.h
 	helpers/manifests.h
+	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
 )
 
 set(SOURCES_SETUP
