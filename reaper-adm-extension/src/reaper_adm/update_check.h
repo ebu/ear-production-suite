@@ -8,7 +8,8 @@ public:
     UpdateChecker();
     ~UpdateChecker();
 
-    bool autoCheckEnabled();
+    bool getAutoCheckEnabled();
+    bool setAutoCheckEnabled(bool enabled);
 
     void doUpdateCheck(bool alwaysShowResult = false, bool failSilently = true, int timeoutMs=3000);
 
@@ -25,5 +26,15 @@ private:
     void displayUpdateAvailable(const std::string& versionText);
     void displayUpdateUnavailable();
     void displayMessageBox(const std::string& title, const std::string& text, long winIcon);
+
+    juce::File settingsFile;
+    bool loadSettings();
+    bool saveSettings();
+    bool settingsFileExists();
+
+    bool settingAutoCheckEnabled{ false };
+    int settingLastReportedVersionMajor{ 0 };
+    int settingLastReportedVersionMinor{ 0 };
+    int settingLastReportedVersionRevision{ 0 };
 
 };

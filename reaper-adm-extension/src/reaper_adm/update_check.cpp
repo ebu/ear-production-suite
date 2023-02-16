@@ -2,6 +2,7 @@
 #include <version/eps_version.h>
 #include <iostream>
 #include <vector>
+#include <helper/resource_paths_juce-file.hpp>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -9,15 +10,31 @@
 
 UpdateChecker::UpdateChecker()
 {
+    settingsFile = ResourcePaths::getSettingsDirectory().getChildFile("UpdateCheck.settings");
+    if (!settingsFileExists()) {
+        // No settings file - perhaps first run?
+        if (saveSettings() && settingsFileExists()) {
+            // Settings file is writable so probably was just first run.
+            // Set autocheck on initially.
+            setAutoCheckEnabled(true);
+        }
+    }
+    loadSettings();
 }
 
 UpdateChecker::~UpdateChecker()
 {
 }
 
-bool UpdateChecker::autoCheckEnabled()
+bool UpdateChecker::getAutoCheckEnabled()
 {
-    return true;
+    return settingAutoCheckEnabled;
+}
+
+bool UpdateChecker::setAutoCheckEnabled(bool enabled)
+{
+    settingAutoCheckEnabled = enabled;
+    return saveSettings();
 }
 
 void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int timeoutMs)
@@ -73,13 +90,22 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
     }
 
     if (newAvailable) {
-        // TODO: if(we haven't mentioned this version before)
-        std::string versionText;
-        juce::var varVersionText = j.getProperty("version", juce::var());
-        if (varVersionText.isString()) {
-            versionText = varVersionText.toString().toStdString();
+        if (alwaysShowResult ||
+            settingLastReportedVersionMajor != versionMajor ||
+            settingLastReportedVersionMinor != versionMinor ||
+            settingLastReportedVersionRevision != versionRevision) {
+            // Haven't mentioned this version before or told to always show result
+            settingLastReportedVersionMajor = versionMajor;
+            settingLastReportedVersionMinor = versionMinor;
+            settingLastReportedVersionRevision = versionRevision;
+            saveSettings();
+            std::string versionText;
+            juce::var varVersionText = j.getProperty("version", juce::var());
+            if (varVersionText.isString()) {
+                versionText = varVersionText.toString().toStdString();
+            }
+            displayUpdateAvailable(versionText);
         }
-        displayUpdateAvailable(versionText);
     }
     else if (alwaysShowResult) {
         displayUpdateUnavailable();
@@ -150,4 +176,53 @@ void UpdateChecker::displayMessageBox(const std::string& title, const std::strin
 #else
     MessageBox(nullptr, text.c_str(), title.c_str(), MB_OK);
 #endif
+}
+
+bool UpdateChecker::loadSettings()
+{
+    if (!settingsFileExists()) {
+        return false;
+    }
+
+    juce::XmlDocument xml(settingsFile);
+    auto updateCheckElement = xml.getDocumentElementIfTagMatches("UpdateCheck");
+    if (!updateCheckElement) {
+        return false;
+    }
+
+    auto lastReportedElement = updateCheckElement->getChildByName("LastReportedVersion");
+    if (lastReportedElement) {
+        settingLastReportedVersionMajor = lastReportedElement->getIntAttribute("VersionMajor", 0);
+        settingLastReportedVersionMinor = lastReportedElement->getIntAttribute("VersionMinor", 0);
+        settingLastReportedVersionRevision = lastReportedElement->getIntAttribute("VersionRevision", 0);
+    }
+
+    auto autoCheckElement = updateCheckElement->getChildByName("AutoCheck");
+    if (autoCheckElement) {
+        settingAutoCheckEnabled = autoCheckElement->getBoolAttribute("OnStartUp", false);
+    }
+
+    return true;
+}
+
+bool UpdateChecker::saveSettings()
+{
+    auto updateCheckElement = new juce::XmlElement("UpdateCheck");
+
+    auto lastReportedElement = new juce::XmlElement("LastReportedVersion");
+    lastReportedElement->setAttribute("VersionMajor", settingLastReportedVersionMajor);
+    lastReportedElement->setAttribute("VersionMinor", settingLastReportedVersionMinor);
+    lastReportedElement->setAttribute("VersionRevision", settingLastReportedVersionRevision);
+    updateCheckElement->addChildElement(lastReportedElement);
+
+    auto autoCheckElement = new juce::XmlElement("AutoCheck");
+    autoCheckElement->setAttribute("OnStartUp", settingAutoCheckEnabled);
+    updateCheckElement->addChildElement(autoCheckElement);
+
+    return updateCheckElement->writeToFile(settingsFile, juce::StringRef{});
+}
+
+bool UpdateChecker::settingsFileExists()
+{
+    return settingsFile.existsAsFile();
 }

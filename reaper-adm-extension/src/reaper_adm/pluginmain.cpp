@@ -197,7 +197,7 @@ extern "C" {
     auto api = reaper->api();
 
     UpdateChecker updateChecker;
-    if (updateChecker.autoCheckEnabled()) {
+    if (updateChecker.getAutoCheckEnabled()) {
         updateChecker.doUpdateCheck(false, false, 1000);
     }
 
