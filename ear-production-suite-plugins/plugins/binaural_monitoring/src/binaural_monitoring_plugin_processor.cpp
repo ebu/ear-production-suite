@@ -5,6 +5,7 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 #include <version/eps_version.h>
+#include <helper/resource_paths_juce-file.hpp>
 
 #define DEFAULT_OSC_PORT 8000
 
@@ -165,7 +166,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
-  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getChildFile("ear-production-suite").getFullPathName();
+  configFileOptions.folderName = ResourcePaths::getSettingsDirectory().getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
   readConfigFile();
 }

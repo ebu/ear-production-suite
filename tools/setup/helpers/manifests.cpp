@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <sstream>
 #include <version/eps_version.h>
+#include <helper/resource_paths_juce-file.hpp>
 
 namespace {
     juce::String getOsStr() {
@@ -27,7 +28,7 @@ namespace {
         return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile)
             .getChildFile("Contents").getChildFile("Resources");
 #else
-    throw std::runtime_error("Unsupported OS");
+        throw std::runtime_error("Unsupported OS");
 #endif
     }
 
@@ -43,68 +44,19 @@ namespace {
 #endif
     }
 
-    juce::File getVst3Directory() {
-#ifdef WIN32
-        // C:\Program Files + \Common Files + \VST3
-        return File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory)
-            .getChildFile("Common Files").getChildFile("VST3");
-#elif __APPLE__
-        // ~/Library + /Audio + /Plug-Ins + /VST3
-        return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
-            .getChildFile("Audio").getChildFile("Plug-Ins").getChildFile("VST3");
-#else
-        throw std::runtime_error("Unsupported OS");
-#endif
-    }
-
-    juce::File getUserPluginsDirectory() {
-#ifdef WIN32
-        // C:\Users\(username)\AppData\Roaming + \REAPER + \UserPlugins
-        return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
-            .getChildFile("REAPER").getChildFile("UserPlugins");
-#elif __APPLE__
-        // ~/Library + /Application Support + /REAPER + /UserPlugins
-        return File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory)
-            .getChildFile("Application Support").getChildFile("REAPER").getChildFile("UserPlugins");
-#else
-        throw std::runtime_error("Unsupported OS");
-#endif
-    }
-
-    juce::File getWinReaperProgramDirectory() {
-#ifdef WIN32
-        // Default install dir on Windows, which might not be correct if customised
-        // C:\Program Files + \REAPER (x64)
-        auto path = File::getSpecialLocation(File::SpecialLocationType::globalApplicationsDirectory).getChildFile("REAPER (x64)");
-        // Windows Registry might provide more accurate information for customised installs
-        const String key("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\REAPER\\InstallLocation");
-        if (WindowsRegistry::valueExists(key)) {
-            auto val = WindowsRegistry::getValue(key);
-            path = File(val);
-        }
-        return path;
-#else
-        throw std::runtime_error("Unsupported OS");
-#endif
-    }
-
-    juce::File getLogsDirectory() {
-        return ::getUserPluginsDirectory().getChildFile("EAR Production Suite logs");
-    }
-
     void replaceDirectorySymbols(juce::String& path) {
         const String vst3DirectorySymbol("[VST3-INSTALL-DIR]");
         const String userPluginsDirectorySymbol("[USERPLUGINS-INSTALL-DIR]");
         const String winReaperProgramDirectorySymbol("[REAPER-PROGRAM-DIR-WIN]");
 
         if (path.startsWith(vst3DirectorySymbol)) {
-            path = path.replaceFirstOccurrenceOf(vst3DirectorySymbol, getVst3Directory().getFullPathName());
+            path = path.replaceFirstOccurrenceOf(vst3DirectorySymbol, ResourcePaths::getVst3Directory().getFullPathName());
         }
         else if (path.startsWith(userPluginsDirectorySymbol)) {
-            path = path.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, getUserPluginsDirectory().getFullPathName());
+            path = path.replaceFirstOccurrenceOf(userPluginsDirectorySymbol, ResourcePaths::getUserPluginsDirectory().getFullPathName());
         }
         else if (path.startsWith(winReaperProgramDirectorySymbol)) {
-            path = path.replaceFirstOccurrenceOf(winReaperProgramDirectorySymbol, getWinReaperProgramDirectory().getFullPathName());
+            path = path.replaceFirstOccurrenceOf(winReaperProgramDirectorySymbol, ResourcePaths::getWinReaperProgramDirectory().getFullPathName());
         }
     }
 
@@ -119,12 +71,12 @@ namespace {
 
 String Locations::getVst3Directory()
 {
-    return ::getVst3Directory().getFullPathName();
+    return ResourcePaths::getVst3Directory().getFullPathName();
 }
 
 String Locations::getUserPluginsDirectory()
 {
-    return ::getUserPluginsDirectory().getFullPathName();
+    return  ResourcePaths::getUserPluginsDirectory().getFullPathName();
 }
 
 
@@ -245,7 +197,7 @@ std::vector<String> InstallManifest::getInstallErrors()
 
 File InstallManifest::dumpLog()
 {
-    File logDir = getLogsDirectory();
+    File logDir = ResourcePaths::getLogsDirectory();
     File logFile = logDir.getChildFile("InstallLog_" + getFormattedTimestamp() + ".txt");
     
     if(!logDir.exists()) {
@@ -443,7 +395,7 @@ void UninstallManifest::sortDirectoriesDeepestFirst()
 
 File UninstallManifest::dumpLog()
 {
-    File logDir = getLogsDirectory();
+    File logDir = ResourcePaths::getLogsDirectory();
     File logFile = logDir.getChildFile("UninstallLog_" + getFormattedTimestamp() + ".txt");
     
     if(!logDir.exists()) {
