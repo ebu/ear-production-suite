@@ -2,6 +2,8 @@
 #include <version/eps_version.h>
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <atomic>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -32,8 +34,30 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
         // Wait for current instance to complete
         updateCheckThread->join();
     }
+
     updateCheckThread.reset();
-    updateCheckThread = std::make_unique<std::thread>([this, alwaysShowResult, failSilently] { this->doUpdateCheckTask(alwaysShowResult, failSilently); });
+    completed = false;
+    completionAction = nullptr;
+    updateCheckThread = std::make_unique<std::thread>([this, alwaysShowResult, failSilently] {
+        this->doUpdateCheckTask(alwaysShowResult, failSilently);
+        this->completed = true;
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while(!completed) {
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        if (elapsed > std::chrono::milliseconds(1000)) {
+            break;
+        }
+    }
+    if (completed) {
+        if (completionAction) {
+            completionAction();
+        }
+    }
+    else if (alwaysShowResult || !failSilently) {
+        displayError("Timed out.");
+    }
 }
 
 void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
@@ -42,7 +66,7 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
     auto getSuccess = getHTTPResponseBody(versionJsonUrl, body);
     if (!getSuccess) {
         if (alwaysShowResult || !failSilently) {
-            displayHTTPError();
+            completionAction = [this]() { this->displayHTTPError(); };
         }
         return;
     }
@@ -51,7 +75,7 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
     auto parseResult = juce::JSON::parse(body, j);
     if (parseResult.failed()) {
         if (alwaysShowResult || !failSilently) {
-            displayJSONParseError();
+            completionAction = [this]() { this->displayJSONParseError(); };
         }
         return;
     }
@@ -64,7 +88,7 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
         !varVersionMinor.isInt() ||
         !varVersionRevision.isInt()) {
         if (alwaysShowResult || !failSilently) {
-            displayJSONVariableError();
+            completionAction = [this]() { this->displayJSONVariableError(); };
         }
         return;
     }
@@ -95,10 +119,10 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
         if (varVersionText.isString()) {
             versionText = varVersionText.toString().toStdString();
         }
-        displayUpdateAvailable(versionText);
+        completionAction = [this, versionText]() { this->displayUpdateAvailable(versionText); };
     }
     else if (alwaysShowResult) {
-        displayUpdateUnavailable();
+        completionAction = [this]() { this->displayUpdateUnavailable(); };
     }
 }
 

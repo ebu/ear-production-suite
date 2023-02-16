@@ -21,6 +21,8 @@ private:
 
     void doUpdateCheckTask(bool alwaysShowResult, bool failSilently);
     std::unique_ptr<std::thread> updateCheckThread;
+    std::atomic<bool> completed;
+    std::function<void()> completionAction;
 
     bool getHTTPResponseBody(const std::string& url, std::string& responseBody);
 
