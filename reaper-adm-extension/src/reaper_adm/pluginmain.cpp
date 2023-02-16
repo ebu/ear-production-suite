@@ -198,7 +198,7 @@ extern "C" {
 
     UpdateChecker updateChecker;
     if (updateChecker.autoCheckEnabled()) {
-        updateChecker.doUpdateCheck(false, false);
+        updateChecker.doUpdateCheck(false, false, 1000);
     }
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));

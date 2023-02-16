@@ -2,8 +2,6 @@
 #include <version/eps_version.h>
 #include <iostream>
 #include <vector>
-#include <chrono>
-#include <thread>
 
 #ifdef WIN32
 #include "win_nonblock_msg.h"
@@ -22,40 +20,13 @@ bool UpdateChecker::autoCheckEnabled()
     return true;
 }
 
-void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently)
-{
-    completed = false;
-    completionAction = nullptr;
-    std::thread updateCheckThread([this, alwaysShowResult, failSilently] {
-        this->doUpdateCheckTask(alwaysShowResult, failSilently);
-        this->completed = true;
-    });
-    updateCheckThread.detach();
-
-    auto start = std::chrono::high_resolution_clock::now();
-    while(!completed) {
-        auto elapsed = std::chrono::high_resolution_clock::now() - start;
-        if (elapsed > std::chrono::milliseconds(1000)) {
-            break;
-        }
-    }
-    if (completed) {
-        if (completionAction) {
-            completionAction();
-        }
-    }
-    else if (alwaysShowResult || !failSilently) {
-        displayError("Timed out.");
-    }
-}
-
-void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
+void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int timeoutMs)
 {
     std::string body;
-    auto getSuccess = getHTTPResponseBody(versionJsonUrl, body);
+    auto getSuccess = getHTTPResponseBody(versionJsonUrl, body, timeoutMs);
     if (!getSuccess) {
         if (alwaysShowResult || !failSilently) {
-            completionAction = [this]() { this->displayHTTPError(); };
+            displayHTTPError();
         }
         return;
     }
@@ -64,7 +35,7 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
     auto parseResult = juce::JSON::parse(body, j);
     if (parseResult.failed()) {
         if (alwaysShowResult || !failSilently) {
-            completionAction = [this]() { this->displayJSONParseError(); };
+            displayJSONParseError();
         }
         return;
     }
@@ -77,7 +48,7 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
         !varVersionMinor.isInt() ||
         !varVersionRevision.isInt()) {
         if (alwaysShowResult || !failSilently) {
-            completionAction = [this]() { this->displayJSONVariableError(); };
+            displayJSONVariableError();
         }
         return;
     }
@@ -108,18 +79,17 @@ void UpdateChecker::doUpdateCheckTask(bool alwaysShowResult, bool failSilently)
         if (varVersionText.isString()) {
             versionText = varVersionText.toString().toStdString();
         }
-        completionAction = [this, versionText]() { this->displayUpdateAvailable(versionText); };
+        displayUpdateAvailable(versionText);
     }
     else if (alwaysShowResult) {
-        completionAction = [this]() { this->displayUpdateUnavailable(); };
+        displayUpdateUnavailable();
     }
 }
 
-bool UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody)
+bool UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs)
 {
     juce::URL jUrl{ url };
-    //auto res = jUrl.readEntireBinaryStream(memoryBlock);
-    auto isOpt = juce::URL::InputStreamOptions(juce::URL::ParameterHandling::inAddress).withConnectionTimeoutMs(1000);
+    auto isOpt = juce::URL::InputStreamOptions(juce::URL::ParameterHandling::inAddress).withConnectionTimeoutMs(timeoutMs);
     auto is = jUrl.createInputStream(isOpt);
     if (is != nullptr)
     {

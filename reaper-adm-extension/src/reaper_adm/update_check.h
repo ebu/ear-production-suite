@@ -1,7 +1,5 @@
 #pragma once
 #include <string>
-#include <atomic>
-#include <functional>
 #include "reaperhost.h"
 #include "juce_modules.h"
 
@@ -12,17 +10,13 @@ public:
 
     bool autoCheckEnabled();
 
-    void doUpdateCheck(bool alwaysShowResult = false, bool failSilently = true);
+    void doUpdateCheck(bool alwaysShowResult = false, bool failSilently = true, int timeoutMs=3000);
 
 private:
     const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" }; //TODO!!!!
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
 
-    void doUpdateCheckTask(bool alwaysShowResult, bool failSilently);
-    std::atomic<bool> completed;
-    std::function<void()> completionAction;
-
-    bool getHTTPResponseBody(const std::string& url, std::string& responseBody);
+    bool getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs);
 
     void displayHTTPError();
     void displayJSONParseError();
