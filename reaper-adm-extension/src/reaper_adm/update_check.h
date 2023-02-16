@@ -10,9 +10,9 @@ public:
     ~UpdateChecker();
 
     bool getAutoCheckEnabled();
-    bool setAutoCheckEnabled(bool enabled);
+    bool setAutoCheckEnabled(bool enabled, bool displayConfirmation=false);
 
-    void doUpdateCheck(bool alwaysShowResult = false, bool failSilently = true, int timeoutMs=3000);
+    void doUpdateCheck(bool manualCheck=false, int timeoutMs=3000);
 
 private:
     const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" }; //TODO!!!!
@@ -20,11 +20,8 @@ private:
 
     bool getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs);
 
-    void displayHTTPError();
-    void displayJSONParseError();
-    void displayJSONVariableError();
     void displayError(const std::string& errorText);
-    void displayUpdateAvailable(const std::string& versionText);
+    void displayUpdateAvailable(const std::string& versionText, bool instigatedManually);
     void displayUpdateUnavailable();
     void displayMessageBox(const std::string& title, const std::string& text, long winIcon);
 
