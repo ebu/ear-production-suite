@@ -3,6 +3,7 @@
 #include <thread>
 #include <memory>
 #include "reaperhost.h"
+#include "juce_modules.h"
 
 class UpdateChecker {
 public:
@@ -14,24 +15,16 @@ public:
     void doUpdateCheck(bool alwaysShowResult = false, bool failSilently = true);
 
 private:
-    const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" };
+    const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" }; //TODO!!!!
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
     std::shared_ptr<admplug::ReaperAPI> api;
-
-    enum HTTPResult {
-        SUCCESS = 0,
-        NO_INTERNET,
-        URL_OPEN_FAIL,
-        CURL_INIT_FAIL,
-        CURL_REQUEST_FAIL
-    };
 
     void doUpdateCheckTask(bool alwaysShowResult, bool failSilently);
     std::unique_ptr<std::thread> updateCheckThread;
 
-    HTTPResult getHTTPResponseBody(const std::string& url, std::string& responseBody);
+    bool getHTTPResponseBody(const std::string& url, std::string& responseBody);
 
-    void displayHTTPError(HTTPResult res);
+    void displayHTTPError();
     void displayJSONParseError();
     void displayJSONVariableError();
     void displayError(const std::string& errorText);
