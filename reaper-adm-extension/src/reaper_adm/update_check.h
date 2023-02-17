@@ -15,7 +15,7 @@ public:
     void doUpdateCheck(bool manualCheck=false, int timeoutMs=3000);
 
 private:
-    const std::string versionJsonUrl{ "http://localhost:4000/version_info.json" }; //TODO!!!!
+    const std::string versionJsonUrl{ "https://ear-production-suite.ebu.io/version_info.json" };
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
 
     bool getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs);
