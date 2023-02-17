@@ -1,0 +1,16 @@
+{
+	"version": "v0.8.0 Beta",
+	"version_major": 0,
+	"version_minor": 8,
+	"version_revision": 0,
+	"version_suffix": "Beta",
+	"version_date": "23rd Dec 2022",
+	"version_date_day": 23,
+	"version_date_month": 12,
+	"version_date_year": 2022,
+	"download_macos_universal_url":"https://github.com/ebu/ear-production-suite/releases/download/v0.8.0-EPS-beta/EPS_0_8_0_macos_universal.dmg",
+	"download_windows_url":"https://github.com/ebu/ear-production-suite/releases/download/v0.8.0-EPS-beta/EPS_0_8_0_windows.zip",
+	"download_linux_url":"",
+	"readme_url":"https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/README.pdf",
+	"license_url":"https://github.com/ebu/ear-production-suite/blob/v0.8.0-EPS-beta/packaging/LICENSE.pdf"
+}
