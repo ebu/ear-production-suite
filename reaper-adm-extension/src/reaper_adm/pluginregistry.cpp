@@ -4,10 +4,7 @@
 #include "pluginsuite.h"
 #include "reaperapi.h"
 #include "filehelpers.h"
-
-#ifdef WIN32
-#include "win_nonblock_msg.h"
-#endif
+#include <helper/native_message_box.hpp>
 
 using namespace admplug;
 
@@ -42,14 +39,7 @@ void admplug::PluginRegistry::repopulateInstalledPlugins(bool warnOnFailure, con
       }
     }
     if(warnOnFailure && !fileFound){
-        std::string msg("Can not open plugin cache file!\n\n");
-        const char* title = "ADM Extension";
-#ifdef WIN32
-        // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(msg, title, MB_ICONEXCLAMATION);
-#else
-        api.ShowMessageBox(msg.c_str(), title, 0);
-#endif
+        NativeMessageBox::splashExtensionError("Can not open plugin cache file!");
         repopulateInstalledPlugins_FailureWarningSent = true;
     }
 }

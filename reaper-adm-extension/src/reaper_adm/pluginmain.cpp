@@ -1,5 +1,4 @@
 #define WIN32_LEAN_AND_MEAN
-
 #include <memory>
 #include <map>
 #include <string>
@@ -15,53 +14,8 @@
 #include "pluginsuite_ear.h"
 #include "update_check.h"
 #include <version/eps_version.h>
-#include <atomic>
-
-#ifdef WIN32
-#include <filesystem>
-#else
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
-#ifdef WIN32
-#include "win_nonblock_msg.h"
-#endif
-
-/*
-
-// USEFUL FOR TRACING MEMORY LEAKS BY OBJECT ALLOCATION NUMBER
-
-#ifdef WIN32
-#include "win_mem_debug.h"
-#endif
-
-#include <crtdbg.h>
-
-#ifdef _DEBUG
-
-#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
-#pragma init_seg(compiler)//global objects in this file get constructed very early on
-
-struct CrtBreakAllocSetter {
-    CrtBreakAllocSetter() {
-        _crtBreakAlloc = 169;
-    }
-};
-
-CrtBreakAllocSetter g_crtBreakAllocSetter;
-
-#endif//_DEBUG
-
-struct CrtBreakAllocSetter {
-    CrtBreakAllocSetter() {
-        CRT_SET
-        //_crtBreakAlloc = 169;
-    }
-};
-
-CrtBreakAllocSetter g_crtBreakAllocSetter;
-*/
+#include <helper/native_message_box.hpp>
+#include <helper/resource_paths.hpp>
 
 namespace {
 #ifdef WIN32
@@ -96,51 +50,6 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 }
 #endif
 
-bool directoryExists(const std::string& directory) {
-#ifdef _WIN32
-    std::filesystem::path p(directory);
-    if (std::filesystem::exists(p) && std::filesystem::is_directory(p)) {
-        return true;
-    }
-    return false;
-#else
-    // Apple - filesystem lib not supported until MacOS 10.15 - use stat
-    // Fine for linux too
-    struct stat info;
-    if (stat(directory.c_str(), &info) != 0)
-        return false;
-    return (info.st_mode & S_IFDIR);
-#endif
-}
-
-bool openDirectory(const std::string& directoryPath) {
-    if (directoryExists(directoryPath)) {
-#ifdef _WIN32
-        std::string command = "explorer \"" + directoryPath + "\"";
-        // Don't use system() for win - blocks and shows cmd prompt
-        auto res = WinExec(command.c_str(), SW_NORMAL);
-        // If WinExec succeeds, the return value is greater than 31.
-        return res > 31;
-#elif __APPLE__
-        std::string command = "open \"" + directoryPath + "\"";
-#else
-        std::string command = "xdg-open \"" + directoryPath + "\"";
-#endif
-        return std::system(command.c_str()) == 0;
-    }
-    return false;
-}
-
-std::string getToolsPath(ReaperAPI const& api) {
-    std::string path(api.GetResourcePath());
-#ifdef _WIN32
-    return path + "\\UserPlugins\\EAR Production Suite extras";
-#else
-    // Apple and Linux
-    return path + "/UserPlugins/EAR Production Suite extras";
-#endif
-}
-
 extern "C" {
 
   uint32_t requestInputInstanceId() {
@@ -158,30 +67,13 @@ extern "C" {
     using namespace admplug;
     std::unique_ptr<ReaperHost> reaper;
 
-    auto nonBlockingMessage = [rec](const char* errMsg) {
-        std::string text{ errMsg };
-        if(eps::versionInfoAvailable()) {
-            text += "\n\n[EAR Production Suite v";
-            text += eps::currentVersion();
-            text += "]";
-        } else {
-            text += "\n\n[EAR Production Suite version information unavailable!]";
-        }
-#ifdef WIN32
-        // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(text, "EAR Production Suite - Extension Error", MB_ICONEXCLAMATION);
-#else
-        MessageBox(rec->hwnd_main, text.c_str(), "EAR Production Suite - Extension Error", MB_OK);
-#endif
-    };
-
     try {
         reaper = std::make_unique<ReaperHost>(hInstance, rec);
     } catch (FuncResolutionException const& e) {
-        nonBlockingMessage(e.what());
+        NativeMessageBox::splashExtensionError(e.what(), rec->hwnd_main);
         reaper = std::make_unique<ReaperHost>(hInstance, rec, false);
     } catch (ReaperAPIException const& e) {
-        nonBlockingMessage(e.what());
+        NativeMessageBox::splashExtensionError(e.what(), rec->hwnd_main);
         return 0;
     }
 
@@ -288,7 +180,7 @@ extern "C" {
         btpActionName.c_str(),
         btpActionStrId.c_str(),
         [](admplug::ReaperAPI& api) {
-            if (!openDirectory(getToolsPath(api))) {
+            if (!ResourcePaths::openDirectory(ResourcePaths::getToolsPath(api))) {
                 api.ShowMessageBox("Failed to open directory.", "Browse Tools and Templates", 0);
             }
         }
@@ -345,7 +237,7 @@ extern "C" {
     if(reaperExtMenu) {
         auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
 
-        if (directoryExists(getToolsPath(*api))) {
+        if (ResourcePaths::directoryExists(ResourcePaths::getToolsPath(*api))) {
             auto btpActionId = reaper->addAction(btpAction);
             auto btpActionItem = std::make_unique<MenuAction>(btpActionName.c_str(), btpActionId);
             auto btpActionInserter = std::make_shared<StartOffset>(0);

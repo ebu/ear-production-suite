@@ -81,6 +81,8 @@ set(EXTENSION_HEADERS
     ${EPS_SHARED_DIR}/helper/char_encoding.hpp
     ${EPS_SHARED_DIR}/helper/version.hpp
     ${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
+    ${EPS_SHARED_DIR}/helper/resource_paths.hpp
+    ${EPS_SHARED_DIR}/helper/native_message_box.hpp
 	
 	AppConfig.h
 	juce_modules.h
@@ -152,7 +154,6 @@ set(EXTENSION_HEADERS
 	track.h
 	update_check.h
 	win_mem_debug.h
-	win_nonblock_msg.h
 	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
 	progress/importlistener.h
