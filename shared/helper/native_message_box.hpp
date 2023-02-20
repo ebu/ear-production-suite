@@ -4,12 +4,15 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#else
+#include <WDL/swell/swell-functions.h>
 #endif
 
 #include <version/eps_version.h>
 #include <string>
 
 namespace NativeMessageBox {
+#ifdef WIN32
 namespace WinHelpers {
 
     /*
@@ -41,6 +44,7 @@ namespace WinHelpers {
     }
 
 }
+#endif
 
     inline void splashCompatibleMessage(const std::string& title, const std::string& msg, HWND hwnd = nullptr, long winIcon = MB_ICONINFORMATION) {
 #ifdef WIN32
