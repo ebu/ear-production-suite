@@ -28,20 +28,7 @@ public:
     }
 
     bool operator<(const Version& other) const {
-        if (major < other.major) {
-            return true;
-        }
-        else if (major == other.major) {
-            if (minor < other.minor) {
-                return true;
-            }
-            else if (minor == other.minor) {
-                if (revision < other.revision) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return other > *this;
     }
 
     bool operator==(const Version& other) const {
