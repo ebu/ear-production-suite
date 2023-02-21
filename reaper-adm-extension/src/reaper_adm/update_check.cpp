@@ -61,7 +61,7 @@ void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
     auto getSuccess = getHTTPResponseBody(versionJsonUrl, body, timeoutMs);
     if (!getSuccess) {
         if (manualCheck) {
-            displayError("Failed to get data.");
+            displayError("Failed to connect to server. Do you have a working internet connection?");
         }
         return;
     }
