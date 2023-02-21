@@ -101,6 +101,11 @@ jobs:
         if: matrix.config.os == 'macos-latest'
         run: |
           brew install ccache
+          
+      name: 'macOS: Install pkg-config.'
+        if: matrix.config.os == 'macos-latest'
+        run: |
+          brew install pkg-config
 
       - name: 'linux: Install dependencies.'
         if: startsWith(matrix.config.os, 'ubuntu')
