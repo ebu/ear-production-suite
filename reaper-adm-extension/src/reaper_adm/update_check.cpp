@@ -57,22 +57,43 @@ bool UpdateChecker::setAutoCheckEnabled(bool enabled, bool displayConfirmation)
 
 void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
 {
+    Version remoteVersion;
+    std::string remoteVersionStr;
+    auto success = getRemoteVersion(manualCheck, timeoutMs, remoteVersion, remoteVersionStr);
+
+    if (success) {
+        if (remoteVersion > currentVersion) {
+            if (manualCheck || remoteVersion != settingLastReportedVersion) {
+                // Haven't mentioned this version before or told to always show result
+                settingLastReportedVersion = remoteVersion;
+                saveSettings();
+                displayUpdateAvailable(remoteVersionStr, manualCheck);
+            }
+        }
+        else if (manualCheck) {
+            displayUpdateUnavailable();
+        }
+    }
+}
+
+bool UpdateChecker::getRemoteVersion(bool reportErrors, int timeoutMs, Version& version, std::string& versionStr)
+{
     std::string body;
     auto getSuccess = getHTTPResponseBody(versionJsonUrl, body, timeoutMs);
     if (!getSuccess) {
-        if (manualCheck) {
+        if (reportErrors) {
             displayError("Failed to connect to server. Do you have a working internet connection?");
         }
-        return;
+        return false;
     }
 
     juce::var j;
     auto parseResult = juce::JSON::parse(body, j);
     if (parseResult.failed()) {
-        if (manualCheck) {
+        if (reportErrors) {
             displayError("Failed to parse data.");
         }
-        return;
+        return false;
     }
 
     juce::var varVersionMajor = j.getProperty("version_major", juce::var());
@@ -82,33 +103,23 @@ void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
     if (!varVersionMajor.isInt() ||
         !varVersionMinor.isInt() ||
         !varVersionRevision.isInt()) {
-        if (manualCheck) {
+        if (reportErrors) {
             displayError("Unexpected data.");
         }
-        return;
+        return false;
     }
 
-    Version remoteVersion(
-        static_cast<int> (varVersionMajor),
-        static_cast<int> (varVersionMinor),
-        static_cast<int> (varVersionRevision));
+    version.major = static_cast<int> (varVersionMajor);
+    version.minor = static_cast<int> (varVersionMinor);
+    version.revision = static_cast<int> (varVersionRevision);
 
-    if (remoteVersion > currentVersion) {
-        if (manualCheck || remoteVersion != settingLastReportedVersion) {
-            // Haven't mentioned this version before or told to always show result
-            settingLastReportedVersion = remoteVersion;
-            saveSettings();
-            std::string versionText;
-            juce::var varVersionText = j.getProperty("version", juce::var());
-            if (varVersionText.isString()) {
-                versionText = varVersionText.toString().toStdString();
-            }
-            displayUpdateAvailable(versionText, manualCheck);
-        }
+    versionStr.clear();
+    juce::var varVersionText = j.getProperty("version", juce::var());
+    if (varVersionText.isString()) {
+        versionStr = varVersionText.toString().toStdString();
     }
-    else if (manualCheck) {
-        displayUpdateUnavailable();
-    }
+
+    return true;
 }
 
 bool UpdateChecker::getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs)
