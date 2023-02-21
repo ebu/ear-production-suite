@@ -149,8 +149,8 @@ extern "C" {
 
     // Extensions Menu
 
-    std::string infoActionName("About EAR Production Suite");
-    std::string infoActionStrId("ADM_SHOW_EPS_INFO");
+    const std::string infoActionName("About EAR Production Suite");
+    const std::string infoActionStrId("ADM_SHOW_EPS_INFO");
 
     auto infoAction = std::make_shared<SimpleAction> (
       infoActionName.c_str(),
@@ -173,8 +173,9 @@ extern "C" {
       }
     );
 
-    std::string btpActionName("Browse tools and templates...");
-    std::string btpActionStrId("ADM_EPS_BROWSE");
+    const std::string btpMenuText("Browse tools and templates...");
+    const std::string btpActionName("EAR Production Suite: Browse tools and templates");
+    const std::string btpActionStrId("ADM_EPS_BROWSE");
 
     auto btpAction = std::make_shared<SimpleAction>(
         btpActionName.c_str(),
@@ -186,8 +187,9 @@ extern "C" {
         }
     );
 
-    std::string ucDisableActionName("Disable update check on startup");
-    std::string ucDisableActionStrId("ADM_EPS_DISABLE_UPDATE_CHECK");
+    const std::string ucDisableMenuText("Disable update check on startup");
+    const std::string ucDisableActionName("EAR Production Suite: Disable update check on startup");
+    const std::string ucDisableActionStrId("ADM_EPS_DISABLE_UPDATE_CHECK");
 
     auto ucDisableAction = std::make_shared<SimpleAction>(
         ucDisableActionName.c_str(),
@@ -198,8 +200,9 @@ extern "C" {
     }
     );
 
-    std::string ucEnableActionName("Enable update check on startup");
-    std::string ucEnableActionStrId("ADM_EPS_ENABLE_UPDATE_CHECK");
+    const std::string ucEnableMenuText("Enable update check on startup");
+    const std::string ucEnableActionName("EAR Production Suite: Enable update check on startup");
+    const std::string ucEnableActionStrId("ADM_EPS_ENABLE_UPDATE_CHECK");
 
     auto ucEnableAction = std::make_shared<SimpleAction>(
         ucEnableActionName.c_str(),
@@ -210,8 +213,9 @@ extern "C" {
     }
     );
 
-    std::string ucActionName("Check for updates now...");
-    std::string ucActionStrId("ADM_EPS_UPDATE_CHECK");
+    const std::string ucMenuText("Check for updates now...");
+    const std::string ucActionName("EAR Production Suite: Check for updates now");
+    const std::string ucActionStrId("ADM_EPS_UPDATE_CHECK");
 
     auto ucAction = std::make_shared<SimpleAction>(
         ucActionName.c_str(),
@@ -239,21 +243,21 @@ extern "C" {
 
         if (ResourcePaths::directoryExists(ResourcePaths::getToolsPath(*api))) {
             auto btpActionId = reaper->addAction(btpAction);
-            auto btpActionItem = std::make_unique<MenuAction>(btpActionName.c_str(), btpActionId);
+            auto btpActionItem = std::make_unique<MenuAction>(btpMenuText.c_str(), btpActionId);
             auto btpActionInserter = std::make_shared<StartOffset>(0);
             epsMenu->insert(std::move(btpActionItem), btpActionInserter);
         }
 
         auto ucActionId = reaper->addAction(ucAction);
-        auto ucActionItem = std::make_unique<MenuAction>(ucActionName.c_str(), ucActionId);
+        auto ucActionItem = std::make_unique<MenuAction>(ucMenuText.c_str(), ucActionId);
         epsMenu->insert(std::move(ucActionItem), std::make_shared<EndOffset>(0));
 
         auto ucEnableActionId = reaper->addAction(ucEnableAction);
-        auto ucEnableActionItem = std::make_unique<MenuAction>(ucEnableActionName.c_str(), ucEnableActionId);
+        auto ucEnableActionItem = std::make_unique<MenuAction>(ucEnableMenuText.c_str(), ucEnableActionId);
         epsMenu->insert(std::move(ucEnableActionItem), std::make_shared<EndOffset>(0));
 
         auto ucDisableActionId = reaper->addAction(ucDisableAction);
-        auto ucDisableActionItem = std::make_unique<MenuAction>(ucDisableActionName.c_str(), ucDisableActionId);
+        auto ucDisableActionItem = std::make_unique<MenuAction>(ucDisableMenuText.c_str(), ucDisableActionId);
         epsMenu->insert(std::move(ucDisableActionItem), std::make_shared<EndOffset>(0));
 
         auto infoActionId = reaper->addAction(infoAction);
