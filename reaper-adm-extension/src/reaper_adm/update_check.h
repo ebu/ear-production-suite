@@ -18,6 +18,7 @@ private:
     const std::string versionJsonUrl{ "https://ear-production-suite.ebu.io/version_info.json" };
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
 
+    bool getRemoteVersion(bool reportErrors, int timeoutMs, Version& version, std::string& versionStr);
     bool getHTTPResponseBody(const std::string& url, std::string& responseBody, int timeoutMs);
 
     void displayError(const std::string& errorText);
