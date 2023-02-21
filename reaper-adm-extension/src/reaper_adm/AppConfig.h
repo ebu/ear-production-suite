@@ -1,5 +1,8 @@
 #pragma once
 
+#define JUCE_WEB_BROWSER 0
+#define JUCE_ALSA 0
+#define JUCE_JACK 0
 #define JUCE_USE_CURL 0
 
 #ifndef JUCE_DISPLAY_SPLASH_SCREEN
