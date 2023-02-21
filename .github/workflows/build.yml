@@ -102,7 +102,7 @@ jobs:
         run: |
           brew install ccache
           
-      name: 'macOS: Install pkg-config.'
+      - name: 'macOS: Install pkg-config.'
         if: matrix.config.os == 'macos-latest'
         run: |
           brew install pkg-config
