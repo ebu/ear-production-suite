@@ -1,5 +1,7 @@
 #pragma once
+#ifndef NNG_STATIC_LIB
 #define NNG_STATIC_LIB
+#endif
 
 #define NNG_PORT_UNKNOWN 0
 #define NNG_PORT_START 1
@@ -663,3 +665,4 @@ private:
         return res;
     }
 };
+
