@@ -48,6 +48,7 @@ namespace {
         const String vst3DirectorySymbol("[VST3-INSTALL-DIR]");
         const String userPluginsDirectorySymbol("[USERPLUGINS-INSTALL-DIR]");
         const String winReaperProgramDirectorySymbol("[REAPER-PROGRAM-DIR-WIN]");
+        const String userApplicationDataDirectorySymbol("[USER-APPLICATION-DATA]");
 
         if (path.startsWith(vst3DirectorySymbol)) {
             path = path.replaceFirstOccurrenceOf(vst3DirectorySymbol, ResourcePaths::getVst3Directory().getFullPathName());
@@ -58,6 +59,11 @@ namespace {
         else if (path.startsWith(winReaperProgramDirectorySymbol)) {
             path = path.replaceFirstOccurrenceOf(winReaperProgramDirectorySymbol, ResourcePaths::getWinReaperProgramDirectory().getFullPathName());
         }
+        else if (path.startsWith(userApplicationDataDirectorySymbol)) {
+            path = path.replaceFirstOccurrenceOf(userApplicationDataDirectorySymbol, 
+                juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory).getFullPathName());
+        }
+
     }
 
     std::string getFormattedTimestamp() {

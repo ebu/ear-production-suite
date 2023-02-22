@@ -51,6 +51,9 @@
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates/EPS two objects, two stereo beds plus HOA template"/>
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates"/>
   <Directory Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras"/>
+  <!-- V0.8.0 and earlier stored this Binaural Monitoring preference file -->
+  <File Path="[USER-APPLICATION-DATA]/ear-production-suite/EAR Binaural Monitoring.settings"/>
+  <Directory Path="[USER-APPLICATION-DATA]/ear-production-suite"/>
   
   <WindowsOnly>
     <File Path="[USERPLUGINS-INSTALL-DIR]/reaper_adm.dll"/>
@@ -73,19 +76,22 @@
     <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Object.vst3"/>
     <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
     <File Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/project_upgrade_utility_gui.exe"/>
-	<!-- Instructions for v0.6.0 incorrectly advised to install extension to REAPER program directory -->
-	<File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/reaper_adm.dll"/>
-	<File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
+    <!-- Instructions for v0.6.0 incorrectly advised to install extension to REAPER program directory -->
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/reaper_adm.dll"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
     <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
     <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
-	<Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360"/>
+    <Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360"/>
     <Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets"/>
+    <!-- V0.8.0 and earlier stored this plugin preference file -->
+    <File Path="[USER-APPLICATION-DATA]/EBU/EAR Production Suite.xml"/>
+    <Directory Path="[USER-APPLICATION-DATA]/EBU"/>
   </WindowsOnly>
   
   <MacOSOnly>
     <File Path="[USERPLUGINS-INSTALL-DIR]/reaper_adm.dylib"/>
     <Bundle Path="[VST3-INSTALL-DIR]/ADM Export Source.vst3"/>
-	<Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Binaural Monitoring.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Binaural Monitoring.vst3"/>
     <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR DirectSpeakers.vst3"/>
     <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR HOA.vst3"/>
     <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+2+0.vst3"/>
@@ -102,6 +108,9 @@
     <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Object.vst3"/>
     <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
     <Bundle Path="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Upgrade Utility GUI.app"/>
+    <!-- V0.8.0 and earlier stored this plugin preference file -->
+    <File Path="[USER-APPLICATION-DATA]/Application Support/EBU/EAR Production Suite.xml"/>
+    <Directory Path="[USER-APPLICATION-DATA]/Application Support/EBU"/>
   </MacOSOnly>
   
 </UninstallList>
