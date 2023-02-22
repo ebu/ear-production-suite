@@ -88,10 +88,14 @@ extern "C" {
 
     auto api = reaper->api();
 
+#ifndef __linux__
+    // Linux requires libcurl even when using juce::URL
+    // Can't guarentee installed, so let's just not do update check for now
     UpdateChecker updateChecker;
     if (updateChecker.getAutoCheckEnabled()) {
         updateChecker.doUpdateCheck(false, 1000);
     }
+#endif
 
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
@@ -248,6 +252,7 @@ extern "C" {
             epsMenu->insert(std::move(btpActionItem), btpActionInserter);
         }
 
+#ifndef __linux__
         auto ucActionId = reaper->addAction(ucAction);
         auto ucActionItem = std::make_unique<MenuAction>(ucMenuText.c_str(), ucActionId);
         epsMenu->insert(std::move(ucActionItem), std::make_shared<EndOffset>(0));
@@ -259,6 +264,7 @@ extern "C" {
         auto ucDisableActionId = reaper->addAction(ucDisableAction);
         auto ucDisableActionItem = std::make_unique<MenuAction>(ucDisableMenuText.c_str(), ucDisableActionId);
         epsMenu->insert(std::move(ucDisableActionItem), std::make_shared<EndOffset>(0));
+#endif
 
         auto infoActionId = reaper->addAction(infoAction);
         auto infoActionItem = std::make_unique<MenuAction>(infoActionName.c_str(), infoActionId);
