@@ -13,6 +13,7 @@
 #include "pluginsuite.h"
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
+#include "update_check.h"
 #include <version/eps_version.h>
 #include <atomic>
 
@@ -193,10 +194,16 @@ extern "C" {
     auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
     rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
+    auto api = reaper->api();
+
+    UpdateChecker updateChecker;
+    if (updateChecker.autoCheckEnabled()) {
+        updateChecker.doUpdateCheck(false, false, 1000);
+    }
+
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
     auto pluginRegistry = PluginRegistry::getInstance();
-    auto api = reaper->api();
     int actionCounter = 0;
 
     // Item right-click menu
