@@ -16,6 +16,7 @@
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
 #define JUCE_MODULE_AVAILABLE_juce_core                  1
+#define JUCE_MODULE_AVAILABLE_juce_gui_basics            1
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          0
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices         0
 #define JUCE_MODULE_AVAILABLE_juce_audio_formats         0
@@ -24,7 +25,6 @@
 #define JUCE_MODULE_AVAILABLE_juce_data_structures       0
 #define JUCE_MODULE_AVAILABLE_juce_events                0
 #define JUCE_MODULE_AVAILABLE_juce_graphics              0
-#define JUCE_MODULE_AVAILABLE_juce_gui_basics            0
 #define JUCE_MODULE_AVAILABLE_juce_gui_extra             0
 #define JUCE_MODULE_AVAILABLE_juce_opengl                0
 
