@@ -3,10 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <helper/resource_paths_juce-file.hpp>
-
-#ifdef WIN32
-#include "win_nonblock_msg.h"
-#endif
+#include <helper/native_message_box.hpp>
 
 UpdateChecker::UpdateChecker()
 {
@@ -159,12 +156,8 @@ void UpdateChecker::displayUpdateUnavailable()
 
 void UpdateChecker::displayMessageBox(const std::string& title, const std::string& text, long winIcon)
 {
-#ifdef WIN32
     // Windows version of Reaper locks up if you try show a message box during splash
-    winhelpers::NonBlockingMessageBox(text, title, winIcon);
-#else
-    MessageBox(nullptr, text.c_str(), title.c_str(), MB_OK);
-#endif
+    NativeMessageBox::splashCompatibleMessage(title.c_str(), text.c_str(), nullptr, winIcon);
 }
 
 bool UpdateChecker::loadSettings()

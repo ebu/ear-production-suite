@@ -1,3 +1,40 @@
+
+/*
+
+// USEFUL FOR TRACING MEMORY LEAKS BY OBJECT ALLOCATION NUMBER
+
+#ifdef WIN32
+#include "win_mem_debug.h"
+#endif
+
+#include <crtdbg.h>
+
+#ifdef _DEBUG
+
+#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
+#pragma init_seg(compiler)//global objects in this file get constructed very early on
+
+struct CrtBreakAllocSetter {
+CrtBreakAllocSetter() {
+_crtBreakAlloc = 169;
+}
+};
+
+CrtBreakAllocSetter g_crtBreakAllocSetter;
+
+#endif//_DEBUG
+
+struct CrtBreakAllocSetter {
+CrtBreakAllocSetter() {
+CRT_SET
+//_crtBreakAlloc = 169;
+}
+};
+
+CrtBreakAllocSetter g_crtBreakAllocSetter;
+*/
+
+
 #ifdef WIN32
 #if defined(DEBUG) || defined(_DEBUG)
 #define DO_ALLOC_DEBUG
