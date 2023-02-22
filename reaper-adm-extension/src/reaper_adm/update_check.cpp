@@ -10,6 +10,13 @@
 
 UpdateChecker::UpdateChecker()
 {
+    if (eps::versionInfoAvailable()) {
+        currentVersion = Version(
+            eps::versionMajor(),
+            eps::versionMinor(),
+            eps::versionRevision());
+    }
+
     settingsFile = ResourcePaths::getSettingsDirectory().getChildFile("UpdateCheck.settings");
     if (!settingsFileExists()) {
         // No settings file - perhaps first run?
@@ -70,34 +77,15 @@ void UpdateChecker::doUpdateCheck(bool alwaysShowResult, bool failSilently, int 
         return;
     }
 
-    int versionMajor = static_cast<int> (varVersionMajor);
-    int versionMinor = static_cast<int> (varVersionMinor);
-    int versionRevision = static_cast<int> (varVersionRevision);
+    Version remoteVersion(
+        static_cast<int> (varVersionMajor),
+        static_cast<int> (varVersionMinor),
+        static_cast<int> (varVersionRevision));
 
-    bool newAvailable = false;
-    if (versionMajor > eps::versionMajor()) {
-        newAvailable = true;
-    }
-    else if (versionMajor == eps::versionMajor()) {
-        if (versionMinor > eps::versionMinor()) {
-            newAvailable = true;
-        }
-        else if (versionMinor == eps::versionMinor()) {
-            if (versionRevision > eps::versionRevision()) {
-                newAvailable = true;
-            }
-        }
-    }
-
-    if (newAvailable) {
-        if (alwaysShowResult ||
-            settingLastReportedVersionMajor != versionMajor ||
-            settingLastReportedVersionMinor != versionMinor ||
-            settingLastReportedVersionRevision != versionRevision) {
+    if (remoteVersion > currentVersion) {
+        if (alwaysShowResult || remoteVersion != settingLastReportedVersion) {
             // Haven't mentioned this version before or told to always show result
-            settingLastReportedVersionMajor = versionMajor;
-            settingLastReportedVersionMinor = versionMinor;
-            settingLastReportedVersionRevision = versionRevision;
+            settingLastReportedVersion = remoteVersion;
             saveSettings();
             std::string versionText;
             juce::var varVersionText = j.getProperty("version", juce::var());
@@ -192,9 +180,9 @@ bool UpdateChecker::loadSettings()
 
     auto lastReportedElement = updateCheckElement->getChildByName("LastReportedVersion");
     if (lastReportedElement) {
-        settingLastReportedVersionMajor = lastReportedElement->getIntAttribute("VersionMajor", 0);
-        settingLastReportedVersionMinor = lastReportedElement->getIntAttribute("VersionMinor", 0);
-        settingLastReportedVersionRevision = lastReportedElement->getIntAttribute("VersionRevision", 0);
+        settingLastReportedVersion.major = lastReportedElement->getIntAttribute("VersionMajor", 0);
+        settingLastReportedVersion.minor = lastReportedElement->getIntAttribute("VersionMinor", 0);
+        settingLastReportedVersion.revision = lastReportedElement->getIntAttribute("VersionRevision", 0);
     }
 
     auto autoCheckElement = updateCheckElement->getChildByName("AutoCheck");
@@ -210,9 +198,9 @@ bool UpdateChecker::saveSettings()
     auto updateCheckElement = new juce::XmlElement("UpdateCheck");
 
     auto lastReportedElement = new juce::XmlElement("LastReportedVersion");
-    lastReportedElement->setAttribute("VersionMajor", settingLastReportedVersionMajor);
-    lastReportedElement->setAttribute("VersionMinor", settingLastReportedVersionMinor);
-    lastReportedElement->setAttribute("VersionRevision", settingLastReportedVersionRevision);
+    lastReportedElement->setAttribute("VersionMajor", settingLastReportedVersion.major);
+    lastReportedElement->setAttribute("VersionMinor", settingLastReportedVersion.minor);
+    lastReportedElement->setAttribute("VersionRevision", settingLastReportedVersion.revision);
     updateCheckElement->addChildElement(lastReportedElement);
 
     auto autoCheckElement = new juce::XmlElement("AutoCheck");
