@@ -109,8 +109,10 @@ TextButton* ComponentExistingSearch::getSkipButton()
     return &skipButton;
 }
 
-void ComponentExistingSearch::setLog(std::vector<String> const& logItems)
+void ComponentExistingSearch::setLog(std::vector<String> const& logItemsVector)
 {
+    juce::StringArray logItems(&logItemsVector[0], logItemsVector.size());
+    logItems.sort(true);
     String logContent;
     for (auto const& item : logItems) {
         logContent += item;
