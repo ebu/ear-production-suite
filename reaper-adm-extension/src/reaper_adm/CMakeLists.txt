@@ -4,6 +4,7 @@ add_library(reaper_adm SHARED "dummy.cpp")
 add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 
 find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
+find_package(JUCE REQUIRED QUIET)
 
 set(EXTENSION_SOURCES
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
@@ -67,6 +68,7 @@ set(EXTENSION_SOURCES
 	reaperguid.cpp
 	reaperhost.cpp
 	track.cpp
+	update_check.cpp
 	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
@@ -143,6 +145,7 @@ set(EXTENSION_HEADERS
 	reaper_plugin_functions.h
 	resource.h
 	track.h
+	update_check.h
 	win_mem_debug.h
 	win_nonblock_msg.h
 	coordinate_conversion/coord_conv.hpp
@@ -191,6 +194,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:Juce::core,INTERFACE_INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR}
     )
 
@@ -203,8 +207,9 @@ target_link_libraries(reaper_adm_dependencies
       Boost::filesystem
       nng::nng
       ear-version
+	  Juce::core
     )
-
+	
 add_dependencies(reaper_adm_dependencies reaper_adm_object)
 
 set_target_properties(reaper_adm
@@ -222,6 +227,12 @@ target_link_libraries(reaper_adm
     PRIVATE
       reaper_adm_dependencies
       )
+	  
+if(MSVC)
+target_compile_options(reaper_adm
+  PRIVATE
+    "/bigobj")
+endif()
 
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
