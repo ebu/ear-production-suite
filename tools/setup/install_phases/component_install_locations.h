@@ -12,7 +12,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    void setLocations(const String& vst3Location, const String& userPluginsLocation);
+    void setLocations(const String& vst3Location, const String& userPluginsLocation, const String& extrasLocation);
 
     TextButton* getContinueButton();
 

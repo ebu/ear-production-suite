@@ -91,7 +91,7 @@ void WindowBody::phaseInstallCleanupProcessFinished()
 void WindowBody::phaseInstallLocations()
 {
     removeAllChildren();
-    cInstallLocations.setLocations(Locations::getVst3Directory(), Locations::getUserPluginsDirectory());
+    cInstallLocations.setLocations(Locations::getVst3Directory(), Locations::getUserPluginsDirectory(), Locations::getExtrasDirectory());
     cInstallLocations.getContinueButton()->onClick = [this]() { phaseInstallProcessStart(); };
     addAndMakeVisible(cInstallLocations);
 }

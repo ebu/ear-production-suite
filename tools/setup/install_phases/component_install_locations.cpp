@@ -77,9 +77,9 @@ void ComponentInstallLocations::resized()
 
 }
 
-void ComponentInstallLocations::setLocations(const String& vst3Location, const String& userPluginsLocation)
+void ComponentInstallLocations::setLocations(const String& vst3Location, const String& userPluginsLocation, const String& extrasLocation)
 {
-    locations.setText(vst3Location + "\n" + userPluginsLocation,
+    locations.setText(vst3Location + "\n" + userPluginsLocation + "\n" + extrasLocation,
         juce::NotificationType::dontSendNotification);
 }
 

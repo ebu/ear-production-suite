@@ -91,21 +91,21 @@
     <Windows Destination="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
   </InstallItem>
   <InstallItem Source="Tools/project_upgrade_utility_gui.exe">
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/project_upgrade_utility_gui.exe"/>
+    <Windows Destination="[EPS-EXTRAS-DIR]/project_upgrade_utility_gui.exe"/>
   </InstallItem>
   <InstallItem Source="Tools/Project Upgrade Utility GUI.app">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Upgrade Utility GUI.app"/>
+    <MacOS Destination="[EPS-EXTRAS-DIR]/Project Upgrade Utility GUI.app"/>
   </InstallItem>
   <InstallItem Source="LICENSE.pdf">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/LICENSE.pdf"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/LICENSE.pdf"/>
+    <MacOS Destination="[EPS-EXTRAS-DIR]/LICENSE.pdf"/>
+    <Windows Destination="[EPS-EXTRAS-DIR]/LICENSE.pdf"/>
   </InstallItem>
   <InstallItem Source="README.pdf">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/README.pdf"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/README.pdf"/>
+    <MacOS Destination="[EPS-EXTRAS-DIR]/README.pdf"/>
+    <Windows Destination="[EPS-EXTRAS-DIR]/README.pdf"/>
   </InstallItem>
   <InstallItem Source="Templates">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/EAR Production Suite extras/Project Templates"/>
+    <MacOS Destination="[EPS-EXTRAS-DIR]/Project Templates"/>
+    <Windows Destination="[EPS-EXTRAS-DIR]/Project Templates"/>
   </InstallItem>
 </InstallList>

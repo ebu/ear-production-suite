@@ -16,6 +16,7 @@
 #include <version/eps_version.h>
 #include <helper/native_message_box.hpp>
 #include <helper/resource_paths.hpp>
+#include <helper/resource_paths_juce-file.hpp>
 
 namespace {
 #ifdef WIN32
@@ -185,7 +186,8 @@ extern "C" {
         btpActionName.c_str(),
         btpActionStrId.c_str(),
         [](admplug::ReaperAPI& api) {
-            if (!ResourcePaths::openDirectory(ResourcePaths::getToolsPath(api))) {
+            auto path = ResourcePaths::getExtrasDirectory().getFullPathName().toStdString();
+            if (!ResourcePaths::openDirectory(path)) {
                 api.ShowMessageBox("Failed to open directory.", "Browse Tools and Templates", 0);
             }
         }
@@ -245,7 +247,8 @@ extern "C" {
     if(reaperExtMenu) {
         auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
 
-        if (ResourcePaths::directoryExists(ResourcePaths::getToolsPath(*api))) {
+        auto path = ResourcePaths::getExtrasDirectory();
+        if (path.exists() && path.isDirectory()) {
             auto btpActionId = reaper->addAction(btpAction);
             auto btpActionItem = std::make_unique<MenuAction>(btpMenuText.c_str(), btpActionId);
             auto btpActionInserter = std::make_shared<StartOffset>(0);

@@ -8,6 +8,7 @@
 namespace Locations {
     String getVst3Directory();
     String getUserPluginsDirectory();
+    String getExtrasDirectory();
 }
 
 struct InstallItem {
