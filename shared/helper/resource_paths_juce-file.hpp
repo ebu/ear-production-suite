@@ -35,9 +35,13 @@ namespace ResourcePaths {
         return juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("EAR Production Suite");
 #elif __APPLE__
-        // ~/Library + /Application Support + \EAR Production Suite
+        // ~/Library + /Application Support + /EAR Production Suite
         return juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
             .getChildFile("Application Support").getChildFile("EAR Production Suite");
+#elif __linux__
+        // ~/.config/EAR Production Suite
+        return juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
+            .getChildFile("EAR Production Suite");
 #else
         throw std::runtime_error("Unsupported OS");
 #endif
@@ -63,7 +67,7 @@ namespace ResourcePaths {
     inline juce::File getLogsDirectory(bool createIfMissing = false) {
         // C:\Users\(username)\AppData\Roaming + \EAR Production Suite + \logs
         // ~/Library + /Application Support + /EAR Production Suite + /logs
-        // ~/.config + /Application Support + /EAR Production Suite + /logs
+        // ~/.config + /EAR Production Suite + /logs
         auto p = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
 #ifdef __APPLE__
         p = p.getChildFile("Application Support");
@@ -78,7 +82,7 @@ namespace ResourcePaths {
     inline juce::File getSettingsDirectory(bool createIfMissing = false) {
         // C:\Users\(username)\AppData\Roaming + \EAR Production Suite + \settings
         // ~/Library + /Application Support + /EAR Production Suite + /settings
-        // ~/.config + /Application Support + /EAR Production Suite + /settings
+        // ~/.config + /EAR Production Suite + /settings
         auto p = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
 #ifdef __APPLE__
         p = p.getChildFile("Application Support");
