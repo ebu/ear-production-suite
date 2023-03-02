@@ -988,13 +988,28 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
     return true;
 }
 
-bool admplug::ReaperAPIImpl::TrackFX_GetActualFXNameClean(MediaTrack* track, int fx, std::string& name) const
+std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaTrack* track) const
 {
-    std::string fxName;
-    if (!TrackFX_GetActualFXName(track, fx, fxName)) {
-        return false;
+    std::vector<std::string> names;
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
+
+    const int nameSectionNum = 0;
+
+    for (auto const& elmPair : vst3Elements) {
+        auto vst3Sections = SplitVSTElement(elmPair.second, true, false);
+        if (vst3Sections.size() <= nameSectionNum) {
+            names.push_back("");
+        }
+        else {
+            names.push_back(vst3Sections[nameSectionNum]);
+        }
     }
 
+    return names;
+}
+
+void admplug::ReaperAPIImpl::CleanFXName(std::string& fxName) const
+{
     // Purposely not removing other prefixes as we're only using this for our plug-ins which are all VST3
     if (fxName.substr(0, 6) == "VST3: ") {
         fxName = fxName.substr(6);
@@ -1012,8 +1027,5 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXNameClean(MediaTrack* track, int
             }
         }
     }
-
-    name = fxName;
-    return true;
 }
 
