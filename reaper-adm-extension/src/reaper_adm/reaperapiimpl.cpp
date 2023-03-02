@@ -984,10 +984,22 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
         return false;
     }
 
-    auto fxName = vst3Sections[nameSectionNum];
+    name = vst3Sections[nameSectionNum];;
+    return true;
+}
+
+bool admplug::ReaperAPIImpl::TrackFX_GetActualFXNameClean(MediaTrack* track, int fx, std::string& name) const
+{
+    std::string fxName;
+    if (!TrackFX_GetActualFXName(track, fx, fxName)) {
+        return false;
+    }
+
+    // Purposely not removing other prefixes as we're only using this for our plug-ins which are all VST3
     if (fxName.substr(0, 6) == "VST3: ") {
         fxName = fxName.substr(6);
     }
+
     // Can be up to 2 bracketed sections - channel count and developer
     for (int i = 0; i < 2; ++i) {
         if (fxName[fxName.length() - 1] == ')') {
@@ -1000,7 +1012,7 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
             }
         }
     }
-    
+
     name = fxName;
     return true;
 }

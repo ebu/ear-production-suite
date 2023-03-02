@@ -232,6 +232,7 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD1(forceAmplitudeScaling, bool(TrackEnvelope * trackEnvelope));
   MOCK_CONST_METHOD2(getTrackAudioBounds, std::optional<std::pair<double, double>>(MediaTrack* tr, bool ignoreBeforeZero));
   MOCK_CONST_METHOD3(TrackFX_GetActualFXName, bool(MediaTrack* track, int fx, std::string& name));
+  MOCK_CONST_METHOD3(TrackFX_GetActualFXNameClean, bool(MediaTrack* track, int fx, std::string& name));
   MOCK_CONST_METHOD1(GetVSTElementsFromTrackStateChunk, std::vector<std::pair<int, std::string>>(MediaTrack* track));
   MOCK_CONST_METHOD3(SplitVSTElement, std::vector<std::string>(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators));
 };
