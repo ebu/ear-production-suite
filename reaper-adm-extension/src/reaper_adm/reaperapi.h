@@ -192,6 +192,7 @@ class ReaperAPI {
     virtual bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const = 0;
     virtual std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const = 0;
     virtual bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const = 0;
+    virtual bool TrackFX_GetActualFXNameClean(MediaTrack* track, int fx, std::string& name) const = 0;
     virtual std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(MediaTrack* track) const = 0;
     virtual std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const = 0;
 };
