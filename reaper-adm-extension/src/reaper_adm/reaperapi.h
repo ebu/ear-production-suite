@@ -155,6 +155,8 @@ class ReaperAPI {
     virtual double GetSetProjectInfo(ReaProject * project, const char* desc, double value, bool is_set) const = 0;
     virtual const char* GetAppVersion() const = 0;
     virtual const char* LocalizeString(const char* src_string, const char* section, int flagsOptional) const = 0;
+    virtual bool GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const = 0;
+    virtual bool SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const = 0;
 
     static constexpr int RENDER_ITEMS_AS_NEW_TAKE_ID = 41999;
     static constexpr int CROP_TO_ACTIVE_TAKE_IN_ITEMS = 40131;
