@@ -142,6 +142,9 @@ public:
     void mapFxPin(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel) const override;
     bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const override;
     std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const override;
+    bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const override;
+    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(MediaTrack* track) const override;
+    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const override;
 
 private:
     reaper_plugin_info_t& plugin_info;
