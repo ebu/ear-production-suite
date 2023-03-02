@@ -977,45 +977,31 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
         return false;
     }
 
-    const int hexIdSectionNum = 4;
+    const int nameSectionNum = 0;
 
     auto vst3Sections = SplitVSTElement(vst3Elements[fx].second, true, false);
-    if (vst3Sections.size() <= hexIdSectionNum) {
+    if (vst3Sections.size() <= nameSectionNum) {
         return false;
     }
 
-    auto hexIdStart = vst3Sections[hexIdSectionNum].find('{');
-    if (hexIdStart == std::string::npos || ++hexIdStart >= (vst3Sections[hexIdSectionNum].length() - 32)) {
-        return false;
+    auto fxName = vst3Sections[nameSectionNum];
+    if (fxName.substr(0, 6) == "VST3: ") {
+        fxName = fxName.substr(6);
     }
-
-    auto hexId = vst3Sections[hexIdSectionNum].substr(hexIdStart, 32);
-
-    const std::map<std::string, std::string> vstIDtoName{
-        {"ABCDEF019182FAEB4542552045505311", "EAR Object"},
-        {"ABCDEF019182FAEB4542552045505310", "EAR DirectSpeakers"},
-        {"ABCDEF019182FAEB4542552045505312", "EAR HOA"},
-        {"ABCDEF019182FAEB45425520455053FF", "EAR Scene"},
-        {"ABCDEF019182FAEB45425520455053F0", "EAR Binaural Monitoring"},
-        {"ABCDEF019182FAEB45425520455053A0", "EAR Monitoring 0 + 2 + 0"},
-        {"ABCDEF019182FAEB45425520455053A1", "EAR Monitoring 0 + 5 + 0"},
-        {"ABCDEF019182FAEB45425520455053A8", "EAR Monitoring 0 + 7 + 0"},
-        {"ABCDEF019182FAEB45425520455053A2", "EAR Monitoring 2 + 5 + 0"},
-        {"ABCDEF019182FAEB45425520455053AA", "EAR Monitoring 2 + 7 + 0"},
-        {"ABCDEF019182FAEB45425520455053A5", "EAR Monitoring 3 + 7 + 0"},
-        {"ABCDEF019182FAEB45425520455053A3", "EAR Monitoring 4 + 5 + 0"},
-        {"ABCDEF019182FAEB45425520455053A4", "EAR Monitoring 4 + 5 + 1"},
-        {"ABCDEF019182FAEB45425520455053A9", "EAR Monitoring 4 + 7 + 0"},
-        {"ABCDEF019182FAEB45425520455053A6", "EAR Monitoring 4 + 9 + 0"},
-        {"ABCDEF019182FAEB45425520455053A7", "EAR Monitoring 9 + 10 + 3"}
-    };
-
-    auto it = vstIDtoName.find(hexId);
-    if (it == vstIDtoName.end()) {
-        return false;
+    // Can be up to 2 bracketed sections - channel count and developer
+    for (int i = 0; i < 2; ++i) {
+        if (fxName[fxName.length() - 1] == ')') {
+            auto obPos = fxName.rfind(" (");
+            if (obPos == std::string::npos) {
+                break;
+            }
+            else {
+                fxName = fxName.substr(0, obPos);
+            }
+        }
     }
     
-    name = it->second;
+    name = fxName;
     return true;
 }
 
