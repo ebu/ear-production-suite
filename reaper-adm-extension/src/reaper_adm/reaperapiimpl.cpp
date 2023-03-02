@@ -504,6 +504,16 @@ const char* admplug::ReaperAPIImpl::LocalizeString(const char* src_string, const
     return ::LocalizeString(src_string, section, flagsOptional);
 }
 
+bool admplug::ReaperAPIImpl::GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const
+{
+    return ::GetTrackStateChunk(track, strNeedBig, strNeedBig_sz, isundoOptional);
+}
+
+bool admplug::ReaperAPIImpl::SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const
+{
+    return ::SetTrackStateChunk(track, str, isundoOptional);
+}
+
 void ReaperAPIImpl::UpdateArrangeForAutomation() const {
   // UpdateArrange() does not force draw of automation. Flipping master track visibility does.
   std::bitset<4> mstTrkSetting(GetMasterTrackVisibility());

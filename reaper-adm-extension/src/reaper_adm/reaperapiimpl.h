@@ -113,6 +113,8 @@ public:
     double GetSetProjectInfo(ReaProject* project, const char* desc, double value, bool is_set) const override;
     const char* GetAppVersion() const override;
     const char* LocalizeString(const char* src_string, const char* section, int flagsOptional) const override;
+    bool GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const override;
+    bool SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const override;
 
     //Custom Funcs
     void UpdateArrangeForAutomation() const override;

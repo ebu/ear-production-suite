@@ -188,6 +188,8 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD4(GetSetProjectInfo, double(ReaProject* project, const char* desc, double value, bool is_set));
   MOCK_CONST_METHOD0(GetAppVersion, const char*());
   MOCK_CONST_METHOD3(LocalizeString, const char*(const char* src_string, const char* section, int flagsOptional));
+  MOCK_CONST_METHOD4(GetTrackStateChunk, bool(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional));
+  MOCK_CONST_METHOD3(SetTrackStateChunk, bool(MediaTrack* track, const char* str, bool isundoOptional));
 
   // Custom funcs
   MOCK_CONST_METHOD0(UpdateArrangeForAutomation,
