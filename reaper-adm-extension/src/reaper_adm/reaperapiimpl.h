@@ -143,13 +143,14 @@ public:
     bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const override;
     std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const override;
     bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const override;
-    bool TrackFX_GetActualFXNameClean(MediaTrack* track, int fx, std::string& name) const override;
-    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(MediaTrack* track) const override;
-    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const override;
+    std::vector<std::string> TrackFX_GetActualFXNames(MediaTrack* track) const override;
+    void CleanFXName(std::string& name) const override;
 
 private:
     reaper_plugin_info_t& plugin_info;
 
+    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(MediaTrack* track) const;
+    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const;
     int reaperChannelOffsetForBusWidth(int busWidth) const;
     int toReaperChannelValue(int busWidth, int startChNum) const;
     int getSrcChannelValue(int busWidth, int startCh) const;
