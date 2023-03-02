@@ -158,7 +158,6 @@ namespace {
         ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, _)).WillByDefault(Return(1));
-        ON_CALL(api, TrackFX_GetByName(_, _, _)).WillByDefault(Return(fake.fxIndex));
         ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(2)); // Object VST and ADM VST
         ON_CALL(api, GetTrackEnvelopeByName(_, StrEq("Volume"))).WillByDefault(Return(fake.envelopeFor.volume));
         ON_CALL(api, CountTracks(_)).WillByDefault(Return(2));
