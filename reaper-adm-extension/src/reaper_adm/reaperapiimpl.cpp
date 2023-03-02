@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <cstring>
+#include <map>
 
 #include "reaperapiimpl.h"
 #include "reaperapivalues.h"
@@ -847,3 +848,174 @@ std::optional<std::pair<double, double>> admplug::ReaperAPIImpl::getTrackAudioBo
     }
     return std::optional<std::pair<double, double>>();
 }
+
+std::vector<std::pair<int, std::string>> admplug::ReaperAPIImpl::GetVSTElementsFromTrackStateChunk(MediaTrack* track) const
+{
+    std::vector<std::pair<int, std::string>> vst3Elements;
+
+    const size_t chunkMaxLen = 65535; // Should be plenty
+    char chunk[chunkMaxLen];
+    auto res = GetTrackStateChunk(track, chunk, chunkMaxLen, false);
+    if (!res) return vst3Elements;
+    std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
+
+    const std::vector<char> quoteMarks{ '\'', '`', '"' };
+    int elmStart = -1;
+
+    for (int pos = 0; pos < fullChunk.length(); ++pos) {
+
+        bool escapedQuote = false;
+        for (auto quote : quoteMarks) {
+            if (fullChunk[pos] == quote) {
+                // Entered a quote mark
+                if (pos == fullChunk.length() - 1) {
+                    // Already at EOF - don't attempt to find
+                    escapedQuote = true;
+                    break;
+                }
+                // Find end quote mark
+                auto newPos = fullChunk.find(quote, pos + 1);
+                if (newPos == std::string::npos) {
+                    // End not found to EOF - abort
+                    escapedQuote = true;
+                    break;
+                }
+                pos = newPos;
+            }
+        }
+        if (escapedQuote) {
+            break;
+        }
+
+        if (elmStart == -1) {
+            // Not in an element - check if at start of one
+            if (fullChunk.substr(pos, 5) == "<VST ") {
+                elmStart = pos;
+            }
+        }
+        else {
+            // In an element - check if at end
+            if (fullChunk.substr(pos, 1) == ">") {
+                vst3Elements.push_back(std::make_pair(
+                    elmStart,
+                    fullChunk.substr(elmStart, pos - elmStart + 1))
+                );
+                elmStart = -1;
+            }
+        }
+    }
+
+    return vst3Elements;
+}
+
+std::vector<std::string> admplug::ReaperAPIImpl::SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const
+{
+    std::vector<std::string> sec;
+
+    const std::vector<char> quoteMarks{ '\'', '`', '"' };
+    const std::vector<char> splitMarks{ ' ', '\r', '\n' };
+    int secStart = 5;
+
+    for (int pos = 5; pos < elm.length(); ++pos) {
+
+        bool escapedQuote = false;
+        for (auto quote : quoteMarks) {
+            if (elm[pos] == quote) {
+                // Entered a quote mark
+                if (pos == elm.length() - 1) {
+                    // Already at EOF - don't attempt to find
+                    escapedQuote = true;
+                    break;
+                }
+                // Find end quote mark
+                auto newPos = elm.find(quote, pos + 1);
+                if (newPos == std::string::npos) {
+                    // End not found to EOF - abort
+                    escapedQuote = true;
+                    break;
+                }
+                pos = newPos;
+            }
+        }
+        if (escapedQuote) {
+            break;
+        }
+
+        for (auto splitMark : splitMarks) {
+            if (elm[pos] == splitMark) {
+                // Close this section and start a new one
+                sec.push_back(elm.substr(secStart, pos - secStart));
+                if (includeSeperators) {
+                    sec.push_back(std::string{ splitMark });
+                }
+                secStart = pos + 1;
+                break;
+            }
+        }
+    }
+
+    if (stripBoundingQuotes) {
+        for (auto& s : sec) {
+            if (s.length() >= 2) {
+                for (auto quote : quoteMarks) {
+                    if (s[0] == quote && s[s.length() - 1] == quote) {
+                        s = s.substr(1, s.length() - 2);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return sec;
+}
+
+bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
+{
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
+    if (fx >= vst3Elements.size()) {
+        return false;
+    }
+
+    const int hexIdSectionNum = 4;
+
+    auto vst3Sections = SplitVSTElement(vst3Elements[fx].second, true, false);
+    if (vst3Sections.size() <= hexIdSectionNum) {
+        return false;
+    }
+
+    auto hexIdStart = vst3Sections[hexIdSectionNum].find('{');
+    if (hexIdStart == std::string::npos || ++hexIdStart >= (vst3Sections[hexIdSectionNum].length() - 32)) {
+        return false;
+    }
+
+    auto hexId = vst3Sections[hexIdSectionNum].substr(hexIdStart, 32);
+
+    const std::map<std::string, std::string> vstIDtoName{
+        {"ABCDEF019182FAEB4542552045505311", "EAR Object"},
+        {"ABCDEF019182FAEB4542552045505310", "EAR DirectSpeakers"},
+        {"ABCDEF019182FAEB4542552045505312", "EAR HOA"},
+        {"ABCDEF019182FAEB45425520455053FF", "EAR Scene"},
+        {"ABCDEF019182FAEB45425520455053F0", "EAR Binaural Monitoring"},
+        {"ABCDEF019182FAEB45425520455053A0", "EAR Monitoring 0 + 2 + 0"},
+        {"ABCDEF019182FAEB45425520455053A1", "EAR Monitoring 0 + 5 + 0"},
+        {"ABCDEF019182FAEB45425520455053A8", "EAR Monitoring 0 + 7 + 0"},
+        {"ABCDEF019182FAEB45425520455053A2", "EAR Monitoring 2 + 5 + 0"},
+        {"ABCDEF019182FAEB45425520455053AA", "EAR Monitoring 2 + 7 + 0"},
+        {"ABCDEF019182FAEB45425520455053A5", "EAR Monitoring 3 + 7 + 0"},
+        {"ABCDEF019182FAEB45425520455053A3", "EAR Monitoring 4 + 5 + 0"},
+        {"ABCDEF019182FAEB45425520455053A4", "EAR Monitoring 4 + 5 + 1"},
+        {"ABCDEF019182FAEB45425520455053A9", "EAR Monitoring 4 + 7 + 0"},
+        {"ABCDEF019182FAEB45425520455053A6", "EAR Monitoring 4 + 9 + 0"},
+        {"ABCDEF019182FAEB45425520455053A7", "EAR Monitoring 9 + 10 + 3"}
+    };
+
+    auto it = vstIDtoName.find(hexId);
+    if (it == vstIDtoName.end()) {
+        return false;
+    }
+    
+    name = it->second;
+    return true;
+}
+
