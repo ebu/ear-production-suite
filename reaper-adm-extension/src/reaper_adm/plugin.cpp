@@ -20,11 +20,9 @@ PluginInstance::PluginInstance(MediaTrack* mediaTrack, std::string pluginName, b
 
 admplug::PluginInstance::PluginInstance(MediaTrack * mediaTrack, int pluginIndex, const ReaperAPI & api) : track{mediaTrack, api}, api{api}
 {
-    char cName[100];
-    if(!api.TrackFX_GetFXName(mediaTrack, pluginIndex, cName, 100)) {
+    if(!api.TrackFX_GetActualFXName(mediaTrack, pluginIndex, name)) {
         throw std::runtime_error("Plugin index appears to be invalid");
     }
-    name = cName;
     guid = std::make_unique<ReaperGUID>(api.TrackFX_GetFXGUID(mediaTrack, pluginIndex));
 }
 
@@ -98,9 +96,9 @@ int admplug::PluginInstance::getPluginIndex() const
 
 std::optional<std::string> admplug::PluginInstance::getPluginName()
 {
-    char cName[100];
-    if(api.TrackFX_GetFXName(getTrackInstance().get(), getPluginIndex(), cName, 100))
-        return std::optional<std::string>(cName);
+    std::string pluginName;
+    if(api.TrackFX_GetActualFXName(getTrackInstance().get(), getPluginIndex(), pluginName))
+        return pluginName;
     return std::optional<std::string>();
 }
 
