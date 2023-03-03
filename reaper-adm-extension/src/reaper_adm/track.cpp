@@ -65,26 +65,16 @@ std::unique_ptr<Plugin> admplug::TrackInstance::getPlugin(int index)
 std::vector<std::unique_ptr<Plugin>> admplug::TrackInstance::getPlugins(std::string pluginName)
 {
     std::vector<std::unique_ptr<Plugin>> pluginMatches;
-    // We know the name is followed by a space and opening bracket for the company - means we can do a stricter comparison
-    pluginName += " (";
 
-    auto pluginCount = api.TrackFX_GetCount(get());
-    for(int pluginIndex = 0; pluginIndex < pluginCount; pluginIndex++) {
-        char cName[100];
-        if(api.TrackFX_GetFXName(get(), pluginIndex, cName, 100)) {
-            // Remove "VST3:/ VST:" from start of plugin name
-            std::string cNameStr{ cName };
-            if(cNameStr.rfind("VST3: ", 0) == 0) { // Starts with
-                cNameStr.erase(0, 6);
-            } else if(cNameStr.rfind("VST: ", 0) == 0) { // Starts with
-                cNameStr.erase(0, 5);
-            }
-            if(cNameStr.rfind(pluginName, 0) == 0) { // Starts with
-                pluginMatches.push_back(std::make_unique<PluginInstance>(get(), pluginIndex, api));
-            }
+    auto trackPlugins = api.TrackFX_GetActualFXNames(get());
+    for (int pluginIndex = 0; pluginIndex < trackPlugins.size(); ++pluginIndex) {
+        api.CleanFXName(trackPlugins[pluginIndex]);
+        if (trackPlugins[pluginIndex] == pluginName) {
+            pluginMatches.push_back(std::make_unique<PluginInstance>(get(), pluginIndex, api));
         }
     }
-    return std::move(pluginMatches);
+
+    return pluginMatches;
 }
 
 std::vector<std::unique_ptr<Plugin>> admplug::TrackInstance::getPlugins()
