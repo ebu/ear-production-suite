@@ -29,11 +29,6 @@ bool AdmVst::isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate)
     return isCandidate;
 }
 
-int AdmVst::trackAdmVstIndex(ReaperAPI const& api, MediaTrack *trk)
-{
-    return api.TrackFX_AddByActualName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
-}
-
 std::vector<int> AdmVst::trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *trk)
 {
     std::vector<int> admVstPos;
