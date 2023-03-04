@@ -972,6 +972,11 @@ std::vector<std::string> admplug::ReaperAPIImpl::SplitVSTElement(const std::stri
 
 bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
 {
+    // Note that;
+    // TrackFX_GetNamedConfigParm( track, 0, "fx_name" )
+    // can get the pre-aliased name but is only supported from v6.37
+    // Also does not support FX renamed in FX selection window
+
     auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
     if (fx >= vst3Elements.size()) {
         return false;
@@ -990,6 +995,9 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
 
 std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaTrack* track) const
 {
+    // Only gets and parses state chunk once
+    // More efficient when you want to query every plugin on the track
+
     std::vector<std::string> names;
     auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
 
@@ -1027,5 +1035,33 @@ void admplug::ReaperAPIImpl::CleanFXName(std::string& fxName) const
             }
         }
     }
+}
+
+int admplug::ReaperAPIImpl::TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const
+{
+    auto fxs = TrackFX_GetActualFXNames(track);
+    for (int i = 0; i < fxs.size(); ++i) {
+        if (fxs[i] == fxName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int admplug::ReaperAPIImpl::TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const
+{
+    // TrackFX_AddByName will not find matches if the plugins are renamed on the tracks - do our own search by actual name
+    if (instantiate == TrackFXAddMode::QueryPresence) {
+        return TrackFX_PositionByActualName(track, fxname);
+    }
+    if (instantiate == TrackFXAddMode::CreateIfMissing) {
+        auto existingIndex = TrackFX_PositionByActualName(track, fxname);
+        if (existingIndex >= 0) {
+            return existingIndex;
+        }
+    }
+
+    // TrackFX_AddByName will not be able to add if the name of the plugin was changed in the FX selection window, but we can only try.
+    return TrackFX_AddByName(track, fxname, recFX, TrackFXAddMode::CreateNew);
 }
 

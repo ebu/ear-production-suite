@@ -194,6 +194,8 @@ class ReaperAPI {
     virtual bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const = 0;
     virtual std::vector<std::string> TrackFX_GetActualFXNames(MediaTrack* track) const = 0;
     virtual void CleanFXName(std::string& name) const = 0;
+    virtual int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const = 0;
+    virtual int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const = 0;
 
 };
 }
