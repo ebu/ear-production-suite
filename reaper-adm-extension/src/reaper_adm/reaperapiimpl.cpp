@@ -976,6 +976,7 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
     // TrackFX_GetNamedConfigParm( track, 0, "fx_name" )
     // can get the pre-aliased name but is only supported from v6.37
     // Also does not support FX renamed in FX selection window
+    // (although neither does this)
 
     auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
     if (fx >= vst3Elements.size()) {
