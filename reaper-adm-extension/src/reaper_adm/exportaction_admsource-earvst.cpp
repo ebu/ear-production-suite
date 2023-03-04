@@ -443,26 +443,6 @@ bool EarInputVst::isDirectSpeakersVstAvailable(ReaperAPI const& api, bool doResc
     return PluginRegistry::getInstance()->checkPluginAvailable(directSpeakersVstName, api, doRescan);
 }
 
-int EarInputVst::trackDirectSpeakersVstIndex(ReaperAPI const& api, MediaTrack *trk)
-{
-    return api.TrackFX_AddByActualName(trk, directSpeakersVstName.c_str(), false, TrackFXAddMode::QueryPresence);
-}
-
-std::vector<int> EarInputVst::trackDirectSpeakersVstIndexes(ReaperAPI const& api, MediaTrack *trk)
-{
-    std::vector<int> vstPos;
-
-    auto trackVstNames = api.TrackFX_GetActualFXNames(trk);
-    for (int i = 0; i < trackVstNames.size(); ++i) {
-        api.CleanFXName(trackVstNames[i]);
-        if (trackVstNames[i] == directSpeakersVstName) {
-            vstPos.push_back(i);
-        }
-    }
-
-    return vstPos;
-}
-
 std::string EarInputVst::objectVstName = admplug::EARPluginSuite::OBJECT_METADATA_PLUGIN_NAME;
 
 const std::string* EarInputVst::getObjectVstNameStr()
@@ -473,26 +453,6 @@ const std::string* EarInputVst::getObjectVstNameStr()
 bool EarInputVst::isObjectVstAvailable(ReaperAPI const& api, bool doRescan)
 {
     return PluginRegistry::getInstance()->checkPluginAvailable(objectVstName, api, doRescan);
-}
-
-int EarInputVst::trackObjectVstIndex(ReaperAPI const& api, MediaTrack *trk)
-{
-    return api.TrackFX_AddByActualName(trk, objectVstName.c_str(), false, TrackFXAddMode::QueryPresence);
-}
-
-std::vector<int> EarInputVst::trackObjectVstIndexes(ReaperAPI const& api, MediaTrack *trk)
-{
-    std::vector<int> vstPos;
-
-    auto trackVstNames = api.TrackFX_GetActualFXNames(trk);
-    for (int i = 0; i < trackVstNames.size(); ++i) {
-        api.CleanFXName(trackVstNames[i]);
-        if (trackVstNames[i] == objectVstName) {
-            vstPos.push_back(i);
-        }
-    }
-
-    return vstPos;
 }
 
 bool EarInputVst::isObjectPlugin(const std::string& vstNameStr)
@@ -626,11 +586,6 @@ bool EarSceneMasterVst::isCandidateForExport(std::shared_ptr<EarSceneMasterVst> 
     isCandidate &= (possibleCandidate->getCommandSocketPort() > 0);
     isCandidate &= (possibleCandidate->getSamplesSocketPort() > 0);
     return isCandidate;
-}
-
-int EarSceneMasterVst::trackEarSceneMasterVstIndex(ReaperAPI const& api, MediaTrack *trk)
-{
-    return api.TrackFX_AddByActualName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> EarSceneMasterVst::trackEarSceneMasterVstIndexes(ReaperAPI const& api, MediaTrack *trk)
@@ -874,26 +829,6 @@ const std::string* EarInputVst::getHoaVstNameStr()
 bool EarInputVst::isHoaVstAvailable(ReaperAPI const& api, bool doRescan)
 {
     return PluginRegistry::getInstance()->checkPluginAvailable(hoaVstName, api, doRescan);
-}
-
-int EarInputVst::trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk)
-{
-    return api.TrackFX_AddByActualName(trk, hoaVstName.c_str(), false, TrackFXAddMode::QueryPresence);
-}
-
-std::vector<int> EarInputVst::trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk)
-{
-    std::vector<int> vstPos;
-
-    auto trackVstNames = api.TrackFX_GetActualFXNames(trk);
-    for (int i = 0; i < trackVstNames.size(); ++i) {
-        api.CleanFXName(trackVstNames[i]);
-        if (trackVstNames[i] == hoaVstName) {
-            vstPos.push_back(i);
-        }
-    }
-
-    return vstPos;
 }
 
 bool EarInputVst::isHoaPlugin(const std::string& vstNameStr)

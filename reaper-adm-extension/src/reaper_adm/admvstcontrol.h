@@ -62,11 +62,9 @@ public:
     int getCommandSocketPort();
 
     // Statics
-    static const char* getVstCompName();
     static const std::string* getVstNameStr();
     static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
     static bool isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate);
-    static int trackAdmVstIndex(ReaperAPI const& api, MediaTrack *trk);
     static std::vector<int> trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *trk);
 
 private:

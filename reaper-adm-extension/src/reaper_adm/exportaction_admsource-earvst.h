@@ -68,18 +68,12 @@ public:
 
 	static const std::string* getDirectSpeakersVstNameStr();
 	static bool isDirectSpeakersVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackDirectSpeakersVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackDirectSpeakersVstIndexes(ReaperAPI const& api, MediaTrack* trk);
 
 	static const std::string* getObjectVstNameStr();
 	static bool isObjectVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackObjectVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackObjectVstIndexes(ReaperAPI const& api, MediaTrack* trk);
 
 	static const std::string* getHoaVstNameStr();
 	static bool isHoaVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk);
 
 	static bool isObjectPlugin(const std::string& vstNameStr);
 	static bool isDirectSpeakersPlugin(const std::string& vstNameStr);
@@ -125,7 +119,6 @@ public:
 	static const std::string* getVstNameStr();
 	static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
 	static bool isCandidateForExport(std::shared_ptr<EarSceneMasterVst> possibleCandidate);
-	static int trackEarSceneMasterVstIndex(ReaperAPI const& api, MediaTrack* trk);
 	static std::vector<int> trackEarSceneMasterVstIndexes(ReaperAPI const& api, MediaTrack* trk);
 
 private:
