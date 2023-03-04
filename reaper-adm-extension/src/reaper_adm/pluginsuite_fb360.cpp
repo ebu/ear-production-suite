@@ -295,7 +295,7 @@ void Facebook360PluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAuto
 
     auto firstBlock = directAutomation.blocks().front();
     if(isCommonDefinition(firstBlock)) {
-        int fxNum = api.TrackFX_AddByName(track->get(), AdmVst::getVstNameStr()->c_str(), false, TrackFXAddMode::QueryPresence);
+        int fxNum = api.TrackFX_AddByActualName(track->get(), AdmVst::getVstNameStr()->c_str(), false, TrackFXAddMode::QueryPresence);
         if(fxNum < 0) {
             // Not yet configured ADM Export VST
             configureAdmExportVst(directAutomation, *track, api);
@@ -317,7 +317,7 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
 
     // Check whether we already processed this track - no point duplicating effort
     /// Need to check that the plugin hasn't already been removed (already processed and was unsuccessful)
-    int fxNum = api.TrackFX_AddByName(track->get(), OBJECT_METADATA_PLUGIN_NAME, false, TrackFXAddMode::QueryPresence);
+    int fxNum = api.TrackFX_AddByActualName(track->get(), OBJECT_METADATA_PLUGIN_NAME, false, TrackFXAddMode::QueryPresence);
     if(fxNum < 0) return;
     /// Need to check that a preset hasn't already been applied (already processed and was successful)
     char presetname[255];
@@ -437,7 +437,7 @@ bool Facebook360PluginSuite::applyFXPreset(const HoaAutomation & hoaAutomation, 
         return false;
     }
 
-    int fxNum = api.TrackFX_AddByName(track->get(), OBJECT_METADATA_PLUGIN_NAME, false, TrackFXAddMode::QueryPresence);
+    int fxNum = api.TrackFX_AddByActualName(track->get(), OBJECT_METADATA_PLUGIN_NAME, false, TrackFXAddMode::QueryPresence);
     std::vector<std::string> pathOptions;
 
 #ifdef WIN32

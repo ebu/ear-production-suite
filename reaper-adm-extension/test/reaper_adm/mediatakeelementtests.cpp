@@ -46,7 +46,7 @@ TEST_CASE("MediaTakeElement") {
         auto mediaItem = reinterpret_cast<MediaItem*>(&fakeItemVal);
         auto mediaTake = reinterpret_cast<MediaItem_Take*>(&fakeTakeVal);
         ON_CALL(*mediaTrackElement, getTrack()).WillByDefault(Return(fakeTrack));
-        ON_CALL(api, TrackFX_AddByName(_, _, _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByActualName(_, _, _, _)).WillByDefault(Return(0));
         EXPECT_CALL(*mediaTrackElement, addMediaItem(_)).Times(AnyNumber()).WillRepeatedly(Return(mediaItem));
         EXPECT_CALL(api, AddTakeToMediaItem(_)).Times(AnyNumber()).WillRepeatedly(Return(mediaTake));
         EXPECT_CALL(api, SetMediaItemTake_Source(_, _)).Times(AnyNumber()).WillRepeatedly(Return(true));
