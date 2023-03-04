@@ -145,6 +145,8 @@ public:
     bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const override;
     std::vector<std::string> TrackFX_GetActualFXNames(MediaTrack* track) const override;
     void CleanFXName(std::string& name) const override;
+    int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const override;
+    int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const override;
 
 private:
     reaper_plugin_info_t& plugin_info;

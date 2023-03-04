@@ -234,6 +234,9 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD3(TrackFX_GetActualFXName, bool(MediaTrack* track, int fx, std::string& name));
   MOCK_CONST_METHOD1(TrackFX_GetActualFXNames, std::vector<std::string>(MediaTrack* track));
   MOCK_CONST_METHOD1(CleanFXName, void(std::string& name));
+  MOCK_CONST_METHOD2(TrackFX_PositionByActualName, int(MediaTrack* track, const std::string& fxName));
+  MOCK_CONST_METHOD4(TrackFX_AddByActualName, int(MediaTrack* track, const char* fxname, bool recFX, int instantiate));
+
 
 };
 
