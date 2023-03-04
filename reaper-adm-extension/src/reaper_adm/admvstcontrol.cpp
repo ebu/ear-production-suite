@@ -31,7 +31,7 @@ bool AdmVst::isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate)
 
 int AdmVst::trackAdmVstIndex(ReaperAPI const& api, MediaTrack *trk)
 {
-    return api.TrackFX_AddByName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
+    return api.TrackFX_AddByActualName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> AdmVst::trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *trk)
@@ -52,7 +52,7 @@ std::vector<int> AdmVst::trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *tr
 // ADMEXPORTVST
 
 AdmVst::AdmVst(MediaTrack* mediaTrack, ReaperAPI const& api) : PluginInstance(mediaTrack, api) {
-    auto index = api.TrackFX_AddByName(mediaTrack, ADM_VST_NAME, false, TrackFXAddMode::CreateIfMissing);
+    auto index = api.TrackFX_AddByActualName(mediaTrack, ADM_VST_NAME, false, TrackFXAddMode::CreateIfMissing);
     if(index < 0) {
         throw std::runtime_error("Could not add to or get plugin from track");
     }

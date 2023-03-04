@@ -445,7 +445,7 @@ bool EarInputVst::isDirectSpeakersVstAvailable(ReaperAPI const& api, bool doResc
 
 int EarInputVst::trackDirectSpeakersVstIndex(ReaperAPI const& api, MediaTrack *trk)
 {
-    return api.TrackFX_AddByName(trk, directSpeakersVstName.c_str(), false, TrackFXAddMode::QueryPresence);
+    return api.TrackFX_AddByActualName(trk, directSpeakersVstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> EarInputVst::trackDirectSpeakersVstIndexes(ReaperAPI const& api, MediaTrack *trk)
@@ -477,7 +477,7 @@ bool EarInputVst::isObjectVstAvailable(ReaperAPI const& api, bool doRescan)
 
 int EarInputVst::trackObjectVstIndex(ReaperAPI const& api, MediaTrack *trk)
 {
-    return api.TrackFX_AddByName(trk, objectVstName.c_str(), false, TrackFXAddMode::QueryPresence);
+    return api.TrackFX_AddByActualName(trk, objectVstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> EarInputVst::trackObjectVstIndexes(ReaperAPI const& api, MediaTrack *trk)
@@ -630,7 +630,7 @@ bool EarSceneMasterVst::isCandidateForExport(std::shared_ptr<EarSceneMasterVst> 
 
 int EarSceneMasterVst::trackEarSceneMasterVstIndex(ReaperAPI const& api, MediaTrack *trk)
 {
-    return api.TrackFX_AddByName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
+    return api.TrackFX_AddByActualName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> EarSceneMasterVst::trackEarSceneMasterVstIndexes(ReaperAPI const& api, MediaTrack *trk)
@@ -671,7 +671,7 @@ void EarSceneMasterVst::releaseCommunicator()
 
 EarSceneMasterVst::EarSceneMasterVst(MediaTrack * mediaTrack, ReaperAPI const & api) : PluginInstance(mediaTrack, api)
 {
-    auto index = api.TrackFX_AddByName(mediaTrack, EARPluginSuite::SCENEMASTER_PLUGIN_NAME, false, TrackFXAddMode::CreateIfMissing);
+    auto index = api.TrackFX_AddByActualName(mediaTrack, EARPluginSuite::SCENEMASTER_PLUGIN_NAME, false, TrackFXAddMode::CreateIfMissing);
     if(index < 0) {
         throw std::runtime_error("Could not add to or get plugin from track");
     }
@@ -878,7 +878,7 @@ bool EarInputVst::isHoaVstAvailable(ReaperAPI const& api, bool doRescan)
 
 int EarInputVst::trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk)
 {
-    return api.TrackFX_AddByName(trk, hoaVstName.c_str(), false, TrackFXAddMode::QueryPresence);
+    return api.TrackFX_AddByActualName(trk, hoaVstName.c_str(), false, TrackFXAddMode::QueryPresence);
 }
 
 std::vector<int> EarInputVst::trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk)

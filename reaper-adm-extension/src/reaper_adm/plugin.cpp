@@ -11,7 +11,7 @@ using namespace admplug;
 
 PluginInstance::PluginInstance(MediaTrack* mediaTrack, std::string pluginName, bool shouldInsert, ReaperAPI const& api) : track{mediaTrack, api}, name{pluginName}, api{api}
 {
-    auto index = api.TrackFX_AddByName(mediaTrack, pluginName.c_str(), false, shouldInsert? TrackFXAddMode::CreateNew : TrackFXAddMode::QueryPresence);
+    auto index = api.TrackFX_AddByActualName(mediaTrack, pluginName.c_str(), false, shouldInsert? TrackFXAddMode::CreateNew : TrackFXAddMode::QueryPresence);
     if(index < 0) {
         throw std::runtime_error("Could not add to or get plugin from track");
     }

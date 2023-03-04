@@ -34,7 +34,7 @@ void setApiDefaults(MockReaperAPI& api) {
     ON_CALL(api, GetTrackGUID(_)).WillByDefault(Return(&guid));
     ON_CALL(api, TrackFX_GetFXGUID(_, _)).WillByDefault(Return(&guid));
     ON_CALL(api, ValidatePtr(_, _)).WillByDefault(Return(true));
-    ON_CALL(api, TrackFX_AddByName(_, _, false, TrackFXAddMode::QueryPresence)).WillByDefault(Return(1));
+    ON_CALL(api, TrackFX_AddByActualName(_, _, false, TrackFXAddMode::QueryPresence)).WillByDefault(Return(1));
 }
 
 

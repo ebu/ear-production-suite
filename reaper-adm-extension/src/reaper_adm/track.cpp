@@ -37,7 +37,7 @@ int admplug::TrackInstance::deletePlugin(std::string pluginName, bool allInstanc
 {
     int deleteCount = 0;
     while(true){
-        int fxNum = api.TrackFX_AddByName(get(), pluginName.c_str(), false, TrackFXAddMode::QueryPresence);
+        int fxNum = api.TrackFX_AddByActualName(get(), pluginName.c_str(), false, TrackFXAddMode::QueryPresence);
         if(fxNum < 0) break;
         auto deleteSuccess = api.TrackFX_Delete(get(), fxNum);
         if(!deleteSuccess) break;
@@ -49,7 +49,7 @@ int admplug::TrackInstance::deletePlugin(std::string pluginName, bool allInstanc
 
 std::unique_ptr<Plugin> TrackInstance::getPlugin(std::string pluginName)
 {
-    auto index = api.TrackFX_AddByName(get(), pluginName.c_str(), false, TrackFXAddMode::QueryPresence);
+    auto index = api.TrackFX_AddByActualName(get(), pluginName.c_str(), false, TrackFXAddMode::QueryPresence);
     if(index < 0) {
         return nullptr;
     }
