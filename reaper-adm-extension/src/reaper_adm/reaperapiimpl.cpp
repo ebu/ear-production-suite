@@ -1044,6 +1044,10 @@ int admplug::ReaperAPIImpl::TrackFX_PositionByActualName(MediaTrack* track, cons
         if (fxs[i] == fxName) {
             return i;
         }
+        CleanFXName(fxs[i]);
+        if (fxs[i] == fxName) {
+            return i;
+        }
     }
     return -1;
 }
