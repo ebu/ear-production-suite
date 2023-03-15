@@ -14,6 +14,8 @@ set(HEADERS_SETUP
 	MainComponent.h
 	WindowBody.h
 	install_phases/component_initial.h
+	install_phases/component_license.h
+	install_phases/component_select_operation.h
 	install_phases/component_install_locations.h
 	install_phases/component_error_log.h
 	install_phases/component_uninstall_confirm.h
@@ -29,6 +31,8 @@ set(SOURCES_SETUP
 	MainComponent.cpp
 	WindowBody.cpp
 	install_phases/component_initial.cpp
+	install_phases/component_license.cpp
+	install_phases/component_select_operation.cpp
 	install_phases/component_install_locations.cpp
 	install_phases/component_error_log.cpp
 	install_phases/component_uninstall_confirm.cpp
@@ -71,6 +75,11 @@ if(WIN32)
 	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/uninstall_list.xml $<TARGET_FILE_DIR:setup>/SetupFiles/uninstall_list.xml
 	)
 endif()
+
+add_custom_command(TARGET setup PRE_BUILD
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/helpers
+		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/helpers/gen_license_header.cmake
+	)
 
 set_target_properties(setup PROPERTIES FOLDER tools)		
 target_link_libraries(setup PRIVATE Juce::core ear-version)

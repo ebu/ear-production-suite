@@ -16,30 +16,16 @@ ComponentInitial::ComponentInitial()
     instructionLabel.setFont(EarFontsSingleton::instance().Label);
     instructionLabel.setColour(Label::textColourId, EarColours::Label);
     instructionLabel.setText("Welcome to the EAR Production Suite Setup Application.\n\n"
-        "Please ensure REAPER is not running before continuing.\n\n\n"
-        "Select an operation:",
+        "Please ensure REAPER is not running before continuing.",
         juce::NotificationType::dontSendNotification);
     instructionLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(instructionLabel);
 
-    installButton.setButtonText("Install / Re-install");
-    installButton.setToggleable(false);
-    installButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Primary);
-    installButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
-    addAndMakeVisible(installButton);
-
-    uninstallButton.setButtonText("Uninstall");
-    uninstallButton.setToggleable(false);
-    uninstallButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::PrimaryHighlight);
-    uninstallButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
-    addAndMakeVisible(uninstallButton);
-
-    exitButton.setButtonText("Exit Setup");
-    exitButton.setToggleable(false);
-    exitButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Background);
-    exitButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
-    exitButton.onClick = []() {JUCEApplicationBase::quit(); };
-    addAndMakeVisible(exitButton);
+    continueButton.setButtonText("Continue");
+    continueButton.setToggleable(false);
+    continueButton.setColour(TextButton::ColourIds::buttonColourId, EarColours::Primary);
+    continueButton.setColour(TextButton::ColourIds::textColourOnId, EarColours::Label);
+    addAndMakeVisible(continueButton);
 }
 
 ComponentInitial::~ComponentInitial()
@@ -59,31 +45,15 @@ void ComponentInitial::resized()
     welcomeTitle.setBounds(area.removeFromTop(sectionHeight));
     instructionLabel.setBounds(area.removeFromTop(sectionHeight));
 
-    auto buttonSectionWidth = area.getWidth() / 3;
+    auto buttonSectionWidth = area.getWidth();
     auto buttonHeight = std::min(area.getHeight(), 40);
     auto buttonWidth = std::min(buttonSectionWidth, 160);
     auto buttonSectionTrimTB = (area.getHeight() - buttonHeight) / 2;
     auto buttonSectionTrimLR = (buttonSectionWidth - buttonWidth) / 2;
-
-    auto leftButtonArea = area.removeFromLeft(buttonSectionWidth);
-    leftButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
-    installButton.setBounds(leftButtonArea);
-
-    auto rightButtonArea = area.removeFromRight(buttonSectionWidth);
-    rightButtonArea.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
-    exitButton.setBounds(rightButtonArea);
-
-    area.reduce(buttonSectionTrimLR, buttonSectionTrimTB);
-    uninstallButton.setBounds(area);
-
+    continueButton.setBounds(area.reduced(buttonSectionTrimLR, buttonSectionTrimTB));
 }
 
-TextButton* ComponentInitial::getInstallButton()
+TextButton* ComponentInitial::getContinueButton()
 {
-    return &installButton;
-}
-
-TextButton* ComponentInitial::getUninstallButton()
-{
-    return &uninstallButton;
+    return &continueButton;
 }

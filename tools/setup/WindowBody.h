@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 #include "install_phases/component_initial.h"
+#include "install_phases/component_license.h"
+#include "install_phases/component_select_operation.h"
 #include "install_phases/component_error_log.h"
 #include "install_phases/component_uninstall_confirm.h"
 #include "install_phases/component_existing_search.h"
@@ -24,6 +26,8 @@ private:
     UninstallManifest uninstallManifest;
 
     ComponentInitial cInitial;
+    ComponentLicense cLicense;
+    ComponentSelectOperation cSelectOperation;
     ComponentErrorLog cErrorLog;
     ComponentUninstallConfirm cUninstallConfirm;
     ComponentExistingSearch cExistingSearch;
@@ -31,6 +35,8 @@ private:
     ComponentProcessing cProcessing;
     ComponentInstallLocations cInstallLocations;
 
+    void phaseLicense();
+    void phaseSelectOperation();
     void phaseSourcesCheck();
     void phaseInstallCleanupSearch();
     void phaseInstallCleanupProcessStart();

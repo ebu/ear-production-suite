@@ -4,8 +4,7 @@
 
 WindowBody::WindowBody()
 {
-    cInitial.getInstallButton()->onClick = [this]() { phaseSourcesCheck(); };
-    cInitial.getUninstallButton()->onClick = [this]() { phaseUninstallConfirm(); };
+    cInitial.getContinueButton()->onClick = [this]() { phaseLicense(); };
     addAndMakeVisible(cInitial);
 }
 
@@ -17,12 +16,14 @@ void WindowBody::paint (Graphics& g)
 {
 
 }
-
+ 
 void WindowBody::resized()
 {
     auto area = getLocalBounds();
 
     cInitial.setBounds(area);
+    cLicense.setBounds(area);
+    cSelectOperation.setBounds(area);
     cErrorLog.setBounds(area);
     cUninstallConfirm.setBounds(area);
     cExistingSearch.setBounds(area);
@@ -30,6 +31,21 @@ void WindowBody::resized()
     cProcessing.setBounds(area);
     cInstallLocations.setBounds(area);
 
+}
+
+void WindowBody::phaseLicense()
+{
+    removeAllChildren();
+    cLicense.getContinueButton()->onClick = [this]() { phaseSelectOperation(); };
+    addAndMakeVisible(cLicense);
+}
+
+void WindowBody::phaseSelectOperation()
+{
+    removeAllChildren();
+    cSelectOperation.getInstallButton()->onClick = [this]() { phaseSourcesCheck(); };
+    cSelectOperation.getUninstallButton()->onClick = [this]() { phaseUninstallConfirm(); };
+    addAndMakeVisible(cSelectOperation);
 }
 
 void WindowBody::phaseSourcesCheck()
