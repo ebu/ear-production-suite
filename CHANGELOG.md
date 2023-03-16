@@ -13,6 +13,12 @@ Version 1.0.0
 * Fix bus config when Input plug-ins on wide track [#228](https://github.com/ebu/ear-production-suite/issues/228)
 * Fix Size param not updating [#229](https://github.com/ebu/ear-production-suite/issues/229)
 * Fix plugin crash on other DAWs [#232](https://github.com/ebu/ear-production-suite/issues/232)
+* Fix parameters not updating in response to other parameter changes after JUCE update
+* Fix render dialog controls inadvertently re-enabling
+* Support render dialog changes in newer REAPER versions
+* Wider REAPER version support (back to 6.11)
+* Various performance improvements
+* Use more appropriate bus layouts
 
 Version 0.8.0
 
