@@ -9,42 +9,37 @@ A collection of VST3 audio plugins, and an extention to REAPER for production of
 
 ## Download/Install prebuilt plugins
 
-You can download prebuilt versions of the plugins and extension using the following links.
+You can download prebuilt versions of the plugins and extension using the link below. There is also an experimental Linux build available, but be aware this is only experimental and could prove buggy.
 
 Releases: https://ear-production-suite.ebu.io/
 
-After download copy the `ear-production-suite` folder and the `ADM Export Source` plugin to the correct folder as shown in the following table.
+There are two methods of installation; using the setup application, or manual.
+
+### Setup Application
+
+For Windows and MacOS, the download package will contain a Setup application.
+
+For MacOS, mount the downloaded disk image and run the "Setup EAR Production Suite" application within.
+
+For Windows, extract the contents of the downloaded package to a temporary location and run the setup application.
+
+### Manual Install
+
+After download, copy the `ear-production-suite` folder and the `ADM Export Source` plugin to the correct folder as shown in the following table.
 
 | System                    | Folder                                   |
 | ------------------------- | ---------------------------------------- |
 | macOS                     | ~/Library/Audio/Plug-ins/VST3            |
-| Windows (64)              | C:\Program Files\Common Files\VST3       |
+| Windows                   | C:\Program Files\Common Files\VST3       |
+| Linux                     | ~/.vst3                                  |
 
-To install the extension you have to copy the dynamic library `reaper_adm` in the zip file to your REAPER resource path. 
+To install the extension, you must copy the dynamic library `reaper_adm` from the `UserPlugins` directory of the downloaded package to your REAPER resource path. 
 
-You can open the folder from within REAPER via 
+You can open this resource folder from within REAPER via 
 
 ```
 [Options] -> [Show REAPER resource path in explorer/finder...]
 ```
-
-### OS X Gatekeeper
-On macOS Catalina or above you may experience plugin load errors due to the new Gatekeeper feature.
-You can disable Gatekeeper globally as per [this site](https://cronotek.net/blog/how-to-disable-gatekeeper-on-macos-mojave-and-catalina)
-using this command:
-
-```bash
-sudo spctl --master-disable 
-```
-
-You can also manually validate the files after install with
-```bash
-sudo xattr -rd com.apple.quarantine \
-~/Library/Application\ Support/REAPER/UserPlugins/reaper_adm.dylib \
-/Library/Audio/Plug-Ins/VST3/ADM\ Export\ Source.vst3 \
-/Library/Audio/Plug-Ins/VST3/ear-production-suite/
-```
-Substituting paths as needed if you have not installed to the default locations.
 
 ## Building from source
 
@@ -55,8 +50,6 @@ The recommended way to build the plugins is via CMake's preset mechanism. Before
 - Compiler with C++14 support
 - [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.8 or higher for manual build)
 - [Ninja](https://ninja-build.org/)
-
-Note that 3.21.0 is a very recent revision of CMake, if you already have it installed you may need to upgrade.
 
 ### MacOS
 ##### Build environment
