@@ -4,6 +4,7 @@
 #include "reaperapivalues.h"
 #include <optional>
 #include <vector>
+#include <utility>
 
 #ifdef _WIN32
   #define NOMINMAX
@@ -196,6 +197,9 @@ class ReaperAPI {
     virtual void CleanFXName(std::string& name) const = 0;
     virtual int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const = 0;
     virtual int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const = 0;
+    virtual std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const = 0;
+    virtual std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const = 0;
+    virtual std::string GetTrackStateChunkStr(MediaTrack* track) const = 0;
 
 };
 }

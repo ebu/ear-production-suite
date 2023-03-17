@@ -147,16 +147,16 @@ public:
     void CleanFXName(std::string& name) const override;
     int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const override;
     int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const override;
+    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const override;
+    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const override;
+    std::string GetTrackStateChunkStr(MediaTrack* track) const override;
 
 private:
     reaper_plugin_info_t& plugin_info;
 
-    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(MediaTrack* track) const;
-    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const;
     int reaperChannelOffsetForBusWidth(int busWidth) const;
     int toReaperChannelValue(int busWidth, int startChNum) const;
     int getSrcChannelValue(int busWidth, int startCh) const;
     int getDstChannelValue(int busWidth, int startCh) const;
-
 };
 }
