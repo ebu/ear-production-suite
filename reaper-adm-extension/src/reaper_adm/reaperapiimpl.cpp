@@ -849,15 +849,9 @@ std::optional<std::pair<double, double>> admplug::ReaperAPIImpl::getTrackAudioBo
     return std::optional<std::pair<double, double>>();
 }
 
-std::vector<std::pair<int, std::string>> admplug::ReaperAPIImpl::GetVSTElementsFromTrackStateChunk(MediaTrack* track) const
+std::vector<std::pair<int, std::string>> admplug::ReaperAPIImpl::GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const
 {
     std::vector<std::pair<int, std::string>> vst3Elements;
-
-    const size_t chunkMaxLen = 65535; // Should be plenty
-    char chunk[chunkMaxLen];
-    auto res = GetTrackStateChunk(track, chunk, chunkMaxLen, false);
-    if (!res) return vst3Elements;
-    std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
 
     const std::vector<char> quoteMarks{ '\'', '`', '"' };
     int elmStart = -1;
@@ -970,6 +964,16 @@ std::vector<std::string> admplug::ReaperAPIImpl::SplitVSTElement(const std::stri
     return sec;
 }
 
+std::string admplug::ReaperAPIImpl::GetTrackStateChunkStr(MediaTrack* track) const
+{
+    const size_t chunkMaxLen = 65535; // Should be plenty
+    char chunk[chunkMaxLen];
+    auto res = GetTrackStateChunk(track, chunk, chunkMaxLen, false);
+    if (!res) return std::string();
+    std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
+    return fullChunk;
+}
+
 bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
 {
     // Note that;
@@ -978,7 +982,9 @@ bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, 
     // Also does not support FX renamed in FX selection window
     // (although neither does this)
 
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
+    auto chunk = GetTrackStateChunkStr(track);
+
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
     if (fx >= vst3Elements.size()) {
         return false;
     }
@@ -1000,7 +1006,10 @@ std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaT
     // More efficient when you want to query every plugin on the track
 
     std::vector<std::string> names;
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(track);
+
+    auto chunk = GetTrackStateChunkStr(track);
+
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
 
     const int nameSectionNum = 0;
 
