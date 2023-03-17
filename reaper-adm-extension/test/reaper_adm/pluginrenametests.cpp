@@ -101,7 +101,8 @@ using namespace admplug;
 
 TEST_CASE("Track State Chunk Parsing") {
 
-    admplug::ReaperAPIImpl api(reaper_plugin_info_t{});
+    reaper_plugin_info_t info{};
+    admplug::ReaperAPIImpl api(info);
 
     auto vst3Elements = api.GetVSTElementsFromTrackStateChunk(trackState);
 
