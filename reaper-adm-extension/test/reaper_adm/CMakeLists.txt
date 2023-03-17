@@ -5,6 +5,7 @@ target_compile_definitions(testreaper_adm PUBLIC SWELL_TESTING)
 
 target_sources(testreaper_adm
     PRIVATE
+       pluginrenametests.cpp
        blockbuilders.cpp
        pcmtests.cpp
        nodetests.cpp
