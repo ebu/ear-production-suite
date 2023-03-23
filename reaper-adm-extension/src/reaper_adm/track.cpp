@@ -56,12 +56,6 @@ std::unique_ptr<Plugin> TrackInstance::getPlugin(std::string pluginName)
     return std::make_unique<PluginInstance>(get(), pluginName, false, api);
 }
 
-std::unique_ptr<Plugin> admplug::TrackInstance::getPlugin(int index)
-{
-    if(index < 0 || index >= api.TrackFX_GetCount(track)) return std::unique_ptr<Plugin>();
-    return std::make_unique<PluginInstance>(track, index, api);
-}
-
 std::vector<std::unique_ptr<Plugin>> admplug::TrackInstance::getPlugins(std::string pluginName)
 {
     std::vector<std::unique_ptr<Plugin>> pluginMatches;
@@ -75,17 +69,6 @@ std::vector<std::unique_ptr<Plugin>> admplug::TrackInstance::getPlugins(std::str
     }
 
     return pluginMatches;
-}
-
-std::vector<std::unique_ptr<Plugin>> admplug::TrackInstance::getPlugins()
-{
-    std::vector<std::unique_ptr<Plugin>> pluginMatches;
-
-    auto pluginCount = api.TrackFX_GetCount(get());
-    for(int pluginIndex = 0; pluginIndex < pluginCount; pluginIndex++) {
-        pluginMatches.push_back(std::make_unique<PluginInstance>(get(), pluginIndex, api));
-    }
-    return std::move(pluginMatches);
 }
 
 void TrackInstance::setParameter(const TrackParameter &parameter, double value) const

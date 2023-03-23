@@ -26,9 +26,7 @@ public:
     virtual std::unique_ptr<Plugin> createPlugin(std::string pluginName) = 0;
     virtual int deletePlugin(std::string pluginName, bool allInstances = true) = 0;
     virtual std::unique_ptr<Plugin> getPlugin(std::string pluginName) = 0; // TODO - get rid - this doesn't catch multiple instances, which we should always be checking for
-    virtual std::unique_ptr<Plugin> getPlugin(int index) = 0;
     virtual std::vector<std::unique_ptr<Plugin>> getPlugins(std::string pluginName) = 0;
-    virtual std::vector<std::unique_ptr<Plugin>> getPlugins() = 0;
     virtual void setParameter(TrackParameter const& parameter, double value) const = 0;
     virtual void setAsVCASlave(TrackGroup const& group) = 0;
     virtual void setAsVCAMaster(const TrackGroup &group) = 0;
@@ -56,9 +54,7 @@ public:
     std::unique_ptr<Plugin> createPlugin(std::string pluginName) override;
     int deletePlugin(std::string pluginName, bool allInstances = true) override;
     std::unique_ptr<Plugin> getPlugin(std::string pluginName) override;
-    std::unique_ptr<Plugin> getPlugin(int index) override;
     std::vector<std::unique_ptr<Plugin>> getPlugins(std::string pluginName) override;
-    std::vector<std::unique_ptr<Plugin>> getPlugins() override;
     void setParameter(TrackParameter const& parameter, double value) const override;
     void setAsVCASlave(TrackGroup const& group) override;
     void setAsVCAMaster(const TrackGroup &group) override;
