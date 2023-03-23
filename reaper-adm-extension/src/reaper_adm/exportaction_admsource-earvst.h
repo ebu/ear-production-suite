@@ -61,7 +61,6 @@ public:
 	~EarInputVst() {};
 
 	int getTrackMapping();
-	int getWidth();
 	int getInputInstanceId();
 
 	// Statics

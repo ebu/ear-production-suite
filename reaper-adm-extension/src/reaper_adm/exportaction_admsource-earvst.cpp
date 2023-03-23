@@ -503,43 +503,6 @@ int EarInputVst::getTrackMapping()
     return *optVal;
 }
 
-int EarInputVst::getWidth()
-{
-    if (isObjectPlugin(name)) {
-        return 1;
-    }
-
-    if (isDirectSpeakersPlugin(name)) {
-        assert(paramDirectSpeakersPackFormatIdValue);
-        auto packFormatIdValue = getParameterWithConvertToInt(*paramDirectSpeakersPackFormatIdValue);
-        assert(packFormatIdValue.has_value());
-
-        if(packFormatIdValue.has_value()) {
-            auto speakerLayoutIndex = ear::plugin::getIndexFromPackFormatIdValue(*packFormatIdValue);
-            if(speakerLayoutIndex >= 0) {
-                return ear::plugin::SPEAKER_SETUPS[speakerLayoutIndex].speakers.size();
-            }
-        }
-        return  0;
-    }
-
-    if (isHoaPlugin(name)) {
-        assert(paramHoaPackFormatIdValue);
-        auto packFormatIdValue = getParameterWithConvertToInt(*paramHoaPackFormatIdValue);
-        assert(packFormatIdValue.has_value());
-
-        if(packFormatIdValue.has_value()) {
-            auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatIdValue);
-            if(pfData) {
-                return pfData->relatedChannelFormats.size();
-            }
-        }
-        return 0;
-    }
-
-    return 0;
-}
-
 int EarInputVst::getInputInstanceId() {
     if(isObjectPlugin(name)) {
         assert(paramObjectInstanceId);

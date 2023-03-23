@@ -66,7 +66,6 @@ auto getMockObjectAutoElement() {
     ON_CALL(*element, getTrack()).WillByDefault(Return(track));
     ON_CALL(*element, parentTake()).WillByDefault(Return(take));
     ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
     ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
     auto simpleObj = adm::createSimpleObject("Test");
     auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid, 0);
