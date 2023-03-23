@@ -14,6 +14,7 @@ Version 1.0.0
 * Fix Size param not updating [#229](https://github.com/ebu/ear-production-suite/issues/229)
 * Fix plugin crash on other DAWs [#232](https://github.com/ebu/ear-production-suite/issues/232)
 * Support plugin renaming in REAPER [#240](https://github.com/ebu/ear-production-suite/issues/240)
+* Fix blank Scene when importing ADM with no high-level metadata [#242](https://github.com/ebu/ear-production-suite/issues/242)
 * Fix parameters not updating in response to other parameter changes after JUCE update
 * Fix render dialog controls inadvertently re-enabling
 * Support render dialog changes in newer REAPER versions
