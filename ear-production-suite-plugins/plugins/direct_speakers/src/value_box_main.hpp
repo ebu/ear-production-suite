@@ -31,7 +31,7 @@ class ValueBoxMain : public Component {
     useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
     addAndMakeVisible(useTrackNameCheckbox_.get());
 
-    routingLabel_->setFont(EarFonts::Label);
+    routingLabel_->setFont(EarFontsSingleton::instance().Label);
     routingLabel_->setText("Routing",
                            juce::NotificationType::dontSendNotification);
     routingLabel_->setColour(Label::textColourId, EarColours::Label);
@@ -41,7 +41,7 @@ class ValueBoxMain : public Component {
     routingComboBox_->setDefaultText("Select Scene channel range");
     addAndMakeVisible(routingComboBox_.get());
 
-    speakerSetupLabel_->setFont(EarFonts::Label);
+    speakerSetupLabel_->setFont(EarFontsSingleton::instance().Label);
     speakerSetupLabel_->setColour(Label::textColourId, EarColours::Label);
     speakerSetupLabel_->setText("Layout",
                                 juce::NotificationType::dontSendNotification);

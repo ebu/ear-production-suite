@@ -19,26 +19,26 @@ public:
         rollLabel_(std::make_unique<Label>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
-    headingLabel_->setFont(EarFonts::Heading);
+    headingLabel_->setFont(EarFontsSingleton::instance().Heading);
     headingLabel_->setColour(Label::textColourId, EarColours::Heading);
     headingLabel_->setText("Listener Orientation",
                            juce::NotificationType::dontSendNotification);
     headingLabel_->setJustificationType(Justification::bottomLeft);
     addAndMakeVisible(headingLabel_.get());
 
-    yawLabel_->setFont(EarFonts::Label);
+    yawLabel_->setFont(EarFontsSingleton::instance().Label);
     yawLabel_->setColour(Label::textColourId, EarColours::Label);
     yawLabel_->setText("Yaw", juce::NotificationType::dontSendNotification);
     yawLabel_->setJustificationType(Justification::topLeft);
     addAndMakeVisible(yawLabel_.get());
 
-    pitchLabel_->setFont(EarFonts::Label);
+    pitchLabel_->setFont(EarFontsSingleton::instance().Label);
     pitchLabel_->setColour(Label::textColourId, EarColours::Label);
     pitchLabel_->setText("Pitch", juce::NotificationType::dontSendNotification);
     pitchLabel_->setJustificationType(Justification::topLeft);
     addAndMakeVisible(pitchLabel_.get());
 
-    rollLabel_->setFont(EarFonts::Label);
+    rollLabel_->setFont(EarFontsSingleton::instance().Label);
     rollLabel_->setColour(Label::textColourId, EarColours::Label);
     rollLabel_->setText("Roll", juce::NotificationType::dontSendNotification);
     rollLabel_->setJustificationType(Justification::topLeft);

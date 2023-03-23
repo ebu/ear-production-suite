@@ -130,11 +130,11 @@ class SpeakerLayer : public Component {
 
   Layer layer_;
 
-  Font speakerLabelFont_ = EarFonts::Description;
-  Font lfeLabelFont_ = EarFonts::Measures;
+  Font speakerLabelFont_ = EarFontsSingleton::instance().Description;
+  Font lfeLabelFont_ = EarFontsSingleton::instance().Measures;
   const float labelDistance_ = 13.f;
   // ITU Labels
-  // Font speakerLabelFont_ = EarFonts::Measures;
+  // Font speakerLabelFont_ = EarFontsSingleton::instance().Measures;
   // const float labelDistance_ = 11.f;
 
   juce::Point<float> centre_;

@@ -19,7 +19,7 @@ class GainInteractionSettings : public Component {
         gainMinSlider(std::make_unique<EarSlider>()),
         gainMaxLabel(std::make_unique<Label>()),
         gainMaxSlider(std::make_unique<EarSlider>()) {
-    gainLabel->setFont(EarFonts::Label);
+    gainLabel->setFont(EarFontsSingleton::instance().Label);
     gainLabel->setColour(Label::textColourId, EarColours::Label);
     gainLabel->setText("Gain", dontSendNotification);
     gainLabel->setJustificationType(Justification::bottomRight);
@@ -44,7 +44,7 @@ class GainInteractionSettings : public Component {
     gainSliderRange->setSkewFactorFromMidPoint(-20.f);
     addAndMakeVisible(gainSliderRange.get());
 
-    gainMinLabel->setFont(EarFonts::MinMaxLabel);
+    gainMinLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     gainMinLabel->setColour(Label::textColourId, EarColours::Label);
     gainMinLabel->setText("Min", juce::NotificationType::dontSendNotification);
     gainMinLabel->setJustificationType(Justification::right);
@@ -71,7 +71,7 @@ class GainInteractionSettings : public Component {
     };
     addAndMakeVisible(gainMinSlider.get());
 
-    gainMaxLabel->setFont(EarFonts::MinMaxLabel);
+    gainMaxLabel->setFont(EarFontsSingleton::instance().MinMaxLabel);
     gainMaxLabel->setColour(Label::textColourId, EarColours::Label);
     gainMaxLabel->setText("Max", juce::NotificationType::dontSendNotification);
     gainMaxLabel->setJustificationType(Justification::right);

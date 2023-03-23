@@ -6,8 +6,24 @@ std::string const& eps::baseVersion() {
 }
 
 std::string const& eps::currentVersion() {
+#ifdef BAREBONESPROFILE
+    static std::string currentVersion("@DESCRIPTIVE_VERSION@[bb]");
+#else
     static std::string currentVersion("@DESCRIPTIVE_VERSION@");
+#endif
     return currentVersion;
+}
+
+int const eps::versionMajor() {
+	return @VERSION_MAJOR@;
+}
+
+int const eps::versionMinor() {
+	return @VERSION_MINOR@;
+}
+
+int const eps::versionRevision() {
+	return @VERSION_PATCH@;
 }
 
 bool const eps::versionInfoAvailable() {

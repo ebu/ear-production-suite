@@ -188,6 +188,8 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD4(GetSetProjectInfo, double(ReaProject* project, const char* desc, double value, bool is_set));
   MOCK_CONST_METHOD0(GetAppVersion, const char*());
   MOCK_CONST_METHOD3(LocalizeString, const char*(const char* src_string, const char* section, int flagsOptional));
+  MOCK_CONST_METHOD4(GetTrackStateChunk, bool(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional));
+  MOCK_CONST_METHOD3(SetTrackStateChunk, bool(MediaTrack* track, const char* str, bool isundoOptional));
 
   // Custom funcs
   MOCK_CONST_METHOD0(UpdateArrangeForAutomation,
@@ -229,6 +231,14 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD4(mapFxPin, void(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel));
   MOCK_CONST_METHOD1(forceAmplitudeScaling, bool(TrackEnvelope * trackEnvelope));
   MOCK_CONST_METHOD2(getTrackAudioBounds, std::optional<std::pair<double, double>>(MediaTrack* tr, bool ignoreBeforeZero));
+  MOCK_CONST_METHOD3(TrackFX_GetActualFXName, bool(MediaTrack* track, int fx, std::string& name));
+  MOCK_CONST_METHOD1(TrackFX_GetActualFXNames, std::vector<std::string>(MediaTrack* track));
+  MOCK_CONST_METHOD1(CleanFXName, void(std::string& name));
+  MOCK_CONST_METHOD2(TrackFX_PositionByActualName, int(MediaTrack* track, const std::string& fxName));
+  MOCK_CONST_METHOD4(TrackFX_AddByActualName, int(MediaTrack* track, const char* fxname, bool recFX, int instantiate));
+  MOCK_CONST_METHOD1(GetVSTElementsFromTrackStateChunk, std::vector<std::pair<int, std::string>>(const std::string& fullChunk));
+  MOCK_CONST_METHOD3(SplitVSTElement, std::vector<std::string>(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators));
+  MOCK_CONST_METHOD1(GetTrackStateChunkStr, std::string(MediaTrack* track));
 
 };
 

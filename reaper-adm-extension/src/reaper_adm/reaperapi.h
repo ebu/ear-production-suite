@@ -3,6 +3,8 @@
 #include <memory>
 #include "reaperapivalues.h"
 #include <optional>
+#include <vector>
+#include <utility>
 
 #ifdef _WIN32
   #define NOMINMAX
@@ -155,6 +157,8 @@ class ReaperAPI {
     virtual double GetSetProjectInfo(ReaProject * project, const char* desc, double value, bool is_set) const = 0;
     virtual const char* GetAppVersion() const = 0;
     virtual const char* LocalizeString(const char* src_string, const char* section, int flagsOptional) const = 0;
+    virtual bool GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const = 0;
+    virtual bool SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const = 0;
 
     static constexpr int RENDER_ITEMS_AS_NEW_TAKE_ID = 41999;
     static constexpr int CROP_TO_ACTIVE_TAKE_IN_ITEMS = 40131;
@@ -188,5 +192,14 @@ class ReaperAPI {
     virtual void mapFxPin(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel) const = 0;
     virtual bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const = 0;
     virtual std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const = 0;
+    virtual bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const = 0;
+    virtual std::vector<std::string> TrackFX_GetActualFXNames(MediaTrack* track) const = 0;
+    virtual void CleanFXName(std::string& name) const = 0;
+    virtual int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const = 0;
+    virtual int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const = 0;
+    virtual std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const = 0;
+    virtual std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const = 0;
+    virtual std::string GetTrackStateChunkStr(MediaTrack* track) const = 0;
+
 };
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../helper/singleton.hpp"
 #include "JuceHeader.h"
 #include "roboto.hpp"
 
@@ -7,25 +8,32 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-namespace EarFonts {
+struct EarFonts {
+  EarFonts()
+      : HeroHeading(font::RobotoSingleton::instance().getRegular(25.f)),
+        Heading(font::RobotoSingleton::instance().getMedium(16.f)),
+        Label(font::RobotoSingleton::instance().getRegular(14.f)),
+        Items(font::RobotoSingleton::instance().getMedium(14.f)),
+        Values(font::RobotoSingleton::instance().getMedium(12.f)),
+        Description(font::RobotoSingleton::instance().getLight(12.f)),
+        Units(font::RobotoSingleton::instance().getMedium(10.f)),
+        Measures(font::RobotoSingleton::instance().getLight(10.f)),
+        Version(font::RobotoSingleton::instance().getLight(10.f)),
+        MinMaxLabel(font::RobotoSingleton::instance().getRegular(12.f)) {}
 
-static const Font HeroHeading =
-    font::RobotoSingleton::instance().getRegular(25.f);
-static const Font Heading = font::RobotoSingleton::instance().getMedium(16.f);
-static const Font Label = font::RobotoSingleton::instance().getRegular(14.f);
-static const Font Items = font::RobotoSingleton::instance().getMedium(14.f);
-static const Font Values = font::RobotoSingleton::instance().getMedium(12.f);
-static const Font Description =
-    font::RobotoSingleton::instance().getLight(12.f);
-static const Font Units = font::RobotoSingleton::instance().getMedium(10.f);
-static const Font Measures = font::RobotoSingleton::instance().getLight(10.f);
-static const Font Version = font::RobotoSingleton::instance().getLight(10.f);
+  const Font HeroHeading;
+  const Font Heading;
+  const Font Label;
+  const Font Items;
+  const Font Values;
+  const Font Description;
+  const Font Units;
+  const Font Measures;
+  const Font Version;
+  const Font MinMaxLabel;
+};
 
-// --
-static const Font MinMaxLabel =
-    font::RobotoSingleton::instance().getRegular(12.f);
-
-}  // namespace EarFonts
+typedef Singleton<EarFonts> EarFontsSingleton;
 
 }  // namespace ui
 }  // namespace plugin

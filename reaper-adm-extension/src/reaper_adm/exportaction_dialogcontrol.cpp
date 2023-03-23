@@ -5,27 +5,39 @@
 #include "resource.h"
 #include "exportaction_issues.h"
 #include "exportaction.h"
-
-// Lots of assumptions made here! May need more re-jigging if future versions differ
-#define EXPECTED_RENDER_DIALOG_WINDOW_TITLE "Render to File"
-#define EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION "8000"
-#define EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION "Mono"
-#define EXPECTED_PRESETS_BUTTON_TEXT "Presets"
-#define EXPECTED_NORMALIZE_BUTTON_TEXT "Normalize/Limit..."
-#define EXPECTED_SECOND_PASS_CHECKBOX_TEXT "2nd pass render"
-#define EXPECTED_MONO2MONO_CHECKBOX_TEXT "Tracks with only mono media to mono files"
-#define EXPECTED_MULTI2MULTI_CHECKBOX_TEXT "Multichannel tracks to multichannel files"
-#define REQUIRED_SOURCE_COMBO_OPTION "Master mix"
-#define REQUIRED_BOUNDS_COMBO_OPTION "Entire project"
-#define EXPECTED_CHANNEL_COUNT_LABEL_TEXT "Channels:"
-#define REQUIRED_CHANNEL_COUNT_COMBO_OPTION "Mono"
-#define EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION "Point Sampling (lowest quality, retro)"
+#include <helper/char_encoding.hpp>
 
 #define TIMER_ID 1
+
+namespace {
 
 int MakeWParam(int loWord, int hiWord)
 {
     return (loWord & 0xFFFF) + ((hiWord & 0xFFFF) << 16);
+}
+
+void localise(std::string &str, std::shared_ptr<ReaperAPI> api) {
+    if(std::stof(api->GetAppVersion()) >= 6.11f) {
+        auto loc = api->LocalizeString(str.c_str(), "render", 0);
+        std::string localised{ api->LocalizeString(str.c_str(),"render", 0) };
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+        localised = api->LocalizeString(str.c_str(), "DLG_506", 0);
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+        // Note that the above sections fall-through to common anyway, but for completeness...
+        localised = api->LocalizeString(str.c_str(), "common", 0);
+        if(!localised.empty() && localised != str) {
+            str = localised;
+            return;
+        }
+    }
+}
+
 }
 
 RenderDialogState::RenderDialogState(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst) : reaperApi{ api }, reaperInst{ *inst } {
@@ -38,7 +50,22 @@ RenderDialogState::ControlType RenderDialogState::getControlType(HWND hwnd){
 
     if (!hwnd || !IsWindow(hwnd)) return UNKNOWN;
 
-#ifdef __APPLE__
+#ifdef WIN32
+    char szClassName[9];
+    GetClassName(hwnd, szClassName, 9);
+    if(strcmp(szClassName, "Edit") == 0) return TEXT;
+    if(strcmp(szClassName, "Static") == 0) return TEXT;
+    if(strcmp(szClassName, "Button") == 0) return BUTTON;
+
+    if(strcmp(szClassName, "ComboBox") == 0) {
+        COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
+        GetComboBoxInfo(hwnd, &info);
+        auto editBoxText = getWindowText(info.hwndItem);
+        bool editable = SetWindowText(info.hwndItem, "TEST");
+        SetWindowText(info.hwndItem, editBoxText.c_str());
+        return editable ? EDITABLECOMBO : COMBOBOX;
+    }
+#else
     if(SWELL_IsButton(hwnd)) return BUTTON;
 
     if(SWELL_IsStaticText(hwnd)){
@@ -56,23 +83,6 @@ RenderDialogState::ControlType RenderDialogState::getControlType(HWND hwnd){
     } catch(...){}
 #endif
 
-#ifdef WIN32
-    char szClassName[9];
-    GetClassName(hwnd, szClassName, 9);
-    if(strcmp(szClassName, "Edit") == 0) return TEXT;
-    if(strcmp(szClassName, "Static") == 0) return TEXT;
-    if(strcmp(szClassName, "Button") == 0) return BUTTON;
-
-    if(strcmp(szClassName, "ComboBox") == 0) {
-        COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
-        GetComboBoxInfo(hwnd, &info);
-        auto editBoxText = getWindowText(info.hwndItem);
-        bool editable = SetWindowText(info.hwndItem, "TEST");
-        SetWindowText(info.hwndItem, editBoxText.c_str());
-        return editable ? EDITABLECOMBO : COMBOBOX;
-    }
-#endif
-
     return UNKNOWN;
 }
 
@@ -81,14 +91,12 @@ HWND RenderDialogState::getComboBoxEdit(HWND hwnd){
     if(controlType == COMBOBOX) return hwnd;
     if(controlType != EDITABLECOMBO) return HWND();
 
-#ifdef __APPLE__
-    return hwnd; //Same thing on OSX - editable bit IS the combobox
-#endif
-
 #ifdef WIN32
     COMBOBOXINFO info = { sizeof(COMBOBOXINFO) };
     GetComboBoxInfo(hwnd, &info);
     return info.hwndItem;
+#else
+    return hwnd; //Same thing on OSX - editable bit IS the combobox
 #endif
 
     return HWND();
@@ -109,9 +117,14 @@ std::string RenderDialogState::getComboBoxItemText(HWND hwnd, int itemIndex)
 
 std::string RenderDialogState::getWindowText(HWND hwnd)
 {
+#ifdef WIN32
+    wchar_t wintxt[100];
+    GetWindowTextW(hwnd, wintxt, 100);
+#else
     char wintxt[100];
     GetWindowText(hwnd, wintxt, 100);
-    return std::string(wintxt);
+#endif
+    return bufferToString(wintxt);
 }
 
 HWND RenderDialogState::ShowConfig(const void *cfg, int cfg_l, HWND parent)
@@ -166,6 +179,21 @@ void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
 {
+    localise(EXPECTED_RENDER_DIALOG_WINDOW_TITLE, reaperApi);
+    localise(EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT1, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT2, reaperApi);
+    localise(EXPECTED_SECOND_PASS_CHECKBOX_TEXT, reaperApi);
+    localise(EXPECTED_MONO2MONO_CHECKBOX_TEXT, reaperApi);
+    localise(EXPECTED_MULTI2MULTI_CHECKBOX_TEXT, reaperApi);
+    localise(REQUIRED_SOURCE_COMBO_OPTION, reaperApi);
+    localise(REQUIRED_BOUNDS_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_CHANNEL_COUNT_LABEL_TEXT, reaperApi);
+    localise(REQUIRED_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
+    localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
+
     // Our dialog displayed - reset all vars (might not be the first time around)
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
@@ -197,15 +225,61 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
                                                                 // This will involve fixing some values and disabling those controls
 
     // MUST do source combo before bounds combo (it affects options)
+    // MUST also do channel count in first pass , as changing that re-enables the bounds checkbox!
     if (hwnd && IsWindow(hwnd))
     {
-        if (getControlType(hwnd) == COMBOBOX) {
+        auto controlType = getControlType(hwnd);
+
+        if (controlType == COMBOBOX) {
             // See if this is the 'Source' dropdown by setting it to the option we want - if successful, it was, and so disable it
             if (selectInComboBox(hwnd, REQUIRED_SOURCE_COMBO_OPTION) != CB_ERR) {
                 sourceControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
         }
+
+        if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
+            // NOTE: Sample Rate and Channels controls are;
+            //       EDITABLECOMBO in REAPER <=6.11
+            //       COMBOBOX in REAPER >=6.12
+
+            auto itemText = getComboBoxItemText(hwnd);
+            // See if this is the sample rate dropdown by seeing if the first item is EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION
+            if(itemText == EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION){
+                sampleRateControlHwnd = hwnd;
+                auto editControl = getComboBoxEdit(hwnd);
+                auto currentOption = getWindowText(editControl);
+                if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
+                    sampleRateLastOption = currentOption;
+                }
+                if(admExportHandler && admExportHandler->getAdmExportSources()) {
+                    int sRate = admExportHandler->getAdmExportSources()->getSampleRate();
+                    if(sRate > 0) {
+                        auto sr = std::to_string(sRate);
+                        auto comboControl = *sampleRateControlHwnd;
+                        sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
+                        auto editControl = getComboBoxEdit(comboControl);
+                        sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
+                        UpdateWindow(editControl);
+                    }
+                }
+                EnableWindow(editControl, false);
+                UpdateWindow(editControl);
+            }
+            // See if this is the channels dropdown by seeing if the first item is EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION
+            if(itemText ==  EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION){
+                channelsControlHwnd = hwnd;
+                auto editControl = getComboBoxEdit(hwnd);
+                auto currentOption = getWindowText(editControl);
+                if(channelsLastOption.length() == 0 && currentOption.length() > 0){
+                    channelsLastOption = currentOption;
+                }
+                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
+                UpdateWindow(editControl);
+                ShowWindow(hwnd, SW_HIDE);
+            }
+        }
+
     }
 
     return true; // MUST return true to continue iterating through controls
@@ -226,7 +300,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
-            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT){
+            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2){
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
@@ -253,7 +327,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             }
         }
 
-        if (controlType == TEXT) {
+        if (controlType == TEXT || controlType == EDITABLECOMBO) {
             if (winStr == EXPECTED_CHANNEL_COUNT_LABEL_TEXT){
                 // This is the label for the channel count combobox - hide it
                 channelsLabelHwnd = hwnd;
@@ -262,34 +336,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         }
 
         if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
-            // NOTE: Sample Rate and Channels controls are;
-            //       EDITABLECOMBO in REAPER <=6.11
-            //       COMBOBOX in REAPER >=6.12
-
             auto itemText = getComboBoxItemText(hwnd);
-            // See if this is the sample rate dropdown by seeing if the first item is EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION
-            if(itemText == EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION){
-                sampleRateControlHwnd = hwnd;
-                auto editControl = getComboBoxEdit(hwnd);
-                auto currentOption = getWindowText(editControl);
-                if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
-                    sampleRateLastOption = currentOption;
-                }
-                EnableWindow(editControl, false);
-                UpdateWindow(editControl);
-            }
-            // See if this is the channels dropdown by seeing if the first item is EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION
-            if(itemText ==  EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION){
-                channelsControlHwnd = hwnd;
-                auto editControl = getComboBoxEdit(hwnd);
-                auto currentOption = getWindowText(editControl);
-                if(channelsLastOption.length() == 0 && currentOption.length() > 0){
-                    channelsLastOption = currentOption;
-                }
-                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
-                UpdateWindow(editControl);
-                ShowWindow(hwnd, SW_HIDE);
-            }
             // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
             if(itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
                 resampleModeControlHwnd = hwnd;
@@ -402,27 +449,14 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 
         sampleRateControlSetError = false;
         channelsControlSetError = false;
+        
+        admExportHandler = std::make_shared<AdmExportHandler>();
+        admExportHandler->repopulate(*reaperApi);
+        
         EnumChildWindows(renderDialogHandle, RenderDialogControl::callback_PrepareRenderControl_pass1, 0);
         EnumChildWindows(renderDialogHandle, RenderDialogControl::callback_PrepareRenderControl_pass2, 0);
         UpdateWindow(renderDialogHandle);
         // By this point we should have handles to all controls we're taking over
-
-        admExportHandler = std::make_shared<AdmExportHandler>();
-        admExportHandler->repopulate(*reaperApi);
-        if(sampleRateControlHwnd.has_value()) {
-            int sRate = 0;
-            if(admExportHandler->getAdmExportSources()) {
-                sRate = admExportHandler->getAdmExportSources()->getSampleRate();
-            }
-            if(sRate > 0) {
-                auto sr = std::to_string(sRate);
-                auto comboControl = *sampleRateControlHwnd;
-                sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
-                auto editControl = getComboBoxEdit(comboControl);
-                sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
-                UpdateWindow(editControl);
-            }
-        }
 
         auto infoPaneText = getAdmExportVstsInfoString();
         // Note that some controls are not checked as they are not present in all versions of REAPER anyway, so it's OK for them to be missing

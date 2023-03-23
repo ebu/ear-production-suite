@@ -17,7 +17,7 @@ class EarExpansionPanel : public Component {
         headingButton_(std::make_unique<EarButton>()),
         component_(nullptr) {
     headingButton_->setColour(EarButton::textColourId, EarColours::Label);
-    headingButton_->setFont(EarFonts::Values);
+    headingButton_->setFont(EarFontsSingleton::instance().Values);
     headingButton_->setShape(EarButton::Shape::Toggle);
     headingButton_->setClickingTogglesState(true);
     headingButton_->onClick = [this]() {

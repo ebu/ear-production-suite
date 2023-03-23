@@ -60,7 +60,7 @@ String EarComboBoxTextEntry::getText() const { return text_; }
 void EarComboBoxTextEntry::drawEntryInList(Graphics& g,
                                            juce::Rectangle<int> area) {
   g.setColour(findColour(textColourId));
-  g.setFont(EarFonts::Items);
+  g.setFont(EarFontsSingleton::instance().Items);
   g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(14),
              Justification::left);
 }
@@ -68,7 +68,7 @@ void EarComboBoxTextEntry::drawEntryInList(Graphics& g,
 void EarComboBoxTextEntry::drawEntryInButton(Graphics& g,
                                              juce::Rectangle<int> area) {
   g.setColour(findColour(textColourId));
-  g.setFont(EarFonts::Items);
+  g.setFont(EarFontsSingleton::instance().Items);
   g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(28),
              Justification::left);
 }
@@ -368,7 +368,7 @@ void EarComboBoxPopup::paint(Graphics& g) {
   if (entry) {
     entry->drawEntryInButton(g, comboBox_->getLocalBounds());
   } else {
-    g.setFont(EarFonts::Items);
+    g.setFont(EarFontsSingleton::instance().Items);
     g.setColour(EarColours::ComboBoxText);
     g.drawText(
         comboBox_->getDefaultText(),
@@ -432,7 +432,7 @@ void EarComboBox::paint(Graphics& g) {
   if (entry) {
     entry->drawEntryInButton(g, getLocalBounds());
   } else {
-    g.setFont(EarFonts::Items);
+    g.setFont(EarFontsSingleton::instance().Items);
     g.setColour(EarColours::Text.withAlpha(Emphasis::disabled));
     g.drawText(defaultText_,
                getLocalBounds().withTrimmedLeft(14).withTrimmedRight(28),

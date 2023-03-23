@@ -109,7 +109,7 @@ class ElementOverview : public Component, private Timer {
         .withTrimmedBottom(20.f);
     g.setColour(EarColours::Sphere);
     drawSphereInRect(g, sphere, 1.f);
-    g.setFont(EarFonts::Description);
+    g.setFont(EarFontsSingleton::instance().Description);
     g.setColour(EarColours::Label);
     auto depthSphere = sphere.withSizeKeepingCentre(
         sphere.getWidth(), depthFactor_ * sphere.getHeight());

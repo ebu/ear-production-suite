@@ -75,7 +75,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
     speakerMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
     addAndMakeVisible(speakerMeters_.back().get());
   }
-  setSize(735, 650);
+  setSize(735, 655);
 }
 
 EarMonitoringAudioProcessorEditor::~EarMonitoringAudioProcessorEditor() {}
@@ -97,18 +97,19 @@ void EarMonitoringAudioProcessorEditor::resized() {
   auto bottomLabelsArea = area.removeFromBottom(30);
   versionLabel.setBounds(bottomLabelsArea);
 
-  auto topArea = area.removeFromTop(290).reduced(5, 5);
+  auto speakerMeterBoxHeight = area.getHeight() / 2;
+  auto topArea = area.removeFromTop(speakerMeterBoxHeight).reduced(5, 5);
   speakerMeterBoxTop_->setBounds(topArea);
-  auto bottomArea = area.removeFromTop(290).reduced(5, 5);
+  auto bottomArea = area.removeFromTop(speakerMeterBoxHeight).reduced(5, 5);
   speakerMeterBoxBottom_->setBounds(bottomArea);
-  topArea.removeFromTop(66);
+  topArea.removeFromTop(45);
   topArea.removeFromLeft(30);
   topArea.removeFromBottom(15);
   for (int i = 0; i < 12 && i < speakerMeters_.size(); ++i) {
     speakerMeters_.at(i)->setBounds(topArea.removeFromLeft(50));
     topArea.removeFromLeft(5);
   }
-  bottomArea.removeFromTop(66);
+  bottomArea.removeFromTop(45);
   bottomArea.removeFromLeft(30);
   bottomArea.removeFromBottom(15);
   for (int i = 12; i < 24 && i < speakerMeters_.size(); ++i) {

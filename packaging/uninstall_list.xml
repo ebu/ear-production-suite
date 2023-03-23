@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UninstallList>
+
+  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
+  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
+  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
+  <Directory Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360"/>
+  <Directory Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets"/>
+  
+  <File Path="[EPS-EXTRAS-DIR]/LICENSE.pdf"/>
+  <File Path="[EPS-EXTRAS-DIR]/README.pdf"/>
+  
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EAR-Production-Suite_Session-Template.RPP"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template/EPS single mono object template.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template/EPS single mono object.png"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template/Mono Object 1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/EPS Two mono objects.png"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Mono_Object_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Mono_Object_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Two mono objects.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/EPS Two Mono Objects plus a Stereo Bed.png"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/EPS two objects plus a stereo bed template.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/Mono_Object_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/Mono_Object_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/StereoBed_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/EPS two objects plus two stereo beds template.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Mono_Object_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Mono_Object_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/StereoBed_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Stereo_Bed_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Two Objects plus two Stereo Beds.png"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/5.0 bed.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/EPS two objects, two stereo beds plus 5.0 bed template.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/EPS Two objects, two stereo, plus 5.0 bed.png"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Mono_Object_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Mono_Object_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/StereoBed_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Stereo_Bed_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/1st order ambiX.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/EPS two objects, two stereo beds plus HOA template.rpp"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Mono_Object_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Mono_Object_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/StereoBed_1.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Stereo_Bed_2.wav"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Two objects, two stereos, plus 1st order ambiX.png"/>
+  <!-- REAPER may auto-generate these files which are irrelevant once the templates are uninstalled -->
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EAR-Production-Suite_Session-Template.RPP-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template/EPS single mono object template.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template/Mono Object 1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Mono_Object_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Mono_Object_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template/Two mono objects.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/EPS two objects plus a stereo bed template.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/Mono_Object_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/Mono_Object_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template/StereoBed_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/EPS two objects plus two stereo beds template.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Mono_Object_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Mono_Object_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/StereoBed_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template/Stereo_Bed_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/5.0 bed.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/EPS two objects, two stereo beds plus 5.0 bed template.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Mono_Object_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Mono_Object_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/StereoBed_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template/Stereo_Bed_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/1st order ambiX.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/EPS two objects, two stereo beds plus HOA template.rpp-bak"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Mono_Object_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Mono_Object_2.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/StereoBed_1.wav.reapeaks"/>
+  <File Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template/Stereo_Bed_2.wav.reapeaks"/>
+  
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS single mono object template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two mono objects template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus a stereo bed template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects plus two stereo beds template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus 5.0 bed template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates/EPS two objects, two stereo beds plus HOA template"/>
+  <Directory Path="[EPS-EXTRAS-DIR]/Project Templates"/>
+  
+  <!-- V0.8.0 and earlier stored this Binaural Monitoring preference file -->
+  <File Path="[USER-APPLICATION-DATA]/ear-production-suite/EAR Binaural Monitoring.settings"/>
+  <Directory Path="[USER-APPLICATION-DATA]/ear-production-suite"/>
+  
+  <WindowsOnly>
+    <File Path="[USERPLUGINS-INSTALL-DIR]/reaper_adm.dll"/>
+    <File Path="[VST3-INSTALL-DIR]/ADM Export Source.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/default_small.tf"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Binaural Monitoring.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR DirectSpeakers.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR HOA.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+2+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+5+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+7+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 2+5+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 2+7+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 3+7+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+5+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+5+1.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+7+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+9+0.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 9+10+3.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Object.vst3"/>
+    <File Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
+    <File Path="[EPS-EXTRAS-DIR]/project_upgrade_utility_gui.exe"/>
+    <!-- Instructions for v0.6.0 incorrectly advised to install extension to REAPER program directory -->
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/reaper_adm.dll"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
+    <File Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
+    <Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets/FB360"/>
+    <Directory Path="[REAPER-PROGRAM-DIR-WIN]/Plugins/ADMPresets"/>
+    <!-- V0.8.0 and earlier stored this plugin preference file -->
+    <File Path="[USER-APPLICATION-DATA]/EBU/EAR Production Suite.xml"/>
+    <Directory Path="[USER-APPLICATION-DATA]/EBU"/>
+  </WindowsOnly>
+  
+  <MacOSOnly>
+    <File Path="[USERPLUGINS-INSTALL-DIR]/reaper_adm.dylib"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ADM Export Source.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Binaural Monitoring.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR DirectSpeakers.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR HOA.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+2+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+5+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 0+7+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 2+5+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 2+7+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 3+7+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+5+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+5+1.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+7+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 4+9+0.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Monitoring 9+10+3.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Object.vst3"/>
+    <Bundle Path="[VST3-INSTALL-DIR]/ear-production-suite/EAR Scene.vst3"/>
+    <Bundle Path="[EPS-EXTRAS-DIR]/Project Upgrade Utility GUI.app"/>
+    <!-- V0.8.0 and earlier stored this plugin preference file -->
+    <File Path="[USER-APPLICATION-DATA]/Application Support/EBU/EAR Production Suite.xml"/>
+    <Directory Path="[USER-APPLICATION-DATA]/Application Support/EBU"/>
+  </MacOSOnly>
+  
+  <Directory Path="[VST3-INSTALL-DIR]/ear-production-suite"/>
+  
+</UninstallList>

@@ -1,5 +1,7 @@
 #pragma once
+#ifndef NNG_STATIC_LIB
 #define NNG_STATIC_LIB
+#endif
 
 #define NNG_PORT_UNKNOWN 0
 #define NNG_PORT_START 1
@@ -11,10 +13,12 @@
 #include <nng/protocol/pair0/pair.h>
 #include <assert.h>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 #include <cstdlib>
 #include <memory>
+#include <cstring>
 
 namespace NNGAddr {
     const std::string protocol {"ipc://"};
@@ -661,3 +665,4 @@ private:
         return res;
     }
 };
+

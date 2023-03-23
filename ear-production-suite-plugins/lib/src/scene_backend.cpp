@@ -2,7 +2,6 @@
 #include "detail/constants.hpp"
 #include <functional>
 #include <memory>
-#include "routing_overlap.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;

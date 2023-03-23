@@ -32,6 +32,7 @@ class ReadOnlyAudioParameterInt : public AudioParameterInt, private Timer {
     beginChangeGesture();
     setValueNotifyingHost(roValue);
     endChangeGesture();
+    startTimer(1); // yes, this is super hacky, but since the upgrade to JUCE 6, the value isn't getting set if it is being set as a consequence of another parameter change! 
   }
 
  private:

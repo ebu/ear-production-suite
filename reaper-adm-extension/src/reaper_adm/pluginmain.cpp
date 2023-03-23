@@ -1,5 +1,4 @@
 #define WIN32_LEAN_AND_MEAN
-
 #include <memory>
 #include <map>
 #include <string>
@@ -13,47 +12,11 @@
 #include "pluginsuite.h"
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
+#include "update_check.h"
 #include <version/eps_version.h>
-#include <atomic>
-
-#ifdef WIN32
-#include "win_nonblock_msg.h"
-#endif
-
-/*
-
-// USEFUL FOR TRACING MEMORY LEAKS BY OBJECT ALLOCATION NUMBER
-
-#ifdef WIN32
-#include "win_mem_debug.h"
-#endif
-
-#include <crtdbg.h>
-
-#ifdef _DEBUG
-
-#pragma warning(disable:4074)//initializers put in compiler reserved initialization area
-#pragma init_seg(compiler)//global objects in this file get constructed very early on
-
-struct CrtBreakAllocSetter {
-    CrtBreakAllocSetter() {
-        _crtBreakAlloc = 169;
-    }
-};
-
-CrtBreakAllocSetter g_crtBreakAllocSetter;
-
-#endif//_DEBUG
-
-struct CrtBreakAllocSetter {
-    CrtBreakAllocSetter() {
-        CRT_SET
-        //_crtBreakAlloc = 169;
-    }
-};
-
-CrtBreakAllocSetter g_crtBreakAllocSetter;
-*/
+#include <helper/native_message_box.hpp>
+#include <helper/resource_paths.hpp>
+#include <helper/resource_paths_juce-file.hpp>
 
 namespace {
 #ifdef WIN32
@@ -66,12 +29,22 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"Empty item", 2},
     {"Group", 4}};
 }
-#else
+#elif defined __APPLE__
 const std::map<const std::string, const int> defaultMenuPositions = {
     {"&File", 1},
     {"&Insert", 4},
     {"&Help", 10},
     {"E&xtensions", 9},
+    {"Project &templates", 8},
+    {"Empty item", 2},
+    {"Group", 4}};
+}
+#else
+const std::map<const std::string, const int> defaultMenuPositions = {
+    {"&File", 0},
+    {"&Insert", 3},
+    {"&Help", 9},
+    {"E&xtensions", 8},
     {"Project &templates", 8},
     {"Empty item", 2},
     {"Group", 4}};
@@ -95,30 +68,13 @@ extern "C" {
     using namespace admplug;
     std::unique_ptr<ReaperHost> reaper;
 
-    auto nonBlockingMessage = [rec](const char* errMsg) {
-        std::string text{ errMsg };
-        if(eps::versionInfoAvailable()) {
-            text += "\n\n[EAR Production Suite v";
-            text += eps::currentVersion();
-            text += "]";
-        } else {
-            text += "\n\n[EAR Production Suite version information unavailable!]";
-        }
-#ifdef WIN32
-        // Windows version of Reaper locks up if you try show a message box during splash
-        winhelpers::NonBlockingMessageBox(text, "EAR Production Suite - Extension Error", MB_ICONEXCLAMATION);
-#else
-        MessageBox(rec->hwnd_main, text.c_str(), "EAR Production Suite - Extension Error", MB_OK);
-#endif
-    };
-
     try {
         reaper = std::make_unique<ReaperHost>(hInstance, rec);
     } catch (FuncResolutionException const& e) {
-        nonBlockingMessage(e.what());
+        NativeMessageBox::splashExtensionError(e.what(), rec->hwnd_main);
         reaper = std::make_unique<ReaperHost>(hInstance, rec, false);
     } catch (ReaperAPIException const& e) {
-        nonBlockingMessage(e.what());
+        NativeMessageBox::splashExtensionError(e.what(), rec->hwnd_main);
         return 0;
     }
 
@@ -131,10 +87,20 @@ extern "C" {
     auto pluginCallbackHandler = EARPluginCallbackHandler::getInstance();
     rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
+    auto api = reaper->api();
+
+#ifndef __linux__
+    // Linux requires libcurl even when using juce::URL
+    // Can't guarentee installed, so let's just not do update check for now
+    UpdateChecker updateChecker;
+    if (updateChecker.getAutoCheckEnabled()) {
+        updateChecker.doUpdateCheck(false, 1000);
+    }
+#endif
+
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
     auto pluginRegistry = PluginRegistry::getInstance();
-    auto api = reaper->api();
     int actionCounter = 0;
 
     // Item right-click menu
@@ -188,12 +154,12 @@ extern "C" {
 
     // Extensions Menu
 
-    std::string actionName("About EAR Production Suite");
-    std::string actionSID("ADM_SHOW_EPS_INFO");
+    const std::string infoActionName("About EAR Production Suite");
+    const std::string infoActionStrId("ADM_SHOW_EPS_INFO");
 
     auto infoAction = std::make_shared<SimpleAction> (
-      actionName.c_str(),
-      actionSID.c_str(),
+      infoActionName.c_str(),
+      infoActionStrId.c_str(),
       [](admplug::ReaperAPI &api) {
         std::string title("EAR Production Suite");
         if(eps::versionInfoAvailable()) {
@@ -212,21 +178,103 @@ extern "C" {
       }
     );
 
+    const std::string btpMenuText("Browse tools and templates...");
+    const std::string btpActionName("EAR Production Suite: Browse tools and templates");
+    const std::string btpActionStrId("ADM_EPS_BROWSE");
+
+    auto btpAction = std::make_shared<SimpleAction>(
+        btpActionName.c_str(),
+        btpActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+            auto path = ResourcePaths::getExtrasDirectory().getFullPathName().toStdString();
+            if (!ResourcePaths::openDirectory(path)) {
+                api.ShowMessageBox("Failed to open directory.", "Browse Tools and Templates", 0);
+            }
+        }
+    );
+
+    const std::string ucDisableMenuText("Disable update check on startup");
+    const std::string ucDisableActionName("EAR Production Suite: Disable update check on startup");
+    const std::string ucDisableActionStrId("ADM_EPS_DISABLE_UPDATE_CHECK");
+
+    auto ucDisableAction = std::make_shared<SimpleAction>(
+        ucDisableActionName.c_str(),
+        ucDisableActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.setAutoCheckEnabled(false, true);
+    }
+    );
+
+    const std::string ucEnableMenuText("Enable update check on startup");
+    const std::string ucEnableActionName("EAR Production Suite: Enable update check on startup");
+    const std::string ucEnableActionStrId("ADM_EPS_ENABLE_UPDATE_CHECK");
+
+    auto ucEnableAction = std::make_shared<SimpleAction>(
+        ucEnableActionName.c_str(),
+        ucEnableActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.setAutoCheckEnabled(true, true);
+    }
+    );
+
+    const std::string ucMenuText("Check for updates now...");
+    const std::string ucActionName("EAR Production Suite: Check for updates now");
+    const std::string ucActionStrId("ADM_EPS_UPDATE_CHECK");
+
+    auto ucAction = std::make_shared<SimpleAction>(
+        ucActionName.c_str(),
+        ucActionStrId.c_str(),
+        [](admplug::ReaperAPI& api) {
+        UpdateChecker updateChecker;
+        updateChecker.doUpdateCheck(true, 3000);
+    }
+    );
+
+    // Make sure Extensions menu is added and then get it
     api->AddExtensionsMainMenu();
     auto reaperExtMenu = reaperMainMenu->getMenuByText(
         "E&xtensions", "common", -1 , *api);
 
     if(!reaperExtMenu) {
+        // Extensions menu didn't appear for some reason - let's just use help menu
         reaperExtMenu = reaperMainMenu->getMenuByText(
             "&Help", "common", -1, *api);
     }
 
+    // Populate menu
     if(reaperExtMenu) {
-        auto infoActionId = reaper->addAction(infoAction);
-        auto infoActionItem = std::make_unique<MenuAction>(actionName.c_str(), infoActionId);
-        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+        auto epsMenu = std::make_unique<SubMenu>("EAR Production Suite");
 
-        reaperExtMenu->insert(std::move(infoActionItem), admExtMenuInserter);
+        auto path = ResourcePaths::getExtrasDirectory();
+        if (path.exists() && path.isDirectory()) {
+            auto btpActionId = reaper->addAction(btpAction);
+            auto btpActionItem = std::make_unique<MenuAction>(btpMenuText.c_str(), btpActionId);
+            auto btpActionInserter = std::make_shared<StartOffset>(0);
+            epsMenu->insert(std::move(btpActionItem), btpActionInserter);
+        }
+
+#ifndef __linux__
+        auto ucActionId = reaper->addAction(ucAction);
+        auto ucActionItem = std::make_unique<MenuAction>(ucMenuText.c_str(), ucActionId);
+        epsMenu->insert(std::move(ucActionItem), std::make_shared<EndOffset>(0));
+
+        auto ucEnableActionId = reaper->addAction(ucEnableAction);
+        auto ucEnableActionItem = std::make_unique<MenuAction>(ucEnableMenuText.c_str(), ucEnableActionId);
+        epsMenu->insert(std::move(ucEnableActionItem), std::make_shared<EndOffset>(0));
+
+        auto ucDisableActionId = reaper->addAction(ucDisableAction);
+        auto ucDisableActionItem = std::make_unique<MenuAction>(ucDisableMenuText.c_str(), ucDisableActionId);
+        epsMenu->insert(std::move(ucDisableActionItem), std::make_shared<EndOffset>(0));
+#endif
+
+        auto infoActionId = reaper->addAction(infoAction);
+        auto infoActionItem = std::make_unique<MenuAction>(infoActionName.c_str(), infoActionId);
+        epsMenu->insert(std::move(infoActionItem), std::make_shared<EndOffset>(0));
+
+        auto admExtMenuInserter = std::make_shared<StartOffset>(0);
+        reaperExtMenu->insert(std::move(epsMenu), admExtMenuInserter);
         reaperExtMenu->init();
     }
 
@@ -283,7 +331,7 @@ extern "C" {
       "&File", "common", defaultMenuPositions.at("&File"), *api);
     assert(reaperFileMenu);
   reaperFileMenu->insert(std::move(admFileMenu), admFileMenuInserter);
-    reaperFileMenu->init();
+  reaperFileMenu->init();
 
     // Insert menu
 

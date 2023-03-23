@@ -38,7 +38,6 @@ add_library(ear-plugin-base STATIC
   src/nng-cpp/error_handling.cpp
   src/object_backend.cpp
   src/programme_types.cpp
-  src/routing_overlap.cpp
   src/scene_backend.cpp
   src/scene_gains_calculator.cpp
   src/store_metadata.cpp
@@ -121,7 +120,6 @@ set(EAR_BASE_HEADERS
 	include/programme_types.hpp
 	include/proto_printers.hpp
 	include/restored_pending_store.hpp
-	include/routing_overlap.hpp
 	include/scene_backend.hpp
 	include/scene_gains_calculator.hpp
 	include/ui/binaural_monitoring_frontend_backend_connector.hpp
@@ -165,7 +163,6 @@ target_include_directories(ear-plugin-base PUBLIC
 )
 target_compile_features(ear-plugin-base PUBLIC cxx_std_17)
 target_compile_definitions(ear-plugin-base PUBLIC BOOST_UUID_FORCE_AUTO_LINK)
-set_target_properties(ear-plugin-base PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_EXTENSIONS OFF)
 set_target_properties(ear-plugin-base PROPERTIES FOLDER ${IDE_FOLDER_PLUGINS})
 
 include(GenerateExportHeader)

@@ -72,6 +72,22 @@ private:
     WDL_DLGRET wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     bool startedPrepareDialogControls{ false };
+
+    std::string EXPECTED_RENDER_DIALOG_WINDOW_TITLE{ "Render to File" };
+    std::string EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION{ "8000" };
+    std::string EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
+    std::string EXPECTED_PRESETS_BUTTON_TEXT{ "Presets" };
+    std::string EXPECTED_NORMALIZE_BUTTON_TEXT1{ "Normalize/Limit..." };
+    std::string EXPECTED_NORMALIZE_BUTTON_TEXT2{ "Normalize/Limit/Fade" }; // Changed to include fade at ~v6.64
+    std::string EXPECTED_SECOND_PASS_CHECKBOX_TEXT{ "2nd pass render" };
+    std::string EXPECTED_MONO2MONO_CHECKBOX_TEXT{ "Tracks with only mono media to mono files" };
+    std::string EXPECTED_MULTI2MULTI_CHECKBOX_TEXT{ "Multichannel tracks to multichannel files" };
+    std::string REQUIRED_SOURCE_COMBO_OPTION{ "Master mix" };
+    std::string REQUIRED_BOUNDS_COMBO_OPTION{ "Entire project" };
+    std::string EXPECTED_CHANNEL_COUNT_LABEL_TEXT{ "Channels:" };
+    std::string REQUIRED_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
+    std::string EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION{ "Point Sampling (lowest quality, retro)" };
+
 };
 
 class RenderDialogControl {

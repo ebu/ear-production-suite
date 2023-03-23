@@ -50,13 +50,13 @@ NNG_ENABLE_ENUM_BITMASK_OPERATORS(Flags);
  */
 template <typename Protocol>
 class SocketBase {
-  using ProtocolTraits = ProtocolTraits<Protocol>;
+  using Traits = ProtocolTraits<Protocol>;
 
  public:
-  using Options = typename ProtocolTraits::Options;
+  using Options = typename Traits::Options;
   SocketBase() {
     aio_.reset(new AsyncIO);
-    ProtocolTraits::open(&socket_);
+    Traits::open(&socket_);
     eventDispatcher_.attach(socket_);
   }
   ~SocketBase() { nng_close(socket_); }
@@ -116,7 +116,7 @@ class SocketBase {
   }
 
   std::size_t read(char* buffer, std::size_t size) {
-    static_assert(ProtocolTraits::can_receive::value,
+    static_assert(Traits::can_receive::value,
                   "This socket cannot read because the used protocol doesn't "
                   "support this.");
     auto ret = nng_recv(socket_, buffer, &size, 0);
@@ -125,7 +125,7 @@ class SocketBase {
   }
 
   Buffer read() {
-    static_assert(ProtocolTraits::can_receive::value,
+    static_assert(Traits::can_receive::value,
                   "This socket cannot read because the used protocol doesn't "
                   "support this.");
     void* data = nullptr;
@@ -138,7 +138,7 @@ class SocketBase {
 
   template <typename ConstBuffer>
   bool send(const ConstBuffer& buffer, Flags flags = Flags::none) {
-    static_assert(ProtocolTraits::can_send::value,
+    static_assert(Traits::can_send::value,
                   "This socket cannot send because the used protocol doesn't "
                   "support this.");
     auto ret = nng_send(socket_, (void*)(buffer.data()), buffer.size(),
@@ -151,7 +151,7 @@ class SocketBase {
   }
 
   bool send(char* buffer, std::size_t size, Flags flags = Flags::none) {
-    static_assert(ProtocolTraits::can_send::value,
+    static_assert(Traits::can_send::value,
                   "This socket cannot send because the used protocol doesn't "
                   "support this.");
     auto ret = nng_send(socket_, buffer, size, static_cast<int>(flags));
@@ -163,7 +163,7 @@ class SocketBase {
   }
 
   bool send(Buffer&& buffer, Flags flags = Flags::none) {
-    static_assert(ProtocolTraits::can_send::value,
+    static_assert(Traits::can_send::value,
                   "This socket cannot send because the used protocol doesn't "
                   "support this.");
 
@@ -181,7 +181,7 @@ class SocketBase {
 
   template <typename ConstBuffer, typename CompletionHandler>
   void asyncSend(const ConstBuffer& buffer, CompletionHandler handler) {
-    static_assert(ProtocolTraits::can_send::value,
+    static_assert(Traits::can_send::value,
                   "This socket cannot send because the used protocol doesn't "
                   "support this.");
 
@@ -190,7 +190,7 @@ class SocketBase {
 
   template <typename CompletionHandler>
   void asyncRead(CompletionHandler handler) {
-    static_assert(ProtocolTraits::can_receive::value,
+    static_assert(Traits::can_receive::value,
                   "This socket cannot read because the used protocol doesn't "
                   "support this.");
     aio_->read(socket_, handler);
@@ -248,7 +248,7 @@ class SocketBase {
 
   template <typename Option>
   void setOpt(Option option, const void* value, std::size_t size) {
-    using ValidOptions = typename ProtocolTraits::Options;
+    using ValidOptions = typename Traits::Options;
     static_assert(boost::mp11::mp_contains<ValidOptions, Option>::value,
                   "Not a valid option for this socket type");
     auto ret = nng_setopt(socket_, option.name(), value, size);
@@ -257,7 +257,7 @@ class SocketBase {
 
   template <typename Option>
   void setOpt(Option option, std::chrono::milliseconds duration) {
-    using ValidOptions = typename ProtocolTraits::Options;
+    using ValidOptions = typename Traits::Options;
     static_assert(boost::mp11::mp_contains<ValidOptions, Option>::value,
                   "Not a valid option for this socket type");
     auto ret = nng_setopt_ms(socket_, option.name(), duration.count());

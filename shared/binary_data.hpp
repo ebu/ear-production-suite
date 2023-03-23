@@ -85,4 +85,7 @@ namespace binary_data
     extern const char*  next_icon_svg;
     const int           next_icon_svgSize = 248;
 
+    extern const char*  infologo_png;
+    const int           infologo_pngSize = 379;
+
 }

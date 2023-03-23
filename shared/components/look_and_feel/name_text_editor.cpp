@@ -43,8 +43,8 @@ void NameTextEditorLookAndFeel::drawTextEditorOutline(Graphics& g, int width,
 		g.setColour(findColour(TextEditor::outlineColourId));
 	}
 
-	g.setFont(EarFonts::Units);
-	const float textWidth = EarFonts::Units.getStringWidthFloat(labelText_);
+	g.setFont(EarFontsSingleton::instance().Units);
+	const float textWidth = EarFontsSingleton::instance().Units.getStringWidthFloat(labelText_);
 	g.drawSingleLineText(labelText_, textIndent,
 		yTopIndent + g.getCurrentFont().getHeight() * 0.1f);
 	Path framePath;

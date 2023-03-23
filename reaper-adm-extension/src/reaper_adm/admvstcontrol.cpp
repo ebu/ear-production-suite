@@ -5,20 +5,6 @@
 using namespace admplug;
 
 std::string AdmVst::vstName = ADM_VST_NAME;
-std::string AdmVst::vstCompName = "";
-size_t AdmVst::vstCompNameLen = 0;
-const char* AdmVst::vstCompNameCStr = nullptr;
-
-const char* AdmVst::getVstCompName() {
-    if (vstCompNameCStr == nullptr) {
-        vstCompName = "VST3: ";
-        vstCompName.append(vstName);
-        vstCompName.append(" (");
-        vstCompNameLen = vstCompName.length();
-        vstCompNameCStr = vstCompName.c_str();
-    }
-    return vstCompNameCStr;
-}
 
 const std::string* AdmVst::getVstNameStr()
 {
@@ -43,35 +29,25 @@ bool AdmVst::isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate)
     return isCandidate;
 }
 
-int AdmVst::trackAdmVstIndex(ReaperAPI const& api, MediaTrack *trk)
-{
-    return api.TrackFX_AddByName(trk, vstName.c_str(), false, TrackFXAddMode::QueryPresence);
-}
-
 std::vector<int> AdmVst::trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *trk)
 {
-    int totalVsts = api.TrackFX_GetCount(trk);
     std::vector<int> admVstPos;
 
-    for (int i = 0; i < totalVsts; i++) {
-        if (vstPosIsAdmVst(api, trk, i)) admVstPos.push_back(i);
+    auto trackVstNames = api.TrackFX_GetActualFXNames(trk);
+    for (int i = 0; i < trackVstNames.size(); ++i) {
+        api.CleanFXName(trackVstNames[i]);
+        if (trackVstNames[i] == vstName) {
+            admVstPos.push_back(i);
+        }
     }
 
     return admVstPos;
 }
 
-bool AdmVst::vstPosIsAdmVst(ReaperAPI const& api, MediaTrack *trk, int vstPos)
-{
-    getVstCompName(); // Need to generate it to get length
-    char name[100];
-    if (!api.TrackFX_GetFXName(trk, vstPos, name, (int)vstCompNameLen + 1)) return false;
-    return (strcmp(name, getVstCompName()) == 0);
-}
-
 // ADMEXPORTVST
 
 AdmVst::AdmVst(MediaTrack* mediaTrack, ReaperAPI const& api) : PluginInstance(mediaTrack, api) {
-    auto index = api.TrackFX_AddByName(mediaTrack, ADM_VST_NAME, false, TrackFXAddMode::CreateIfMissing);
+    auto index = api.TrackFX_AddByActualName(mediaTrack, ADM_VST_NAME, false, TrackFXAddMode::CreateIfMissing);
     if(index < 0) {
         throw std::runtime_error("Could not add to or get plugin from track");
     }
@@ -80,9 +56,15 @@ AdmVst::AdmVst(MediaTrack* mediaTrack, ReaperAPI const& api) : PluginInstance(me
 }
 
 AdmVst::AdmVst(MediaTrack * mediaTrack, int fxIndex, ReaperAPI const & api) : PluginInstance(mediaTrack, api) {
-    if(!vstPosIsAdmVst(api, mediaTrack, fxIndex)) {
+    std::string trackVstName;
+    bool getNameSuccess = api.TrackFX_GetActualFXName(mediaTrack, fxIndex, trackVstName);
+    if (getNameSuccess) {
+        api.CleanFXName(trackVstName);
+    }
+    if(!getNameSuccess || trackVstName != ADM_VST_NAME) {
         throw std::runtime_error("Plugin is not an ADM export plugin");
     }
+
     name = ADM_VST_NAME;
     guid = std::make_unique<ReaperGUID>(api.TrackFX_GetFXGUID(mediaTrack, fxIndex));
 }

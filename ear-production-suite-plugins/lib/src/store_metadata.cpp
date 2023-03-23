@@ -91,7 +91,7 @@ void Metadata::addProgramme() {
     std::string name{"Programme_"};
     auto index = programmeStore_.programme_size();
     name.append(std::to_string(index));
-    addProgrammeImpl(name, "");
+    addProgrammeImpl(name);
 }
 
 void Metadata::removeProgramme(const ProgrammeInternalId &progId) {
@@ -281,7 +281,7 @@ void Metadata::addBackendListener(std::weak_ptr<MetadataListener> listener) {
 
 void Metadata::ensureDefaultProgrammePresent() {
     if(programmeStore_.programme_size() == 0) {
-        addProgrammeImpl("Default", "");
+        addProgrammeImpl("Default");
         auto defProgId = programmeStore_.programme(0).programme_internal_id();
         programmeStore_.set_selected_programme_internal_id(defProgId);
         doSelectProgramme(programmeStore_.programme(0));
@@ -312,12 +312,9 @@ void Metadata::doRemoveElementFromProgramme(int programmeIndex, const communicat
     }
 }
 
-void Metadata::addProgrammeImpl(
-        const std::string& name,
-        const std::string& language) {
+void Metadata::addProgrammeImpl(const std::string& name) {
     auto programme = programmeStore_.add_programme();
     programme->set_name(name);
-    programme->set_language(language);
     auto progId = newProgrammeInternalId();
     programme->set_programme_internal_id(progId);
     fireEvent(&MetadataListener::notifyProgrammeAdded,

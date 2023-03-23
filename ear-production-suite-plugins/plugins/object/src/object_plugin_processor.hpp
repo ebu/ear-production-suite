@@ -109,6 +109,7 @@ class ObjectsAudioProcessor : public AudioProcessor, public VST3ClientExtensions
   std::unique_ptr<ear::plugin::ObjectBackend> backend_;
 
   int samplerate_;
+  int numPluginChannels_;
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObjectsAudioProcessor)

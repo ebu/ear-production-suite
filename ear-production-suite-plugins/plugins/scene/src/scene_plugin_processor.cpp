@@ -11,10 +11,10 @@
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
-          BusesProperties()
-              .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-              .withOutput("Output", AudioChannelSet::discreteChannels(64),
-                          true)),
+      // 64 channels of input supports the largest track width in REAPER.
+      // The omission of an output bus is also intentional.
+      /// We do not actually manipulate audio here - only analyse it for level.
+      BusesProperties().withInput("Input", AudioChannelSet::discreteChannels(64), true)),
       metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>(),
                 std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_)),
       autoModeController_(std::make_shared<ear::plugin::AutoModeController>(metadata_))
@@ -118,13 +118,18 @@ void SceneAudioProcessor::releaseResources() {}
 
 bool SceneAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(64) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
-  return false;
+
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
+  return true;
 }
 
 void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
@@ -136,7 +141,9 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
   doSampleRateChecks();
 
   if(!sendSamplesToExtension) {
-    levelMeter_->process(buffer);
+    if(getActiveEditor()) {
+      levelMeter_->process(buffer);
+    }
   } else {
     size_t sampleSize = sizeof(float);
     uint8_t numChannels = 64;
@@ -175,6 +182,7 @@ bool SceneAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* SceneAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new SceneAudioProcessorEditor(this);
 }
 

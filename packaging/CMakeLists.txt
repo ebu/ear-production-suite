@@ -31,18 +31,36 @@ add_custom_target(generate-package-docs
             "${CMAKE_CURRENT_LIST_DIR}/LICENSE.pdf"
         )
 
+install(DIRECTORY 
+		Templates 
+		DESTINATION
+		.)
+
 install(FILES
-        EAR-Production-Suite_Session-Template.RPP
         README.pdf
         LICENSE.pdf
         DESTINATION
         .)
 
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	if(WIN32)
+		install(FILES
+				install_list.xml
+				uninstall_list.xml
+				DESTINATION
+				./SetupFiles)
+	endif()
+	install(TARGETS
+			setup
+			DESTINATION
+			.)
+endif()
+
 install(TARGETS
         project_upgrade
         project_upgrade_gui
         DESTINATION
-        tools)
+        ./Tools)
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_NAME "EAR Production Suite")

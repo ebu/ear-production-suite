@@ -12,10 +12,12 @@ using namespace ear::plugin;
 
 HoaAudioProcessor::HoaAudioProcessor()
     : AudioProcessor(
-          BusesProperties()
-              .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-              .withOutput("Output", AudioChannelSet::discreteChannels(64),
-                          true)),
+      // 49 channels of input supports the largest HOA order in common definitions.
+      /// Use of 49 Discrete Channels avoids REAPER applying potentially incorrect labels to the input channels.
+      /// Better to show just "Input #" rather than something potentially incorrect.
+      // The omission of an output bus is also intentional.
+      /// We do not actually manipulate audio here - only analyse it for level.
+      BusesProperties().withInput("Input", AudioChannelSet::discreteChannels(49), true)),
       samplerate_(48000),
       levelMeterCalculator_(
           std::make_shared<LevelMeterCalculator>(49, samplerate_)) {
@@ -92,19 +94,28 @@ void HoaAudioProcessor::releaseResources() {}
 
 bool HoaAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(24) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(24)) {
-    return true;
-  }
-  return false;
+
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(49))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
+  return true;
 }
 
 void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                      MidiBuffer& midiMessages) {
-  if (!bypass_->get()) {
-    levelMeterCalculator_->process(buffer);
+  if(!bypass_->get()) {
+    if(getActiveEditor()) {
+      levelMeterCalculator_->process(buffer);
+    } else {
+      levelMeterCalculator_->processForClippingOnly(buffer);
+    }
     backend_->triggerMetadataSend();
   }
 }
@@ -112,6 +123,7 @@ void HoaAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool HoaAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* HoaAudioProcessor::createEditor() {
+  levelMeterCalculator_->resetLevels();
   return new HoaAudioProcessorEditor(this);
 }
 
@@ -170,20 +182,22 @@ void HoaAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
   reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
   VST3ClientExtensions::setIHostApplication(unknown);
+  if(reaperHost) {
 
-  auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
-  if(requestInputInstanceIdPtr) {
-    auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
-    uint32_t inputInstanceId = requestInputInstanceId();
-    inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
-  }
+    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
+    if(requestInputInstanceIdPtr) {
+      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+      uint32_t inputInstanceId = requestInputInstanceId();
+      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
+    }
 
-  auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
-  if(registerPluginLoadPtr) {
-    auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
-    registerPluginLoad([this](std::string const& xmlState) {
-      this->extensionSetState(xmlState);
-    });
+    auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+    if(registerPluginLoadPtr) {
+      auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+      registerPluginLoad([this](std::string const& xmlState) {
+        this->extensionSetState(xmlState);
+      });
+    }
   }
 }
 

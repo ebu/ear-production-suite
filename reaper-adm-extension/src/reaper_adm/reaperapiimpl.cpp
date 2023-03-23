@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <cstring>
+#include <map>
 
 #include "reaperapiimpl.h"
 #include "reaperapivalues.h"
@@ -504,6 +505,16 @@ const char* admplug::ReaperAPIImpl::LocalizeString(const char* src_string, const
     return ::LocalizeString(src_string, section, flagsOptional);
 }
 
+bool admplug::ReaperAPIImpl::GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const
+{
+    return ::GetTrackStateChunk(track, strNeedBig, strNeedBig_sz, isundoOptional);
+}
+
+bool admplug::ReaperAPIImpl::SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const
+{
+    return ::SetTrackStateChunk(track, str, isundoOptional);
+}
+
 void ReaperAPIImpl::UpdateArrangeForAutomation() const {
   // UpdateArrange() does not force draw of automation. Flipping master track visibility does.
   std::bitset<4> mstTrkSetting(GetMasterTrackVisibility());
@@ -837,3 +848,234 @@ std::optional<std::pair<double, double>> admplug::ReaperAPIImpl::getTrackAudioBo
     }
     return std::optional<std::pair<double, double>>();
 }
+
+std::vector<std::pair<int, std::string>> admplug::ReaperAPIImpl::GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const
+{
+    std::vector<std::pair<int, std::string>> vst3Elements;
+
+    const std::vector<char> quoteMarks{ '\'', '`', '"' };
+    int elmStart = -1;
+
+    for (int pos = 0; pos < fullChunk.length(); ++pos) {
+
+        bool escapedQuote = false;
+        for (auto quote : quoteMarks) {
+            if (fullChunk[pos] == quote) {
+                // Entered a quote mark
+                if (pos == fullChunk.length() - 1) {
+                    // Already at EOF - don't attempt to find
+                    escapedQuote = true;
+                    break;
+                }
+                // Find end quote mark
+                auto newPos = fullChunk.find(quote, pos + 1);
+                if (newPos == std::string::npos) {
+                    // End not found to EOF - abort
+                    escapedQuote = true;
+                    break;
+                }
+                pos = newPos;
+            }
+        }
+        if (escapedQuote) {
+            break;
+        }
+
+        if (elmStart == -1) {
+            // Not in an element - check if at start of one
+            if (fullChunk.substr(pos, 5) == "<VST ") {
+                elmStart = pos;
+            }
+        }
+        else {
+            // In an element - check if at end
+            if (fullChunk.substr(pos, 1) == ">") {
+                vst3Elements.push_back(std::make_pair(
+                    elmStart,
+                    fullChunk.substr(elmStart, pos - elmStart + 1))
+                );
+                elmStart = -1;
+            }
+        }
+    }
+
+    return vst3Elements;
+}
+
+std::vector<std::string> admplug::ReaperAPIImpl::SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const
+{
+    std::vector<std::string> sec;
+
+    const std::vector<char> quoteMarks{ '\'', '`', '"' };
+    const std::vector<char> splitMarks{ ' ', '\r', '\n' };
+    int secStart = 5;
+
+    for (int pos = 5; pos < elm.length(); ++pos) {
+
+        bool escapedQuote = false;
+        for (auto quote : quoteMarks) {
+            if (elm[pos] == quote) {
+                // Entered a quote mark
+                if (pos == elm.length() - 1) {
+                    // Already at EOF - don't attempt to find
+                    escapedQuote = true;
+                    break;
+                }
+                // Find end quote mark
+                auto newPos = elm.find(quote, pos + 1);
+                if (newPos == std::string::npos) {
+                    // End not found to EOF - abort
+                    escapedQuote = true;
+                    break;
+                }
+                pos = newPos;
+            }
+        }
+        if (escapedQuote) {
+            break;
+        }
+
+        for (auto splitMark : splitMarks) {
+            if (elm[pos] == splitMark) {
+                // Close this section and start a new one
+                sec.push_back(elm.substr(secStart, pos - secStart));
+                if (includeSeperators) {
+                    sec.push_back(std::string{ splitMark });
+                }
+                secStart = pos + 1;
+                break;
+            }
+        }
+    }
+
+    if (stripBoundingQuotes) {
+        for (auto& s : sec) {
+            if (s.length() >= 2) {
+                for (auto quote : quoteMarks) {
+                    if (s[0] == quote && s[s.length() - 1] == quote) {
+                        s = s.substr(1, s.length() - 2);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return sec;
+}
+
+std::string admplug::ReaperAPIImpl::GetTrackStateChunkStr(MediaTrack* track) const
+{
+    const size_t chunkMaxLen = 65535; // Should be plenty
+    char chunk[chunkMaxLen];
+    auto res = GetTrackStateChunk(track, chunk, chunkMaxLen, false);
+    if (!res) return std::string();
+    std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
+    return fullChunk;
+}
+
+bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
+{
+    // Note that;
+    // TrackFX_GetNamedConfigParm( track, 0, "fx_name" )
+    // can get the pre-aliased name but is only supported from v6.37
+    // Also does not support FX renamed in FX selection window
+    // (although neither does this)
+
+    auto chunk = GetTrackStateChunkStr(track);
+
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
+    if (fx >= vst3Elements.size()) {
+        return false;
+    }
+
+    const int nameSectionNum = 0;
+
+    auto vst3Sections = SplitVSTElement(vst3Elements[fx].second, true, false);
+    if (vst3Sections.size() <= nameSectionNum) {
+        return false;
+    }
+
+    name = vst3Sections[nameSectionNum];;
+    return true;
+}
+
+std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaTrack* track) const
+{
+    // Only gets and parses state chunk once
+    // More efficient when you want to query every plugin on the track
+
+    std::vector<std::string> names;
+
+    auto chunk = GetTrackStateChunkStr(track);
+
+    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
+
+    const int nameSectionNum = 0;
+
+    for (auto const& elmPair : vst3Elements) {
+        auto vst3Sections = SplitVSTElement(elmPair.second, true, false);
+        if (vst3Sections.size() <= nameSectionNum) {
+            names.push_back("");
+        }
+        else {
+            names.push_back(vst3Sections[nameSectionNum]);
+        }
+    }
+
+    return names;
+}
+
+void admplug::ReaperAPIImpl::CleanFXName(std::string& fxName) const
+{
+    // Purposely not removing other prefixes as we're only using this for our plug-ins which are all VST3
+    if (fxName.substr(0, 6) == "VST3: ") {
+        fxName = fxName.substr(6);
+    }
+
+    // Can be up to 2 bracketed sections - channel count and developer
+    for (int i = 0; i < 2; ++i) {
+        if (fxName[fxName.length() - 1] == ')') {
+            auto obPos = fxName.rfind(" (");
+            if (obPos == std::string::npos) {
+                break;
+            }
+            else {
+                fxName = fxName.substr(0, obPos);
+            }
+        }
+    }
+}
+
+int admplug::ReaperAPIImpl::TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const
+{
+    auto fxs = TrackFX_GetActualFXNames(track);
+    for (int i = 0; i < fxs.size(); ++i) {
+        if (fxs[i] == fxName) {
+            return i;
+        }
+        CleanFXName(fxs[i]);
+        if (fxs[i] == fxName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int admplug::ReaperAPIImpl::TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const
+{
+    // TrackFX_AddByName will not find matches if the plugins are renamed on the tracks - do our own search by actual name
+    if (instantiate == TrackFXAddMode::QueryPresence) {
+        return TrackFX_PositionByActualName(track, fxname);
+    }
+    if (instantiate == TrackFXAddMode::CreateIfMissing) {
+        auto existingIndex = TrackFX_PositionByActualName(track, fxname);
+        if (existingIndex >= 0) {
+            return existingIndex;
+        }
+    }
+
+    // TrackFX_AddByName will not be able to add if the name of the plugin was changed in the FX selection window, but we can only try.
+    return TrackFX_AddByName(track, fxname, recFX, TrackFXAddMode::CreateNew);
+}
+

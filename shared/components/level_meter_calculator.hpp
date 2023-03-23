@@ -25,6 +25,7 @@ public:
      * @a input must have the correct channel count.
      */
     void process(const AudioBuffer<float>& buffer);
+    void processForClippingOnly(const AudioBuffer<float>& buffer);
 
     bool hasSignal(int channel);
     bool thisTrackHasClipped();
@@ -41,6 +42,7 @@ public:
     std::size_t channels() const { return channels_; }
 
     void resetClipping();
+    void resetLevels();
 
 private:
     void processSample(float currentValue, std::size_t channel);

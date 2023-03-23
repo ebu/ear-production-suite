@@ -43,6 +43,7 @@ set(HEADERS_OBJECT_INPUT
 	${EPS_SHARED_DIR}/components/look_and_feel/roboto.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/tooltips.hpp
 	
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/iso_lang_codes.hpp
@@ -74,4 +75,4 @@ add_juce_vst3_plugin(object
   
 target_include_directories(object_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(object_VST3 PRIVATE ear-plugin-base ear-version)
-install_juce_vst3_plugin(object "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install_juce_vst3_plugin(object "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")

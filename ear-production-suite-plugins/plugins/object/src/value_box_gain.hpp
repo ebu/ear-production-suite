@@ -17,11 +17,21 @@ class ValueBoxGain : public Component {
   ValueBoxGain()
       : levelMeter_(std::make_shared<LevelMeter>()),
         gainLabel_(std::make_unique<Label>()),
+        levelInfoIcon_(std::make_unique<ImageComponent>()),
         gainSlider_(std::make_shared<EarSlider>()) {
+
     setColour(backgroundColourId, EarColours::Area01dp);
+
     addAndMakeVisible(levelMeter_.get());
 
-    gainLabel_->setFont(EarFonts::Label);
+    levelInfoIcon_->setImage(ImageFileFormat::loadFrom(binary_data::infologo_png, binary_data::infologo_pngSize));
+    levelInfoIcon_->setImagePlacement(RectanglePlacement::centred + RectanglePlacement::doNotResize);
+    levelInfoIcon_->setAlpha(0.8);
+    levelInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
+    levelInfoIcon_->setTooltip ("Meter will display the max of the 2 plug-in input channels.\nIf this Object does not use the first 2 channels of audio on this track, the plug-in I/O pin mapping should be updated for relevant metering.");
+    addAndMakeVisible(levelInfoIcon_.get());
+
+    gainLabel_->setFont(EarFontsSingleton::instance().Label);
     gainLabel_->setColour(Label::textColourId, EarColours::Label);
     gainLabel_->setText("Gain", dontSendNotification);
     gainLabel_->setJustificationType(Justification::bottomRight);
@@ -71,7 +81,14 @@ class ValueBoxGain : public Component {
   void resized() override {
     auto area = getLocalBounds();
     area.reduce(10, 5);
-    levelMeter_->setBounds(area.removeFromTop(33).reduced(0, 10));
+
+    auto levelMeterArea = area.removeFromTop(33).reduced(0, 10);
+    auto levelMeterInfoArea = levelMeterArea.removeFromRight(13);
+    levelInfoIcon_->setBounds(levelMeterInfoArea);
+    levelMeterArea.removeFromRight(5);
+    levelMeter_->setBounds(levelMeterArea);
+
+    area.removeFromTop(10);
 
     float sliderWidth = area.getWidth() - labelWidth_ - marginBig_;
 
@@ -88,10 +105,11 @@ class ValueBoxGain : public Component {
 
  private:
   std::shared_ptr<LevelMeter> levelMeter_;
+  std::shared_ptr<ImageComponent> levelInfoIcon_;
   std::unique_ptr<Label> gainLabel_;
   std::shared_ptr<EarSlider> gainSlider_;
 
-  const float labelWidth_ = 71.f;
+  const float labelWidth_ = 48.f;
   const float labelPaddingBottom_ = 0.f;
   const float sliderHeight_ = 40.f;
   const float marginSmall_ = 5.f;

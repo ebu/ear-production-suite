@@ -113,6 +113,8 @@ public:
     double GetSetProjectInfo(ReaProject* project, const char* desc, double value, bool is_set) const override;
     const char* GetAppVersion() const override;
     const char* LocalizeString(const char* src_string, const char* section, int flagsOptional) const override;
+    bool GetTrackStateChunk(MediaTrack* track, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const override;
+    bool SetTrackStateChunk(MediaTrack* track, const char* str, bool isundoOptional) const override;
 
     //Custom Funcs
     void UpdateArrangeForAutomation() const override;
@@ -140,6 +142,14 @@ public:
     void mapFxPin(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel) const override;
     bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const override;
     std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const override;
+    bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const override;
+    std::vector<std::string> TrackFX_GetActualFXNames(MediaTrack* track) const override;
+    void CleanFXName(std::string& name) const override;
+    int TrackFX_PositionByActualName(MediaTrack* track, const std::string& fxName) const override;
+    int TrackFX_AddByActualName(MediaTrack* track, const char* fxname, bool recFX, int instantiate) const override;
+    std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const override;
+    std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const override;
+    std::string GetTrackStateChunkStr(MediaTrack* track) const override;
 
 private:
     reaper_plugin_info_t& plugin_info;
@@ -148,6 +158,5 @@ private:
     int toReaperChannelValue(int busWidth, int startChNum) const;
     int getSrcChannelValue(int busWidth, int startCh) const;
     int getDstChannelValue(int busWidth, int startCh) const;
-
 };
 }

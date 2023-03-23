@@ -38,6 +38,7 @@ set(HEADERS_SCENE
 	${EPS_SHARED_DIR}/components/ear_header.hpp
 	${EPS_SHARED_DIR}/components/ear_inverted_slider.hpp
 	${EPS_SHARED_DIR}/components/ear_name_text_editor.hpp
+	${EPS_SHARED_DIR}/components/ear_inc_dec_slider.hpp
 	${EPS_SHARED_DIR}/components/ear_slider.hpp
 	${EPS_SHARED_DIR}/components/ear_slider_label.hpp
 	${EPS_SHARED_DIR}/components/ear_slider_range.hpp
@@ -98,6 +99,6 @@ add_juce_vst3_plugin(scene
   OUTPUT_NAME "EAR Scene")
   
 target_link_libraries(scene_VST3 PRIVATE ear-plugin-base ear-version)
-install_juce_vst3_plugin(scene "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install_juce_vst3_plugin(scene "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 
 

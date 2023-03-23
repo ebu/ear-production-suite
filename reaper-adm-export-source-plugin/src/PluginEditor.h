@@ -46,7 +46,7 @@ class Panel : public Component
 public:
 
     Panel() {
-        headingLabel.setFont(ear::plugin::ui::EarFonts::Heading);
+        headingLabel.setFont(ear::plugin::ui::EarFontsSingleton::instance().Heading);
         headingLabel.setColour(Label::textColourId, ear::plugin::ui::EarColours::Heading);
         headingLabel.setText("AudioObject Settings", juce::NotificationType::dontSendNotification);
         headingLabel.setJustificationType(Justification::bottomLeft);

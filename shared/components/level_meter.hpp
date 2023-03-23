@@ -17,7 +17,7 @@ namespace ui {
 
 class LevelMeter : public Component, private Timer {
 public:
-	LevelMeter() : averageEnabled_(false) {
+	LevelMeter() {
 		setColour(backgroundColourId, EarColours::Transparent);
 		setColour(outlineColorId, EarColours::Area06dp);
 		setColour(highlightColourId, EarColours::Text.withAlpha(Emphasis::high));
@@ -27,12 +27,18 @@ public:
 
 	enum Orientation { horizontal, vertical };
 
+    enum MeterMode { Individual, PeakChannel };
+
 	void setOrientation(Orientation orientation) { orientation_ = orientation; }
 
 	void setMeter(std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator,
 		int channel) {
 		calculator_ = calculator;
-		if (channels_.size() != 1 || channels_[0] != channel) {
+		if (channels_.size() != 1 ||
+            channels_[0] != channel ||
+            values_.size() != 1 ||
+            meterMode_ != Individual) {
+            meterMode_ = Individual;
 			channels_ = { channel };
 			values_ = { 0.f };
 			if (!isTimerRunning()) startTimer(50);
@@ -40,22 +46,47 @@ public:
 	}
 
 	void setMeter(std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator,
-		std::vector<int> channels) {
+		std::vector<int> &channels) {
 		calculator_ = calculator;
-		if (channels_ != channels)
-		{
+		if (channels_ != channels ||
+            values_.size() != channels_.size() ||
+            meterMode_ != Individual) {
+            meterMode_ = Individual;
 			channels_ = channels;
 			values_ = std::vector<float>(channels_.size(), 0.f);
 			if (!isTimerRunning()) startTimer(50);
 		}
 	}
 
+    void setMeterPeakChannel(std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator,
+        std::vector<int> &channels) {
+        calculator_ = calculator;
+        if (channels_ != channels || values_.size() != 1 ||
+            meterMode_ != PeakChannel) {
+            meterMode_ = PeakChannel;
+            channels_ = channels;
+            values_ = std::vector<float>(1, 0.f);
+            if (!isTimerRunning()) startTimer(50);
+        }
+    }
+
 	void timerCallback() override {
 		if (auto meter = calculator_.lock()) {
 			meter->decayIfNeeded();
-			for (int i = 0; i < channels_.size(); ++i) {
-				values_.at(i) = meter->getLevel(channels_.at(i));
-			}
+            if(meterMode_ == PeakChannel) {
+                float maxVal = 0.0;
+                for(int i = 0; i < channels_.size(); ++i) {
+                    auto level = meter->getLevel(channels_.at(i));
+                    if(level > maxVal) {
+                        maxVal = level;
+                    }
+                }
+                values_.at(0) = maxVal;
+            } else {
+                for(int i = 0; i < channels_.size(); ++i) {
+                    values_.at(i) = meter->getLevel(channels_.at(i));
+                }
+            }
 			repaint();
 		}
 	}
@@ -73,9 +104,9 @@ public:
 		auto area = getLocalBounds().toFloat();
 		area.reduce(outlineWidth_, outlineWidth_);
 		float channelHeight =
-			area.getHeight() / static_cast<float>(channels_.size());
-		float channelWidth = area.getWidth() / static_cast<float>(channels_.size());
-		for (int i = 0; i < channels_.size(); ++i) {
+			area.getHeight() / static_cast<float>(values_.size());
+		float channelWidth = area.getWidth() / static_cast<float>(values_.size());
+		for (int i = 0; i < values_.size(); ++i) {
 			float scalingFactor =
 				std::pow(clamp<float>(values_.at(i), 0.f, 1.f), 0.3);
 			if (orientation_ == Orientation::horizontal) {
@@ -87,9 +118,7 @@ public:
 			}
 		}
 
-		g.setColour(findColour(outlineColorId));
-
-		if (averageEnabled_) {
+		if (averageBarEnabled_) {
 			auto channelsInMeter = static_cast<float>(values_.size());
 			float averageValue = std::reduce(values_.begin(), values_.end()) / channelsInMeter;
 			float scalingFactorFromAverage = std::pow(clamp<float>(averageValue, 0.f, 1.f), 0.3);
@@ -102,7 +131,7 @@ public:
 	}
 
 	void enableAverage(bool averageEnabled) {
-		averageEnabled_ = averageEnabled;
+		averageBarEnabled_ = averageEnabled;
 		repaint();
 	}
 
@@ -116,11 +145,12 @@ public:
 private:
 	std::vector<int> channels_;
 	std::vector<float> values_;
+    MeterMode meterMode_{ Individual };
 
 	Orientation orientation_ = Orientation::horizontal;
 	float outlineWidth_ = 1.f;
 	std::weak_ptr<ear::plugin::LevelMeterCalculator> calculator_;
-	bool averageEnabled_;
+    bool averageBarEnabled_{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
 };

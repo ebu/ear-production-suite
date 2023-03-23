@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 #include <catch2/catch_all.hpp>
+#include <fstream>
 #include "reaperapi.h"
 #include "tempdir.h"
 #include "mocks/reaperapi.h"
@@ -16,6 +17,7 @@
 #include "fakeptr.h"
 #include <track.h>
 #include <helper/container_helpers.hpp>
+#include <fstream>
 
 using namespace admplug;
 using ::testing::_;
@@ -151,12 +153,11 @@ namespace {
         ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.distance));
         ON_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).WillByDefault(Return(true));
         ON_CALL(api, CreateTrackSend(_, _)).WillByDefault(Return(fake.sendIndex));
-        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_SCENE_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
-        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
-        ON_CALL(api, TrackFX_AddByName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
-        ON_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
-        ON_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, _)).WillByDefault(Return(1));
-        ON_CALL(api, TrackFX_GetByName(_, _, _)).WillByDefault(Return(fake.fxIndex));
+        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_SCENE_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(ADM_VST_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
+        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, _)).WillByDefault(Return(1));
         ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(2)); // Object VST and ADM VST
         ON_CALL(api, GetTrackEnvelopeByName(_, StrEq("Volume"))).WillByDefault(Return(fake.envelopeFor.volume));
         ON_CALL(api, CountTracks(_)).WillByDefault(Return(2));
@@ -204,10 +205,10 @@ namespace {
         }
 
         SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
-            EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks * 2); // Once via MediaTrackElement::addAdmExportVst, again via MediaTakeElement::createProjectElements
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks);
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks * 2); // Once via MediaTrackElement::addAdmExportVst, again via MediaTakeElement::createProjectElements
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedTracks);
+            EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
         }
 
         SECTION("Sets the number of track channels to 16, disables object and submix track master sends") {
@@ -271,12 +272,12 @@ namespace {
 
         SECTION("Instantiates a spatialiser plugin on the channel tracks and a control plugin on the render bus") {
             if(expectedDirectChannels > 0) {
-                EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), false, TrackFXAddMode::QueryPresence)).WillOnce(Return(-1)).WillRepeatedly(Return(0));
-                EXPECT_CALL(api, TrackFX_AddByName(_, StrNe(ADM_VST_PLUGIN_NAME), _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
-                EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(1);
+                EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), false, TrackFXAddMode::QueryPresence)).WillOnce(Return(-1)).WillRepeatedly(Return(0));
+                EXPECT_CALL(api, TrackFX_AddByActualName(_, StrNe(ADM_VST_PLUGIN_NAME), _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
+                EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.directSpeakers, StrEq(ADM_VST_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(1);
             }
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME) ,_ ,AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedDirectChannels);
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME) ,_ ,AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing))).Times(expectedDirectChannels);
+            EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.renderer, StrEq(CONTROL_PLUGIN_NAME), _, AnyOf(TrackFXAddMode::CreateNew, TrackFXAddMode::CreateIfMissing)));
         }
 
         SECTION("Sets the number of track channels to 16, disables directspeaker, common definition and submix track master sends") {
@@ -323,9 +324,9 @@ namespace {
         });
 
         EXPECT_CALL(api, GetResourcePath()).WillRepeatedly(Return("../../test/reaper_adm/data"));
-        EXPECT_CALL(api, TrackFX_AddByName(_, _, _, _)).WillRepeatedly(Return(0));
-        EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(SPATIALISER_PLUGIN_NAME), false, 0)).WillOnce(Return(1)).WillRepeatedly(Return(-1));
-        EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(ADM_VST_PLUGIN_NAME), false, 0)).WillOnce(Return(0)).WillRepeatedly(Return(-1));
+        EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, _)).WillRepeatedly(Return(0));
+        EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME), false, 0)).WillOnce(Return(1)).WillRepeatedly(Return(-1));
+        EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(ADM_VST_PLUGIN_NAME), false, 0)).WillOnce(Return(0)).WillRepeatedly(Return(-1));
         char* notNothing = "not_nothing";
         char* isNothing = "";
         EXPECT_CALL(api, TrackFX_GetPreset(_, 1, _, _)).WillOnce(DoAll(SetArgumentPointee<2>(*isNothing), Return(true))).WillRepeatedly(DoAll(SetArgumentPointee<2>(*notNothing), Return(true)));
@@ -383,11 +384,11 @@ namespace {
         }
 
         SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
-            EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(_, _, _, TrackFXAddMode::CreateIfMissing)).Times(AnyNumber());
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedObjectPlugins);
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.submix, StrEq(EAR_SCENE_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
-            EXPECT_CALL(api, TrackFX_AddByName(fake.trackFor.renderer, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, TrackFXAddMode::CreateIfMissing)).Times(AnyNumber());
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedObjectPlugins);
+            EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.submix, StrEq(EAR_SCENE_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
+            EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.renderer, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
         }
 
         SECTION("Sets the number of track channels to 64, disables object and scene track master sends") {

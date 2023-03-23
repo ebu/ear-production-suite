@@ -5,6 +5,7 @@
 #include "binaural_monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 #include <version/eps_version.h>
+#include <helper/resource_paths_juce-file.hpp>
 
 #define DEFAULT_OSC_PORT 8000
 
@@ -165,7 +166,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
-  configFileOptions.folderName = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getChildFile("ear-production-suite").getFullPathName();
+  configFileOptions.folderName = ResourcePaths::getSettingsDirectory(true).getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
   readConfigFile();
 }
@@ -216,10 +217,12 @@ void EarBinauralMonitoringAudioProcessor::timerCallback() {
 //==============================================================================
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  return BusesProperties()
-      .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-      .withOutput("Left Ear", AudioChannelSet::mono(), true)
-      .withOutput("Right Ear", AudioChannelSet::mono(), true);
+  auto ret = BusesProperties().withInput(
+    "Input", AudioChannelSet::discreteChannels(64), true);
+  ret = ret.withOutput("Left Ear", AudioChannelSet::mono(), true);
+  ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
+  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(62), true);
+  return ret;
 }
 
 bool EarBinauralMonitoringAudioProcessor::readConfigFile()
@@ -315,14 +318,24 @@ void EarBinauralMonitoringAudioProcessor::releaseResources() {
 
 bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(2) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
 
-  return false;
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+    return false;
+
+  if(layouts.outputBuses.size() != 3)
+    return false;
+  if(layouts.outputBuses[0] != AudioChannelSet::mono())
+    return false;
+  if(layouts.outputBuses[1] != AudioChannelSet::mono())
+    return false;
+  if(layouts.outputBuses[2] != AudioChannelSet::discreteChannels(62))
+    return false;
+
+  return true;
 }
 
 void EarBinauralMonitoringAudioProcessor::processBlock(
@@ -351,74 +364,72 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     return;
   }
 
-  std::lock_guard<std::mutex> lock(processorMutex_);
-  processor_->setIsPlaying(true);
+  {
+    std::lock_guard<std::mutex> lock(processorMutex_);
+    processor_->setIsPlaying(true);
 
-  auto objIds = backend_->getActiveObjectIds();
-  auto dsIds = backend_->getActiveDirectSpeakersIds();
-  auto hoaIds = backend_->getActiveHoaIds();
+    auto objIds = backend_->getActiveObjectIds();
+    auto dsIds = backend_->getActiveDirectSpeakersIds();
+    auto hoaIds = backend_->getActiveHoaIds();
 
-  size_t numHoa = backend_->getTotalHoaChannels();
-  size_t numObj = backend_->getTotalObjectChannels();
-  size_t numDs = backend_->getTotalDirectSpeakersChannels();
+    size_t numHoa = backend_->getTotalHoaChannels();
+    size_t numObj = backend_->getTotalObjectChannels();
+    size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
-  // Ensure BEAR has enough channels configured and is not erroring
-  if (!processor_ || processor_->rendererError()) return;
-  if (!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
-    assert(false);
-    return;
-  }
-
-  // Listener Position
-
-  auto latestQuat = backend_->listenerOrientation->getQuaternion();
-  processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
-                                     latestQuat.z);
-
-  // BEAR Metadata
-
-  for (auto& connId : objIds) {
-    auto md = backend_->getLatestObjectsTypeMetadata(connId);
-    if (md.has_value() && md->channel >= 0) {
-      processor_->pushBearMetadata(md->channel, &(md->earMetadata));
+    // Ensure BEAR has enough channels configured and is not erroring
+    if(!processor_ || processor_->rendererError()) return;
+    if(!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
+      assert(false);
+      return;
     }
-  }
 
-  for (auto& connId : dsIds) {
-    auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
-    if (md.has_value() && md->startingChannel >= 0) {
-      for (int index = 0; index < md->earMetadata.size(); index++) {
-        processor_->pushBearMetadata(
+    // Listener Position
+
+    auto latestQuat = backend_->listenerOrientation->getQuaternion();
+    processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
+                                       latestQuat.z);
+
+    // BEAR Metadata
+
+    for(auto& connId : objIds) {
+      auto md = backend_->getLatestObjectsTypeMetadata(connId);
+      if(md.has_value() && md->channel >= 0) {
+        processor_->pushBearMetadata(md->channel, &(md->earMetadata));
+      }
+    }
+
+    for(auto& connId : dsIds) {
+      auto md = backend_->getLatestDirectSpeakersTypeMetadata(connId);
+      if(md.has_value() && md->startingChannel >= 0) {
+        for(int index = 0; index < md->earMetadata.size(); index++) {
+          processor_->pushBearMetadata(
             md->startingChannel + index,
             &(md->earMetadata[index]));  // earMetadata is a vector for DS but
                                          // not for obj or HOA
+        }
       }
     }
-  }
 
-  size_t streamIdentifier = 0;
-  for (auto& connId : hoaIds) {
-    auto md = backend_->getLatestHoaTypeMetadata(connId);
-    if (md.has_value() && md->startingChannel >= 0) {
-      processor_->pushBearMetadata(md->startingChannel, &(md->earMetadata),
-                                   streamIdentifier++);
+    size_t streamIdentifier = 0;
+    for(auto& connId : hoaIds) {
+      auto md = backend_->getLatestHoaTypeMetadata(connId);
+      if(md.has_value() && md->startingChannel >= 0) {
+        processor_->pushBearMetadata(md->startingChannel, &(md->earMetadata),
+                                     streamIdentifier++);
+      }
     }
+
+    // BEAR audio processing
+    processor_->process(buffer, buffer);
   }
 
-  // BEAR audio processing
-  processor_->process(buffer, buffer);
-
-  // Zero unused output channels - probably not necessary in most cases;
-  // e.g, REAPER only takes the first n channels defined by the output bus width
-  //   remaining are passed through.
-  auto buffMaxChns = buffer.getNumChannels();
-  auto buffSamples = buffer.getNumSamples();
-  for (int ch = 2; ch < buffMaxChns; ch++) {
-    buffer.clear(ch, 0, buffSamples);
+  // Clear unused output channels
+  for(int outChn = 2; outChn < buffer.getNumChannels(); ++outChn) {
+    buffer.clear(outChn, 0, buffer.getNumSamples());
   }
 
   // Meters
-  if (buffer.getNumChannels() >= levelMeter_->channels()) {
+  if (getActiveEditor() && buffer.getNumChannels() >= levelMeter_->channels()) {
     levelMeter_->process(buffer);
   }
 
@@ -431,6 +442,7 @@ bool EarBinauralMonitoringAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* EarBinauralMonitoringAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new EarBinauralMonitoringAudioProcessorEditor(this);
 }
 

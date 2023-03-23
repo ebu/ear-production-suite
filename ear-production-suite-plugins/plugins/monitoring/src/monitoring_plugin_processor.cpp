@@ -52,12 +52,13 @@ ear::Layout const& layout() {
 
 juce::AudioProcessor::BusesProperties
 EarMonitoringAudioProcessor::_getBusProperties() {
-  channels_ = layout().channelNames().size();
+  numOutputChannels_ = layout().channelNames().size();
   auto ret = BusesProperties().withInput(
       "Input", AudioChannelSet::discreteChannels(64), true);
   for (const std::string& name : layout().channelNames()) {
     ret = ret.withOutput(name, AudioChannelSet::mono(), true);
   }
+  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(64 - numOutputChannels_), true);
   return ret;
 }
 
@@ -124,14 +125,26 @@ void EarMonitoringAudioProcessor::releaseResources() {
 
 bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  if (layouts.getMainOutputChannelSet() ==
-          AudioChannelSet::discreteChannels(layout().channelNames().size()) &&
-      layouts.getMainInputChannelSet() ==
-          AudioChannelSet::discreteChannels(64)) {
-    return true;
-  }
 
-  return false;
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 1)
+    return false;
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+    return false;
+
+  auto outputBusCount = layouts.outputBuses.size();
+  auto expectedOutputBusCount = numOutputChannels_ + 1;
+  if(outputBusCount != expectedOutputBusCount)
+    return false;
+  for(int i = 0; i < numOutputChannels_; ++i) {
+    if(layouts.outputBuses[i] != AudioChannelSet::mono())
+      return false;
+  }
+  if(layouts.outputBuses[numOutputChannels_] != AudioChannelSet::discreteChannels(64 - numOutputChannels_))
+    return false;
+
+  return true;
 }
 
 void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
@@ -149,28 +162,28 @@ void EarMonitoringAudioProcessor::processBlock(AudioBuffer<float>& buffer,
         if(destChn < getTotalNumOutputChannels()) {
           buffer.copyFrom(destChn, 0, buffer.getReadPointer(0), buffer.getNumSamples());
         } else {
-          for(int sampleNum = 0; sampleNum < buffer.getNumSamples(); sampleNum++) {
-            buffer.setSample(destChn, sampleNum, 0.f);
-          }
+          buffer.clear(destChn, 0, buffer.getNumSamples());
         }
       }
     }
     return;
   }
 
+  // Do EAR render
   auto gains = backend_->currentGains();
-
-  // Make sure to reset the state if your inner loop is processing
-  // the samples and the outer loop is handling the channels.
-  // Alternatively, you can process the samples with the channels
-  // interleaved by keeping the same state.
   if (processor_) {
     processor_->process(buffer, buffer, gains.direct, gains.diffuse);
-    // Check enough channels - prevents crash if track/buffer too narrow
-    if (buffer.getNumChannels() >= levelMeter_->channels()) {
-      levelMeter_->process(buffer);
-    }
   }
+
+  if(getActiveEditor()) {
+    levelMeter_->process(buffer);
+  }
+
+  // Clear unused output channels
+  for(int outChn = numOutputChannels_; outChn < buffer.getNumChannels(); ++outChn) {
+    buffer.clear(outChn, 0, buffer.getNumSamples());
+  }
+
 }
 
 //==============================================================================
@@ -179,6 +192,7 @@ bool EarMonitoringAudioProcessor::hasEditor() const {
 }
 
 AudioProcessorEditor* EarMonitoringAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new EarMonitoringAudioProcessorEditor(this);
 }
 

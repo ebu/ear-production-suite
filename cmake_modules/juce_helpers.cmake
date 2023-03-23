@@ -29,7 +29,12 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
   configure_file(${JUCE_SUPPORT_RESOURCES}/juce/JuceHeader.h.in ${_SUPPORT_PATH}/JuceHeader.h)
   configure_file(${JUCE_SUPPORT_RESOURCES}/osx/VST-Info.plist.in ${_SUPPORT_PATH}/Info.plist)
   file(COPY ${JUCE_SUPPORT_RESOURCES}/osx/PkgInfo DESTINATION ${_SUPPORT_PATH})
-  add_library(${PLUGIN_NAME}_VST3 MODULE ${PLUGIN_SOURCES} ${_SUPPORT_PATH}/AppConfig.h  ${_SUPPORT_PATH}/JuceHeader.h  ${_SUPPORT_PATH}/Info.plist  ${_SUPPORT_PATH}/PkgInfo)
+  if(CMAKE_GENERATOR STREQUAL Xcode)
+    # Xcode doesn't like PkgInfo in library modules (Error "Multiple commands produce 'Contents/PkgInfo'")
+    add_library(${PLUGIN_NAME}_VST3 MODULE ${PLUGIN_SOURCES} ${_SUPPORT_PATH}/AppConfig.h ${_SUPPORT_PATH}/JuceHeader.h ${_SUPPORT_PATH}/Info.plist)
+  else()
+    add_library(${PLUGIN_NAME}_VST3 MODULE ${PLUGIN_SOURCES} ${_SUPPORT_PATH}/AppConfig.h ${_SUPPORT_PATH}/JuceHeader.h ${_SUPPORT_PATH}/Info.plist ${_SUPPORT_PATH}/PkgInfo)
+  endif()
   target_include_directories(${PLUGIN_NAME}_VST3 PRIVATE ${_SUPPORT_PATH}/ ${EPS_SHARED_DIR})
   target_link_libraries(${PLUGIN_NAME}_VST3 PRIVATE Juce::VST3)
 
@@ -44,6 +49,9 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/VST3"
     COMPILE_PDB_NAME "${PLUGIN_OUTPUT_NAME}"
     COMPILE_PDB_OUTPUT_DIR "${PROJECT_BINARY_DIR}/VST3"
+    C_VISIBILITY_PRESET hidden
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN TRUE
   )
   
   if(PLUGIN_IDE_FOLDER)

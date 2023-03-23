@@ -41,6 +41,11 @@ namespace ear {
             auto doc = adm::parseXml(iss, adm::xml::ParserOptions::recursive_node_search);
             pluginToAdmMaps_ = pluginToAdmMaps;
             pendingElements_ = populateStoreFromAdm(*doc, pendingStore_);
+            if (pendingElements_.empty()) {
+              // not waiting for anything
+              killThread = true;
+              finishPendingElementsSearch();
+            }
         }
 
         void PendingStore::inputAdded(InputItem const & item, bool autoModeState)
@@ -92,7 +97,11 @@ namespace ear {
           std::lock_guard lock(finisher);
           if(!finished) {
             finished = true;
-            data_.setStore(pendingStore_);
+            // Don't set store if we didn't get any high-level metadata (programmes)
+            // Leave it (will remain with the initial default programme and in auto mode)
+            if (pendingStore_.programme_size() > 0) {
+              data_.setStore(pendingStore_);
+            }
           }
         }
 

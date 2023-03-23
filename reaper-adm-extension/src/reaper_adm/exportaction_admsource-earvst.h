@@ -57,41 +57,27 @@ private:
 class EarInputVst : public PluginInstance
 {
 public:
-	EarInputVst(MediaTrack* mediaTrack, char* vstName, ReaperAPI const& api);
 	EarInputVst(MediaTrack* mediaTrack, int fxIndex, ReaperAPI const& api);
 	~EarInputVst() {};
 
 	int getTrackMapping();
-	int getWidth();
 	int getInputInstanceId();
 
 	// Statics
 
-	static const char* getDirectSpeakersVstCompName();
 	static const std::string* getDirectSpeakersVstNameStr();
 	static bool isDirectSpeakersVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackDirectSpeakersVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackDirectSpeakersVstIndexes(ReaperAPI const& api, MediaTrack* trk);
-	static bool vstPosIsDirectSpeakersVst(ReaperAPI const& api, MediaTrack* trk, int vstPos);
 
-	static const char* getObjectVstCompName();
 	static const std::string* getObjectVstNameStr();
 	static bool isObjectVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackObjectVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackObjectVstIndexes(ReaperAPI const& api, MediaTrack* trk);
-	static bool vstPosIsObjectVst(ReaperAPI const& api, MediaTrack* trk, int vstPos);
 
-	static const char* getHoaVstCompName();
 	static const std::string* getHoaVstNameStr();
 	static bool isHoaVstAvailable(ReaperAPI const& api, bool doRescan = true);
-	static int trackHoaVstIndex(ReaperAPI const& api, MediaTrack* trk);
-	static std::vector<int> trackHoaVstIndexes(ReaperAPI const& api, MediaTrack* trk);
-	static bool vstPosIsHoaVst(ReaperAPI const& api, MediaTrack* trk, int vstPos);
 
-	static bool isObjectPlugin(std::string vstNameStr);
-	static bool isDirectSpeakersPlugin(std::string vstNameStr);
-	static bool isHoaPlugin(std::string vstNameStr);
-	static bool isInputPlugin(char* vstName);
+	static bool isObjectPlugin(const std::string& vstNameStr);
+	static bool isDirectSpeakersPlugin(const std::string& vstNameStr);
+	static bool isHoaPlugin(const std::string& vstNameStr);
+	static bool isInputPlugin(const std::string& vstName);
 	static bool isInputPlugin(ReaperAPI const& api, MediaTrack* trk, int vstPos);
 
 private:
@@ -106,19 +92,8 @@ private:
 	// Statics
 
 	static std::string directSpeakersVstName; // Human-readable name
-	static std::string directSpeakersVstCompName; // Name for comparison purposes using API funcs
-	static size_t directSpeakersVstCompNameLen;
-	static const char* directSpeakersVstCompNameCStr;
-
 	static std::string objectVstName; // Human-readable name
-	static std::string objectVstCompName; // Name for comparison purposes using API funcs
-	static size_t objectVstCompNameLen;
-	static const char* objectVstCompNameCStr;
-
 	static std::string hoaVstName; // Human-readable name
-	static std::string hoaVstCompName; // Name for comparison purposes using API funcs
-	static size_t hoaVstCompNameLen;
-	static const char* hoaVstCompNameCStr;
 };
 
 class EarSceneMasterVst : public PluginInstance
@@ -140,13 +115,10 @@ public:
 	int getCommandSocketPort();
 
 	// Statics
-	static const char* getVstCompName();
 	static const std::string* getVstNameStr();
 	static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
 	static bool isCandidateForExport(std::shared_ptr<EarSceneMasterVst> possibleCandidate);
-	static int trackEarSceneMasterVstIndex(ReaperAPI const& api, MediaTrack* trk);
 	static std::vector<int> trackEarSceneMasterVstIndexes(ReaperAPI const& api, MediaTrack* trk);
-	static bool vstPosIsEarSceneMasterVst(ReaperAPI const& api, MediaTrack* trk, int vstPos);
 
 private:
 	std::shared_ptr<EarVstCommunicator> communicator;
@@ -161,9 +133,6 @@ private:
 
 	// Statics
 	static std::string vstName; // Human-readable name
-	static std::string vstCompName; // Name for comparison purposes using API funcs
-	static size_t vstCompNameLen;
-	static const char* vstCompNameCStr;
 };
 
 class EarVstExportSources : public IExportSources

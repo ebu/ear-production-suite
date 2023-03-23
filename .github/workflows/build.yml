@@ -21,7 +21,7 @@ jobs:
       CCACHE_MAXSIZE: '500M'
       CCACHE_BASEDIR: '${{ github.workspace }}'
       VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      VCPKG_CACHE_LOCATION: '${{ github.workspace }}/vcpkg_cache'
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
     strategy:
       matrix:
         config:
@@ -49,9 +49,15 @@ jobs:
             cmake_preset: "macos-arm64-packaging-release"
             vcpkg_triplet: arm64-osx-11_0
             test: false
+          - name: "Ubuntu 20.04"
+            os: ubuntu-20.04
+            package: true
+            cmake_preset: "linux-packaging-release"
+            vcpkg_triplet: x64-linux
+            test: true
     steps:
       - name: 'Checkout repo recursively.'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -60,17 +66,22 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@v3
 
       - name: 'Create vcpkg cache dir.'
-        run: cmake -E make_directory ${{ env.VCPKG_CACHE_LOCATION }}
+        run: cmake -E make_directory ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
-      # See https://github.com/lukka/CppBuildTasks-Validation/blob/master/.github/workflows/hosted-pure-workflow.yml
-      # We use cache key from above, possibly redundant due to vcpkg's own hashing, but it doesn't hurt while we're
-      # still using a binary cache per repo/triplet rather than a global package repo.
+      - name: 'Prepare timestamp.'
+        id: cache_timestamp
+        shell: cmake -P {0}
+        run: |
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
+
       - name: 'Restore vcpkg and its artifacts.'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          path: ${{ env.VCPKG_CACHE_LOCATION }}
-          key: |
-            ${{ hashFiles( 'vcpkg.json' ) }}-${{ hashFiles( '.git/modules/submodules/vcpkg/HEAD' )}}--${{ matrix.config.vcpkg_triplet }}-invalidate
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+              ${{ matrix.config.name }}-vcpkg-
 
       - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
@@ -90,19 +101,22 @@ jobs:
         if: matrix.config.os == 'macos-latest'
         run: |
           brew install ccache
-
-      - name: 'Prepare ccache timestamp.'
-        id: ccache_cache_timestamp
-        shell: cmake -P {0}
+          
+      - name: 'macOS: Install pkg-config.'
+        if: matrix.config.os == 'macos-latest'
         run: |
-          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
+          brew install pkg-config
+
+      - name: 'linux: Install dependencies.'
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          sudo apt-get install -y ccache libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
 
       - name: 'Cache ccache files.'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-ccache-
 
@@ -122,8 +136,8 @@ jobs:
           file(TO_CMAKE_PATH "$ENV{RUNNER_WORKSPACE}" RUNNER_WORKSPACE)
           set(INSTALL_DIR "${NAME_NO_SPACES}")
           file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
-          message("::set-output name=install_prefix::${PREFIX}")
-          message("::set-output name=install_dir::${INSTALL_DIR}")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
 
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
@@ -135,9 +149,6 @@ jobs:
       - name: 'Configure with CMake, vcpkg and ccmake.'
         run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
         env:
-          # See https://vcpkg.io/en/docs/users/binarycaching.html for syntax of this variable. We want to clear out
-          # the default locations and both restore from and save to our custom .vcpkg directory.
-          VCPKG_BINARY_SOURCES: 'clear;files,${{ env.VCPKG_CACHE_LOCATION }},readwrite'
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
           CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
 
@@ -147,6 +158,9 @@ jobs:
         # This is for the windows relwithdebinfo build as otherwise we run out of disk space
       - name: 'Clean up vcpkg temporary files.'
         run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
+
+      - name: 'Prune the vcpkg cache'
+        run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
 
       - name: 'Build using CMake and Ninja via CMake preset.'
         run: cmake --build --preset ${{ matrix.config.cmake_preset }}
@@ -164,12 +178,12 @@ jobs:
           cmake -E make_directory "${{ steps.cmake_install_prefix.outputs.install_prefix }}"
           cmake --build --preset ${{ matrix.config.cmake_preset }} --target install
 
-      - name: 'macOS: Tar output dir.'
-        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+      - name: 'unix: Tar output dir.'
+        if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
         run: tar -cvf ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar -C ${{ steps.cmake_install_prefix.outputs.install_prefix }} .
                   
-      - name: 'macOS: Upload Tar as build artifact.'
-        if: ${{ matrix.config.package && matrix.config.os == 'macos-latest' }}
+      - name: 'unix: Upload Tar as build artifact.'
+        if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
@@ -233,8 +247,17 @@ jobs:
           LIBS=`find $intel_dir -name '*.dylib'`
           # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
           PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
+          APPS=`find $intel_dir -path '*app/Contents/MacOS/*' ! -name '*.*'`
+          # don't forget project upgrade command line util
+          EXES=`find $intel_dir -name 'project_upgrade'`
           
           IFS=$'\n'
+          
+          for exe in $EXES; do
+            echo "Making UB Exectuable from: $exe"
+            make_ub "$exe"
+          done
+
           for lib in $LIBS; do
             echo "Making UB Library from: $lib"
             make_ub "$lib"
@@ -243,6 +266,11 @@ jobs:
           for plugin in $PLUGINS; do
             echo "Making UB Plugin from: $plugin"
             make_ub "$plugin"
+          done
+          
+          for app in $APPS; do
+            echo "Making UB App from: $app"
+            make_ub "$app"
           done
           
       - name: 'dir listing'

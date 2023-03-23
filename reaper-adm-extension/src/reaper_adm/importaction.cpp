@@ -5,6 +5,7 @@
 #include "progress/importdialog.h"
 #include "bw64/bw64.hpp"
 #include "admvstcontrol.h"
+#include <array>
 
 using namespace admplug;
 

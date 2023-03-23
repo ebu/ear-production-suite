@@ -23,7 +23,7 @@ ElementViewList::ElementViewList(ElementsContainer* parentContainer)
   assert(parentContainer);
   helpLabel_->setText("Add Items by clicking the Buttons above",
                       dontSendNotification);
-  helpLabel_->setFont(EarFonts::Items);
+  helpLabel_->setFont(EarFontsSingleton::instance().Items);
   helpLabel_->setColour(Label::textColourId,
                         EarColours::Text.withAlpha(Emphasis::medium));
   addAndMakeVisible(helpLabel_.get());

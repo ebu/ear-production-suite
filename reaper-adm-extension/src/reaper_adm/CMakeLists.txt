@@ -4,6 +4,7 @@ add_library(reaper_adm SHARED "dummy.cpp")
 add_library(Reaper_adm::reaper_adm ALIAS reaper_adm)
 
 find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
+find_package(JUCE REQUIRED QUIET)
 
 set(EXTENSION_SOURCES
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
@@ -67,6 +68,7 @@ set(EXTENSION_SOURCES
 	reaperguid.cpp
 	reaperhost.cpp
 	track.cpp
+	update_check.cpp
 	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
@@ -76,6 +78,14 @@ set(EXTENSION_SOURCES
 set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/common_definition_helper.h
     ${EPS_SHARED_DIR}/helper/nng_wrappers.h
+    ${EPS_SHARED_DIR}/helper/char_encoding.hpp
+    ${EPS_SHARED_DIR}/helper/version.hpp
+    ${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
+    ${EPS_SHARED_DIR}/helper/resource_paths.hpp
+    ${EPS_SHARED_DIR}/helper/native_message_box.hpp
+	
+	AppConfig.h
+	juce_modules.h
 	
 	actionmanager.h
 	admchannel.h
@@ -142,8 +152,8 @@ set(EXTENSION_HEADERS
 	reaper_plugin_functions.h
 	resource.h
 	track.h
+	update_check.h
 	win_mem_debug.h
-	win_nonblock_msg.h
 	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
 	progress/importlistener.h
@@ -173,8 +183,6 @@ source_group("Resources" FILES ${EXTENSION_RESOURCES})
 target_compile_definitions(reaper_adm_object
     PUBLIC $<TARGET_PROPERTY:WDL::swell,INTERFACE_COMPILE_DEFINITIONS>)
 
-set_target_properties(reaper_adm_object PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
 add_library(reaper_adm_dependencies INTERFACE)
 
 target_include_directories(reaper_adm_dependencies
@@ -192,6 +200,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:Juce::core,INTERFACE_INCLUDE_DIRECTORIES>
 	${EPS_SHARED_DIR}
     )
 
@@ -204,8 +213,9 @@ target_link_libraries(reaper_adm_dependencies
       Boost::filesystem
       nng::nng
       ear-version
+	  Juce::core
     )
-
+	
 add_dependencies(reaper_adm_dependencies reaper_adm_object)
 
 set_target_properties(reaper_adm
@@ -223,21 +233,16 @@ target_link_libraries(reaper_adm
     PRIVATE
       reaper_adm_dependencies
       )
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-add_custom_command(
-    TARGET reaper_adm 
-    PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory        
-        ${CMAKE_CURRENT_BINARY_DIR}/ear-production-suite.build
-        ${CMAKE_CURRENT_BINARY_DIR}/reaper_adm.build
-)
+	  
+if(MSVC)
+target_compile_options(reaper_adm
+  PRIVATE
+    "/bigobj")
 endif()
-
 
 set(win_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 set(macos_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
-set(linux_install_dir "share/REAPER/UserPlugins")
+set(linux_install_dir "${EPS_EXTENSION_INSTALL_PREFIX}UserPlugins")
 
 install(TARGETS
     reaper_adm

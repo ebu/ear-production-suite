@@ -30,17 +30,17 @@ class SpeakerMeter : public Component {
     g.fillAll(findColour(backgroundColourId));
     auto area = getLocalBounds();
     area.reduce(5, 5);
-    g.setFont(EarFonts::Values);
+    g.setFont(EarFontsSingleton::instance().Values);
     g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
     g.drawText(index_, area.removeFromTop(30).reduced(5, 5),
                Justification::centredBottom, false);
 
-    g.setFont(EarFonts::Measures);
+    g.setFont(EarFontsSingleton::instance().Measures);
     g.setColour(EarColours::Text.withAlpha(Emphasis::high));
     g.drawText(speakerLabel_, area.removeFromBottom(15), Justification::centred,
                false);
 
-    g.setFont(EarFonts::Label);
+    g.setFont(EarFontsSingleton::instance().Label);
     g.setColour(EarColours::Text);
     g.drawText(speakerName_, area.removeFromBottom(30), Justification::centred,
                false);

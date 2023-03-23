@@ -46,16 +46,32 @@ LevelMeterCalculator::LevelMeterCalculator(std::size_t channels,
 }
 
 void LevelMeterCalculator::setup(std::size_t channels, std::size_t samplerate) {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        channels_ = channels;
+        samplerate_ = samplerate;
+        setConstants();
+    }
+    resetClipping();
+    resetLevels();
+}
+
+void LevelMeterCalculator::processForClippingOnly(const AudioBuffer<float>& buffer) {
     std::lock_guard<std::mutex> lock(mutex_);
-    channels_ = channels;
-    samplerate_ = samplerate;
-    lastLevel_.clear();
-    lastLevel_.assign(channels_, 0.);
-    lastLevelHasSignal_.clear();
-    lastLevelHasSignal_.assign(channels_, false);
-    lastLevelHasClipped_.clear();
-    lastLevelHasClipped_.assign(channels_, false);
-    setConstants();
+    size_t channelsToProcess = std::min(static_cast<size_t>(buffer.getNumChannels()), channels_);
+    for(std::size_t c = 0; c < channelsToProcess; ++c) {
+        if(lastLevelHasClipped_[c]) {
+            break; // Already set - no need to check samples
+        }
+        for(std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
+            auto sample(buffer.getSample(c, n));
+            auto absSample = std::abs(sample);
+            if(absSample > SIGNAL_CLIPPED_THRESHOLD) {
+                lastLevelHasClipped_[c] = true;
+                break; // Found a sample which clips - no further checking required
+            }
+        }
+    }
 }
 
 void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
@@ -65,7 +81,8 @@ void LevelMeterCalculator::process(const AudioBuffer<float>& buffer) {
         blocksize_ = buffer.getNumSamples();
         blockPeriodLimitMs_ = ((static_cast<float>(blocksize_) / static_cast<float>(samplerate_)) * 1000.f) * BLOCK_PERIOD_MULTIPLIER;
     }
-    for(std::size_t c = 0; c < channels_; ++c) {
+    size_t channelsToProcess = std::min(static_cast<size_t>(buffer.getNumChannels()), channels_);
+    for(std::size_t c = 0; c < channelsToProcess; ++c) {
         bool hasSignal(false);
         bool hasClipped(false);
         for(std::size_t n = 0; n < buffer.getNumSamples(); ++n) {
@@ -155,9 +172,17 @@ void LevelMeterCalculator::decayIfNeeded() {
 
 void LevelMeterCalculator::resetClipping() {
     std::lock_guard<std::mutex> lock(mutex_);
-    for(std::size_t c = 0; c < channels_; ++c) {
-        lastLevelHasClipped_[c] = false;
-    }
+    lastLevelHasSignal_.clear();
+    lastLevelHasSignal_.assign(channels_, false);
+    lastLevelHasClipped_.clear();
+    lastLevelHasClipped_.assign(channels_, false);
+}
+
+void LevelMeterCalculator::resetLevels()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    lastLevel_.clear();
+    lastLevel_.assign(channels_, 0.);
 }
 
 void LevelMeterCalculator::setConstants() {

@@ -66,7 +66,6 @@ auto getMockObjectAutoElement() {
     ON_CALL(*element, getTrack()).WillByDefault(Return(track));
     ON_CALL(*element, parentTake()).WillByDefault(Return(take));
     ON_CALL(*track, getPlugin(An<std::string>())).WillByDefault(getPluginStr);
-    ON_CALL(*track, getPlugin(An<int>())).WillByDefault(getPluginInt);
     ON_CALL(*track, createPlugin(An<std::string>())).WillByDefault(createPlugin);
     auto simpleObj = adm::createSimpleObject("Test");
     auto channel = ADMChannel(simpleObj.audioObject, simpleObj.audioChannelFormat, simpleObj.audioPackFormat, simpleObj.audioTrackUid, 0);
@@ -303,7 +302,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
     SECTION("A track element with no automation data does not create plugins") {
         EXPECT_CALL(api, createTrackAtIndex(_,_)).Times(1);
-        EXPECT_CALL(api, TrackFX_AddByName(_,_,_,_)).Times(0);
+        EXPECT_CALL(api, TrackFX_AddByActualName(_,_,_,_)).Times(0);
         earSuite.onCreateObjectTrack(*trackElement, api);
     }
 
@@ -313,7 +312,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates track and plugin") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(1);
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("EAR Object"), _, _)).Times(1);
             earSuite.onCreateObjectTrack(*trackElement, api);
         }
 
@@ -346,7 +345,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates 2 tracks and 2 plugins") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(2);
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("EAR Object"), _, _)).Times(2);
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -381,7 +380,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates track and 2 plugins") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("EAR Object"), _, _)).Times(2);
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -414,7 +413,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 
         SECTION("Creates track and 2 plugins") {
             EXPECT_CALL(api, createTrackAtIndex(_, _)).Times(1);
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("EAR Object"), _, _)).Times(2);
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("EAR Object"), _, _)).Times(2);
             earSuite.onCreateObjectTrack(*trackElement, api);
             earSuite.onCreateObjectTrack(*trackElement2, api);
         }
@@ -508,7 +507,7 @@ TEST_CASE("Directspeaker tracks are created and configured") {
     }
 
     SECTION("Plugin is created") {
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
+        EXPECT_CALL(api, TrackFX_AddByActualName(_,StrEq("EAR DirectSpeakers"),_,_)).Times(1);
         earSuite.onCreateDirectTrack(*trackElement, api);
     }
 
@@ -584,7 +583,7 @@ TEST_CASE("HOA tracks are created and configured") {
     }
 
     SECTION("Plugin is created") {
-        EXPECT_CALL(api, TrackFX_AddByName(_,StrEq("EAR HOA"),_,_)).Times(1);
+        EXPECT_CALL(api, TrackFX_AddByActualName(_,StrEq("EAR HOA"),_,_)).Times(1);
         earSuite.onCreateHoaTrack(*trackElement, api);
     }
 

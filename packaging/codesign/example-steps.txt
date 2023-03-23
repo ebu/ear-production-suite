@@ -1,0 +1,22 @@
+- Copy artefact zip in to this dir
+
+- Run: 
+   python codesign.py "CERTIFICATE NAME" macOS_Latest_Clang_universal.zip EPS_1_0_0_macos_universal
+= Expect: 
+   created: /???/packaging/codesign/EPS_1_0_0_macos_universal.dmg
+
+- Check DMG Contents 
+
+- Run:
+   xcrun notarytool submit ./EPS_1_0_0_macos_universal.dmg --apple-id your@apple.id --team-id TEAMID --wait
+= Expect: 
+   Processing complete
+     id: some-random-guid
+     status: Accepted
+
+- Run:
+   xcrun stapler staple ./EPS_1_0_0_macos_universal.dmg
+= Expect: 
+   The staple and validate action worked!
+
+- Upload to Release

@@ -7,6 +7,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/shadows.hpp"
+#include "components/look_and_feel/tooltips.hpp"
 #include "components/ear_combo_box.hpp"
 #include "components/onboarding.hpp"
 #include "components/overlay.hpp"
@@ -21,6 +22,7 @@
 #include "value_box_panning_view.hpp"
 #include "components/version_label.hpp"
 #include <memory>
+#include <optional>
 
 namespace ear {
 namespace plugin {
@@ -45,6 +47,10 @@ class ObjectsComponent : public Component,
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
         propertiesFile(getPropertiesFile(propertiesFileLock.get())) {
+
+    tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
+    tooltipWindow.setOpaque(false);
+
     header->setText(" Object");
     onBoardingButton->setButtonText("?");
     onBoardingButton->setShape(EarButton::Shape::Circular);
@@ -79,7 +85,7 @@ class ObjectsComponent : public Component,
     metadataValueBox->setEnabled(false);
     metadataValueBox->setAlpha(0.38f);
 
-    statusBarLabel->setFont(EarFonts::Measures);
+    statusBarLabel->setFont(EarFontsSingleton::instance().Measures);
     addAndMakeVisible(statusBarLabel.get());
 
     configureVersionLabel(versionLabel);
@@ -92,15 +98,34 @@ class ObjectsComponent : public Component,
     panningViewValueBox->getPannerTopView()->setDistance(
         p->getDistance()->get(), dontSendNotification);
 
-    gainValueBox->getLevelMeter()->setMeter(p->getLevelMeter(), 0);
+    levelMeterSetup();
 
     mainValueBox->getRoutingComboBox()->grabKeyboardFocus();
   }
 
   ~ObjectsComponent() {}
 
+  void levelMeterSetup() {
+    auto levelMeter = p_->getLevelMeter().lock();
+    if(levelMeter){
+      auto channelCount = levelMeter->channels();
+      if(lastSetMeterChannelCount_ != channelCount ||
+         lastSetMeterStartingChannel_ != 0 ||
+         !lastSetMeterMode_.has_value() ||
+         lastSetMeterMode_.value() != LevelMeter::MeterMode::PeakChannel) {
+        std::vector<int> channelNums_(channelCount);
+        std::iota(std::begin(channelNums_), std::end(channelNums_), 0);
+        gainValueBox->getLevelMeter()->setMeterPeakChannel(levelMeter, channelNums_);
+        lastSetMeterMode_ = LevelMeter::MeterMode::PeakChannel;
+        lastSetMeterChannelCount_ = channelCount;
+        lastSetMeterStartingChannel_ = 0;
+      }
+    }
+  }
+
   void paint(Graphics& g) override {
     g.fillAll(EarColours::Background);
+    levelMeterSetup();
 
     Shadows::elevation04dp.drawForRectangle(g, mainValueBox->getBounds());
     //Shadows::elevation04dp.drawForRectangle(g, metadataValueBox->getBounds());
@@ -128,7 +153,7 @@ class ObjectsComponent : public Component,
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(187).reduced(5, 5));
-    gainValueBox->setBounds(leftColumn.removeFromTop(103).reduced(5, 5));
+    gainValueBox->setBounds(leftColumn.removeFromTop(113).reduced(5, 5));
     // TODO - panningValueBox original position - reinstate when metadata implemented
     //panningValueBox->setBounds(leftColumn.removeFromTop(219).reduced(5, 5));
     // TODO - extent component reduced by 135px to hide divergence (currently not implemented)
@@ -167,8 +192,15 @@ class ObjectsComponent : public Component,
   std::unique_ptr<InterProcessLock> propertiesFileLock;
   std::unique_ptr<PropertiesFile> propertiesFile;
 
+  std::optional<LevelMeter::MeterMode> lastSetMeterMode_;
+  int lastSetMeterStartingChannel_{ 0 };
+  int lastSetMeterChannelCount_{ 0 };
+
  private:
   ObjectsAudioProcessor* p_;
+
+  TooltipWindow tooltipWindow{ this };
+  TooltipLookAndFeel tooltipLookAndFeel;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObjectsComponent)
 };

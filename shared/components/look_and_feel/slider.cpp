@@ -68,7 +68,7 @@ void SliderLookAndFeel::drawLinearSliderBackground(
 			sliderPos - valueOriginPos, trackWidth_, 1.f);
 
 		g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
-		g.setFont(EarFonts::Measures);
+		g.setFont(EarFontsSingleton::instance().Measures);
 		for (const auto tick : ticks_) {
 			float tickPos = slider.getPositionOfValue(tick.value);
 			g.drawLine(tickPos, trackPosY - trackWidth_ / 2.f - tickMargin_,
@@ -100,7 +100,7 @@ void SliderLookAndFeel::drawLinearSliderBackground(
 			trackWidth_, sliderPos - valueOriginPos, 1.f);
 
 		g.setColour(EarColours::Text.withAlpha(Emphasis::medium));
-		g.setFont(EarFonts::Measures);
+		g.setFont(EarFontsSingleton::instance().Measures);
 		for (const auto tick : ticks_) {
 			float tickPos = slider.getPositionOfValue(tick.value);
 			g.drawLine(trackPosX - trackWidth_ / 2.f - tickMargin_, tickPos,
@@ -108,7 +108,7 @@ void SliderLookAndFeel::drawLinearSliderBackground(
 				tickPos, tickWidth_);
 			juce::Rectangle<float> labelRect(
 				trackPosX - trackWidth_ / 2.f - tickMargin_ - tickLength_ -
-				tickLabelWidth_ - 0.3f * EarFonts::Measures.getHeight(),
+				tickLabelWidth_ - 0.3f * EarFontsSingleton::instance().Measures.getHeight(),
 				tickPos - tickLabelHeight_ / 2.f, tickLabelWidth_,
 				tickLabelHeight_);
 			if (tick.justification == Justification::topRight) {
@@ -194,8 +194,8 @@ Label* SliderLookAndFeel::createSliderTextBox(Slider& slider) {
 	else {
 		l->setBorderSize(BorderSize<int>(0));
 	}
-	l->setFont(EarFonts::Values);
-	l->setUnitFont(EarFonts::Units);
+	l->setFont(EarFontsSingleton::instance().Values);
+	l->setUnitFont(EarFontsSingleton::instance().Units);
 	l->setUnit(unit_);
 	l->setJustificationType(Justification::centred);
 	l->setKeyboardType(TextInputTarget::decimalKeyboard);
@@ -210,7 +210,7 @@ Label* SliderLookAndFeel::createSliderTextBox(Slider& slider) {
 		auto* e = l->getCurrentTextEditor();
 		e->setLookAndFeel(this);
 		e->setJustification(Justification::centredTop);
-		e->setFont(EarFonts::Values);
+		e->setFont(EarFontsSingleton::instance().Values);
 		e->setColour(TextEditor::highlightColourId,
 			EarColours::Text.withAlpha(Emphasis::disabled));
 		e->setColour(TextEditor::focusedOutlineColourId, EarColours::Primary);

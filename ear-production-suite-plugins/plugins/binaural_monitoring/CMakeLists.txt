@@ -36,11 +36,13 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
+	${EPS_SHARED_DIR}/components/look_and_feel/tooltips.hpp
 	
 	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h
 	${EPS_SHARED_DIR}/helper/properties_file.hpp
+	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
 
 	src/binaural_monitoring_frontend_connector.hpp
 	src/binaural_monitoring_plugin_editor.hpp
@@ -65,7 +67,7 @@ add_juce_vst3_plugin(
 	OUTPUT_NAME "EAR Binaural Monitoring")
 	
 target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base ear-version bear)
-install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 
 set(TENSORFILE_TARGET tensorfile_default_small)
 
@@ -79,10 +81,10 @@ if(APPLE)
 	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/../Resources/${TENSORFILE_FILENAME}"
 	)
-    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
+    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
 else()
 	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/${TENSORFILE_FILENAME}"
 	)
-	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 endif()

@@ -73,4 +73,4 @@ add_juce_vst3_plugin(hoa
   
 target_link_libraries(hoa_VST3 PRIVATE ear-plugin-base ear-version)
 
-install_juce_vst3_plugin(hoa "${EPS_PLUGIN_INSTALL_PREFIX}VST3/ear-production-suite")
+install_juce_vst3_plugin(hoa "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")

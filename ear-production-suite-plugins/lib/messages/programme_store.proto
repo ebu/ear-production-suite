@@ -28,6 +28,7 @@ message Object {
   optional OnOffInteractive interactive_on_off = 3;
   optional GainInteractive interactive_gain = 4;
   optional PositionInteractive interactive_position = 5;
+  optional int32 importance = 6 [default = 10];
 }
 message Toggle {
   optional string name = 1 [default = "Toggle"];

@@ -11,9 +11,20 @@ uint32_t requestInputInstanceIdSig();
 using namespace ear::plugin;
 
 ObjectsAudioProcessor::ObjectsAudioProcessor()
+    // The 2 channels of input here is intentional.
+    /// 2ch is the narrowest track width REAPER will assign.
+    /// If we were to set 1ch input, the meter would only monitor the first channel of the track.
+    /// However, REAPERs default send behaviour is to send from the first 2 channels regardless of track width, and even if you are only sending to 1 channel.
+    /// Therefore it is more appropriate to be monitoring activity on the first 2 input channels.
+    /// The use of 2 buses rather than one 2 channel bus is also intentional. It avoids REAPER applying left and right labels to the inputs.
+    // The omission of an output bus is also intentional.
+    /// We do not actually manipulate audio here - only analyse it for level.
+    /// On a side-note; If we were to set mono output, REAPERs default pin-mapping causes the output to be passed to both output channels on a stereo track
+    /// This can cause dropping of the original audio for the second channel, which is problematic if the second channel is in fact used by an additional plugin.
+
     : AudioProcessor(BusesProperties()
-                         .withInput("Input", AudioChannelSet::mono(), true)
-                         .withOutput("Output", AudioChannelSet::mono(), true)),
+                     .withInput("Input", AudioChannelSet::discreteChannels(1), true)
+                     .withInput("Input", AudioChannelSet::discreteChannels(1), true)),
       samplerate_(48000),
       levelMeter_(std::make_shared<LevelMeterCalculator>(1, samplerate_)) {
   /* clang-format off */
@@ -93,9 +104,11 @@ void ObjectsAudioProcessor::changeProgramName(int index,
 
 void ObjectsAudioProcessor::prepareToPlay(double samplerate,
                                           int samplesPerBlock) {
-  if (samplerate_ != static_cast<int>(samplerate)) {
+  auto channels = getTotalNumInputChannels();
+  if (samplerate_ != static_cast<int>(samplerate) || numPluginChannels_ != channels) {
     samplerate_ = static_cast<int>(samplerate);
-    levelMeter_->setup(1, samplerate_);
+    numPluginChannels_= channels;
+    levelMeter_->setup(numPluginChannels_, samplerate_);
   }
 }
 
@@ -106,21 +119,28 @@ void ObjectsAudioProcessor::releaseResources() {
 
 bool ObjectsAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-  // This is the place where you check if the layout is supported.
-  if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()) {
-    return false;
-  }
 
-  if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet()) {
+  // Must accept default config specified in ctor
+
+  if(layouts.inputBuses.size() != 2)
     return false;
-  }
+  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(1))
+    return false;
+  if(layouts.inputBuses[1] != AudioChannelSet::discreteChannels(1))
+    return false;
+
+  if(layouts.outputBuses.size() != 0)
+    return false;
+
   return true;
 }
 
 void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
                                          MidiBuffer& midiMessages) {
-  if(! bypass_->get()) {
-    levelMeter_->process(buffer);
+  if(!bypass_->get()) {
+    if(getActiveEditor()) {
+      levelMeter_->process(buffer);
+    }
     backend_->triggerMetadataSend();
   }
 }
@@ -128,6 +148,7 @@ void ObjectsAudioProcessor::processBlock(AudioBuffer<float>& buffer,
 bool ObjectsAudioProcessor::hasEditor() const { return true; }
 
 AudioProcessorEditor* ObjectsAudioProcessor::createEditor() {
+  levelMeter_->resetLevels();
   return new ObjectAudioProcessorEditor(this);
 }
 
@@ -231,20 +252,22 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
 {
   reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
   VST3ClientExtensions::setIHostApplication(unknown);
+  if(reaperHost) {
 
-  auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
-  if(requestInputInstanceIdPtr) {
-    auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
-    uint32_t inputInstanceId = requestInputInstanceId();
-    inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
-  }
+    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
+    if(requestInputInstanceIdPtr) {
+      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+      uint32_t inputInstanceId = requestInputInstanceId();
+      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
+    }
 
-  auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
-  if(registerPluginLoadPtr) {
-    auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
-    registerPluginLoad([this](std::string const& xmlState) {
-      this->extensionSetState(xmlState);
-    });
+    auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
+    if(registerPluginLoadPtr) {
+      auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
+      registerPluginLoad([this](std::string const& xmlState) {
+        this->extensionSetState(xmlState);
+      });
+    }
   }
 }
 

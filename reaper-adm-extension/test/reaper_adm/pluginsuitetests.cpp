@@ -98,8 +98,8 @@ TEST_CASE("Facebook360 plugin suite") {
         }
         SECTION("suite instatiates spatializer plugin and adm plugin") {
             EXPECT_CALL(api, RouteTrackToTrack(_, 0, _, 0, 16, PostFaderPostFx, _));
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("FB360 Spatialiser (ambiX)"), false, _));
-            EXPECT_CALL(api, TrackFX_AddByName(_, StrEq("ADM Export Source"), false, _));
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("FB360 Spatialiser (ambiX)"), false, _));
+            EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq("ADM Export Source"), false, _));
             pluginSuite.onCreateObjectTrack(trackElement, api);
         }
 

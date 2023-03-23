@@ -31,7 +31,7 @@ class ValueBoxMain : public Component {
     useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
     addAndMakeVisible(useTrackNameCheckbox_.get());
 
-    routingLabel_->setFont(EarFonts::Label);
+    routingLabel_->setFont(EarFontsSingleton::instance().Label);
     routingLabel_->setText("Routing",
                            juce::NotificationType::dontSendNotification);
     routingLabel_->setColour(Label::textColourId, EarColours::Label);

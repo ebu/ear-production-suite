@@ -62,13 +62,10 @@ public:
     int getCommandSocketPort();
 
     // Statics
-    static const char* getVstCompName();
     static const std::string* getVstNameStr();
     static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
     static bool isCandidateForExport(std::shared_ptr<AdmVst> possibleCandidate);
-    static int trackAdmVstIndex(ReaperAPI const& api, MediaTrack *trk);
     static std::vector<int> trackAdmVstIndexes(ReaperAPI const& api, MediaTrack *trk);
-    static bool vstPosIsAdmVst(ReaperAPI const& api, MediaTrack *trk, int vstPos);
 
 private:
     std::unique_ptr<PluginParameter> paramIncludeInRender   { createPluginParameter(ADM_VST_INCLUDEINADMPARAM,
@@ -90,7 +87,4 @@ private:
 
     // Statics
     static std::string vstName; // Human-readable name
-    static std::string vstCompName; // Name for comparison purposes using API funcs
-    static size_t vstCompNameLen;
-    static const char* vstCompNameCStr;
 };

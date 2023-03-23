@@ -33,7 +33,7 @@ class ValueBoxExtent : public Component {
         rangeSlider_(std::make_shared<EarSlider>()) {
     setColour(backgroundColourId, EarColours::Area01dp);
 
-    extentLabel_->setFont(EarFonts::Heading);
+    extentLabel_->setFont(EarFontsSingleton::instance().Heading);
     extentLabel_->setColour(Label::textColourId, EarColours::Heading);
     extentLabel_->setText("Extent",
                           juce::NotificationType::dontSendNotification);
@@ -48,7 +48,7 @@ class ValueBoxExtent : public Component {
                                       binary_data::link_off_icon_svgSize)));
     addAndMakeVisible(linkSizeButton_.get());
 
-    sizeLabel_->setFont(EarFonts::Label);
+    sizeLabel_->setFont(EarFontsSingleton::instance().Label);
     sizeLabel_->setColour(Label::textColourId, EarColours::Label);
     sizeLabel_->setText("Size", juce::NotificationType::dontSendNotification);
     sizeLabel_->setJustificationType(Justification::right);
@@ -63,7 +63,7 @@ class ValueBoxExtent : public Component {
     sizeSlider_->setNumDecimalPlacesToDisplay(2);
     addAndMakeVisible(sizeSlider_.get());
 
-    widthLabel_->setFont(EarFonts::Label);
+    widthLabel_->setFont(EarFontsSingleton::instance().Label);
     widthLabel_->setColour(Label::textColourId, EarColours::Label);
     widthLabel_->setText("Width", juce::NotificationType::dontSendNotification);
     widthLabel_->setJustificationType(Justification::right);
@@ -75,7 +75,7 @@ class ValueBoxExtent : public Component {
     widthSlider_->setDoubleClickReturnValue(true, 0.f);
     addAndMakeVisible(widthSlider_.get());
 
-    heightLabel_->setFont(EarFonts::Label);
+    heightLabel_->setFont(EarFontsSingleton::instance().Label);
     heightLabel_->setColour(Label::textColourId, EarColours::Label);
     heightLabel_->setText("Height",
                           juce::NotificationType::dontSendNotification);
@@ -88,7 +88,7 @@ class ValueBoxExtent : public Component {
     heightSlider_->setDoubleClickReturnValue(true, 0.f);
     heightSlider_->getValueObject().referTo(sizeValue);
     addAndMakeVisible(heightSlider_.get());
-    depthLabel_->setFont(EarFonts::Label);
+    depthLabel_->setFont(EarFontsSingleton::instance().Label);
     depthLabel_->setColour(Label::textColourId, EarColours::Label);
     depthLabel_->setText("Depth", juce::NotificationType::dontSendNotification);
     depthLabel_->setJustificationType(Justification::right);
@@ -117,7 +117,7 @@ class ValueBoxExtent : public Component {
     heightSlider_->setGrabFocusOnTextChange(false);
     depthSlider_->setGrabFocusOnTextChange(false);
 
-    diffuseLabel_->setFont(EarFonts::Label);
+    diffuseLabel_->setFont(EarFontsSingleton::instance().Label);
     diffuseLabel_->setColour(Label::textColourId, EarColours::Label);
     diffuseLabel_->setText("Diffuse",
                            juce::NotificationType::dontSendNotification);
@@ -140,7 +140,7 @@ class ValueBoxExtent : public Component {
     divergenceButton_->setEnabled(false);
     addAndMakeVisible(divergenceButton_.get());
 
-    factorLabel_->setFont(EarFonts::Label);
+    factorLabel_->setFont(EarFontsSingleton::instance().Label);
     factorLabel_->setColour(Label::textColourId, EarColours::Label);
     factorLabel_->setText("Factor",
                           juce::NotificationType::dontSendNotification);
@@ -156,7 +156,7 @@ class ValueBoxExtent : public Component {
     addAndMakeVisible(factorLabel_.get());
     addAndMakeVisible(factorSlider_.get());
 
-    rangeLabel_->setFont(EarFonts::Label);
+    rangeLabel_->setFont(EarFontsSingleton::instance().Label);
     rangeLabel_->setColour(Label::textColourId, EarColours::Label);
     rangeLabel_->setText("Range", juce::NotificationType::dontSendNotification);
     rangeLabel_->setJustificationType(Justification::right);

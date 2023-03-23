@@ -84,7 +84,7 @@ class Overlay : public Component {
     g.fillAll(findColour(overlayBackgroundColourId));
     g.setColour(findColour(windowBorderColourId));
     g.fillRect(windowRect_);
-    g.setFont(EarFonts::Items);
+    g.setFont(EarFontsSingleton::instance().Items);
     g.setColour(findColour(headerTextColourId));
     g.drawText(headerText_, headerRect_, Justification::centredLeft);
     g.setColour(findColour(contentBackgroundColourId));
@@ -112,8 +112,8 @@ class Overlay : public Component {
   std::function<void()> onClose;
 
  private:
-  int windowWidth_;
-  int windowHeight_;
+  int windowWidth_ = 0;
+  int windowHeight_ = 0;
   int borderWidth_ = 2;
   int headerHeight_ = 31;
   int headerPadding_ = 11;
