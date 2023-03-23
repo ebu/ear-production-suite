@@ -11,15 +11,15 @@ ComponentLicense::ComponentLicense()
     title.setFont(EarFontsSingleton::instance().HeroHeading);
     title.setColour(Label::textColourId, EarColours::Heading);
     title.setJustificationType(Justification::bottomLeft);
-    title.setText("License Agreement",
+    title.setText("Terms of Use - License Agreement",
         juce::NotificationType::dontSendNotification);
     addAndMakeVisible(title);
 
     description.setFont(EarFontsSingleton::instance().Label);
     description.setColour(Label::textColourId, EarColours::Label);
     description.setJustificationType(Justification::centredLeft);
-    description.setText("The EAR Production Suite carries the GPLv3 License.\n"
-        "Please read the following license agreement. You must agree to the terms of this agreement before continuing.",
+    description.setText("Your download and use of the EAR Production Suite is subject to your agreement that the terms of GPLv3 (the GNU General Public License v3.0) will govern such download and use. " 
+        "You must agree to the GPLv3 terms, as set out below, before continuing.",
         juce::NotificationType::dontSendNotification);
     addAndMakeVisible(description);
 
@@ -78,6 +78,7 @@ void ComponentLicense::resized()
     exitButton.setBounds(rightButtonArea);
 
     // Remaining area is flexible for textbox
+    area.removeFromTop(10);
     auto sideTrim = (area.getWidth() - 600) / 2;
     if (sideTrim < 10) sideTrim = 10;
     license.setBounds(area.reduced(sideTrim, 5));
