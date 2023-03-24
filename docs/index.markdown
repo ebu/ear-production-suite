@@ -7,7 +7,7 @@ subtitle: A collection of production tools for Audio Definition Model (ADM) comp
 <div markdown="1" class="text_section">
 The EAR Production Suite (EPS) is a set of VST® plugins for digital audio workstations (DAWs) that enable sound engineers to produce immersive and personalizable content using the [Audio Definition Model](https://www.itu.int/rec/R-REC-BS.2076) (ADM) format and to monitor it for any [ITU-R BS.2051](https://www.itu.int/rec/R-REC-BS.2051/en) loudspeaker configuration using the [ITU ADM Renderer](https://www.itu.int/rec/R-REC-BS.2127/en). ADM is the only format available for codec-agnostic [Next Generation Audio](https://tech.ebu.ch/nga) (NGA) productions. Moreover, the EAR Production Suite enables professionals to import and export ADM files, compliant to the [EBU ADM Production profile](https://tech.ebu.ch/docs/tech/tech3392.pdf). The VST® plugins are currently optimized for the Reaper DAW, which features an extension interface that is used to import and export ADM files within a BW64 container. The EAR Production Suite was designed to demonstrate the intended use of the ADM in audio production workflows, so that the standards can be adopted in other professional tools in a consistent manner.
 
-The EAR Production Suite is a joint [open-source development](https://github.com/ebu/ear-production-suite) of [BBC R&D](https://bbc.co.uk/rd) and [IRT](https://www.irt.de/en/home).
+The EAR Production Suite began as a joint [open-source development](https://github.com/ebu/ear-production-suite) of [BBC R&D](https://bbc.co.uk/rd) and IRT under the EBU. It continues to be maintained by BBC R&D.
 
 </div>
 
@@ -41,9 +41,8 @@ The EAR Production Suite is a joint [open-source development](https://github.com
   <div class="yt-iframe">
     <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
-  <i><b>Please note:</b> The tutorial video advises to install the REAPER extension to the REAPER directory of `Program Files` on Windows. 
-  Although this will be functional, it is now advised to install to your user directory instead.<br />
-  Please refer to the <a href="#installation">installation instructions</a> below.</i>
+  <i><b>Please note:</b> The tutorial video describes manual installation of the EAR Production Suite which is no longer necessary.
+  Please refer to the updated <a href="#installation">installation instructions</a> below.</i>
 </div>
 
 <div markdown="1" class="text_section">
@@ -78,6 +77,9 @@ The EAR Production Suite is a joint [open-source development](https://github.com
 
 <div markdown="1" class="text_section">
 ## Download and Install
+The EAR Production Suite carries the <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> license</a>.
+Your download and use of the EAR Production Suite is subject to your agreement that the terms of <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> (<span data-source="license_type_long" data-type="innertext">GNU General Public License v3.0</span>)</a> will govern such download and use.
+
 Download the latest EAR Production Suite release (<span data-source="version" data-type="innertext">Unknown</span> - <span data-source="version_date" data-type="innertext">Unknown</span>):
   <div class="button-grid">
     <a data-source="download_windows_url" data-type="href"><button class="c-btn">📦 Download Windows (x64)</button></a>
@@ -85,21 +87,46 @@ Download the latest EAR Production Suite release (<span data-source="version" da
   </div>
 <br />
 <p>
-The EPS is designed for REAPER 64-bit v6.18 or greater, on a 64-bit OS (macOS or Windows). The EAR Production Suite carries the <a data-source="license_url" data-type="href">GPL v3.0 license</a>. View the <a data-source="readme_url" data-type="href">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
+The EPS is designed for REAPER 64-bit <span data-source="min_reaper_ver" data-type="innertext">v6.11</span> or greater, on a 64-bit OS (macOS or Windows). An experimental <a data-source="download_linux_url" data-type="href">Linux Build (x64)</a> is also available, but please be aware that this is very experimental at this time and may be buggy.
+View the <a data-source="readme_url" data-type="href">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
 </p>
 <br />
   <details>
     <summary>Show installation instructions</summary>
-	  <a name="installation"></a> 
+	  <a name="installation"></a>
+	  <div class="text_section">
+        <p>The EAR Production Suite can be installed using the Setup application provided within the download package. This is the easiest method to install the EAR Production Suite. Alternatively, you can manually install the various components of the software. </p>
+        <p>Please note that for the Linux build, there is currently no Setup application and the software must be installed manually.</p>
+      </div>
+	  <h3>
+        Installation via Setup Application
+      </h3>
+	  <ol>
+        <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
+        <li>Download the package appropriate for your operating system above, then;
+          <br>- <b>macOS:</b> Mount the disk image and run the Setup application contained within.
+          <br>- <b>Windows:</b> Unzip the package to a temporary location and run the Setup application from that location.
+        </li>
+        <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
+        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
+        </li>
+      </ol>
+	  
+	  <hr />
+	  <h3>
+        Manual Installation
+      </h3>
       <ol>
         <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
         <li>Copy / install the <b>VST plugins</b> into your common VST folder.
           <br>- <b>macOS:</b> ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>Linux:</b> ~./vst3
           <br>- <b>Windows:</b> C:\Program&nbsp;Files\Common&nbsp;Files\VST3
         </li>
         <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
         <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
           <br>- <b>macOS:</b> ~/Library/Application Support/REAPER/UserPlugins
+		  <br>- <b>Linux:</b> ~/.config/REAPER/
           <br>- <b>Windows:</b> C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
 		  <div style="margin-left: 2em; margin-right: 4em;">
 		  <i>Note: If you have a previous version of the REAPER Extension installed to C:\Program&nbsp;Files\REAPER&nbsp;(x64)\Plugins\reaper_adm.dll, then this should be deleted on installation of the latest version.</i>
@@ -125,7 +152,7 @@ A discussion community for users of the EPS is available on the <a href="https:/
   <details>
     <summary>What version of REAPER is required to run the EAR Production Suite?</summary>
       <div class="text_section">
-        <p>The current version of the EAR Production Suite requires REAPER 64-bit, version 6.18 or greater. </p>
+        <p>The current version of the EAR Production Suite requires REAPER 64-bit, version <span data-source="min_reaper_ver" data-type="innertext">v6.11</span> or greater. </p>
       </div>
   </details>
   <details>
