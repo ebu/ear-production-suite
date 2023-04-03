@@ -13,6 +13,8 @@
 #include "track.h"
 #include "plugin.h"
 
+#include <global_config.h>
+
 #define TWO_TO_THE_POWER_OF(power) (1<<power)
 
 extern void (*InsertTrackAtIndex)(int index, bool wantDefaults);
@@ -564,7 +566,7 @@ int ReaperAPIImpl::reaperChannelOffsetForBusWidth(int busWidth) const {
     case 1:     return 1024;
     case 2:     return 0;
     default:    {
-        if(busWidth > 64) {
+        if(busWidth > MAX_DAW_CHANNELS) {
             throw std::runtime_error("ReaperAPI::reaperChannelOffsetForBusWidth() bus width too large");
         }
         if(busWidth % 2) {
@@ -760,7 +762,7 @@ ReaProject* ReaperAPIImpl::getCurrentProject() const
 
 void admplug::ReaperAPIImpl::resetFxPinMap(MediaTrack * trk, int fxNum) const
 {
-    for(int pinNum = 0; pinNum < 64; pinNum++) {
+    for(int pinNum = 0; pinNum < MAX_DAW_CHANNELS; pinNum++) {
         mapFxPin(trk, fxNum, pinNum, pinNum);
     }
 }
@@ -771,7 +773,7 @@ void admplug::ReaperAPIImpl::mapFxPin(MediaTrack * trk, int fxNum, int trackChan
         uint32_t low = TWO_TO_THE_POWER_OF(trackChannel);
         TrackFX_SetPinMappings(trk, fxNum, 0, fxChannel, low, 0);
         TrackFX_SetPinMappings(trk, fxNum, 1, fxChannel, low, 0);
-    } else if(trackChannel < 64) {
+    } else if(trackChannel < 64) { // TODO - what about channels up to 128??
         trackChannel -= 32;
         uint32_t high = TWO_TO_THE_POWER_OF(trackChannel);
         TrackFX_SetPinMappings(trk, fxNum, 0, fxChannel, 0, high);

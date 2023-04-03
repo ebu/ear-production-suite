@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <global_config.h>
+
 using namespace admplug;
 
 EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources(api)
@@ -713,7 +715,7 @@ bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck
     }
 
     // Advance to the end of this data
-    int advanceAmount = 64 - currentReadPosChannelNumber;
+    int advanceAmount = MAX_DAW_CHANNELS - currentReadPosChannelNumber;
     // Sanity check; Make sure we haven't already exceeded the end of the message
     assert(advanceAmount >= 0);
     if(advanceAmount > 0) {
@@ -751,13 +753,13 @@ void EarVstCommunicator::admAndMappingExchange()
     // channelMappings must be sorted by originalChannel (which, in turn should be sorted for writtenChannelNumber too)
     // This makes it faster for the copyNextFrame method to jump between channels
 
-    std::vector<std::vector<PluginToAdmMap>>routingToPluginToAdmMaps(64);
+    std::vector<std::vector<PluginToAdmMap>>routingToPluginToAdmMaps(MAX_DAW_CHANNELS);
 
     for(auto const& pluginToAdmMap : pluginToAdmMaps) {
         if(pluginToAdmMap.audioObjectIdVal != 0x0000 &&
            pluginToAdmMap.audioTrackUidVal != 0x00000000 &&
            pluginToAdmMap.routing >= 0 &&
-           pluginToAdmMap.routing < 64) {
+           pluginToAdmMap.routing < MAX_DAW_CHANNELS) {
             routingToPluginToAdmMaps[pluginToAdmMap.routing].push_back(pluginToAdmMap);
         }
     }

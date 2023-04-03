@@ -6,6 +6,7 @@
 #include "variable_block_adapter.hpp"
 #include <version/eps_version.h>
 #include <helper/resource_paths_juce-file.hpp>
+#include <global_config.h>
 
 #define DEFAULT_OSC_PORT 8000
 
@@ -108,8 +109,8 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     bypass_->setValueNotifyingHost(bypass_->get());
   };
 
-  backend_ =
-      std::make_unique<ear::plugin::BinauralMonitoringBackend>(nullptr, 64);
+  backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
+      nullptr, MAX_DAW_CHANNELS);
   connector_ =
       std::make_unique<ui::BinauralMonitoringJuceFrontendConnector>(this);
   connector_->setListenerOrientationInstance(backend_->listenerOrientation);
@@ -158,7 +159,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
   std::lock_guard<std::mutex> lock(processorMutex_);
   processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-      64, 64, 64, 48000, 512,
+      MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 48000, 512,
       bearDataFilePath);  // Used to verify if BEAR can be initialised - can't
                           // get SR and block size in ctor. Made assumption -
                           // prepareToPlay will be called with correct values
@@ -218,7 +219,7 @@ void EarBinauralMonitoringAudioProcessor::timerCallback() {
 juce::AudioProcessor::BusesProperties
 EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   auto ret = BusesProperties().withInput(
-    "Input", AudioChannelSet::discreteChannels(64), true);
+      "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true);
   ret = ret.withOutput("Left Ear", AudioChannelSet::mono(), true);
   ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
   ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(62), true);
@@ -307,7 +308,9 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   if (!processor_ || !processor_->configMatches(sampleRate, samplesPerBlock)) {
     processor_ =
         std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-            64, 64, 64, sampleRate, samplesPerBlock, bearDataFilePath);
+            MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 
+            sampleRate, samplesPerBlock,
+            bearDataFilePath);
   }
 }
 
@@ -323,7 +326,8 @@ bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
 
   if(layouts.inputBuses.size() != 1)
     return false;
-  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+  if (layouts.inputBuses[0] !=
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
     return false;
 
   if(layouts.outputBuses.size() != 3)

@@ -4,10 +4,11 @@
 #include "eigen_catch2.hpp"
 #include <ear/bs2051.hpp>
 #include <catch2/catch_all.hpp>
+#include <global_config.h>
 
 using namespace ear::plugin;
 
-const int INPUT_CHANNELS = 64;
+const int INPUT_CHANNELS = MAX_DAW_CHANNELS;
 
 void updateExpectedGainMatrix(const ear::ObjectsTypeMetadata& metadata,
                               int track, ear::GainCalculatorObjects& calculator,

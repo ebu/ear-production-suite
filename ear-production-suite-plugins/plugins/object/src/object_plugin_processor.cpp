@@ -5,6 +5,8 @@
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
 
+#include <global_config.h>
+
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -28,7 +30,7 @@ ObjectsAudioProcessor::ObjectsAudioProcessor()
       samplerate_(48000),
       levelMeter_(std::make_shared<LevelMeterCalculator>(1, samplerate_)) {
   /* clang-format off */
-  addParameter(routing_ = new ui::NonAutomatedParameter<AudioParameterInt>("routing", "Routing", -1, 63, -1));
+  addParameter(routing_ = new ui::NonAutomatedParameter<AudioParameterInt>("routing", "Routing", -1, MAX_DAW_CHANNELS-1, -1));
   addParameter(gain_ = new AudioParameterFloat("gain", "Gain", NormalisableRange<float>{-100.f, 6.f}, 0.f));
   addParameter(azimuth_ = new AudioParameterFloat("azimuth", "Azimuth", NormalisableRange<float>{-180.f, 180.f}, 0.f));
   addParameter(elevation_ = new AudioParameterFloat("elevation", "Elevation", NormalisableRange<float>{-90.f, 90.f}, 0.f));

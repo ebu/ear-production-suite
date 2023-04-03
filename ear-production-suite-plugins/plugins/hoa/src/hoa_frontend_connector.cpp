@@ -4,6 +4,8 @@
 #include "components/ear_name_text_editor.hpp"
 #include "detail/weak_ptr_helpers.hpp"
 
+#include <global_config.h>
+
 namespace {
 String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
   return String(position) + String::fromUTF8("-") +
@@ -175,7 +177,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {
 
     routingComboBoxLocked->clearEntries();
     auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
-    for (int i = 1; i + cfCountFixed <= 64; ++i) {
+    for (int i = 1; i + cfCountFixed <= MAX_DAW_CHANNELS; ++i) {
       routingComboBoxLocked->addTextEntry(
           routingLayoutDescriptionAt(i, cfCountFixed));
     }

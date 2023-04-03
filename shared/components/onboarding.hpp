@@ -88,8 +88,9 @@ class Onboarding : public Component {
         "Create object-based audioscenes and listen to your project.\n\n",
         font::RobotoSingleton::instance().getMedium(17.f));
     slide4Text.append(
-        "Route all 64 channels of the EAR Scene into the EAR Monitoring plugin "
-        "with the setup of your choice. Set the hardware routing in the EAR "
+        "Route all channels of the EAR Scene into the EAR Monitoring plugin "
+        "with the setup of your choice. This may be 64 or 128 channels "
+        "depending on your DAW version. Set the hardware routing in the EAR "
         "Monitoring track according to your monitoring setup.",
         font::RobotoSingleton::instance().getRegular(16.f));
     slide4Text.setColour(EarColours::Text);

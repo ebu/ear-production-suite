@@ -6,6 +6,7 @@
 #include "components/ear_name_text_editor.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include <global_config.h>
 
 namespace ear {
 namespace plugin {
@@ -39,7 +40,7 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(routingLabel_.get());
     // routingComboBox_->setLookAndFeel(&routingLookAndFeel_);
     routingComboBox_->setDefaultText("Select Scene channel");
-    for (int i = 1; i <= 64; ++i) {
+    for (int i = 1; i <= MAX_DAW_CHANNELS; ++i) {
       routingComboBox_->addTextEntry(String(i));
     }
     addAndMakeVisible(routingComboBox_.get());

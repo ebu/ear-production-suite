@@ -10,6 +10,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <global_config.h>
+
 #define COMMONDEFINITIONS_MAX_ID 0x0FFF
 
 using namespace admplug;
@@ -26,7 +28,7 @@ using namespace admplug;
 #define ADM_VST_SAMPLERATEPARAM_NORMLIMIT 192000.0
 
 #define ADM_VST_NUMCHNSPARAM 4
-#define ADM_VST_NUMCHNSPARAM_NORMLIMIT 64.0
+#define ADM_VST_NUMCHNSPARAM_NORMLIMIT float(MAX_DAW_CHANNELS)
 
 #define ADM_VST_ADMTYPEDEFINITIONPARAM 5
 #define ADM_VST_ADMPACKFORMATPARAM 6

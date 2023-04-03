@@ -2,6 +2,8 @@
 #include "monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
+#include <global_config.h>
+
 namespace ear {
 namespace plugin {
 template <>
@@ -54,11 +56,14 @@ juce::AudioProcessor::BusesProperties
 EarMonitoringAudioProcessor::_getBusProperties() {
   numOutputChannels_ = layout().channelNames().size();
   auto ret = BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(64), true);
+      "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true);
   for (const std::string& name : layout().channelNames()) {
     ret = ret.withOutput(name, AudioChannelSet::mono(), true);
   }
-  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(64 - numOutputChannels_), true);
+  ret = ret.withOutput(
+      "(Unused)",
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - numOutputChannels_),
+      true);
   return ret;
 }
 
@@ -67,7 +72,7 @@ EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
   auto speakerLayout = layout();
   backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
-      nullptr, speakerLayout, 64);
+      nullptr, speakerLayout, MAX_DAW_CHANNELS);
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), 512,
@@ -130,7 +135,8 @@ bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
 
   if(layouts.inputBuses.size() != 1)
     return false;
-  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+  if (layouts.inputBuses[0] !=
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
     return false;
 
   auto outputBusCount = layouts.outputBuses.size();
@@ -141,7 +147,8 @@ bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     if(layouts.outputBuses[i] != AudioChannelSet::mono())
       return false;
   }
-  if(layouts.outputBuses[numOutputChannels_] != AudioChannelSet::discreteChannels(64 - numOutputChannels_))
+  if (layouts.outputBuses[numOutputChannels_] !=
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - numOutputChannels_))
     return false;
 
   return true;
