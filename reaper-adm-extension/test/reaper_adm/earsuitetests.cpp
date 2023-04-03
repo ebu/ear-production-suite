@@ -16,9 +16,10 @@
 #include "hoaautomationelement.h"
 #include "mediatakeelement.h"
 #include "mediatrackelement.h"
+#include <global_config.h>
 
 #define TRACK_MAPPING_PARAM_INDEX 0
-#define TRACK_MAPPING_PARAM_MAXVAL 64
+#define TRACK_MAPPING_PARAM_MAXVAL MAX_DAW_CHANNELS
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -192,14 +193,14 @@ TEST_CASE("On first create project, scene master and renderer added") {
     earSuite.onCreateProject(node, api);
 }
 
-TEST_CASE("On first create project, bus and renderer tracks set to 64 channels") {
+TEST_CASE("On first create project, bus and renderer tracks set to MAX_DAW_CHANNELS channels") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
 
     auto returnTrackWithPluginExpectations = createTrack([](MockTrack& track){
-        EXPECT_CALL(track, setChannelCount(64));
+        EXPECT_CALL(track, setChannelCount(MAX_DAW_CHANNELS));
     });
 
     ON_CALL(api, createTrack()).WillByDefault(returnTrackWithPluginExpectations);

@@ -22,10 +22,12 @@
 #include <helper/common_definition_helper.h>
 #include <helper/container_helpers.hpp>
 
+#include <global_config.h>
+
 using namespace admplug;
 
 #define TRACK_MAPPING_MIN -1
-#define TRACK_MAPPING_MAX 63
+#define TRACK_MAPPING_MAX MAX_DAW_CHANNELS - 1
 #define PACKFORMAT_ID_VALUE_MIN 0x0
 #define PACKFORMAT_ID_VALUE_MAX 0xFFFF
 
@@ -239,7 +241,7 @@ const char* EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME = "EAR DirectSpe
 const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";
 const char* EARPluginSuite::SCENEMASTER_PLUGIN_NAME = "EAR Scene";
 const char* EARPluginSuite::RENDERER_PLUGIN_NAME = "EAR Monitoring 0+2+0";
-const int EARPluginSuite::MAX_CHANNEL_COUNT = 64;
+const int EARPluginSuite::MAX_CHANNEL_COUNT = MAX_DAW_CHANNELS;
 
 bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupportedPluginSuite("EAR", std::make_shared<EARPluginSuite>());
 

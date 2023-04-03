@@ -1,12 +1,13 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
 #include <fstream>
+#include <global_config.h>
 
 AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
   : AudioProcessor (BusesProperties()
-         .withInput("Input", AudioChannelSet::discreteChannels(64), true)
-         .withOutput("Output", AudioChannelSet::discreteChannels(64), true)
+         .withInput("Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true)
+         .withOutput("Output", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true)
      )
 #endif
 {
@@ -42,7 +43,7 @@ AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 
     addParameter(numChnsParam = new ReadOnlyAudioParameterInt("numChns", // parameter ID
                                                               "Number of Channels defined by ADM essence type", // parameter name
-                                                              0, 64, 0)); // range and default value
+                                                              0, MAX_DAW_CHANNELS, 0)); // range and default value
 
     addParameter(admTypeDefinitionParam = new NonAutoAudioParameterInt("admTypeDefinition", // parameter ID
                                                                        "ADM essence type (typeDefinition)", // parameter name
@@ -382,8 +383,8 @@ void AdmStemPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool AdmStemPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    if (layouts.getMainOutputChannelSet() == AudioChannelSet::discreteChannels(64) &&
-        layouts.getMainInputChannelSet() == AudioChannelSet::discreteChannels(64)) {
+    if (layouts.getMainOutputChannelSet() == AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS) &&
+        layouts.getMainInputChannelSet() == AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS)) {
         return true;
     }
     return false;

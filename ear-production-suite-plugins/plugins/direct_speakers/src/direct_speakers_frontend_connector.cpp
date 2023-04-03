@@ -5,6 +5,7 @@
 #include "detail/weak_ptr_helpers.hpp"
 
 #include "speaker_setups.hpp"
+#include <global_config.h>
 
 namespace {
   String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
@@ -186,7 +187,7 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
         speakerSetupByIndex(cachedSpeakerSetupIndex_).speakers.size();
     routingComboBoxLocked->clearEntries();
     auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
-    for (int i = 1; i + layoutSizeFixed <= 64; ++i) {
+    for (int i = 1; i + layoutSizeFixed <= MAX_DAW_CHANNELS; ++i) {
       routingComboBoxLocked->addTextEntry(routingLayoutDescriptionAt(i, layoutSizeFixed));
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);

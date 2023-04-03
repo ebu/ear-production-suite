@@ -18,6 +18,7 @@
 #include <track.h>
 #include <helper/container_helpers.hpp>
 #include <fstream>
+#include <global_config.h>
 
 using namespace admplug;
 using ::testing::_;
@@ -391,9 +392,9 @@ namespace {
             EXPECT_CALL(api, TrackFX_AddByActualName(fake.trackFor.renderer, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, TrackFXAddMode::CreateNew));
         }
 
-        SECTION("Sets the number of track channels to 64, disables object and scene track master sends") {
-            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, 64)).Times(1);
-            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, 64)).Times(1);
+        SECTION("Sets the number of track channels to MAX_DAW_CHANNELS, disables object and scene track master sends") {
+            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.renderer, MAX_DAW_CHANNELS)).Times(1);
+            EXPECT_CALL(api, setTrackChannelCount(fake.trackFor.submix, MAX_DAW_CHANNELS)).Times(1);
             for(int i = 0; i < expectedTracks; ++i) {
                 EXPECT_CALL(api, setTrackChannelCount(fake.generatedTracks[i], _)).Times(1);
                 EXPECT_CALL(api, disableTrackMasterSend(fake.generatedTracks[i])).Times(1);
@@ -406,7 +407,7 @@ namespace {
             for(int i = 0; i < expectedTracks; ++i) {
                 EXPECT_CALL(api, RouteTrackToTrack(fake.generatedTracks[i],_,fake.trackFor.submix,_,_,_,_)).Times(1);
             }
-            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.submix,_,fake.trackFor.renderer,_,64,_,_)).Times(1);
+            EXPECT_CALL(api, RouteTrackToTrack(fake.trackFor.submix,_,fake.trackFor.renderer,_, MAX_DAW_CHANNELS,_,_)).Times(1);
         }
 
         SECTION("Adds audio to the track") {

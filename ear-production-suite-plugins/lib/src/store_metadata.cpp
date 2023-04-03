@@ -391,7 +391,7 @@ void Metadata::setElementOrder(const ProgrammeInternalId &progId, const std::vec
 }
 
 // This is horribly inefficient algorithm wise (O(n^2)?).
-// OTOH, order.size() is always <= 64 so a linear vector search probably still wins over a map. (it may fit in cache.)
+// OTOH, order.size() is probably <= 128 (unless asset reuse and huge project) so a linear vector search probably still wins over a map. (it may fit in cache.)
 // If this ends up profiling slow, try changing it.
 // This should only be called rarely (on a routing change in auto mode or an element move in the GUI),
 // so it's not on a hot path.

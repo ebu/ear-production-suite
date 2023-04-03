@@ -8,13 +8,16 @@
 #include "metadata_event_dispatcher.hpp"
 #include "pending_store.hpp"
 #include "restored_pending_store.hpp"
+#include <global_config.h>
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
-      // 64 channels of input supports the largest track width in REAPER.
+      // MAX_DAW_CHANNELS of input supports the largest track width in REAPER.
       // The omission of an output bus is also intentional.
       /// We do not actually manipulate audio here - only analyse it for level.
-      BusesProperties().withInput("Input", AudioChannelSet::discreteChannels(64), true)),
+          BusesProperties().withInput(
+              "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS),
+              true)),
       metadata_(std::make_unique<ear::plugin::ui::UIEventDispatcher>(),
                 std::make_unique<ear::plugin::MetadataEventDispatcher>(metadataThread_)),
       autoModeController_(std::make_shared<ear::plugin::AutoModeController>(metadata_))
@@ -31,8 +34,8 @@ SceneAudioProcessor::SceneAudioProcessor()
     backendSetupTimer_->startTimer(1000);
   }
 
-  levelMeter_ =
-      std::make_shared<ear::plugin::LevelMeterCalculator>(64, samplerate_);
+  levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(
+      MAX_DAW_CHANNELS, samplerate_);
 
   samplesSocket = new SamplesSender();
   samplesSocket->open();
@@ -123,7 +126,8 @@ bool SceneAudioProcessor::isBusesLayoutSupported(
 
   if(layouts.inputBuses.size() != 1)
     return false;
-  if(layouts.inputBuses[0] != AudioChannelSet::discreteChannels(64))
+  if (layouts.inputBuses[0] !=
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
     return false;
 
   if(layouts.outputBuses.size() != 0)
@@ -146,7 +150,7 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     }
   } else {
     size_t sampleSize = sizeof(float);
-    uint8_t numChannels = 64;
+    uint8_t numChannels = MAX_DAW_CHANNELS;
     size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize;
 
     auto msg = std::make_shared<NngMsg>(msg_size);
@@ -208,7 +212,7 @@ void SceneAudioProcessor::doSampleRateChecks() {
   auto curSampleRate = static_cast<int>(getSampleRate());
   if (samplerate_ != curSampleRate) {
     samplerate_ = curSampleRate;
-    levelMeter_->setup(64, samplerate_);
+    levelMeter_->setup(MAX_DAW_CHANNELS, samplerate_);
   }
 }
 
@@ -260,7 +264,7 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     future.get();
 
   } else if (cmd == commandSocket->Command::GetConfig) {
-    uint8_t numChannels = 64;
+    uint8_t numChannels = MAX_DAW_CHANNELS;
     uint32_t sampleRate = samplerate_;
     commandSocket->sendInfo(numChannels, samplerate_);
 

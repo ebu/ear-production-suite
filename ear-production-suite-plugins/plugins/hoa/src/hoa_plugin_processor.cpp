@@ -5,6 +5,8 @@
 #include "hoa_frontend_connector.hpp"
 #include "components/level_meter_calculator.hpp"
 
+#include <global_config.h>
+
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -25,7 +27,7 @@ HoaAudioProcessor::HoaAudioProcessor()
   addParameter(routing_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
-      -1, 63, -1));
+      -1, MAX_DAW_CHANNELS-1, -1));
   addParameter(packFormatIdValue_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packformat_id_value", "PackFormat ID Value",

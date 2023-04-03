@@ -5,6 +5,8 @@
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
+#include <global_config.h>
+
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -24,7 +26,7 @@ DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
   addParameter(routing_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "routing", "Routing",
-      -1, 63, -1));
+      -1, MAX_DAW_CHANNELS-1, -1));
   addParameter(packFormatIdValue_ =
     new ui::NonAutomatedParameter<AudioParameterInt>(
       "packFormatIdValue", "PackFormat ID Value",
