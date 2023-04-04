@@ -37,12 +37,69 @@ The EAR Production Suite began as a joint [open-source development](https://gith
 <div style="clear: both;"></div>
 
 <div markdown="1" class="text_section">
-## Video Tutorial
-  <div class="yt-iframe">
-    <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+## Download and Install
+The EAR Production Suite carries the <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> license</a>.
+Your download and use of the EAR Production Suite is subject to your agreement that the terms of <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> (<span data-source="license_type_long" data-type="innertext">GNU General Public License v3.0</span>)</a> will govern such download and use.
+
+Download the latest EAR Production Suite release (<span data-source="version" data-type="innertext">Unknown</span> - <span data-source="version_date" data-type="innertext">Unknown</span>):
+  <div class="button-grid">
+    <a data-source="download_windows_url" data-type="href"><button class="c-btn">📦 Download Windows (x64)</button></a>
+	<a data-source="download_macos_universal_url" data-type="href"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
   </div>
-  <i><b>Please note:</b> The tutorial video describes manual installation of the EAR Production Suite which is no longer necessary.
-  Please refer to the updated <a href="#installation">installation instructions</a> below.</i>
+<br />
+<p>
+The EPS is designed for REAPER 64-bit <span data-source="min_reaper_ver" data-type="innertext">v6.11</span> or greater, on a 64-bit OS (macOS or Windows). An experimental <a data-source="download_linux_url" data-type="href">Linux Build (x64)</a> is also available, but please be aware that this is very experimental at this time and may be buggy.
+View the <a data-source="readme_url" data-type="href">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
+</p>
+<br />
+  <details>
+    <summary>Show installation instructions</summary>
+	  <a name="installation"></a>
+	  <div class="text_section">
+        <p>The EAR Production Suite can be installed using the Setup application provided within the download package. This is the easiest method to install the EAR Production Suite. Alternatively, you can manually install the various components of the software. </p>
+        <p>Please note that for the Linux build, there is currently no Setup application and the software must be installed manually.</p>
+      </div>
+	  
+	  <hr />
+	  <h3 class="text_section">
+        Installation via Setup Application
+      </h3>
+	  <ol>
+        <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
+        <li>Download the package appropriate for your operating system above, then;
+          <br>- <b>macOS:</b> Mount the disk image and run the Setup application contained within.
+          <br>- <b>Windows:</b> Unzip the package to a temporary location and run the Setup application from that location.
+        </li>
+        <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
+        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
+        </li>
+      </ol>
+	  
+	  <hr />
+	  <h3 class="text_section">
+        Manual Installation
+      </h3>
+      <ol>
+        <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
+        <li>Copy / install the <b>VST plugins</b> into your common VST folder.
+          <br>- <b>macOS:</b> ~/Library/Audio/Plug-Ins/VST3
+          <br>- <b>Linux:</b> ~./vst3
+          <br>- <b>Windows:</b> C:\Program&nbsp;Files\Common&nbsp;Files\VST3
+        </li>
+        <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
+        <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
+          <br>- <b>macOS:</b> ~/Library/Application Support/REAPER/UserPlugins
+		  <br>- <b>Linux:</b> ~/.config/REAPER/
+          <br>- <b>Windows:</b> C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
+		  <div style="margin-left: 2em; margin-right: 4em;">
+		  <i>Note: If you have a previous version of the REAPER Extension installed to C:\Program&nbsp;Files\REAPER&nbsp;(x64)\Plugins\reaper_adm.dll, then this should be deleted on installation of the latest version.</i>
+		  </div>
+        </li>
+        <li>Restart REAPER</li>
+        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
+        </li>
+      </ol>
+  </details>
 </div>
 
 <div markdown="1" class="text_section">
@@ -76,67 +133,12 @@ The EAR Production Suite began as a joint [open-source development](https://gith
 </div>
 
 <div markdown="1" class="text_section">
-## Download and Install
-The EAR Production Suite carries the <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> license</a>.
-Your download and use of the EAR Production Suite is subject to your agreement that the terms of <a data-source="license_url" data-type="href"><span data-source="license_type" data-type="innertext">GPL v3.0</span> (<span data-source="license_type_long" data-type="innertext">GNU General Public License v3.0</span>)</a> will govern such download and use.
-
-Download the latest EAR Production Suite release (<span data-source="version" data-type="innertext">Unknown</span> - <span data-source="version_date" data-type="innertext">Unknown</span>):
-  <div class="button-grid">
-    <a data-source="download_windows_url" data-type="href"><button class="c-btn">📦 Download Windows (x64)</button></a>
-	<a data-source="download_macos_universal_url" data-type="href"><button class="c-btn">📦 Download macOS (x64/ARM64)</button></a>
+## Video Tutorial
+  <div class="yt-iframe">
+    <iframe src="https://www.youtube-nocookie.com/embed/u7P5mEFY76k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
-<br />
-<p>
-The EPS is designed for REAPER 64-bit <span data-source="min_reaper_ver" data-type="innertext">v6.11</span> or greater, on a 64-bit OS (macOS or Windows). An experimental <a data-source="download_linux_url" data-type="href">Linux Build (x64)</a> is also available, but please be aware that this is very experimental at this time and may be buggy.
-View the <a data-source="readme_url" data-type="href">ReadMe and Change Log</a> for this release. Old versions are available <a href="https://github.com/ebu/ear-production-suite/releases">here.</a>
-</p>
-<br />
-  <details>
-    <summary>Show installation instructions</summary>
-	  <a name="installation"></a>
-	  <div class="text_section">
-        <p>The EAR Production Suite can be installed using the Setup application provided within the download package. This is the easiest method to install the EAR Production Suite. Alternatively, you can manually install the various components of the software. </p>
-        <p>Please note that for the Linux build, there is currently no Setup application and the software must be installed manually.</p>
-      </div>
-	  <h3>
-        Installation via Setup Application
-      </h3>
-	  <ol>
-        <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
-        <li>Download the package appropriate for your operating system above, then;
-          <br>- <b>macOS:</b> Mount the disk image and run the Setup application contained within.
-          <br>- <b>Windows:</b> Unzip the package to a temporary location and run the Setup application from that location.
-        </li>
-        <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
-        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
-        </li>
-      </ol>
-	  
-	  <hr />
-	  <h3>
-        Manual Installation
-      </h3>
-      <ol>
-        <li>Install <a href="https://www.reaper.fm/download.php">REAPER</a></li>
-        <li>Copy / install the <b>VST plugins</b> into your common VST folder.
-          <br>- <b>macOS:</b> ~/Library/Audio/Plug-Ins/VST3
-          <br>- <b>Linux:</b> ~./vst3
-          <br>- <b>Windows:</b> C:\Program&nbsp;Files\Common&nbsp;Files\VST3
-        </li>
-        <li>Open REAPER and go to Options -> Preferences -> Plug-Ins -> VST and click Rescan</li>
-        <li>Copy / install REAPER ADM <b>Extension</b> into the REAPER plugins folder. Ensure you include the ADMPresets subdirectory.
-          <br>- <b>macOS:</b> ~/Library/Application Support/REAPER/UserPlugins
-		  <br>- <b>Linux:</b> ~/.config/REAPER/
-          <br>- <b>Windows:</b> C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins
-		  <div style="margin-left: 2em; margin-right: 4em;">
-		  <i>Note: If you have a previous version of the REAPER Extension installed to C:\Program&nbsp;Files\REAPER&nbsp;(x64)\Plugins\reaper_adm.dll, then this should be deleted on installation of the latest version.</i>
-		  </div>
-        </li>
-        <li>Restart REAPER</li>
-        <li>You should see a new menu option <b>File -> Create Project from ADM file</b> now. If you don't see this option and you are using Windows, it might be necessary to download and install the <a href="https://support.microsoft.com/en-gb/help/2977003/the-latest-supported-visual-c-downloads">Visual C++ 2015 redistributable</a> ("vc_redist.x64.exe") from Microsoft.
-        </li>
-      </ol>
-  </details>
+  <i><b>Please note:</b> The tutorial video describes manual installation of the EAR Production Suite which is no longer necessary.
+  Please refer to the updated <a href="#installation">installation instructions</a> above.</i>
 </div>
 
 <div markdown="1" class="text_section">
