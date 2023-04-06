@@ -145,7 +145,6 @@ class ReaperAPI {
     virtual bool GetEnvelopeStateChunk(TrackEnvelope* env, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const = 0;
     virtual bool SetEnvelopeStateChunk(TrackEnvelope* env, const char* str, bool isundoOptional ) const = 0;
     virtual void* GetSetTrackSendInfo(MediaTrack* tr, int category, int sendidx, const char* parmname, void* setNewValue) const = 0;
-    virtual bool TrackFX_SetPinMappings(MediaTrack* tr, int fx, int isoutput, int pin, int low32bits, int hi32bits) const = 0;
     virtual int GetEnvelopeScalingMode(TrackEnvelope* env ) const = 0;
     virtual double ScaleFromEnvelopeMode(int scaling_mode, double val ) const = 0;
     virtual double ScaleToEnvelopeMode(int scaling_mode, double val ) const = 0;
@@ -188,8 +187,6 @@ class ReaperAPI {
     virtual std::unique_ptr<Track> createTrack(MediaTrack* track) const = 0;
     virtual std::unique_ptr<Track> masterTrack() const = 0;
     virtual ReaProject* getCurrentProject() const = 0;
-    virtual void resetFxPinMap(MediaTrack* trk, int fxNum) const = 0;
-    virtual void mapFxPin(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel) const = 0;
     virtual bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const = 0;
     virtual std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const = 0;
     virtual bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const = 0;
