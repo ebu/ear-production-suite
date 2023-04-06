@@ -318,7 +318,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
   SECTION("out of bounds routing") {
     auto item1 = store.add_monitoring_items();
     item1->set_connection_id(communication::ConnectionId::generate().string());
-    item1->set_routing(62);
+    item1->set_routing(INPUT_CHANNELS - 3); // item requires 10 channels but we're starting at only 3 channels away from the end of the available range
     item1->set_changed(true);
     item1->set_allocated_ds_metadata(obj1);
 
