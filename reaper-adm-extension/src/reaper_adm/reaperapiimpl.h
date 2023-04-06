@@ -101,7 +101,6 @@ public:
     bool GetEnvelopeStateChunk(TrackEnvelope* env, char* strNeedBig, int strNeedBig_sz, bool isundoOptional) const override;
     bool SetEnvelopeStateChunk(TrackEnvelope* env, const char* str, bool isundoOptional ) const override;
     void* GetSetTrackSendInfo(MediaTrack* tr, int category, int sendidx, const char* parmname, void* setNewValue) const override;
-    bool TrackFX_SetPinMappings(MediaTrack* tr, int fx, int isoutput, int pin, int low32bits, int hi32bits) const override;
     int GetEnvelopeScalingMode(TrackEnvelope* env ) const override;
     double ScaleFromEnvelopeMode(int scaling_mode, double val ) const override;
     double ScaleToEnvelopeMode(int scaling_mode, double val ) const override;
@@ -138,8 +137,6 @@ public:
     std::unique_ptr<Track> createTrack(MediaTrack*) const override;
     std::unique_ptr<Track> masterTrack() const override;
     ReaProject* getCurrentProject() const override;
-    void resetFxPinMap(MediaTrack* trk, int fxNum) const override;
-    void mapFxPin(MediaTrack* trk, int fxNum, int trackChannel, int fxChannel) const override;
     bool forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const override;
     std::optional<std::pair<double, double>> getTrackAudioBounds(MediaTrack* trk, bool ignoreBeforeZero) const override;
     bool TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const override;

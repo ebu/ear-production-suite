@@ -448,10 +448,6 @@ void* admplug::ReaperAPIImpl::GetSetTrackSendInfo(MediaTrack* tr, int category, 
     return ::GetSetTrackSendInfo(tr, category, sendidx, parmname, setNewValue);
 }
 
-bool admplug::ReaperAPIImpl::TrackFX_SetPinMappings(MediaTrack* tr, int fx, int isoutput, int pin, int low32bits, int hi32bits) const
-{
-    return ::TrackFX_SetPinMappings(tr, fx, isoutput, pin, low32bits, hi32bits);
-}
 int admplug::ReaperAPIImpl::GetEnvelopeScalingMode(TrackEnvelope * env) const
 {
     return ::GetEnvelopeScalingMode(env);
@@ -758,28 +754,6 @@ std::unique_ptr<Track> ReaperAPIImpl::masterTrack() const
 ReaProject* ReaperAPIImpl::getCurrentProject() const
 {
     return EnumProjects(-1, NULL, 0);
-}
-
-void admplug::ReaperAPIImpl::resetFxPinMap(MediaTrack * trk, int fxNum) const
-{
-    for(int pinNum = 0; pinNum < MAX_DAW_CHANNELS; pinNum++) {
-        mapFxPin(trk, fxNum, pinNum, pinNum);
-    }
-}
-
-void admplug::ReaperAPIImpl::mapFxPin(MediaTrack * trk, int fxNum, int trackChannel, int fxChannel) const
-{
-    if(trackChannel < 32) {
-        uint32_t low = TWO_TO_THE_POWER_OF(trackChannel);
-        TrackFX_SetPinMappings(trk, fxNum, 0, fxChannel, low, 0);
-        TrackFX_SetPinMappings(trk, fxNum, 1, fxChannel, low, 0);
-    } else if(trackChannel < 64) { // TODO - what about channels up to 128??
-        trackChannel -= 32;
-        uint32_t high = TWO_TO_THE_POWER_OF(trackChannel);
-        TrackFX_SetPinMappings(trk, fxNum, 0, fxChannel, 0, high);
-        TrackFX_SetPinMappings(trk, fxNum, 1, fxChannel, 0, high);
-    }
-
 }
 
 bool admplug::ReaperAPIImpl::forceAmplitudeScaling(TrackEnvelope * trackEnvelope) const
