@@ -32,6 +32,8 @@ class MonitoringBackend {
 
   GainHolder currentGains();
 
+  void oscReceive(const int& objNum, const ObjectsTypeMetadata& earMd);
+
   bool isExporting() { return isExporting_; }
 
  private:

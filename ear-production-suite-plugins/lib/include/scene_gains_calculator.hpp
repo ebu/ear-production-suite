@@ -28,6 +28,7 @@ class SceneGainsCalculator {
  public:
   SceneGainsCalculator(Layout outputLayout, int inputChannelCount);
   bool update(proto::SceneStore store);
+  bool update(const int &objNum, const ear::ObjectsTypeMetadata &earMd);
   Eigen::MatrixXf directGains();
   Eigen::MatrixXf diffuseGains();
 

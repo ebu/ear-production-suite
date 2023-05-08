@@ -73,6 +73,12 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
   return true;
 }
 
+bool SceneGainsCalculator::update(const int& objNum,
+                                  const ear::ObjectsTypeMetadata& earMd) {
+  objectCalculator_.calculate(earMd, direct_[objNum], diffuse_[objNum]);
+  return true;
+}
+
 Eigen::MatrixXf SceneGainsCalculator::directGains() {
   return toEigenMat(direct_);
 }

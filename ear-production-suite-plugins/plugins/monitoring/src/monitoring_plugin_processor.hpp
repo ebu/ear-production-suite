@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "components/level_meter_calculator.hpp"
+#include "monitoring_admosc.hpp"
 
 namespace ear {
 namespace plugin {
@@ -69,6 +70,8 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
   };
+
+  ear::plugin::AdmOscReceiver osc{};
 
  private:
   BusesProperties _getBusProperties();

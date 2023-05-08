@@ -57,6 +57,19 @@ GainHolder MonitoringBackend::currentGains() {
   return gains_;
 }
 
+void MonitoringBackend::oscReceive(const int& objNum,
+                                   const ObjectsTypeMetadata& earMd) {
+  {
+    std::lock_guard<std::mutex> lock(gainsCalculatorMutex_);
+    gainsCalculator_.update(objNum, earMd);
+  }
+  {
+    std::lock_guard<std::mutex> lock(gainsMutex_);
+    gains_.direct = gainsCalculator_.directGains();
+    gains_.diffuse = gainsCalculator_.diffuseGains();
+  }
+}
+
 void MonitoringBackend::updateActiveGains(proto::SceneStore store) {
   {
     std::lock_guard<std::mutex> lock(gainsCalculatorMutex_);

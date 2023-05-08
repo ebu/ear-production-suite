@@ -73,6 +73,11 @@ EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
                             getTotalNumOutputChannels(), 512,
                             speakerLayout};
   configureProcessor(newConfig);
+
+  osc.onReceive = [this](int objNum, ear::ObjectsTypeMetadata md) {
+    backend_->oscReceive(objNum, md);
+  };
+
 }
 
 EarMonitoringAudioProcessor::~EarMonitoringAudioProcessor() {}
