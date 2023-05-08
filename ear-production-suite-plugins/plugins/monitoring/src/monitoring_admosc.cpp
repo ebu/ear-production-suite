@@ -1,4 +1,5 @@
 #include "monitoring_admosc.hpp"
+#include <cmath>
 
 #define OSC_READY_MSG "OSC Ready."
 #define OSC_CLOSED_MSG "OSC Closed."
@@ -78,6 +79,9 @@ void AdmOscReceiver::oscMessageReceived(
         }
         if (addStr == "/gain" && vals.size() == 1) {
           objs[objNum].gain = vals[0];
+        }
+        if (addStr == "/s" && vals.size() == 1) { // Hack for L-ISA gain control
+          objs[objNum].gain = std::pow(10, vals[0] / 20.f);
         }
         if (addStr == "/azim" && vals.size() == 1) {
           objs[objNum].az = vals[0];
