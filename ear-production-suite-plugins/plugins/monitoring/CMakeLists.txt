@@ -3,6 +3,7 @@ set(SOURCES_MONITORING
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
     src/monitoring_plugin_editor.cpp
     src/monitoring_plugin_processor.cpp
+	src/monitoring_admosc.cpp
 )
 
 set(HEADERS_MONITORING
@@ -34,6 +35,7 @@ set(HEADERS_MONITORING
 
 	src/monitoring_plugin_editor.hpp
 	src/monitoring_plugin_processor.hpp
+	src/monitoring_admosc.hpp
 	src/speaker_meter.hpp
 	src/speaker_meter_box.hpp
 )
