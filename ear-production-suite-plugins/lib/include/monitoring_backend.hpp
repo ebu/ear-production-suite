@@ -49,8 +49,8 @@ class MonitoringBackend {
   std::mutex gainsCalculatorMutex_;
   SceneGainsCalculator gainsCalculator_;
   ui::MonitoringFrontendBackendConnector* frontendConnector_;
-  std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
-  communication::MonitoringControlConnection controlConnection_;
+  //std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
+  //communication::MonitoringControlConnection controlConnection_;
 
   bool isExporting_{ false };
 };

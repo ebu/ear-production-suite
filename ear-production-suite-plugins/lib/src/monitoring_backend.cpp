@@ -12,8 +12,8 @@ MonitoringBackend::MonitoringBackend(
     ui::MonitoringFrontendBackendConnector* connector,
     const Layout& targetLayout, int inputChannelCount)
     : gainsCalculator_(targetLayout, inputChannelCount),
-      frontendConnector_(connector),
-      controlConnection_() {
+      frontendConnector_(connector) {
+      //controlConnection_() {
   logger_ = createLogger(fmt::format("Monitoring@{}", (const void*)this));
 
 #ifdef EPS_ENABLE_LOGGING
@@ -24,15 +24,18 @@ MonitoringBackend::MonitoringBackend(
 
   gains_.direct = gainsCalculator_.directGains();
   gains_.diffuse = gainsCalculator_.diffuseGains();
+  /*
   controlConnection_.logger(logger_);
   controlConnection_.onConnectionEstablished(
       std::bind(&MonitoringBackend::onConnection, this, _1, _2));
   controlConnection_.onConnectionLost(
       std::bind(&MonitoringBackend::onConnectionLost, this));
   controlConnection_.start(detail::SCENE_MASTER_CONTROL_ENDPOINT);
+  */
 }
 
 MonitoringBackend::~MonitoringBackend() {
+  /*
   if (metadataReceiver_) {
     metadataReceiver_->shutdown();
   }
@@ -45,6 +48,7 @@ MonitoringBackend::~MonitoringBackend() {
   // on `stop()` as well, so this wouldn't help here?
   controlConnection_.onConnectionLost(nullptr);
   controlConnection_.onConnectionEstablished(nullptr);
+  */
 }
 
 void MonitoringBackend::onSceneReceived(proto::SceneStore store) {
@@ -89,11 +93,13 @@ void MonitoringBackend::onConnection(communication::ConnectionId id,
         "Connected to Scene ({}), will now listening for metadata from "
         "{}",
         id.string(), streamEndpoint);
+    /*
     metadataReceiver_ =
         std::make_unique<communication::MonitoringMetadataReceiver>(logger_);
     metadataReceiver_->start(
         streamEndpoint,
         std::bind(&MonitoringBackend::onSceneReceived, this, _1));
+        */
   } catch (const std::runtime_error& e) {
     logger_->error("Failed to start stream receiver: {}", e.what());
   }
@@ -101,7 +107,7 @@ void MonitoringBackend::onConnection(communication::ConnectionId id,
 
 void MonitoringBackend::onConnectionLost() {
   logger_->info("Lost connection to Scene");
-  metadataReceiver_->shutdown();
+  //metadataReceiver_->shutdown();
   // force update with an "empty" store to generate silence
   updateActiveGains(proto::SceneStore{});
 }
