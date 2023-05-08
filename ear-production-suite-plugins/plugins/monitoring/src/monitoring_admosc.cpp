@@ -72,13 +72,28 @@ void AdmOscReceiver::oscMessageReceived(
       addStr = addStr.substring(slashPos);
       if (objNum >= 0 && objNum < 63) {
         if (addStr == "/aed" && vals.size() == 3) {
-          objs[objNum].position = ear::PolarPosition(vals[0], vals[1], vals[3]);
+          objs[objNum].az = vals[0];
+          objs[objNum].el = vals[1];
+          objs[objNum].d = vals[2];
         }
         if (addStr == "/gain" && vals.size() == 1) {
           objs[objNum].gain = vals[0];
         }
+        if (addStr == "/azim" && vals.size() == 1) {
+          objs[objNum].az = vals[0];
+        }
+        if (addStr == "/elev" && vals.size() == 1) {
+          objs[objNum].el = vals[0];
+        }
+        if (addStr == "/dist" && vals.size() == 1) {
+          objs[objNum].d = vals[0];
+        }
         if (onReceive) {
-          onReceive(objs[objNum]);
+          ear::ObjectsTypeMetadata md;
+          md.gain = objs[objNum].gain;
+          md.position = ear::PolarPosition(objs[objNum].az, objs[objNum].el,
+                                           objs[objNum].d);
+          onReceive(md);
         }
       }
     }

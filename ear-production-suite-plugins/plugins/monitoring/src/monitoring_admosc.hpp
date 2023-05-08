@@ -42,7 +42,13 @@ class AdmOscReceiver
 
   // Have to track this because we can receive one param at a time,
   //   but we have to send a full set
-  std::vector<ObjectsTypeMetadata> objs;
+  struct SimpleObj {
+    float az = 0.0;
+    float el = 0.0;
+    float d = 0.0;
+    float gain = 0.0;
+  };
+  std::vector<SimpleObj> objs;
 };
 
 }  // namespace plugin
