@@ -15,7 +15,7 @@ class AdmOscReceiver
   AdmOscReceiver();
   ~AdmOscReceiver();
 
-  std::function<void(ObjectsTypeMetadata earMd)> onReceive;
+  std::function<void(int objNum, ObjectsTypeMetadata earMd)> onReceive;
   std::function<void(std::string newStatus)> onStatusChange;
 
   void listenForConnections(uint16_t port);

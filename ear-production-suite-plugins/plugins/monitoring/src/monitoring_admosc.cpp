@@ -93,7 +93,7 @@ void AdmOscReceiver::oscMessageReceived(
           md.gain = objs[objNum].gain;
           md.position = ear::PolarPosition(objs[objNum].az, objs[objNum].el,
                                            objs[objNum].d);
-          onReceive(md);
+          onReceive(objNum, md);
         }
       }
     }
