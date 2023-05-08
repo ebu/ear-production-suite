@@ -68,7 +68,7 @@ void AdmOscReceiver::oscMessageReceived(
     auto slashPos = addStr.indexOf("/");
     if (slashPos > 0) {
       auto objNumStr = addStr.substring(0, slashPos);
-      auto objNum = objNumStr.getIntValue();
+      auto objNum = objNumStr.getIntValue() - 1; //1-indexed in adm-osc
       addStr = addStr.substring(slashPos);
       if (objNum >= 0 && objNum < 63) {
         if (addStr == "/aed" && vals.size() == 3) {
