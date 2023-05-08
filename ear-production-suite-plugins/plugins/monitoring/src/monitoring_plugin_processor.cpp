@@ -121,6 +121,7 @@ void EarMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   configureProcessor(newConfig);
   samplerate_ = sampleRate;
   levelMeter_->setup(newConfig.layout.channels().size(), sampleRate);
+  osc.listenForConnections(8000);
 }
 
 void EarMonitoringAudioProcessor::releaseResources() {
