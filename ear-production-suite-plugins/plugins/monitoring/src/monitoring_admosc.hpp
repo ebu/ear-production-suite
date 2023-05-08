@@ -24,6 +24,9 @@ class AdmOscReceiver
   void oscMessageReceived(const OSCMessage& message) override;
   void timerCallback(int timerId) override;
 
+  void purgeAllObjects(
+      std::function<void(int objNum, ObjectsTypeMetadata earMd)>);
+
   std::string getStatus();
 
  private:
@@ -46,7 +49,7 @@ class AdmOscReceiver
     float az = 0.0;
     float el = 0.0;
     float d = 0.0;
-    float gain = 0.0;
+    float gain = 1.0;
   };
   std::vector<SimpleObj> objs;
 };

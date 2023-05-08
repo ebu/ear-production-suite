@@ -119,6 +119,18 @@ void AdmOscReceiver::timerCallback(int timerId) {
   }
 }
 
+void AdmOscReceiver::purgeAllObjects(
+    std::function<void(int objNum, ObjectsTypeMetadata earMd)> callback) {
+  for (int objNum = 0; objNum < objs.size(); objNum++) {
+    ear::ObjectsTypeMetadata md;
+    md.gain = objs[objNum].gain;
+    md.position =
+        ear::PolarPosition(objs[objNum].az, objs[objNum].el, objs[objNum].d);
+    callback(objNum, md);
+  }
+}
+
+
 std::string AdmOscReceiver::getStatus() {
   return curStatusText;
 }

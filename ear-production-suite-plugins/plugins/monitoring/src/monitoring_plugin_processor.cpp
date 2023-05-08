@@ -122,6 +122,9 @@ void EarMonitoringAudioProcessor::prepareToPlay(double sampleRate,
   samplerate_ = sampleRate;
   levelMeter_->setup(newConfig.layout.channels().size(), sampleRate);
   osc.listenForConnections(8000);
+  osc.purgeAllObjects([this](int objNum, ear::ObjectsTypeMetadata md) {
+    backend_->oscReceive(objNum, md);
+  });
 }
 
 void EarMonitoringAudioProcessor::releaseResources() {
