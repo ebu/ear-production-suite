@@ -27,7 +27,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
       propertiesFileLock_(
           std::make_unique<InterProcessLock>("EPS_preferences")),
       propertiesFile_(getPropertiesFile(propertiesFileLock_.get())) {
-  String headingText = String::fromUTF8(" Monitoring – ");
+  String headingText = String::fromUTF8(" ADM-OSC Monitor – ");
   headingText += SPEAKER_LAYOUT_NAME;
   headingText += " (";
   headingText += SPEAKER_LAYOUT;
