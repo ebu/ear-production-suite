@@ -24,7 +24,10 @@ AdmOscReceiver::~AdmOscReceiver() {
 void AdmOscReceiver::listenForConnections(uint16_t port) {
   disconnect();
   oscPort = port;
-  isListening = osc.connect(oscPort);
+  for (uint16_t pOS = 0; pOS < 3; pOS++) {
+    isListening = osc.connect(oscPort + pOS);
+    if (isListening) break;
+  }
   updateStatusTextForListenAttempt();
   if(!isListening) {
     // To auto-reconnect on connection errors, we constantly try rebinding.
@@ -111,7 +114,10 @@ void AdmOscReceiver::timerCallback(int timerId) {
     updateStatusText(std::string(isListening ? OSC_READY_MSG : OSC_CLOSED_MSG));
   } else if (timerId == timerIdPersistentListen) {
     // If this timer is running, we should be listening
-    isListening = osc.connect(oscPort);
+    for (uint16_t pOS = 0; pOS < 3; pOS++) {
+      isListening = osc.connect(oscPort + pOS);
+      if (isListening) break;
+    }
     updateStatusTextForListenAttempt();
     if(isListening) {
       stopTimer(timerIdPersistentListen);
