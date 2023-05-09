@@ -71,7 +71,7 @@ void AdmOscReceiver::oscMessageReceived(
       auto objNumStr = addStr.substring(0, slashPos);
       auto objNum = objNumStr.getIntValue() - 1; //1-indexed in adm-osc
       addStr = addStr.substring(slashPos);
-      if (objNum >= 0 && objNum < 63) {
+      if (objNum >= 0 && objNum < 64) {
         if (addStr == "/aed" && vals.size() == 3) {
           objs[objNum].az = vals[0];
           objs[objNum].el = vals[1];
