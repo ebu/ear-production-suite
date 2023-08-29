@@ -34,14 +34,14 @@ void DefinedStartEnvelope::createPoints(double pointsOffset)
 {
     double earliestPointOnTimeline{ -1.0 };
     double pointOnTimeline{ 0.0 };
-    bool sortPoints{false};
+    bool noSortPoints{true};
 
     for(auto& point : points) {
         pointOnTimeline = point.effectiveTime() + pointsOffset;
         if (earliestPointOnTimeline < 0.0 || pointOnTimeline < earliestPointOnTimeline) {
             earliestPointOnTimeline = pointOnTimeline;
         }
-        api.InsertEnvelopePoint(trackEnvelope, pointOnTimeline, point.value(), 0, 0, false, &sortPoints);
+        api.InsertEnvelopePoint(trackEnvelope, pointOnTimeline, point.value(), 0, 0, false, &noSortPoints);
     }
     api.Envelope_SortPoints(trackEnvelope);
 
