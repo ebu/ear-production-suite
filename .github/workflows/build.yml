@@ -66,8 +66,16 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Create vcpkg cache dir.'
         run: cmake -E make_directory ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
@@ -79,6 +87,10 @@ jobs:
           string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
           file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Restore vcpkg and its artifacts.'
         uses: actions/cache@v3
         with:
@@ -86,6 +98,10 @@ jobs:
           key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-vcpkg-
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Windows: Install ccache.'
         if: matrix.config.os == 'windows-latest'
@@ -116,6 +132,10 @@ jobs:
         run: |
           sudo apt-get install -y ccache libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Cache ccache files.'
         uses: actions/cache@v3
         with:
@@ -123,6 +143,10 @@ jobs:
           key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-ccache-
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Zero ccache stats.'
         run: ccache -z
@@ -143,9 +167,17 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
         if: matrix.config.os == 'windows-latest'
+        
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
         
       - name: 'Git Status'
         run: git status
@@ -159,6 +191,10 @@ jobs:
       - name: 'Git Status'
         run: git status
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
         # This is for the windows relwithdebinfo build as otherwise we run out of disk space
       - name: 'Clean up vcpkg temporary files.'
         run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
@@ -166,11 +202,19 @@ jobs:
       - name: 'Prune the vcpkg cache'
         run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
 
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Build using CMake and Ninja via CMake preset.'
         run: cmake --build --preset ${{ matrix.config.cmake_preset }}
 
       - name: 'Print ccache stats.'
         run: ccache -s
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Run tests.'
         if: ${{ matrix.config.test }}
@@ -181,6 +225,10 @@ jobs:
         run: |
           cmake -E make_directory "${{ steps.cmake_install_prefix.outputs.install_prefix }}"
           cmake --build --preset ${{ matrix.config.cmake_preset }} --target install
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'unix: Tar output dir.'
         if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
@@ -199,6 +247,10 @@ jobs:
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
+
+      - name: 'Disks'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
   # mac_universal_bin:
     # name: mac_universal_bin
