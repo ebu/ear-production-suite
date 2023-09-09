@@ -81,7 +81,7 @@ jobs:
         run: Get-PSDrive
 
       - name: 'Create vcpkg cache dir.'
-        run: cmake -E make_directory ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}' }}
+        run: cmake -E make_directory [ ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}' }}];
 
       - name: 'Prepare timestamp.'
         id: cache_timestamp
