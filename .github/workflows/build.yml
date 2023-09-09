@@ -169,7 +169,7 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
-              ${{ matrix.config.name }}-ccache-
+              ${{ matrix.config.name }}-ccache-DISABLE
 
       - name: 'Disks'
         if: matrix.config.os == 'windows-latest'
