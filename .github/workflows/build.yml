@@ -61,7 +61,7 @@ jobs:
     steps:
       - name: Set Conditional Environment Variables (Win)
         if: matrix.config.os == 'windows-latest'
-        run: echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $GITHUB_ENV
+        run: echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $env:GITHUB_ENV
       - name: Set Conditional Environment Variables (NOT Win)
         if: matrix.config.os != 'windows-latest'
         run: echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
