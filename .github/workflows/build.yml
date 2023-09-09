@@ -23,8 +23,8 @@ jobs:
       CCACHE_BASEDIR: '${{ github.workspace }}'
       # CCACHE_BASEDIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp' : '${{ github.workspace }}' }}
       VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      # VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ github.workspace }}/vcpkg_cache' }}
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
+      #VCPKG_DEFAULT_BINARY_CACHE: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ github.workspace }}/vcpkg_cache' }}
     strategy:
       matrix:
         config:
