@@ -15,13 +15,13 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     env:
       CCACHE_WIN_VERSION: 4.2.1
-      # CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_DIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/.ccache' : '${{ github.workspace }}/.ccache' }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      # CCACHE_DIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/.ccache' : '${{ github.workspace }}/.ccache' }}
       CCACHE_COMPRESS: 'true'
       CCACHE_COMPRESSLEVEL: '5'
       CCACHE_MAXSIZE: '500M'
-      # CCACHE_BASEDIR: '${{ github.workspace }}'
-      CCACHE_BASEDIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp' : '${{ github.workspace }}' }}
+      CCACHE_BASEDIR: '${{ github.workspace }}'
+      # CCACHE_BASEDIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp' : '${{ github.workspace }}' }}
       VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
       # VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
       VCPKG_DEFAULT_BINARY_CACHE: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ github.workspace }}/vcpkg_cache' }}
@@ -81,7 +81,7 @@ jobs:
         run: Get-PSDrive
 
       - name: 'Create vcpkg cache dir.'
-        run: cmake -E make_directory ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+        run: cmake -E make_directory ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}' }}
 
       - name: 'Prepare timestamp.'
         id: cache_timestamp
@@ -97,7 +97,7 @@ jobs:
       - name: 'Restore vcpkg and its artifacts.'
         uses: actions/cache@v3
         with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          path: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}' }}
           key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
               ${{ matrix.config.name }}-vcpkg-
