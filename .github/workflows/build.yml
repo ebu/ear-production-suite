@@ -210,7 +210,7 @@ jobs:
         run: git status
         
       - name: 'Configure with CMake, vcpkg and ccmake.'
-        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
         env:
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
           CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
