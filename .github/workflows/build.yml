@@ -23,7 +23,7 @@ jobs:
       CCACHE_BASEDIR: '${{ github.workspace }}'
       # CCACHE_BASEDIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp' : '${{ github.workspace }}' }}
       VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
+      #VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
       #VCPKG_DEFAULT_BINARY_CACHE: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ github.workspace }}/vcpkg_cache' }}
     strategy:
       matrix:
@@ -62,6 +62,10 @@ jobs:
       - name: Set Conditional Environment Variables (Win)
         if: matrix.config.os == 'windows-latest'
         run: echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $GITHUB_ENV
+      - name: Set Conditional Environment Variables (NOT Win)
+        if: matrix.config.os != 'windows-latest'
+        run: echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
+        
       - name: Check Environment Variable
         run: |
           echo "Accessing VCPKG_DEFAULT_BINARY_CACHE using env.VCPKG_DEFAULT_BINARY_CACHE: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}"
