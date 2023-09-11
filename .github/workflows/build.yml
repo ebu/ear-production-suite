@@ -176,10 +176,6 @@ jobs:
       - name: 'Git Status'
         run: git status
 
-        # This is for the windows relwithdebinfo build as otherwise we run out of disk space
-      - name: 'Clean up vcpkg temporary files.'
-        run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
-
       - name: 'Prune the vcpkg cache'
         run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
 
@@ -228,6 +224,11 @@ jobs:
       - name: 'Windows Disk Space'
         if: matrix.config.os == 'windows-latest'
         run: Get-PSDrive
+        
+        # Clean up windows tmp dir
+      - name: 'Clean up temporary files (Win)'
+        if: matrix.config.os == 'windows-latest'
+        run: cmake -E rm -rf "C:/tmp"
 
   mac_universal_bin:
     name: mac_universal_bin
