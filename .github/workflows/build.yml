@@ -57,9 +57,9 @@ jobs:
       - name: Set Conditional Environment Variables (Win)
         if: matrix.config.os == 'windows-latest'
         run: |
-          echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache1" >> $env:GITHUB_ENV
-          echo "VCPKG_ROOT=C:/tmp/submodules/vcpkg1" >> $env:GITHUB_ENV
-          echo "VCPKG_DOWNLOADS=C:/tmp/vcpkg_downloads1" >> $env:GITHUB_ENV
+          echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $env:GITHUB_ENV
+          echo "VCPKG_ROOT=C:/tmp/submodules/vcpkg" >> $env:GITHUB_ENV
+          echo "VCPKG_DOWNLOADS=C:/tmp/vcpkg_downloads" >> $env:GITHUB_ENV
       - name: Set Conditional Environment Variables (NOT Win)
         if: matrix.config.os != 'windows-latest'
         run: |
@@ -132,7 +132,7 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
-              ${{ matrix.config.name }}-ccache-DISABLE
+              ${{ matrix.config.name }}-ccache-
 
       - name: 'Zero ccache stats.'
         run: ccache -z
