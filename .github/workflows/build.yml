@@ -58,13 +58,10 @@ jobs:
         if: matrix.config.os == 'windows-latest'
         run: |
           echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $env:GITHUB_ENV
-          echo "VCPKG_ROOT=C:/tmp/submodules/vcpkg" >> $env:GITHUB_ENV
-          echo "VCPKG_DOWNLOADS=C:/tmp/vcpkg_downloads" >> $env:GITHUB_ENV
       - name: Set Conditional Environment Variables (NOT Win)
         if: matrix.config.os != 'windows-latest'
         run: |
           echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
-          echo "VCPKG_ROOT=${{ github.workspace }}/submodules/vcpkg" >> $GITHUB_ENV
     
       - name: 'Windows Disk Space'
         if: matrix.config.os == 'windows-latest'
@@ -162,7 +159,7 @@ jobs:
         
       - name: 'Configure with CMake, vcpkg and ccmake (Win)'
         if: matrix.config.os == 'windows-latest'
-        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/tmp/vcpkg-io_buildtrees;--downloads-root=C:/tmp/vcpkg-io_downloads;--x-packages-root=C:/tmp/vcpkg-io_packages" -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/tmp/vcpkg_buildtrees;--downloads-root=C:/tmp/vcpkg_downloads;--x-packages-root=C:/tmp/vcpkg_packages" -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
         env:
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
           CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
