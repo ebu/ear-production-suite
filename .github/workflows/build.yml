@@ -16,15 +16,10 @@ jobs:
     env:
       CCACHE_WIN_VERSION: 4.2.1
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      # CCACHE_DIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/.ccache' : '${{ github.workspace }}/.ccache' }}
       CCACHE_COMPRESS: 'true'
       CCACHE_COMPRESSLEVEL: '5'
       CCACHE_MAXSIZE: '500M'
       CCACHE_BASEDIR: '${{ github.workspace }}'
-      # CCACHE_BASEDIR: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp' : '${{ github.workspace }}' }}
-      #VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      #VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
-      #VCPKG_DEFAULT_BINARY_CACHE: ${{ matrix.config.os == 'windows-latest' ? 'C:/tmp/vcpkg_cache' : '${{ github.workspace }}/vcpkg_cache' }}
     strategy:
       matrix:
         config:
@@ -34,30 +29,30 @@ jobs:
             cmake_preset: "windows-packaging-release"
             vcpkg_triplet: x64-windows-static
             test: true
-          # - name: "Windows Latest MSVC RelWithDebInfo"
-            # os: windows-latest
-            # package: true
-            # cmake_preset: "windows-packaging-relwithdebinfo"
-            # vcpkg_triplet: x64-windows-static
-            # test: true
-          # - name: "macOS Latest Clang x64"
-            # os: macos-latest
-            # package: true
-            # cmake_preset: "macos-packaging-release"
-            # vcpkg_triplet: x64-osx-10_13
-            # test: true
-          # - name: "macOS Latest Clang arm64"
-            # os: macos-latest
-            # package: true
-            # cmake_preset: "macos-arm64-packaging-release"
-            # vcpkg_triplet: arm64-osx-11_0
-            # test: false
-          # - name: "Ubuntu 20.04"
-            # os: ubuntu-20.04
-            # package: true
-            # cmake_preset: "linux-packaging-release"
-            # vcpkg_triplet: x64-linux
-            # test: true
+          - name: "Windows Latest MSVC RelWithDebInfo"
+            os: windows-latest
+            package: true
+            cmake_preset: "windows-packaging-relwithdebinfo"
+            vcpkg_triplet: x64-windows-static
+            test: true
+          - name: "macOS Latest Clang x64"
+            os: macos-latest
+            package: true
+            cmake_preset: "macos-packaging-release"
+            vcpkg_triplet: x64-osx-10_13
+            test: true
+          - name: "macOS Latest Clang arm64"
+            os: macos-latest
+            package: true
+            cmake_preset: "macos-arm64-packaging-release"
+            vcpkg_triplet: arm64-osx-11_0
+            test: false
+          - name: "Ubuntu 20.04"
+            os: ubuntu-20.04
+            package: true
+            cmake_preset: "linux-packaging-release"
+            vcpkg_triplet: x64-linux
+            test: true
     steps:
       - name: Set Conditional Environment Variables (Win)
         if: matrix.config.os == 'windows-latest'
@@ -70,11 +65,6 @@ jobs:
         run: |
           echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
           echo "VCPKG_ROOT=${{ github.workspace }}/submodules/vcpkg" >> $GITHUB_ENV
-        
-      - name: Check Environment Variable
-        run: |
-          echo "Accessing VCPKG_DEFAULT_BINARY_CACHE using env.VCPKG_DEFAULT_BINARY_CACHE: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}"
-          echo "Accessing VCPKG_ROOT using env.VCPKG_ROOT: ${{ env.VCPKG_ROOT }}"
           
       - name: Setup Github Actions Cache for vcpkg
         uses: actions/github-script@v6
@@ -209,7 +199,14 @@ jobs:
       - name: 'Git Status'
         run: git status
         
-      - name: 'Configure with CMake, vcpkg and ccmake.'
+      - name: 'Configure with CMake, vcpkg and ccmake (Win)'
+        if: matrix.config.os == 'windows-latest'
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/tmp/vcpkg-io_buildtrees;--downloads-root=C:/tmp/vcpkg-io_downloads;--x-packages-root=C:/tmp/vcpkg-io_packages" -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: 'ccache'
+          CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
+      - name: 'Configure with CMake, vcpkg and ccmake (NOT Win)'
+        if: matrix.config.os != 'windows-latest'
         run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/tmp/vcpkg-io_buildtrees;--downloads-root=C:/tmp/vcpkg-io_downloads;--x-packages-root=C:/tmp/vcpkg-io_packages" -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
         env:
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
@@ -279,90 +276,90 @@ jobs:
         if: matrix.config.os == 'windows-latest'
         run: Get-PSDrive
 
-  # mac_universal_bin:
-    # name: mac_universal_bin
-    # runs-on: macos-latest
-    # needs: build
+  mac_universal_bin:
+    name: mac_universal_bin
+    runs-on: macos-latest
+    needs: build
 
-    # steps:
-      # - uses: actions/download-artifact@v2
-        # with:
-          # name: 'macOS_Latest_Clang_x64'
-          # path: 'macOS_Latest_Clang_x64'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_x64'
+          path: 'macOS_Latest_Clang_x64'
 
-      # - uses: actions/download-artifact@v2
-        # with:
-          # name: 'macOS_Latest_Clang_arm64'
-          # path: 'macOS_Latest_Clang_arm64'
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_arm64'
+          path: 'macOS_Latest_Clang_arm64'
         
-      # - name: 'un-tar x64'
-        # run: tar -xf macOS_Latest_Clang_x64.tar && rm macOS_Latest_Clang_x64.tar
-        # working-directory: macOS_Latest_Clang_x64
+      - name: 'un-tar x64'
+        run: tar -xf macOS_Latest_Clang_x64.tar && rm macOS_Latest_Clang_x64.tar
+        working-directory: macOS_Latest_Clang_x64
         
-      # - name: 'un-tar arm64'
-        # run: tar -xf macOS_Latest_Clang_arm64.tar && rm macOS_Latest_Clang_arm64.tar
-        # working-directory: macOS_Latest_Clang_arm64
+      - name: 'un-tar arm64'
+        run: tar -xf macOS_Latest_Clang_arm64.tar && rm macOS_Latest_Clang_arm64.tar
+        working-directory: macOS_Latest_Clang_arm64
         
-      # - name: 'dir listing'
-        # run: ls -R
+      - name: 'dir listing'
+        run: ls -R
 
-      # - name: 'build ub'
-        # run: |
-          # intel_dir="macOS_Latest_Clang_x64"
-          # arm_dir="macOS_Latest_Clang_arm64"
-          # ub_dir="macOS_Latest_Clang_universal"
+      - name: 'build ub'
+        run: |
+          intel_dir="macOS_Latest_Clang_x64"
+          arm_dir="macOS_Latest_Clang_arm64"
+          ub_dir="macOS_Latest_Clang_universal"
           
-          # cp -r $intel_dir $ub_dir
+          cp -r $intel_dir $ub_dir
           
-          # function make_ub() {
-            # intel_bin="$1"
-            # arm_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$arm_dir:")
-            # ub_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$ub_dir:")
+          function make_ub() {
+            intel_bin="$1"
+            arm_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$arm_dir:")
+            ub_bin=$(echo "$intel_bin" | sed "s:$intel_dir:$ub_dir:")
             
-            # if [ ! -f "$arm_bin" ]; then
-              # echo "$arm_bin not found"
-              # exit 1
-            # fi
+            if [ ! -f "$arm_bin" ]; then
+              echo "$arm_bin not found"
+              exit 1
+            fi
             
-            # lipo "$intel_bin" "$arm_bin" -create -output "$ub_bin"
-          # }
+            lipo "$intel_bin" "$arm_bin" -create -output "$ub_bin"
+          }
           
-          # LIBS=`find $intel_dir -name '*.dylib'`
-          # # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
-          # PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
-          # APPS=`find $intel_dir -path '*app/Contents/MacOS/*' ! -name '*.*'`
-          # # don't forget project upgrade command line util
-          # EXES=`find $intel_dir -name 'project_upgrade'`
+          LIBS=`find $intel_dir -name '*.dylib'`
+          # note: "! -name '*.*'" excludes files with an extension (auxiliary files)
+          PLUGINS=`find $intel_dir -path '*vst3/Contents/MacOS/*' ! -name '*.*'`
+          APPS=`find $intel_dir -path '*app/Contents/MacOS/*' ! -name '*.*'`
+          # don't forget project upgrade command line util
+          EXES=`find $intel_dir -name 'project_upgrade'`
           
-          # IFS=$'\n'
+          IFS=$'\n'
           
-          # for exe in $EXES; do
-            # echo "Making UB Exectuable from: $exe"
-            # make_ub "$exe"
-          # done
+          for exe in $EXES; do
+            echo "Making UB Exectuable from: $exe"
+            make_ub "$exe"
+          done
 
-          # for lib in $LIBS; do
-            # echo "Making UB Library from: $lib"
-            # make_ub "$lib"
-          # done
+          for lib in $LIBS; do
+            echo "Making UB Library from: $lib"
+            make_ub "$lib"
+          done
           
-          # for plugin in $PLUGINS; do
-            # echo "Making UB Plugin from: $plugin"
-            # make_ub "$plugin"
-          # done
+          for plugin in $PLUGINS; do
+            echo "Making UB Plugin from: $plugin"
+            make_ub "$plugin"
+          done
           
-          # for app in $APPS; do
-            # echo "Making UB App from: $app"
-            # make_ub "$app"
-          # done
+          for app in $APPS; do
+            echo "Making UB App from: $app"
+            make_ub "$app"
+          done
           
-      # - name: 'dir listing'
-        # run: ls -R
+      - name: 'dir listing'
+        run: ls -R
           
-      # - name: 'tar ub'
-        # run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
+      - name: 'tar ub'
+        run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
 
-      # - uses: actions/upload-artifact@v2
-        # with:
-          # name: 'macOS_Latest_Clang_universal'
-          # path: 'macOS_Latest_Clang_universal.tar'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: 'macOS_Latest_Clang_universal'
+          path: 'macOS_Latest_Clang_universal.tar'
