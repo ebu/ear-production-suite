@@ -20,8 +20,6 @@ jobs:
       CCACHE_COMPRESSLEVEL: '5'
       CCACHE_MAXSIZE: '500M'
       CCACHE_BASEDIR: '${{ github.workspace }}'
-      VCPKG_ROOT: ${{ github.workspace }}/submodules/vcpkg
-      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vcpkg_cache'
     strategy:
       matrix:
         config:
@@ -31,12 +29,12 @@ jobs:
             cmake_preset: "windows-packaging-release"
             vcpkg_triplet: x64-windows-static
             test: true
-          # - name: "Windows Latest MSVC RelWithDebInfo"
-            # os: windows-latest
-            # package: true
-            # cmake_preset: "windows-packaging-relwithdebinfo"
-            # vcpkg_triplet: x64-windows-static
-            # test: true
+          - name: "Windows Latest MSVC RelWithDebInfo"
+            os: windows-latest
+            package: true
+            cmake_preset: "windows-packaging-relwithdebinfo"
+            vcpkg_triplet: x64-windows-static
+            test: true
           - name: "macOS Latest Clang x64"
             os: macos-latest
             package: true
@@ -56,6 +54,19 @@ jobs:
             vcpkg_triplet: x64-linux
             test: true
     steps:
+      - name: Set Conditional Environment Variables (Win)
+        if: matrix.config.os == 'windows-latest'
+        run: |
+          echo "VCPKG_DEFAULT_BINARY_CACHE=C:/tmp/vcpkg_cache" >> $env:GITHUB_ENV
+      - name: Set Conditional Environment Variables (NOT Win)
+        if: matrix.config.os != 'windows-latest'
+        run: |
+          echo "VCPKG_DEFAULT_BINARY_CACHE=${{ github.workspace }}/vcpkg_cache" >> $GITHUB_ENV
+    
+      - name: 'Windows Disk Space'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+
       - name: 'Checkout repo recursively.'
         uses: actions/checkout@v3
         with:
@@ -142,11 +153,18 @@ jobs:
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
         if: matrix.config.os == 'windows-latest'
-        
+
       - name: 'Git Status'
         run: git status
         
-      - name: 'Configure with CMake, vcpkg and ccmake.'
+      - name: 'Configure with CMake, vcpkg and ccmake (Win)'
+        if: matrix.config.os == 'windows-latest'
+        run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON -DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=C:/tmp/vcpkg_buildtrees;--downloads-root=C:/tmp/vcpkg_downloads;--x-packages-root=C:/tmp/vcpkg_packages" -DVCPKG_INSTALLED_DIR="C:/tmp/vcpkg_installed"
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: 'ccache'
+          CMAKE_CXX_COMPILER_LAUNCHER: 'ccache'
+      - name: 'Configure with CMake, vcpkg and ccmake (NOT Win)'
+        if: matrix.config.os != 'windows-latest'
         run: cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_INSTALL_PREFIX="${{ steps.cmake_install_prefix.outputs.install_prefix }}" -DEPS_CI=ON
         env:
           CMAKE_C_COMPILER_LAUNCHER: 'ccache'
@@ -155,18 +173,22 @@ jobs:
       - name: 'Git Status'
         run: git status
 
-        # This is for the windows relwithdebinfo build as otherwise we run out of disk space
-      - name: 'Clean up vcpkg temporary files.'
-        run: cmake -E rm -rf "${{ env.VCPKG_ROOT }}/buildtrees" "${{ env.VCPKG_ROOT }}/packages" "${{ env.VCPKG_ROOT }}/downloads"
-
       - name: 'Prune the vcpkg cache'
         run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
+
+      - name: 'Windows Disk Space'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Build using CMake and Ninja via CMake preset.'
         run: cmake --build --preset ${{ matrix.config.cmake_preset }}
 
       - name: 'Print ccache stats.'
         run: ccache -s
+
+      - name: 'Windows Disk Space'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
 
       - name: 'Run tests.'
         if: ${{ matrix.config.test }}
@@ -195,6 +217,15 @@ jobs:
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
+
+      - name: 'Windows Disk Space'
+        if: matrix.config.os == 'windows-latest'
+        run: Get-PSDrive
+        
+        # Clean up windows tmp dir
+      - name: 'Clean up temporary files (Win)'
+        if: matrix.config.os == 'windows-latest'
+        run: cmake -E rm -rf "C:/tmp"
 
   mac_universal_bin:
     name: mac_universal_bin
