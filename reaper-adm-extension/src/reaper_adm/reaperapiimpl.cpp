@@ -13,7 +13,7 @@
 #include "track.h"
 #include "plugin.h"
 
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 #define TWO_TO_THE_POWER_OF(power) (1<<power)
 

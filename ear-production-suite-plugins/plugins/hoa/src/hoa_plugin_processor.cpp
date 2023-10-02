@@ -5,7 +5,7 @@
 #include "hoa_frontend_connector.hpp"
 #include "components/level_meter_calculator.hpp"
 
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();

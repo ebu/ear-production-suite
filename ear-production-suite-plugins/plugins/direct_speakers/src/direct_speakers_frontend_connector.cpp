@@ -5,7 +5,7 @@
 #include "detail/weak_ptr_helpers.hpp"
 
 #include "speaker_setups.hpp"
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 namespace {
   String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {

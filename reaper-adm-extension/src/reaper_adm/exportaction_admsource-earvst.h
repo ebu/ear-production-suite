@@ -8,7 +8,7 @@
 #include "exportaction_parameterprocessing.h"
 #include "helper/nng_wrappers.h"
 
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 #include <vector>
 #include <memory>

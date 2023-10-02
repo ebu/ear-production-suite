@@ -22,7 +22,7 @@
 #include <helper/common_definition_helper.h>
 #include <helper/container_helpers.hpp>
 
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 using namespace admplug;
 

@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 using namespace admplug;
 

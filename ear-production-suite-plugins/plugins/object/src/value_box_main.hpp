@@ -6,7 +6,7 @@
 #include "components/ear_name_text_editor.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 namespace ear {
 namespace plugin {

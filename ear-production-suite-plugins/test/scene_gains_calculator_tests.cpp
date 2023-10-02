@@ -4,7 +4,7 @@
 #include "eigen_catch2.hpp"
 #include <ear/bs2051.hpp>
 #include <catch2/catch_all.hpp>
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 using namespace ear::plugin;
 

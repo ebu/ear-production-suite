@@ -18,7 +18,7 @@
 #include <track.h>
 #include <helper/container_helpers.hpp>
 #include <fstream>
-#include <global_config.h>
+#include <global_config_defaults.h>
 
 using namespace admplug;
 using ::testing::_;
