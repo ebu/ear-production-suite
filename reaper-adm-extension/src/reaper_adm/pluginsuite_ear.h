@@ -113,8 +113,6 @@ private:
 	std::string originalAdmDocument;
 	bool sceneMasterAlreadyExisted{ false };
 
-	static const int MAX_CHANNEL_COUNT;
-
 	static bool registered;
 };
 }

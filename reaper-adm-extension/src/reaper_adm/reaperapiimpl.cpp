@@ -12,8 +12,7 @@
 #include "reaper_plugin_functions.h"
 #include "track.h"
 #include "plugin.h"
-
-#include <global_config_defaults.h>
+#include "global_config.h"
 
 #define TWO_TO_THE_POWER_OF(power) (1<<power)
 
@@ -562,7 +561,7 @@ int ReaperAPIImpl::reaperChannelOffsetForBusWidth(int busWidth) const {
     case 1:     return 1024;
     case 2:     return 0;
     default:    {
-        if(busWidth > MAX_DAW_CHANNELS) {
+        if(busWidth > GlobalConfig::getInstance().getMaxDawChannels() - 1) {
             throw std::runtime_error("ReaperAPI::reaperChannelOffsetForBusWidth() bus width too large");
         }
         if(busWidth % 2) {
