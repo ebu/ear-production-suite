@@ -561,7 +561,7 @@ int ReaperAPIImpl::reaperChannelOffsetForBusWidth(int busWidth) const {
     case 1:     return 1024;
     case 2:     return 0;
     default:    {
-        if(busWidth > MAX_DAW_CHANNELS) {
+        if(busWidth > GetDawChannelCount()) {
             throw std::runtime_error("ReaperAPI::reaperChannelOffsetForBusWidth() bus width too large");
         }
         if(busWidth % 2) {
@@ -947,6 +947,11 @@ std::string admplug::ReaperAPIImpl::GetTrackStateChunkStr(MediaTrack* track) con
     if (!res) return std::string();
     std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
     return fullChunk;
+}
+
+int admplug::ReaperAPIImpl::GetDawChannelCount() const
+{
+    return GetReaperChannelCount(GetAppVersion());
 }
 
 bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const

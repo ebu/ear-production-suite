@@ -197,6 +197,7 @@ class ReaperAPI {
     virtual std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const = 0;
     virtual std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const = 0;
     virtual std::string GetTrackStateChunkStr(MediaTrack* track) const = 0;
+    virtual int GetDawChannelCount() const = 0;
 
 };
 }
