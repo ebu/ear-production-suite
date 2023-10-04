@@ -240,7 +240,6 @@ const char* EARPluginSuite::DIRECTSPEAKERS_METADATA_PLUGIN_NAME = "EAR DirectSpe
 const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";
 const char* EARPluginSuite::SCENEMASTER_PLUGIN_NAME = "EAR Scene";
 const char* EARPluginSuite::RENDERER_PLUGIN_NAME = "EAR Monitoring 0+2+0";
-const int EARPluginSuite::MAX_CHANNEL_COUNT = MAX_DAW_CHANNELS;
 
 bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupportedPluginSuite("EAR", std::make_shared<EARPluginSuite>());
 
@@ -296,7 +295,7 @@ void EARPluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI & api)
 		sceneMasterTrack->disableMasterSend();
 		if (!Track::trackPresent(rendererTrack.get())) {
 			rendererTrack = createBusTrack(RENDERER_PLUGIN_NAME, api);
-			sceneMasterTrack->routeTo(*rendererTrack, MAX_CHANNEL_COUNT);
+			sceneMasterTrack->routeTo(*rendererTrack, api.GetDawChannelCount());
 			rendererTrack->setName("EAR Monitor Bus");
 		}
 	}
@@ -311,7 +310,7 @@ std::unique_ptr<Track> EARPluginSuite::createBusTrack(std::string pluginName, Re
 	track->moveToBefore(trackInsertionIndex++);
 	track->hideFromTrackControlPanel();
 	track->createPlugin(pluginName);
-	track->setChannelCount(MAX_CHANNEL_COUNT);
+	track->setChannelCount(api.GetDawChannelCount());
 	return track;
 }
 

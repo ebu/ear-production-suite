@@ -40,6 +40,11 @@ namespace {
 
 FakePtrFactory fakePtr;
 
+void setApiDefaults(MockReaperAPI& api) {
+    ON_CALL(api, GetAppVersion()).WillByDefault(Return("7.0"));
+    ON_CALL(api, GetDawChannelCount()).WillByDefault(Return(MAX_DAW_CHANNELS));
+}
+
 auto getPluginStr = [](std::string){
     return std::make_unique<NiceMock<MockPlugin>>();
 };
@@ -169,6 +174,7 @@ MATCHER_P(HasIndex, index, "")
 TEST_CASE("On create project, two tracks are created") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
     EXPECT_CALL(api, createTrack()).Times(2).WillRepeatedly(createDefaultTrack);
@@ -178,6 +184,7 @@ TEST_CASE("On create project, two tracks are created") {
 TEST_CASE("On first create project, scene master and renderer added") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
 
@@ -196,6 +203,7 @@ TEST_CASE("On first create project, scene master and renderer added") {
 TEST_CASE("On first create project, bus and renderer tracks set to MAX_DAW_CHANNELS channels") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
 
@@ -210,6 +218,7 @@ TEST_CASE("On first create project, bus and renderer tracks set to MAX_DAW_CHANN
 TEST_CASE("On first create project, bus track has master send disabled") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
     EXPECT_CALL(api, disableTrackMasterSend(_)).Times(1);
     auto node = initProject(earSuite, api);
     earSuite.onCreateProject(node, api);
@@ -218,6 +227,7 @@ TEST_CASE("On first create project, bus track has master send disabled") {
 TEST_CASE("On subsequent create project, scene master and renderer not added") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
 
     auto smTrack = createTrack([](MockTrack& track){
         ON_CALL(track, stillExists()).WillByDefault(Return(true));
@@ -257,6 +267,7 @@ TEST_CASE("On subsequent create project, scene master and renderer not added") {
 TEST_CASE("Bus and renderer tracks positioned") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
     auto project = std::make_shared<NiceMock<MockProjectElement>>();
     auto node = ProjectNode{project};
     auto mediaPosition{7};
@@ -286,6 +297,7 @@ TEST_CASE("Bus and renderer tracks positioned") {
 TEST_CASE("Object tracks created and plugin instantiated") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
 
     auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
     auto atu = adm::AudioTrackUid::create();
@@ -455,6 +467,7 @@ TEST_CASE("Object tracks created and plugin instantiated") {
 TEST_CASE("Object tracks are routed to scene, and not sent to master") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
 
     auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
     auto atu = adm::AudioTrackUid::create();
@@ -480,6 +493,7 @@ TEST_CASE("Object tracks are routed to scene, and not sent to master") {
 TEST_CASE("Directspeaker tracks are created and configured") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
 
     auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
     auto apf = adm::AudioPackFormat::create(adm::AudioPackFormatName("test"), adm::TypeDefinition::DIRECT_SPEAKERS, adm::parseAudioPackFormatId("AP_00010002"));
@@ -548,6 +562,7 @@ TEST_CASE("Directspeaker tracks are created and configured") {
 TEST_CASE("HOA tracks are created and configured") {
     EARPluginSuite earSuite;
     auto api = NiceMock<MockReaperAPI>{};
+    setApiDefaults(api);
 
     auto ao = adm::AudioObject::create(adm::AudioObjectName("test"));
     auto apf = admCommonDef->lookup(adm::parseAudioPackFormatId("AP_00040001"));
