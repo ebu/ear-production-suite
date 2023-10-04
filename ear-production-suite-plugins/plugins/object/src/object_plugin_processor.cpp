@@ -273,12 +273,9 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
     }
 
     auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
+    // TODO - set default channel count to MAX_DAW_CHANNELS here
     if (getAppVersionPtr) {
-      auto getAppVersion =
-          reinterpret_cast<decltype(&GetAppVersionSig)>(getAppVersionPtr);
-      auto appVer = getAppVersion();
-      auto appVerFlt = std::stof(appVer);
-      auto chns = appVerFlt >= 7.0f ? 128 : 64;
+      auto chns = GetReaperChannelCount(getAppVersionPtr);
     }
   }
 }
