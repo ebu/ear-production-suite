@@ -147,6 +147,7 @@ public:
     std::vector<std::pair<int, std::string>> GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const override;
     std::vector<std::string> SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const override;
     std::string GetTrackStateChunkStr(MediaTrack* track) const override;
+    int GetDawChannelCount() const override;
 
 private:
     reaper_plugin_info_t& plugin_info;

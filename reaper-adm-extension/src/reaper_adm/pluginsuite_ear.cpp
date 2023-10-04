@@ -295,7 +295,7 @@ void EARPluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI & api)
 		sceneMasterTrack->disableMasterSend();
 		if (!Track::trackPresent(rendererTrack.get())) {
 			rendererTrack = createBusTrack(RENDERER_PLUGIN_NAME, api);
-			sceneMasterTrack->routeTo(*rendererTrack, GetReaperChannelCount(api.GetAppVersion()));
+			sceneMasterTrack->routeTo(*rendererTrack, api.GetDawChannelCount());
 			rendererTrack->setName("EAR Monitor Bus");
 		}
 	}
@@ -310,7 +310,7 @@ std::unique_ptr<Track> EARPluginSuite::createBusTrack(std::string pluginName, Re
 	track->moveToBefore(trackInsertionIndex++);
 	track->hideFromTrackControlPanel();
 	track->createPlugin(pluginName);
-	track->setChannelCount(GetReaperChannelCount(api.GetAppVersion()));
+	track->setChannelCount(api.GetDawChannelCount());
 	return track;
 }
 

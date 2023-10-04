@@ -42,6 +42,7 @@ FakePtrFactory fakePtr;
 
 void setApiDefaults(MockReaperAPI& api) {
     ON_CALL(api, GetAppVersion()).WillByDefault(Return("7.0"));
+    ON_CALL(api, GetDawChannelCount()).WillByDefault(Return(MAX_DAW_CHANNELS));
 }
 
 auto getPluginStr = [](std::string){

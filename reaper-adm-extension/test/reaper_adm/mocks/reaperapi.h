@@ -239,7 +239,7 @@ class MockReaperAPI : public ReaperAPI {
   MOCK_CONST_METHOD1(GetVSTElementsFromTrackStateChunk, std::vector<std::pair<int, std::string>>(const std::string& fullChunk));
   MOCK_CONST_METHOD3(SplitVSTElement, std::vector<std::string>(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators));
   MOCK_CONST_METHOD1(GetTrackStateChunkStr, std::string(MediaTrack* track));
-
+  MOCK_CONST_METHOD0(GetDawChannelCount, int());
 };
 
 }  // namespace admplug
