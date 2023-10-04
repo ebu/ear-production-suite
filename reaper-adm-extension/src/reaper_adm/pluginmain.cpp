@@ -4,7 +4,6 @@
 #include <string>
 #include "reaperhost.h"
 #include "reaperapi.h"
-#include "global_config.h"
 #include "actionmanager.h"
 #include "menu.h"
 #include "admmetadata.h"
@@ -89,7 +88,6 @@ extern "C" {
     rec->Register("API_registerPluginLoad", reinterpret_cast<void*>(&registerPluginLoad));
 
     auto api = reaper->api();
-    GlobalConfig::createInstance(api.get());
 
 #ifndef __linux__
     // Linux requires libcurl even when using juce::URL

@@ -17,7 +17,6 @@
 #include "mediatakeelement.h"
 #include "mediatrackelement.h"
 #include <global_config_defaults.h>
-#include "global_config.h"
 
 #define TRACK_MAPPING_PARAM_INDEX 0
 #define TRACK_MAPPING_PARAM_MAXVAL MAX_DAW_CHANNELS
@@ -43,7 +42,6 @@ FakePtrFactory fakePtr;
 
 void setApiDefaults(MockReaperAPI& api) {
     ON_CALL(api, GetAppVersion()).WillByDefault(Return("7.0"));
-    GlobalConfig::createInstance(&api);
 }
 
 auto getPluginStr = [](std::string){

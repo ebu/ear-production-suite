@@ -19,7 +19,6 @@
 #include <helper/container_helpers.hpp>
 #include <fstream>
 #include <global_config_defaults.h>
-#include "global_config.h"
 
 using namespace admplug;
 using ::testing::_;
@@ -140,7 +139,6 @@ namespace {
 
     void setApiDefaults(MockReaperAPI& api, FakeReaperObjects& fake) {
         ON_CALL(api, GetAppVersion()).WillByDefault(Return("7.0"));
-        GlobalConfig::createInstance(&api);
         ON_CALL(api, GetResourcePath()).WillByDefault(Return("data"));
         ON_CALL(api, PCM_Source_CreateFromFile(_)).WillByDefault(Return(fake.source));
         ON_CALL(api, AddMediaItemToTrack(_)).WillByDefault([&api, &fake](MediaTrack* tr){

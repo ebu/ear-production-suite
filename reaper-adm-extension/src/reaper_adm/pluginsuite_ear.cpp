@@ -21,9 +21,7 @@
 #include <speaker_setups.hpp>
 #include <helper/common_definition_helper.h>
 #include <helper/container_helpers.hpp>
-
 #include <global_config_defaults.h>
-#include "global_config.h"
 
 using namespace admplug;
 
@@ -297,7 +295,7 @@ void EARPluginSuite::onCreateProject(const ProjectNode&, const ReaperAPI & api)
 		sceneMasterTrack->disableMasterSend();
 		if (!Track::trackPresent(rendererTrack.get())) {
 			rendererTrack = createBusTrack(RENDERER_PLUGIN_NAME, api);
-			sceneMasterTrack->routeTo(*rendererTrack, GlobalConfig::getInstance().getMaxDawChannels());
+			sceneMasterTrack->routeTo(*rendererTrack, GetReaperChannelCount(api.GetAppVersion()));
 			rendererTrack->setName("EAR Monitor Bus");
 		}
 	}
@@ -312,7 +310,7 @@ std::unique_ptr<Track> EARPluginSuite::createBusTrack(std::string pluginName, Re
 	track->moveToBefore(trackInsertionIndex++);
 	track->hideFromTrackControlPanel();
 	track->createPlugin(pluginName);
-	track->setChannelCount(GlobalConfig::getInstance().getMaxDawChannels());
+	track->setChannelCount(GetReaperChannelCount(api.GetAppVersion()));
 	return track;
 }
 
