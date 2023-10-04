@@ -77,12 +77,13 @@ set(EXTENSION_SOURCES
 	
 set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/common_definition_helper.h
-    ${EPS_SHARED_DIR}/helper/nng_wrappers.h
-    ${EPS_SHARED_DIR}/helper/char_encoding.hpp
-    ${EPS_SHARED_DIR}/helper/version.hpp
-    ${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
-    ${EPS_SHARED_DIR}/helper/resource_paths.hpp
-    ${EPS_SHARED_DIR}/helper/native_message_box.hpp
+	${EPS_SHARED_DIR}/helper/nng_wrappers.h
+	${EPS_SHARED_DIR}/helper/char_encoding.hpp
+	${EPS_SHARED_DIR}/helper/version.hpp
+	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
+	${EPS_SHARED_DIR}/helper/resource_paths.hpp
+	${EPS_SHARED_DIR}/helper/native_message_box.hpp
+	${EPS_SHARED_DIR}/daw_channel_count.h
 	
 	AppConfig.h
 	juce_modules.h

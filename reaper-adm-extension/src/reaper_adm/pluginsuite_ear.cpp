@@ -21,8 +21,7 @@
 #include <speaker_setups.hpp>
 #include <helper/common_definition_helper.h>
 #include <helper/container_helpers.hpp>
-
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 using namespace admplug;
 

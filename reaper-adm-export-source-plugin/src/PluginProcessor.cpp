@@ -1,7 +1,7 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
 #include <fstream>
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations

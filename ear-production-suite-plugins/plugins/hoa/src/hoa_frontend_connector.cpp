@@ -4,7 +4,7 @@
 #include "components/ear_name_text_editor.hpp"
 #include "detail/weak_ptr_helpers.hpp"
 
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 namespace {
 String routingLayoutDescriptionAt(int position, int layoutSizeFixed) {
