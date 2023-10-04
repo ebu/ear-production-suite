@@ -8,7 +8,7 @@
 #include "exportaction_parameterprocessing.h"
 #include "helper/nng_wrappers.h"
 
-#include <global_config_defaults.h>
+#include <daw_channel_count.h>
 
 #include <vector>
 #include <memory>

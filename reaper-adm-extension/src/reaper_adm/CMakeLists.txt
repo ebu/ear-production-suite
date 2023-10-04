@@ -36,7 +36,6 @@ set(EXTENSION_SOURCES
 	exportaction_parameterprocessing.cpp
 	exportaction_pcmsink.cpp
 	filehelpers.cpp
-	global_config.cpp
 	hoaautomationelement.cpp
 	importaction.cpp
 	importelement.cpp
@@ -84,7 +83,7 @@ set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
 	${EPS_SHARED_DIR}/helper/resource_paths.hpp
 	${EPS_SHARED_DIR}/helper/native_message_box.hpp
-	${EPS_SHARED_DIR}/global_config_defaults.h
+	${EPS_SHARED_DIR}/daw_channel_count.h
 	
 	AppConfig.h
 	juce_modules.h
@@ -118,7 +117,6 @@ set(EXTENSION_HEADERS
 	exportaction_parameterprocessing.h
 	exportaction_pcmsink.h
 	filehelpers.h
-	global_config.h
 	hoaautomationelement.h
 	importaction.h
 	importelement.h

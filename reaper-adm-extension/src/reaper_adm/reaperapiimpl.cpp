@@ -12,7 +12,7 @@
 #include "reaper_plugin_functions.h"
 #include "track.h"
 #include "plugin.h"
-#include <global_config_defaults.h>
+#include <daw_channel_count.h>
 
 #define TWO_TO_THE_POWER_OF(power) (1<<power)
 

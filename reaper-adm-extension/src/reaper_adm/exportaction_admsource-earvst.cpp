@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <global_config_defaults.h>
+#include <daw_channel_count.h>
 
 using namespace admplug;
 
