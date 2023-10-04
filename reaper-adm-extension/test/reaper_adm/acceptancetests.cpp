@@ -138,7 +138,8 @@ namespace {
     };
 
     void setApiDefaults(MockReaperAPI& api, FakeReaperObjects& fake) {
-
+        ON_CALL(api, GetAppVersion()).WillByDefault(Return("7.0"));
+        ON_CALL(api, GetDawChannelCount()).WillByDefault(Return(MAX_DAW_CHANNELS));
         ON_CALL(api, GetResourcePath()).WillByDefault(Return("data"));
         ON_CALL(api, PCM_Source_CreateFromFile(_)).WillByDefault(Return(fake.source));
         ON_CALL(api, AddMediaItemToTrack(_)).WillByDefault([&api, &fake](MediaTrack* tr){
