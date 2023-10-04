@@ -2,7 +2,7 @@
 #include "monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 namespace ear {
 namespace plugin {

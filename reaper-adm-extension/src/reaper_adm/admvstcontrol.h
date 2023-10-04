@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 #define COMMONDEFINITIONS_MAX_ID 0x0FFF
 

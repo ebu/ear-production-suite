@@ -8,7 +8,7 @@
 #include "metadata_event_dispatcher.hpp"
 #include "pending_store.hpp"
 #include "restored_pending_store.hpp"
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(

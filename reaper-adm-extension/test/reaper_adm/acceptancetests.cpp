@@ -18,7 +18,7 @@
 #include <track.h>
 #include <helper/container_helpers.hpp>
 #include <fstream>
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 using namespace admplug;
 using ::testing::_;

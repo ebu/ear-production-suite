@@ -5,7 +5,7 @@
 #include "hoa_frontend_connector.hpp"
 #include "components/level_meter_calculator.hpp"
 
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();

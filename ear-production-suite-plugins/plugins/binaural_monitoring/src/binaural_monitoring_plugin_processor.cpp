@@ -6,7 +6,7 @@
 #include "variable_block_adapter.hpp"
 #include <version/eps_version.h>
 #include <helper/resource_paths_juce-file.hpp>
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 #define DEFAULT_OSC_PORT 8000
 

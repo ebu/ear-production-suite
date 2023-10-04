@@ -5,7 +5,7 @@
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();

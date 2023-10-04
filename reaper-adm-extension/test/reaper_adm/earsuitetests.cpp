@@ -16,7 +16,7 @@
 #include "hoaautomationelement.h"
 #include "mediatakeelement.h"
 #include "mediatrackelement.h"
-#include <global_config.h>
+#include <daw_channel_count.h>
 
 #define TRACK_MAPPING_PARAM_INDEX 0
 #define TRACK_MAPPING_PARAM_MAXVAL MAX_DAW_CHANNELS
