@@ -9,6 +9,7 @@
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
+const char* GetAppVersionSig();
 
 using namespace ear::plugin;
 
@@ -269,6 +270,15 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
       registerPluginLoad([this](std::string const& xmlState) {
         this->extensionSetState(xmlState);
       });
+    }
+
+    auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
+    if (getAppVersionPtr) {
+      auto getAppVersion =
+          reinterpret_cast<decltype(&GetAppVersionSig)>(getAppVersionPtr);
+      auto appVer = getAppVersion();
+      auto appVerFlt = std::stof(appVer);
+      auto chns = appVerFlt >= 7.0f ? 128 : 64;
     }
   }
 }
