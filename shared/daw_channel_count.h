@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <cassert>
 
 #define MAX_DAW_CHANNELS 128
