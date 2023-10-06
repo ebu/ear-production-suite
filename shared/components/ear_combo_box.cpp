@@ -502,20 +502,31 @@ void EarComboBox::setDefaultText(const String& text) {
 }
 String EarComboBox::getDefaultText() const { return defaultText_; }
 
-void EarComboBox::addEntry(std::unique_ptr<EarComboBoxEntry> entry) {
+EarComboBoxEntry* EarComboBox::addEntry(std::unique_ptr<EarComboBoxEntry> entry) {
+	auto rawptr = entry.get();
 	popup_->addEntry(std::move(entry));
+	return rawptr;
 }
 
-void EarComboBox::addTextEntry(const String& text, int id) {
-	addEntry(std::make_unique<EarComboBoxTextEntry>(text, id));
+EarComboBoxTextEntry* EarComboBox::addTextEntry(const String& text, int id) {
+	auto uptr = std::make_unique<EarComboBoxTextEntry>(text, id);
+	auto rawptr = uptr.get();
+	addEntry(std::move(uptr));
+	return rawptr;
 }
 
-void EarComboBox::addColourEntry(const Colour& colour, int id) {
-	addEntry(std::make_unique<EarComboBoxColourEntry>(colour, id));
+EarComboBoxColourEntry* EarComboBox::addColourEntry(const Colour& colour, int id) {
+	auto uptr = std::make_unique<EarComboBoxColourEntry>(colour, id);
+	auto rawptr = uptr.get();
+	addEntry(std::move(uptr));
+	return rawptr;
 }
 
-void EarComboBox::addSectionEntry(const String& text, int id) {
-	addEntry(std::make_unique<EarComboBoxSectionEntry>(text, id));
+EarComboBoxSectionEntry* EarComboBox::addSectionEntry(const String& text, int id) {
+	auto uptr = std::make_unique<EarComboBoxSectionEntry>(text, id);
+	auto rawptr = uptr.get();
+	addEntry(std::move(uptr));
+	return rawptr;
 }
 
 void EarComboBox::clearEntries() {
