@@ -20,6 +20,7 @@ public:
 	bool isSelected() const;
 	void setSelected(bool selected);
 	bool isSelectable() const;
+	void setSelectable(bool selectable);
 	bool isHighlighted() const;
 	void setHighlighted(bool highlighted);
 
