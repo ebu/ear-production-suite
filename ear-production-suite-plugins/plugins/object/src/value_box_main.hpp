@@ -41,7 +41,7 @@ class ValueBoxMain : public Component {
     // routingComboBox_->setLookAndFeel(&routingLookAndFeel_);
     routingComboBox_->setDefaultText("Select Scene channel");
     for (int i = 1; i <= MAX_DAW_CHANNELS; ++i) {
-      routingComboBox_->addTextEntry(String(i));
+      routingComboBox_->addTextEntry(String(i), i);
     }
     addAndMakeVisible(routingComboBox_.get());
 
@@ -92,6 +92,17 @@ class ValueBoxMain : public Component {
   std::shared_ptr<ToggleButton> getUseTrackNameCheckbox() { return useTrackNameCheckbox_; }
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
+
+  void setValidRoutingMax(int maxChVal) { 
+    if (auto popup = routingComboBox_->getPopup()) {
+      for (int i = 1; i <= MAX_DAW_CHANNELS; ++i) {
+        auto entry = popup->getEntryById(i);
+        if (entry) {
+          entry->setSelectable(i <= maxChVal);
+        }
+      }
+    }
+  }
 
  private:
   const float labelWidth_ = 110.f;

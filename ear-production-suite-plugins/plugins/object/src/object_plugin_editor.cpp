@@ -47,6 +47,8 @@ ObjectAudioProcessorEditor::ObjectAudioProcessorEditor(ObjectsAudioProcessor* p)
   p->getFrontendConnector()->setPannerSideView(content_->panningViewValueBox->getPannerSideView());
   /* clang-format on */
 
+  content_->mainValueBox->setValidRoutingMax(p->getNumDawChannels());
+
   viewport_->setViewedComponent(content_.get(), false);
   viewport_->setScrollBarsShown(true, true);
   viewport_->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId,
