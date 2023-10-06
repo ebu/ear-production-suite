@@ -6,6 +6,7 @@
 #include "components/level_meter_calculator.hpp"
 #include "reaper_vst3_interfaces.h"
 #include "components/read_only_audio_parameter_int.hpp"
+#include <daw_channel_count.h>
 
 #include <memory>
 
@@ -72,6 +73,8 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
   void setIHostApplication(Steinberg::FUnknown *unknown) override;
   void extensionSetState(std::string const& xmlState);
 
+  int getNumDawChannels() { return numDawChannels_; }
+
  private:
   IReaperHostApplication* reaperHost{ nullptr };
   ear::plugin::communication::ConnectionId connectionId_;
@@ -87,6 +90,7 @@ class DirectSpeakersAudioProcessor : public AudioProcessor, public VST3ClientExt
   std::unique_ptr<ear::plugin::DirectSpeakersBackend> backend_;
 
   int samplerate_;
+  int numDawChannels_{MAX_DAW_CHANNELS};
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DirectSpeakersAudioProcessor)
