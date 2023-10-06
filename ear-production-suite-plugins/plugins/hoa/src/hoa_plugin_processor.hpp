@@ -6,6 +6,7 @@
 #include "helper/common_definition_helper.h"
 #include "reaper_vst3_interfaces.h"
 #include "components/read_only_audio_parameter_int.hpp"
+#include <daw_channel_count.h>
 
 namespace ear {
 namespace plugin {
@@ -72,6 +73,8 @@ class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
   void setIHostApplication(Steinberg::FUnknown *unknown) override;
   void extensionSetState(std::string const& xmlState);
 
+  int getNumDawChannels() { return numDawChannels_; }
+
  private:
   IReaperHostApplication* reaperHost{ nullptr };
   ear::plugin::communication::ConnectionId connectionId_;
@@ -86,6 +89,7 @@ class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
   std::unique_ptr<ear::plugin::HoaBackend> backend_;
 
   int samplerate_;
+  int numDawChannels_{MAX_DAW_CHANNELS};
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeterCalculator_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HoaAudioProcessor)

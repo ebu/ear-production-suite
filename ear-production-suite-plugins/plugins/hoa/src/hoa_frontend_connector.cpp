@@ -178,8 +178,9 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {
     routingComboBoxLocked->clearEntries();
     auto cfCountFixed = cfCount != 0 ? cfCount - 1 : cfCount;
     for (int i = 1; i + cfCountFixed <= MAX_DAW_CHANNELS; ++i) {
-      routingComboBoxLocked->addTextEntry(
-          routingLayoutDescriptionAt(i, cfCountFixed));
+      auto entry = routingComboBoxLocked->addTextEntry(
+          routingLayoutDescriptionAt(i, cfCountFixed), i);
+      entry->setSelectable(i + cfCountFixed <= p_->getNumDawChannels());
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }
