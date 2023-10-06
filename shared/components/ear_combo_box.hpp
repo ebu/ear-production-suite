@@ -322,10 +322,10 @@ public:
 	void setDefaultText(const String& text);
 	String getDefaultText() const;
 
-	void addEntry(std::unique_ptr<EarComboBoxEntry> entry);
-	void addTextEntry(const String& text, int id = 0);
-	void addColourEntry(const Colour& colour, int id = 0);
-	void addSectionEntry(const String& text, int id = 0);
+	EarComboBoxEntry* addEntry(std::unique_ptr<EarComboBoxEntry> entry);
+	EarComboBoxTextEntry* addTextEntry(const String& text, int id = 0);
+	EarComboBoxColourEntry* addColourEntry(const Colour& colour, int id = 0);
+	EarComboBoxSectionEntry* addSectionEntry(const String& text, int id = 0);
 
 	void selectEntry(int newIndex, NotificationType notification) {
 		if (newIndex != currentSelectedIndex_) {
