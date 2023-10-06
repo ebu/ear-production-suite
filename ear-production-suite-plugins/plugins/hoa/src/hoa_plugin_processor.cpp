@@ -5,8 +5,6 @@
 #include "hoa_frontend_connector.hpp"
 #include "components/level_meter_calculator.hpp"
 
-#include <daw_channel_count.h>
-
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -199,6 +197,12 @@ void HoaAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
       registerPluginLoad([this](std::string const& xmlState) {
         this->extensionSetState(xmlState);
       });
+    }
+
+    auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
+    numDawChannels_ = MAX_DAW_CHANNELS;
+    if (getAppVersionPtr) {
+      numDawChannels_ = GetReaperChannelCount(getAppVersionPtr);
     }
   }
 }
