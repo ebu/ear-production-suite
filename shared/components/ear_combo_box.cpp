@@ -19,6 +19,11 @@ EarComboBoxEntry::EarComboBoxEntry(int id) : id_{ id } {
 }
 
 bool EarComboBoxEntry::isSelectable() const { return isSelectable_; }
+void EarComboBoxEntry::setSelectable(bool selectable)
+{
+	isSelectable_ = selectable;
+	repaint();
+}
 bool EarComboBoxEntry::isSelected() const { return selected_; }
 void EarComboBoxEntry::setSelected(bool selected) { selected_ = selected; }
 
@@ -58,7 +63,12 @@ String EarComboBoxTextEntry::getText() const { return text_; }
 
 void EarComboBoxTextEntry::drawEntryInList(Graphics& g,
 	juce::Rectangle<int> area) {
-	g.setColour(findColour(textColourId));
+	if (isSelectable_) {
+		g.setColour(findColour(textColourId));
+	}
+	else {
+		g.setColour(findColour(textColourId).withBrightness(0.5));
+	}
 	g.setFont(EarFontsSingleton::instance().Items);
 	g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(14),
 		Justification::left);
