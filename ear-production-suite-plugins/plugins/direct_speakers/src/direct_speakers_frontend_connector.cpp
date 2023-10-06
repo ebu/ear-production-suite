@@ -188,7 +188,8 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
     routingComboBoxLocked->clearEntries();
     auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
     for (int i = 1; i + layoutSizeFixed <= MAX_DAW_CHANNELS; ++i) {
-      routingComboBoxLocked->addTextEntry(routingLayoutDescriptionAt(i, layoutSizeFixed));
+      auto entry = routingComboBoxLocked->addTextEntry(routingLayoutDescriptionAt(i, layoutSizeFixed), i);
+      entry->setSelectable(i + layoutSizeFixed <= p_->getNumDawChannels());
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }

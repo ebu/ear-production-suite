@@ -5,8 +5,6 @@
 #include "direct_speakers_plugin_editor.hpp"
 #include "direct_speakers_frontend_connector.hpp"
 
-#include <daw_channel_count.h>
-
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -212,6 +210,12 @@ void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unk
       registerPluginLoad([this](std::string const& xmlState) {
         this->extensionSetState(xmlState);
       });
+    }
+
+    auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
+    numDawChannels_ = MAX_DAW_CHANNELS;
+    if (getAppVersionPtr) {
+      numDawChannels_ = GetReaperChannelCount(getAppVersionPtr);
     }
   }
 }
