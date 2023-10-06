@@ -5,8 +5,6 @@
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
 
-#include <daw_channel_count.h>
-
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
@@ -269,6 +267,12 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
       registerPluginLoad([this](std::string const& xmlState) {
         this->extensionSetState(xmlState);
       });
+    }
+
+    auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
+    numDawChannels_ = MAX_DAW_CHANNELS;
+    if (getAppVersionPtr) {
+      numDawChannels_ = GetReaperChannelCount(getAppVersionPtr);
     }
   }
 }
