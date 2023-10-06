@@ -125,7 +125,7 @@ class EarComboBoxPopup : public Component {
     return -1;
   }
 
-  int getEntryById(int id) {
+  int getEntryIndexById(int id) {
     for (int i = 0; i < entries_.size(); ++i) {
       if (entries_.at(i)->getId() == id) {
         return i;
@@ -302,7 +302,7 @@ class EarComboBox : public Component,
   bool hasSelection() { return getSelectedEntryIndex() >= 0; }
 
   bool setSelectedId(int id, NotificationType notification) {
-    auto index = popup_->getEntryById(id);
+    auto index = popup_->getEntryIndexById(id);
     if(index < 0) return false;
     selectEntry(index, notification);
     return true;
