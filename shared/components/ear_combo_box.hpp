@@ -415,6 +415,10 @@ public:
 		}
 	}
 
+	EarComboBoxPopup* getPopup() {
+		return popup_.get();
+	}
+
 	std::function<void(int)> onValueChange;
 
 	class Listener {
