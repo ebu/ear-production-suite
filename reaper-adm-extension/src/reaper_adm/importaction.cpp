@@ -93,8 +93,28 @@ bool admplug::ImportAction::canMediaExplode_QuickCheck(const ReaperAPI & api, st
 {
     try {
         auto bw64File = bw64::readFile(mediaFile);
-        if (!bw64File->chnaChunk()) return false;
-        if (!bw64File->axmlChunk()) return false;
+        bool chnaMissing{ false };
+        bool axmlMissing{ false };
+        if (!bw64File->chnaChunk()) chnaMissing = true;
+        if (!bw64File->axmlChunk()) axmlMissing = true;
+        if (chnaMissing && axmlMissing) {
+            if (errOut) {
+                *errOut = "No CHNA or AXML chunk found.";
+            }
+            return false;
+        }
+        if (chnaMissing) {
+            if (errOut) {
+                *errOut = "No CHNA chunk found.";
+            }
+            return false;
+        }
+        if (axmlMissing) {
+            if (errOut) {
+                *errOut = "No AXML chunk found.";
+            }
+            return false;
+        }
     }
     catch (const std::runtime_error& e) {
         // Probably not RIFF/BW64/RF64 or not WAVE.
