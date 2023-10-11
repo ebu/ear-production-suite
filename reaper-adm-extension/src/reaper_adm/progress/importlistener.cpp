@@ -59,3 +59,10 @@ void ImportBroadcaster::error(const std::exception &e)
     }
 }
 
+void admplug::ImportBroadcaster::warning(const std::string& msg)
+{
+    for (auto& listener : listeners) {
+        listener->warning(msg);
+    }
+}
+
