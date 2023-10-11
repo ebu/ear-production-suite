@@ -88,6 +88,11 @@ std::map<std::string, uint16_t> admplug::ImportProgress::getWarnings()
     return warnings;
 }
 
+bool admplug::ImportProgress::hasWarnings()
+{
+    std::scoped_lock<std::mutex> lock(mutex);
+    return warnings.size() > 0;
+}
 
 void ImportProgress::dialogClosed()
 {
