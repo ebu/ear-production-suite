@@ -35,6 +35,7 @@ public:
     std::pair<uint64_t, uint64_t> sampleProgress();
     std::optional<std::string> getError();
     std::map<std::string, uint16_t> getWarnings();
+    bool hasWarnings();
 private:
     uint64_t frameCount{0};
     uint64_t currentFrames{0};

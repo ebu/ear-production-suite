@@ -181,7 +181,9 @@ INT_PTR ReaperDialogBox::process(HWND window, UINT msg, WPARAM wParam, LPARAM lP
                 reportAudioProgress();
             }
             if(currentState == ImportStatus::COMPLETE) {
-                finish();
+                if (!progress->hasWarnings()) {
+                    finish();
+                }
             }
         }
         return 0;
