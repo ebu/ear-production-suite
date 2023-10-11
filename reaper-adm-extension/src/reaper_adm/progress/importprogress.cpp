@@ -1,4 +1,5 @@
 #include "importprogress.h"
+#include "helper/container_helpers.hpp"
 
 using namespace admplug;
 
@@ -63,10 +64,28 @@ void ImportProgress::error(const std::exception &e)
     errorText = e.what();
 }
 
+void admplug::ImportProgress::warning(const std::string& msg)
+{
+    std::scoped_lock<std::mutex> lock(mutex);
+    auto counter = getValuePointerFromMap(warnings, msg);
+    if (counter) {
+        (*counter)++;
+    }
+    else {
+        setInMap(warnings, msg, uint16_t(1));
+    }
+}
+
 std::optional<std::string> ImportProgress::getError() {
 
     std::scoped_lock<std::mutex> lock(mutex);
     return errorText;
+}
+
+std::map<std::string, uint16_t> admplug::ImportProgress::getWarnings()
+{
+    std::scoped_lock<std::mutex> lock(mutex);
+    return warnings;
 }
 
 
