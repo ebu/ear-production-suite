@@ -2,6 +2,7 @@
 
 #include "JuceHeader.h"
 
+#include "components/look_and_feel/tooltips.hpp"
 #include "components/ear_combo_box.hpp"
 #include "components/onboarding.hpp"
 #include "components/overlay.hpp"
@@ -42,6 +43,10 @@ class DirectSpeakersComponent : public Component,
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
         propertiesFile(getPropertiesFile(propertiesFileLock.get())) {
+
+    tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
+    tooltipWindow.setOpaque(false);
+
     header->setText(" Direct Speakers");
 
     onBoardingButton->setButtonText("?");
@@ -68,6 +73,7 @@ class DirectSpeakersComponent : public Component,
     addChildComponent(onBoardingOverlay.get());
 
     //addAndMakeVisible(metadataValueBox.get());
+    mainValueBox->showRoutingTooltip(p->getNumDawChannels() < 128);
     addAndMakeVisible(mainValueBox.get());
     addAndMakeVisible(channelMetersBox.get());
 
@@ -110,8 +116,10 @@ class DirectSpeakersComponent : public Component,
         headingArea.removeFromRight(39).removeFromBottom(39));
     header->setBounds(headingArea);
 
-    auto leftColumn = area.withTrimmedRight(area.getWidth() / 2);
-    auto rightColumn = area.withTrimmedLeft(area.getWidth() / 2);
+    auto leftColumnWidth = area.getWidth() / 2;
+    if (leftColumnWidth < 385) leftColumnWidth = 385;
+    auto leftColumn = area.removeFromLeft(leftColumnWidth);
+    auto rightColumn = area;
 
     // left column
     mainValueBox->setBounds(leftColumn.removeFromTop(223).reduced(5, 5));
@@ -161,6 +169,10 @@ class DirectSpeakersComponent : public Component,
 
  private:
   DirectSpeakersAudioProcessor* p_;
+
+  TooltipWindow tooltipWindow{this};
+  TooltipLookAndFeel tooltipLookAndFeel;
+
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DirectSpeakersComponent)
 };
 

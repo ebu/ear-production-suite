@@ -20,6 +20,7 @@ class ValueBoxMain : public Component {
         speakerSetupLabel_(std::make_unique<Label>()),
         speakerSetupsComboBox_(std::make_shared<EarComboBox>()),
         routingLabel_(std::make_unique<Label>()),
+        routingInfoIcon_(std::make_unique<ImageComponent>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     name_->setLabelText("Object Name");
     name_->setText("Object_1");
@@ -37,6 +38,16 @@ class ValueBoxMain : public Component {
     routingLabel_->setColour(Label::textColourId, EarColours::Label);
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
+
+    routingInfoIcon_->setImage(ImageFileFormat::loadFrom(
+        binary_data::infologo_png, binary_data::infologo_pngSize));
+    routingInfoIcon_->setImagePlacement(RectanglePlacement::centred +
+                                        RectanglePlacement::doNotResize);
+    routingInfoIcon_->setAlpha(0.8);
+    routingInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
+    routingInfoIcon_->setTooltip(
+        "128 channel support requires REAPER v7 or later.");
+    addChildComponent(routingInfoIcon_.get());
 
     routingComboBox_->setDefaultText("Select Scene channel range");
     addAndMakeVisible(routingComboBox_.get());
@@ -92,11 +103,23 @@ class ValueBoxMain : public Component {
 
     auto routingArea = area.removeFromTop(rowHeight_);
     auto routingLabelArea = routingArea.withWidth(labelWidth_);
+    routingLabel_->setBounds(routingLabelArea);
+    if (routingInfoIcon_->isVisible()) {
+      auto routingInfoArea = routingArea.removeFromRight(13).withTrimmedTop(
+          1);  // Trimming 1 to get an odd height. Icon is odd height too, so
+               // ensures an integer number of pixels padding top and bottom to
+               // avoid blurring through anti-aliasing.
+      routingInfoIcon_->setBounds(routingInfoArea);
+      routingArea.removeFromRight(marginSmall_);
+    }
     auto routingComboBoxArea =
         routingArea.withTrimmedLeft(labelWidth_ + marginBig_)
             .reduced(0, marginSmall_);
-    routingLabel_->setBounds(routingLabelArea);
     routingComboBox_->setBounds(routingComboBoxArea);
+  }
+
+  void showRoutingTooltip(bool visible) {
+    routingInfoIcon_->setVisible(visible);
   }
 
   std::shared_ptr<EarNameTextEditor> getNameTextEditor() { return name_; }
@@ -119,6 +142,7 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> speakerSetupsComboBox_;
   std::unique_ptr<Label> routingLabel_;
   std::shared_ptr<EarComboBox> routingComboBox_;
+  std::shared_ptr<ImageComponent> routingInfoIcon_;
   std::shared_ptr<ToggleButton> useTrackNameCheckbox_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ValueBoxMain)
