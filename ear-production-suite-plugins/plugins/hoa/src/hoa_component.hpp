@@ -2,6 +2,7 @@
 
 #include "JuceHeader.h"
 
+#include "components/look_and_feel/tooltips.hpp"
 #include "components/onboarding.hpp"
 #include "components/overlay.hpp"
 #include "helper/properties_file.hpp"
@@ -31,6 +32,9 @@ class HoaComponent : public Component,
         propertiesFileLock(
             std::make_unique<InterProcessLock>("EPS_preferences")),
         propertiesFile(getPropertiesFile(propertiesFileLock.get())) {
+
+    tooltipWindow.setLookAndFeel(&tooltipLookAndFeel);
+    tooltipWindow.setOpaque(false);
 
     header->setName("EarHeader (HoaComponent::header)");
     onBoardingButton->setName("EarButton (HoaComponent::onBoardingButton)");
@@ -65,6 +69,7 @@ class HoaComponent : public Component,
     addAndMakeVisible(onBoardingButton.get());
     addChildComponent(onBoardingOverlay.get());
 
+    mainValueBox->showRoutingTooltip(p->getNumDawChannels() < 128);
     addAndMakeVisible(mainValueBox.get());
     addAndMakeVisible(orderDisplayValueBox.get());
 
@@ -128,6 +133,10 @@ class HoaComponent : public Component,
 
  private:
   HoaAudioProcessor* p_;
+
+  TooltipWindow tooltipWindow{this};
+  TooltipLookAndFeel tooltipLookAndFeel;
+
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HoaComponent)
 };
 

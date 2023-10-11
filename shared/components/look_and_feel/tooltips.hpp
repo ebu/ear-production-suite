@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "colours.hpp"
 
 namespace ear {
 namespace plugin {
