@@ -19,6 +19,7 @@ class ValueBoxMain : public Component {
         name_(std::make_shared<EarNameTextEditor>()),
         useTrackNameCheckbox_(std::make_shared<ToggleButton>()),
         routingLabel_(std::make_unique<Label>()),
+        routingInfoIcon_(std::make_unique<ImageComponent>()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     setColour(backgroundColourId, EarColours::Area04dp);
 
@@ -31,6 +32,15 @@ class ValueBoxMain : public Component {
     useTrackNameCheckbox_->setButtonText("Use track name");
     useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
     addAndMakeVisible(useTrackNameCheckbox_.get());
+
+    routingInfoIcon_->setImage(ImageFileFormat::loadFrom(
+        binary_data::infologo_png, binary_data::infologo_pngSize));
+    routingInfoIcon_->setImagePlacement(RectanglePlacement::centred +
+                                      RectanglePlacement::doNotResize);
+    routingInfoIcon_->setAlpha(0.8);
+    routingInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
+    routingInfoIcon_->setTooltip("128 channel support requires REAPER v7 or later.");
+    addChildComponent(routingInfoIcon_.get());
 
     routingLabel_->setFont(EarFontsSingleton::instance().Label);
     routingLabel_->setText("Routing",
@@ -81,10 +91,15 @@ class ValueBoxMain : public Component {
 
     auto routingArea = area.removeFromTop(rowHeight_);
     auto routingLabelArea = routingArea.withWidth(labelWidth_);
+    routingLabel_->setBounds(routingLabelArea);
+    if (routingInfoIcon_->isVisible()) {
+      auto routingInfoArea = routingArea.removeFromRight(13).withTrimmedTop(1); // Trimming 1 to get an odd height. Icon is odd height too, so ensures an integer number of pixels padding top and bottom to avoid blurring through anti-aliasing. 
+      routingInfoIcon_->setBounds(routingInfoArea);
+      routingArea.removeFromRight(marginSmall_);
+    }
     auto routingComboBoxArea =
         routingArea.withTrimmedLeft(labelWidth_ + marginBig_)
             .reduced(0, marginSmall_);
-    routingLabel_->setBounds(routingLabelArea);
     routingComboBox_->setBounds(routingComboBoxArea);
   }
 
@@ -93,7 +108,8 @@ class ValueBoxMain : public Component {
   std::shared_ptr<EarComboBox> getColourComboBox() { return colourComboBox_; }
   std::shared_ptr<EarComboBox> getRoutingComboBox() { return routingComboBox_; }
 
-  void setValidRoutingMax(int maxChVal) { 
+  void setValidRoutingMax(int maxChVal) {
+    routingInfoIcon_->setVisible(maxChVal < 128);
     if (auto popup = routingComboBox_->getPopup()) {
       for (int i = 1; i <= MAX_DAW_CHANNELS; ++i) {
         auto entry = popup->getEntryById(i);
@@ -115,6 +131,7 @@ class ValueBoxMain : public Component {
   std::unique_ptr<Label> routingLabel_;
   std::shared_ptr<EarComboBox> routingComboBox_;
   std::shared_ptr<ToggleButton> useTrackNameCheckbox_;
+  std::shared_ptr<ImageComponent> routingInfoIcon_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ValueBoxMain)
 };
