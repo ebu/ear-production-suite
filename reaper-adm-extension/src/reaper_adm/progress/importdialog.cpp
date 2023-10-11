@@ -180,11 +180,6 @@ INT_PTR ReaperDialogBox::process(HWND window, UINT msg, WPARAM wParam, LPARAM lP
             if(currentState == ImportStatus::EXTRACTING_AUDIO) {
                 reportAudioProgress();
             }
-            if(currentState == ImportStatus::COMPLETE) {
-                if (!progress->hasWarnings()) {
-                    finish();
-                }
-            }
         }
         return 0;
     }
@@ -212,6 +207,15 @@ void ReaperDialogBox::onStateChanged()
           if(errorText) {
               setStatusText(*errorText);
           }
+      }
+  }
+  if (currentState == ImportStatus::COMPLETE) {
+      auto progress = parent.lock();
+      if (!progress || !progress->hasWarnings()) {
+          finish(); // Closes window automatically
+      }
+      else {
+          // TODO: List warnings
       }
   }
 }
