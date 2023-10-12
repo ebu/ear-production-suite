@@ -451,7 +451,9 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
             }
 
         } else {
-            // TODO - warn user - can't support this directspeaker pack format
+            if (importBroadcast) {
+                importBroadcast->warning("Unsupported DirectSpeakers audioPackFormat.");
+            }
         }
     }
 }
@@ -512,7 +514,9 @@ void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAP
             }
 
         } else {
-            // TODO - warn user - can't support this hoa pack format
+            if (importBroadcast) {
+                importBroadcast->warning("Unsupported HOA audioPackFormat.");
+            }
         }
     }
 }
