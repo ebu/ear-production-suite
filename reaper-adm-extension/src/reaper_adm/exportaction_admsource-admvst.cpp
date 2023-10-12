@@ -23,6 +23,7 @@ std::vector<adm::TypeDescriptor> getAdmTypeDefinitionsExcluding(adm::TypeDescrip
 AdmVstExportSources::AdmVstExportSources(ReaperAPI const& api) : IExportSources(api)
 {
 	admDocument = adm::Document::create();
+	admDocument->set(adm::Version("ITU-R_BS.2076-2"));
 	admProgramme = adm::AudioProgramme::create(adm::AudioProgrammeName("Programme"));
 	admContent = adm::AudioContent::create(adm::AudioContentName("Content"));
 

@@ -272,6 +272,7 @@ ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap>
   programmes_ = std::move(stores.first);
   items_ = std::move(stores.second);
   doc = adm::Document::create();
+  doc->set(adm::Version("ITU-R_BS.2076-2"));
   addCommonDefinitionsTo(doc);
   pluginMap.clear();
   for (auto& programme : programmes_.programme()) {
