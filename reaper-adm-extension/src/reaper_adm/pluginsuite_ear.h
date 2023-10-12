@@ -66,7 +66,7 @@ public:
 	EARPluginSuite();
 	~EARPluginSuite();
 
-	void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI& api) override;
+	void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, std::shared_ptr<ImportListener> broadcast, const ReaperAPI& api) override;
 	void onCreateProject(const ProjectNode& rootNode, const ReaperAPI& api) override;
 	void onCreateObjectTrack(TrackElement&, const ReaperAPI& api) override;
 	void onCreateDirectTrack(TrackElement&, const ReaperAPI& api) override;
@@ -86,6 +86,8 @@ public:
 	static const char* RENDERER_PLUGIN_NAME;
 
 private:
+	std::shared_ptr<ImportListener> importBroadcast;
+
 	std::vector<std::unique_ptr<PluginParameter>> const& automatedObjectPluginParameters();
 	std::shared_ptr<PluginParameter> objectTrackMappingParameter;
 	std::shared_ptr<PluginParameter> directSpeakersTrackMappingParameter;

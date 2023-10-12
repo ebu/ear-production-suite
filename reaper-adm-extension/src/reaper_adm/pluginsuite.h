@@ -17,6 +17,7 @@ namespace admplug {
     class TrackElement;
     class TakeElement;
     class ReaperAPI;
+    class ImportListener;
 
     class PluginSuite {
     public:
@@ -27,7 +28,7 @@ namespace admplug {
             POST_SPATIALISATION
         };
 
-        virtual void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI &api) {}
+        virtual void onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, std::shared_ptr<ImportListener> broadcast, const ReaperAPI &api) {}
         virtual void onCreateProject(const ProjectNode &rootNode, const ReaperAPI &api) {}//TODO = 0;
         virtual void onCreateObjectTrack(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
         virtual void onCreateDirectTrack(TrackElement&, ReaperAPI const& api) {}//TODO = 0;
