@@ -257,7 +257,7 @@ void ADMImporter::buildProject() {
                               asInt(ReaperAPI::UndoFlag::POOLED_ENVELOPES);
 
     try {
-        context.pluginSuite->onProjectBuildBegin(metadata, api);
+        context.pluginSuite->onProjectBuildBegin(metadata, context.broadcast, api);
         sourceCreator->linkSources(api);
         project->create(*context.pluginSuite, api);
         if (originalMediaItem != nullptr) {

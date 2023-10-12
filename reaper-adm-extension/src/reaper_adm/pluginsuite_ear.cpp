@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "reaperapi.h"
+#include "progress/importlistener.h";
 #include "plugin.h"
 #include "pluginregistry.h"
 #include "exportaction_admsource-earvst.h" // TODO - the fact we have to include an export header here probably means some stuff is defined in the wrong place
@@ -254,8 +255,10 @@ EARPluginSuite::EARPluginSuite() :
 
 EARPluginSuite::~EARPluginSuite() = default;
 
-void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, const ReaperAPI&)
+void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> metadata, std::shared_ptr<ImportListener> broadcast, const ReaperAPI&)
 {
+    importBroadcast = broadcast;
+
 	// Store ADM document ready for transmitting to EAR Scene
 	assert(metadata);
 	std::stringstream xmlStream;
@@ -270,6 +273,7 @@ void admplug::EARPluginSuite::onProjectBuildBegin(std::shared_ptr<IADMMetaData> 
 
 void admplug::EARPluginSuite::onProjectBuildComplete(const ReaperAPI & api)
 {
+    importBroadcast.reset();
 	assert(originalAdmDocument.length() > 0);
 	if (!sceneMasterAlreadyExisted) {
 		auto sceneMaster = EarSceneMasterVst(sceneMasterTrack->get(), api);
@@ -344,7 +348,9 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
         assert(trackMappingAssigner);
         trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
         if(!trackInfo.routingStartChannel.has_value()) {
-            //TODO: Need to warn user no channels available
+            if (importBroadcast) {
+                importBroadcast->warning("Unable to route Object to Scene - insufficient channels.");
+            }
         } else {
             assert(sceneMasterTrack);
             trackInfo.track->routeTo(*sceneMasterTrack, channelCount, 0, *trackInfo.routingStartChannel);
@@ -401,7 +407,9 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         assert(trackMappingAssigner);
         trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
         if(!trackInfo.routingStartChannel.has_value()) {
-            //TODO: Need to warn user no channels available
+            if (importBroadcast) {
+                importBroadcast->warning("Unable to route DirectSpeakers to Scene - insufficient channels.");
+            }
         }
         setInMap(takesOnTracks, take, trackInfo);
         trackElement.setTrack(trackInfo.track);
@@ -469,7 +477,9 @@ void EARPluginSuite::onCreateHoaTrack(TrackElement &trackElement, const ReaperAP
         assert(trackMappingAssigner);
         trackInfo.routingStartChannel = trackMappingAssigner->getNextAvailableValue(channelCount);
         if(!trackInfo.routingStartChannel.has_value()) {
-            //TODO: Need to warn user no channels available
+            if (importBroadcast) {
+                importBroadcast->warning("Unable to route HOA to Scene - insufficient channels.");
+            }
         }
         setInMap(takesOnTracks, take, trackInfo);
         trackElement.setTrack(trackInfo.track);
