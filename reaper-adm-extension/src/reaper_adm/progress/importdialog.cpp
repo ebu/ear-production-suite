@@ -215,7 +215,16 @@ void ReaperDialogBox::onStateChanged()
           finish(); // Closes window automatically
       }
       else {
-          // TODO: List warnings
+          // List warnings
+          auto warnings = progress->getWarnings();
+          std::string sts;
+          for (const auto& warning : warnings) {
+              if (!sts.empty()) sts += "\n";
+              sts += warning.first + " (" + std::to_string(warning.second) + ")";
+          }
+          // In this case it makes sense to list in the header text - more space and less prominent.
+          setStatusText("Finished with warnings.");
+          setHeaderText(sts);
       }
   }
 }
