@@ -60,6 +60,9 @@ class ChannelMeterLayout : public Component {
     if(speakerLevels_.size() > 18) meterRows = 4;
 
     auto metersBoxHeight = area.getHeight() / meterRows;
+    // 6 meters require 337 px - centre them with left padding
+    int leftPad = (area.getWidth() - 337) / 2;
+    if (leftPad > 0) area.removeFromLeft(leftPad);
 
     auto metersBoxArea = area.removeFromTop(metersBoxHeight);
     channelMeterBox1to6_->setBounds(metersBoxArea.reduced(0, 5));
