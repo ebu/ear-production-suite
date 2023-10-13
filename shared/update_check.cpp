@@ -4,7 +4,6 @@
 #include <vector>
 #include <helper/resource_paths_juce-file.hpp>
 #include <helper/native_message_box.hpp>
-#include <juce_modules.h>
 
 UpdateChecker::UpdateChecker()
 {

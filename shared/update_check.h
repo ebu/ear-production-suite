@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-#include <juce_modules.h>
+#include <AppConfig.h>
+#include <juce_core/juce_core.h>
 #include <helper/version.hpp>
 
 class UpdateChecker {
