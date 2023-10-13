@@ -27,8 +27,6 @@ private:
     const String text2Str{ "You can change your preference at any time from the REAPER Extensions menu." };
     const int marginBoxText{ 10 };
 
-    bool enabled{ false };
-
     UpdateChecker updateChecker;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoUpdateCheckButton)

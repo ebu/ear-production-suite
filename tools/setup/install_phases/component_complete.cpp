@@ -87,6 +87,7 @@ void ComponentComplete::configureForInstallPhase()
         // Only instantiate this on successful install because UpdateCheck will want to write a settings file.
         autoUpdateCheck = std::make_unique<AutoUpdateCheckButton>();
         addAndMakeVisible(autoUpdateCheck.get());
+        resized();
     }
     titleLabel.setText("Installation Complete",
         juce::NotificationType::dontSendNotification);
@@ -122,7 +123,8 @@ AutoUpdateCheckButton::~AutoUpdateCheckButton()
 void AutoUpdateCheckButton::paint(Graphics& g)
 {
     auto area = getLocalBounds();
-    getLookAndFeel().drawTickBox(g, text1, 1, 1, area.getHeight() - 2, area.getHeight() - 2, enabled, true, true, false);
+    auto checked = updateChecker.getAutoCheckEnabled();
+    getLookAndFeel().drawTickBox(g, text1, 1, 1, area.getHeight() - 2, area.getHeight() - 2, checked, true, true, false);
 }
 
 void AutoUpdateCheckButton::resized()
@@ -143,11 +145,11 @@ int AutoUpdateCheckButton::getMinReqWidth(int forComponentHeight)
 
 void AutoUpdateCheckButton::setState(bool checked)
 {
-    enabled = checked;
+    updateChecker.setAutoCheckEnabled(checked);
     repaint();
 }
 
 void AutoUpdateCheckButton::mouseDown(const MouseEvent& event)
 {
-    setState(!enabled);
+    setState(!updateChecker.getAutoCheckEnabled());
 }
