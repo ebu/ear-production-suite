@@ -87,7 +87,6 @@ set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/update_check.h
 	
 	AppConfig.h
-	juce_modules.h
 	
 	actionmanager.h
 	admchannel.h
