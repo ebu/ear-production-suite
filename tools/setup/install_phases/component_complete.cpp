@@ -84,6 +84,7 @@ void ComponentComplete::configureForUninstallUnnecessaryPhase()
 void ComponentComplete::configureForInstallPhase()
 {
     if (!autoUpdateCheck) {
+        // Only instantiate this on successful install because UpdateCheck will want to write a settings file.
         autoUpdateCheck = std::make_unique<AutoUpdateCheckButton>();
         addAndMakeVisible(autoUpdateCheck.get());
     }

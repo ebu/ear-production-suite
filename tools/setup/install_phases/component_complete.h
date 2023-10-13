@@ -2,6 +2,7 @@
 
 #include "JuceHeader.h"
 #include <memory>
+#include <update_check.h>
 
 class AutoUpdateCheckButton : public Component
 {
@@ -27,6 +28,8 @@ private:
     const int marginBoxText{ 10 };
 
     bool enabled{ false };
+
+    UpdateChecker updateChecker;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoUpdateCheckButton)
 };
