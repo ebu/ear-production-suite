@@ -12,7 +12,7 @@
 #include "pluginsuite.h"
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
-#include "update_check.h"
+#include <update_check.h>
 #include <version/eps_version.h>
 #include <helper/native_message_box.hpp>
 #include <helper/resource_paths.hpp>

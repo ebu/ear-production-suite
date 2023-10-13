@@ -24,6 +24,7 @@ set(HEADERS_SETUP
 	install_phases/component_complete.h
 	helpers/manifests.h
 	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
+	${EPS_SHARED_DIR}/update_check.cpp
 )
 
 set(SOURCES_SETUP
@@ -41,6 +42,7 @@ set(SOURCES_SETUP
 	install_phases/component_complete.cpp
 	helpers/manifests.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
+	${EPS_SHARED_DIR}/update_check.h
 )
 
 source_group("Header Files" FILES ${HEADERS_SETUP})
