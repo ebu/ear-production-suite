@@ -8,6 +8,7 @@ find_package(JUCE REQUIRED QUIET)
 
 set(EXTENSION_SOURCES
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	${EPS_SHARED_DIR}/update_check.cpp
 	
 	actionmanager.cpp
 	admchannel.cpp
@@ -68,7 +69,6 @@ set(EXTENSION_SOURCES
 	reaperguid.cpp
 	reaperhost.cpp
 	track.cpp
-	update_check.cpp
 	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
@@ -84,6 +84,7 @@ set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/resource_paths.hpp
 	${EPS_SHARED_DIR}/helper/native_message_box.hpp
 	${EPS_SHARED_DIR}/daw_channel_count.h
+	${EPS_SHARED_DIR}/update_check.h
 	
 	AppConfig.h
 	juce_modules.h
@@ -153,7 +154,6 @@ set(EXTENSION_HEADERS
 	reaper_plugin_functions.h
 	resource.h
 	track.h
-	update_check.h
 	win_mem_debug.h
 	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
@@ -197,6 +197,7 @@ find_package(WDL REQUIRED QUIET)
 
 target_include_directories(reaper_adm_object
     PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}
     $<TARGET_PROPERTY:WDL::swell,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
