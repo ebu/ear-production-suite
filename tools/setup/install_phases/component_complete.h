@@ -23,8 +23,6 @@ private:
     Label text1;
     Label text2;
 
-    const String text1Str{ "Automatically check for updates on start-up (requires internet connection.)" };
-    const String text2Str{ "You can change your preference at any time from the REAPER Extensions menu." };
     const int marginBoxText{ 10 };
 
     UpdateChecker updateChecker;

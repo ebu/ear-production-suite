@@ -76,6 +76,16 @@ void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
     }
 }
 
+bool UpdateChecker::canReadSettingsFile()
+{
+    return loadSettings();
+}
+
+bool UpdateChecker::canWriteSettingsFile()
+{
+    return saveSettings();
+}
+
 bool UpdateChecker::getRemoteVersion(bool reportErrors, int timeoutMs, Version& version, std::string& versionStr)
 {
     std::string body;

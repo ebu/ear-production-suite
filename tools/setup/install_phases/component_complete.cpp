@@ -97,16 +97,18 @@ void ComponentComplete::configureForInstallPhase()
 
 AutoUpdateCheckButton::AutoUpdateCheckButton()
 {
+    bool success = updateChecker.canWriteSettingsFile();
+
     text1.setFont(EarFontsSingleton::instance().Label);
     text1.setColour(Label::textColourId, EarColours::Label.withAlpha(Emphasis::high));
     text1.setJustificationType(Justification::centredLeft);
-    text1.setText(text1Str, dontSendNotification);
+    text1.setText(success ? "Automatically check for updates on start-up (requires internet connection.)" : "Automatic update checking disabled - cannot write preferences to settings file.", dontSendNotification);
     addAndMakeVisible(text1);
 
     text2.setFont(EarFontsSingleton::instance().Label);
     text2.setColour(Label::textColourId, EarColours::Label.withAlpha(Emphasis::medium));
     text2.setJustificationType(Justification::centredLeft);
-    text2.setText(text2Str, dontSendNotification);
+    text2.setText(success ? "You can change your preference at any time from the REAPER Extensions menu." : "You can still perform a manual update check from the REAPER Extensions menu.", dontSendNotification);
     addAndMakeVisible(text2);
 
     this->setMouseCursor(MouseCursor::PointingHandCursor);
@@ -137,8 +139,8 @@ void AutoUpdateCheckButton::resized()
 
 int AutoUpdateCheckButton::getMinReqWidth(int forComponentHeight)
 {
-    auto text1Width = EarFontsSingleton::instance().Label.getStringWidthFloat(text1Str);
-    auto text2Width = EarFontsSingleton::instance().Label.getStringWidthFloat(text2Str);
+    auto text1Width = EarFontsSingleton::instance().Label.getStringWidthFloat(text1.getText());
+    auto text2Width = EarFontsSingleton::instance().Label.getStringWidthFloat(text2.getText());
     auto textWidth = std::max(text1Width, text2Width) * 1.05f; // 5% excess
     return forComponentHeight + marginBoxText + textWidth;
 }
