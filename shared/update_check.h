@@ -14,6 +14,9 @@ public:
 
     void doUpdateCheck(bool manualCheck=false, int timeoutMs=3000);
 
+    bool canReadSettingsFile();
+    bool canWriteSettingsFile();
+
 private:
     const std::string versionJsonUrl{ "https://ear-production-suite.ebu.io/version_info.json" };
     const std::string messageBoxTitles{ "EAR Production Suite Update" };
