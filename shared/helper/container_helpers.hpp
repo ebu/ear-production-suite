@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <algorithm>
 
 /*
     Series of very basic common functions for working with containers
