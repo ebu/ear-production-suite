@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else
-#include <WDL/swell/swell-functions.h>
+#include <WDL/swell/swell.h>
 #endif
 
 #include <version/eps_version.h>
