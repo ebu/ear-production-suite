@@ -3,6 +3,7 @@
 #include <AppConfig.h>
 #include <juce_core/juce_core.h>
 #include <helper/version.hpp>
+#include <update_check_settings_file.h>
 
 class UpdateChecker {
 public:
@@ -13,9 +14,6 @@ public:
     bool setAutoCheckEnabled(bool enabled, bool displayConfirmation=false);
 
     void doUpdateCheck(bool manualCheck=false, int timeoutMs=3000);
-
-    bool canReadSettingsFile();
-    bool canWriteSettingsFile();
 
 private:
     const std::string versionJsonUrl{ "https://ear-production-suite.ebu.io/version_info.json" };
@@ -29,14 +27,7 @@ private:
     void displayUpdateUnavailable();
     void displayMessageBox(const std::string& title, const std::string& text, long winIcon);
 
-    juce::File settingsFile;
-    bool loadSettings();
-    bool saveSettings();
-    bool settingsFileExists();
-
-    bool settingAutoCheckEnabled{ false };
-    Version settingLastReportedVersion;
-
+    UpdateCheckerSettingsFile settingsFile;
     Version currentVersion;
 
 };

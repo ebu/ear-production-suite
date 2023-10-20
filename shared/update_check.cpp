@@ -13,17 +13,6 @@ UpdateChecker::UpdateChecker()
             eps::versionMinor(),
             eps::versionRevision());
     }
-
-    settingsFile = ResourcePaths::getSettingsDirectory(true).getChildFile("UpdateCheck.settings");
-    if (!settingsFileExists()) {
-        // No settings file - perhaps first run?
-        if (saveSettings() && settingsFileExists()) {
-            // Settings file is writable so probably was just first run.
-            // Set autocheck on initially.
-            setAutoCheckEnabled(true);
-        }
-    }
-    loadSettings();
 }
 
 UpdateChecker::~UpdateChecker()
@@ -32,13 +21,12 @@ UpdateChecker::~UpdateChecker()
 
 bool UpdateChecker::getAutoCheckEnabled()
 {
-    return settingAutoCheckEnabled;
+    return settingsFile.getAutoCheckEnabled();
 }
 
 bool UpdateChecker::setAutoCheckEnabled(bool enabled, bool displayConfirmation)
 {
-    settingAutoCheckEnabled = enabled;
-    auto success = saveSettings();
+    auto success = settingsFile.setAutoCheckEnabled(enabled);
     if (displayConfirmation) {
         if (success) {
             if (enabled) {
@@ -63,10 +51,9 @@ void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
 
     if (success) {
         if (remoteVersion > currentVersion) {
-            if (manualCheck || remoteVersion != settingLastReportedVersion) {
+            if (manualCheck || remoteVersion != settingsFile.getLastReportedVersion()) {
                 // Haven't mentioned this version before or told to always show result
-                settingLastReportedVersion = remoteVersion;
-                saveSettings();
+                settingsFile.setLastReportedVersion(remoteVersion);
                 displayUpdateAvailable(remoteVersionStr, manualCheck);
             }
         }
@@ -74,16 +61,6 @@ void UpdateChecker::doUpdateCheck(bool manualCheck, int timeoutMs)
             displayUpdateUnavailable();
         }
     }
-}
-
-bool UpdateChecker::canReadSettingsFile()
-{
-    return loadSettings();
-}
-
-bool UpdateChecker::canWriteSettingsFile()
-{
-    return saveSettings();
 }
 
 bool UpdateChecker::getRemoteVersion(bool reportErrors, int timeoutMs, Version& version, std::string& versionStr)
@@ -179,53 +156,4 @@ void UpdateChecker::displayMessageBox(const std::string& title, const std::strin
 {
     // Windows version of Reaper locks up if you try show a message box during splash
     NativeMessageBox::splashCompatibleMessage(title.c_str(), text.c_str(), nullptr, winIcon);
-}
-
-bool UpdateChecker::loadSettings()
-{
-    if (!settingsFileExists()) {
-        return false;
-    }
-
-    juce::XmlDocument xml(settingsFile);
-    auto updateCheckElement = xml.getDocumentElementIfTagMatches("UpdateCheck");
-    if (!updateCheckElement) {
-        return false;
-    }
-
-    auto lastReportedElement = updateCheckElement->getChildByName("LastReportedVersion");
-    if (lastReportedElement) {
-        settingLastReportedVersion.major = lastReportedElement->getIntAttribute("VersionMajor", 0);
-        settingLastReportedVersion.minor = lastReportedElement->getIntAttribute("VersionMinor", 0);
-        settingLastReportedVersion.revision = lastReportedElement->getIntAttribute("VersionRevision", 0);
-    }
-
-    auto autoCheckElement = updateCheckElement->getChildByName("AutoCheck");
-    if (autoCheckElement) {
-        settingAutoCheckEnabled = autoCheckElement->getBoolAttribute("OnStartUp", false);
-    }
-
-    return true;
-}
-
-bool UpdateChecker::saveSettings()
-{
-    auto updateCheckElement = juce::XmlElement("UpdateCheck");
-
-    auto lastReportedElement = new juce::XmlElement("LastReportedVersion");
-    lastReportedElement->setAttribute("VersionMajor", settingLastReportedVersion.major);
-    lastReportedElement->setAttribute("VersionMinor", settingLastReportedVersion.minor);
-    lastReportedElement->setAttribute("VersionRevision", settingLastReportedVersion.revision);
-    updateCheckElement.addChildElement(lastReportedElement);
-
-    auto autoCheckElement = new juce::XmlElement("AutoCheck");
-    autoCheckElement->setAttribute("OnStartUp", settingAutoCheckEnabled);
-    updateCheckElement.addChildElement(autoCheckElement);
-
-    return updateCheckElement.writeTo(settingsFile);
-}
-
-bool UpdateChecker::settingsFileExists()
-{
-    return settingsFile.existsAsFile();
 }

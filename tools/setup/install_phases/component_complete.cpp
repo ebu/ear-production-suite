@@ -97,7 +97,7 @@ void ComponentComplete::configureForInstallPhase()
 
 AutoUpdateCheckButton::AutoUpdateCheckButton()
 {
-    bool success = updateChecker.canWriteSettingsFile();
+    bool success = updateCheckerSettingsFile.canWriteSettingsFile();
 
     text1.setFont(EarFontsSingleton::instance().Label);
     text1.setColour(Label::textColourId, EarColours::Label.withAlpha(Emphasis::high));
@@ -125,7 +125,7 @@ AutoUpdateCheckButton::~AutoUpdateCheckButton()
 void AutoUpdateCheckButton::paint(Graphics& g)
 {
     auto area = getLocalBounds();
-    auto checked = updateChecker.getAutoCheckEnabled();
+    auto checked = updateCheckerSettingsFile.getAutoCheckEnabled();
     getLookAndFeel().drawTickBox(g, text1, 1, 1, area.getHeight() - 2, area.getHeight() - 2, checked, true, true, false);
 }
 
@@ -147,11 +147,11 @@ int AutoUpdateCheckButton::getMinReqWidth(int forComponentHeight)
 
 void AutoUpdateCheckButton::setState(bool checked)
 {
-    updateChecker.setAutoCheckEnabled(checked);
+    updateCheckerSettingsFile.setAutoCheckEnabled(checked);
     repaint();
 }
 
 void AutoUpdateCheckButton::mouseDown(const MouseEvent& event)
 {
-    setState(!updateChecker.getAutoCheckEnabled());
+    setState(!updateCheckerSettingsFile.getAutoCheckEnabled());
 }

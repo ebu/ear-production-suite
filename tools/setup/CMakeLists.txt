@@ -24,7 +24,7 @@ set(HEADERS_SETUP
 	install_phases/component_complete.h
 	helpers/manifests.h
 	${EPS_SHARED_DIR}/helper/resource_paths_juce-file.hpp
-	${EPS_SHARED_DIR}/update_check.cpp
+	${EPS_SHARED_DIR}/update_check_settings_file.h
 )
 
 set(SOURCES_SETUP
@@ -42,7 +42,7 @@ set(SOURCES_SETUP
 	install_phases/component_complete.cpp
 	helpers/manifests.cpp
 	${EPS_SHARED_DIR}/binary_data.cpp
-	${EPS_SHARED_DIR}/update_check.h
+	${EPS_SHARED_DIR}/update_check_settings_file.cpp
 )
 
 source_group("Header Files" FILES ${HEADERS_SETUP})
@@ -83,6 +83,6 @@ add_custom_command(TARGET setup PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/helpers/gen_license_header.cmake
 	)
 
-set_target_properties(setup PROPERTIES FOLDER tools)		
+set_target_properties(setup PROPERTIES FOLDER tools)
 target_link_libraries(setup PRIVATE Juce::core ear-version)
 target_include_directories(setup PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${EPS_SHARED_DIR})
