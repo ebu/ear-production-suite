@@ -9,6 +9,7 @@ find_package(JUCE REQUIRED QUIET)
 set(EXTENSION_SOURCES
 	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
 	${EPS_SHARED_DIR}/update_check.cpp
+	${EPS_SHARED_DIR}/update_check_settings_file.cpp
 	
 	actionmanager.cpp
 	admchannel.cpp
@@ -85,6 +86,7 @@ set(EXTENSION_HEADERS
 	${EPS_SHARED_DIR}/helper/native_message_box.hpp
 	${EPS_SHARED_DIR}/daw_channel_count.h
 	${EPS_SHARED_DIR}/update_check.h
+	${EPS_SHARED_DIR}/update_check_settings_file.h
 	
 	AppConfig.h
 	
