@@ -165,13 +165,8 @@ void DirectSpeakersAudioProcessor::setStateInformation(XmlElement * xmlState, bo
       }
       else if(xmlState->hasAttribute("speaker_setup_index")) {
         int legacySpeakerSetupIndex = xmlState->getIntAttribute("speaker_setup_index", -1);
-        int newSpeakerSetupIndex = getIndexFromLegacySpeakerSetupIndex(legacySpeakerSetupIndex);
-        if(newSpeakerSetupIndex >= 0) {
-          auto speakerSetup = speakerSetupByIndex(newSpeakerSetupIndex);
-          *packFormatIdValue_ = speakerSetup.packFormatIdValue;
-        } else {
-          *packFormatIdValue_ = 0;
-        }
+        *packFormatIdValue_ = getPackFormatIdValueFromLegacySpeakerSetupsIndex(
+            legacySpeakerSetupIndex); // return 0 (unset) if not a valid index
       }
 
       if(useDefaultsIfUnspecified || xmlState->hasAttribute("use_track_name")) {
