@@ -14,14 +14,19 @@ public:
 	static std::shared_ptr<AdmCommonDefinitionHelper> getSingleton();
 
 	struct ChannelFormatData {
-		int id;
+		int id{ 0 };
 		std::string name;
 		std::shared_ptr<adm::AudioChannelFormat> channelFormat;
 		std::shared_ptr<adm::AudioPackFormat> immediatePackFormat;
+		bool isLfe{ false };
+		std::vector<std::string> speakerLabels;
+		float azimuth{ 0.f };
+		float elevation{ 0.f };
+		float distance{ 1.f	};
 	};
 
 	struct PackFormatData {
-		int id;
+		int id{ 0 };
 		std::string name;
 		std::string niceName;
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
@@ -29,7 +34,7 @@ public:
 	};
 
 	struct TypeDefinitionData {
-		int id;
+		int id{ 0 };
 		adm::TypeDescriptor typeDescriptor;
 		std::string name;
 		std::vector<std::shared_ptr<PackFormatData>> relatedPackFormats;
