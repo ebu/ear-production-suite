@@ -102,6 +102,37 @@ void AdmCommonDefinitionHelper::recursePackFormatsForChannelFormats(std::shared_
 		cfData->name = cf->get<adm::AudioChannelFormatName>().get();
 		cfData->channelFormat = cf;
 		cfData->immediatePackFormat = fromPackFormat;
+		
+		if (cf->has<adm::Frequency>()) {
+			auto freq = cf->get<adm::Frequency>();
+			cfData->isLfe = adm::isLowPass(freq);
+		}
+
+		auto td = fromPackFormat->get<adm::TypeDescriptor>();
+		if (td == adm::TypeDefinition::DIRECT_SPEAKERS) {
+			auto bfs = cf->getElements<adm::AudioBlockFormatDirectSpeakers>();
+			if (bfs.size() > 0) {
+				auto const& bf = bfs[0];
+
+				if (bf.has<adm::SphericalSpeakerPosition>()) {
+					auto const& pos = bf.get<adm::SphericalSpeakerPosition>();
+					if (pos.has<adm::Azimuth>()) {
+						cfData->azimuth = pos.get<adm::Azimuth>().get();
+					}
+					if (pos.has<adm::Elevation>()) {
+						cfData->elevation = pos.get<adm::Elevation>().get();
+					}
+					if (pos.has<adm::Distance>()) {
+						cfData->distance = pos.get<adm::Distance>().get();
+					}
+				}
+
+				auto speakerLabels = bf.get<adm::SpeakerLabels>();
+				for (auto const& speakerLabel : speakerLabels) {
+					cfData->speakerLabels.push_back(speakerLabel.get());
+				}
+			}
+		}
 
 		forPackFormatData->relatedChannelFormats.push_back(cfData);
 	}
