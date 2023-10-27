@@ -3,6 +3,7 @@
 #include "value_box_order_display.hpp"
 #include "components/ear_name_text_editor.hpp"
 #include "detail/weak_ptr_helpers.hpp"
+#include <helper/common_definition_helper.h>
 
 #include <daw_channel_count.h>
 
@@ -167,8 +168,8 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {
 
   auto packFormatIdValue = p_->getPackFormatIdValue()->get();
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    auto pfData =
-        p_->admCommonDefinitions.getPackFormatData(4, packFormatIdValue);
+    auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(
+        4, packFormatIdValue);
     size_t cfCount{0};
 
     if (pfData) {

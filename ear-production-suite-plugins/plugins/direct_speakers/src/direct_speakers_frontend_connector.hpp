@@ -51,7 +51,7 @@ class DirectSpeakersJuceFrontendConnector
   void setColour(Colour colour);
   void setUseTrackName(bool value);
   void setRouting(int routing);
-  void setSpeakerSetup(int speakerSetupIndex);
+  void setSpeakerSetupPackFormat(int speakerSetupPackFormatIdValue);
   void setChannelGainsValueBox(std::shared_ptr<ChannelMeterLayout> gains);
 
   std::string getActiveName();
@@ -97,8 +97,7 @@ class DirectSpeakersJuceFrontendConnector
   std::weak_ptr<EarComboBox> routingComboBox_;
   int cachedRouting_{ -1 };
   std::weak_ptr<EarComboBox> speakerSetupsComboBox_;
-  int cachedSpeakerSetupIndex_{ -1 };
-  ear::plugin::SpeakerSetup cachedSpeakerSetup_;
+  int cachedPackFormatId_{ -1 };
 
   std::weak_ptr<ValueBoxSpeakerLayer> upperLayer_;
   std::weak_ptr<ValueBoxSpeakerLayer> middleLayer_;

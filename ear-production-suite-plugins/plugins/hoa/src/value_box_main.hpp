@@ -7,6 +7,7 @@
 #include "components/routing_info_icon.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
+#include <helper/common_definition_helper.h>
 
 namespace ear {
 namespace plugin {
