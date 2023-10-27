@@ -3,7 +3,6 @@
 #include "JuceHeader.h"
 
 #include "hoa_backend.hpp"
-#include "helper/common_definition_helper.h"
 #include "reaper_vst3_interfaces.h"
 #include "components/read_only_audio_parameter_int.hpp"
 #include <daw_channel_count.h>
@@ -52,8 +51,6 @@ class HoaAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
   void setStateInformation(XmlElement* xmlState, bool useDefaultsIfUnspecified = true);
 
   void updateTrackProperties(const TrackProperties& properties) override;
-
-  AdmCommonDefinitionHelper admCommonDefinitions{};
 
   AudioParameterInt* getRouting() { return routing_; }
   AudioParameterInt* getPackFormatIdValue() { return packFormatIdValue_; }
