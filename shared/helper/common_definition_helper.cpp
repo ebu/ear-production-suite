@@ -42,7 +42,7 @@ std::shared_ptr<AdmCommonDefinitionHelper::PackFormatData> AdmCommonDefinitionHe
 	auto td = getTypeDefinitionData(tdId);
 	if (!td) return nullptr;
 	for (auto pf : td->relatedPackFormats) {
-		if (pf->id == pfId) return pf;
+		if (pf->idValue == pfId) return pf;
 	}
 	return nullptr;
 }
@@ -52,7 +52,7 @@ std::shared_ptr<AdmCommonDefinitionHelper::ChannelFormatData> AdmCommonDefinitio
 	auto pf = getPackFormatData(tdId, pfId);
 	if (!pf) return nullptr;
 	for (auto cf : pf->relatedChannelFormats) {
-		if (cf->id == cfId) return cf;
+		if (cf->idValue == cfId) return cf;
 	}
 	return nullptr;
 }
@@ -68,10 +68,10 @@ void AdmCommonDefinitionHelper::populateElementRelationshipsFor(adm::TypeDescrip
 	for (auto pf : packFormats) {
 		int thisTypeDefinition = pf->get<adm::TypeDescriptor>().get();
 		if (thisTypeDefinition == tdData->id) {
-			auto pfId = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
 
 			auto pfData = std::make_shared<PackFormatData>();
-			pfData->id = pfId;
+			pfData->idValue = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
+			pfData->fullId = adm::formatId(pf->get<adm::AudioPackFormatId>());
 			pfData->name = pf->get<adm::AudioPackFormatName>().get();
 			pfData->niceName = makeNicePackFormatName(pfData->name);
 			pfData->packFormat = pf;
@@ -98,7 +98,8 @@ void AdmCommonDefinitionHelper::recursePackFormatsForChannelFormats(std::shared_
 	for (auto cf : channelFormats) {
 
 		auto cfData = std::make_shared<ChannelFormatData>();
-		cfData->id = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
+		cfData->idValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
+		cfData->fullId = adm::formatId(cf->get<adm::AudioChannelFormatId>());
 		cfData->name = cf->get<adm::AudioChannelFormatName>().get();
 		cfData->channelFormat = cf;
 		cfData->immediatePackFormat = fromPackFormat;

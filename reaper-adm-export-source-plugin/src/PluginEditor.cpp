@@ -179,15 +179,15 @@ void AdmStemPluginAudioProcessorEditor::updateComboBoxOptions(int tdId, int pfId
 
     if(typeDefinitionData) {
         for(auto& pfData : typeDefinitionData->relatedPackFormats) {
-            packFormatSelector.addTextEntry(pfData->niceName, pfData->id);
-            if(pfData->id == pfId) {
+            packFormatSelector.addTextEntry(pfData->niceName, pfData->idValue);
+            if(pfData->idValue == pfId) {
                 packFormatSelector.setSelectedId(pfId, juce::NotificationType::dontSendNotification);
                 channelFormatSelector.setDefaultText("Select Channel Format");
                 channelFormatSelector.addTextEntry("[All Channels]", CHANNELFORMAT_ALLCHANNELS_ID);
                 if(cfId == CHANNELFORMAT_ALLCHANNELS_ID) channelFormatSelector.setSelectedId(CHANNELFORMAT_ALLCHANNELS_ID, juce::NotificationType::dontSendNotification);
                 for(auto& cfData : pfData->relatedChannelFormats) {
-                    channelFormatSelector.addTextEntry(cfData->name, cfData->id);
-                    if(cfData->id == cfId) {
+                    channelFormatSelector.addTextEntry(cfData->name, cfData->idValue);
+                    if(cfData->idValue == cfId) {
                         channelFormatSelector.setSelectedId(cfId, juce::NotificationType::dontSendNotification);
                     }
                 }
