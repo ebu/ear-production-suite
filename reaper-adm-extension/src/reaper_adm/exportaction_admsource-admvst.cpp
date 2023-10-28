@@ -430,7 +430,7 @@ void AdmVstExporter::newAdmCommonDefinitionReference(ReaperAPI const& api, std::
 
 			for (auto cfData : pfData->relatedChannelFormats) {
 
-				auto cfId = adm::AudioChannelFormatId(typeDefinition, adm::AudioChannelFormatIdValue(cfData->id));
+				auto cfId = adm::AudioChannelFormatId(typeDefinition, adm::AudioChannelFormatIdValue(cfData->idValue));
 				auto channelFormat = parentDocument->lookup(cfId);
 				assert(channelFormat);
 

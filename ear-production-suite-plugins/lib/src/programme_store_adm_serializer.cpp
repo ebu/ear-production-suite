@@ -449,7 +449,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
           // not the document admCommonDefinitionHelper is using!
           auto channelFormatId = adm::AudioChannelFormatId(
             adm::TypeDefinition::HOA,
-            adm::AudioChannelFormatIdValue(channelFormats[i]->id));
+            adm::AudioChannelFormatIdValue(channelFormats[i]->idValue));
           auto channelFormat = doc->lookup(channelFormatId);
           assert(channelFormat);
 
