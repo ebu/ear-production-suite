@@ -9,12 +9,12 @@
 namespace {
 
 Eigen::MatrixXf toEigenMat(std::vector<std::vector<float>>& vec) {
-  auto outputCount = vec.size();
-  auto inputCount = static_cast<int>(vec[0].size());
-  Eigen::MatrixXf mat(inputCount, outputCount);
-  for (std::size_t i = 0; i < outputCount; i++) {
-    mat.col(static_cast<int>(i)) =
-      Eigen::VectorXf::Map(vec[i].data(), inputCount);
+  auto totalInputs = vec.size();
+  auto totalOutputs = static_cast<int>(vec[0].size());
+  Eigen::MatrixXf mat(totalOutputs, totalInputs);
+  for (int inputChannel = 0; inputChannel < totalInputs; inputChannel++) {
+    mat.col(inputChannel) =
+      Eigen::VectorXf::Map(vec[inputChannel].data(), totalOutputs);
   }
   return mat;
 }
