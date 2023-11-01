@@ -49,7 +49,6 @@ private:
     void addGroup(proto::ProgrammeElement const& element);
     void addToggle(proto::ProgrammeElement const& element);
     void sendUpdate();
-    void flagOverlaps();
 };
 }
 
