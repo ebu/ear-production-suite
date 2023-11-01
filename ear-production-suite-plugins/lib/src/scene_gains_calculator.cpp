@@ -8,15 +8,24 @@
 
 namespace {
 
-Eigen::MatrixXf toEigenMat(std::vector<std::vector<float>>& vec) {
-  auto totalInputs = vec.size();
-  auto totalOutputs = static_cast<int>(vec[0].size());
-  Eigen::MatrixXf mat(totalOutputs, totalInputs);
-  for (int inputChannel = 0; inputChannel < totalInputs; inputChannel++) {
-    mat.col(inputChannel) =
-      Eigen::VectorXf::Map(vec[inputChannel].data(), totalOutputs);
+void addToEigenMat(Eigen::MatrixXf& mat,
+                   std::vector<std::vector<float>> const& gainsTable,
+                   int inputStartingChannelOffset) {
+  for (int inputChannelCounter = 0; inputChannelCounter < gainsTable.size(); ++inputChannelCounter) {
+    int inputChannel = inputStartingChannelOffset + inputChannelCounter;
+    if (inputChannel < mat.cols()) {
+      mat.col(inputChannel) += Eigen::VectorXf::Map(gainsTable[inputChannelCounter].data(),
+                               gainsTable[inputChannelCounter].size());
+    }
   }
-  return mat;
+}
+
+void resize2dVector(std::vector<std::vector<float>>& vec, int inputs,
+                    int outputs, float fill = 0.f) {
+  vec.resize(inputs);
+  for (auto& subVec : vec) {
+    subVec.resize(outputs, fill);
+  }
 }
 
 }
@@ -29,8 +38,9 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
                                            int inputChannelCount)
     : objectCalculator_{outputLayout},
       directSpeakersCalculator_{outputLayout},
-      hoaCalculator_{outputLayout} {
-  resize(outputLayout, static_cast<std::size_t>(inputChannelCount));
+      hoaCalculator_{outputLayout},
+      totalOutputChannels{static_cast<int>(outputLayout.channels().size())},
+      totalInputChannels{inputChannelCount} {
   commonDefinitionHelper_.getElementRelationships();
 }
 
@@ -45,7 +55,7 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
     for(auto const&[key, val] : routingCache_) {
       cachedIdsChecklist.push_back(key);
     }
-    /// Check-off found items, and also zero original gains for changed items and delete from routing cache to be re-evaluated
+    /// Check-off found items, and also delete changed items from routing cache to be re-evaluated
     for(const auto& item : store.monitoring_items()) {
       auto itemId = communication::ConnectionId{ item.connection_id() };
       cachedIdsChecklist.erase(std::remove(cachedIdsChecklist.begin(), cachedIdsChecklist.end(), itemId), cachedIdsChecklist.end());
@@ -53,7 +63,7 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
         removeItem(itemId);
       }
     }
-    /// Zero original gains for removed items and delete from routing cache  (i.e, those that weren't checked-off and therefore remain in cachedIdsChecklist)
+    /// Delete removed items from routing cache  (i.e, those that weren't checked-off and therefore remain in cachedIdsChecklist)
     for(const auto& itemId : cachedIdsChecklist) {
       removeItem(itemId);
     }
@@ -74,37 +84,24 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
 }
 
 Eigen::MatrixXf SceneGainsCalculator::directGains() {
-  return toEigenMat(direct_);
+  Eigen::MatrixXf mat = Eigen::MatrixXf::Zero(totalOutputChannels, totalInputChannels);
+  for (auto const& [itemId, routing] : routingCache_) {
+    addToEigenMat(mat, routing.direct_, routing.inputStartingChannel);
+  }
+  return mat;
 }
 
 Eigen::MatrixXf SceneGainsCalculator::diffuseGains() {
-  return toEigenMat(diffuse_);
-}
-
-void SceneGainsCalculator::resize(ear::Layout& outputLayout,
-                                  std::size_t inputChannelCount) {
-  direct_.resize(inputChannelCount);
-  diffuse_.resize(inputChannelCount);
-  auto outputChannelCount = outputLayout.channels().size();
-  for (auto& gainVec : direct_) {
-    gainVec.resize(outputChannelCount, 0.0f);
+  Eigen::MatrixXf mat = Eigen::MatrixXf::Zero(totalOutputChannels, totalInputChannels);
+  for (auto const& [itemId, routing] : routingCache_) {
+    addToEigenMat(mat, routing.diffuse_, routing.inputStartingChannel);
   }
-  for (auto& gainVec : diffuse_) {
-    gainVec.resize(outputChannelCount, 0.0f);
-  }
+  return mat;
 }
 
 void SceneGainsCalculator::removeItem(const communication::ConnectionId &itemId)
 {
-  auto itemRouting = getValuePointerFromMap(routingCache_, itemId);
-  if(itemRouting) {
-    if(itemRouting->inputStartingChannel >= 0) {
-      int channelLim = std::min((int)direct_.size(), itemRouting->inputStartingChannel + itemRouting->inputChannelCount);
-      for(int ch = itemRouting->inputStartingChannel; ch < channelLim; ch++) {
-        std::fill(direct_[ch].begin(), direct_[ch].end(), 0.0f);
-        std::fill(diffuse_[ch].begin(), diffuse_[ch].end(), 0.0f);
-      }
-    }
+  if (mapHasKey(routingCache_, itemId)) {
     routingCache_.erase(itemId);
   }
 }
@@ -117,16 +114,12 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     auto earMetadata = EpsToEarMetadataConverter::convert(item.ds_metadata());
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.size();
-    auto finalChannel = routing->inputStartingChannel + routing->inputChannelCount - 1;
-
-    if(routing->inputStartingChannel >= 0 && finalChannel < direct_.size()) {
-      for(int i = 0; i < routing->inputChannelCount; i++) {
-        auto inputChannel = routing->inputStartingChannel + i;
-        if(inputChannel >= 0 && inputChannel < direct_.size()) {
-          directSpeakersCalculator_.calculate(earMetadata.at(i),
-                                              direct_[inputChannel]);
-        }
-      }
+    resize2dVector(routing->direct_, routing->inputChannelCount, totalOutputChannels);
+    resize2dVector(routing->diffuse_, routing->inputChannelCount, totalOutputChannels);
+    for (int inputChannelCounter = 0; inputChannelCounter < routing->inputChannelCount; inputChannelCounter++) {
+      directSpeakersCalculator_.calculate(
+          earMetadata.at(inputChannelCounter),
+          routing->direct_[inputChannelCounter]);
     }
   }
 
@@ -134,11 +127,11 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     auto earMetadata = EpsToEarMetadataConverter::convert(item.obj_metadata());
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = 1;
-
-    if(routing->inputStartingChannel >= 0 && routing->inputStartingChannel < direct_.size()) {
-      objectCalculator_.calculate(earMetadata, direct_[routing->inputStartingChannel],
-                                  diffuse_[routing->inputStartingChannel]);
-    }
+    resize2dVector(routing->direct_, routing->inputChannelCount, totalOutputChannels);
+    resize2dVector(routing->diffuse_, routing->inputChannelCount, totalOutputChannels);
+    objectCalculator_.calculate(earMetadata,
+                                routing->direct_[0],
+                                routing->diffuse_[0]);
   }
 
   if(item.has_hoa_metadata()) {
@@ -149,21 +142,9 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     }
     routing->inputStartingChannel = item.routing();
     routing->inputChannelCount = earMetadata.degrees.size();
-    auto finalChannel = routing->inputStartingChannel + routing->inputChannelCount - 1;
-
-    if(routing->inputStartingChannel >= 0 && finalChannel < direct_.size()) {
-      std::vector<std::vector<float>> hoaGains(
-        routing->inputChannelCount,
-        std::vector<float>(direct_[0].size(), 0));
-      hoaCalculator_.calculate(earMetadata, hoaGains);
-
-      for(int i = 0; i < routing->inputChannelCount; i++) {
-        auto inputChannel = routing->inputStartingChannel + i;
-        if(inputChannel >= 0 && inputChannel < direct_.size()) {
-          direct_[inputChannel] = hoaGains[i];
-        }
-      }
-    }
+    resize2dVector(routing->direct_, routing->inputChannelCount, totalOutputChannels);
+    resize2dVector(routing->diffuse_, routing->inputChannelCount, totalOutputChannels);
+    hoaCalculator_.calculate(earMetadata, routing->direct_);
   }
 
   if(item.has_bin_metadata()) {

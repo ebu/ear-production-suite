@@ -22,6 +22,8 @@ struct GainHolder {
 struct ItemRouting {
   int inputStartingChannel;
   int inputChannelCount;
+  std::vector<std::vector<float>> direct_;
+  std::vector<std::vector<float>> diffuse_;
 };
 
 class SceneGainsCalculator {
@@ -32,12 +34,11 @@ class SceneGainsCalculator {
   Eigen::MatrixXf diffuseGains();
 
  private:
-  void resize(ear::Layout &ouputLayout, std::size_t inputChannelCount);
+  int totalOutputChannels;
+  int totalInputChannels;
+
   void removeItem(const communication::ConnectionId &itemId);
   void addOrUpdateItem(const proto::MonitoringItemMetadata &item);
-
-  std::vector<std::vector<float>> direct_;
-  std::vector<std::vector<float>> diffuse_;
 
   ear::GainCalculatorObjects objectCalculator_;
   ear::GainCalculatorDirectSpeakers directSpeakersCalculator_;
