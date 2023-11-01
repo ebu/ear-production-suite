@@ -86,7 +86,11 @@ bool SceneGainsCalculator::update(proto::SceneStore store) {
 Eigen::MatrixXf SceneGainsCalculator::directGains() {
   Eigen::MatrixXf mat = Eigen::MatrixXf::Zero(totalOutputChannels, totalInputChannels);
   for (auto const& [itemId, routing] : routingCache_) {
-    addToEigenMat(mat, routing.direct_, routing.inputStartingChannel);
+    if (routing.inputStartingChannel >= 0 &&
+        (routing.inputStartingChannel + routing.inputChannelCount) <
+            totalInputChannels) {
+      addToEigenMat(mat, routing.direct_, routing.inputStartingChannel);
+    }
   }
   return mat;
 }
@@ -94,7 +98,11 @@ Eigen::MatrixXf SceneGainsCalculator::directGains() {
 Eigen::MatrixXf SceneGainsCalculator::diffuseGains() {
   Eigen::MatrixXf mat = Eigen::MatrixXf::Zero(totalOutputChannels, totalInputChannels);
   for (auto const& [itemId, routing] : routingCache_) {
-    addToEigenMat(mat, routing.diffuse_, routing.inputStartingChannel);
+    if (routing.inputStartingChannel >= 0 &&
+        (routing.inputStartingChannel + routing.inputChannelCount) <
+            totalInputChannels) {
+      addToEigenMat(mat, routing.diffuse_, routing.inputStartingChannel);
+    }
   }
   return mat;
 }
