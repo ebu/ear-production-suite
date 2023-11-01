@@ -33,8 +33,6 @@ void SceneStore::dataReset(const ear::plugin::proto::ProgrammeStore &programmes,
             }
         }
     }
-
-    flagOverlaps();
 }
 
 void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObjects &objects) {
@@ -46,7 +44,6 @@ void ear::plugin::SceneStore::programmeSelected(const ear::plugin::ProgrammeObje
     for(auto const& object : objects) {
         addMonitoringItem(object.inputMetadata);
     }
-    flagOverlaps();
 }
 
 void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus status,
@@ -55,7 +52,6 @@ void ear::plugin::SceneStore::itemsAddedToProgramme(ear::plugin::ProgrammeStatus
         for (auto const &object: objects) {
             addMonitoringItem(object.inputMetadata);
         }
-        flagOverlaps();
     }
 }
 
@@ -78,7 +74,6 @@ void ear::plugin::SceneStore::itemRemovedFromProgramme(ear::plugin::ProgrammeSta
                 item != monitoringItems->end()) {
             monitoringItems->erase(item);
             itemsChangedSinceLastSend.insert(id);
-            flagOverlaps();
         }
     }
 }
@@ -89,9 +84,6 @@ bool SceneStore::updateMonitoringItem(proto::InputItemMetadata const& inputItem)
             item != monitoringItems->end()) {
         auto routingChanged = item->routing() != inputItem.routing();
         setMonitoringItemFrom(*item, inputItem);
-        if(routingChanged) {
-            flagOverlaps();
-        }
         return true;
     } else {
         return false;
@@ -103,7 +95,6 @@ void ear::plugin::SceneStore::programmeItemUpdated(ear::plugin::ProgrammeStatus 
     if(status.isSelected) {
         if(!updateMonitoringItem(object.inputMetadata)) {
             addMonitoringItem(object.inputMetadata);
-            flagOverlaps();
         }
     }
 }
@@ -247,10 +238,3 @@ void SceneStore::exporting(bool isExporting) {
     }
 }
 
-void SceneStore::flagOverlaps() {
-  // Keep it simple - for any routing/monitoring mix changes
-  // Set changed on all items
-  for(auto& item : store_.all_available_items()) {
-    itemsChangedSinceLastSend.insert(item.connection_id());
-  }
-}
