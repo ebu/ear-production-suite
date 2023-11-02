@@ -6,8 +6,6 @@
 #include "direct_speakers_frontend_connector.hpp"
 #include "reaper_integration.hpp"
 
-uint32_t requestInputInstanceIdSig();
-
 using namespace ear::plugin;
 
 DirectSpeakersAudioProcessor::DirectSpeakersAudioProcessor()
@@ -197,12 +195,8 @@ void DirectSpeakersAudioProcessor::setIHostApplication(Steinberg::FUnknown * unk
   VST3ClientExtensions::setIHostApplication(unknown);
   if(reaperHost) {
 
-    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
-    if(requestInputInstanceIdPtr) {
-      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
-      uint32_t inputInstanceId = requestInputInstanceId();
-      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
-    }
+    inputInstanceId_->internalSetIntAndNotifyHost(
+          requestInstanceIdFromExtension(reaperHost));
 
     registerPluginLoadWithExtension(reaperHost,
                                     [this](std::string const& xmlState) {
