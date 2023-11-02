@@ -10,7 +10,7 @@ set(EAR_PROTO_INPUT
 
 protobuf_generate_cpp(EAR_PROTO_SRC EAR_PROTO_HDR ${EAR_PROTO_INPUT})
 
-add_library(ear-plugin-base STATIC
+set(EAR_BASE_SOURCES
   src/communication/commands.cpp
   src/communication/metadata_sender.cpp
   src/communication/direct_speakers_metadata_sender.cpp
@@ -56,7 +56,7 @@ add_library(ear-plugin-base STATIC
   ${EAR_PROTO_SRC} src/restored_pending_store.cpp
   )
 		
-set(EAR_BASE_HEADERS		
+set(EAR_BASE_HEADERS
 	include/binaural_monitoring_audio_processor.hpp
 	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
@@ -131,10 +131,12 @@ set(EAR_BASE_HEADERS
 	include/scene_store.hpp
 	include/communication/metadata_thread.hpp
 	include/auto_mode_controller.hpp
+	include/reaper_vst3_interfaces.h
 	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
 
+add_library(ear-plugin-base STATIC ${EAR_BASE_HEADERS} ${EAR_BASE_SOURCES})
 set_source_files_properties(${EAR_PROTO_INPUT} PROPERTIES HEADER_ONLY TRUE)
 source_group("Header Files" FILES ${EAR_BASE_HEADERS})
 target_sources(ear-plugin-base PRIVATE ${EAR_PROTO_INPUT} ${EAR_BASE_HEADERS})
