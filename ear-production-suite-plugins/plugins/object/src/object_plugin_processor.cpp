@@ -4,6 +4,7 @@
 #include "object_backend.hpp"
 #include "object_frontend_connector.hpp"
 #include "object_plugin_editor.hpp"
+#include "reaper_integration.hpp"
 
 void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
@@ -269,11 +270,7 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
       });
     }
 
-    auto getAppVersionPtr = reaperHost->getReaperApi("GetAppVersion");
-    numDawChannels_ = MAX_DAW_CHANNELS;
-    if (getAppVersionPtr) {
-      numDawChannels_ = GetReaperChannelCount(getAppVersionPtr);
-    }
+    numDawChannels_ = DetermineChannelCount(reaperHost);
   }
 }
 

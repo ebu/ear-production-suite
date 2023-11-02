@@ -131,6 +131,7 @@ set(EAR_BASE_HEADERS
 	include/scene_store.hpp
 	include/communication/metadata_thread.hpp
 	include/auto_mode_controller.hpp
+	include/reaper_integration.hpp
 	include/reaper_vst3_interfaces.h
 	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
