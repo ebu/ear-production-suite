@@ -6,7 +6,6 @@
 #include "object_plugin_editor.hpp"
 #include "reaper_integration.hpp"
 
-void registerPluginLoadSig(std::function<void(std::string const&)>);
 uint32_t requestInputInstanceIdSig();
 
 using namespace ear::plugin;
@@ -262,13 +261,10 @@ void ObjectsAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
       inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
     }
 
-    auto registerPluginLoadPtr = reaperHost->getReaperApi("registerPluginLoad");
-    if(registerPluginLoadPtr) {
-      auto registerPluginLoad = reinterpret_cast<decltype(&registerPluginLoadSig)>(registerPluginLoadPtr);
-      registerPluginLoad([this](std::string const& xmlState) {
-        this->extensionSetState(xmlState);
-      });
-    }
+    registerPluginLoadWithExtension(reaperHost,
+                                    [this](std::string const& xmlState) {
+                                      this->extensionSetState(xmlState);
+                                    });
 
     numDawChannels_ = DetermineChannelCount(reaperHost);
   }
