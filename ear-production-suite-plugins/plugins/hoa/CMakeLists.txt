@@ -36,6 +36,7 @@ set(HEADERS_HOA_INPUT
 	${EPS_SHARED_DIR}/components/level_meter_calculator.hpp
 	${EPS_SHARED_DIR}/components/non_automatable_parameter.hpp
 	${EPS_SHARED_DIR}/components/onboarding.hpp
+    ${EPS_SHARED_DIR}/components/routing_info_icon.hpp
 	${EPS_SHARED_DIR}/components/version_label.hpp
 	
 	${EPS_SHARED_DIR}/components/look_and_feel/colours.hpp
