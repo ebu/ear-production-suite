@@ -4,6 +4,7 @@
 
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
+#include "components/routing_info_icon.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 
@@ -20,7 +21,7 @@ class ValueBoxMain : public Component {
         speakerSetupLabel_(std::make_unique<Label>()),
         speakerSetupsComboBox_(std::make_shared<EarComboBox>()),
         routingLabel_(std::make_unique<Label>()),
-        routingInfoIcon_(std::make_unique<ImageComponent>()),
+        routingInfoIcon_(createRoutingInfoIcon()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     name_->setLabelText("Object Name");
     name_->setText("Object_1");
@@ -39,14 +40,6 @@ class ValueBoxMain : public Component {
     routingLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(routingLabel_.get());
 
-    routingInfoIcon_->setImage(ImageFileFormat::loadFrom(
-        binary_data::infologo_png, binary_data::infologo_pngSize));
-    routingInfoIcon_->setImagePlacement(RectanglePlacement::centred +
-                                        RectanglePlacement::doNotResize);
-    routingInfoIcon_->setAlpha(0.8);
-    routingInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
-    routingInfoIcon_->setTooltip(
-        "128 channel support requires REAPER v7 or later.");
     addChildComponent(routingInfoIcon_.get());
 
     routingComboBox_->setDefaultText("Select Scene channel range");

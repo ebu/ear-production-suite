@@ -4,6 +4,7 @@
 
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
+#include "components/routing_info_icon.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include <daw_channel_count.h>
@@ -19,7 +20,7 @@ class ValueBoxMain : public Component {
         name_(std::make_shared<EarNameTextEditor>()),
         useTrackNameCheckbox_(std::make_shared<ToggleButton>()),
         routingLabel_(std::make_unique<Label>()),
-        routingInfoIcon_(std::make_unique<ImageComponent>()),
+        routingInfoIcon_(createRoutingInfoIcon()),
         routingComboBox_(std::make_shared<EarComboBox>()) {
     setColour(backgroundColourId, EarColours::Area04dp);
 
@@ -33,13 +34,6 @@ class ValueBoxMain : public Component {
     useTrackNameCheckbox_->setClickingTogglesState(false); // FrontendConnector controls state
     addAndMakeVisible(useTrackNameCheckbox_.get());
 
-    routingInfoIcon_->setImage(ImageFileFormat::loadFrom(
-        binary_data::infologo_png, binary_data::infologo_pngSize));
-    routingInfoIcon_->setImagePlacement(RectanglePlacement::centred +
-                                      RectanglePlacement::doNotResize);
-    routingInfoIcon_->setAlpha(0.8);
-    routingInfoIcon_->setMouseCursor(MouseCursor::PointingHandCursor);
-    routingInfoIcon_->setTooltip("128 channel support requires REAPER v7 or later.");
     addChildComponent(routingInfoIcon_.get());
 
     routingLabel_->setFont(EarFontsSingleton::instance().Label);
