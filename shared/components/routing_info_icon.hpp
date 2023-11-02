@@ -21,6 +21,16 @@ namespace ui {
         return std::move(routingIcon);
     }
 
+    inline void placeRoutingInfoIconRight(juce::Rectangle<int>& area, ImageComponent* routingInfoIcon) {
+        auto routingInfoArea = area.removeFromRight(13);
+        // Need an odd height to avoid blurring through anti-aliasing
+        // (since icon is odd height too, so ensures integer padding when centring vertically)
+        if (routingInfoArea.getHeight() % 2 == 0) {
+            routingInfoArea.removeFromTop(1);
+        }
+        routingInfoIcon->setBounds(routingInfoArea);
+    }
+
 }  // namespace ui
 }  // namespace plugin
 }  // namespace ear
