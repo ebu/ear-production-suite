@@ -87,8 +87,7 @@ class ValueBoxMain : public Component {
     auto routingLabelArea = routingArea.withWidth(labelWidth_);
     routingLabel_->setBounds(routingLabelArea);
     if (routingInfoIcon_->isVisible()) {
-      auto routingInfoArea = routingArea.removeFromRight(13).withTrimmedTop(1); // Trimming 1 to get an odd height. Icon is odd height too, so ensures an integer number of pixels padding top and bottom to avoid blurring through anti-aliasing. 
-      routingInfoIcon_->setBounds(routingInfoArea);
+      placeRoutingInfoIconRight(routingArea, routingInfoIcon_.get());
       routingArea.removeFromRight(marginSmall_);
     }
     auto routingComboBoxArea =
