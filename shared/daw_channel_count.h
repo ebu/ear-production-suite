@@ -1,7 +1,7 @@
 #pragma once
 #include <cassert>
 
-#define MAX_DAW_CHANNELS 128
+constexpr int const MAX_DAW_CHANNELS{ 128 };
 
 inline int GetReaperChannelCount(float reaperAppVersionFlt) {
     return reaperAppVersionFlt >= 7.0f ? 128 : 64;
