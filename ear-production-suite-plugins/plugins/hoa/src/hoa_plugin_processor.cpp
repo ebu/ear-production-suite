@@ -6,8 +6,6 @@
 #include "components/level_meter_calculator.hpp"
 #include "reaper_integration.hpp"
 
-uint32_t requestInputInstanceIdSig();
-
 using namespace ear::plugin;
 
 HoaAudioProcessor::HoaAudioProcessor()
@@ -184,12 +182,8 @@ void HoaAudioProcessor::setIHostApplication(Steinberg::FUnknown * unknown)
   VST3ClientExtensions::setIHostApplication(unknown);
   if(reaperHost) {
 
-    auto requestInputInstanceIdPtr = reaperHost->getReaperApi("requestInputInstanceId");
-    if(requestInputInstanceIdPtr) {
-      auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
-      uint32_t inputInstanceId = requestInputInstanceId();
-      inputInstanceId_->internalSetIntAndNotifyHost(inputInstanceId);
-    }
+    inputInstanceId_->internalSetIntAndNotifyHost(
+        requestInstanceIdFromExtension(reaperHost));
 
     registerPluginLoadWithExtension(reaperHost,
                                     [this](std::string const& xmlState) {

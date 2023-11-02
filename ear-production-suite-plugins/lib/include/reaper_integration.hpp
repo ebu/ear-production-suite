@@ -31,3 +31,14 @@ inline bool registerPluginLoadWithExtension(
   registerPluginLoad(callback);
   return true;
 }
+
+// Queries the extension to get a unique ID for a plugin instance
+inline uint32_t requestInstanceIdFromExtension(
+    IReaperHostApplication* reaperHostPtr) {
+  if(!reaperHostPtr) return 0;
+  uint32_t requestInputInstanceIdSig();
+  auto requestInputInstanceIdPtr = reaperHostPtr->getReaperApi("requestInputInstanceId");
+  if (!requestInputInstanceIdPtr) return 0;
+  auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+  return requestInputInstanceId();
+}
