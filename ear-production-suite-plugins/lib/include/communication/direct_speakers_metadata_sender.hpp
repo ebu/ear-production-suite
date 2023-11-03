@@ -23,7 +23,7 @@ class DirectSpeakersMetadataSender {
   void name(const std::string& value);
   void inputInstanceId(int value);
   void colour(int value);
-  void speakerSetupIndex(int value);
+  void packFormatIdValue(int value);
 
   ConnectionId getConnectionId() { return sender_.connectionId(); }
 
