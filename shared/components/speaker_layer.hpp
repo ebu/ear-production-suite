@@ -3,6 +3,7 @@
 #include "JuceHeader.h"
 
 #include <speaker_setups.hpp>
+#include <helper/common_definition_helper.h>
 
 #include "look_and_feel/colours.hpp"
 #include "look_and_feel/fonts.hpp"
@@ -28,11 +29,11 @@ class SpeakerLayer : public Component {
   }
 
   void clearSpeakerSetup() {
-    speakerSetup_ = SpeakerSetup{};
+    pfData.reset();
     repaint();
   }
-  void setSpeakerSetup(const SpeakerSetup &speakerSetup) {
-    speakerSetup_ = speakerSetup;
+  void setSpeakerSetupPackFormat(int pfId) {
+    pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, pfId);
     repaint();
   }
 
@@ -57,21 +58,35 @@ class SpeakerLayer : public Component {
     g.drawLine(horizontalLine, crossLinewidth_);
     g.drawLine(verticalLine, crossLinewidth_);
 
-    for (auto speaker : speakerSetup_.speakers) {
-      if (speaker.layer == layer_) {
-        if (speaker.isVoG) {
-          drawVoiceOfGod(g, speaker);
-        } else if (speaker.isLfe) {
-          drawLfe(g, speaker);
-        } else {
-          drawSpeaker(g, speaker);
+    if (pfData) {
+        for (auto const& cfData : pfData->relatedChannelFormats) {
+            Layer layer{ Layer::middle };
+            if (cfData->elevation <= -30.f) {
+                layer = Layer::bottom;
+            } else if(cfData->elevation >= 30.f) {
+                layer = Layer::upper;
+            }
+            if (layer == layer_) {
+                std::string label{ cfData->name };
+                if (cfData->speakerLabels.size() > 0) {
+                    label = cfData->speakerLabels[0];
+                }
+                if (cfData->elevation >= 90.f) {
+                    drawVoiceOfGod(g, label);
+                }
+                else if (cfData->isLfe) {
+                    drawLfe(g, cfData->azimuth, label);
+                }
+                else {
+                    drawSpeaker(g, cfData->azimuth, label);
+                }
+            }
         }
-      }
     }
   }
 
-  void drawSpeaker(Graphics &g, const Speaker &speaker) {
-    const float angleRad = speaker.azimuth / 180.f * MathConstants<float>::pi;
+  void drawSpeaker(Graphics &g, float azimuth, const std::string& label) {
+    const float angleRad = azimuth / 180.f * MathConstants<float>::pi;
     g.setColour(findColour(highlightColourId));
     float xPos = centre_.getX() - std::sin(angleRad) * diameter_ / 2.f;
     float yPos = centre_.getY() - std::cos(angleRad) * diameter_ / 2.f;
@@ -85,11 +100,11 @@ class SpeakerLayer : public Component {
     labelRect.translate(-50.f, -13.f);
     g.setFont(speakerLabelFont_);
     g.setColour(findColour(labelColourId));
-    g.drawText(String(speaker.spLabel), labelRect, Justification::centred);
+    g.drawText(String(label), labelRect, Justification::centred);
   }
 
-  void drawLfe(Graphics &g, const Speaker &speaker) {
-    float angleRad = speaker.azimuth / 180.f * MathConstants<float>::pi;
+  void drawLfe(Graphics &g, float azimuth, const std::string& label) {
+    float angleRad = azimuth / 180.f * MathConstants<float>::pi;
     float xPos =
         centre_.getX() - std::sin(angleRad) * (diameter_ / 2.f + lfeDistance_);
     float yPos =
@@ -98,12 +113,12 @@ class SpeakerLayer : public Component {
     lfeRect.translate(-13.f, -13.f);
     g.setFont(lfeLabelFont_);
     g.setColour(findColour(labelColourId));
-    g.drawText(String(speaker.spLabel), lfeRect, Justification::centred);
+    g.drawText(String(label), lfeRect, Justification::centred);
     g.setColour(findColour(highlightColourId));
     g.drawRect(lfeRect);
   }
 
-  void drawVoiceOfGod(Graphics &g, const Speaker &speaker) {
+  void drawVoiceOfGod(Graphics &g, const std::string& label) {
     g.setColour(findColour(highlightColourId));
     float xPos = centre_.getX();
     float yPos = centre_.getY();
@@ -113,7 +128,7 @@ class SpeakerLayer : public Component {
     labelRect.translate(-50.f, -13.f);
     g.setFont(speakerLabelFont_);
     g.setColour(findColour(labelColourId));
-    g.drawText(String(speaker.spLabel), labelRect, Justification::centred);
+    g.drawText(String(label), labelRect, Justification::centred);
   }
 
   enum ColourIds {
@@ -126,7 +141,7 @@ class SpeakerLayer : public Component {
   void resized() override {}
 
  private:
-  SpeakerSetup speakerSetup_;
+  std::shared_ptr<AdmCommonDefinitionHelper::PackFormatData> pfData;
 
   Layer layer_;
 
