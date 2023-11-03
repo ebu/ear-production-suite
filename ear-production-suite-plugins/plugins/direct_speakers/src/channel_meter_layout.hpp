@@ -8,6 +8,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/slider.hpp"
+#include <helper/common_definition_helper.h>
 #include "speaker_meters_box.hpp"
 #include "speaker_setups.hpp"
 
@@ -91,11 +92,17 @@ class ChannelMeterLayout : public Component {
     channelMeterBox19to24_->setVisible(false);
   }
 
-  void setSpeakerSetup(SpeakerSetup speakerSetup) {
+  void setSpeakerSetupPackFormat(int pfId) {
     clearSpeakerSetup();
-    for (int i = 0; i < speakerSetup.speakers.size(); ++i) {
-      speakerLevels_.push_back(
-          std::make_unique<SpeakerLevel>(speakerSetup.speakers.at(i).spLabel));
+    auto pfData =
+        AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, pfId);
+    for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
+      auto cfData = pfData->relatedChannelFormats[i];
+      auto label = cfData->name;
+      if (cfData->speakerLabels.size() > 0) {
+        label = cfData->speakerLabels[0];
+      }
+      speakerLevels_.push_back(std::make_unique<SpeakerLevel>(label));
       speakerLevels_.back()->getLevelMeter()->setMeter(levelMeter_, i);
       if (i < 6) {
         channelMeterBox1to6_->addLevelMeter(speakerLevels_.back().get());

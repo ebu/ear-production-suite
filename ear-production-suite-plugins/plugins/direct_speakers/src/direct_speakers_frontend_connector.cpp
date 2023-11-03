@@ -3,7 +3,7 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 #include "detail/weak_ptr_helpers.hpp"
-
+#include <helper/common_definition_helper.h>
 #include "speaker_setups.hpp"
 #include <daw_channel_count.h>
 
@@ -173,18 +173,19 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetupsComboBox(
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);
   speakerSetupsComboBox_ = comboBox;
-  setSpeakerSetup(cachedSpeakerSetupIndex_);
+  setSpeakerSetupPackFormat(cachedPackFormatId_);
 }
 
-void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
-    int speakerSetupIndex) {
-  cachedSpeakerSetupIndex_ = speakerSetupIndex;
+void DirectSpeakersJuceFrontendConnector::setSpeakerSetupPackFormat(
+    int speakerSetupPackFormatIdValue) {
+  cachedPackFormatId_ = speakerSetupPackFormatIdValue;
   if (auto speakerSetupsComboBoxLocked = speakerSetupsComboBox_.lock())
-    speakerSetupsComboBoxLocked->selectEntry(speakerSetupIndex,
+    speakerSetupsComboBoxLocked->setSelectedId(speakerSetupPackFormatIdValue,
                                              dontSendNotification);
+  auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(
+      1, cachedPackFormatId_);
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    int layoutSize =
-        speakerSetupByIndex(cachedSpeakerSetupIndex_).speakers.size();
+    int layoutSize = pfData ? pfData->relatedChannelFormats.size() : 0;
     routingComboBoxLocked->clearEntries();
     auto layoutSizeFixed = layoutSize != 0 ? layoutSize - 1 : layoutSize;
     for (int i = 1; i + layoutSizeFixed <= MAX_DAW_CHANNELS; ++i) {
@@ -193,42 +194,41 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetup(
     }
     routingComboBoxLocked->selectEntry(cachedRouting_, sendNotification);
   }
-  auto speakerSetup = speakerSetupByIndex(speakerSetupIndex);
   if (auto upperLayerLocked = upperLayer_.lock()) {
-    upperLayerLocked->setSpeakerSetup(speakerSetup);
+    upperLayerLocked->setSpeakerSetupPackFormat(cachedPackFormatId_);
   }
   if (auto middleLayerLocked = middleLayer_.lock()) {
-    middleLayerLocked->setSpeakerSetup(speakerSetup);
+    middleLayerLocked->setSpeakerSetupPackFormat(cachedPackFormatId_);
   }
   if (auto bottomLayerLocked = bottomLayer_.lock()) {
-    bottomLayerLocked->setSpeakerSetup(speakerSetup);
+    bottomLayerLocked->setSpeakerSetupPackFormat(cachedPackFormatId_);
   }
   if (auto channelGainsLocked = channelGains_.lock()) {
-    channelGainsLocked->setSpeakerSetup(speakerSetup);
+    channelGainsLocked->setSpeakerSetupPackFormat(cachedPackFormatId_);
   }
 }
 
 void DirectSpeakersJuceFrontendConnector::setUpperLayerValueBox(
     std::shared_ptr<ValueBoxSpeakerLayer> layer) {
   layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
+  layer->setSpeakerSetupPackFormat(cachedPackFormatId_);
   upperLayer_ = layer;
 }
 void DirectSpeakersJuceFrontendConnector::setMiddleLayerValueBox(
     std::shared_ptr<ValueBoxSpeakerLayer> layer) {
   layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
+  layer->setSpeakerSetupPackFormat(cachedPackFormatId_);
   middleLayer_ = layer;
 }
 void DirectSpeakersJuceFrontendConnector::setBottomLayerValueBox(
     std::shared_ptr<ValueBoxSpeakerLayer> layer) {
   layer->setHighlightColour(cachedColour_);
-  layer->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
+  layer->setSpeakerSetupPackFormat(cachedPackFormatId_);
   bottomLayer_ = layer;
 }
 void DirectSpeakersJuceFrontendConnector::setChannelGainsValueBox(
     std::shared_ptr<ChannelMeterLayout> gains) {
-  gains->setSpeakerSetup(speakerSetupByIndex(cachedSpeakerSetupIndex_));
+  gains->setSpeakerSetupPackFormat(cachedPackFormatId_);
   channelGains_ = gains;
 }
 
@@ -246,8 +246,7 @@ void DirectSpeakersJuceFrontendConnector::parameterValueChanged(
       notifyParameterChanged(ParameterId::PACKFORMAT_ID_VALUE,
                              p_->getPackFormatIdValue()->get());
       updater_.callOnMessageThread([this]() {
-        auto speakerSetupIndex = getIndexFromPackFormatIdValue(p_->getPackFormatIdValue()->get());
-        setSpeakerSetup(speakerSetupIndex);
+        setSpeakerSetupPackFormat(p_->getPackFormatIdValue()->get());
       });
       break;
     case 3:
@@ -287,7 +286,7 @@ void DirectSpeakersJuceFrontendConnector::sliderDragEnded(Slider* slider) {}
 void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
   if (auto speakerSetupsComboBox = lockIfSame(speakerSetupsComboBox_, comboBox)) {
-    *(p_->getPackFormatIdValue()) = speakerSetupByIndex(speakerSetupsComboBox->getSelectedEntryIndex()).packFormatIdValue;
+    *(p_->getPackFormatIdValue()) = speakerSetupsComboBox->getSelectedId();
   }
   if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
     *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
