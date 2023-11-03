@@ -28,8 +28,8 @@ class ValueBoxSpeakerLayer : public Component {
   ~ValueBoxSpeakerLayer() {}
 
   void clearSpeakerSetup() { layer_->clearSpeakerSetup(); }
-  void setSpeakerSetup(ear::plugin::SpeakerSetup speakerSetup) {
-    layer_->setSpeakerSetup(speakerSetup);
+  void setSpeakerSetupPackFormat(int pfId) {
+    layer_->setSpeakerSetupPackFormat(pfId);
   }
 
   void setHighlightColour(Colour colour) {
