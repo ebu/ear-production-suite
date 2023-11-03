@@ -13,7 +13,7 @@ message Speaker {
 }
 
 message DirectSpeakersTypeMetadata {
-  optional SpeakerLayout layout = 1 [default = ITU_BS_2051_UNKNOWN];
+  optional int32 packFormatIdValue = 1 [default = 0];
   repeated Speaker speakers = 2;
 }
 

@@ -2,6 +2,10 @@
 
 #include "helper/protobuf_utilities.hpp"
 #include "helper/common_definition_helper.h"
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 namespace ear {
 namespace plugin {
@@ -26,12 +30,14 @@ struct EpsToEarMetadataConverter {
 
   static std::vector<ear::DirectSpeakersTypeMetadata> convert(
       const proto::DirectSpeakersTypeMetadata &epsMetadata) {
-    auto packFormatId =
-        proto::SpeakerLayoutTranslator::proto2ear(epsMetadata.layout());
+    std::stringstream ss;
+    ss << "AP_0001" << std::setw(4) << std::setfill('0') << std::hex
+       << epsMetadata.packformatidvalue();
+    std::string audioPackFormatID{ ss.str() };
     std::vector<ear::DirectSpeakersTypeMetadata> earMetadata;
     for (auto epsSpeaker : epsMetadata.speakers()) {
       ear::DirectSpeakersTypeMetadata earSpeaker;
-      earSpeaker.audioPackFormatID = packFormatId;
+      earSpeaker.audioPackFormatID = audioPackFormatID;
       earSpeaker.position = ear::PolarSpeakerPosition(
           epsSpeaker.position().azimuth(), epsSpeaker.position().elevation(),
           epsSpeaker.position().distance());

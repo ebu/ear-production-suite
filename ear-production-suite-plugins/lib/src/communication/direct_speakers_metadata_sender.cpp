@@ -39,10 +39,10 @@ void DirectSpeakersMetadataSender::inputInstanceId(int value)
 void DirectSpeakersMetadataSender::colour(int value) {
   setData([value](auto data) { data->set_colour(value); });
 }
-void DirectSpeakersMetadataSender::speakerSetupIndex(int value) {
+void DirectSpeakersMetadataSender::packFormatIdValue(int value) {
   setData([value](auto data) {
     data->set_allocated_ds_metadata(
-        proto::convertSpeakerSetupToEpsMetadata(value));
+        proto::convertPackFormatToEpsMetadata(value));
   });
 }
 
