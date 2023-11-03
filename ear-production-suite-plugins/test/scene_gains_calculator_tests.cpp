@@ -208,7 +208,7 @@ void updateExpectedGainMatrix(
 
 TEST_CASE("scene gain calculation (DirectSpeakers)") {
   proto::SceneStore store;
-  auto obj1 = proto::convertSpeakerSetupToEpsMetadata(14);
+  auto obj1 = proto::convertPackFormatToEpsMetadata(0x0005);  // AP_00010005 = 5.1+4H
   REQUIRE(obj1->speakers_size() == 10);
 
   auto layout = ear::getLayout("0+5+0");
@@ -270,7 +270,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
 
     calculator.update(store);
 
-    auto obj2 = proto::convertSpeakerSetupToEpsMetadata(6);
+    auto obj2 = proto::convertPackFormatToEpsMetadata(0x000d);  // AP_0001000d = 6.1
     item1->set_allocated_ds_metadata(obj2);
 
     calculator.update(store);
@@ -346,7 +346,7 @@ TEST_CASE("scene gain calculation (DirectSpeakers)") {
                              item1->routing(), referenceCalculator,
                              expectedDirect);
 
-    auto obj2 = proto::convertSpeakerSetupToEpsMetadata(6);
+    auto obj2 = proto::convertPackFormatToEpsMetadata(0x000d); //AP_0001000d = 6.1
     item1->set_allocated_ds_metadata(obj2);
     item1->set_changed(false);
 

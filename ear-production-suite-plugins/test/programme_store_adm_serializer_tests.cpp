@@ -4,6 +4,7 @@
 #include <scene_store.pb.h>
 #include <programme_store_adm_serializer.hpp>
 #include <adm/common_definitions.hpp>
+#include <helper/common_definition_helper.h>
 #include <algorithm>
 #include <functional>
 #include "store_metadata.hpp"
@@ -74,9 +75,23 @@ class ItemBuilder {
       metadata_.mutable_ds_metadata();
       return *this;
     }
-    ItemBuilder& withDsLayout(proto::SpeakerLayout layout) {
+    ItemBuilder& withDsPackFormat(int pfId) {
       auto dsMeta = metadata_.mutable_ds_metadata();
-      dsMeta->set_layout(layout);
+      dsMeta->set_packformatidvalue(pfId);
+      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto pfData = commonDefinitionHelper->getPackFormatData(1, pfId);
+      if (pfData) {
+        for (auto cfData : pfData->relatedChannelFormats) {
+          auto newSpeaker = dsMeta->add_speakers();
+          newSpeaker->set_id(cfData->idValue);
+          newSpeaker->set_is_lfe(cfData->isLfe);
+          for (auto const& speakerLabel : cfData->speakerLabels) {
+            newSpeaker->add_labels(speakerLabel);
+          }
+          newSpeaker->mutable_position()->set_azimuth(cfData->azimuth);
+          newSpeaker->mutable_position()->set_elevation(cfData->elevation);
+        }
+      }
       return *this;
     }
     InputItemMetadata build() const& {
@@ -216,8 +231,8 @@ InputItemMetadata simpleObjectItem(ConnectionId const& id,
 InputItemMetadata simpleDsItem(ConnectionId const& id,
                                std::string const& name,
                                int routing,
-                               SpeakerLayout layout) {
-  return simpleItem(id, name, routing).withDsLayout(layout);
+                               int pfId) {
+  return simpleItem(id, name, routing).withDsPackFormat(pfId);
 }
 
 }
@@ -276,7 +291,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
   auto item = simpleDsItem(connectionId,
                            "testDs",
                            2,
-                           SpeakerLayout::ITU_BS_2051_0_2_0);
+                           0x0002);
 
   Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   metadata.setInputItemMetadata(connectionId, item);
