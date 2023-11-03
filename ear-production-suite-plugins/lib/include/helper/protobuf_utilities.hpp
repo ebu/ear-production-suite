@@ -8,16 +8,6 @@ namespace ear {
 namespace plugin {
 namespace proto {
 
-class SpeakerLayoutTranslator {
- public:
-  static std::string proto2ear(const SpeakerLayout& layout);
-  static SpeakerLayout ear2proto(const std::string& layout);
-
- private:
-  static std::map<SpeakerLayout, std::string> SpeakerLayoutProtoToEarLUT_;
-  static std::map<std::string, SpeakerLayout> SpeakerLayoutEarToProtoLUT_;
-};
-
 inline proto::DirectSpeakersTypeMetadata* convertSpeakerSetupToEpsMetadata(
     int setupIndex) {
   auto ds_metadata = new proto::DirectSpeakersTypeMetadata();

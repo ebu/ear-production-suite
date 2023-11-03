@@ -26,7 +26,6 @@ set(EAR_BASE_SOURCES
   src/communication/scene_metadata_receiver.cpp
   src/direct_speakers_backend.cpp
   src/hoa_backend.cpp
-  src/helper/protobuf_utilities.cpp
   src/proto_printers.cpp
   src/log.cpp
   src/binaural_monitoring_audio_processor.cpp
