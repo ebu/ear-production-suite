@@ -8,6 +8,7 @@
 #include "helper/move.hpp"
 #include "components/overlay.hpp"
 #include "communication/common_types.hpp"
+#include <google/protobuf/util/message_differencer.h>
 
 namespace {
 
@@ -20,6 +21,16 @@ ComponentType* getAncestorComponentOfType(Component* startingComponent) {
     parentComponent = parentComponent->getParentComponent();
   }
   return nullptr;
+}
+
+bool matchingSpeakers(const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& a, const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& b)
+{
+  if (a.size() != b.size()) return false;
+  for (int i = 0; i < a.size(); ++i) {
+    if(!google::protobuf::util::MessageDifferencer::Equals(
+        a[i], b[i])) return false;
+  }
+  return true;
 }
 
 }
@@ -268,12 +279,9 @@ void ear::plugin::ui::ProgrammesContainer::updateMeter(const proto::InputItemMet
   if(item.has_ds_metadata() && oldItem.has_ds_metadata()) {
     if(forceUpdate ||
        oldItem.routing() != item.routing() ||
-       oldItem.ds_metadata().layout() != item.ds_metadata().layout()) {
+       !matchingSpeakers(oldItem.ds_metadata().speakers(), item.ds_metadata().speakers())) {
       updateRequired = true;
-      auto ssIndex = item.ds_metadata().layout();
-      if(ssIndex >= 0 && ssIndex < SPEAKER_SETUPS.size()) {
-        channelCount = static_cast<int>(SPEAKER_SETUPS.at(ssIndex).speakers.size());
-      }
+      channelCount = item.ds_metadata().speakers_size();
     }
   }
 

@@ -224,9 +224,11 @@ class ObjectView : public ElementView,
     juce::String metadataLabelText;
     if (data_.item.has_ds_metadata()) {
       metadataLabelText = "DirectSpeakers";
-      auto layoutIndex = data_.item.ds_metadata().layout();
-      if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
-        metadataLabelText = String(SPEAKER_SETUPS.at(layoutIndex).commonName);
+      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto pfData = commonDefinitionHelper->getPackFormatData(
+        1, data_.item.ds_metadata().packformatidvalue());
+      if (pfData) {
+        metadataLabelText = pfData->niceName;
       }
     } else if (data_.item.has_hoa_metadata()) {
       metadataLabelText = "HOA";
