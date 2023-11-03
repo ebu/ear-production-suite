@@ -93,7 +93,7 @@ void DirectSpeakersBackend::onParameterChanged(
   } else if (parameter == ParameterId::PACKFORMAT_ID_VALUE) {
     auto extractedValue = boost::get<int>(value);
     EAR_LOGGER_DEBUG(logger_, "PackFormat ID Value -> {}", extractedValue);
-    metadataSender_.speakerSetupIndex(getIndexFromPackFormatIdValue(extractedValue));
+    metadataSender_.packFormatIdValue(extractedValue);
   } else if(parameter == ParameterId::INPUT_INSTANCE_ID) {
     auto extractedValue = boost::get<int>(value);
     EAR_LOGGER_DEBUG(logger_, "Input Instance ID -> {}", extractedValue);
