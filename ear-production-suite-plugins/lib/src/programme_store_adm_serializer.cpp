@@ -7,10 +7,28 @@
 #include <utility>
 #include <iomanip>
 #include <optional>
+#include <iostream>
+#include <sstream>
 
 using namespace ear::plugin;
 
 namespace {
+
+adm::AudioChannelFormatId genAudioChannelFormatId(int typedefinition, int value) {
+  std::stringstream ss;
+  ss << "AC_" 
+    << std::setw(4) << std::setfill('0') << std::hex << typedefinition
+    << std::setw(4) << std::setfill('0') << std::hex << value;
+  return adm::parseAudioChannelFormatId(ss.str());
+}
+
+adm::AudioPackFormatId genAudioPackFormatId(int typedefinition,
+                                                  int value) {
+  std::stringstream ss;
+  ss << "AP_" << std::setw(4) << std::setfill('0') << std::hex << typedefinition
+     << std::setw(4) << std::setfill('0') << std::hex << value;
+  return adm::parseAudioPackFormatId(ss.str());
+}
 
 template <typename T>
 std::string int_to_hex(T i, size_t size) {
@@ -460,31 +478,32 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       }
 
     } else if (metadata.has_ds_metadata()) {
-      auto layoutIndex = metadata.ds_metadata().layout();
-      if (layoutIndex >= 0 && layoutIndex < SPEAKER_SETUPS.size()) {
-        std::vector<std::string> speakerLabels;
-        std::vector<adm::AudioChannelFormatId> channelFormatIds;
-        auto& speakerSetup = SPEAKER_SETUPS.at(layoutIndex);
+      std::vector<std::string> speakerLabels;
+      std::vector<adm::AudioChannelFormatId> channelFormatIds;
 
-        for (auto& speaker : speakerSetup.speakers) {
-          speakerLabels.push_back(speaker.label);
-          auto channelFormatId = speaker.channelFormatId;
-          channelFormatIds.push_back(adm::parseAudioChannelFormatId(channelFormatId));
+      for (auto& speaker : metadata.ds_metadata().speakers()) {
+        auto thisSpeakerLabels = speaker.labels();
+        if (thisSpeakerLabels.size() > 0) {
+          speakerLabels.push_back(thisSpeakerLabels[0]);
+        } else {
+          speakerLabels.push_back("");
         }
-        auto objectHolder = add2076v2TailoredCommonDefinitionsObjectTo(
-            doc, metadata.name(),
-            adm::parseAudioPackFormatId(speakerSetup.packFormatId),
-            channelFormatIds, speakerLabels);
-
-        setInteractivity(*objectHolder.audioObject, object);
-        setImportance(*objectHolder.audioObject, object);
-        content.addReference(objectHolder.audioObject);
-        for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
-          auto speakerLabel = speakerLabels.at(i);
-          pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids.at(speakerLabel) });
-        }
-        serializedObjects[connectionId] = objectHolder.audioObject;
+        auto channelFormatId = genAudioChannelFormatId(1, speaker.id());
+        channelFormatIds.push_back(channelFormatId);
       }
+      auto objectHolder = add2076v2TailoredCommonDefinitionsObjectTo(
+          doc, metadata.name(),
+          genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()),
+          channelFormatIds, speakerLabels);
+
+      setInteractivity(*objectHolder.audioObject, object);
+      setImportance(*objectHolder.audioObject, object);
+      content.addReference(objectHolder.audioObject);
+      for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
+        auto speakerLabel = speakerLabels.at(i);
+        pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids.at(speakerLabel) });
+      }
+      serializedObjects[connectionId] = objectHolder.audioObject;
     }
   }
 }
