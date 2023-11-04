@@ -17,6 +17,7 @@ public:
 		int idValue{ 0 };
 		std::string fullId;
 		std::string name;
+		std::string niceName;
 		std::shared_ptr<adm::AudioChannelFormat> channelFormat;
 		std::shared_ptr<adm::AudioPackFormat> immediatePackFormat;
 		bool isLfe{ false };
@@ -51,7 +52,8 @@ public:
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
-	std::string makeNicePackFormatName(std::string originalName);
+	std::string makeNicePackFormatName(const std::string& originalName);
+	std::string makeNiceSpeakerName(const std::vector<std::string>& speakerLabels);
 	std::shared_ptr<adm::Document> admCommonDefinitions;
 	std::map<int, std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas;
 };
