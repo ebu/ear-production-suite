@@ -72,10 +72,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   if (pfData) {
     for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
       auto cfData = pfData->relatedChannelFormats[i];
-      auto label = cfData->name;
-      if (cfData->speakerLabels.size() > 0) {
-        label = cfData->speakerLabels[0];
-      }
+      auto label = cfData->niceName;
       speakerMeters_.push_back(std::make_unique<SpeakerMeter>(
           String(i + 1), label,
           label));  // was speakers.at(i).spLabel, speakers.at(i).label - e.g,
