@@ -69,17 +69,20 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   auto typeDef = apfid.get<adm::TypeDescriptor>().get();
   auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(
       typeDef, idValue);
-
-  for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
-    auto cfData = pfData->relatedChannelFormats[i];
-    auto label = cfData->name;
-    if (cfData->speakerLabels.size() > 0) {
-      label = cfData->speakerLabels[0];
+  if (pfData) {
+    for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
+      auto cfData = pfData->relatedChannelFormats[i];
+      auto label = cfData->name;
+      if (cfData->speakerLabels.size() > 0) {
+        label = cfData->speakerLabels[0];
+      }
+      speakerMeters_.push_back(std::make_unique<SpeakerMeter>(
+          String(i + 1), label,
+          label));  // was speakers.at(i).spLabel, speakers.at(i).label - e.g,
+                    // "L", "M+030"
+      speakerMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
+      addAndMakeVisible(speakerMeters_.back().get());
     }
-    speakerMeters_.push_back(
-        std::make_unique<SpeakerMeter>(String(i + 1), label, label)); // was speakers.at(i).spLabel, speakers.at(i).label - e.g, "L", "M+030"
-    speakerMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
-    addAndMakeVisible(speakerMeters_.back().get());
   }
   setSize(735, 655);
 }
