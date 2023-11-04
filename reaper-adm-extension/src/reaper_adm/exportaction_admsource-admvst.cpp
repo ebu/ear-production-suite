@@ -428,28 +428,30 @@ void AdmVstExporter::newAdmCommonDefinitionReference(ReaperAPI const& api, std::
 			//  but also those it may inherit if it references another Pack Format (which may also inherit another)
 			auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(typeDefinitionId, packFormatId);
 
-			for (auto cfData : pfData->relatedChannelFormats) {
+			if (pfData) {
+				for (auto cfData : pfData->relatedChannelFormats) {
 
-				auto cfId = adm::AudioChannelFormatId(typeDefinition, adm::AudioChannelFormatIdValue(cfData->idValue));
-				auto channelFormat = parentDocument->lookup(cfId);
-				assert(channelFormat);
+					auto cfId = adm::AudioChannelFormatId(typeDefinition, adm::AudioChannelFormatIdValue(cfData->idValue));
+					auto channelFormat = parentDocument->lookup(cfId);
+					assert(channelFormat);
 
-				auto subgraph = std::make_shared<AdmSubgraphElements>();
-				subgraph->audioChannelFormat = channelFormat;
+					auto subgraph = std::make_shared<AdmSubgraphElements>();
+					subgraph->audioChannelFormat = channelFormat;
 
-				for (auto trackFormat : allTrackFormats) {
-					auto referencedStreamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
-					if (referencedStreamFormat->getReference<adm::AudioChannelFormat>() == channelFormat) {
-						subgraph->audioStreamFormat = referencedStreamFormat;
-						subgraph->audioTrackFormat = trackFormat;
-						subgraph->audioTrackUid = adm::AudioTrackUid::create();
-						subgraph->audioTrackUid->setReference(subgraph->audioTrackFormat);
-						subgraph->audioTrackUid->setReference(audioPackFormat);
-						audioObject->addReference(subgraph->audioTrackUid);
+					for (auto trackFormat : allTrackFormats) {
+						auto referencedStreamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
+						if (referencedStreamFormat->getReference<adm::AudioChannelFormat>() == channelFormat) {
+							subgraph->audioStreamFormat = referencedStreamFormat;
+							subgraph->audioTrackFormat = trackFormat;
+							subgraph->audioTrackUid = adm::AudioTrackUid::create();
+							subgraph->audioTrackUid->setReference(subgraph->audioTrackFormat);
+							subgraph->audioTrackUid->setReference(audioPackFormat);
+							audioObject->addReference(subgraph->audioTrackUid);
+						}
 					}
-				}
 
-				admSubgraphs.push_back(subgraph);
+					admSubgraphs.push_back(subgraph);
+				}
 			}
 
 		}

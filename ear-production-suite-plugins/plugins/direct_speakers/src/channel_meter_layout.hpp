@@ -96,22 +96,24 @@ class ChannelMeterLayout : public Component {
     clearSpeakerSetup();
     auto pfData =
         AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, pfId);
-    for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
-      auto cfData = pfData->relatedChannelFormats[i];
-      auto label = cfData->name;
-      if (cfData->speakerLabels.size() > 0) {
-        label = cfData->speakerLabels[0];
-      }
-      speakerLevels_.push_back(std::make_unique<SpeakerLevel>(label));
-      speakerLevels_.back()->getLevelMeter()->setMeter(levelMeter_, i);
-      if (i < 6) {
-        channelMeterBox1to6_->addLevelMeter(speakerLevels_.back().get());
-      } else if (i < 12) {
-        channelMeterBox7to12_->addLevelMeter(speakerLevels_.back().get());
-      } else if (i < 18) {
-        channelMeterBox13to18_->addLevelMeter(speakerLevels_.back().get());
-      } else {
-        channelMeterBox19to24_->addLevelMeter(speakerLevels_.back().get());
+    if (pfData) {
+      for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
+        auto cfData = pfData->relatedChannelFormats[i];
+        auto label = cfData->name;
+        if (cfData->speakerLabels.size() > 0) {
+          label = cfData->speakerLabels[0];
+        }
+        speakerLevels_.push_back(std::make_unique<SpeakerLevel>(label));
+        speakerLevels_.back()->getLevelMeter()->setMeter(levelMeter_, i);
+        if (i < 6) {
+          channelMeterBox1to6_->addLevelMeter(speakerLevels_.back().get());
+        } else if (i < 12) {
+          channelMeterBox7to12_->addLevelMeter(speakerLevels_.back().get());
+        } else if (i < 18) {
+          channelMeterBox13to18_->addLevelMeter(speakerLevels_.back().get());
+        } else {
+          channelMeterBox19to24_->addLevelMeter(speakerLevels_.back().get());
+        }
       }
     }
 
