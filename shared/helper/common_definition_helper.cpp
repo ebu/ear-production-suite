@@ -96,69 +96,11 @@ void AdmCommonDefinitionHelper::recursePackFormatsForChannelFormats(std::shared_
 	// Find Channel formats
 	auto channelFormats = fromPackFormat->getReferences<adm::AudioChannelFormat>();
 	for (auto cf : channelFormats) {
-
-		auto cfData = std::make_shared<ChannelFormatData>();
-		cfData->idValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
-		cfData->fullId = adm::formatId(cf->get<adm::AudioChannelFormatId>());
-		cfData->name = cf->get<adm::AudioChannelFormatName>().get();
-		cfData->niceName = cfData->name;
-		cfData->channelFormat = cf;
-		cfData->immediatePackFormat = fromPackFormat;
-		
-		if (cf->has<adm::Frequency>()) {
-			auto freq = cf->get<adm::Frequency>();
-			cfData->isLfe = adm::isLowPass(freq);
-		}
-
-		auto td = fromPackFormat->get<adm::TypeDescriptor>();
-		if (td == adm::TypeDefinition::DIRECT_SPEAKERS) {
-			auto bfs = cf->getElements<adm::AudioBlockFormatDirectSpeakers>();
-			if (bfs.size() > 0) {
-				auto const& bf = bfs[0];
-
-				if (bf.has<adm::SphericalSpeakerPosition>()) {
-					auto const& pos = bf.get<adm::SphericalSpeakerPosition>();
-					if (pos.has<adm::Azimuth>()) {
-						cfData->azimuth = pos.get<adm::Azimuth>().get();
-					}
-					if (pos.has<adm::Elevation>()) {
-						cfData->elevation = pos.get<adm::Elevation>().get();
-					}
-					if (pos.has<adm::Distance>()) {
-						cfData->distance = pos.get<adm::Distance>().get();
-					}
-				}
-
-				auto speakerLabels = bf.get<adm::SpeakerLabels>();
-				for (auto const& speakerLabel : speakerLabels) {
-					cfData->speakerLabels.push_back(speakerLabel.get());
-				}
-			}
-			if (cfData->speakerLabels.size() > 0) {
-				cfData->niceName = makeNiceSpeakerName(cfData->speakerLabels);
-			}
-		}
-
+		auto cfData = std::make_shared<ChannelFormatData>(cf, fromPackFormat);
 		forPackFormatData->relatedChannelFormats.push_back(cfData);
 	}
 }
 
-std::string AdmCommonDefinitionHelper::makeNiceSpeakerName(const std::vector<std::string>& speakerLabels)
-{
-	// Use first speaker label
-	if (speakerLabels.size() > 0) {
-		std::string newName = speakerLabels[0];
-		// Remove urn if present
-		if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
-			auto colonPos = newName.find_last_of(':');
-			if (colonPos != std::string::npos) {
-				newName = newName.substr(colonPos + 1);
-			}
-		}
-		return newName;
-	}
-	return std::string();
-}
 
 std::string AdmCommonDefinitionHelper::makeNicePackFormatName(const std::string& originalName)
 {
@@ -191,4 +133,69 @@ std::string AdmCommonDefinitionHelper::makeNicePackFormatName(const std::string&
 	newName += standard;
 
 	return newName;
+}
+
+AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<adm::AudioChannelFormat> cf, std::shared_ptr<adm::AudioPackFormat> fromPackFormat)
+{
+	idValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
+	fullId = adm::formatId(cf->get<adm::AudioChannelFormatId>());
+	name = cf->get<adm::AudioChannelFormatName>().get();
+	niceName = name;
+	channelFormat = cf;
+	immediatePackFormat = fromPackFormat;
+
+	if (cf->has<adm::Frequency>()) {
+		auto freq = cf->get<adm::Frequency>();
+		isLfe = adm::isLowPass(freq);
+	}
+
+	auto td = fromPackFormat->get<adm::TypeDescriptor>();
+	if (td == adm::TypeDefinition::DIRECT_SPEAKERS) {
+		auto bfs = cf->getElements<adm::AudioBlockFormatDirectSpeakers>();
+		if (bfs.size() > 0) {
+			auto const& bf = bfs[0];
+
+			if (bf.has<adm::SphericalSpeakerPosition>()) {
+				auto const& pos = bf.get<adm::SphericalSpeakerPosition>();
+				if (pos.has<adm::Azimuth>()) {
+					azimuth = pos.get<adm::Azimuth>().get();
+				}
+				if (pos.has<adm::Elevation>()) {
+					elevation = pos.get<adm::Elevation>().get();
+				}
+				if (pos.has<adm::Distance>()) {
+					distance = pos.get<adm::Distance>().get();
+				}
+			}
+
+			auto bfSpeakerLabels = bf.get<adm::SpeakerLabels>();
+			for (auto const& bfSpeakerLabel : bfSpeakerLabels) {
+				speakerLabels.push_back(bfSpeakerLabel.get());
+			}
+		}
+		if (speakerLabels.size() > 0) {
+			niceName = makeNiceSpeakerName(speakerLabels);
+		}
+	}
+}
+
+AdmCommonDefinitionHelper::ChannelFormatData::~ChannelFormatData()
+{
+}
+
+std::string AdmCommonDefinitionHelper::ChannelFormatData::makeNiceSpeakerName(const std::vector<std::string>& speakerLabels)
+{
+	// Use first speaker label
+	if (speakerLabels.size() > 0) {
+		std::string newName = speakerLabels[0];
+		// Remove urn if present
+		if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
+			auto colonPos = newName.find_last_of(':');
+			if (colonPos != std::string::npos) {
+				newName = newName.substr(colonPos + 1);
+			}
+		}
+		return newName;
+	}
+	return std::string();
 }

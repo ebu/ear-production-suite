@@ -13,7 +13,11 @@ public:
 
 	static std::shared_ptr<AdmCommonDefinitionHelper> getSingleton();
 
-	struct ChannelFormatData {
+	class ChannelFormatData {
+	public:
+		ChannelFormatData(std::shared_ptr<adm::AudioChannelFormat> acf, std::shared_ptr<adm::AudioPackFormat> fromPackFormat);
+		~ChannelFormatData();
+
 		int idValue{ 0 };
 		std::string fullId;
 		std::string name;
@@ -25,6 +29,10 @@ public:
 		float azimuth{ 0.f };
 		float elevation{ 0.f };
 		float distance{ 1.f	};
+
+	private:
+		std::string makeNiceSpeakerName(const std::vector<std::string>& speakerLabels);
+
 	};
 
 	struct PackFormatData {
@@ -53,7 +61,6 @@ private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
 	std::string makeNicePackFormatName(const std::string& originalName);
-	std::string makeNiceSpeakerName(const std::vector<std::string>& speakerLabels);
 	std::shared_ptr<adm::Document> admCommonDefinitions;
 	std::map<int, std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas;
 };
