@@ -187,15 +187,17 @@ void AdmCommonDefinitionHelper::ChannelFormatData::setItuLabels()
 
 void AdmCommonDefinitionHelper::ChannelFormatData::setLegacySpeakerLabel()
 {
-	if (!mapHasKey(channelFormatNiceNames, fullId)) {
+	auto itLabels = channelFormatNiceNames.find(fullId);
+	if (itLabels == channelFormatNiceNames.end()){
 		return;
 	}
-	auto labels = getValueFromMap(channelFormatNiceNames, fullId);
+	auto const &labels = itLabels->second;
 	legacySpeakerLabel = labels.defaultLegacySpeakerLabel;
 	if (!labels.specificForPackFormatId.empty()) {
 		auto pfId = adm::formatId(immediatePackFormat->get<adm::AudioPackFormatId>());
-		if (mapHasKey(labels.specificForPackFormatId, pfId)) {
-			legacySpeakerLabel = getValueFromMap(labels.specificForPackFormatId, pfId);
+		auto itPfSpecificLabel = labels.specificForPackFormatId.find(pfId);
+		if (itPfSpecificLabel != labels.specificForPackFormatId.end()) {
+			legacySpeakerLabel = itPfSpecificLabel->second;
 		}
 	}
 }
