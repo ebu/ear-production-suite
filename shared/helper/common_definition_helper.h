@@ -35,13 +35,20 @@ public:
 
 	};
 
-	struct PackFormatData {
+	class PackFormatData {
+	public:
+		PackFormatData(std::shared_ptr<adm::AudioPackFormat> apf);
+		~PackFormatData();
+
 		int idValue{ 0 };
 		std::string fullId;
 		std::string name;
 		std::string niceName;
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
 		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
+
+	private:
+		std::string makeNicePackFormatName(const std::string& originalName);
 	};
 
 	struct TypeDefinitionData {
@@ -60,7 +67,6 @@ public:
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
-	std::string makeNicePackFormatName(const std::string& originalName);
 	std::shared_ptr<adm::Document> admCommonDefinitions;
 	std::map<int, std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas;
 };

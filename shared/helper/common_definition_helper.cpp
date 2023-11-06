@@ -69,13 +69,7 @@ void AdmCommonDefinitionHelper::populateElementRelationshipsFor(adm::TypeDescrip
 		int thisTypeDefinition = pf->get<adm::TypeDescriptor>().get();
 		if (thisTypeDefinition == tdData->id) {
 
-			auto pfData = std::make_shared<PackFormatData>();
-			pfData->idValue = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
-			pfData->fullId = adm::formatId(pf->get<adm::AudioPackFormatId>());
-			pfData->name = pf->get<adm::AudioPackFormatName>().get();
-			pfData->niceName = makeNicePackFormatName(pfData->name);
-			pfData->packFormat = pf;
-
+			auto pfData = std::make_shared<PackFormatData>(pf);
 			// Find Channel formats
 			recursePackFormatsForChannelFormats(pf, pfData);
 
@@ -102,38 +96,6 @@ void AdmCommonDefinitionHelper::recursePackFormatsForChannelFormats(std::shared_
 }
 
 
-std::string AdmCommonDefinitionHelper::makeNicePackFormatName(const std::string& originalName)
-{
-	std::string newName = originalName;
-
-	// Tidy up name
-	/// Extract ITU standard name if present
-	auto standard = std::string("");
-	if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
-		auto standardStart = newName.find(':', 10);
-		auto standardDiv = newName.find(':', standardStart + 1);
-		auto standardEnd = newName.find(':', standardDiv + 1);
-		auto standardNumber = newName.substr(standardStart + 1, standardDiv - standardStart - 1);
-		auto standardRevision = newName.substr(standardDiv + 1, standardEnd - standardDiv - 1);
-		standard += "  [BS. ";
-		standard += standardNumber;
-		standard += "-";
-		standard += standardRevision;
-		standard += "]";
-	}
-	///Tidy rest of string
-	auto colonPos = newName.find_last_of(':');
-	if (colonPos != std::string::npos) {
-		newName = newName.substr(colonPos + 1);
-	}
-	std::replace(newName.begin(), newName.end(), '_', ' ');
-	assert(newName.length() > 0);
-	newName[0] = toupper(newName[0]);
-	///Apply standard (if present)
-	newName += standard;
-
-	return newName;
-}
 
 AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<adm::AudioChannelFormat> cf, std::shared_ptr<adm::AudioPackFormat> fromPackFormat)
 {
@@ -198,4 +160,50 @@ std::string AdmCommonDefinitionHelper::ChannelFormatData::makeNiceSpeakerName(co
 		return newName;
 	}
 	return std::string();
+}
+
+AdmCommonDefinitionHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::AudioPackFormat> pf)
+{
+	idValue = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
+	fullId = adm::formatId(pf->get<adm::AudioPackFormatId>());
+	name = pf->get<adm::AudioPackFormatName>().get();
+	niceName = makeNicePackFormatName(name);
+	packFormat = pf;
+}
+
+AdmCommonDefinitionHelper::PackFormatData::~PackFormatData()
+{
+}
+
+std::string AdmCommonDefinitionHelper::PackFormatData::makeNicePackFormatName(const std::string& originalName)
+{
+	std::string newName = originalName;
+
+	// Tidy up name
+	/// Extract ITU standard name if present
+	auto standard = std::string("");
+	if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
+		auto standardStart = newName.find(':', 10);
+		auto standardDiv = newName.find(':', standardStart + 1);
+		auto standardEnd = newName.find(':', standardDiv + 1);
+		auto standardNumber = newName.substr(standardStart + 1, standardDiv - standardStart - 1);
+		auto standardRevision = newName.substr(standardDiv + 1, standardEnd - standardDiv - 1);
+		standard += "  [BS. ";
+		standard += standardNumber;
+		standard += "-";
+		standard += standardRevision;
+		standard += "]";
+	}
+	///Tidy rest of string
+	auto colonPos = newName.find_last_of(':');
+	if (colonPos != std::string::npos) {
+		newName = newName.substr(colonPos + 1);
+	}
+	std::replace(newName.begin(), newName.end(), '_', ' ');
+	assert(newName.length() > 0);
+	newName[0] = toupper(newName[0]);
+	///Apply standard (if present)
+	newName += standard;
+
+	return newName;
 }
