@@ -44,7 +44,6 @@ public:
 			const std::map<const std::string, const std::string> specificForPackFormatId = {};
 		};
 		static const std::map<const std::string, const ChannelFormatNiceName> channelFormatNiceNames;
-
 	};
 
 	class PackFormatData {
@@ -56,11 +55,13 @@ public:
 		std::string fullId;
 		std::string name;
 		std::string niceName;
+		std::optional<std::string> ituLabel;
+		std::optional<std::string> ituStandard;
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
 		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
 
 	private:
-		std::string makeNicePackFormatName(const std::string& originalName);
+		void setLabels();
 	};
 
 	struct TypeDefinitionData {

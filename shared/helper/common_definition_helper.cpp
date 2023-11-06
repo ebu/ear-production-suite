@@ -207,46 +207,31 @@ AdmCommonDefinitionHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::A
 	idValue = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
 	fullId = adm::formatId(pf->get<adm::AudioPackFormatId>());
 	name = pf->get<adm::AudioPackFormatName>().get();
-	niceName = makeNicePackFormatName(name);
 	packFormat = pf;
+	setLabels();
 }
 
 AdmCommonDefinitionHelper::PackFormatData::~PackFormatData()
 {
 }
 
-std::string AdmCommonDefinitionHelper::PackFormatData::makeNicePackFormatName(const std::string& originalName)
+void AdmCommonDefinitionHelper::PackFormatData::setLabels()
 {
-	std::string newName = originalName;
-
-	// Tidy up name
-	/// Extract ITU standard name if present
-	auto standard = std::string("");
-	if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
-		auto standardStart = newName.find(':', 10);
-		auto standardDiv = newName.find(':', standardStart + 1);
-		auto standardEnd = newName.find(':', standardDiv + 1);
-		auto standardNumber = newName.substr(standardStart + 1, standardDiv - standardStart - 1);
-		auto standardRevision = newName.substr(standardDiv + 1, standardEnd - standardDiv - 1);
-		standard += "  [BS. ";
-		standard += standardNumber;
-		standard += "-";
-		standard += standardRevision;
-		standard += "]";
+	if (name.compare(0, 11, "urn:itu:bs:") == 0) {
+		auto sections = splitString(name, ':', 7);
+		// we already know the first 3 elms are "urn", "itu", "bs"
+		if (sections[5] == "pack") {
+			ituStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
+			ituLabel = std::string(sections[6]);
+		}
 	}
-	///Tidy rest of string
-	auto colonPos = newName.find_last_of(':');
-	if (colonPos != std::string::npos) {
-		newName = newName.substr(colonPos + 1);
-	}
-	std::replace(newName.begin(), newName.end(), '_', ' ');
-	assert(newName.length() > 0);
-	newName[0] = toupper(newName[0]);
-	///Apply standard (if present)
-	newName += standard;
 
-	return newName;
+	niceName = ituLabel.has_value() ? ituLabel.value() : name;
+	std::replace(niceName.begin(), niceName.end(), '_', ' ');
+	assert(niceName.length() > 0);
+	niceName[0] = toupper(niceName[0]);
 }
+
 
 /* clang-format off */
 const std::map<const std::string, const AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatNiceName> 
