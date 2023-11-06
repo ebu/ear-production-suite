@@ -24,7 +24,6 @@ public:
 		int idValue{ 0 };
 		std::string fullId;
 		std::string name;
-		std::string niceName;
 		std::optional<std::string> legacySpeakerLabel;
 		std::optional<std::string> ituLabel;
 		std::optional<std::string> ituStandard;
@@ -37,7 +36,6 @@ public:
 		float distance{ 1.f	};
 
 	private:
-		std::string makeNiceSpeakerName(const std::vector<std::string>& speakerLabels);
 		void setItuLabels();
 		void setLegacySpeakerLabel();
 

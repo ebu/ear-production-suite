@@ -72,11 +72,14 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   if (pfData) {
     for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
       auto cfData = pfData->relatedChannelFormats[i];
-      auto label = cfData->niceName;
+      auto spLabel = cfData->legacySpeakerLabel.has_value()
+                         ? cfData->legacySpeakerLabel.value()
+                         : std::string();
+      auto ituLabel = cfData->ituLabel.has_value()
+                         ? cfData->ituLabel.value()
+                         : std::string();
       speakerMeters_.push_back(std::make_unique<SpeakerMeter>(
-          String(i + 1), label,
-          label));  // was speakers.at(i).spLabel, speakers.at(i).label - e.g,
-                    // "L", "M+030"
+          String(i + 1), spLabel, ituLabel));
       speakerMeters_.back()->getLevelMeter()->setMeter(p->getLevelMeter(), i);
       addAndMakeVisible(speakerMeters_.back().get());
     }
