@@ -128,7 +128,6 @@ AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<
 	idValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
 	fullId = adm::formatId(cf->get<adm::AudioChannelFormatId>());
 	name = cf->get<adm::AudioChannelFormatName>().get();
-	niceName = name;
 	channelFormat = cf;
 	immediatePackFormat = fromPackFormat;
 
@@ -161,9 +160,7 @@ AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<
 				speakerLabels.push_back(bfSpeakerLabel.get());
 			}
 		}
-		if (speakerLabels.size() > 0) {
-			niceName = makeNiceSpeakerName(speakerLabels);
-		}
+
 		setItuLabels();
 		setLegacySpeakerLabel();
 	}
@@ -171,23 +168,6 @@ AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<
 
 AdmCommonDefinitionHelper::ChannelFormatData::~ChannelFormatData()
 {
-}
-
-std::string AdmCommonDefinitionHelper::ChannelFormatData::makeNiceSpeakerName(const std::vector<std::string>& speakerLabels)
-{
-	// Use first speaker label
-	if (speakerLabels.size() > 0) {
-		std::string newName = speakerLabels[0];
-		// Remove urn if present
-		if (newName.rfind("urn:itu:bs:", 0) == 0 && std::count(newName.begin(), newName.end(), ':') > 4) {
-			auto colonPos = newName.find_last_of(':');
-			if (colonPos != std::string::npos) {
-				newName = newName.substr(colonPos + 1);
-			}
-		}
-		return newName;
-	}
-	return std::string();
 }
 
 void AdmCommonDefinitionHelper::ChannelFormatData::setItuLabels()
