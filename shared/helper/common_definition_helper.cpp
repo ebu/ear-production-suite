@@ -1,6 +1,32 @@
 #include "common_definition_helper.h"
 #include <adm/common_definitions.hpp>
 #include <algorithm>
+#include <string>
+#include <vector>
+#include <string_view>
+#include <helper/container_helpers.hpp>
+
+namespace {
+	std::vector<std::string_view> splitString(const std::string& input, char delimiter, size_t maxElements) {
+		std::vector<std::string_view> result;
+		std::string_view str(input);
+		size_t start = 0;
+
+		for (size_t i = 0; i < maxElements - 1; ++i) {
+			size_t end = str.find(delimiter, start);
+			if (end == std::string_view::npos) {
+				break;
+			}
+			result.push_back(str.substr(start, end - start));
+			start = end + 1;
+		}
+
+		// Add the remaining text, even if it contains more delimiters
+		result.push_back(str.substr(start));
+
+		return result;
+	}
+}
 
 AdmCommonDefinitionHelper::AdmCommonDefinitionHelper()
 {
@@ -138,6 +164,8 @@ AdmCommonDefinitionHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<
 		if (speakerLabels.size() > 0) {
 			niceName = makeNiceSpeakerName(speakerLabels);
 		}
+		setItuLabels();
+		setLegacySpeakerLabel();
 	}
 }
 
@@ -160,6 +188,36 @@ std::string AdmCommonDefinitionHelper::ChannelFormatData::makeNiceSpeakerName(co
 		return newName;
 	}
 	return std::string();
+}
+
+void AdmCommonDefinitionHelper::ChannelFormatData::setItuLabels()
+{
+	for (auto const& speakerLabel : speakerLabels) {
+		if (speakerLabel.compare(0, 10, "urn:itu:bs:") == 0){
+			auto sections = splitString(speakerLabel, ':', 7);
+			// we already know the first 3 elms are "urn", "itu", "bs"
+			if (sections[5] == "speaker") {
+				ituStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
+				ituLabel = std::string(sections[6]);
+				return;
+			}
+		}
+	}
+}
+
+void AdmCommonDefinitionHelper::ChannelFormatData::setLegacySpeakerLabel()
+{
+	if (!mapHasKey(channelFormatNiceNames, fullId)) {
+		return;
+	}
+	auto labels = getValueFromMap(channelFormatNiceNames, fullId);
+	legacySpeakerLabel = labels.defaultLegacySpeakerLabel;
+	if (!labels.specificForPackFormatId.empty()) {
+		auto pfId = adm::formatId(immediatePackFormat->get<adm::AudioPackFormatId>());
+		if (mapHasKey(labels.specificForPackFormatId, pfId)) {
+			legacySpeakerLabel = getValueFromMap(labels.specificForPackFormatId, pfId);
+		}
+	}
 }
 
 AdmCommonDefinitionHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::AudioPackFormat> pf)
