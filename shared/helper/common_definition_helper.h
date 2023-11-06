@@ -40,12 +40,12 @@ public:
 		void setLegacySpeakerLabel();
 
 		struct ChannelFormatNiceName {
-			std::string defaultLegacySpeakerLabel;
-			std::map<std::string, std::string> specificForPackFormatId = {};
+			const std::string defaultLegacySpeakerLabel;
+			const std::map<const std::string, const std::string> specificForPackFormatId = {};
 		};
 
 		/* clang-format off */
-		std::map<std::string, ChannelFormatNiceName> channelFormatNiceNames{
+		std::map<const std::string, const ChannelFormatNiceName> channelFormatNiceNames{
 			{"AC_00010001", ChannelFormatNiceName{ "L", {
 				{"AP_00010009", "FLc"},
 			}}},
