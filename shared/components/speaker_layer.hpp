@@ -67,14 +67,21 @@ class SpeakerLayer : public Component {
                 layer = Layer::upper;
             }
             if (layer == layer_) {
+                std::string label;
+                if (cfData->legacySpeakerLabel.has_value()) {
+                    label = cfData->legacySpeakerLabel.value();
+                }
+                else if (cfData->ituLabel.has_value()) {
+                    label = cfData->ituLabel.value();
+                }
                 if (cfData->elevation >= 90.f) {
-                    drawVoiceOfGod(g, cfData->niceName);
+                    drawVoiceOfGod(g, label);
                 }
                 else if (cfData->isLfe) {
-                    drawLfe(g, cfData->azimuth, cfData->niceName);
+                    drawLfe(g, cfData->azimuth, label);
                 }
                 else {
-                    drawSpeaker(g, cfData->azimuth, cfData->niceName);
+                    drawSpeaker(g, cfData->azimuth, label);
                 }
             }
         }
