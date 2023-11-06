@@ -173,7 +173,7 @@ AdmCommonDefinitionHelper::ChannelFormatData::~ChannelFormatData()
 void AdmCommonDefinitionHelper::ChannelFormatData::setItuLabels()
 {
 	for (auto const& speakerLabel : speakerLabels) {
-		if (speakerLabel.compare(0, 10, "urn:itu:bs:") == 0){
+		if (speakerLabel.compare(0, 11, "urn:itu:bs:") == 0){
 			auto sections = splitString(speakerLabel, ':', 7);
 			// we already know the first 3 elms are "urn", "itu", "bs"
 			if (sections[5] == "speaker") {
