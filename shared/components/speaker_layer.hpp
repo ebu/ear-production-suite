@@ -111,7 +111,7 @@ class SpeakerLayer : public Component {
             }
         );
         const float minDist = 15.f;
-        const float labNudge = 7.5f;
+        const float labNudge = 5.f;
         int drawableSpeakersSize = static_cast<int>(drawableSpeakers.size());
         /// Check from 0 to 180 for spacing
         for (int i = 1; i < drawableSpeakersSize - 1; ++i) {
@@ -126,12 +126,12 @@ class SpeakerLayer : public Component {
                 // Surrounded by outer labels. Should we pull this one in?
                 if (thisAz - prevAz < minDist) {
                     drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz += labNudge;
+                    drawableSpeakers[i].labAz += (labNudge * 2.f);
                     drawableSpeakers[prev].labAz -= labNudge;
                 }
                 if (nextAz - thisAz < minDist) {
                     drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz -= labNudge;
+                    drawableSpeakers[i].labAz -= (labNudge * 2.f);
                     drawableSpeakers[next].labAz += labNudge;
                 }
             }
@@ -155,12 +155,12 @@ class SpeakerLayer : public Component {
                 // Surrounded by outer labels. Should we pull this one in?
                 if (thisAz - nextAz < minDist) {
                     drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz += labNudge;
+                    drawableSpeakers[i].labAz += (labNudge * 2.f);
                     drawableSpeakers[next].labAz -= labNudge;
                 }
                 if (prevAz - thisAz < minDist) {
                     drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz -= labNudge;
+                    drawableSpeakers[i].labAz -= (labNudge * 2.f);
                     drawableSpeakers[prev].labAz += labNudge;
                 }
             }
