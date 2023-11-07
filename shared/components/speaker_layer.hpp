@@ -70,6 +70,8 @@ class SpeakerLayer : public Component {
     g.drawLine(verticalLine, crossLinewidth_);
 
     if (pfData) {
+        struct SpUi { std::string label; float azimuth; bool outer; };
+        std::vector<SpUi> drawableSpeakers;
         for (auto const& cfData : pfData->relatedChannelFormats) {
             Layer layer{ Layer::middle };
             if (cfData->elevation <= -30.f) {
@@ -92,14 +94,69 @@ class SpeakerLayer : public Component {
                     drawLfe(g, cfData->azimuth, label);
                 }
                 else {
-                    drawSpeaker(g, cfData->azimuth, label);
+                    // Can't draw immediately - need to check label spacing
+                    SpUi spUi{ label, cfData->azimuth, true };
+                    while (spUi.azimuth >= 360.0) spUi.azimuth -= 360.0;
+                    while (spUi.azimuth < 0.0) spUi.azimuth += 360.0;
+                    drawableSpeakers.push_back(spUi);
                 }
             }
+        }
+
+        // Check spacing between labels
+        std::sort(drawableSpeakers.begin(), drawableSpeakers.end(), 
+            [](const SpUi& a, const SpUi& b) {
+                return a.azimuth < b.azimuth;
+            }
+        );
+        const float minDist = 15.f;
+        int drawableSpeakersSize = static_cast<int>(drawableSpeakers.size());
+        /// Check from 0 to 180 for spacing
+        for (int i = 1; i < drawableSpeakersSize - 1; ++i) {
+            int prev = i - 1;
+            int next = i + 1;
+            float thisAz = drawableSpeakers[i].azimuth;
+            if (thisAz == 0.f) continue;
+            if (thisAz >= 180.f) break;
+            float prevAz = drawableSpeakers[prev].azimuth;
+            float nextAz = drawableSpeakers[next].azimuth;
+            if (drawableSpeakers[prev].outer && drawableSpeakers[next].outer) {
+                // Surrounded by outer labels. Should we pull this one in?
+                if (thisAz - prevAz < minDist || nextAz - thisAz < minDist) {
+                    drawableSpeakers[i].outer = false;
+                }
+            }
+        }
+        /// Check from 360 to 180 for spacing
+        for (int i = drawableSpeakersSize - 1; i > 0; --i) {
+            int prev = i + 1;
+            int next = i - 1;
+            float thisAz = drawableSpeakers[i].azimuth;
+            if (thisAz <= 180.f) break;
+            float prevAz;
+            float nextAz = drawableSpeakers[next].azimuth;
+            if (prev >= drawableSpeakersSize) {
+                prev = 0;
+                prevAz = drawableSpeakers[prev].azimuth + 360.f;
+            }
+            else {
+                prevAz = drawableSpeakers[prev].azimuth;
+            }
+            if (drawableSpeakers[prev].outer && drawableSpeakers[next].outer) {
+                // Surrounded by outer labels. Should we pull this one in?
+                if (thisAz - nextAz < minDist || prevAz - thisAz < minDist) {
+                    drawableSpeakers[i].outer = false;
+                }
+            }
+        }
+        /// Draw them
+        for (auto const& spUi : drawableSpeakers) {
+            drawSpeaker(g, spUi.azimuth, spUi.label, spUi.outer);
         }
     }
   }
 
-  void drawSpeaker(Graphics &g, float azimuth, const std::string& label) {
+  void drawSpeaker(Graphics &g, float azimuth, const std::string& label, bool outer) {
     const float angleRad = azimuth / 180.f * MathConstants<float>::pi;
     g.setColour(findColour(highlightColourId));
 
@@ -112,9 +169,10 @@ class SpeakerLayer : public Component {
     float labelWidth = speakerLabelFont_.getStringWidthFloat(String(label));
     const float labelHeight = speakerLabelFont_.getHeight();
     float labelRadius = distanceToEdge(labelWidth, labelHeight, azimuth);
+    float radOffset = outer ? (labelRadius + knobSize_) : -(labelRadius + knobSize_);
 
-    xPos = centre_.getX() - std::sin(angleRad) * (radius + labelRadius + knobSize_);
-    yPos = centre_.getY() - std::cos(angleRad) * (radius + labelRadius + knobSize_);
+    xPos = centre_.getX() - std::sin(angleRad) * (radius + radOffset);
+    yPos = centre_.getY() - std::cos(angleRad) * (radius + radOffset);
     juce::Rectangle<float> labelRect{xPos, yPos, labelWidth, labelHeight };
     labelRect.setCentre(xPos, yPos); // we point to intended centre
     g.setFont(speakerLabelFont_);
