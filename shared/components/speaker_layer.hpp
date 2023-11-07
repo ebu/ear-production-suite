@@ -91,16 +91,21 @@ class SpeakerLayer : public Component {
   void drawSpeaker(Graphics &g, float azimuth, const std::string& label) {
     const float angleRad = azimuth / 180.f * MathConstants<float>::pi;
     g.setColour(findColour(highlightColourId));
-    float xPos = centre_.getX() - std::sin(angleRad) * diameter_ / 2.f;
-    float yPos = centre_.getY() - std::cos(angleRad) * diameter_ / 2.f;
-    g.fillEllipse(xPos - knobSize_ / 2.f, yPos - knobSize_ / 2.f, knobSize_,
-                  knobSize_);
-    float xPosLabel = centre_.getX() -
-                      std::sin(angleRad) * (diameter_ / 2.f + labelDistance_);
-    float yPosLabel = centre_.getY() -
-                      std::cos(angleRad) * (diameter_ / 2.f + labelDistance_);
-    juce::Rectangle<float> labelRect{xPos, yPos - labelDistance_, 100.f, 26.f};
-    labelRect.translate(-50.f, -13.f);
+
+    auto radius = diameter_ / 2.f;
+
+    float xPos = centre_.getX() - std::sin(angleRad) * radius;
+    float yPos = centre_.getY() - std::cos(angleRad) * radius;
+    g.fillEllipse(xPos - knobSize_ / 2.f, yPos - knobSize_ / 2.f, knobSize_,  knobSize_);
+
+    float labelWidth = speakerLabelFont_.getStringWidthFloat(String(label));
+    const float labelHeight = speakerLabelFont_.getHeight();
+    float labelRadius = std::max(labelWidth, labelHeight) / 2.f;
+
+    xPos = centre_.getX() - std::sin(angleRad) * (radius + labelRadius + knobSize_);
+    yPos = centre_.getY() - std::cos(angleRad) * (radius + labelRadius + knobSize_);
+    juce::Rectangle<float> labelRect{xPos, yPos, labelWidth, labelHeight };
+    labelRect.setCentre(xPos, yPos); // we point to intended centre
     g.setFont(speakerLabelFont_);
     g.setColour(findColour(labelColourId));
     g.drawText(String(label), labelRect, Justification::centred);
