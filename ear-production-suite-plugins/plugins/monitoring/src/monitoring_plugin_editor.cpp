@@ -4,7 +4,7 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "components/version_label.hpp"
 #include "helper/properties_file.hpp"
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include "detail/constants.hpp"
 #include "monitoring_plugin_processor.hpp"
 #include "speaker_setups.hpp"
@@ -67,7 +67,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   auto apfid = adm::parseAudioPackFormatId(AUDIO_PACK_FORMAT_ID);
   auto idValue = apfid.get<adm::AudioPackFormatIdValue>().get();
   auto typeDef = apfid.get<adm::TypeDescriptor>().get();
-  auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(
+  auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(
       typeDef, idValue);
   if (pfData) {
     for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {

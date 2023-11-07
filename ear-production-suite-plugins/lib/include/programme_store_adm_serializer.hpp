@@ -7,7 +7,7 @@
 #include <bw64/bw64.hpp>
 #include <vector>
 #include <map>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 namespace ear {
 namespace plugin {
@@ -50,7 +50,7 @@ class ProgrammeStoreAdmSerializer {
   void setImportance(adm::AudioObject& object, const proto::Object& object1);
   bool isSerializedWithDifferentObjectSettings(const proto::Object& object);
 
-  AdmCommonDefinitionHelper admCommonDefinitionHelper;
+  AdmPresetDefinitionsHelper admCommonDefinitionHelper;
 };
 
 }  // namespace plugin

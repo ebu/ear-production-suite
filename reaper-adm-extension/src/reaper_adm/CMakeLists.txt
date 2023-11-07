@@ -7,7 +7,7 @@ find_package(Boost REQUIRED QUIET COMPONENTS filesystem)
 find_package(JUCE REQUIRED QUIET)
 
 set(EXTENSION_SOURCES
-	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
 	${EPS_SHARED_DIR}/update_check_settings_file.cpp
 	
 	actionmanager.cpp
@@ -77,7 +77,7 @@ set(EXTENSION_SOURCES
 	)
 	
 set(EXTENSION_HEADERS
-	${EPS_SHARED_DIR}/helper/common_definition_helper.h
+	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.h
 	${EPS_SHARED_DIR}/helper/nng_wrappers.h
 	${EPS_SHARED_DIR}/helper/char_encoding.hpp
 	${EPS_SHARED_DIR}/helper/version.hpp

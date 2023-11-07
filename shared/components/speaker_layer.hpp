@@ -3,7 +3,7 @@
 #include "JuceHeader.h"
 
 #include <speaker_setups.hpp>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 #include "look_and_feel/colours.hpp"
 #include "look_and_feel/fonts.hpp"
@@ -33,7 +33,7 @@ class SpeakerLayer : public Component {
     repaint();
   }
   void setSpeakerSetupPackFormat(int pfId) {
-    pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, pfId);
+    pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, pfId);
     repaint();
   }
 
@@ -144,7 +144,7 @@ class SpeakerLayer : public Component {
   void resized() override {}
 
  private:
-  std::shared_ptr<AdmCommonDefinitionHelper::PackFormatData> pfData;
+  std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> pfData;
 
   Layer layer_;
 

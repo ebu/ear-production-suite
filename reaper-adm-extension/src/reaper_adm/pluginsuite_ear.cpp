@@ -20,7 +20,7 @@
 #include <adm/common_definitions.hpp>
 #include <bw64/bw64.hpp>
 #include <speaker_setups.hpp>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include <helper/container_helpers.hpp>
 #include <daw_channel_count.h>
 
@@ -130,7 +130,7 @@ std::vector<int> determineUsedDirectSpeakersTrackMappingValues(PluginInstance& p
     assert(packFormatId.has_value());
 
     if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
-        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, *packFormatId);
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, *packFormatId);
         if (pfData) {
             int trackWidth = pfData->relatedChannelFormats.size();
             for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
@@ -154,7 +154,7 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	assert(packFormatId.has_value());
 
 	if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
-		auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(4, *packFormatId);
+		auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(4, *packFormatId);
 		if(pfData) {
 			int trackWidth = pfData->relatedChannelFormats.size();
 			for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
@@ -422,7 +422,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         auto packFormat = channel.packFormat();
         auto packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
 
-        auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, packFormatIdValue);
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, packFormatIdValue);
         if (!pfData) {
             // Could be cart pf
             auto cartLayout = getCartLayout(*packFormat);
@@ -430,7 +430,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
                 auto altPfIdStr = getMappedCommonPackId(*cartLayout);
                 auto altPfId = adm::parseAudioPackFormatId(altPfIdStr);
                 auto altPfIdValue = altPfId.get<adm::AudioPackFormatIdValue>().get();
-                pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, altPfIdValue);
+                pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, altPfIdValue);
                 if (pfData) {
                     packFormatIdValue = altPfIdValue;
                 }

@@ -1,6 +1,6 @@
 set(VST_SOURCES
 	${EPS_SHARED_DIR}/binary_data.cpp
-	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
 	
 	PluginEditor.cpp
 	PluginProcessor.cpp
@@ -17,7 +17,7 @@ set(VST_HEADERS
 	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/singleton.hpp
-	${EPS_SHARED_DIR}/helper/common_definition_helper.h
+	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.h
 	${EPS_SHARED_DIR}/helper/nng_wrappers.h
 	
 	JuceHeader_Wrapper.h
