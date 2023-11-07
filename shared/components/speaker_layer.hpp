@@ -23,6 +23,17 @@ class SpeakerLayer : public Component {
 
   ~SpeakerLayer() {}
 
+ private:
+  float distanceToEdge(float width, float height, float angleDegrees) {
+    // Convert angle from degrees to radians
+    float angleRadians = angleDegrees * M_PI / 180.0f;
+    float a = fabs((height / 2.0f) / cos(angleRadians));
+    float b = fabs((width / 2.0f) / sin(angleRadians));
+    return std::min(a, b);
+  }
+
+ public:
+
   void setLayer(Layer layer) {
     layer_ = layer;
     repaint();
@@ -100,7 +111,7 @@ class SpeakerLayer : public Component {
 
     float labelWidth = speakerLabelFont_.getStringWidthFloat(String(label));
     const float labelHeight = speakerLabelFont_.getHeight();
-    float labelRadius = std::max(labelWidth, labelHeight) / 2.f;
+    float labelRadius = distanceToEdge(labelWidth, labelHeight, azimuth);
 
     xPos = centre_.getX() - std::sin(angleRad) * (radius + labelRadius + knobSize_);
     yPos = centre_.getY() - std::cos(angleRad) * (radius + labelRadius + knobSize_);
@@ -164,10 +175,10 @@ class SpeakerLayer : public Component {
   // TODO: Dia was 120 when boxes were smaller (before metadata removal)
   const float diameter_ = 170.f;
   const float trackWidth_ = 5.f;
-  const float knobSize_ = 10.37f;
+  const float knobSize_ = 10.f;
   const float crossSize_ = 17.f;
   const float crossLinewidth_ = 1.f;
-  const float lfeDistance_ = 45.f;
+  const float lfeDistance_ = 50.f;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpeakerLayer)
 };  // namespace ui
