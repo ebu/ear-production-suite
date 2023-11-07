@@ -7,7 +7,7 @@
 #include "components/routing_info_icon.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 namespace ear {
 namespace plugin {
@@ -60,7 +60,7 @@ class ValueBoxMain : public Component {
     hoaTypeLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(hoaTypeLabel_.get());
 
-    auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+    auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
     auto elementRelationships =
         commonDefinitionHelper->getElementRelationships();
     for (auto const& [id, tdData] : elementRelationships) {

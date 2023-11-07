@@ -129,7 +129,7 @@ auto createAdmDocument() {
 }
 
 auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, const std::string &pfIdStr) {
-    auto helper = AdmCommonDefinitionHelper::getSingleton();
+    auto helper = AdmPresetDefinitionsHelper::getSingleton();
     auto obj = adm::AudioObject::create(adm::AudioObjectName("AO"));
     auto pfId = adm::parseAudioPackFormatId(pfIdStr);
     doc->add(obj);

@@ -11,7 +11,7 @@
 #include "pcmsourcecreator.h"
 #include "mediatakeelement.h"
 #include <helper/container_helpers.hpp>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 using namespace admplug;
 

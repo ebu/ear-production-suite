@@ -8,7 +8,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "components/look_and_feel/slider.hpp"
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include "speaker_meters_box.hpp"
 #include "speaker_setups.hpp"
 
@@ -95,7 +95,7 @@ class ChannelMeterLayout : public Component {
   void setSpeakerSetupPackFormat(int pfId) {
     clearSpeakerSetup();
     auto pfData =
-        AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(1, pfId);
+        AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, pfId);
     if (pfData) {
       for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
         auto cfData = pfData->relatedChannelFormats[i];

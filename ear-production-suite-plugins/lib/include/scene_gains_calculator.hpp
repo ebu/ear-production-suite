@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "helper/common_definition_helper.h"
+#include "helper/adm_preset_definitions_helper.h"
 
 namespace ear {
 namespace plugin {
@@ -46,7 +46,7 @@ class SceneGainsCalculator {
   std::map<communication::ConnectionId, ItemGains> routingCache_;
 
   std::mutex commonDefinitionHelperMutex_;
-  AdmCommonDefinitionHelper commonDefinitionHelper_{};
+  AdmPresetDefinitionsHelper commonDefinitionHelper_{};
 };
 
 }  // namespace plugin

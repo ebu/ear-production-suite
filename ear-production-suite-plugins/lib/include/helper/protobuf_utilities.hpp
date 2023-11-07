@@ -3,7 +3,7 @@
 #include <map>
 #include "type_metadata.pb.h"
 #include <speaker_setups.hpp>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 namespace ear {
 namespace plugin {
@@ -11,7 +11,7 @@ namespace proto {
 
 inline proto::DirectSpeakersTypeMetadata* convertPackFormatToEpsMetadata(
     int packFormatIdValue) {
-  auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+  auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
   
   auto ds_metadata = new proto::DirectSpeakersTypeMetadata();
   ds_metadata->set_packformatidvalue(packFormatIdValue);

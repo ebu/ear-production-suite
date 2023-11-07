@@ -426,7 +426,7 @@ void AdmVstExporter::newAdmCommonDefinitionReference(ReaperAPI const& api, std::
 
 			// We use the commonDefinitionHelper to get not only the Pack Formats immediate Channel Formats,
 			//  but also those it may inherit if it references another Pack Format (which may also inherit another)
-			auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(typeDefinitionId, packFormatId);
+			auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(typeDefinitionId, packFormatId);
 
 			if (pfData) {
 				for (auto cfData : pfData->relatedChannelFormats) {

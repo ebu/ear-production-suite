@@ -6,7 +6,7 @@
 #include "components/look_and_feel/fonts.hpp"
 #include "order_display_box.hpp"
 #include "order_box.hpp"
-#include "helper/common_definition_helper.h"
+#include "helper/adm_preset_definitions_helper.h"
 
 namespace ear {
 namespace plugin {
@@ -75,7 +75,7 @@ void ValueBoxOrderDisplay::clearHoaSetup() {
 
 void ValueBoxOrderDisplay::setHoaType(int hoaId) {
   clearHoaSetup();
-  auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+  auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
   auto elementRelationships = commonDefinitionHelper->getElementRelationships();
   auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
   size_t cfCount(0);
