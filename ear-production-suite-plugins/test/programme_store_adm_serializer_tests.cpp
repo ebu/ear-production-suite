@@ -4,7 +4,7 @@
 #include <scene_store.pb.h>
 #include <programme_store_adm_serializer.hpp>
 #include <adm/common_definitions.hpp>
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include <algorithm>
 #include <functional>
 #include "store_metadata.hpp"
@@ -78,7 +78,7 @@ class ItemBuilder {
     ItemBuilder& withDsPackFormat(int pfId) {
       auto dsMeta = metadata_.mutable_ds_metadata();
       dsMeta->set_packformatidvalue(pfId);
-      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(1, pfId);
       if (pfData) {
         for (auto cfData : pfData->relatedChannelFormats) {

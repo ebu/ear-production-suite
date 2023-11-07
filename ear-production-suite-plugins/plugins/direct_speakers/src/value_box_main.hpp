@@ -7,7 +7,7 @@
 #include "components/routing_info_icon.hpp"
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 namespace ear {
 namespace plugin {
@@ -54,7 +54,7 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(speakerSetupLabel_.get());
     speakerSetupsComboBox_->setDefaultText("Select speaker layout");
 
-    auto tdData = AdmCommonDefinitionHelper::getSingleton()->getTypeDefinitionData(1);
+    auto tdData = AdmPresetDefinitionsHelper::getSingleton()->getTypeDefinitionData(1);
     for (auto const& pfData : tdData->relatedPackFormats) {
       speakerSetupsComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
     }

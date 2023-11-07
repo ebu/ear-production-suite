@@ -14,7 +14,7 @@
 #include "components/look_and_feel/colours.hpp"
 #include "components/look_and_feel/fonts.hpp"
 #include "metadata.hpp"
-#include "helper/common_definition_helper.h"
+#include "helper/adm_preset_definitions_helper.h"
 #include <memory>
 
 namespace ear {
@@ -224,7 +224,7 @@ class ObjectView : public ElementView,
     juce::String metadataLabelText;
     if (data_.item.has_ds_metadata()) {
       metadataLabelText = "DirectSpeakers";
-      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(
         1, data_.item.ds_metadata().packformatidvalue());
       if (pfData) {
@@ -232,7 +232,7 @@ class ObjectView : public ElementView,
       }
     } else if (data_.item.has_hoa_metadata()) {
       metadataLabelText = "HOA";
-      auto commonDefinitionHelper = AdmCommonDefinitionHelper::getSingleton();
+      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(
         4, data_.item.hoa_metadata().packformatidvalue());
       if (pfData) {

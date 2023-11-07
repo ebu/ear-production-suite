@@ -1,15 +1,11 @@
 set(SOURCES_HOA_INPUT
     ${EPS_SHARED_DIR}/binary_data.cpp
-
-	# TODO - C+P'd from DS plugin - remove unnecessary components once UI dev finished
     ${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
     ${EPS_SHARED_DIR}/components/look_and_feel/name_text_editor.cpp
     ${EPS_SHARED_DIR}/components/ear_combo_box.cpp
     ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
-	
-	${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
-
+    ${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
     src/hoa_frontend_connector.cpp
     src/hoa_plugin_editor.cpp
     src/hoa_plugin_processor.cpp
@@ -45,7 +41,7 @@ set(HEADERS_HOA_INPUT
 	${EPS_SHARED_DIR}/components/look_and_feel/shadows.hpp
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.hpp
 	
-	${EPS_SHARED_DIR}/helper/common_definition_helper.h
+	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.h
 	${EPS_SHARED_DIR}/helper/graphics.hpp
 	${EPS_SHARED_DIR}/helper/multi_async_updater.h
 	${EPS_SHARED_DIR}/helper/properties_file.hpp

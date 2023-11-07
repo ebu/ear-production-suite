@@ -3,7 +3,7 @@
 #include "components/ear_combo_box.hpp"
 #include "components/ear_name_text_editor.hpp"
 #include "detail/weak_ptr_helpers.hpp"
-#include <helper/common_definition_helper.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include "speaker_setups.hpp"
 #include <daw_channel_count.h>
 
@@ -182,7 +182,7 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetupPackFormat(
   if (auto speakerSetupsComboBoxLocked = speakerSetupsComboBox_.lock())
     speakerSetupsComboBoxLocked->setSelectedId(speakerSetupPackFormatIdValue,
                                              dontSendNotification);
-  auto pfData = AdmCommonDefinitionHelper::getSingleton()->getPackFormatData(
+  auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(
       1, cachedPackFormatId_);
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
     int layoutSize = pfData ? pfData->relatedChannelFormats.size() : 0;

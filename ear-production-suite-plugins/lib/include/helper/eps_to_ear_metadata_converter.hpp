@@ -1,7 +1,7 @@
 #pragma once
 
 #include "helper/protobuf_utilities.hpp"
-#include "helper/common_definition_helper.h"
+#include "helper/adm_preset_definitions_helper.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -55,7 +55,7 @@ struct EpsToEarMetadataConverter {
   }
   static ear::HOATypeMetadata convert(
       const proto::HoaTypeMetadata &epsMetadata,
-      AdmCommonDefinitionHelper &commonDefinitionHelper) {
+      AdmPresetDefinitionsHelper &commonDefinitionHelper) {
     auto pfData = commonDefinitionHelper.getPackFormatData(
         4, epsMetadata.packformatidvalue());
 

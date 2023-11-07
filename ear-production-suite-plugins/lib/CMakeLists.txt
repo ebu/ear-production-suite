@@ -51,7 +51,7 @@ set(EAR_BASE_SOURCES
   src/communication/metadata_thread.cpp
   src/pending_store.cpp
   src/auto_mode_controller.cpp
-  ${EPS_SHARED_DIR}/helper/common_definition_helper.cpp
+  ${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
   ${EAR_PROTO_SRC} src/restored_pending_store.cpp
   )
 		
@@ -132,6 +132,7 @@ set(EAR_BASE_HEADERS
 	include/auto_mode_controller.hpp
 	include/reaper_integration.hpp
 	include/reaper_vst3_interfaces.h
+    ${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.h
 	${EPS_SHARED_DIR}/helper/container_helpers.hpp
 	${EPS_SHARED_DIR}/speaker_setups.hpp
 	)
