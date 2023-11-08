@@ -5,6 +5,7 @@ set(SOURCES_DIRECT_SPEAKERS_INPUT
     ${EPS_SHARED_DIR}/components/ear_combo_box.cpp
     ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
     ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
+    ${EPS_SHARED_DIR}/components/speaker_layer.cpp
     ${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
     src/direct_speakers_frontend_connector.cpp
     src/direct_speakers_plugin_editor.cpp
