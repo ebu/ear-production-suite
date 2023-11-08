@@ -6,7 +6,6 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
-
 SpeakerLayer::SpeakerLayer() {
     setColour(backgroundColourId, EarColours::Transparent);
     setColour(trackColourId, EarColours::SliderTrack);
@@ -25,6 +24,7 @@ void SpeakerLayer::clearSpeakerSetup() {
     pfData.reset();
     repaint();
 }
+
 void SpeakerLayer::setSpeakerSetupPackFormat(int pfId) {
     pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, pfId);
     repaint();
@@ -35,7 +35,7 @@ void SpeakerLayer::resized() {}
 void SpeakerLayer::paint(Graphics& g) {
     g.fillAll(findColour(backgroundColourId));
 
-    centre_ = juce::Point<float>{ getWidth() / 2.f, getHeight() / 2.f + 10.f };
+    centre_ = juce::Point<float>{ getWidth() / 2.f, getHeight() / 2.f };
 
     // circle
     g.setColour(findColour(trackColourId));
@@ -53,9 +53,8 @@ void SpeakerLayer::paint(Graphics& g) {
     g.drawLine(horizontalLine, crossLinewidth_);
     g.drawLine(verticalLine, crossLinewidth_);
 
+    speakerPlacement_.reset();
     if (pfData) {
-        struct SpUi { std::string label; float spAz; float labAz; bool outer; };
-        std::vector<SpUi> drawableSpeakers;
         for (auto const& cfData : pfData->relatedChannelFormats) {
             Layer layer{ Layer::middle };
             if (cfData->elevation <= -30.f) {
@@ -80,80 +79,12 @@ void SpeakerLayer::paint(Graphics& g) {
                 }
                 else {
                     // Can't draw immediately - need to check label spacing
-                    SpUi spUi{ label, cfData->azimuth, cfData->azimuth, true };
-                    while (spUi.spAz >= 360.0) spUi.spAz -= 360.0;
-                    while (spUi.spAz < 0.0) spUi.spAz += 360.0;
-                    spUi.labAz = spUi.spAz;
-                    drawableSpeakers.push_back(spUi);
+                    speakerPlacement_.addSpeaker(label, cfData->azimuth);
                 }
             }
         }
-
-        // Check spacing between labels
-        std::sort(drawableSpeakers.begin(), drawableSpeakers.end(),
-            [](const SpUi& a, const SpUi& b) {
-            return a.spAz < b.spAz;
-        }
-        );
-        const float minDist = 15.f;
-        const float labNudge = 5.f;
-        int drawableSpeakersSize = static_cast<int>(drawableSpeakers.size());
-        /// Check from 0 to 180 for spacing
-        for (int i = 1; i < drawableSpeakersSize - 1; ++i) {
-            int prev = i - 1;
-            int next = i + 1;
-            float thisAz = drawableSpeakers[i].spAz;
-            if (thisAz == 0.f) continue;
-            if (thisAz >= 180.f) break;
-            float prevAz = drawableSpeakers[prev].spAz;
-            float nextAz = drawableSpeakers[next].spAz;
-            if (drawableSpeakers[prev].outer && drawableSpeakers[next].outer) {
-                // Surrounded by outer labels. Should we pull this one in?
-                if (thisAz - prevAz < minDist) {
-                    drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz += (labNudge * 2.f);
-                    drawableSpeakers[prev].labAz -= labNudge;
-                }
-                if (nextAz - thisAz < minDist) {
-                    drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz -= (labNudge * 2.f);
-                    drawableSpeakers[next].labAz += labNudge;
-                }
-            }
-        }
-        /// Check from 360 to 180 for spacing
-        for (int i = drawableSpeakersSize - 1; i > 0; --i) {
-            int prev = i + 1;
-            int next = i - 1;
-            float thisAz = drawableSpeakers[i].spAz;
-            if (thisAz <= 180.f) break;
-            float prevAz;
-            float nextAz = drawableSpeakers[next].spAz;
-            if (prev >= drawableSpeakersSize) {
-                prev = 0;
-                prevAz = drawableSpeakers[prev].spAz + 360.f;
-            }
-            else {
-                prevAz = drawableSpeakers[prev].spAz;
-            }
-            if (drawableSpeakers[prev].outer && drawableSpeakers[next].outer) {
-                // Surrounded by outer labels. Should we pull this one in?
-                if (thisAz - nextAz < minDist) {
-                    drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz += (labNudge * 2.f);
-                    drawableSpeakers[next].labAz -= labNudge;
-                }
-                if (prevAz - thisAz < minDist) {
-                    drawableSpeakers[i].outer = false;
-                    drawableSpeakers[i].labAz -= (labNudge * 2.f);
-                    drawableSpeakers[prev].labAz += labNudge;
-                }
-            }
-        }
-        /// Draw them
-        for (auto const& spUi : drawableSpeakers) {
-            drawSpeaker(g, spUi.spAz, spUi.labAz, spUi.label, spUi.outer);
-        }
+        // Draw speakers
+        speakerPlacement_.drawSpeakers(g, this);
     }
 }
 
@@ -218,6 +149,124 @@ float SpeakerLayer::distanceToEdge(float width, float height, float angleDegrees
     return std::min(a, b);
 }
 
+SpeakerLabelPlacement::SpeakerLabelPlacement() {};
+SpeakerLabelPlacement::~SpeakerLabelPlacement() {};
+
+void SpeakerLabelPlacement::reset() {
+    drawableSpeakers.clear();
+}
+
+void SpeakerLabelPlacement::addSpeaker(const std::string& label, float azimuth) {
+    SpUi spUi{ label, azimuth, azimuth, false };
+    while (spUi.spAz >= 360.0) spUi.spAz -= 360.0;
+    while (spUi.spAz < 0.0) spUi.spAz += 360.0;
+    spUi.labAz = spUi.spAz;
+    drawableSpeakers.push_back(spUi);
+}
+
+void SpeakerLabelPlacement::drawSpeakers(Graphics& g, SpeakerLayer* layer) {
+    sortSpeakers();
+    int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
+    // Check from 0 to 180 for spacing
+    for (int i = 0; i <= lastIndex; ++i) {
+        const float thisAz = drawableSpeakers[i].spAz;
+        if (thisAz == 0.f) continue;
+        if (thisAz >= 180.f) break;
+
+        if (tooCloseToPrev(i)) {
+            drawableSpeakers[i].inner = true;
+            drawableSpeakers[i].labAz += bigAzNudge;
+            getPrevSpk(i)->labAz -= littleAzNudge;
+        }
+
+        if (tooCloseToNext(i)) {
+            drawableSpeakers[i].inner = true;
+            drawableSpeakers[i].labAz -= bigAzNudge;
+            getNextSpk(i)->labAz += littleAzNudge;
+        }
+    }
+    // Check from 360 to 180 for spacing
+    for (int i = lastIndex; i >= 0; --i) {
+        const float thisAz = drawableSpeakers[i].spAz;
+        if (thisAz == 0.f) continue;
+        if (thisAz <= 180.f) break;
+
+        if (tooCloseToPrev(i)) {
+            drawableSpeakers[i].inner = true;
+            drawableSpeakers[i].labAz += bigAzNudge;
+            getPrevSpk(i)->labAz -= littleAzNudge;
+        }
+
+        if (tooCloseToNext(i)) {
+            drawableSpeakers[i].inner = true;
+            drawableSpeakers[i].labAz -= bigAzNudge;
+            getNextSpk(i)->labAz += littleAzNudge;
+        }
+    }
+    // Draw them
+    for (auto const& spUi : drawableSpeakers) {
+        layer->drawSpeaker(g, spUi.spAz, spUi.labAz, spUi.label, !spUi.inner);
+    }
+}
+
+void SpeakerLabelPlacement::sortSpeakers()
+{
+    std::sort(drawableSpeakers.begin(), drawableSpeakers.end(),
+        [](const SpUi& a, const SpUi& b) {
+            return a.spAz < b.spAz;
+        }
+    );
+}
+
+bool SpeakerLabelPlacement::tooCloseToNext(int spkIndex)
+{
+    auto spk = getNextSpk(spkIndex);
+    return tooClose(&drawableSpeakers[spkIndex], spk);
+}
+
+bool SpeakerLabelPlacement::tooCloseToPrev(int spkIndex)
+{
+    auto spk = getPrevSpk(spkIndex);
+    return tooClose(&drawableSpeakers[spkIndex], spk);
+}
+
+bool SpeakerLabelPlacement::tooClose(const SpUi* spkA, const SpUi* spkB)
+{
+    // Check there actually is a neighbour
+    if (!spkA || !spkB) return false;
+    // Check that the neighbour is on a separate ring
+    if (spkA->inner != spkB->inner) return false;
+    // Check angular distance between speakers
+    return angularDistance(*spkA, *spkB) < minAzDist;
+}
+
+float SpeakerLabelPlacement::angularDistance(const SpUi& spkA, const SpUi& spkB)
+{
+    float mid = std::max(spkA.spAz, spkB.spAz);
+    float lower = std::min(spkA.spAz, spkB.spAz);
+    float upper = lower + 360.0;
+    return std::min(mid - lower, upper - mid);
+}
+
+SpeakerLabelPlacement::SpUi* SpeakerLabelPlacement::getNextSpk(int fromIndex)
+{
+    if (drawableSpeakers.size() < 2) return nullptr;
+    int index = fromIndex + 1;
+    const int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
+    if (index > lastIndex)
+        index = 0;
+    return &drawableSpeakers[index];
+}
+
+SpeakerLabelPlacement::SpUi* SpeakerLabelPlacement::getPrevSpk(int fromIndex)
+{
+    if (drawableSpeakers.size() < 2) return nullptr;
+    int index = fromIndex - 1;
+    const int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
+    if (index < 0)
+        index = lastIndex;
+    return &drawableSpeakers[index];
+}
 
 }  // namespace ui
 }  // namespace plugin

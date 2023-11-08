@@ -12,6 +12,37 @@ namespace ear {
 namespace plugin {
 namespace ui {
 
+class SpeakerLayer;
+
+class SpeakerLabelPlacement {
+public:
+    SpeakerLabelPlacement();
+    ~SpeakerLabelPlacement();
+
+    void reset();
+    void addSpeaker(const std::string& label, float azimuth);
+    void drawSpeakers(Graphics& g, SpeakerLayer* layer);
+
+private:
+    struct SpUi {
+        std::string label;
+        float spAz;
+        float labAz;
+        bool inner;
+    };
+    std::vector<SpUi> drawableSpeakers;
+    void sortSpeakers();
+    bool tooCloseToNext(int spkIndex);
+    bool tooCloseToPrev(int spkIndex);
+    bool tooClose(const SpUi* spkA, const SpUi* spkB);
+    float angularDistance(const SpUi& spkA, const SpUi& spkB);
+    SpUi* getNextSpk(int fromIndex);
+    SpUi* getPrevSpk(int fromIndex);
+    const float minAzDist = 15.f;
+    const float bigAzNudge = 10.f;
+    const float littleAzNudge = 5.f;
+};
+
 class SpeakerLayer : public Component {
 public:
     SpeakerLayer();
@@ -40,6 +71,7 @@ private:
     std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> pfData;
 
     Layer layer_;
+    SpeakerLabelPlacement speakerPlacement_{};
 
     Font speakerLabelFont_ = EarFontsSingleton::instance().Description;
     Font lfeLabelFont_ = EarFontsSingleton::instance().Measures;
