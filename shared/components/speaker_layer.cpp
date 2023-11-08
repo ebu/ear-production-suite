@@ -167,41 +167,20 @@ void SpeakerLabelPlacement::addSpeaker(const std::string& label, float azimuth) 
 void SpeakerLabelPlacement::drawSpeakers(Graphics& g, SpeakerLayer* layer) {
     sortSpeakers();
     int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
-    // Check from 0 to 180 for spacing
+    // Process speaker positions. Ignore 0 deg and 180 - we always want to leave those as they are.
+    /// Check from 0 to 180 for spacing
     for (int i = 0; i <= lastIndex; ++i) {
         const float thisAz = drawableSpeakers[i].spAz;
         if (thisAz == 0.f) continue;
         if (thisAz >= 180.f) break;
-
-        if (tooCloseToPrev(i)) {
-            drawableSpeakers[i].inner = true;
-            drawableSpeakers[i].labAz += bigAzNudge;
-            getPrevSpk(i)->labAz -= littleAzNudge;
-        }
-
-        if (tooCloseToNext(i)) {
-            drawableSpeakers[i].inner = true;
-            drawableSpeakers[i].labAz -= bigAzNudge;
-            getNextSpk(i)->labAz += littleAzNudge;
-        }
+        processSpeaker(i);
     }
-    // Check from 360 to 180 for spacing
+    /// Check from 360 to 180 for spacing
     for (int i = lastIndex; i >= 0; --i) {
         const float thisAz = drawableSpeakers[i].spAz;
         if (thisAz == 0.f) continue;
         if (thisAz <= 180.f) break;
-
-        if (tooCloseToPrev(i)) {
-            drawableSpeakers[i].inner = true;
-            drawableSpeakers[i].labAz += bigAzNudge;
-            getPrevSpk(i)->labAz -= littleAzNudge;
-        }
-
-        if (tooCloseToNext(i)) {
-            drawableSpeakers[i].inner = true;
-            drawableSpeakers[i].labAz -= bigAzNudge;
-            getNextSpk(i)->labAz += littleAzNudge;
-        }
+        processSpeaker(i);
     }
     // Draw them
     for (auto const& spUi : drawableSpeakers) {
@@ -216,6 +195,21 @@ void SpeakerLabelPlacement::sortSpeakers()
             return a.spAz < b.spAz;
         }
     );
+}
+
+void SpeakerLabelPlacement::processSpeaker(int spkIndex)
+{
+    if (tooCloseToPrev(spkIndex)) {
+        drawableSpeakers[spkIndex].inner = true;
+        drawableSpeakers[spkIndex].labAz += bigAzNudge;
+        getPrevSpk(spkIndex)->labAz -= littleAzNudge;
+    }
+
+    if (tooCloseToNext(spkIndex)) {
+        drawableSpeakers[spkIndex].inner = true;
+        drawableSpeakers[spkIndex].labAz -= bigAzNudge;
+        getNextSpk(spkIndex)->labAz += littleAzNudge;
+    }
 }
 
 bool SpeakerLabelPlacement::tooCloseToNext(int spkIndex)
