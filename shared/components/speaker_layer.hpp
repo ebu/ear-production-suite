@@ -32,6 +32,7 @@ private:
     };
     std::vector<SpUi> drawableSpeakers;
     void sortSpeakers();
+    void processSpeaker(int spkIndex);
     bool tooCloseToNext(int spkIndex);
     bool tooCloseToPrev(int spkIndex);
     bool tooClose(const SpUi* spkA, const SpUi* spkB);
