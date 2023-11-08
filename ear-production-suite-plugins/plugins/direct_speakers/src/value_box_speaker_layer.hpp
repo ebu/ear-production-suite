@@ -44,8 +44,7 @@ class ValueBoxSpeakerLayer : public Component {
     auto area = getLocalBounds();
     area.reduce(10, 5);
     headingLabel_->setBounds(area.removeFromTop(30));
-    // TODO: No trimmed bottom when boxes were smaller (before metadata removal)
-    layer_->setBounds(area.withTrimmedLeft(70).withTrimmedBottom(20));
+    layer_->setBounds(area.withTrimmedLeft(70));
   }
 
  private:
