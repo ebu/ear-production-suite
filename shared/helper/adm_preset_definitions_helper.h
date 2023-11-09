@@ -35,6 +35,8 @@ public:
 		float elevation{ 0.f };
 		float distance{ 1.f	};
 
+		bool isCommonDefinition();
+
 	private:
 		void setItuLabels();
 		void setLegacySpeakerLabel();
@@ -59,6 +61,8 @@ public:
 		std::optional<std::string> ituStandard;
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
 		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
+
+		bool isCommonDefinition();
 
 	private:
 		void setLabels();
