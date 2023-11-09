@@ -9,6 +9,8 @@
 #include "components/look_and_feel/fonts.hpp"
 #include <helper/adm_preset_definitions_helper.h>
 
+#include <algorithm>
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -55,7 +57,16 @@ class ValueBoxMain : public Component {
     speakerSetupsComboBox_->setDefaultText("Select speaker layout");
 
     auto tdData = AdmPresetDefinitionsHelper::getSingleton()->getTypeDefinitionData(1);
-    for (auto const& pfData : tdData->relatedPackFormats) {
+    auto pfDatas = tdData->relatedPackFormats;
+    std::sort(
+        pfDatas.begin(), pfDatas.end(),
+        [](const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& a,
+           const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& b) {
+          return a->relatedChannelFormats.size() <
+                 b->relatedChannelFormats.size();
+    });
+
+    for (auto const& pfData : pfDatas) {
       speakerSetupsComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
     }
     addAndMakeVisible(speakerSetupsComboBox_.get());
