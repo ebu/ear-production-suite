@@ -88,7 +88,7 @@ void SpeakerLayer::paint(Graphics& g) {
     }
 }
 
-void SpeakerLayer::drawSpeaker(Graphics& g, float azimuth, float labelAzimuth, const std::string& label, bool outer) {
+void SpeakerLayer::drawSpeaker(Graphics& g, float azimuth, float labelAzimuth, const std::string& label, bool inner) {
     const float angleRad = azimuth / 180.f * MathConstants<float>::pi;
     const float angleRadLabel = labelAzimuth / 180.f * MathConstants<float>::pi;
     g.setColour(findColour(highlightColourId));
@@ -102,7 +102,7 @@ void SpeakerLayer::drawSpeaker(Graphics& g, float azimuth, float labelAzimuth, c
     float labelWidth = speakerLabelFont_.getStringWidthFloat(String(label));
     const float labelHeight = speakerLabelFont_.getHeight();
     float labelRadius = distanceToEdge(labelWidth, labelHeight, labelAzimuth);
-    float radOffset = outer ? (labelRadius + knobSize_) : -(labelRadius + knobSize_);
+    float radOffset = inner ? -(labelRadius + knobSize_) : (labelRadius + knobSize_);
 
     xPos = centre_.getX() - std::sin(angleRadLabel) * (radius + radOffset);
     yPos = centre_.getY() - std::cos(angleRadLabel) * (radius + radOffset);
@@ -184,7 +184,7 @@ void SpeakerLabelPlacement::drawSpeakers(Graphics& g, SpeakerLayer* layer) {
     }
     // Draw them
     for (auto const& spUi : drawableSpeakers) {
-        layer->drawSpeaker(g, spUi.spAz, spUi.labAz, spUi.label, !spUi.inner);
+        layer->drawSpeaker(g, spUi.spAz, spUi.labAz, spUi.label, spUi.inner);
     }
 }
 
