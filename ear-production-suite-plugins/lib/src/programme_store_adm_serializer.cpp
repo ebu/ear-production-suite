@@ -4,6 +4,7 @@
 #include <adm/adm.hpp>
 #include <adm/utilities/object_creation.hpp>
 #include <adm/common_definitions.hpp>
+#include <helper/adm_preset_definitions_helper.h>
 #include <utility>
 #include <iomanip>
 #include <optional>
@@ -449,7 +450,8 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
         setImportance(*hoaAudioObject, object);
 
         auto channelFormats =
-          admCommonDefinitionHelper.getPackFormatData(4, packFormatIdValue)
+          AdmPresetDefinitionsHelper::getSingleton()
+          ->getPackFormatData(4, packFormatIdValue)
           ->relatedChannelFormats;
         // The AudioTrackIUD needs to reference the track format
         // To get the correct track format we go through all track formats and
@@ -464,7 +466,7 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
           audioTrackUid->setReference(packFormat);
 
           // We need the channel format from our document,
-          // not the document admCommonDefinitionHelper is using!
+          // not the document AdmPresetDefinitionsHelper is using!
           auto channelFormatId = adm::AudioChannelFormatId(
             adm::TypeDefinition::HOA,
             adm::AudioChannelFormatIdValue(channelFormats[i]->idValue));
