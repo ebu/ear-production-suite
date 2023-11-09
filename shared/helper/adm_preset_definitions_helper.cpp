@@ -174,6 +174,11 @@ AdmPresetDefinitionsHelper::ChannelFormatData::~ChannelFormatData()
 {
 }
 
+bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
+{
+	return idValue <= 0x0FFF;
+}
+
 void AdmPresetDefinitionsHelper::ChannelFormatData::setItuLabels()
 {
 	for (auto const& speakerLabel : speakerLabels) {
@@ -217,6 +222,11 @@ AdmPresetDefinitionsHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::
 
 AdmPresetDefinitionsHelper::PackFormatData::~PackFormatData()
 {
+}
+
+bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition()
+{
+	return idValue <= 0x0FFF;
 }
 
 void AdmPresetDefinitionsHelper::PackFormatData::setLabels()
