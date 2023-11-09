@@ -56,7 +56,7 @@ public:
     void resized() override;
     void paint(Graphics& g) override;
 
-    void drawSpeaker(Graphics& g, float azimuth, float labelAzimuth, const std::string& label, bool outer);
+    void drawSpeaker(Graphics& g, float azimuth, float labelAzimuth, const std::string& label, bool inner);
     void drawLfe(Graphics& g, float azimuth, const std::string& label);
     void drawVoiceOfGod(Graphics& g, const std::string& label);
 
