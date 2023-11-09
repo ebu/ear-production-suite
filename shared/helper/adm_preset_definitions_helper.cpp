@@ -1,10 +1,13 @@
 #include "adm_preset_definitions_helper.h"
 #include <adm/common_definitions.hpp>
+#include <adm/parse.hpp>
 #include <algorithm>
 #include <string>
-#include <vector>
 #include <string_view>
+#include <sstream>
+#include <vector>
 #include <helper/container_helpers.hpp>
+#include <helper/supplementary_definitions.hpp>
 
 namespace {
 	std::vector<std::string_view> splitString(const std::string& input, char delimiter, size_t maxElements) {
@@ -45,7 +48,8 @@ std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingl
 std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> AdmPresetDefinitionsHelper::getElementRelationships()
 {
 	if (!presetDefinitions) {
-		presetDefinitions = adm::getCommonDefinitions();
+		//presetDefinitions = adm::getCommonDefinitions();
+		presetDefinitions = adm::parseXml(std::istringstream(xmlSupplementaryDefinitions), adm::xml::ParserOptions::recursive_node_search); // will also add common defs
 		populateElementRelationshipsFor(adm::TypeDefinition::UNDEFINED);
 		populateElementRelationshipsFor(adm::TypeDefinition::OBJECTS);
 		populateElementRelationshipsFor(adm::TypeDefinition::DIRECT_SPEAKERS);
