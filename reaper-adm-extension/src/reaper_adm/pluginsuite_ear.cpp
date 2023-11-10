@@ -422,7 +422,8 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
         auto packFormat = channel.packFormat();
         auto packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
 
-        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, packFormatIdValue);
+        auto defs = AdmPresetDefinitionsHelper::getSingleton();
+        auto pfData = defs->getPackFormatData(1, packFormatIdValue);
         if (!pfData) {
             // Could be cart pf
             auto cartLayout = getCartLayout(*packFormat);
@@ -430,10 +431,18 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
                 auto altPfIdStr = getMappedCommonPackId(*cartLayout);
                 auto altPfId = adm::parseAudioPackFormatId(altPfIdStr);
                 auto altPfIdValue = altPfId.get<adm::AudioPackFormatIdValue>().get();
-                pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, altPfIdValue);
+                pfData = defs->getPackFormatData(1, altPfIdValue);
                 if (pfData) {
                     packFormatIdValue = altPfIdValue;
                 }
+            }
+        }
+        if (!pfData) {
+            // Some third-party tools do not use consistent PF IDs for their custom definitions.
+            // Try lookup by channels.
+            pfData = defs->getPackFormatDataByMatchingChannels(packFormat);
+            if (pfData) {
+                packFormatIdValue = pfData->idValue;
             }
         }
 
