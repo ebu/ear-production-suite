@@ -87,6 +87,38 @@ std::shared_ptr<AdmPresetDefinitionsHelper::ChannelFormatData> AdmPresetDefiniti
 	return nullptr;
 }
 
+std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat)
+{
+	if(!packFormat) return nullptr;
+
+	std::vector<int> cfIdValuesToFind;
+	auto cfs = packFormat->getReferences<adm::AudioChannelFormat>();
+	for (auto const& cf : cfs) {
+		auto cfIdValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
+		cfIdValuesToFind.push_back(cfIdValue);
+	}
+
+	auto tdId = packFormat->get<adm::TypeDescriptor>().get();
+	for (auto pfData : getTypeDefinitionData(tdId)->relatedPackFormats) {
+		auto pfDataCfDatas = pfData->relatedChannelFormats;
+		if (pfDataCfDatas.size() == cfIdValuesToFind.size()) {
+			bool matching = true;
+			// Ordering must also be exact
+			for (int i = 0; i < pfDataCfDatas.size(); ++i) {
+				if (pfDataCfDatas[i]->idValue != cfIdValuesToFind[i]) {
+					matching = false;
+					break;
+				}
+			}
+			if (matching) {
+				return pfData;
+			}
+		}
+	}
+
+	return std::shared_ptr<PackFormatData>();
+}
+
 void AdmPresetDefinitionsHelper::populateElementRelationshipsFor(adm::TypeDescriptor typeDescriptor)
 {
 	auto tdData = std::make_shared<TypeDefinitionData>();
