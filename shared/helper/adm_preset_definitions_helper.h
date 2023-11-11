@@ -36,6 +36,7 @@ public:
 		float distance{ 1.f	};
 
 		bool isCommonDefinition();
+		std::string getBestSpeakerLabel();
 
 	private:
 		void setItuLabels();

@@ -211,6 +211,17 @@ bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
 	return idValue <= 0x0FFF;
 }
 
+std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel()
+{
+	if (legacySpeakerLabel.has_value())
+		return legacySpeakerLabel.value();
+	if (ituLabel.has_value())
+		return ituLabel.value();
+	if (speakerLabels.size() > 0)
+		return speakerLabels[0];
+	return name;
+}
+
 void AdmPresetDefinitionsHelper::ChannelFormatData::setItuLabels()
 {
 	for (auto const& speakerLabel : speakerLabels) {
