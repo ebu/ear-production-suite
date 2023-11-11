@@ -1,6 +1,7 @@
 set(VST_SOURCES
 	${EPS_SHARED_DIR}/binary_data.cpp
 	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
+	${EPS_SHARED_DIR}/helper/cartesianspeakerlayouts.cpp
 	
 	PluginEditor.cpp
 	PluginProcessor.cpp

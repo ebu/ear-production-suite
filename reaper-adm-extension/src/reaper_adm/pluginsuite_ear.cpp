@@ -20,7 +20,6 @@
 #include <bw64/bw64.hpp>
 #include <speaker_setups.hpp>
 #include <helper/adm_preset_definitions_helper.h>
-#include <helper/cartesianspeakerlayouts.h>
 #include <helper/container_helpers.hpp>
 #include <daw_channel_count.h>
 
@@ -420,31 +419,8 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
     if(automationElements.size() > 0) {
         auto channel = automationElements.front()->channel();
         auto packFormat = channel.packFormat();
-        auto packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
-
         auto defs = AdmPresetDefinitionsHelper::getSingleton();
-        auto pfData = defs->getPackFormatData(1, packFormatIdValue);
-        if (!pfData) {
-            // Could be cart pf
-            auto cartLayout = getCartLayout(*packFormat);
-            if (cartLayout) {
-                auto altPfIdStr = getMappedCommonPackId(*cartLayout);
-                auto altPfId = adm::parseAudioPackFormatId(altPfIdStr);
-                auto altPfIdValue = altPfId.get<adm::AudioPackFormatIdValue>().get();
-                pfData = defs->getPackFormatData(1, altPfIdValue);
-                if (pfData) {
-                    packFormatIdValue = altPfIdValue;
-                }
-            }
-        }
-        if (!pfData) {
-            // Some third-party tools do not use consistent PF IDs for their custom definitions.
-            // Try lookup by channels.
-            pfData = defs->getPackFormatDataByMatchingChannels(packFormat);
-            if (pfData) {
-                packFormatIdValue = pfData->idValue;
-            }
-        }
+        auto pfData = defs->getPackFormatData(packFormat);
 
         if(pfData) {
             int32_t routingToScene = -1;
@@ -453,7 +429,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
             }
 
             auto plugin = createAndNamePlugin(DIRECTSPEAKERS_METADATA_PLUGIN_NAME, trackInfo.track.get(), &trackElement, routingToScene);
-            plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(packFormatIdValue));
+            plugin->setParameter(*directPackFormatIdValueParameter, directPackFormatIdValueParameter->forwardMap(pfData->idValue));
 
             if(routingToScene >= 0) {
                 plugin->setParameter(*directSpeakersTrackMappingParameter, directSpeakersTrackMappingParameter->forwardMap(routingToScene));
