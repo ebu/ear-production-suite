@@ -82,6 +82,7 @@ public:
 	std::shared_ptr<PackFormatData> getPackFormatData(int tdId, int pfId);
 	std::shared_ptr<ChannelFormatData> getChannelFormatData(int tdId, int pfId, int cfId);
 
+	std::shared_ptr<PackFormatData> getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 	std::shared_ptr<PackFormatData> getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 
 private:
