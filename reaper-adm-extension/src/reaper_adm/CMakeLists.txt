@@ -8,6 +8,7 @@ find_package(JUCE REQUIRED QUIET)
 
 set(EXTENSION_SOURCES
 	${EPS_SHARED_DIR}/helper/adm_preset_definitions_helper.cpp
+	${EPS_SHARED_DIR}/helper/cartesianspeakerlayouts.cpp
 	${EPS_SHARED_DIR}/update_check_settings_file.cpp
 	
 	actionmanager.cpp
@@ -20,7 +21,6 @@ set(EXTENSION_SOURCES
 	admvstcontrol.cpp
 	automationenvelope.cpp
 	automationpoint.cpp
-	cartesianspeakerlayouts.cpp
 	channelindexer.cpp
 	channelrouter.cpp
 	color.cpp
@@ -100,7 +100,6 @@ set(EXTENSION_HEADERS
 	automate.h
 	automationenvelope.h
 	automationpoint.h
-	cartesianspeakerlayouts.h
 	channelindexer.h
 	channelrouter.h
 	color.h

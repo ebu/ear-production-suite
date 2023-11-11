@@ -1,5 +1,4 @@
 #include "pluginsuite_ear.h"
-#include "cartesianspeakerlayouts.h"
 
 #include <cassert>
 #include <sstream>
@@ -21,6 +20,7 @@
 #include <bw64/bw64.hpp>
 #include <speaker_setups.hpp>
 #include <helper/adm_preset_definitions_helper.h>
+#include <helper/cartesianspeakerlayouts.h>
 #include <helper/container_helpers.hpp>
 #include <daw_channel_count.h>
 
