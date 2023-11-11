@@ -64,13 +64,7 @@ void SpeakerLayer::paint(Graphics& g) {
                 layer = Layer::upper;
             }
             if (layer == layer_) {
-                std::string label;
-                if (cfData->legacySpeakerLabel.has_value()) {
-                    label = cfData->legacySpeakerLabel.value();
-                }
-                else if (cfData->ituLabel.has_value()) {
-                    label = cfData->ituLabel.value();
-                }
+                auto label = cfData->getBestSpeakerLabel();
                 if (cfData->elevation >= 90.f) {
                     drawVoiceOfGod(g, label);
                 }

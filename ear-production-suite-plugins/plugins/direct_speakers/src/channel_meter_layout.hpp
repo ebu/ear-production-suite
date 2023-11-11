@@ -99,12 +99,7 @@ class ChannelMeterLayout : public Component {
     if (pfData) {
       for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
         auto cfData = pfData->relatedChannelFormats[i];
-        std::string label;
-        if (cfData->legacySpeakerLabel.has_value()) {
-          label = cfData->legacySpeakerLabel.value();
-        } else if (cfData->ituLabel.has_value()) {
-          label = cfData->ituLabel.value();
-        }
+        auto label = cfData->getBestSpeakerLabel();
         speakerLevels_.push_back(std::make_unique<SpeakerLevel>(label));
         speakerLevels_.back()->getLevelMeter()->setMeter(levelMeter_, i);
         if (i < 6) {

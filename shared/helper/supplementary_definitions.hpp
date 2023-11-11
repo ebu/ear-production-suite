@@ -146,7 +146,8 @@ R"5UPPL3M3N74RY(
         <!-- audioPackFormat_18 in MPEG-H ADM Profile 1.0.0 -->
         <audioChannelFormat audioChannelFormatID="AC_00011001" audioChannelFormatName="Left back surround" typeLabel="0001" typeDefinition="DirectSpeakers">
           <audioBlockFormat audioBlockFormatID="AB_00011001_00000001">
-            <speakerLabel>CH_M_L150</speakerLabel>
+            <!-- speakerLabel "CH_M_L150" -->
+            <speakerLabel>L150</speakerLabel>
             <position coordinate="azimuth">150.0</position>
             <position coordinate="elevation">0.0</position>
             <position coordinate="distance">1.0</position>
@@ -154,7 +155,8 @@ R"5UPPL3M3N74RY(
         </audioChannelFormat>
         <audioChannelFormat audioChannelFormatID="AC_00011002" audioChannelFormatName="Right back surround" typeLabel="0001" typeDefinition="DirectSpeakers">
           <audioBlockFormat audioBlockFormatID="AB_00011002_00000001">
-            <speakerLabel>CH_M_R150</speakerLabel>
+            <!-- speakerLabel "CH_M_R150" -->
+            <speakerLabel>R150</speakerLabel>
             <position coordinate="azimuth">-150.0</position>
             <position coordinate="elevation">0.0</position>
             <position coordinate="distance">1.0</position>
