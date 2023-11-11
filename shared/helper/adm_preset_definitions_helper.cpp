@@ -8,6 +8,7 @@
 #include <vector>
 #include <helper/container_helpers.hpp>
 #include <helper/supplementary_definitions.hpp>
+#include <helper/cartesianspeakerlayouts.h>
 
 namespace {
 	std::vector<std::string_view> splitString(const std::string& input, char delimiter, size_t maxElements) {
@@ -87,6 +88,32 @@ std::shared_ptr<AdmPresetDefinitionsHelper::ChannelFormatData> AdmPresetDefiniti
 	return nullptr;
 }
 
+std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat)
+{
+	if (!packFormat) return nullptr;
+
+	auto td = packFormat->get<adm::TypeDescriptor>().get();
+	auto packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
+	auto pfData = getPackFormatData(td, packFormatIdValue);
+	if (pfData) return pfData;
+
+	// Could be cart pf
+	auto cartLayout = admplug::getCartLayout(*packFormat);
+	if (cartLayout) {
+		auto altPfIdStr = getMappedCommonPackId(*cartLayout);
+		auto altPfId = adm::parseAudioPackFormatId(altPfIdStr);
+		auto altPfIdValue = altPfId.get<adm::AudioPackFormatIdValue>().get();
+		pfData = getPackFormatData(td, altPfIdValue);
+		if (pfData)  return pfData;
+	}
+
+	// Some third-party tools do not use consistent PF IDs for their custom definitions. Try lookup by channels.
+	pfData = getPackFormatDataByMatchingChannels(packFormat);
+	if (pfData)  return pfData;
+
+	return nullptr;
+}
+
 std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat)
 {
 	if(!packFormat) return nullptr;
@@ -98,8 +125,8 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 		cfIdValuesToFind.push_back(cfIdValue);
 	}
 
-	auto tdId = packFormat->get<adm::TypeDescriptor>().get();
-	for (auto pfData : getTypeDefinitionData(tdId)->relatedPackFormats) {
+	auto td = packFormat->get<adm::TypeDescriptor>().get();
+	for (auto pfData : getTypeDefinitionData(td)->relatedPackFormats) {
 		auto pfDataCfDatas = pfData->relatedChannelFormats;
 		if (pfDataCfDatas.size() == cfIdValuesToFind.size()) {
 			bool matching = true;
