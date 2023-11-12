@@ -50,7 +50,8 @@ std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> A
 {
 	if (!presetDefinitions) {
 		//presetDefinitions = adm::getCommonDefinitions();
-		presetDefinitions = adm::parseXml(std::istringstream(xmlSupplementaryDefinitions), adm::xml::ParserOptions::recursive_node_search); // will also add common defs
+		std::istringstream xmlIs { xmlSupplementaryDefinitions };
+		presetDefinitions = adm::parseXml(xmlIs, adm::xml::ParserOptions::recursive_node_search); // will also add common defs
 		populateElementRelationshipsFor(adm::TypeDefinition::UNDEFINED);
 		populateElementRelationshipsFor(adm::TypeDefinition::OBJECTS);
 		populateElementRelationshipsFor(adm::TypeDefinition::DIRECT_SPEAKERS);
