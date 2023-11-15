@@ -1,6 +1,7 @@
 #include "admvstcontrol.h"
 
 #include "pluginregistry.h"
+#include <helper/adm_preset_definitions_helper.h>
 
 using namespace admplug;
 
@@ -148,8 +149,8 @@ bool AdmVst::isUsingCommonDefinition()
 {
     auto packFormat = getAdmPackFormat();
     if(packFormat == ADM_VST_PACKFORMAT_UNSET_ID) return false;
-    bool packIsCommonDef = (packFormat <= COMMONDEFINITIONS_MAX_ID);
-    bool channelIsCommonDef = (getAdmChannelFormat() <= COMMONDEFINITIONS_MAX_ID);
+    bool packIsCommonDef = AdmPresetDefinitionsHelper::isCommonDefinition(packFormat);
+    bool channelIsCommonDef = AdmPresetDefinitionsHelper::isCommonDefinition(getAdmChannelFormat());
     assert(packIsCommonDef == channelIsCommonDef); // Should be
     return (packIsCommonDef && channelIsCommonDef);
 }

@@ -12,8 +12,6 @@
 
 #include <daw_channel_count.h>
 
-#define COMMONDEFINITIONS_MAX_ID 0x0FFF
-
 using namespace admplug;
 
 #define ADM_VST_NAME "ADM Export Source"

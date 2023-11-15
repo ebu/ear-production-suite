@@ -147,6 +147,11 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 	return std::shared_ptr<PackFormatData>();
 }
 
+bool AdmPresetDefinitionsHelper::isCommonDefinition(int idValue)
+{
+	return idValue <= 0x0FFF;
+}
+
 void AdmPresetDefinitionsHelper::populateElementRelationshipsFor(adm::TypeDescriptor typeDescriptor)
 {
 	auto tdData = std::make_shared<TypeDefinitionData>();
@@ -236,7 +241,7 @@ AdmPresetDefinitionsHelper::ChannelFormatData::~ChannelFormatData()
 
 bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
 {
-	return idValue <= 0x0FFF;
+	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
 
 std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel()
@@ -297,7 +302,7 @@ AdmPresetDefinitionsHelper::PackFormatData::~PackFormatData()
 
 bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition()
 {
-	return idValue <= 0x0FFF;
+	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
 
 void AdmPresetDefinitionsHelper::PackFormatData::setLabels()
