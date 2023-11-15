@@ -13,8 +13,6 @@
 #include <vector>
 #include <memory>
 
-#define COMMONDEFINITIONS_MAX_ID 0x0FFF
-
 using namespace admplug;
 
 class EarVstCommunicator : public CommunicatorBase

@@ -3,6 +3,7 @@
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
 #include <version/eps_version.h>
+#include <helper/adm_preset_definitions_helper.h>
 #include <speaker_setups.hpp>
 
 #include <adm/write.hpp>
@@ -351,7 +352,7 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     }
 
     auto audioChannelFormatId = audioChannelFormat->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
-    bool isCommonDefinition = (audioChannelFormatId <= COMMONDEFINITIONS_MAX_ID);
+    bool isCommonDefinition = AdmPresetDefinitionsHelper::isCommonDefinition(audioChannelFormatId);
 
     adm::TypeDescriptor typeDescriptor = audioChannelFormat->get<adm::TypeDescriptor>();
 
