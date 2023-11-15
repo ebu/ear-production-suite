@@ -85,6 +85,8 @@ public:
 	std::shared_ptr<PackFormatData> getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 	std::shared_ptr<PackFormatData> getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 
+	static bool isCommonDefinition(int idValue);
+
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);

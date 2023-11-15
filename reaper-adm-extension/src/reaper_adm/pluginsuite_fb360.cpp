@@ -17,6 +17,7 @@
 #include "commontrackpool.h"
 #include "admvstcontrol.h"
 #include "mediatrackelement.h"
+#include <helper/adm_preset_definitions_helper.h>
 
 #include <memory>
 #include <stdexcept>
@@ -93,7 +94,7 @@ namespace {
             }
 
             // Set PackFormat and ChannelFormat. Only supporting CommonDefinitions. Set defaults if not CommonDefinition.
-            vst.setAdmPackFormat(packFormatIdValue > COMMONDEFINITIONS_MAX_ID ? ADM_VST_PACKFORMAT_UNSET_ID : packFormatIdValue);
+            vst.setAdmPackFormat(AdmPresetDefinitionsHelper::isCommonDefinition(packFormatIdValue) ? packFormatIdValue : ADM_VST_PACKFORMAT_UNSET_ID);
             vst.setAdmChannelFormat(ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID);
         }
     }

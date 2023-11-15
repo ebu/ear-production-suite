@@ -2,6 +2,7 @@
 
 #include "pluginregistry.h"
 #include <version/eps_version.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 #include <adm/adm.hpp>
 #include <adm/utilities/id_assignment.hpp>
@@ -402,7 +403,7 @@ void AdmVstExporter::newAdmCommonDefinitionReference(ReaperAPI const& api, std::
 	int channelFormatId = admExportVst->getAdmChannelFormat();
 
 	assert(packFormatId != ADM_VST_PACKFORMAT_UNSET_ID);
-	assert(packFormatId <= COMMONDEFINITIONS_MAX_ID);
+	assert(AdmPresetDefinitionsHelper::isCommonDefinition(packFormatId));
 
 	if (!audioPackFormat) {
 		// Lookup packformat for this commondefinition
