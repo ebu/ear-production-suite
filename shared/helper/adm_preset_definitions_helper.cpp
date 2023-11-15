@@ -96,9 +96,15 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 	auto td = packFormat->get<adm::TypeDescriptor>().get();
 	auto packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
 	auto pfData = getPackFormatData(td, packFormatIdValue);
+
+	// Common defs should always be matched by ID
+	if (isCommonDefinition(packFormatIdValue))
+		return pfData;
+
+	// Not common def - Do more thorough checks
 	if (pfData) return pfData;
 
-	// Could be cart pf
+	/// Could be cart pf
 	auto cartLayout = admplug::getCartLayout(*packFormat);
 	if (cartLayout) {
 		auto altPfIdStr = getMappedCommonPackId(*cartLayout);
@@ -108,7 +114,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 		if (pfData)  return pfData;
 	}
 
-	// Some third-party tools do not use consistent PF IDs for their custom definitions. Try lookup by channels.
+	/// Some third-party tools do not use consistent PF IDs for their custom definitions. Try lookup by channels.
 	pfData = getPackFormatDataByMatchingChannels(packFormat);
 	if (pfData)  return pfData;
 
