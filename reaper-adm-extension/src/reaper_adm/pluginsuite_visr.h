@@ -44,7 +44,7 @@ namespace admplug {
 
         void doGenericTrackSetup(Track& track);
         void setupTrackWithMetadataPlugin(Track &track, ReaperAPI const& api);
-        Track &getCommonDefinitionTrack(const DirectSpeakersAutomation &element, const ReaperAPI &api);
+        Track &getCommonTrack(const DirectSpeakersAutomation &element, const ReaperAPI &api);
 
         std::unique_ptr<Track> busTrack3D;
         std::unique_ptr<CommonTrackPool> commonTracks;
