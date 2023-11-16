@@ -85,16 +85,17 @@ namespace {
             auto vst = AdmVst(track.get(), api); // Will attempt to wrap existing plugin or create new if missing
             vst.setIncludeInRenderState(true);
 
-            auto td = packFormat->get<adm::TypeDescriptor>();
-            vst.setAdmTypeDefinition(td.get());
-            auto packFormatIdValue = packFormatIdValueOverride;
-            if(packFormatIdValueOverride <= 0) {
-                // Not overridden - pull it out of the pack
-                packFormatIdValue = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
+            auto td = packFormat->get<adm::TypeDescriptor>().get();
+            vst.setAdmTypeDefinition(td);
+
+            auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(packFormat);
+            if(packFormatIdValueOverride > 0) {
+                // Overridden - pull out correct pack
+                pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(td, packFormatIdValueOverride);
             }
 
-            // Set PackFormat and ChannelFormat. Only supporting CommonDefinitions. Set defaults if not CommonDefinition.
-            vst.setAdmPackFormat(AdmPresetDefinitionsHelper::isCommonDefinition(packFormatIdValue) ? packFormatIdValue : ADM_VST_PACKFORMAT_UNSET_ID);
+            // Set PackFormat and ChannelFormat. Only supporting Preset Definitions. Set defaults if not Preset Definition.
+            vst.setAdmPackFormat(pfData ? pfData->idValue : ADM_VST_PACKFORMAT_UNSET_ID);
             vst.setAdmChannelFormat(ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID);
         }
     }
@@ -294,20 +295,20 @@ void Facebook360PluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAuto
     auto trackWidth = static_cast<int>(take->channelCount());
     track->setChannelCount(trackWidth);
 
-    auto firstBlock = directAutomation.blocks().front();
-    if(isCommonDefinition(firstBlock)) {
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(directAutomation.channel().packFormat());
+    if (pfData) {
         int fxNum = api.TrackFX_AddByActualName(track->get(), AdmVst::getVstNameStr()->c_str(), false, TrackFXAddMode::QueryPresence);
         if(fxNum < 0) {
             // Not yet configured ADM Export VST
             configureAdmExportVst(directAutomation, *track, api);
         }
         if(directAutomation.channel().channelFormat()) {
-            auto& busTrack = getCommonDefinitionTrack(directAutomation, api);
+            auto& busTrack = getCommonTrack(directAutomation, api);
             track->routeTo(busTrack, 1, directAutomation.channelIndex(), 0);
         }
 
     } else {
-        // TODO: Warn user - We don't support non-common-definition
+        // TODO: Warn user - We don't support non-preset-definition
     }
 }
 
@@ -330,11 +331,12 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
     if(applyFXPreset(hoaAutomation, api)) {
 
         // Configure plug-ins
-        if(isCommonDefinition(hoaAutomation.blocks().front())) {
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(hoaAutomation.channel().packFormat());
+        if (pfData) {
             configureAdmExportVst(hoaAutomation, *track, api);
 
         } else {
-            // If it wasn't a common definition, we can't use the ADM Export VST directly on the source.
+            // If it wasn't a preset definition, we can't use the ADM Export VST directly on the source.
             // However the FB360 spat plugin outputs SN3D ACN, which are in common definitions!
             // We can use this but we need to move the ADM Export VST post-FB360.
             track->deletePlugin(AdmVst::getVstNameStr()->c_str(), true);
@@ -395,7 +397,7 @@ std::vector<std::unique_ptr<TrackParameter>> const & Facebook360PluginSuite::tra
     return parameters;
 }
 
-Track& Facebook360PluginSuite::getCommonDefinitionTrack(const DirectSpeakersAutomation& element, const ReaperAPI &api)
+Track& Facebook360PluginSuite::getCommonTrack(const DirectSpeakersAutomation& element, const ReaperAPI &api)
 {
     auto onCreate = [&element, this, &api] (Track& newTrack) {
         doGenericTrackSetup(newTrack);

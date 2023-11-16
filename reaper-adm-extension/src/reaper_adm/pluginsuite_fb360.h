@@ -47,7 +47,7 @@ namespace admplug {
                              const Track &track,
                              const Plugin &plugin) const;
 
-        Track& getCommonDefinitionTrack(const DirectSpeakersAutomation &element, const ReaperAPI &api);
+        Track& getCommonTrack(const DirectSpeakersAutomation &element, const ReaperAPI &api);
         std::unique_ptr<Track> getControlTrack(const ReaperAPI &api);
         void setAsGroupsSlave(const TrackElement &element, Track &track);
 
