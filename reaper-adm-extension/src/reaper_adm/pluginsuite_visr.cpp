@@ -79,12 +79,12 @@ namespace {
             auto vst = AdmVst(track.get(), api); // Will attempt to wrap existing plugin or create new if missing
             vst.setIncludeInRenderState(true);
 
-            auto td = packFormat->get<adm::TypeDescriptor>();
-            vst.setAdmTypeDefinition(td.get());
+            auto td = packFormat->get<adm::TypeDescriptor>().get();
+            vst.setAdmTypeDefinition(td);
 
-            // Set PackFormat and ChannelFormat. Only supporting CommonDefinitions. Set defaults if not CommonDefinition.
-            auto packFormatId = packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
-            vst.setAdmPackFormat(AdmPresetDefinitionsHelper::isCommonDefinition(packFormatId) ? packFormatId : ADM_VST_PACKFORMAT_UNSET_ID);
+            // Set PackFormat and ChannelFormat. Only supporting Preset Definitions. Set defaults if not Preset Definition.
+            auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(packFormat);
+            vst.setAdmPackFormat(pfData ? pfData->idValue : ADM_VST_PACKFORMAT_UNSET_ID);
             vst.setAdmChannelFormat(ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID);
         }
     }
@@ -260,7 +260,7 @@ void VisrPluginSuite::onCreateProject(const ProjectNode &, const ReaperAPI &api)
     commonTracks->removeDeletedTracks();
 }
 
-Track& VisrPluginSuite::getCommonDefinitionTrack(const DirectSpeakersAutomation& element, const ReaperAPI &api)
+Track& VisrPluginSuite::getCommonTrack(const DirectSpeakersAutomation& element, const ReaperAPI &api)
 {
     auto onCreate = [&element, this, &api] (Track& newTrack) {
         setupTrackWithMetadataPlugin(newTrack, api);
@@ -295,15 +295,15 @@ void VisrPluginSuite::onDirectSpeakersAutomation(DirectSpeakersAutomation const&
     auto trackWidth = static_cast<int>(take->channelCount());
     track->setChannelCount(trackWidth);
     configureAdmExportVst(automationNode, *track, api);
-    auto firstBlock = automationNode.blocks().front();
 
     if(automationNode.channel().channelFormat()) {
-        if(isCommonDefinition(firstBlock)) {
-            auto& commonTrack = getCommonDefinitionTrack(automationNode, api);
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(automationNode.channel().packFormat());
+        if (pfData) {
+            auto& commonTrack = getCommonTrack(automationNode, api);
             track->routeTo(commonTrack, 1, automationNode.channelIndex());
 
         } else {
-            // Note: ADM VST currently has no support for non-common-def
+            // Note: ADM VST currently has no support for non-preset-definitions
             auto channel = automationNode.channel();
             auto channelTrack = api.createTrack();
             channelTrack->setName(channel.name());
