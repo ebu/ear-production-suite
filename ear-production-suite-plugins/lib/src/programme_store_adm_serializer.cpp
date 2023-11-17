@@ -235,12 +235,16 @@ adm::SimpleObjectHolder add2076v2SimpleObjectTo(std::shared_ptr<adm::Document> d
   return holder;
 }
 
-adm::SimpleCommonDefinitionsObjectHolder add2076v2TailoredCommonDefinitionsObjectTo(
+struct ObjectHolder {
+  std::shared_ptr<adm::AudioObject> audioObject;
+  std::vector<std::shared_ptr<adm::AudioTrackUid>> audioTrackUids;
+};
+
+ObjectHolder add2076v2TailoredCommonDefinitionsObjectTo(
   std::shared_ptr<adm::Document> document, const std::string& name,
   const adm::AudioPackFormatId packFormatId,
-  const std::vector<adm::AudioChannelFormatId>& channelFormatIds,
-  const std::vector<std::string>& speakerLabels) {
-  adm::SimpleCommonDefinitionsObjectHolder holder;
+  const std::vector<adm::AudioChannelFormatId>& channelFormatIds) {
+  ObjectHolder holder;
   holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
   auto packFormat = document->lookup(packFormatId);
   if (!packFormat) {
@@ -250,10 +254,7 @@ adm::SimpleCommonDefinitionsObjectHolder add2076v2TailoredCommonDefinitionsObjec
     throw adm::error::AdmException(ss.str());
   }
   holder.audioObject->addReference(packFormat);
-  if (channelFormatIds.size() != speakerLabels.size()) {
-    throw adm::error::AdmException(
-      "Sizes of channelFormatIds and speakerLabels arguments do not match.");
-  }
+  holder.audioTrackUids.resize(channelFormatIds.size(), nullptr);
   for (size_t i = 0; i < channelFormatIds.size(); i++) {
     auto cf = document->lookup(channelFormatIds.at(i));
     if (!cf) {
@@ -266,7 +267,7 @@ adm::SimpleCommonDefinitionsObjectHolder add2076v2TailoredCommonDefinitionsObjec
     uid->setReference(packFormat);
     uid->setReference(cf);
     holder.audioObject->addReference(uid);
-    holder.audioTrackUids[speakerLabels.at(i)] = uid;
+    holder.audioTrackUids[i] = uid;
   }
   document->add(holder.audioObject);
   return holder;
@@ -480,30 +481,22 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       }
 
     } else if (metadata.has_ds_metadata()) {
-      std::vector<std::string> speakerLabels;
       std::vector<adm::AudioChannelFormatId> channelFormatIds;
 
       for (auto& speaker : metadata.ds_metadata().speakers()) {
-        auto thisSpeakerLabels = speaker.labels();
-        if (thisSpeakerLabels.size() > 0) {
-          speakerLabels.push_back(thisSpeakerLabels[0]);
-        } else {
-          speakerLabels.push_back("");
-        }
         auto channelFormatId = genAudioChannelFormatId(1, speaker.id());
         channelFormatIds.push_back(channelFormatId);
       }
       auto objectHolder = add2076v2TailoredCommonDefinitionsObjectTo(
           doc, metadata.name(),
           genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()),
-          channelFormatIds, speakerLabels);
+          channelFormatIds);
 
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
       for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
-        auto speakerLabel = speakerLabels.at(i);
-        pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids.at(speakerLabel) });
+        pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids[i] });
       }
       serializedObjects[connectionId] = objectHolder.audioObject;
     }
