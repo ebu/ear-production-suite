@@ -80,7 +80,7 @@ public:
 
     void incomingMessage(std::shared_ptr<NngMsg> msg);
 
-    AdmPresetDefinitionsHelper admCommonDefinitions{};
+    AdmPresetDefinitionsHelper admPresetDefinitions{};
 
 private:
     AdmStemPluginAudioProcessorEditor* editor();

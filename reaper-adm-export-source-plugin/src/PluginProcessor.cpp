@@ -209,14 +209,14 @@ int AdmStemPluginAudioProcessor::calcNumChannels()
     auto selPf = admPackFormatParam->get();
     auto selCf = admChannelFormatParam->get();
 
-    auto typeDefinitionData = admCommonDefinitions.getTypeDefinitionData(selTd);
+    auto typeDefinitionData = admPresetDefinitions.getTypeDefinitionData(selTd);
 
-    auto packFormatData = admCommonDefinitions.getPackFormatData(selTd, selPf);
+    auto packFormatData = admPresetDefinitions.getPackFormatData(selTd, selPf);
     if(!packFormatData) return 0;
 
     if(selCf == CHANNELFORMAT_ALLCHANNELS_ID) return packFormatData->relatedChannelFormats.size();
 
-    auto channelFormatData = admCommonDefinitions.getChannelFormatData(selTd, selPf, selCf);
+    auto channelFormatData = admPresetDefinitions.getChannelFormatData(selTd, selPf, selCf);
     if(!channelFormatData) return 0;
 
     return 1;
@@ -238,11 +238,11 @@ void AdmStemPluginAudioProcessor::updateAdmParameters(bool force)
     int valPackFormat = PACKFORMAT_UNSET_ID;
     int valChannelFormat = CHANNELFORMAT_ALLCHANNELS_ID;
 
-    if(admCommonDefinitions.getPackFormatData(valTypeDefinition, desiredPackFormat)) {
+    if(admPresetDefinitions.getPackFormatData(valTypeDefinition, desiredPackFormat)) {
         valPackFormat = desiredPackFormat;
     }
 
-    if(admCommonDefinitions.getChannelFormatData(valTypeDefinition, desiredPackFormat, desiredChannelFormat)) {
+    if(admPresetDefinitions.getChannelFormatData(valTypeDefinition, desiredPackFormat, desiredChannelFormat)) {
         valChannelFormat = desiredChannelFormat;
     }
 
