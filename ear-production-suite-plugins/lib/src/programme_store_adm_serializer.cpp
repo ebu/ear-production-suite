@@ -462,56 +462,13 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       pluginMap.push_back({ metadata.input_instance_id(), metadata.routing(), objectHolder.audioObject, objectHolder.audioTrackUid });
 
     } 
-    else if (metadata.has_hoa_metadata()) {
-      // get the pack format Id from the metadata and from that create the full
-      // pack format string This can be used to look up channel information using
-      // the common definitions helper
-      int packFormatIdValue = metadata.hoa_metadata().packformatidvalue();
-      int packFormatId = 0x00040000 | packFormatIdValue;
-      std::string packFormatIdStr =
-          std::string("AP_") + int_to_hex(packFormatId, 8);
-      auto packFormat =
-          doc->lookup(adm::parseAudioPackFormatId(packFormatIdStr));
+    else if (metadata.has_hoa_metadata() || metadata.has_ds_metadata()) {
+      int pfIdVal = metadata.has_ds_metadata()
+                        ? metadata.ds_metadata().packformatidvalue()
+                        : metadata.hoa_metadata().packformatidvalue();
 
-      if(packFormat) {
-        auto hoaAudioObject =
-          adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
-        hoaAudioObject->addReference(packFormat);
-        content.addReference(hoaAudioObject);
-        setInteractivity(*hoaAudioObject, object);
-        setImportance(*hoaAudioObject, object);
-
-        auto channelFormats =
-          AdmPresetDefinitionsHelper::getSingleton()
-          ->getPackFormatData(4, packFormatIdValue)
-          ->relatedChannelFormats;
-
-        // For each channel format create a AudioTrackUid that references the pack
-        // format. The audio object also needs to reference the channel format.
-        for(int i(0); i < channelFormats.size(); ++i) {
-          auto audioTrackUid = adm::AudioTrackUid::create();
-          hoaAudioObject->addReference(audioTrackUid);
-          audioTrackUid->setReference(packFormat);
-
-          // We need the channel format from our document,
-          // not the document AdmPresetDefinitionsHelper is using!
-          auto channelFormatId = adm::AudioChannelFormatId(
-            adm::TypeDefinition::HOA,
-            adm::AudioChannelFormatIdValue(channelFormats[i]->idValue));
-          auto channelFormat = doc->lookup(channelFormatId);
-          assert(channelFormat);
-
-          audioTrackUid->setReference(channelFormat);
-          pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, hoaAudioObject, audioTrackUid });
-        }
-        serializedObjects[connectionId] = hoaAudioObject;
-      }
-
-    } 
-    else if (metadata.has_ds_metadata()) {
       auto objectHolder = addPresetDefinitionObjectTo(
-          doc, metadata.name(),
-          genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()));
+          doc, metadata.name(), genAudioPackFormatId(1, pfIdVal));
 
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
@@ -522,7 +479,8 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
                              objectHolder.channels[i].audioTrackUid});
       }
       serializedObjects[connectionId] = objectHolder.audioObject;
-    }
+
+    } 
   }
 }
 
