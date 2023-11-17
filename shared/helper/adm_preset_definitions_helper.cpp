@@ -158,6 +158,31 @@ bool AdmPresetDefinitionsHelper::isCommonDefinition(int idValue)
 	return idValue <= 0x0FFF;
 }
 
+std::shared_ptr<adm::AudioPackFormat> AdmPresetDefinitionsHelper::copyMissingTreeElms(std::shared_ptr<adm::AudioPackFormat> srcPf, std::shared_ptr<adm::Document> dstDoc)
+{
+	auto pfCopy = srcPf->copy();
+	dstDoc->add(pfCopy);
+	for (auto subPf : srcPf->getReferences<adm::AudioPackFormat>()) {
+		auto subPfId = subPf->get<adm::AudioPackFormatId>();
+		auto docSubPf = dstDoc->lookup(subPfId);
+		if (!docSubPf) {
+			docSubPf = copyMissingTreeElms(subPf, dstDoc);
+		}
+		pfCopy->addReference(docSubPf);
+	}
+	for (auto cf : srcPf->getReferences<adm::AudioChannelFormat>()) {
+		auto cfId = cf->get<adm::AudioChannelFormatId>();
+		auto docCf = dstDoc->lookup(cfId);
+		if (!docCf) {
+			auto cfCopy = cf->copy();
+			dstDoc->add(cfCopy);
+			docCf = cfCopy;
+		}
+		pfCopy->addReference(docCf);
+	}
+	return pfCopy;	
+}
+
 void AdmPresetDefinitionsHelper::populateElementRelationshipsFor(adm::TypeDescriptor typeDescriptor)
 {
 	auto tdData = std::make_shared<TypeDefinitionData>();

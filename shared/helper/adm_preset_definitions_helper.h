@@ -86,6 +86,7 @@ public:
 	std::shared_ptr<PackFormatData> getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 
 	static bool isCommonDefinition(int idValue);
+	static std::shared_ptr<adm::AudioPackFormat> copyMissingTreeElms(std::shared_ptr<adm::AudioPackFormat> srcPf, std::shared_ptr<adm::Document> dstDoc);
 
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
