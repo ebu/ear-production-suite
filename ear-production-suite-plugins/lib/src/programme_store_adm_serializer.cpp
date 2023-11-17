@@ -240,20 +240,43 @@ struct ObjectHolder {
   std::vector<std::shared_ptr<adm::AudioTrackUid>> audioTrackUids;
 };
 
-ObjectHolder add2076v2TailoredCommonDefinitionsObjectTo(
+ObjectHolder addPresetDefinitionObjectTo(
   std::shared_ptr<adm::Document> document, const std::string& name,
   const adm::AudioPackFormatId packFormatId,
   const std::vector<adm::AudioChannelFormatId>& channelFormatIds) {
+
   ObjectHolder holder;
   holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
-  auto packFormat = document->lookup(packFormatId);
-  if (!packFormat) {
-    std::stringstream ss;
-    ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
-      << "\" not found. Are the common definitions added to the document?";
-    throw adm::error::AdmException(ss.str());
+
+  auto docPackFormat = document->lookup(packFormatId);
+  if (!docPackFormat) {
+    // not yet in document - shouldn't be a common def
+    auto td = packFormatId.get<adm::TypeDescriptor>().get();
+    auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
+    auto presets = AdmPresetDefinitionsHelper::getSingleton();
+    auto pfData = presets->getPackFormatData(td, pfIdVal);
+
+    if (!pfData) {
+      // not a preset (or therefore a common def)
+      std::stringstream ss;
+      ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
+         << "\" not found in Preset Definitions. Can't author ADM.";
+      throw adm::error::AdmException(ss.str());
+    } 
+
+    if (pfData->isCommonDefinition()) {
+      // common def but not already in doc
+      std::stringstream ss;
+      ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
+         << "\" not found in document. Are the common definitions added to the document?";
+      throw adm::error::AdmException(ss.str());
+    } 
+
+    // It's a supplementary definition - add the necessary PF/CF tree
+    docPackFormat = presets->copyMissingTreeElms(pfData->packFormat, document);
   }
-  holder.audioObject->addReference(packFormat);
+
+  holder.audioObject->addReference(docPackFormat);
   holder.audioTrackUids.resize(channelFormatIds.size(), nullptr);
   for (size_t i = 0; i < channelFormatIds.size(); i++) {
     auto cf = document->lookup(channelFormatIds.at(i));
@@ -264,7 +287,7 @@ ObjectHolder add2076v2TailoredCommonDefinitionsObjectTo(
       throw adm::error::AdmException(ss.str());
     }
     auto uid = adm::AudioTrackUid::create();
-    uid->setReference(packFormat);
+    uid->setReference(docPackFormat);
     uid->setReference(cf);
     holder.audioObject->addReference(uid);
     holder.audioTrackUids[i] = uid;
@@ -431,7 +454,8 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       serializedObjects[connectionId] = objectHolder.audioObject;
       pluginMap.push_back({ metadata.input_instance_id(), metadata.routing(), objectHolder.audioObject, objectHolder.audioTrackUid });
 
-    } else if (metadata.has_hoa_metadata()) {
+    } 
+    else if (metadata.has_hoa_metadata()) {
       // get the pack format Id from the metadata and from that create the full
       // pack format string This can be used to look up channel information using
       // the common definitions helper
@@ -480,14 +504,15 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
         serializedObjects[connectionId] = hoaAudioObject;
       }
 
-    } else if (metadata.has_ds_metadata()) {
+    } 
+    else if (metadata.has_ds_metadata()) {
       std::vector<adm::AudioChannelFormatId> channelFormatIds;
 
       for (auto& speaker : metadata.ds_metadata().speakers()) {
         auto channelFormatId = genAudioChannelFormatId(1, speaker.id());
         channelFormatIds.push_back(channelFormatId);
       }
-      auto objectHolder = add2076v2TailoredCommonDefinitionsObjectTo(
+      auto objectHolder = addPresetDefinitionObjectTo(
           doc, metadata.name(),
           genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()),
           channelFormatIds);
