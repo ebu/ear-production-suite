@@ -76,6 +76,18 @@ public:
 		std::vector<std::shared_ptr<PackFormatData>> relatedPackFormats;
 	};
 
+	struct ChannelTrackAssociation {
+		std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
+		std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
+	};
+
+	struct ObjectHolder {
+		std::shared_ptr<adm::AudioObject> audioObject;
+		std::vector<ChannelTrackAssociation> channels;
+	};
+
+	ObjectHolder addPresetDefinitionObjectTo(std::shared_ptr<adm::Document> document, const std::string& name, const adm::AudioPackFormatId packFormatId);
+
 	std::map<int, std::shared_ptr<TypeDefinitionData>> getElementRelationships();
 
 	std::shared_ptr<TypeDefinitionData> getTypeDefinitionData(int tdId);
