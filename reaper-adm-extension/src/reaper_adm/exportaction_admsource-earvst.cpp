@@ -225,59 +225,51 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 admElements->audioObject->set(adm::Duration{ duration });
             }
 
-            if(!(*admElements).isUsingCommonDefinition) {
+            const bool isPresetDef = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(admElements->audioPackFormat) != nullptr;
+            const bool isObjectType = admElements->typeDescriptor == adm::TypeDefinition::OBJECTS;
 
-                auto cumulatedPointData = CumulatedPointData(start, start + duration);
+            if (!isPresetDef) {
+                if (isObjectType) {
+                    // Need to generate BFs
+                    auto cumulatedPointData = CumulatedPointData(start, start + duration);
 
-                // Get all values for all parameters, whether automated or not.
-                for(int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
-                    auto admParameter = (AdmParameter)admParameterIndex;
-                    auto param = pluginSuite->getParameterFor(admParameter);
-                    auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
+                    // Get all values for all parameters, whether automated or not.
+                    for (int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
+                        auto admParameter = (AdmParameter)admParameterIndex;
+                        auto param = pluginSuite->getParameterFor(admParameter);
+                        auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
 
-                    if(getEnvelopeBypassed(env, api)) {
-                        // We have an envelope, but it is bypassed
-                        auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
-                        auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-                        for(auto& newError : newErrors) {
-                            warningStrings.push_back(newError.what());
-                        }
-                    } else if(param && env) {
-                        // We have an envelope for this ADM parameter
-                        auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
-                        for(auto &newError : newErrors) {
-                            warningStrings.push_back(newError.what());
-                        }
+                        if (getEnvelopeBypassed(env, api)) {
+                            // We have an envelope, but it is bypassed
+                            auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
+                            auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
+                            for (auto& newError : newErrors) {
+                                warningStrings.push_back(newError.what());
+                            }
 
-                    } else if(auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api)) {
-                        // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
-                        // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
-                        auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-                        for(auto &newError : newErrors) {
-                            warningStrings.push_back(newError.what());
+                        } else if (param && env) {
+                            // We have an envelope for this ADM parameter
+                            auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
+                            for (auto& newError : newErrors) {
+                                warningStrings.push_back(newError.what());
+                            }
+
+                        } else if (auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api)) {
+                            // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
+                            // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
+                            auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
+                            for (auto& newError : newErrors) {
+                                warningStrings.push_back(newError.what());
+                            }
                         }
                     }
-                }
 
-                if(admElements->typeDescriptor == adm::TypeDefinition::OBJECTS) {
                     auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst.get(), api);
-                    for(auto& block : *blocks) admElements->audioChannelFormat->add(*block);
+                    for (auto& block : *blocks) admElements->audioChannelFormat->add(*block);
+
                 }
-                else if(admElements->typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
-                    //TODO
-                    warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
-                }
-                else if(admElements->typeDescriptor == adm::TypeDefinition::HOA) {
-                    //TODO
-                    warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
-                }
-                else if(admElements->typeDescriptor == adm::TypeDefinition::BINAURAL) {
-                    //TODO
-                    warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
-                }
-                else if(admElements->typeDescriptor == adm::TypeDefinition::MATRIX) {
-                    //TODO
-                    warningStrings.push_back("Currently only supporting Common Defintions for non-Objects types");
+                else {
+                    warningStrings.push_back("Currently only supporting Preset Definitions for non-Objects types");
                 }
             }
         }
@@ -352,12 +344,9 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     }
 
     auto audioChannelFormatId = audioChannelFormat->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
-    bool isCommonDefinition = AdmPresetDefinitionsHelper::isCommonDefinition(audioChannelFormatId);
-
     adm::TypeDescriptor typeDescriptor = audioChannelFormat->get<adm::TypeDescriptor>();
 
     return AdmElements{
-        isCommonDefinition,
         typeDescriptor,
         audioTrackUid,
         audioTrackFormat,
