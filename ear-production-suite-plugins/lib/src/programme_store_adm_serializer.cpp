@@ -235,26 +235,31 @@ adm::SimpleObjectHolder add2076v2SimpleObjectTo(std::shared_ptr<adm::Document> d
   return holder;
 }
 
+struct ChannelTrackAssociation {
+  std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
+  std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
+};
+
 struct ObjectHolder {
   std::shared_ptr<adm::AudioObject> audioObject;
-  std::vector<std::shared_ptr<adm::AudioTrackUid>> audioTrackUids;
+  std::vector<ChannelTrackAssociation> channels;
 };
 
 ObjectHolder addPresetDefinitionObjectTo(
   std::shared_ptr<adm::Document> document, const std::string& name,
-  const adm::AudioPackFormatId packFormatId,
-  const std::vector<adm::AudioChannelFormatId>& channelFormatIds) {
+  const adm::AudioPackFormatId packFormatId) {
 
   ObjectHolder holder;
   holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
 
+  auto td = packFormatId.get<adm::TypeDescriptor>().get();
+  auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
+  auto presets = AdmPresetDefinitionsHelper::getSingleton();
+  auto pfData = presets->getPackFormatData(td, pfIdVal);
   auto docPackFormat = document->lookup(packFormatId);
+
   if (!docPackFormat) {
     // not yet in document - shouldn't be a common def
-    auto td = packFormatId.get<adm::TypeDescriptor>().get();
-    auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
-    auto presets = AdmPresetDefinitionsHelper::getSingleton();
-    auto pfData = presets->getPackFormatData(td, pfIdVal);
 
     if (!pfData) {
       // not a preset (or therefore a common def)
@@ -277,20 +282,22 @@ ObjectHolder addPresetDefinitionObjectTo(
   }
 
   holder.audioObject->addReference(docPackFormat);
-  holder.audioTrackUids.resize(channelFormatIds.size(), nullptr);
-  for (size_t i = 0; i < channelFormatIds.size(); i++) {
-    auto cf = document->lookup(channelFormatIds.at(i));
-    if (!cf) {
-      std::stringstream ss;
-      ss << "AudioTrackFormatId \"" << adm::formatId(channelFormatIds.at(i))
-        << "\" not found. Id might be invalid.";
-      throw adm::error::AdmException(ss.str());
+  if (pfData) {
+    for (auto cfData : pfData->relatedChannelFormats) {
+      auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
+      auto cf = document->lookup(cfId);
+      if (!cf) {
+        std::stringstream ss;
+        ss << "AudioChannelFormatId \"" << adm::formatId(cfId)
+           << "\" not found in document. Id might be invalid.";
+        throw adm::error::AdmException(ss.str());
+      }
+      auto uid = adm::AudioTrackUid::create();
+      uid->setReference(docPackFormat);
+      uid->setReference(cf);
+      holder.audioObject->addReference(uid);
+      holder.channels.push_back(ChannelTrackAssociation{cf, uid});
     }
-    auto uid = adm::AudioTrackUid::create();
-    uid->setReference(docPackFormat);
-    uid->setReference(cf);
-    holder.audioObject->addReference(uid);
-    holder.audioTrackUids[i] = uid;
   }
   document->add(holder.audioObject);
   return holder;
@@ -478,10 +485,6 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
           AdmPresetDefinitionsHelper::getSingleton()
           ->getPackFormatData(4, packFormatIdValue)
           ->relatedChannelFormats;
-        // The AudioTrackIUD needs to reference the track format
-        // To get the correct track format we go through all track formats and
-        // find the one that references the correct channel format
-        auto allTrackFormats = doc->getElements<adm::AudioTrackFormat>();
 
         // For each channel format create a AudioTrackUid that references the pack
         // format. The audio object also needs to reference the channel format.
@@ -506,22 +509,17 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
 
     } 
     else if (metadata.has_ds_metadata()) {
-      std::vector<adm::AudioChannelFormatId> channelFormatIds;
-
-      for (auto& speaker : metadata.ds_metadata().speakers()) {
-        auto channelFormatId = genAudioChannelFormatId(1, speaker.id());
-        channelFormatIds.push_back(channelFormatId);
-      }
       auto objectHolder = addPresetDefinitionObjectTo(
           doc, metadata.name(),
-          genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()),
-          channelFormatIds);
+          genAudioPackFormatId(1, metadata.ds_metadata().packformatidvalue()));
 
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
-      for (int i(0); i < objectHolder.audioTrackUids.size(); ++i) {
-        pluginMap.push_back({ metadata.input_instance_id(), metadata.routing() + i, objectHolder.audioObject, objectHolder.audioTrackUids[i] });
+      for (int i(0); i < objectHolder.channels.size(); ++i) {
+        pluginMap.push_back({metadata.input_instance_id(),
+                             metadata.routing() + i, objectHolder.audioObject,
+                             objectHolder.channels[i].audioTrackUid});
       }
       serializedObjects[connectionId] = objectHolder.audioObject;
     }
