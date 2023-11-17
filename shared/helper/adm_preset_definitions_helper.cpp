@@ -46,6 +46,57 @@ std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingl
 	return instance;
 }
 
+AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::addPresetDefinitionObjectTo(std::shared_ptr<adm::Document> document, const std::string& name, const adm::AudioPackFormatId packFormatId)
+{
+	ObjectHolder holder;
+	holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
+
+	auto td = packFormatId.get<adm::TypeDescriptor>().get();
+	auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
+	auto pfData = getPackFormatData(td, pfIdVal);
+	auto docPackFormat = document->lookup(packFormatId);
+
+	if (!docPackFormat) {
+		if (!pfData) {
+			// not a preset (or therefore a common def)
+			std::stringstream ss;
+			ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
+				<< "\" not found in Preset Definitions. Can't author ADM.";
+			throw adm::error::AdmException(ss.str());
+		}
+
+		if (pfData->isCommonDefinition()) {
+			// common def but not already in doc
+			adm::addCommonDefinitionsTo(document);
+			auto pfData = getPackFormatData(td, pfIdVal);
+		}
+
+		// It's a supplementary definition - add the necessary PF/CF tree
+		docPackFormat = copyMissingTreeElms(pfData->packFormat, document);
+	}
+
+	holder.audioObject->addReference(docPackFormat);
+	if (pfData) {
+		for (auto cfData : pfData->relatedChannelFormats) {
+			auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
+			auto cf = document->lookup(cfId);
+			if (!cf) {
+				std::stringstream ss;
+				ss << "AudioChannelFormatId \"" << adm::formatId(cfId)
+					<< "\" not found in document. Id might be invalid.";
+				throw adm::error::AdmException(ss.str());
+			}
+			auto uid = adm::AudioTrackUid::create();
+			uid->setReference(docPackFormat);
+			uid->setReference(cf);
+			holder.audioObject->addReference(uid);
+			holder.channels.push_back(ChannelTrackAssociation{ cf, uid });
+		}
+	}
+	document->add(holder.audioObject);
+	return holder;
+}
+
 std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> AdmPresetDefinitionsHelper::getElementRelationships()
 {
 	if (!presetDefinitions) {

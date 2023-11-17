@@ -235,75 +235,6 @@ adm::SimpleObjectHolder add2076v2SimpleObjectTo(std::shared_ptr<adm::Document> d
   return holder;
 }
 
-struct ChannelTrackAssociation {
-  std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
-  std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
-};
-
-struct ObjectHolder {
-  std::shared_ptr<adm::AudioObject> audioObject;
-  std::vector<ChannelTrackAssociation> channels;
-};
-
-ObjectHolder addPresetDefinitionObjectTo(
-  std::shared_ptr<adm::Document> document, const std::string& name,
-  const adm::AudioPackFormatId packFormatId) {
-
-  ObjectHolder holder;
-  holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
-
-  auto td = packFormatId.get<adm::TypeDescriptor>().get();
-  auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
-  auto presets = AdmPresetDefinitionsHelper::getSingleton();
-  auto pfData = presets->getPackFormatData(td, pfIdVal);
-  auto docPackFormat = document->lookup(packFormatId);
-
-  if (!docPackFormat) {
-    // not yet in document - shouldn't be a common def
-
-    if (!pfData) {
-      // not a preset (or therefore a common def)
-      std::stringstream ss;
-      ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
-         << "\" not found in Preset Definitions. Can't author ADM.";
-      throw adm::error::AdmException(ss.str());
-    } 
-
-    if (pfData->isCommonDefinition()) {
-      // common def but not already in doc
-      std::stringstream ss;
-      ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
-         << "\" not found in document. Are the common definitions added to the document?";
-      throw adm::error::AdmException(ss.str());
-    } 
-
-    // It's a supplementary definition - add the necessary PF/CF tree
-    docPackFormat = presets->copyMissingTreeElms(pfData->packFormat, document);
-  }
-
-  holder.audioObject->addReference(docPackFormat);
-  if (pfData) {
-    for (auto cfData : pfData->relatedChannelFormats) {
-      auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
-      auto cf = document->lookup(cfId);
-      if (!cf) {
-        std::stringstream ss;
-        ss << "AudioChannelFormatId \"" << adm::formatId(cfId)
-           << "\" not found in document. Id might be invalid.";
-        throw adm::error::AdmException(ss.str());
-      }
-      auto uid = adm::AudioTrackUid::create();
-      uid->setReference(docPackFormat);
-      uid->setReference(cf);
-      holder.audioObject->addReference(uid);
-      holder.channels.push_back(ChannelTrackAssociation{cf, uid});
-    }
-  }
-  document->add(holder.audioObject);
-  return holder;
-}
-
-
 }  // namespace
 
 bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
@@ -467,7 +398,8 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
                         ? metadata.ds_metadata().packformatidvalue()
                         : metadata.hoa_metadata().packformatidvalue();
 
-      auto objectHolder = addPresetDefinitionObjectTo(
+      auto presets = AdmPresetDefinitionsHelper::getSingleton();
+      auto objectHolder = presets->addPresetDefinitionObjectTo(
           doc, metadata.name(), genAudioPackFormatId(1, pfIdVal));
 
       setInteractivity(*objectHolder.audioObject, object);
