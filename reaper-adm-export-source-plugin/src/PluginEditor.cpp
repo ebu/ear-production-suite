@@ -54,7 +54,7 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
     channelFormatLabel.setJustificationType(Justification::right);
     addAndMakeVisible(channelFormatLabel);
 
-    auto elementRelationships = processor.admCommonDefinitions.getElementRelationships();
+    auto elementRelationships = processor.admPresetDefinitions.getElementRelationships();
 
     for(auto const&[id, tdData] : elementRelationships) {
         typeDefinitionSelector.addTextEntry(tdData->name, id);
@@ -175,7 +175,7 @@ void AdmStemPluginAudioProcessorEditor::updateComboBoxOptions(int tdId, int pfId
         channelFormatSelector.setDefaultText("Select Pack Format");
     }
 
-    auto typeDefinitionData = processor.admCommonDefinitions.getTypeDefinitionData(tdId);
+    auto typeDefinitionData = processor.admPresetDefinitions.getTypeDefinitionData(tdId);
 
     if(typeDefinitionData) {
         for(auto& pfData : typeDefinitionData->relatedPackFormats) {
