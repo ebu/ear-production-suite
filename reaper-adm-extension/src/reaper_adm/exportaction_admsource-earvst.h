@@ -173,7 +173,6 @@ private:
 	void generateAdmAndChna(ReaperAPI const& api);
 
 	struct AdmElements {
-		bool isUsingCommonDefinition;
 		adm::TypeDescriptor typeDescriptor;
 		std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
 		std::shared_ptr<adm::AudioTrackFormat> audioTrackFormat;
