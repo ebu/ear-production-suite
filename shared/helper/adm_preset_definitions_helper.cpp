@@ -64,9 +64,9 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 	auto td = packFormatId.get<adm::TypeDescriptor>().get();
 	auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
 	auto pfData = getPackFormatData(td, pfIdVal);
-	auto docPackFormat = document->lookup(packFormatId);
+	holder.audioPackFormat = document->lookup(packFormatId);
 
-	if (!docPackFormat) {
+	if (!holder.audioPackFormat) {
 		if (!pfData) {
 			// not a preset (or therefore a common def)
 			std::stringstream ss;
@@ -82,10 +82,10 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 		}
 
 		// It's a supplementary definition - add the necessary PF/CF tree
-		docPackFormat = copyMissingTreeElms(pfData->packFormat, document);
+		holder.audioPackFormat = copyMissingTreeElms(pfData->packFormat, document);
 	}
 
-	holder.audioObject->addReference(docPackFormat);
+	holder.audioObject->addReference(holder.audioPackFormat);
 	if (pfData) {
 		for (auto cfData : pfData->relatedChannelFormats) {
 			if (!forSingleCfIdValue.has_value() || forSingleCfIdValue.value() == cfData->idValue) {
@@ -98,7 +98,7 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 					throw adm::error::AdmException(ss.str());
 				}
 				auto uid = adm::AudioTrackUid::create();
-				uid->setReference(docPackFormat);
+				uid->setReference(holder.audioPackFormat);
 				uid->setReference(cf);
 				holder.audioObject->addReference(uid);
 				holder.channels.push_back(ChannelTrackAssociation{ cf, uid });
