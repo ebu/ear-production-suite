@@ -152,14 +152,14 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
             assert(admElements.has_value());
 
             if(admElements->audioTrackFormat) {
-                // 2076-1 structure
+                // BS.2076-1 style structure (ATUID->ATF->ASF->ACF)
                 audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
                                                  formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
                                                  formatId((*admElements).audioTrackFormat->get<AudioTrackFormatId>()),
                                                  formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
                 ));
             } else {
-                // 2076-2 structure
+                // BS.2076-2 style structure (ATUID->ACF)
                 std::string cfId = formatId(admElements->audioChannelFormat->get<AudioChannelFormatId>());
                 cfId += "_00";
                 audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
