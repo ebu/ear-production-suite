@@ -83,6 +83,7 @@ public:
 
 	struct ObjectHolder {
 		std::shared_ptr<adm::AudioObject> audioObject;
+		std::shared_ptr<adm::AudioPackFormat> audioPackFormat;
 		std::vector<ChannelTrackAssociation> channels;
 	};
 
