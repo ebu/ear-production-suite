@@ -145,14 +145,12 @@ void AdmVst::setAdmChannelFormat(int channelFormat)
     setParameterWithConvert(*paramAdmChannelFormat, (double)channelFormat);
 }
 
-bool AdmVst::isUsingCommonDefinition()
+bool AdmVst::isUsingPresetDefinition()
 {
-    auto packFormat = getAdmPackFormat();
-    if(packFormat == ADM_VST_PACKFORMAT_UNSET_ID) return false;
-    bool packIsCommonDef = AdmPresetDefinitionsHelper::isCommonDefinition(packFormat);
-    bool channelIsCommonDef = AdmPresetDefinitionsHelper::isCommonDefinition(getAdmChannelFormat());
-    assert(packIsCommonDef == channelIsCommonDef); // Should be
-    return (packIsCommonDef && channelIsCommonDef);
+    auto td = getAdmTypeDefinition();
+    auto pfId = getAdmPackFormat();
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(td, pfId);
+    return pfData != nullptr;
 }
 
 int AdmVst::getSamplesSocketPort()
