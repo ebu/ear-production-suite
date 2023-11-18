@@ -390,15 +390,11 @@ std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI co
 	admSubgraphs.push_back(subgraph);
 
 	subgraph->audioChannelFormat = adm::AudioChannelFormat::create(adm::AudioChannelFormatName(objectName + suffix), objectType);
-	subgraph->audioStreamFormat = adm::AudioStreamFormat::create(adm::AudioStreamFormatName(objectName + suffix), format);
-	subgraph->audioTrackFormat = adm::AudioTrackFormat::create(adm::AudioTrackFormatName(objectName + suffix), format);
 	subgraph->audioTrackUid = adm::AudioTrackUid::create();
 	// References
 	audioPackFormat->addReference(subgraph->audioChannelFormat);
-	subgraph->audioStreamFormat->setReference(subgraph->audioChannelFormat);
-	subgraph->audioTrackFormat->setReference(subgraph->audioStreamFormat);
 	audioObject->addReference(subgraph->audioTrackUid);
-	subgraph->audioTrackUid->setReference(subgraph->audioTrackFormat);
+	subgraph->audioTrackUid->setReference(subgraph->audioChannelFormat);
 	subgraph->audioTrackUid->setReference(audioPackFormat);
 
 	if (pluginSuite && spatPlugin) {
