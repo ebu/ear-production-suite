@@ -46,10 +46,20 @@ std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingl
 	return instance;
 }
 
-AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::addPresetDefinitionObjectTo(std::shared_ptr<adm::Document> document, const std::string& name, const adm::AudioPackFormatId packFormatId)
+AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::addPresetDefinitionObjectTo(
+	std::shared_ptr<adm::Document> document, const std::string& name, const adm::AudioPackFormatId packFormatId)
+{
+	auto audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
+	auto holder = setupPresetDefinitionObject(document, audioObject, packFormatId);
+	document->add(holder.audioObject);
+	return holder;
+}
+
+AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPresetDefinitionObject(
+	std::shared_ptr<adm::Document> document, std::shared_ptr<adm::AudioObject> existingAudioObject, const adm::AudioPackFormatId packFormatId, std::optional<int> forSingleCfIdValue)
 {
 	ObjectHolder holder;
-	holder.audioObject = adm::AudioObject::create(adm::AudioObjectName(name));
+	holder.audioObject = existingAudioObject;
 
 	auto td = packFormatId.get<adm::TypeDescriptor>().get();
 	auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
@@ -78,19 +88,21 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::addPresetDe
 	holder.audioObject->addReference(docPackFormat);
 	if (pfData) {
 		for (auto cfData : pfData->relatedChannelFormats) {
-			auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
-			auto cf = document->lookup(cfId);
-			if (!cf) {
-				std::stringstream ss;
-				ss << "AudioChannelFormatId \"" << adm::formatId(cfId)
-					<< "\" not found in document. Id might be invalid.";
-				throw adm::error::AdmException(ss.str());
+			if (!forSingleCfIdValue.has_value() || forSingleCfIdValue.value() == cfData->idValue) {
+				auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
+				auto cf = document->lookup(cfId);
+				if (!cf) {
+					std::stringstream ss;
+					ss << "AudioChannelFormatId \"" << adm::formatId(cfId)
+						<< "\" not found in document. Id might be invalid.";
+					throw adm::error::AdmException(ss.str());
+				}
+				auto uid = adm::AudioTrackUid::create();
+				uid->setReference(docPackFormat);
+				uid->setReference(cf);
+				holder.audioObject->addReference(uid);
+				holder.channels.push_back(ChannelTrackAssociation{ cf, uid });
 			}
-			auto uid = adm::AudioTrackUid::create();
-			uid->setReference(docPackFormat);
-			uid->setReference(cf);
-			holder.audioObject->addReference(uid);
-			holder.channels.push_back(ChannelTrackAssociation{ cf, uid });
 		}
 	}
 	document->add(holder.audioObject);

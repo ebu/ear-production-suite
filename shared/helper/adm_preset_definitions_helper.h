@@ -86,7 +86,13 @@ public:
 		std::vector<ChannelTrackAssociation> channels;
 	};
 
-	ObjectHolder addPresetDefinitionObjectTo(std::shared_ptr<adm::Document> document, const std::string& name, const adm::AudioPackFormatId packFormatId);
+	ObjectHolder addPresetDefinitionObjectTo(std::shared_ptr<adm::Document> document, 
+		const std::string& name, 
+		const adm::AudioPackFormatId packFormatId);
+	ObjectHolder setupPresetDefinitionObject(std::shared_ptr<adm::Document> document, 
+		std::shared_ptr<adm::AudioObject> existingAudioObject,
+		const adm::AudioPackFormatId packFormatId,
+		std::optional<int> forSingleCfIdValue = {});
 
 	std::map<int, std::shared_ptr<TypeDefinitionData>> getElementRelationships();
 
