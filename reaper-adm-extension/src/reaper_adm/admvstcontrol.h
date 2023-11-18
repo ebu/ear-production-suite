@@ -56,7 +56,7 @@ public:
     int getAdmChannelFormat();
     void setAdmChannelFormat(int channelFormat);
 
-    bool isUsingCommonDefinition();
+    bool isUsingPresetDefinition();
 
     int getSamplesSocketPort();
     int getCommandSocketPort();

@@ -8,6 +8,7 @@
 #include <adm/utilities/id_assignment.hpp>
 #include <adm/write.hpp>
 #include <adm/common_definitions.hpp>
+#include <optional>
 
 namespace {
 std::vector<adm::TypeDescriptor> getAdmTypeDefinitionsExcluding(adm::TypeDescriptor exclude) {
@@ -242,11 +243,24 @@ std::shared_ptr<bw64::ChnaChunk> AdmVstExportSources::getChnaChunk()
 		if (auto audioPackFormat = metadata->getAudioPackFormat()) {
 			auto audioPackFormatIdStr = formatId(audioPackFormat->get<AudioPackFormatId>());
 			for (auto& admTrack : *metadata->getAdmSubgraphs()) {
-				audioIds.push_back(bw64::AudioId(trackNumCounter++,
-					formatId(admTrack->audioTrackUid->get<AudioTrackUidId>()),
-					formatId(admTrack->audioTrackFormat->get<AudioTrackFormatId>()),
-					audioPackFormatIdStr
-				));
+				if (admTrack->audioTrackFormat) {
+					// BS.2076-1 style structure (ATUID->ATF->ASF->ACF)
+					audioIds.push_back(bw64::AudioId(trackNumCounter++,
+						formatId(admTrack->audioTrackUid->get<AudioTrackUidId>()),
+						formatId(admTrack->audioTrackFormat->get<AudioTrackFormatId>()),
+						audioPackFormatIdStr
+					));
+				}
+				else {
+					// BS.2076-2 style structure (ATUID->ACF)
+					std::string cfId = formatId(admTrack->audioChannelFormat->get<AudioChannelFormatId>());
+					cfId += "_00";
+					audioIds.push_back(bw64::AudioId(trackNumCounter++,
+						formatId(admTrack->audioTrackUid->get<AudioTrackUidId>()),
+						cfId,
+						audioPackFormatIdStr
+					));
+				}
 			}
 		}
 	}
@@ -302,14 +316,14 @@ void AdmVstExporter::assignAdmMetadata(ReaperAPI const& api)
 		chosenPlugin = &(supportingPlugins.begin()->second);
 	}
 
-	if (admExportVst->isUsingCommonDefinition()) {
-		// Common definitions (directspeakers, hoa) may not need spatialising so it's acceptable to not provide a plugin
+	if (admExportVst->isUsingPresetDefinition()) {
+		// Preset definitions (directspeakers, hoa) may not need spatialising so it's acceptable to not provide a plugin
 
 		if (chosenPlugin) {
-			newAdmCommonDefinitionReference(api, chosenPlugin->first, chosenPlugin->second.get());
+			newAdmPresetDefinitionReference(api, chosenPlugin->first, chosenPlugin->second.get());
 		}
 		else {
-			newAdmCommonDefinitionReference(api, nullptr, nullptr);
+			newAdmPresetDefinitionReference(api, nullptr, nullptr);
 		}
 
 	}
@@ -395,98 +409,38 @@ std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI co
 	return subgraph;
 }
 
-void AdmVstExporter::newAdmCommonDefinitionReference(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin)
+void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin)
 {
 	auto typeDefinition = admExportVst->getAdmType();
-	int typeDefinitionId = typeDefinition.get();
-	int packFormatId = admExportVst->getAdmPackFormat();
-	int channelFormatId = admExportVst->getAdmChannelFormat();
+	int typeDefinitionValue = typeDefinition.get();
+	int packFormatIdValue = admExportVst->getAdmPackFormat();
+	int channelFormatIdValue = admExportVst->getAdmChannelFormat();
+	assert(packFormatIdValue != ADM_VST_PACKFORMAT_UNSET_ID);
 
-	assert(packFormatId != ADM_VST_PACKFORMAT_UNSET_ID);
-	assert(AdmPresetDefinitionsHelper::isCommonDefinition(packFormatId));
+	auto presets = AdmPresetDefinitionsHelper::getSingleton();
+	auto pfData = presets->getPackFormatData(typeDefinitionValue, packFormatIdValue);
 
-	if (!audioPackFormat) {
-		// Lookup packformat for this commondefinition
-		auto allPackFormats = parentDocument->getElements<adm::AudioPackFormat>();
-		for (auto packFormat : allPackFormats) {
-			if (packFormat->get<adm::TypeDescriptor>() == typeDefinition &&
-				packFormat->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get() == packFormatId) {
-				audioPackFormat = packFormat;
-				audioObject->addReference(audioPackFormat);
-				break;
-			}
-		}
-	}
+	if (pfData) {
+		std::optional<int> specificCfIdValue;
+		if (channelFormatIdValue != ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID)
+			specificCfIdValue = channelFormatIdValue;
 
-	assert(audioPackFormat);
+		auto holder = presets->setupPresetDefinitionObject(parentDocument, audioObject,
+			pfData->packFormat->get<adm::AudioPackFormatId>(), specificCfIdValue);
 
-	if (audioPackFormat) {
-		if (channelFormatId == ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID) {
-			// ALL channels for this packformat, in the order they are referenced in the packformat
-			auto allTrackFormats = parentDocument->getElements<adm::AudioTrackFormat>();
+		audioPackFormat = holder.audioPackFormat;
 
-			// We use the commonDefinitionHelper to get not only the Pack Formats immediate Channel Formats,
-			//  but also those it may inherit if it references another Pack Format (which may also inherit another)
-			auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(typeDefinitionId, packFormatId);
-
-			if (pfData) {
-				for (auto cfData : pfData->relatedChannelFormats) {
-
-					auto cfId = adm::AudioChannelFormatId(typeDefinition, adm::AudioChannelFormatIdValue(cfData->idValue));
-					auto channelFormat = parentDocument->lookup(cfId);
-					assert(channelFormat);
-
-					auto subgraph = std::make_shared<AdmSubgraphElements>();
-					subgraph->audioChannelFormat = channelFormat;
-
-					for (auto trackFormat : allTrackFormats) {
-						auto referencedStreamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
-						if (referencedStreamFormat->getReference<adm::AudioChannelFormat>() == channelFormat) {
-							subgraph->audioStreamFormat = referencedStreamFormat;
-							subgraph->audioTrackFormat = trackFormat;
-							subgraph->audioTrackUid = adm::AudioTrackUid::create();
-							subgraph->audioTrackUid->setReference(subgraph->audioTrackFormat);
-							subgraph->audioTrackUid->setReference(audioPackFormat);
-							audioObject->addReference(subgraph->audioTrackUid);
-						}
-					}
-
-					admSubgraphs.push_back(subgraph);
-				}
-			}
-
-		}
-		else {
-			// Single channel - find it
+		for (auto channel : holder.channels) {
 			auto subgraph = std::make_shared<AdmSubgraphElements>();
+			subgraph->audioChannelFormat = channel.audioChannelFormat;
+			subgraph->audioTrackUid = channel.audioTrackUid;
 
-			auto allTrackFormats = parentDocument->getElements<adm::AudioTrackFormat>();
-			for (auto trackFormat : allTrackFormats) {
-				auto referencedStreamFormat = trackFormat->getReference<adm::AudioStreamFormat>();
-				auto referencedChannelFormat = referencedStreamFormat->getReference<adm::AudioChannelFormat>();
-
-				if (referencedChannelFormat->get<adm::TypeDescriptor>() == typeDefinition &&
-					referencedChannelFormat->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get() == channelFormatId) {
-					subgraph->audioChannelFormat = referencedChannelFormat;
-					subgraph->audioStreamFormat = referencedStreamFormat;
-					subgraph->audioTrackFormat = trackFormat;
-					break;
-				}
-			}
-
-			if (subgraph->audioChannelFormat) {
-				subgraph->audioTrackUid = adm::AudioTrackUid::create();
-				subgraph->audioTrackUid->setReference(subgraph->audioTrackFormat);
-				subgraph->audioTrackUid->setReference(audioPackFormat);
-				audioObject->addReference(subgraph->audioTrackUid);
-
-				admSubgraphs.push_back(subgraph);
-			}
+			admSubgraphs.push_back(subgraph);
 		}
 	}
 
 	if (pluginSuite && spatPlugin) {
-		// TODO checkPluginParamsMatchCommonDefinition(chosenPlugin, commondef);
+		// TODO checkPluginParamsMatchPresetDefinition(chosenPlugin, commondef);
 		checkPluginPositions(pluginSuite, spatPlugin);
 	}
 }
