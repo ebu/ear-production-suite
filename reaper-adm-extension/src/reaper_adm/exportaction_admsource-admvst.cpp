@@ -71,7 +71,7 @@ AdmVstExportSources::AdmVstExportSources(ReaperAPI const& api) : IExportSources(
 		}
 	}
 
-	adm::reassignIds(admDocument); // Must be done before allowing to generate AXML/CHNA so align ID's
+	adm::reassignIds(admDocument); // Must be done before allowing to generate AXML/CHNA to align ID's
 
 	updateErrorsWarningsInfo(api);
 }
