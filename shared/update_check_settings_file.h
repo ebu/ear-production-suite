@@ -22,6 +22,7 @@ private:
     bool loadSettings();
     bool saveSettings();
     bool settingsFileExists();
+    bool ensureSettingsFileExists();
 
     bool settingAutoCheckEnabled{ false };
     Version settingLastReportedVersion;
