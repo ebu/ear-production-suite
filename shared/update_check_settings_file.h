@@ -7,11 +7,11 @@ class UpdateCheckerSettingsFile {
 public:
     UpdateCheckerSettingsFile();
 
-    bool getAutoCheckEnabled();
-    bool setAutoCheckEnabled(bool enabled);
+    const bool getAutoCheckEnabled();
+    const bool setAutoCheckEnabled(bool enabled);
 
-    Version getLastReportedVersion();
-    bool setLastReportedVersion(Version version);
+    const Version getLastReportedVersion();
+    const bool setLastReportedVersion(const Version& version);
 
     const bool canRead();
     const bool canWrite();

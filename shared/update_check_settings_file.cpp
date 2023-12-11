@@ -16,23 +16,23 @@ UpdateCheckerSettingsFile::UpdateCheckerSettingsFile()
     loadSettings();
 }
 
-bool UpdateCheckerSettingsFile::getAutoCheckEnabled()
+const bool UpdateCheckerSettingsFile::getAutoCheckEnabled()
 {
     return settingAutoCheckEnabled;
 }
 
-bool UpdateCheckerSettingsFile::setAutoCheckEnabled(bool enabled)
+const bool UpdateCheckerSettingsFile::setAutoCheckEnabled(bool enabled)
 {
     settingAutoCheckEnabled = enabled;
     return saveSettings();
 }
 
-Version UpdateCheckerSettingsFile::getLastReportedVersion()
+const Version UpdateCheckerSettingsFile::getLastReportedVersion()
 {
     return settingLastReportedVersion;
 }
 
-bool UpdateCheckerSettingsFile::setLastReportedVersion(Version version)
+const bool UpdateCheckerSettingsFile::setLastReportedVersion(const Version& version)
 {
     settingLastReportedVersion = version;
     return saveSettings();
