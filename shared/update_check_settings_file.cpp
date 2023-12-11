@@ -39,12 +39,12 @@ bool UpdateCheckerSettingsFile::setLastReportedVersion(Version version)
 }
 
 
-bool UpdateCheckerSettingsFile::canRead()
+const bool UpdateCheckerSettingsFile::canRead()
 {
     return loadSettings();
 }
 
-bool UpdateCheckerSettingsFile::canWrite()
+const bool UpdateCheckerSettingsFile::canWrite()
 {
     return saveSettings();
 }
