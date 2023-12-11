@@ -13,8 +13,8 @@ public:
     Version getLastReportedVersion();
     bool setLastReportedVersion(Version version);
 
-    bool canRead();
-    bool canWrite();
+    const bool canRead();
+    const bool canWrite();
 
 private:
 
