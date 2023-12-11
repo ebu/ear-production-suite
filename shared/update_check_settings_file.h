@@ -6,7 +6,6 @@
 class UpdateCheckerSettingsFile {
 public:
     UpdateCheckerSettingsFile();
-    ~UpdateCheckerSettingsFile();
 
     bool getAutoCheckEnabled();
     bool setAutoCheckEnabled(bool enabled);

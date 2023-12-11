@@ -16,10 +16,6 @@ UpdateCheckerSettingsFile::UpdateCheckerSettingsFile()
     loadSettings();
 }
 
-UpdateCheckerSettingsFile::~UpdateCheckerSettingsFile()
-{
-}
-
 bool UpdateCheckerSettingsFile::getAutoCheckEnabled()
 {
     return settingAutoCheckEnabled;
