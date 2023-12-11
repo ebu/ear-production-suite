@@ -13,8 +13,8 @@ public:
     Version getLastReportedVersion();
     bool setLastReportedVersion(Version version);
 
-    bool canReadSettingsFile();
-    bool canWriteSettingsFile();
+    bool canRead();
+    bool canWrite();
 
 private:
 

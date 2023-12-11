@@ -97,7 +97,7 @@ void ComponentComplete::configureForInstallPhase()
 
 AutoUpdateCheckButton::AutoUpdateCheckButton()
 {
-    bool success = updateCheckerSettingsFile.canWriteSettingsFile();
+    bool success = updateCheckerSettingsFile.canWrite();
 
     text1.setFont(EarFontsSingleton::instance().Label);
     text1.setColour(Label::textColourId, EarColours::Label.withAlpha(Emphasis::high));
