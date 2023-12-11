@@ -7,7 +7,7 @@ UpdateCheckerSettingsFile::UpdateCheckerSettingsFile()
     settingsFile = ResourcePaths::getSettingsDirectory(true).getChildFile("UpdateCheck.settings");
     if (!settingsFileExists()) {
         // No settings file - perhaps first run?
-        if (saveSettings() && settingsFileExists()) {
+        if (ensureSettingsFileExists()) {
             // Settings file is writable so probably was just first run.
             // Set autocheck on initially.
             setAutoCheckEnabled(true);
@@ -96,4 +96,13 @@ bool UpdateCheckerSettingsFile::saveSettings()
 bool UpdateCheckerSettingsFile::settingsFileExists()
 {
     return settingsFile.existsAsFile();
+}
+
+bool UpdateCheckerSettingsFile::ensureSettingsFileExists()
+{
+    bool success = settingsFileExists();
+    if (!success) {
+        success = saveSettings() && settingsFileExists();
+    }
+    return success;
 }
