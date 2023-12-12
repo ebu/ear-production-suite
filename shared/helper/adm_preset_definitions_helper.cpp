@@ -33,12 +33,12 @@ namespace {
 
 	template <typename Prop, typename Elm>
 	bool matchingProp(const Elm& elmA, const Elm& elmB) {
-		bool hasProp = elmA.has<Prop>();
-		if (hasProp != elmB.has<Prop>())
+		bool hasProp = elmA.template has<Prop>();
+		if (hasProp != elmB.template has<Prop>())
 			return false;
 		if (hasProp) {
-			auto valA = elmA.get<Prop>();
-			auto valB = elmB.get<Prop>();
+			auto valA = elmA.template get<Prop>();
+			auto valB = elmB.template get<Prop>();
 			if (valA != valB) return false;
 		}
 		return true;
