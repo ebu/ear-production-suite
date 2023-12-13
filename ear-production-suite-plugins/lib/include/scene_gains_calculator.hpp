@@ -21,7 +21,6 @@ struct GainHolder {
 
 struct ItemGains {
   int inputStartingChannel;
-  int inputChannelCount;
   std::vector<std::vector<float>> direct_;
   std::vector<std::vector<float>> diffuse_;
 };
