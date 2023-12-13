@@ -8,6 +8,11 @@
 
 namespace {
 
+int inputCount(ear::plugin::ItemGains const& itemGains) {
+  assert(itemGains.direct_.size() == itemGains.diffuse_.size());
+  return static_cast<int>(itemGains.direct_.size());
+}
+
 void addToEigenMat(Eigen::MatrixXf& mat,
                    std::vector<std::vector<float>> const& gainsTable,
                    int inputStartingChannelOffset) {
@@ -28,9 +33,10 @@ void resize2dVector(std::vector<std::vector<float>>& vec, int inputs,
   }
 }
 
-int inputCount(ear::plugin::ItemGains const& itemGains) {
-  assert(itemGains.direct_.size() == itemGains.diffuse_.size());
-  return static_cast<int>(itemGains.direct_.size());
+void resizeGainTables(ear::plugin::ItemGains& itemGains, 
+            int inputCount, int outputCount) {
+  resize2dVector(itemGains.direct_, inputCount, outputCount);
+  resize2dVector(itemGains.diffuse_, inputCount, outputCount);
 }
 
 }
@@ -127,8 +133,8 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     auto earMetadata = EpsToEarMetadataConverter::convert(item.ds_metadata());
     routing->inputStartingChannel = item.routing();
     int inputChannelCount = static_cast<int>(earMetadata.size());
-    resize2dVector(routing->direct_, inputChannelCount, totalOutputChannels);
-    resize2dVector(routing->diffuse_, inputChannelCount, totalOutputChannels);
+    resizeGainTables(*routing, static_cast<int>(earMetadata.size()),
+                     totalOutputChannels);
     for (int inputChannelCounter = 0; inputChannelCounter < inputChannelCount; inputChannelCounter++) {
       directSpeakersCalculator_.calculate(
           earMetadata.at(inputChannelCounter),
@@ -139,9 +145,7 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
   if(item.has_obj_metadata()) {
     auto earMetadata = EpsToEarMetadataConverter::convert(item.obj_metadata());
     routing->inputStartingChannel = item.routing();
-    int inputChannelCount = 1;
-    resize2dVector(routing->direct_, inputChannelCount, totalOutputChannels);
-    resize2dVector(routing->diffuse_, inputChannelCount, totalOutputChannels);
+    resizeGainTables(*routing, 1, totalOutputChannels);
     objectCalculator_.calculate(earMetadata,
                                 routing->direct_[0],
                                 routing->diffuse_[0]);
@@ -155,8 +159,7 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
     }
     routing->inputStartingChannel = item.routing();
     int inputChannelCount = static_cast<int>(earMetadata.degrees.size());
-    resize2dVector(routing->direct_, inputChannelCount, totalOutputChannels);
-    resize2dVector(routing->diffuse_, inputChannelCount, totalOutputChannels);
+    resizeGainTables(*routing, inputChannelCount, totalOutputChannels);
     hoaCalculator_.calculate(earMetadata, routing->direct_);
   }
 
