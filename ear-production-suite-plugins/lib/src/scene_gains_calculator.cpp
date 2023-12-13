@@ -116,7 +116,7 @@ void SceneGainsCalculator::removeItem(const communication::ConnectionId &itemId)
 
 void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata & item)
 {
-  ItemRouting* routing = setInMap(routingCache_, communication::ConnectionId{ item.connection_id() }, {});
+  ItemGains* routing = setInMap(routingCache_, communication::ConnectionId{ item.connection_id() }, {});
 
   if(item.has_ds_metadata()) {
     auto earMetadata = EpsToEarMetadataConverter::convert(item.ds_metadata());
