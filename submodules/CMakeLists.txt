@@ -23,6 +23,9 @@ if (MSVC) # Fix for MSVC 2022 based on https://forums.steinberg.net/t/pluginterf
 endif()
 set(SMTG_USE_STATIC_CRT ON CACHE BOOL "" FORCE)
 set(SMTG_ADD_VSTGUI OFF CACHE BOOL "" FORCE)
+set(SMTG_ADD_VST3_PLUGINS_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SMTG_ADD_VST3_HOSTING_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "" FORCE)
 if((NOT DEFINED REAPPLY_VST3_PATCHES) OR (${REAPPLY_VST3_PATCHES}))
 	execute_process(COMMAND git apply ../../0001-VST3-base_Add-MinSizeRel-config.patch
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/VST3/base")
@@ -30,10 +33,14 @@ if((NOT DEFINED REAPPLY_VST3_PATCHES) OR (${REAPPLY_VST3_PATCHES}))
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/VST3/cmake")
 	execute_process(COMMAND git apply ../../0002-VST3-cmake_Dont-mess-with-project-folders.patch
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/VST3/cmake")
+	execute_process(COMMAND git apply ../0001-VST3_TargetReduction.patch
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/VST3")
+	execute_process(COMMAND git apply ../../0001-VST3-publicsdk_TargetReduction.patch
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/VST3/public.sdk")
 	set(REAPPLY_VST3_PATCHES OFF CACHE BOOL "" FORCE)
 endif()
 add_subdirectory(VST3)
-set_target_properties(base cmake_modules pluginterfaces sdk sdk_common sdk_hosting validator PROPERTIES FOLDER submodules/vst3)
+set_target_properties(base pluginterfaces sdk sdk_common PROPERTIES FOLDER submodules/vst3)
 
 # libear
 set(EAR_HIDE_INTERNAL_SYMBOLS OFF CACHE BOOL " " FORCE)
