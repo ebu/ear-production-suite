@@ -19,7 +19,7 @@ struct GainHolder {
   Eigen::MatrixXf diffuse;
 };
 
-struct ItemRouting {
+struct ItemGains {
   int inputStartingChannel;
   int inputChannelCount;
   std::vector<std::vector<float>> direct_;
@@ -44,7 +44,7 @@ class SceneGainsCalculator {
   ear::GainCalculatorDirectSpeakers directSpeakersCalculator_;
   ear::GainCalculatorHOA hoaCalculator_;
 
-  std::map<communication::ConnectionId, ItemRouting> routingCache_;
+  std::map<communication::ConnectionId, ItemGains> routingCache_;
 
   std::mutex commonDefinitionHelperMutex_;
   AdmCommonDefinitionHelper commonDefinitionHelper_{};
