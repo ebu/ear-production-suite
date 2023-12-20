@@ -178,7 +178,6 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 		return pfData;
 
 	// Not common def - Do more thorough checks
-	if (pfData) return pfData;
 
 	/// Could be cart pf
 	auto cartLayout = admplug::getCartLayout(*packFormat);
@@ -187,12 +186,12 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 		auto altPfId = adm::parseAudioPackFormatId(altPfIdStr);
 		auto altPfIdValue = altPfId.get<adm::AudioPackFormatIdValue>().get();
 		pfData = getPackFormatData(td, altPfIdValue);
-		if (pfData)  return pfData;
+		if (pfData) return pfData;
 	}
 
 	/// Some third-party tools do not use consistent PF IDs for their custom definitions. Try lookup by channels.
 	pfData = getPackFormatDataByMatchingChannels(packFormat);
-	if (pfData)  return pfData;
+	if (pfData) return pfData;
 
 	return nullptr;
 }
@@ -209,39 +208,31 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 	}
 
 	auto td = packFormat->get<adm::TypeDescriptor>().get();
-
-	// First pass is check by ID - if ID's match, they're the same - quick and easy
-	/// This only works for CF ID's which are consistent! (i.e, pack formats which ONLY reference common definitions CFs)
-	// Second pass compares channel format properties to see if they're equivalent. 
-	/// We don't do this during the first pass as it is much slower
-	int passCount = 0;
-	while(passCount < 2)
-	{
-		for (auto pfData : getTypeDefinitionData(td)->relatedPackFormats) {
-			auto pfDataCfDatas = pfData->relatedChannelFormats;
-			if (pfDataCfDatas.size() == cfsToFind.size()) {
-				bool matching = true;
-				// Ordering must also be exact
-				for (int i = 0; i < pfDataCfDatas.size(); ++i) {
-					if (passCount == 0) {
-						if (pfDataCfDatas[i]->idValue != cfsToFind[i].first) {
-							matching = false;
-							break;
-						}
-					} 
-					else if(passCount == 1){
-						if (!isEquivalentByProperties(pfDataCfDatas[i]->channelFormat, cfsToFind[i].second)) {
-							matching = false;
-							break;
-						}
+	for (auto pfData : getTypeDefinitionData(td)->relatedPackFormats) {
+		auto pfDataCfDatas = pfData->relatedChannelFormats;
+		if (pfDataCfDatas.size() == cfsToFind.size()) {
+			bool matching = true;
+			// Ordering must also be exact
+			for (int i = 0; i < pfDataCfDatas.size(); ++i) {
+				// Common Defs must always be matched by ID, because they're consistent
+				if (isCommonDefinition(cfsToFind[i].first)) {
+					if (pfDataCfDatas[i]->idValue != cfsToFind[i].first) {
+						matching = false;
+						break;
 					}
 				}
-				if (matching) {
-					return pfData;
+				// Custom CF's must be matched by properties, because they won't have consistent ID's
+				else {
+					if (!isEquivalentByProperties(pfDataCfDatas[i]->channelFormat, cfsToFind[i].second)) {
+						matching = false;
+						break;
+					}
 				}
 			}
+			if (matching) {
+				return pfData;
+			}
 		}
-		passCount++;
 	}
 
 	return std::shared_ptr<PackFormatData>();
