@@ -286,7 +286,11 @@ void DirectSpeakersJuceFrontendConnector::sliderDragEnded(Slider* slider) {}
 void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
   if (auto speakerSetupsComboBox = lockIfSame(speakerSetupsComboBox_, comboBox)) {
-    *(p_->getPackFormatIdValue()) = speakerSetupsComboBox->getSelectedId();
+    if (speakerSetupsComboBox->hasSelection()) {
+      *(p_->getPackFormatIdValue()) = speakerSetupsComboBox->getSelectedId();
+    } else {
+      *(p_->getPackFormatIdValue()) = 0;
+    }
   }
   if (auto routingComboBox = lockIfSame(routingComboBox_, comboBox)) {
     *(p_->getRouting()) = routingComboBox->getSelectedEntryIndex();
