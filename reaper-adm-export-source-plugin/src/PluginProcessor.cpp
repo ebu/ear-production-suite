@@ -209,8 +209,6 @@ int AdmStemPluginAudioProcessor::calcNumChannels()
     auto selPf = admPackFormatParam->get();
     auto selCf = admChannelFormatParam->get();
 
-    auto typeDefinitionData = admPresetDefinitions.getTypeDefinitionData(selTd);
-
     auto packFormatData = admPresetDefinitions.getPackFormatData(selTd, selPf);
     if(!packFormatData) return 0;
 
