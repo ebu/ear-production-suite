@@ -4,6 +4,7 @@
 #include <adm/adm.hpp>
 #include <adm/utilities/object_creation.hpp>
 #include <adm/common_definitions.hpp>
+#include <adm/utilities/id_assignment.hpp>
 #include <helper/adm_preset_definitions_helper.h>
 #include <utility>
 #include <iomanip>
@@ -259,6 +260,7 @@ ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap>
   for (auto& programme : programmes_.programme()) {
     serializeProgramme(*doc, programme);
   }
+  adm::reassignIds(doc); // ADM elms in pluginMap are shared_ptr so will also have the updated ID's
   return {doc, pluginMap};
 }
 
