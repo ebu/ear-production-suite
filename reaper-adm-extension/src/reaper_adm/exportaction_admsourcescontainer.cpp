@@ -67,6 +67,10 @@ std::vector<std::string> AdmExportHandler::generateExportWarningStrings()
     auto admExportSources = getAdmExportSources();
     std::vector<std::string> msgs;
 
+    if (admExportVstSources) {
+        msgs.push_back(std::string("Support for FB360 and VISR plugin suites will be dropped in future versions of the EAR Production Suite."));
+    }
+
     if(earSceneMasterVstSources && earSceneMasterVstSources->validForExport() && admExportVstSources && admExportVstSources->validForExport()) {
         msgs.push_back(std::string("Multiple Types of Export Source!"));
     }
