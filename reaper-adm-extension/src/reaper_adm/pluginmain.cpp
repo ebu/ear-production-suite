@@ -12,6 +12,7 @@
 #include "pluginsuite.h"
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
+#include "plugin_deprecation_warning.h"
 #include <update_check.h>
 #include <version/eps_version.h>
 #include <helper/native_message_box.hpp>
@@ -50,15 +51,6 @@ const std::map<const std::string, const int> defaultMenuPositions = {
     {"Group", 4}};
 }
 #endif
-
-void pluginDeprecationWarning(const std::pair<std::string, std::shared_ptr<PluginSuite>>& pluginSuite, ReaperAPI& api) {
-    if (pluginSuite.first != std::string("EAR")) { // a bit hacky, but this won't be in long-term so meh
-        api.ShowMessageBox(
-            "Please note:\nSupport for FB360 and VISR plugin suites will" 
-            " be dropped in future versions of the EAR Production Suite.", 
-            "ADM Open", 0);
-    }
-}
 
 extern "C" {
 
