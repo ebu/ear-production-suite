@@ -1,0 +1,112 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f4fc61..12071d6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -130,56 +130,56 @@ if(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
+     )
+ endif(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
+ 
+-#--for hosting----------------
+-add_library(sdk_hosting 
+-    STATIC
+-        source/vst/hosting/connectionproxy.cpp
+-        source/vst/hosting/connectionproxy.h
+-        source/vst/hosting/eventlist.cpp
+-        source/vst/hosting/eventlist.h
+-        source/vst/hosting/hostclasses.cpp
+-        source/vst/hosting/hostclasses.h
+-        source/vst/hosting/module.cpp
+-        source/vst/hosting/module.h
+-        source/vst/hosting/parameterchanges.cpp
+-        source/vst/hosting/parameterchanges.h
+-        source/vst/hosting/pluginterfacesupport.cpp
+-        source/vst/hosting/pluginterfacesupport.h
+-        source/vst/hosting/processdata.cpp
+-        source/vst/hosting/processdata.h
+-        source/vst/utility/optional.h
+-        source/vst/utility/stringconvert.cpp
+-        source/vst/utility/stringconvert.h
+-        source/vst/utility/uid.h
+-        source/vst/utility/versionparser.h
+-        source/vst/vstinitiids.cpp
+-)
+-# add dependencies
+-target_link_libraries(sdk_hosting 
+-    PUBLIC 
+-        sdk_common
+-)
+-target_include_directories(sdk_hosting
+-    PUBLIC
+-        ${CMAKE_CURRENT_SOURCE_DIR}/..
+-)
+-smtg_setup_universal_binary(sdk_hosting)
++# #--for hosting----------------
++# add_library(sdk_hosting
++    # STATIC
++        # source/vst/hosting/connectionproxy.cpp
++        # source/vst/hosting/connectionproxy.h
++        # source/vst/hosting/eventlist.cpp
++        # source/vst/hosting/eventlist.h
++        # source/vst/hosting/hostclasses.cpp
++        # source/vst/hosting/hostclasses.h
++        # source/vst/hosting/module.cpp
++        # source/vst/hosting/module.h
++        # source/vst/hosting/parameterchanges.cpp
++        # source/vst/hosting/parameterchanges.h
++        # source/vst/hosting/pluginterfacesupport.cpp
++        # source/vst/hosting/pluginterfacesupport.h
++        # source/vst/hosting/processdata.cpp
++        # source/vst/hosting/processdata.h
++        # source/vst/utility/optional.h
++        # source/vst/utility/stringconvert.cpp
++        # source/vst/utility/stringconvert.h
++        # source/vst/utility/uid.h
++        # source/vst/utility/versionparser.h
++        # source/vst/vstinitiids.cpp
++# )
++# # add dependencies
++# target_link_libraries(sdk_hosting
++    # PUBLIC
++        # sdk_common
++# )
++# target_include_directories(sdk_hosting
++    # PUBLIC
++        # ${CMAKE_CURRENT_SOURCE_DIR}/..
++# )
++# smtg_setup_universal_binary(sdk_hosting)
+ 
+-get_target_property(sdk_hosting_SOURCES sdk_hosting SOURCES)
++# get_target_property(sdk_hosting_SOURCES sdk_hosting SOURCES)
+ 
+-# iOS target for hosting
+-if(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
+-    add_library(sdk_hosting_ios STATIC 
+-        ${sdk_hosting_SOURCES}
+-    )
+-    smtg_set_platform_ios(sdk_hosting_ios)
+-    set_target_properties(sdk_hosting_ios
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-    target_link_libraries(sdk_hosting_ios
+-        PUBLIC 
+-            base_ios
+-            pluginterfaces_ios
+-    )
+-endif(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
++# # iOS target for hosting
++# if(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)
++    # add_library(sdk_hosting_ios STATIC
++        # ${sdk_hosting_SOURCES}
++    # )
++    # smtg_set_platform_ios(sdk_hosting_ios)
++    # set_target_properties(sdk_hosting_ios
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++    # target_link_libraries(sdk_hosting_ios
++        # PUBLIC
++            # base_ios
++            # pluginterfaces_ios
++    # )
++# endif(SMTG_MAC AND XCODE AND SMTG_IOS_DEVELOPMENT_TEAM)

@@ -1,0 +1,133 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9807407..ea48de8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -89,7 +89,7 @@ endif(SMTG_AAX_SDK_PATH)
+ 
+ # Add hosting examples, it includes the validator (must be done before any plug-ins to support running the validator after building)
+ set(SDK_IDE_HOSTING_EXAMPLES_FOLDER FOLDER "HostingExamples")
+-add_subdirectory(public.sdk/samples/vst-hosting)
++#add_subdirectory(public.sdk/samples/vst-hosting)
+ 
+ #-------------------------------------------------------------------------------
+ # Here is added your own plug-ins folder location
+@@ -119,61 +119,61 @@ if(SMTG_ADD_VST3_PLUGINS_SAMPLES)
+     add_subdirectory(public.sdk/source/vst/auv3wrapper)
+ endif(SMTG_ADD_VST3_PLUGINS_SAMPLES)
+ 
+-#-------------------------------------------------------------------------------
+-# IDE sorting
+-#-------------------------------------------------------------------------------
+-set_target_properties(sdk
+-    PROPERTIES
+-        ${SDK_IDE_LIBS_FOLDER}
+-)
+-set_target_properties(sdk_common
+-    PROPERTIES
+-        ${SDK_IDE_LIBS_FOLDER}
+-)
+-set_target_properties(sdk_hosting
+-    PROPERTIES
+-        ${SDK_IDE_LIBS_FOLDER}
+-)
+-set_target_properties(base
+-    PROPERTIES
+-        ${SDK_IDE_LIBS_FOLDER}
+-)
+-set_target_properties(pluginterfaces
+-    PROPERTIES
+-        ${SDK_IDE_LIBS_FOLDER}
+-)
+-if(TARGET base_ios)
+-    set_target_properties(base_ios
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-    set_target_properties(pluginterfaces_ios
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-endif(TARGET base_ios)
+-
+-if(SMTG_ADD_VSTGUI)
+-    set_target_properties(vstgui
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-    set_target_properties(vstgui_support
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-    set_target_properties(vstgui_uidescription
+-        PROPERTIES
+-            ${SDK_IDE_LIBS_FOLDER}
+-    )
+-
+-    if(TARGET vstgui_standalone)
+-        set_target_properties(vstgui_standalone
+-            PROPERTIES
+-                ${SDK_IDE_LIBS_FOLDER}
+-        )
+-    endif(TARGET vstgui_standalone)
+-endif(SMTG_ADD_VSTGUI)
+-
+-include(SMTG_CustomModuleTarget)
+-set_target_properties(cmake_modules PROPERTIES ${SDK_IDE_LIBS_FOLDER})
++# #-------------------------------------------------------------------------------
++# # IDE sorting
++# #-------------------------------------------------------------------------------
++# set_target_properties(sdk
++    # PROPERTIES
++        # ${SDK_IDE_LIBS_FOLDER}
++# )
++# set_target_properties(sdk_common
++    # PROPERTIES
++        # ${SDK_IDE_LIBS_FOLDER}
++# )
++# set_target_properties(sdk_hosting
++    # PROPERTIES
++        # ${SDK_IDE_LIBS_FOLDER}
++# )
++# set_target_properties(base
++    # PROPERTIES
++        # ${SDK_IDE_LIBS_FOLDER}
++# )
++# set_target_properties(pluginterfaces
++    # PROPERTIES
++        # ${SDK_IDE_LIBS_FOLDER}
++# )
++# if(TARGET base_ios)
++    # set_target_properties(base_ios
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++    # set_target_properties(pluginterfaces_ios
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++# endif(TARGET base_ios)
++
++# if(SMTG_ADD_VSTGUI)
++    # set_target_properties(vstgui
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++    # set_target_properties(vstgui_support
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++    # set_target_properties(vstgui_uidescription
++        # PROPERTIES
++            # ${SDK_IDE_LIBS_FOLDER}
++    # )
++
++    # if(TARGET vstgui_standalone)
++        # set_target_properties(vstgui_standalone
++            # PROPERTIES
++                # ${SDK_IDE_LIBS_FOLDER}
++        # )
++    # endif(TARGET vstgui_standalone)
++# endif(SMTG_ADD_VSTGUI)
++
++# include(SMTG_CustomModuleTarget)
++# set_target_properties(cmake_modules PROPERTIES ${SDK_IDE_LIBS_FOLDER})
