@@ -3,6 +3,7 @@
 
 #include "exportaction_admsource-admvst.h"
 #include "exportaction_admsource-earvst.h"
+#include "plugin_deprecation_warning.h"
 
 void AdmExportHandler::repopulate(ReaperAPI const & api)
 {
@@ -68,7 +69,7 @@ std::vector<std::string> AdmExportHandler::generateExportWarningStrings()
     std::vector<std::string> msgs;
 
     if (admExportVstSources) {
-        msgs.push_back(std::string("Support for FB360 and VISR plugin suites will be dropped in future versions of the EAR Production Suite."));
+        msgs.push_back(pluginDeprecationMessage);
     }
 
     if(earSceneMasterVstSources && earSceneMasterVstSources->validForExport() && admExportVstSources && admExportVstSources->validForExport()) {
