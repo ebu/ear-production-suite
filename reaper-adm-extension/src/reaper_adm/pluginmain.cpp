@@ -51,6 +51,15 @@ const std::map<const std::string, const int> defaultMenuPositions = {
 }
 #endif
 
+void pluginDeprecationWarning(const std::pair<std::string, std::shared_ptr<PluginSuite>>& pluginSuite, ReaperAPI& api) {
+    if (pluginSuite.first != std::string("EAR")) { // a bit hacky, but this won't be in long-term so meh
+        api.ShowMessageBox(
+            "Please note:\nSupport for FB360 and VISR plugin suites will" 
+            " be dropped in future versions of the EAR Production Suite.", 
+            "ADM Open", 0);
+    }
+}
+
 extern "C" {
 
   uint32_t requestInputInstanceId() {
@@ -296,6 +305,8 @@ extern "C" {
             std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
             [pluginSuite](ReaperAPI& api, ImportAction& importer) {
 
+            pluginDeprecationWarning(pluginSuite, api);
+
             api.Main_openProject("template:"); // This will TRY to start a blank project, but it will replace the current project if successful, so the user is prompted with the save dialog: yes, no, CANCEL
             auto res = api.IsProjectDirty(nullptr); // If the project is still dirty (1), the user must have canceled! (yes/no would save/not save and start a new clean project)
             if(res == 0) {
@@ -350,6 +361,8 @@ extern "C" {
             actionSID.c_str(),
             std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
             [pluginSuite](ReaperAPI& api, ImportAction& importer) {
+
+            pluginDeprecationWarning(pluginSuite, api);
 
             char filename[4096];
             api.GetProjectPath(filename, 4096);
