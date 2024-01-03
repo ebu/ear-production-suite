@@ -56,6 +56,7 @@ public:
 
 	void setText(const String& text);
 	String getText() const;
+	void setLightFont(bool isLight);
 
 	virtual void drawEntryInList(Graphics& g, juce::Rectangle<int> area) override;
 	virtual void drawEntryInButton(Graphics& g,
@@ -67,6 +68,7 @@ public:
 
 private:
 	String text_;
+	bool lightFont{ false };
 };
 
 class EarComboBoxColourEntry : public EarComboBoxEntry {

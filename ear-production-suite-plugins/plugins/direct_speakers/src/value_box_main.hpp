@@ -62,12 +62,16 @@ class ValueBoxMain : public Component {
         pfDatas.begin(), pfDatas.end(),
         [](const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& a,
            const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& b) {
+          if (a->isCommonDefinition() != b->isCommonDefinition()) {
+            return a->isCommonDefinition() > b->isCommonDefinition();
+          }
           return a->relatedChannelFormats.size() <
                  b->relatedChannelFormats.size();
     });
 
     for (auto const& pfData : pfDatas) {
-      speakerSetupsComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
+      auto entry = speakerSetupsComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
+      entry->setLightFont(!pfData->isCommonDefinition());
     }
     addAndMakeVisible(speakerSetupsComboBox_.get());
 
