@@ -67,7 +67,8 @@ class ValueBoxMain : public Component {
       if (id == 4) {
         auto packData = tdData->relatedPackFormats;
         for (auto const& pfData : packData) {
-          hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
+          auto entry = hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
+          entry->setLightFont(!pfData->isCommonDefinition());
         }
       }
     }
