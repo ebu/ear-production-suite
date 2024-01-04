@@ -35,6 +35,17 @@ struct BufferTraits<juce::AudioBuffer<float>> {
   }
 };
 
+juce::File getBearDataFileDirectory(){
+  auto vstPath = juce::File::getSpecialLocation(
+      juce::File::SpecialLocationType::currentExecutableFile);
+  vstPath = vstPath.getParentDirectory();
+#ifdef __APPLE__
+  vstPath = vstPath.getParentDirectory();
+  vstPath = vstPath.getChildFile("Resources");
+#endif
+  return vstPath;
+};
+
 }  // namespace plugin
 }  // namespace ear
 
@@ -128,15 +139,10 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(11, oscInvertQuatY_->get());
   connector_->parameterValueChanged(12, oscInvertQuatZ_->get());
 
-  auto vstPath = juce::File::getSpecialLocation(
-      juce::File::SpecialLocationType::currentExecutableFile);
-  vstPath = vstPath.getParentDirectory();
-#ifdef __APPLE__
-  vstPath = vstPath.getParentDirectory();
-  vstPath = vstPath.getChildFile("Resources");
-#endif
-  vstPath = vstPath.getChildFile(BEAR_DATA_FILE);
-  bearDataFilePath = vstPath.getFullPathName().toStdString();
+  bearDataFilePath = getBearDataFileDirectory()
+                         .getChildFile(BEAR_DATA_FILE)
+                         .getFullPathName()
+                         .toStdString();
 
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
     connector_->setEuler(euler);
