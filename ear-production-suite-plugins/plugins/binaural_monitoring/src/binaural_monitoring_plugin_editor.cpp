@@ -68,6 +68,13 @@ EarBinauralMonitoringAudioProcessorEditor::
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
+  statusLabel.setColour(juce::Label::textColourId, ear::plugin::ui::EarColours::Version);
+  statusLabel.setText("Status", juce::NotificationType::dontSendNotification);
+  statusLabel.setFont(ear::plugin::ui::EarFontsSingleton::instance().Version);
+  statusLabel.setJustificationType(juce::Justification::left);
+  statusLabel.setEditable(false);
+  addAndMakeVisible(statusLabel);
+
   /* clang-format off */
   p->getFrontendConnector()->setYawView(orientationValueBox->getYawControl());
   p->getFrontendConnector()->setPitchView(orientationValueBox->getPitchControl());
@@ -134,7 +141,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   onBoardingOverlay_->setBounds(area);
   errorOverlay_->setBounds(area);
   auto p = static_cast<EarBinauralMonitoringAudioProcessor*>(p_);
-  errorOverlay_->setVisible(p->rendererError());
+  //errorOverlay_->setVisible(p->rendererError());
   area.reduce(5, 5);
   auto headingArea = area.removeFromTop(55);
   onBoardingButton_->setBounds(
@@ -161,8 +168,9 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   orientationValueBox->setBounds(rightColumn.removeFromTop(300).reduced(5, 5));
   oscValueBox->setBounds(rightColumn.reduced(5, 5));
 
-  auto bottomLabelsArea = area.removeFromTop(30);
-  versionLabel.setBounds(bottomLabelsArea);
+  auto footerArea = area.removeFromTop(30);
+  versionLabel.setBounds(footerArea.removeFromRight(150));
+  statusLabel.setBounds(footerArea);
 }
 
 void EarBinauralMonitoringAudioProcessorEditor::endButtonClicked(
