@@ -139,8 +139,8 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(11, oscInvertQuatY_->get());
   connector_->parameterValueChanged(12, oscInvertQuatZ_->get());
 
-  bearDataFilePath = getBearDataFileDirectory()
-                         .getChildFile(BEAR_DATA_FILE)
+  bearDataFileDir = getBearDataFileDirectory();
+  bearDataFilePath = bearDataFileDir.getChildFile(BEAR_DATA_FILE)
                          .getFullPathName()
                          .toStdString();
 
