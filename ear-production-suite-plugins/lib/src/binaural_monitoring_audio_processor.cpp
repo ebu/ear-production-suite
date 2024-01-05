@@ -37,19 +37,26 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
 
   bearListener.set_position_cart(std::array<double, 3>{0.0, 0.0, 0.0});
 
+  bearStatus.startupConfig = bearConfig;
   try {
     bearRenderer = std::make_shared<bear::DynamicRenderer>(
         blockSize,
         std::max(std::max(maxObjChannels, maxDsChannels), maxHoaChannels));
+    bearRenderer->set_config_blocking(bearConfig);
+    bearStatus.startupSuccess = BearStatusStates::SUCCEEDED;
     try {
       bearRenderer->set_listener(bearListener);
+      bearStatus.listenerDataSetSuccess = BearStatusStates::SUCCEEDED;
     } catch (std::exception &e) {
+      bearStatus.listenerDataSetSuccess = BearStatusStates::FAILED;
+      bearStatus.listenerDataSetErrorDesc = e.what();
       bearRenderer.reset();
-      assert(false);
+      assert(false); // we're not feeding back this yet, so assert so we notice it
     }
   } catch (std::exception &e) {
+    bearStatus.startupSuccess = BearStatusStates::FAILED;
+    bearStatus.startupErrorDesc = e.what();
     bearRenderer.reset();
-    assert(false);
   }
 }
 
