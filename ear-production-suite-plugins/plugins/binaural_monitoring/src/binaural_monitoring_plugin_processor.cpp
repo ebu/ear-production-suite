@@ -222,7 +222,7 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
       "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true);
   ret = ret.withOutput("Left Ear", AudioChannelSet::mono(), true);
   ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
-  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(62), true);
+  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS-2), true);
   return ret;
 }
 
