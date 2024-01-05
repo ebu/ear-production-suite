@@ -218,6 +218,7 @@ bool BinauralMonitoringAudioProcessor::updateChannelCounts(
     // Do immediate update
     bearRenderer->set_config_blocking(bearConfig);
   }
+  return true;
 }
 
 }  // namespace plugin
