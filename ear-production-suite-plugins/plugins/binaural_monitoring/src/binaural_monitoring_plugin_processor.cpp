@@ -232,8 +232,21 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   return ret;
 }
 
-bool EarBinauralMonitoringAudioProcessor::readConfigFile()
-{
+std::vector<std::string>
+EarBinauralMonitoringAudioProcessor::getCustomBearDataFiles() {
+  std::vector<std::string> bearDataFiles;
+  auto tfFiles = bearDataFileDir.findChildFiles(
+      juce::File::TypesOfFileToFind::findFiles, false, "*.tf");
+  for (auto const& file : tfFiles) {
+    auto fn = file.getFileName().toStdString();
+    if (fn != BEAR_DATA_FILE) {
+      bearDataFiles.push_back(fn);
+    }
+  }
+  return bearDataFiles;
+}
+
+bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
   configRestoreState = ConfigRestoreState::IN_PROGRESS;
   PropertiesFile props(configFileOptions);
   // reload() check alone isn't sufficient - returns true if file didn't exist
