@@ -116,6 +116,7 @@ class EarBinauralMonitoringAudioProcessor
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;
   juce::File bearDataFileDir;
+  std::vector<std::string> getCustomBearDataFiles();
 
   int samplerate_;
   int blocksize_;
