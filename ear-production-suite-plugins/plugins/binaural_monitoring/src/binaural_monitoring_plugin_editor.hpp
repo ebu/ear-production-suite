@@ -45,6 +45,7 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<PropertiesFile> propertiesFile_;
 
   Label versionLabel;
+  Label statusLabel;
 
   // --- Onboarding::Listener
   void endButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
