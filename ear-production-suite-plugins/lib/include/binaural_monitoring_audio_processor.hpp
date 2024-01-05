@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <../src/dynamic_renderer.hpp>
 #include "variable_block_adapter.hpp"
 #include <chrono>
@@ -8,6 +9,20 @@
 
 namespace ear {
 namespace plugin {
+
+enum BearStatusStates {
+  NOT_ATTEMPTED = 0,
+  FAILED,
+  SUCCEEDED
+};
+
+struct BearStatus {
+  bear::Config startupConfig;
+  BearStatusStates startupSuccess{NOT_ATTEMPTED};
+  std::string startupErrorDesc;
+  BearStatusStates listenerDataSetSuccess{NOT_ATTEMPTED};
+  std::string listenerDataSetErrorDesc;
+};
 
 /**
  * @brief Binaural monitoring plugin dsp implementation
@@ -47,6 +62,8 @@ class BinauralMonitoringAudioProcessor {
   BinauralMonitoringAudioProcessor& operator=(
       BinauralMonitoringAudioProcessor&&) = delete;
 
+  BearStatus getBearStatus() { return bearStatus; }
+
   template <typename InBuffer, typename OutBuffer>
   void process(const InBuffer& in, OutBuffer& out) {
     using InTraits = BufferTraits<InBuffer>;
@@ -84,6 +101,7 @@ class BinauralMonitoringAudioProcessor {
   std::shared_ptr<bear::DynamicRenderer> bearRenderer;  // TODO - why shared?
   std::mutex bearListenerMutex_;
   bear::Listener bearListener;
+  BearStatus bearStatus;
 
   bool listenerQuatsDirty{false};
   std::array<double, 4> listenerQuats{1.0, 0.0, 0.0, 0.0};
