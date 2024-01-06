@@ -84,7 +84,7 @@ class BinauralMonitoringAudioProcessor {
   void setListenerOrientation(float quatW, float quatX, float quatY,
                               float quatZ);
 
-  bool rendererError() { return !bearRenderer; }
+  bool rendererStarted() { return !bearRenderer; }
 
   void setIsPlaying(bool state) { isPlaying = state; }
   bool getIsPlaying() { return isPlaying; }

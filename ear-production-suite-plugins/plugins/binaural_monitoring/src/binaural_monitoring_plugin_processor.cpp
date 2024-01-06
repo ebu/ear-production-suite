@@ -180,9 +180,9 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
 
-bool EarBinauralMonitoringAudioProcessor::rendererError() {
+bool EarBinauralMonitoringAudioProcessor::rendererStarted() {
   std::lock_guard<std::mutex> lock(processorMutex_);
-  return (!processor_ || processor_->rendererError());
+  return (!processor_ || processor_->rendererStarted());
 }
 
 void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
@@ -400,8 +400,8 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     size_t numObj = backend_->getTotalObjectChannels();
     size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
-    // Ensure BEAR has enough channels configured and is not erroring
-    if(!processor_ || processor_->rendererError()) return;
+    // Check BEAR has started and ensure enough channels configured
+    if(!processor_ || processor_->rendererStarted()) return;
     if(!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
       assert(false);
       return;
