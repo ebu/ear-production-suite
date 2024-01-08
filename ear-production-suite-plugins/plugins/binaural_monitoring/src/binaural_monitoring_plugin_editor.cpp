@@ -68,6 +68,7 @@ EarBinauralMonitoringAudioProcessorEditor::
   configureVersionLabel(versionLabel);
   addAndMakeVisible(versionLabel);
 
+  statusLabel = std::make_shared<Label>();
   statusLabel->setColour(juce::Label::textColourId, ear::plugin::ui::EarColours::Version);
   statusLabel->setText("Status", juce::NotificationType::dontSendNotification);
   statusLabel->setFont(ear::plugin::ui::EarFontsSingleton::instance().Version);
