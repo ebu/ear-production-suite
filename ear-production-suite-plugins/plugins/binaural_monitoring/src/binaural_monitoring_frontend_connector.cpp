@@ -280,6 +280,12 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZ(bool invert) {
   cachedOscInvertQuatZ_ = invert;
 }
 
+void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
+    const ear::plugin::BearStatus& bearStatus) {
+  //TODO: Update UI
+  cachedBearStatus_ = bearStatus;
+}
+
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
     ear::plugin::ListenerOrientation::Euler euler) {
   // ListenerOrientation callback from backend
