@@ -163,13 +163,17 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   oscInvertQuatY_->addListener(this);
   oscInvertQuatZ_->addListener(this);
 
-  std::lock_guard<std::mutex> lock(processorMutex_);
-  processor_ = std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-      MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 48000, 512,
-      bearDataFilePath);  // Used to verify if BEAR can be initialised - can't
-                          // get SR and block size in ctor. Made assumption -
-                          // prepareToPlay will be called with correct values
-                          // when required
+  {
+    std::lock_guard<std::mutex> lock(processorMutex_);
+    processor_ =
+        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+            MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 48000, 512,
+            bearDataFilePath);  // Used to verify if BEAR can be initialised -
+                                // can't get SR and block size in ctor. Made
+                                // assumption - prepareToPlay will be called
+                                // with correct values when required
+    connector_->setRendererStatus(processor_->getBearStatus());
+  }
 
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
@@ -330,6 +334,9 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
             MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 
             sampleRate, samplesPerBlock,
             bearDataFilePath);
+    if (connector_) {
+      connector_->setRendererStatus(processor_->getBearStatus());
+    }
   }
 }
 

@@ -9,6 +9,7 @@
 #include "helper/multi_async_updater.h"
 
 #include "binaural_monitoring_plugin_processor.hpp"
+#include "binaural_monitoring_audio_processor.hpp"
 #include <memory>
 
 namespace ear {
@@ -72,6 +73,9 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatY(bool invert);
   void setOscInvertQuatZ(bool invert);
 
+  // Renderer Status update
+  void setRendererStatus(const ear::plugin::BearStatus& bearStatus);
+
  protected:
   // Orientation::Listener
   void orientationValueChanged(ear::plugin::ui::OrientationView* view) override;
@@ -122,6 +126,7 @@ class BinauralMonitoringJuceFrontendConnector
   bool cachedOscInvertQuatX_;
   bool cachedOscInvertQuatY_;
   bool cachedOscInvertQuatZ_;
+  ear::plugin::BearStatus cachedBearStatus_;
 
   /// Listener Orientation Object
   std::shared_ptr<ListenerOrientation> listenerOrientation;
