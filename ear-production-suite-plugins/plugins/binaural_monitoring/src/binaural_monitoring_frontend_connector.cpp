@@ -172,6 +172,12 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZButton(
   setOscInvertQuatZ(cachedOscInvertQuatZ_);
 }
 
+void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
+    std::shared_ptr<Label> label) {
+  rendererStatusLabel_ = label;
+  setRendererStatus(cachedBearStatus_);
+}
+
 void BinauralMonitoringJuceFrontendConnector::setListenerOrientationInstance(
     std::shared_ptr<ListenerOrientation> lo) {
   listenerOrientation = lo;
@@ -282,7 +288,14 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZ(bool invert) {
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
     const ear::plugin::BearStatus& bearStatus) {
-  //TODO: Update UI
+  //TODO: Update UI according to bearStatus
+  if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
+    rendererStatusLabelLocked->setColour(juce::Label::textColourId,
+                           ear::plugin::ui::EarColours::Version);
+    rendererStatusLabelLocked->setText(
+      "Status update from BinauralMonitoringJuceFrontendConnector", 
+      juce::NotificationType::dontSendNotification);
+  }
   cachedBearStatus_ = bearStatus;
 }
 
