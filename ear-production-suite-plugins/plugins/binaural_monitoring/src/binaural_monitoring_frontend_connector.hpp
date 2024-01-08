@@ -53,6 +53,9 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatYButton(std::shared_ptr<ToggleButton> button);
   void setOscInvertQuatZButton(std::shared_ptr<ToggleButton> button);
 
+  // Renderer and Filter Set Selection Controls
+  void setRendererStatusLabel(std::shared_ptr<Label> label);
+
   // Listener Orientation Object
   void setListenerOrientationInstance(std::shared_ptr<ListenerOrientation> lo);
 
@@ -115,6 +118,9 @@ class BinauralMonitoringJuceFrontendConnector
   std::weak_ptr<ToggleButton> oscInvertQuatXButton_;
   std::weak_ptr<ToggleButton> oscInvertQuatYButton_;
   std::weak_ptr<ToggleButton> oscInvertQuatZButton_;
+
+  // Renderer and Filter Set Selection Controls
+  std::weak_ptr<Label> rendererStatusLabel_;
 
   // Values
   bool cachedOscEnable_;
