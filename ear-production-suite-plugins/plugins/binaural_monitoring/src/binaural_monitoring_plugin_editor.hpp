@@ -36,6 +36,7 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<ear::plugin::ui::Overlay> onBoardingOverlay_;
   std::unique_ptr<ear::plugin::ui::Onboarding> onBoardingContent_;
   std::shared_ptr<ear::plugin::ui::BinauralRendererErrorOverlay> errorOverlay_;
+  std::shared_ptr<Label> statusLabel;
 
   std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeterBox> headphoneMeterBox_;
   std::vector<std::unique_ptr<ear::plugin::ui::HeadphoneChannelMeter>>
@@ -45,7 +46,6 @@ class EarBinauralMonitoringAudioProcessorEditor
   std::unique_ptr<PropertiesFile> propertiesFile_;
 
   Label versionLabel;
-  Label statusLabel;
 
   // --- Onboarding::Listener
   void endButtonClicked(ear::plugin::ui::Onboarding* onboarding) override;
