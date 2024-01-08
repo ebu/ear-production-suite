@@ -336,7 +336,8 @@ bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
     return false;
   if(layouts.outputBuses[1] != AudioChannelSet::mono())
     return false;
-  if(layouts.outputBuses[2] != AudioChannelSet::discreteChannels(62))
+  if (layouts.outputBuses[2] !=
+      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - 2))
     return false;
 
   return true;
