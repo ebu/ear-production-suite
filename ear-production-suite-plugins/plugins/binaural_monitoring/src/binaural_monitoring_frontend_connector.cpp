@@ -288,13 +288,41 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZ(bool invert) {
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
     const ear::plugin::BearStatus& bearStatus) {
-  //TODO: Update UI according to bearStatus
   if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
-    rendererStatusLabelLocked->setColour(juce::Label::textColourId,
-                           ear::plugin::ui::EarColours::Version);
-    rendererStatusLabelLocked->setText(
-      "Status update from BinauralMonitoringJuceFrontendConnector", 
-      juce::NotificationType::dontSendNotification);
+    if (bearStatus.startupSuccess == BearStatusStates::SUCCEEDED) {
+      // Might be running, but see if accepting listener position data
+      if (bearStatus.listenerDataSetSuccess == BearStatusStates::FAILED) {
+        rendererStatusLabelLocked->setColour(
+            juce::Label::textColourId,
+            ear::plugin::ui::EarColours::StatusWarning);
+        juce::String msg("BEAR did not accept listener orientation data: ");
+        msg += juce::String(bearStatus.listenerDataSetErrorDesc);
+        rendererStatusLabelLocked->setText(
+            msg, juce::NotificationType::dontSendNotification);
+      } else {
+        // SUCCEEDED and NOT_ATTEMPTED states for listener data - BEAR is running
+        rendererStatusLabelLocked->setColour(
+            juce::Label::textColourId, ear::plugin::ui::EarColours::StatusGood);
+        rendererStatusLabelLocked->setText(
+            "BEAR running...", juce::NotificationType::dontSendNotification);
+      }
+    } else if (bearStatus.startupSuccess == BearStatusStates::FAILED) {
+      rendererStatusLabelLocked->setColour(
+          juce::Label::textColourId, ear::plugin::ui::EarColours::StatusBad);
+      juce::String msg("BEAR startup failed: ");
+      msg += juce::String(bearStatus.startupErrorDesc);
+      rendererStatusLabelLocked->setText(
+          msg, juce::NotificationType::dontSendNotification);
+    } else {
+      // Unusual case - we should always expect a start attempt (class init)
+      rendererStatusLabelLocked->setColour(
+          juce::Label::textColourId, ear::plugin::ui::EarColours::StatusWarning);
+      if (bearStatus.startupSuccess == BearStatusStates::NOT_ATTEMPTED) {
+        rendererStatusLabelLocked->setText(
+            "BEAR not started.",
+            juce::NotificationType::dontSendNotification);
+      }
+    }
   }
   cachedBearStatus_ = bearStatus;
 }
