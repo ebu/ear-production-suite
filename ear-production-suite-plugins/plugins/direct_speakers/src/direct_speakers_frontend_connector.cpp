@@ -287,7 +287,8 @@ void DirectSpeakersJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBox) {
   if (auto speakerSetupsComboBox = lockIfSame(speakerSetupsComboBox_, comboBox)) {
     if (speakerSetupsComboBox->hasSelection()) {
-      *(p_->getPackFormatIdValue()) = speakerSetupsComboBox->getSelectedId();
+      juce::var id = speakerSetupsComboBox->getSelectedId();
+      *(p_->getPackFormatIdValue()) = static_cast<int>(id);
     } else {
       *(p_->getPackFormatIdValue()) = 0;
     }
