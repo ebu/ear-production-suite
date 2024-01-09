@@ -3,15 +3,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES_BINAURAL_MONITORING
-    ${EPS_SHARED_DIR}/binary_data.cpp
-    ${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
-    ${EPS_SHARED_DIR}/components/ear_header.cpp
-    ${EPS_SHARED_DIR}/components/ear_slider_label.cpp
-    ${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
+	${EPS_SHARED_DIR}/binary_data.cpp
+	${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
+	${EPS_SHARED_DIR}/components/ear_combo_box.cpp
+	${EPS_SHARED_DIR}/components/ear_header.cpp
+	${EPS_SHARED_DIR}/components/ear_slider_label.cpp
+	${EPS_SHARED_DIR}/components/level_meter_calculator.cpp
 	src/binaural_monitoring_frontend_connector.cpp
-    src/binaural_monitoring_plugin_editor.cpp
-    src/binaural_monitoring_plugin_processor.cpp
+	src/binaural_monitoring_plugin_editor.cpp
+	src/binaural_monitoring_plugin_processor.cpp
 	src/orientation_osc.cpp
+	src/value_box_data_file.cpp
 )
 
 set(HEADERS_BINAURAL_MONITORING
@@ -25,6 +27,7 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/binary_data.hpp
 	
 	${EPS_SHARED_DIR}/components/ear_button.hpp
+	${EPS_SHARED_DIR}/components/ear_combo_box.cpp
 	${EPS_SHARED_DIR}/components/ear_header.hpp
 	${EPS_SHARED_DIR}/components/ear_inverted_slider.hpp
 	${EPS_SHARED_DIR}/components/ear_slider.hpp
@@ -51,6 +54,7 @@ set(HEADERS_BINAURAL_MONITORING
 	src/headphone_channel_meter.hpp
 	src/headphone_channel_meter_box.hpp
 	src/orientation_osc.hpp
+	src/value_box_data_file.hpp
 	src/value_box_orientation.hpp
 	src/value_box_osc.hpp
 )
@@ -60,7 +64,7 @@ source_group("Header Files" FILES ${HEADERS_BINAURAL_MONITORING})
 add_juce_vst3_plugin(
 	ear_binaural_monitoring
 	SOURCES ${SOURCES_BINAURAL_MONITORING} ${HEADERS_BINAURAL_MONITORING}
-    IDE_FOLDER ${IDE_FOLDER_PLUGINS}
+	IDE_FOLDER ${IDE_FOLDER_PLUGINS}
 	CODE_SUFFIX "F0" # Speaker Monitoring suffixes start from A0 and increment. For bin, lets use F0 (Note FF is scene)
 	DISPLAY_NAME "EAR Binaural Monitoring"
 	DESCRIPTION "The binaural monitoring plugin"
@@ -81,7 +85,7 @@ if(APPLE)
 	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/../Resources/${TENSORFILE_FILENAME}"
 	)
-    install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
+	install(FILES ${TENSORFILE_FULLPATH} DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite/EAR Binaural Monitoring.vst3/Contents/Resources")
 else()
 	add_custom_command(TARGET ear_binaural_monitoring_VST3 POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy ${TENSORFILE_FULLPATH} "$<TARGET_FILE_DIR:ear_binaural_monitoring_VST3>/${TENSORFILE_FILENAME}"
