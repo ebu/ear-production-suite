@@ -366,11 +366,17 @@ public:
 	void openPopup();
 	void closePopup();
 
+	void setCanClearSelection(bool opt) {
+		canClearSelection = opt;
+	}
+
 	virtual bool keyPressed(const KeyPress& key) override {
-		if (key == KeyPress::deleteKey || key == KeyPress::backspaceKey) {
-			selectEntry(-1, sendNotificationAsync);
-			repaint();
-			return true;
+		if (canClearSelection) {
+			if (key == KeyPress::deleteKey || key == KeyPress::backspaceKey) {
+				selectEntry(-1, sendNotificationAsync);
+				repaint();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -438,6 +444,7 @@ private:
 	String defaultText_;
 	ListenerList<Listener> listeners_;
 	std::unique_ptr<EarComboBoxPopup> popup_;
+	bool canClearSelection{ true };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarComboBox)
 };  // namespace ui
