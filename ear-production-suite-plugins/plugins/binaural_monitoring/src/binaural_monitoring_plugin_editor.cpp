@@ -19,6 +19,7 @@ EarBinauralMonitoringAudioProcessorEditor::
         EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
+      dataFileValueBox(std::make_unique<ValueBoxDataFile>()),
       oscValueBox(std::make_unique<ValueBoxOsc>()),
       orientationValueBox(std::make_unique<ValueBoxOrientation>()),
       header_(std::make_unique<EarHeader>()),
@@ -92,6 +93,7 @@ EarBinauralMonitoringAudioProcessorEditor::
   p->getFrontendConnector()->setOscInvertQuatZButton(oscValueBox->getInvertQuatZButton());
   /* clang-format on */
 
+  addAndMakeVisible(dataFileValueBox.get());
   addAndMakeVisible(orientationValueBox.get());
   addAndMakeVisible(oscValueBox.get());
   addChildComponent(errorOverlay_.get());
@@ -151,6 +153,11 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
   header_->setBounds(headingArea);
 
   area.removeFromTop(10);  // Padding between header and content
+
+  // TODO: Condition around showing this section
+  { 
+    dataFileValueBox->setBounds(area.removeFromTop(60).reduced(5, 5));
+  }
 
   auto body = area.removeFromTop(390);
   // All content to go below and to be fitted within `area`
