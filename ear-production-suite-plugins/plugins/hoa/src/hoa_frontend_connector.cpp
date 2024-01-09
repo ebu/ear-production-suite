@@ -245,7 +245,8 @@ void HoaJuceFrontendConnector::trackPropertiesChanged(
 void HoaJuceFrontendConnector::comboBoxChanged(EarComboBox* comboBox) {
   if(auto hoaTypeComboBox = lockIfSame(hoaTypeComboBox_, comboBox)) {
     if(hoaTypeComboBox->hasSelection()) {
-      *(p_->getPackFormatIdValue()) = hoaTypeComboBox->getSelectedId();
+      juce::var id = hoaTypeComboBox->getSelectedId();
+      *(p_->getPackFormatIdValue()) = static_cast<int>(id);
     } else {
       *(p_->getPackFormatIdValue()) = 0;
     }

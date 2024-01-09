@@ -220,7 +220,7 @@ void ProgrammesContainer::setProgrammeViewLanguage(const ProgrammeInternalId& pr
                                                    const std::optional<std::string>& language) {
   for(auto programme : programmes_) {
     if(programme->getProgrammeId() == progId) {
-      auto languageIndex = language? getLanguageIndex(*language) : -1;
+      int languageIndex = language? getLanguageIndex(*language) : -1;
       programme->getLanguageComboBox()->setSelectedId(languageIndex, NotificationType::dontSendNotification);
     }
   }
