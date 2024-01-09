@@ -15,7 +15,7 @@ class EarComboBox;
 
 class EarComboBoxEntry : public Component {
 public:
-	EarComboBoxEntry(int id = 0);
+	EarComboBoxEntry(const juce::var& id = 0);
 
 	bool isSelected() const;
 	void setSelected(bool selected);
@@ -24,7 +24,7 @@ public:
 	bool isHighlighted() const;
 	void setHighlighted(bool highlighted);
 
-	int getId();
+	juce::var getId();
 
 	String getSearchString() { return searchString_; }
 
@@ -42,7 +42,7 @@ public:
 protected:
 	bool isSelectable_ = true;
 	String searchString_ = "";
-	int id_;
+	juce::var id_;
 
 private:
 	juce::Point<int> mouseXyRelative_;
@@ -52,7 +52,7 @@ private:
 
 class EarComboBoxTextEntry : public EarComboBoxEntry {
 public:
-	EarComboBoxTextEntry(const String& text = "", int id = 0);
+	EarComboBoxTextEntry(const String& text = "", const juce::var& id = juce::var());
 
 	void setText(const String& text);
 	String getText() const;
@@ -73,7 +73,7 @@ private:
 
 class EarComboBoxColourEntry : public EarComboBoxEntry {
 public:
-	EarComboBoxColourEntry(Colour colour = Colour{}, int id = 0);
+	EarComboBoxColourEntry(Colour colour = Colour{}, const juce::var& id = juce::var());
 
 	void setEntryColour(const Colour& colour);
 	Colour getEntryColour() const;
@@ -88,7 +88,7 @@ private:
 
 class EarComboBoxSectionEntry : public EarComboBoxEntry {
 public:
-	EarComboBoxSectionEntry(const String& text = "", int id = 0);
+	EarComboBoxSectionEntry(const String& text = "", const juce::var& id = juce::var());
 
 	void setText(const String& text);
 	String getText() const;
@@ -161,19 +161,23 @@ public:
 		return -1;
 	}
 
-	int getEntryIndexById(int id) {
-		for (int i = 0; i < entries_.size(); ++i) {
-			if (entries_.at(i)->getId() == id) {
-				return i;
+	int getEntryIndexById(const juce::var& id) {
+		if (!id.isVoid()) {
+			for (int i = 0; i < entries_.size(); ++i) {
+				if (entries_.at(i)->getId().equalsWithSameType(id)) {
+					return i;
+				}
 			}
 		}
 		return -1;
 	}
 
-	EarComboBoxEntry* getEntryById(int id) {
-		for (int i = 0; i < entries_.size(); ++i) {
-			if (entries_.at(i)->getId() == id) {
-				return entries_.at(i).get();
+	EarComboBoxEntry* getEntryById(const juce::var& id) {
+		if (!id.isVoid()) {
+			for (int i = 0; i < entries_.size(); ++i) {
+				if (entries_.at(i)->getId().equalsWithSameType(id)) {
+					return entries_.at(i).get();
+				}
 			}
 		}
 		return nullptr;
@@ -325,9 +329,9 @@ public:
 	String getDefaultText() const;
 
 	EarComboBoxEntry* addEntry(std::unique_ptr<EarComboBoxEntry> entry);
-	EarComboBoxTextEntry* addTextEntry(const String& text, int id = 0);
-	EarComboBoxColourEntry* addColourEntry(const Colour& colour, int id = 0);
-	EarComboBoxSectionEntry* addSectionEntry(const String& text, int id = 0);
+	EarComboBoxTextEntry* addTextEntry(const String& text, const juce::var& id = juce::var());
+	EarComboBoxColourEntry* addColourEntry(const Colour& colour, const juce::var& id = juce::var());
+	EarComboBoxSectionEntry* addSectionEntry(const String& text, const juce::var& id = juce::var());
 
 	void selectEntry(int newIndex, NotificationType notification) {
 		if (newIndex != currentSelectedIndex_) {
@@ -349,13 +353,13 @@ public:
 
 	bool hasSelection() { return getSelectedEntryIndex() >= 0; }
 
-	bool setSelectedId(int id, NotificationType notification) {
+	bool setSelectedId(const juce::var& id, NotificationType notification) {
 		auto index = popup_->getEntryIndexById(id);
 		if (index < 0) return false;
 		selectEntry(index, notification);
 		return true;
 	}
-	int getSelectedId() {
+	juce::var getSelectedId() {
 		auto selectedEntry = getSelectedEntry();
 		assert(selectedEntry);
 		return selectedEntry->getId();
