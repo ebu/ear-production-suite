@@ -51,7 +51,6 @@ BinauralMonitoringAudioProcessor::BinauralMonitoringAudioProcessor(
       bearStatus.listenerDataSetSuccess = BearStatusStates::FAILED;
       bearStatus.listenerDataSetErrorDesc = e.what();
       bearRenderer.reset();
-      assert(false); // we're not feeding back this yet, so assert so we notice it
     }
   } catch (std::exception &e) {
     bearStatus.startupSuccess = BearStatusStates::FAILED;
