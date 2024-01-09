@@ -5,6 +5,16 @@
 #include "detail/weak_ptr_helpers.hpp"
 
 
+namespace {
+void removePath(std::string& filePath) {
+  // Find the last occurrence of forward slash or backslash
+  size_t lastSlash = filePath.find_last_of("/\\");
+  if (lastSlash != std::string::npos) {
+    filePath = filePath.substr(lastSlash + 1);
+  }
+}
+}
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -310,7 +320,10 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
       rendererStatusLabelLocked->setColour(
           juce::Label::textColourId, ear::plugin::ui::EarColours::StatusBad);
       juce::String msg("BEAR startup failed: ");
-      msg += juce::String(bearStatus.startupErrorDesc);
+      msg += juce::String(bearStatus.startupErrorDesc) + " (";
+      auto dataFile = bearStatus.startupConfig.get_data_path();
+      removePath(dataFile);
+      msg += juce::String(dataFile) + ").";
       rendererStatusLabelLocked->setText(
           msg, juce::NotificationType::dontSendNotification);
     } else {
