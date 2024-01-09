@@ -24,9 +24,9 @@ static const Colour Primary = Colour(26, 93, 159);
 static const Colour PrimaryVariant = Colour(0, 128, 255);
 static const Colour PrimaryHighlight = Colour(207, 102, 121);
 static const Colour Error = Colour(207, 102, 121);
-static const Colour StatusGood = Colour(207, 102, 121);
+static const Colour StatusBad = Colour(207, 102, 121);
 static const Colour StatusWarning = Colour(222, 139, 31);
-static const Colour StatusBad = Colour(102, 207, 121);
+static const Colour StatusGood = Colour(102, 207, 121);
 
 static const Colour Area01dp = Colour(255, 255, 255).withAlpha(0.05f);
 static const Colour Area02dp = Colour(255, 255, 255).withAlpha(0.07f);
