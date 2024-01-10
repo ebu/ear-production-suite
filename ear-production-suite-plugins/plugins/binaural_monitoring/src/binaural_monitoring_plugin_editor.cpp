@@ -19,7 +19,7 @@ EarBinauralMonitoringAudioProcessorEditor::
         EarBinauralMonitoringAudioProcessor* p)
     : AudioProcessorEditor(p),
       p_(p),
-      dataFileValueBox(std::make_unique<ValueBoxDataFile>()),
+      dataFileValueBox(std::make_shared<ValueBoxDataFile>()),
       oscValueBox(std::make_unique<ValueBoxOsc>()),
       orientationValueBox(std::make_unique<ValueBoxOrientation>()),
       header_(std::make_unique<EarHeader>()),
@@ -79,6 +79,8 @@ EarBinauralMonitoringAudioProcessorEditor::
 
   /* clang-format off */
   p->getFrontendConnector()->setRendererStatusLabel(statusLabel);
+  p->getFrontendConnector()->setDataFileComponent(dataFileValueBox);
+  p->getFrontendConnector()->setDataFileComboBox(dataFileValueBox->getDataFileComboBox());
   p->getFrontendConnector()->setYawView(orientationValueBox->getYawControl());
   p->getFrontendConnector()->setPitchView(orientationValueBox->getPitchControl());
   p->getFrontendConnector()->setRollView(orientationValueBox->getRollControl());

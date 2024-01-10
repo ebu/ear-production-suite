@@ -182,6 +182,19 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZButton(
   setOscInvertQuatZ(cachedOscInvertQuatZ_);
 }
 
+void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
+    std::shared_ptr<Component> comp) {
+  dataFileComponent_ = comp;
+  // TODO: Update visibility
+}
+
+void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
+    std::shared_ptr<EarComboBox> comboBox) {
+  comboBox->addListener(this);
+  dataFileComboBox_ = comboBox;
+  // TODO: Set entries and select
+}
+
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
     std::shared_ptr<Label> label) {
   rendererStatusLabel_ = label;
@@ -364,6 +377,11 @@ void BinauralMonitoringJuceFrontendConnector::orientationChange(
           control->setValue(euler.r, dontSendNotification);
       }
   });
+}
+
+void BinauralMonitoringJuceFrontendConnector::comboBoxChanged(
+    EarComboBox* comboBoxThatHasChanged) {
+  // TODO
 }
 
 void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(
