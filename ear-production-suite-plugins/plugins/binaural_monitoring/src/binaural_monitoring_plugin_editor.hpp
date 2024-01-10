@@ -28,7 +28,7 @@ class EarBinauralMonitoringAudioProcessorEditor
 
   std::unique_ptr<ear::plugin::ui::ValueBoxOrientation> orientationValueBox;
   std::unique_ptr<ear::plugin::ui::ValueBoxOsc> oscValueBox;
-  std::unique_ptr<ear::plugin::ui::ValueBoxDataFile> dataFileValueBox;
+  std::shared_ptr<ear::plugin::ui::ValueBoxDataFile> dataFileValueBox;
 
  private:
   EarBinauralMonitoringAudioProcessor* p_;

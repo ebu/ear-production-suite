@@ -5,6 +5,7 @@
 
 #include "components/orientation.hpp"
 #include "components/ear_button.hpp"
+#include "components/ear_combo_box.hpp"
 #include "components/ear_slider.hpp"
 #include "helper/multi_async_updater.h"
 
@@ -21,6 +22,7 @@ class BinauralMonitoringJuceFrontendConnector
       private AudioProcessorParameter::Listener,
       Slider::Listener,
       Button::Listener,
+      ear::plugin::ui::EarComboBox::Listener,
       ear::plugin::ui::OrientationView::Listener,
       ear::plugin::ListenerOrientation::EulerListener {
  public:
@@ -54,6 +56,8 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatZButton(std::shared_ptr<ToggleButton> button);
 
   // Renderer and Filter Set Selection Controls
+  void setDataFileComponent(std::shared_ptr<Component> comp);
+  void setDataFileComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setRendererStatusLabel(std::shared_ptr<Label> label);
 
   // Listener Orientation Object
@@ -97,6 +101,9 @@ class BinauralMonitoringJuceFrontendConnector
   void orientationChange(
       ear::plugin::ListenerOrientation::Euler euler) override;
 
+  // EarComboBox::Listener
+  void comboBoxChanged(EarComboBox* comboBoxThatHasChanged) override;
+
  private:
   EarBinauralMonitoringAudioProcessor* p_;
   std::map<int, RangedAudioParameter*> parameters_;
@@ -119,7 +126,9 @@ class BinauralMonitoringJuceFrontendConnector
   std::weak_ptr<ToggleButton> oscInvertQuatYButton_;
   std::weak_ptr<ToggleButton> oscInvertQuatZButton_;
 
-  // Renderer and Filter Set Selection Controls
+  // Renderer Status and Filter Set Selection Controls
+  std::weak_ptr<Component> dataFileComponent_;
+  std::weak_ptr<EarComboBox> dataFileComboBox_;
   std::weak_ptr<Label> rendererStatusLabel_;
 
   // Values
