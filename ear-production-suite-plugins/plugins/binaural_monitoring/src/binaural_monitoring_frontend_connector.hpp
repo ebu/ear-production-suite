@@ -80,8 +80,9 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatY(bool invert);
   void setOscInvertQuatZ(bool invert);
 
-  // Renderer Status update
+  // Renderer Status and Filter Set
   void setRendererStatus(const ear::plugin::BearStatus& bearStatus);
+  void setDataFile(const juce::String& dataFile);
 
  protected:
   // Orientation::Listener
