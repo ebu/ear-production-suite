@@ -9,6 +9,7 @@
 
 #include "components/level_meter_calculator.hpp"
 
+#include "bear_data_files.hpp"
 #include "orientation_osc.hpp"
 
 namespace ear {
@@ -84,6 +85,7 @@ class EarBinauralMonitoringAudioProcessor
   }
 
   bool rendererStarted();
+  std::unique_ptr<ear::plugin::DataFileManager> dataFileManager;
 
  protected:
   void parameterValueChanged(int parameterIndex, float newValue) override;
@@ -116,7 +118,6 @@ class EarBinauralMonitoringAudioProcessor
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
   std::string bearDataFilePath;
   juce::File bearDataFileDir;
-  std::vector<std::string> getCustomBearDataFiles();
 
   int samplerate_;
   int blocksize_;

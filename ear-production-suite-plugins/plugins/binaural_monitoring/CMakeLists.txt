@@ -12,6 +12,7 @@ set(SOURCES_BINAURAL_MONITORING
 	src/binaural_monitoring_frontend_connector.cpp
 	src/binaural_monitoring_plugin_editor.cpp
 	src/binaural_monitoring_plugin_processor.cpp
+	src/bear_data_files.cpp
 	src/orientation_osc.cpp
 	src/value_box_data_file.cpp
 )
@@ -50,6 +51,7 @@ set(HEADERS_BINAURAL_MONITORING
 	src/binaural_monitoring_frontend_connector.hpp
 	src/binaural_monitoring_plugin_editor.hpp
 	src/binaural_monitoring_plugin_processor.hpp
+	src/bear_data_files.hpp
 	src/error_overlay.hpp
 	src/headphone_channel_meter.hpp
 	src/headphone_channel_meter_box.hpp
