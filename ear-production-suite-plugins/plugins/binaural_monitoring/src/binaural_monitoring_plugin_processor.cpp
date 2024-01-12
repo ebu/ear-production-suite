@@ -57,6 +57,8 @@ using namespace ear::plugin;
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
+  dataFileManager = std::make_unique<ear::plugin::DataFileManager>(
+      getBearDataFileDirectory());
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
 
   /* clang-format off */
@@ -234,20 +236,6 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
   ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS-2), true);
   return ret;
-}
-
-std::vector<std::string>
-EarBinauralMonitoringAudioProcessor::getCustomBearDataFiles() {
-  std::vector<std::string> bearDataFiles;
-  auto tfFiles = bearDataFileDir.findChildFiles(
-      juce::File::TypesOfFileToFind::findFiles, false, "*.tf");
-  for (auto const& file : tfFiles) {
-    auto fn = file.getFileName().toStdString();
-    if (fn != BEAR_DATA_FILE) {
-      bearDataFiles.push_back(fn);
-    }
-  }
-  return bearDataFiles;
 }
 
 bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
