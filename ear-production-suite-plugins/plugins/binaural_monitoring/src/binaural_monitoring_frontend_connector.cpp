@@ -186,6 +186,17 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
     std::shared_ptr<Component> comp) {
   dataFileComponent_ = comp;
   // TODO: Update visibility
+  /*
+  dataFileManager->updateAvailableFiles();
+  auto df = dataFileManager->getSelectedDataFileInfo();
+  if (dataFileManager->dataFiles.size() == 1 &&
+      df.isBearRelease) {
+    // Only 1 data file and it is a bear release. Don't show options.
+    comp->setVisible(false);
+  } else {
+    comp->setVisible(true);
+  }
+  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
@@ -193,6 +204,22 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
   comboBox->addListener(this);
   dataFileComboBox_ = comboBox;
   // TODO: Set entries and select
+  /*
+  dataFileManager->updateAvailableFiles();
+  comboBox->clearEntries();
+  for (const auto& df : dataFileManager->dataFiles) {
+    if (df.label.isEmpty()) {
+      auto entry = comboBox->addTextEntry(df.filename, df.filename);
+      entry->setLightFont(!df.isBearRelease);
+    } else {
+      auto entry = comboBox->addTextEntry(df.filename + ": \"" + df.label + "\"", df.filename);
+      entry->setLightFont(!df.isBearRelease);
+    }
+  }
+  auto df = dataFileManager->getSelectedDataFileInfo();
+  comboBox->setSelectedId(df.filename,
+                          juce::NotificationType::dontSendNotification);
+  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
@@ -353,6 +380,18 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
   cachedBearStatus_ = bearStatus;
 }
 
+void BinauralMonitoringJuceFrontendConnector::setDataFile(
+    const juce::String& dataFile) {
+  if (auto cbLocked = dataFileComboBox_.lock()) {
+    cbLocked->setSelectedId(dataFile, dontSendNotification);
+  }
+  // TODO - select the file
+  /*
+  dataFileManager->setSelectedDataFile(dataFile);
+  p_->restartBear(); // TODO - should set a dataFileManager->onSelectedDataFileChange callback for this?
+  */
+}
+
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
     ear::plugin::ListenerOrientation::Euler euler) {
   // ListenerOrientation callback from backend
@@ -381,7 +420,10 @@ void BinauralMonitoringJuceFrontendConnector::orientationChange(
 
 void BinauralMonitoringJuceFrontendConnector::comboBoxChanged(
     EarComboBox* comboBoxThatHasChanged) {
-  // TODO
+  if (auto comboBox =
+          lockIfSame(dataFileComboBox_, comboBoxThatHasChanged)) {
+    setDataFile(comboBox->getSelectedId());
+  }
 }
 
 void BinauralMonitoringJuceFrontendConnector::parameterValueChanged(
