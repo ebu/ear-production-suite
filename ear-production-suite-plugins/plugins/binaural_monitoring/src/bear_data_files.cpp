@@ -38,15 +38,23 @@ int DataFileManager::getAvailableDataFilesCount() {
 
 bool DataFileManager::setSelectedDataFile(const juce::String& filename) {
   selectedDataFile_.reset();
+  auto found = getDataFileInfo(filename);
+  if (found == nullptr) return false;
+  selectedDataFile_ = found;
+  return true;
+}
+
+std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(const juce::String& filename) {
   auto it = std::find_if(availableDataFiles_.begin(), availableDataFiles_.end(),
                          [&filename](const std::shared_ptr<DataFile>& elm) {
                            return elm->filename == filename;
                          });
 
-  if (it == availableDataFiles_.end()) return false;
+  return it == availableDataFiles_.end() ? nullptr : *it;
+}
 
-  selectedDataFile_ = *it;
-  return true;
+bool DataFileManager::dataFileAvailable(const juce::String& filename) {
+  return getDataFileInfo(filename) != nullptr;
 }
 
 }  // namespace plugin

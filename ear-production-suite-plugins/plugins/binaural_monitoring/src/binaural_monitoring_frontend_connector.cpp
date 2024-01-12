@@ -185,18 +185,15 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZButton(
 void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
     std::shared_ptr<Component> comp) {
   dataFileComponent_ = comp;
-  // TODO: Update visibility
-  /*
-  dataFileManager->updateAvailableFiles();
-  auto df = dataFileManager->getSelectedDataFileInfo();
-  if (dataFileManager->dataFiles.size() == 1 &&
-      df.isBearRelease) {
+  p_->dataFileManager->updateAvailableFiles();
+  auto dfs = p_->dataFileManager->getAvailableDataFiles();
+  auto df = p_->dataFileManager->getSelectedDataFileInfo();
+  if (dfs.size() == 1 && df && dfs[0] == df && df->isBearRelease) {
     // Only 1 data file and it is a bear release. Don't show options.
     comp->setVisible(false);
   } else {
     comp->setVisible(true);
   }
-  */
 }
 
 void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
@@ -204,22 +201,21 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
   comboBox->addListener(this);
   dataFileComboBox_ = comboBox;
   // TODO: Set entries and select
-  /*
-  dataFileManager->updateAvailableFiles();
+  p_->dataFileManager->updateAvailableFiles();
   comboBox->clearEntries();
-  for (const auto& df : dataFileManager->dataFiles) {
-    if (df.label.isEmpty()) {
-      auto entry = comboBox->addTextEntry(df.filename, df.filename);
-      entry->setLightFont(!df.isBearRelease);
+  for (const auto& df : p_->dataFileManager->getAvailableDataFiles()) {
+    if (df->label.isEmpty()) {
+      auto entry = comboBox->addTextEntry(df->filename, df->filename);
+      entry->setLightFont(!df->isBearRelease);
     } else {
-      auto entry = comboBox->addTextEntry(df.filename + ": \"" + df.label + "\"", df.filename);
-      entry->setLightFont(!df.isBearRelease);
+      auto entry = comboBox->addTextEntry(df->filename + ": \"" + df->label + "\"", df->filename);
+      entry->setLightFont(!df->isBearRelease);
     }
   }
-  auto df = dataFileManager->getSelectedDataFileInfo();
-  comboBox->setSelectedId(df.filename,
-                          juce::NotificationType::dontSendNotification);
-  */
+  if (auto df = p_->dataFileManager->getSelectedDataFileInfo()) {
+    comboBox->setSelectedId(df->filename,
+                            juce::NotificationType::dontSendNotification);
+  }
 }
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
@@ -385,11 +381,8 @@ void BinauralMonitoringJuceFrontendConnector::setDataFile(
   if (auto cbLocked = dataFileComboBox_.lock()) {
     cbLocked->setSelectedId(dataFile, dontSendNotification);
   }
-  // TODO - select the file
-  /*
-  dataFileManager->setSelectedDataFile(dataFile);
-  p_->restartBear(); // TODO - should set a dataFileManager->onSelectedDataFileChange callback for this?
-  */
+  p_->dataFileManager->setSelectedDataFile(dataFile);
+  //p_->restartBear(); // TODO - should set a dataFileManager->onSelectedDataFileChange callback for this?
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
