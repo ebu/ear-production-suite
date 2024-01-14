@@ -1,4 +1,5 @@
 #include "bear_data_files.hpp"
+#include <bear/api.hpp>
 
 namespace ear {
 namespace plugin {
@@ -16,8 +17,15 @@ void DataFileManager::updateAvailableFiles() {
     auto df = std::make_shared<DataFile>();
     df->fullPath = file;
     df->filename = file.getFileName();
-    df->label = "TODO!";  // TODO
-    df->isBearRelease = true;  // TODO
+    try {
+      auto md = bear::DataFileMetadata::read_from_file(
+          file.getFullPathName().toStdString());
+       if(md.has_metadata()) {
+        df->label = md.get_label();
+        df->isBearRelease = md.is_released();
+      }
+    } catch (std::exception) {
+    }
     availableDataFiles_.push_back(df);
   }
 }
