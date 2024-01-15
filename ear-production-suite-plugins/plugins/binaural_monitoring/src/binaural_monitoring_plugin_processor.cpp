@@ -389,6 +389,13 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
 
   {
     std::lock_guard<std::mutex> lock(processorMutex_);
+
+    // Check BEAR has started - if not, we still want to zero output to make problem obvious
+    if (!processor_ || processor_->rendererStarted()) {
+      buffer.clear();
+      return;
+    }
+
     processor_->setIsPlaying(true);
 
     auto objIds = backend_->getActiveObjectIds();
@@ -399,15 +406,13 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     size_t numObj = backend_->getTotalObjectChannels();
     size_t numDs = backend_->getTotalDirectSpeakersChannels();
 
-    // Check BEAR has started and ensure enough channels configured
-    if(!processor_ || processor_->rendererStarted()) return;
+    // Check BEAR has enough channels configured
     if(!processor_->updateChannelCounts(numObj, numDs, numHoa)) {
       assert(false);
       return;
     }
 
     // Listener Position
-
     auto latestQuat = backend_->listenerOrientation->getQuaternion();
     processor_->setListenerOrientation(latestQuat.w, latestQuat.x, latestQuat.y,
                                        latestQuat.z);
