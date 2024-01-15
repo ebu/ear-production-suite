@@ -59,6 +59,11 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
   dataFileManager = std::make_unique<ear::plugin::DataFileManager>(
       getBearDataFileDirectory());
+  dataFileManager->onSelectedDataFileChange(
+      [this](std::shared_ptr<ear::plugin::DataFileManager::DataFile> df) {
+        writeConfigFile();
+        restartBearProcessor();
+      });
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
 
   /* clang-format off */
@@ -142,9 +147,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(12, oscInvertQuatZ_->get());
 
   bearDataFileDir = getBearDataFileDirectory();
-  bearDataFilePath = bearDataFileDir.getChildFile(BEAR_DATA_FILE)
-                         .getFullPathName()
-                         .toStdString();
 
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
     connector_->setEuler(euler);
@@ -165,23 +167,11 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   oscInvertQuatY_->addListener(this);
   oscInvertQuatZ_->addListener(this);
 
-  {
-    std::lock_guard<std::mutex> lock(processorMutex_);
-    processor_ =
-        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-            MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 48000, 512,
-            bearDataFilePath);  // Used to verify if BEAR can be initialised -
-                                // can't get SR and block size in ctor. Made
-                                // assumption - prepareToPlay will be called
-                                // with correct values when required
-    connector_->setRendererStatus(processor_->getBearStatus());
-  }
-
   configFileOptions.applicationName = ProjectInfo::projectName;
   configFileOptions.filenameSuffix = ".settings";
   configFileOptions.folderName = ResourcePaths::getSettingsDirectory(true).getFullPathName();
   configFileOptions.storageFormat = PropertiesFile::storeAsXML;
-  readConfigFile();
+  readConfigFile(); // This will fire up the processor too because of data file change.
 }
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
@@ -238,6 +228,26 @@ EarBinauralMonitoringAudioProcessor::_getBusProperties() {
   return ret;
 }
 
+void EarBinauralMonitoringAudioProcessor::restartBearProcessor(
+    bool onlyOnConfigChange) {
+  std::lock_guard<std::mutex> lock(processorMutex_);
+  if (!onlyOnConfigChange || !processor_ ||
+      !processor_->configMatches(samplerate_, blocksize_)) {
+    auto bearDataFile = dataFileManager->getSelectedDataFileInfo();
+    std::string dataFilePath;
+    if (bearDataFile) {
+      dataFilePath = bearDataFile->fullPath.getFullPathName().toStdString();
+    }
+    processor_ =
+        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
+            MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, samplerate_,
+            blocksize_, dataFilePath);
+    if (connector_) {
+      connector_->setRendererStatus(processor_->getBearStatus());
+    }
+  }
+}
+
 bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
   configRestoreState = ConfigRestoreState::IN_PROGRESS;
   PropertiesFile props(configFileOptions);
@@ -252,6 +262,11 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
     *oscInvertQuatX_ = props.getBoolValue("oscInvertQuatX", false);
     *oscInvertQuatY_ = props.getBoolValue("oscInvertQuatY", false);
     *oscInvertQuatZ_ = props.getBoolValue("oscInvertQuatZ", false);
+    auto selectedDataFile = props.getValue("bearPreferredDataFile");
+    if (selectedDataFile.isEmpty() ||
+        !dataFileManager->setSelectedDataFile(selectedDataFile)) {
+      dataFileManager->setSelectedDataFileDefault();
+    }
     configRestoreState = ConfigRestoreState::RESTORED;
     return true;
   }
@@ -273,6 +288,9 @@ bool EarBinauralMonitoringAudioProcessor::writeConfigFile()
   props.setValue("oscInvertQuatX", (bool)*oscInvertQuatX_);
   props.setValue("oscInvertQuatY", (bool)*oscInvertQuatY_);
   props.setValue("oscInvertQuatZ", (bool)*oscInvertQuatZ_);
+  if (auto selectedDataFile = dataFileManager->getSelectedDataFileInfo()) {
+    props.setValue("bearPreferredDataFile", selectedDataFile->filename);
+  }
   return props.save();
 }
 
@@ -312,20 +330,8 @@ void EarBinauralMonitoringAudioProcessor::prepareToPlay(double sampleRate,
                                                         int samplesPerBlock) {
   samplerate_ = sampleRate;
   blocksize_ = samplesPerBlock;
-
   levelMeter_->setup(2, sampleRate);
-
-  std::lock_guard<std::mutex> lock(processorMutex_);
-  if (!processor_ || !processor_->configMatches(sampleRate, samplesPerBlock)) {
-    processor_ =
-        std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
-            MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, 
-            sampleRate, samplesPerBlock,
-            bearDataFilePath);
-    if (connector_) {
-      connector_->setRendererStatus(processor_->getBearStatus());
-    }
-  }
+  restartBearProcessor(true);
 }
 
 void EarBinauralMonitoringAudioProcessor::releaseResources() {

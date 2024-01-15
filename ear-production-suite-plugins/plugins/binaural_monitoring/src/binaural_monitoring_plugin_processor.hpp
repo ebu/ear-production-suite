@@ -116,11 +116,11 @@ class EarBinauralMonitoringAudioProcessor
   std::unique_ptr<ear::plugin::BinauralMonitoringBackend> backend_;
   std::mutex processorMutex_;  // used to prevent access during (re)construction
   std::unique_ptr<ear::plugin::BinauralMonitoringAudioProcessor> processor_;
-  std::string bearDataFilePath;
   juce::File bearDataFileDir;
+  void restartBearProcessor(bool onlyOnConfigChange = false);
 
-  int samplerate_;
-  int blocksize_;
+  int samplerate_{48000};
+  int blocksize_{512};
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
