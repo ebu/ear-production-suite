@@ -45,10 +45,14 @@ int DataFileManager::getAvailableDataFilesCount() {
 }
 
 bool DataFileManager::setSelectedDataFile(const juce::String& filename) {
-  selectedDataFile_.reset();
   auto found = getDataFileInfo(filename);
   if (found == nullptr) return false;
-  selectedDataFile_ = found;
+  if (found != selectedDataFile_) {
+    selectedDataFile_ = found;
+    if (selectedDataFileChangeCallback_) {
+      selectedDataFileChangeCallback_(selectedDataFile_);
+    }
+  }
   return true;
 }
 
@@ -63,6 +67,11 @@ std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(cons
 
 bool DataFileManager::dataFileAvailable(const juce::String& filename) {
   return getDataFileInfo(filename) != nullptr;
+}
+
+void DataFileManager::onSelectedDataFileChange(
+    std::function<void(std::shared_ptr<DataFile>)> callback) {
+  selectedDataFileChangeCallback_ = callback;
 }
 
 }  // namespace plugin
