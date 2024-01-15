@@ -204,13 +204,15 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
   p_->dataFileManager->updateAvailableFiles();
   comboBox->clearEntries();
   for (const auto& df : p_->dataFileManager->getAvailableDataFiles()) {
-    if (df->label.isEmpty()) {
-      auto entry = comboBox->addTextEntry(df->filename, df->filename);
-      entry->setLightFont(!df->isBearRelease);
-    } else {
-      auto entry = comboBox->addTextEntry(df->filename + ": \"" + df->label + "\"", df->filename);
-      entry->setLightFont(!df->isBearRelease);
+    juce::String txt(df->filename);
+    if (df->label.isNotEmpty()) {
+      txt += "      (" + df->label + ")";
     }
+    if (df->isBearRelease) {
+      txt += "      [RELEASED]";
+    }
+    auto entry = comboBox->addTextEntry(txt, df->filename);
+    entry->setLightFont(!df->isBearRelease);
   }
   if (auto df = p_->dataFileManager->getSelectedDataFileInfo()) {
     comboBox->setSelectedId(df->filename,
