@@ -56,6 +56,26 @@ bool DataFileManager::setSelectedDataFile(const juce::String& filename) {
   return true;
 }
 
+bool DataFileManager::setSelectedDataFileDefault() { 
+  updateAvailableFiles();
+  // try look for expected file first
+  auto defaultFileInfo = getDataFileInfo(BEAR_DATA_FILE);
+  if (defaultFileInfo && defaultFileInfo->isBearRelease) {
+    if (setSelectedDataFile(defaultFileInfo->filename)) {
+      return true;
+    }
+  }
+  // else look for any released
+  for (auto const& df : availableDataFiles_) {
+    if (df->isBearRelease) {
+      if (setSelectedDataFile(df->filename)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(const juce::String& filename) {
   auto it = std::find_if(availableDataFiles_.begin(), availableDataFiles_.end(),
                          [&filename](const std::shared_ptr<DataFile>& elm) {
