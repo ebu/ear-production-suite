@@ -28,7 +28,7 @@ set(HEADERS_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/binary_data.hpp
 	
 	${EPS_SHARED_DIR}/components/ear_button.hpp
-	${EPS_SHARED_DIR}/components/ear_combo_box.cpp
+	${EPS_SHARED_DIR}/components/ear_combo_box.hpp
 	${EPS_SHARED_DIR}/components/ear_header.hpp
 	${EPS_SHARED_DIR}/components/ear_inverted_slider.hpp
 	${EPS_SHARED_DIR}/components/ear_slider.hpp
