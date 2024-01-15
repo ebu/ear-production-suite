@@ -76,6 +76,7 @@ EarBinauralMonitoringAudioProcessorEditor::
   statusLabel->setJustificationType(juce::Justification::left);
   statusLabel->setEditable(false);
   addAndMakeVisible(statusLabel.get());
+  addChildComponent(dataFileValueBox.get());
 
   /* clang-format off */
   p->getFrontendConnector()->setRendererStatusLabel(statusLabel);
@@ -95,7 +96,6 @@ EarBinauralMonitoringAudioProcessorEditor::
   p->getFrontendConnector()->setOscInvertQuatZButton(oscValueBox->getInvertQuatZButton());
   /* clang-format on */
 
-  addAndMakeVisible(dataFileValueBox.get());
   addAndMakeVisible(orientationValueBox.get());
   addAndMakeVisible(oscValueBox.get());
   addChildComponent(errorOverlay_.get());
@@ -156,8 +156,7 @@ void EarBinauralMonitoringAudioProcessorEditor::resized() {
 
   area.removeFromTop(10);  // Padding between header and content
 
-  // TODO: Condition around showing this section
-  { 
+  if(dataFileValueBox->isVisible()){ 
     dataFileValueBox->setBounds(area.removeFromTop(60).reduced(5, 5));
   }
 
