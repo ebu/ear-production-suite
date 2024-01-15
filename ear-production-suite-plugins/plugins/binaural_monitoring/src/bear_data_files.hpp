@@ -23,6 +23,7 @@ class DataFileManager {
   std::vector<std::shared_ptr<DataFile>> getAvailableDataFiles();
   int getAvailableDataFilesCount();
   bool setSelectedDataFile(const juce::String& filename);
+  bool setSelectedDataFileDefault();
   std::shared_ptr<DataFile> getDataFileInfo(const juce::String& filename);
   bool dataFileAvailable(const juce::String& filename);
   void onSelectedDataFileChange(
