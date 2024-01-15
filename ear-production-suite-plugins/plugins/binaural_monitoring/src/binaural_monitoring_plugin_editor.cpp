@@ -26,7 +26,6 @@ EarBinauralMonitoringAudioProcessorEditor::
       onBoardingButton_(std::make_unique<EarButton>()),
       onBoardingOverlay_(std::make_unique<Overlay>()),
       onBoardingContent_(std::make_unique<Onboarding>()),
-      errorOverlay_(std::make_shared<BinauralRendererErrorOverlay>()),
       headphoneMeterBox_(std::make_unique<HeadphoneChannelMeterBox>(
           String::fromUTF8("Output"))),
       propertiesFileLock_(
@@ -98,7 +97,6 @@ EarBinauralMonitoringAudioProcessorEditor::
 
   addAndMakeVisible(orientationValueBox.get());
   addAndMakeVisible(oscValueBox.get());
-  addChildComponent(errorOverlay_.get());
 
   oscValueBox->getPortControl()->setValue(p->getOscPort()->get(),
                                           dontSendNotification);
@@ -145,9 +143,7 @@ void EarBinauralMonitoringAudioProcessorEditor::paint(Graphics& g) {
 void EarBinauralMonitoringAudioProcessorEditor::resized() {
   auto area = getLocalBounds();
   onBoardingOverlay_->setBounds(area);
-  errorOverlay_->setBounds(area);
-  auto p = static_cast<EarBinauralMonitoringAudioProcessor*>(p_);
-  //errorOverlay_->setVisible(p->rendererError());
+
   area.reduce(5, 5);
   auto headingArea = area.removeFromTop(55);
   onBoardingButton_->setBounds(
