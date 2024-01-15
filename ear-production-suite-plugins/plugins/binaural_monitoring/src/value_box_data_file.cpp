@@ -7,12 +7,12 @@ namespace ui {
 ValueBoxDataFile::ValueBoxDataFile() { 
   label_.setFont(EarFontsSingleton::instance().Label);
   label_.setColour(Label::textColourId, EarColours::Label);
-  label_.setText("Filter Set:", juce::NotificationType::dontSendNotification);
+  label_.setText("BEAR Data File:", juce::NotificationType::dontSendNotification);
   label_.setJustificationType(Justification::left);
   addAndMakeVisible(label_);
 
   comboBox_ = std::make_shared<EarComboBox>();
-  comboBox_->setDefaultText("Select filter set");
+  comboBox_->setDefaultText("Select data file");
   comboBox_->setCanClearSelection(false);
   addAndMakeVisible(comboBox_.get());
 }
