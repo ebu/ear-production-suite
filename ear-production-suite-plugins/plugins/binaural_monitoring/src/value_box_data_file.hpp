@@ -22,7 +22,7 @@ class ValueBoxDataFile : public Component {
   std::shared_ptr<EarComboBox> getDataFileComboBox() { return comboBox_; }
 
  private:
-  const float labelWidth_ = 80.f;
+  const float labelWidth_ = 115.f;
   const float rowHeight_ = 30.f;
   const float margin_ = 10.f;
 
