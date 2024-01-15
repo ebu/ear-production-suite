@@ -381,8 +381,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFile(
   if (auto cbLocked = dataFileComboBox_.lock()) {
     cbLocked->setSelectedId(dataFile, dontSendNotification);
   }
-  p_->dataFileManager->setSelectedDataFile(dataFile);
-  //p_->restartBear(); // TODO - should set a dataFileManager->onSelectedDataFileChange callback for this?
+  p_->dataFileManager->setSelectedDataFile(dataFile); // fires callback to restart bear
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
