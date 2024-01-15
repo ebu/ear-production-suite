@@ -146,8 +146,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
   connector_->parameterValueChanged(11, oscInvertQuatY_->get());
   connector_->parameterValueChanged(12, oscInvertQuatZ_->get());
 
-  bearDataFileDir = getBearDataFileDirectory();
-
   oscReceiver.onReceiveEuler = [this](ListenerOrientation::Euler euler) {
     connector_->setEuler(euler);
   };
