@@ -2,6 +2,7 @@
 #include "JuceHeader.h"
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace ear {
 namespace plugin {
@@ -24,11 +25,14 @@ class DataFileManager {
   bool setSelectedDataFile(const juce::String& filename);
   std::shared_ptr<DataFile> getDataFileInfo(const juce::String& filename);
   bool dataFileAvailable(const juce::String& filename);
+  void onSelectedDataFileChange(
+      std::function<void(std::shared_ptr<DataFile>)> callback);
 
  private:
   juce::File path_;
   std::shared_ptr<DataFile> selectedDataFile_;
   std::vector<std::shared_ptr<DataFile>> availableDataFiles_;
+  std::function<void(std::shared_ptr<DataFile>)> selectedDataFileChangeCallback_;
 };
 
 }  // namespace plugin
