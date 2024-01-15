@@ -14,10 +14,30 @@ namespace ui {
 
 class ValueBoxDataFile : public Component {
  public:
-  ValueBoxDataFile();
+  ValueBoxDataFile(){
+    label_.setFont(EarFontsSingleton::instance().Label);
+    label_.setColour(Label::textColourId, EarColours::Label);
+    label_.setText("BEAR Data File:",
+                   juce::NotificationType::dontSendNotification);
+    label_.setJustificationType(Justification::left);
+    addAndMakeVisible(label_);
 
-  void paint(Graphics& g) override;
-  void resized() override;
+    comboBox_ = std::make_shared<EarComboBox>();
+    comboBox_->setDefaultText("Select data file");
+    comboBox_->setCanClearSelection(false);
+    addAndMakeVisible(comboBox_.get());
+  }
+
+  void paint(Graphics& g) override { g.fillAll(EarColours::Area01dp); } 
+  
+  void resized() override {
+    auto area = getLocalBounds();
+    auto vPad = (area.getHeight() - rowHeight_) / 2;
+    if (vPad < 0) vPad = 0;
+    area.reduce(margin_, vPad);
+    label_.setBounds(area.removeFromLeft(labelWidth_));
+    comboBox_->setBounds(area);
+  }
 
   std::shared_ptr<EarComboBox> getDataFileComboBox() { return comboBox_; }
 

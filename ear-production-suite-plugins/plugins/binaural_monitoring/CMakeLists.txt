@@ -14,7 +14,6 @@ set(SOURCES_BINAURAL_MONITORING
 	src/binaural_monitoring_plugin_processor.cpp
 	src/bear_data_files.cpp
 	src/orientation_osc.cpp
-	src/value_box_data_file.cpp
 )
 
 set(HEADERS_BINAURAL_MONITORING
