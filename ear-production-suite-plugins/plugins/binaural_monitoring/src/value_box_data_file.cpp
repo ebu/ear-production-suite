@@ -14,13 +14,6 @@ ValueBoxDataFile::ValueBoxDataFile() {
   comboBox_ = std::make_shared<EarComboBox>();
   comboBox_->setDefaultText("Select filter set");
   comboBox_->setCanClearSelection(false);
-  {
-    // TODO: this is just mock data
-    auto entryA = comboBox_->addTextEntry("default_small.tf");
-    entryA->setLightFont(false);
-    auto entryB = comboBox_->addTextEntry("custom.tf");
-    entryB->setLightFont(true);
-  }
   addAndMakeVisible(comboBox_.get());
 }
 
