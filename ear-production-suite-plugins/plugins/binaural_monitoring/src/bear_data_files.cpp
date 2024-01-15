@@ -60,17 +60,13 @@ bool DataFileManager::setSelectedDataFileDefault() {
   updateAvailableFiles();
   // try look for expected file first
   auto defaultFileInfo = getDataFileInfo(BEAR_DATA_FILE);
-  if (defaultFileInfo && defaultFileInfo->isBearRelease) {
-    if (setSelectedDataFile(defaultFileInfo->filename)) {
-      return true;
-    }
+  if (defaultFileInfo && setSelectedDataFile(defaultFileInfo->filename)) {
+    return true;
   }
-  // else look for any released
+  // else look for any released (may have been renamed)
   for (auto const& df : availableDataFiles_) {
-    if (df->isBearRelease) {
-      if (setSelectedDataFile(df->filename)) {
-        return true;
-      }
+    if (df->isBearRelease && setSelectedDataFile(df->filename)) {
+      return true;
     }
   }
   return false;
