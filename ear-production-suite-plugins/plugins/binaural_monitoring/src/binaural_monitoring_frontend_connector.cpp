@@ -200,7 +200,6 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);
   dataFileComboBox_ = comboBox;
-  // TODO: Set entries and select
   p_->dataFileManager->updateAvailableFiles();
   comboBox->clearEntries();
   for (const auto& df : p_->dataFileManager->getAvailableDataFiles()) {

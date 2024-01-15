@@ -55,7 +55,7 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatYButton(std::shared_ptr<ToggleButton> button);
   void setOscInvertQuatZButton(std::shared_ptr<ToggleButton> button);
 
-  // Renderer and Filter Set Selection Controls
+  // Renderer status and Data File selection controls
   void setDataFileComponent(std::shared_ptr<Component> comp);
   void setDataFileComboBox(std::shared_ptr<EarComboBox> comboBox);
   void setRendererStatusLabel(std::shared_ptr<Label> label);
@@ -80,7 +80,7 @@ class BinauralMonitoringJuceFrontendConnector
   void setOscInvertQuatY(bool invert);
   void setOscInvertQuatZ(bool invert);
 
-  // Renderer Status and Filter Set
+  // Renderer status and Data File setters
   void setRendererStatus(const ear::plugin::BearStatus& bearStatus);
   void setDataFile(const juce::String& dataFile);
 
@@ -127,7 +127,7 @@ class BinauralMonitoringJuceFrontendConnector
   std::weak_ptr<ToggleButton> oscInvertQuatYButton_;
   std::weak_ptr<ToggleButton> oscInvertQuatZButton_;
 
-  // Renderer Status and Filter Set Selection Controls
+  // Renderer status and Data File UI components
   std::weak_ptr<Component> dataFileComponent_;
   std::weak_ptr<EarComboBox> dataFileComboBox_;
   std::weak_ptr<Label> rendererStatusLabel_;
