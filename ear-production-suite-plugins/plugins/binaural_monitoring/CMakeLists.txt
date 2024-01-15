@@ -52,7 +52,6 @@ set(HEADERS_BINAURAL_MONITORING
 	src/binaural_monitoring_plugin_editor.hpp
 	src/binaural_monitoring_plugin_processor.hpp
 	src/bear_data_files.hpp
-	src/error_overlay.hpp
 	src/headphone_channel_meter.hpp
 	src/headphone_channel_meter_box.hpp
 	src/orientation_osc.hpp
