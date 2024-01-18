@@ -4,6 +4,7 @@
 #include "components/ear_inverted_slider.hpp"
 #include "detail/weak_ptr_helpers.hpp"
 
+#include <cassert>
 
 namespace {
 void removePath(std::string& filePath) {
@@ -337,7 +338,7 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
     const ear::plugin::BearStatus& bearStatus) {
   if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
     if (bearStatus.startupSuccess == BearStatusStates::SUCCEEDED) {
-      // Might be running, but see if accepting listener position data
+      // Is running. See if accepting listener position data
       if (bearStatus.listenerDataSetSuccess == BearStatusStates::FAILED) {
         rendererStatusLabelLocked->setColour(
             juce::Label::textColourId,
@@ -347,9 +348,9 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
         rendererStatusLabelLocked->setText(
             msg, juce::NotificationType::dontSendNotification);
       } else {
-        // SUCCEEDED and NOT_ATTEMPTED states for listener data - BEAR is running
+        // Other states (good or insignificant) for listener data - BEAR is running
         rendererStatusLabelLocked->setColour(
-            juce::Label::textColourId, ear::plugin::ui::EarColours::StatusGood);
+            juce::Label::textColourId, ear::plugin::ui::EarColours::Label);
         rendererStatusLabelLocked->setText(
             "BEAR running...", juce::NotificationType::dontSendNotification);
       }
@@ -363,15 +364,17 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
       msg += juce::String(dataFile) + ").";
       rendererStatusLabelLocked->setText(
           msg, juce::NotificationType::dontSendNotification);
-    } else {
+    } else if (bearStatus.startupSuccess == BearStatusStates::NOT_ATTEMPTED) {
       // Unusual case - we should always expect a start attempt (class init)
+      assert(false);
       rendererStatusLabelLocked->setColour(
           juce::Label::textColourId, ear::plugin::ui::EarColours::StatusWarning);
-      if (bearStatus.startupSuccess == BearStatusStates::NOT_ATTEMPTED) {
-        rendererStatusLabelLocked->setText(
-            "BEAR not started.",
-            juce::NotificationType::dontSendNotification);
-      }
+      rendererStatusLabelLocked->setText(
+          "BEAR not started.",
+          juce::NotificationType::dontSendNotification);
+    } else {
+      // Unimplemented case
+      assert(false);
     }
   }
   cachedBearStatus_ = bearStatus;
