@@ -174,11 +174,6 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
 
 EarBinauralMonitoringAudioProcessor::~EarBinauralMonitoringAudioProcessor() {}
 
-bool EarBinauralMonitoringAudioProcessor::rendererStarted() {
-  std::lock_guard<std::mutex> lock(processorMutex_);
-  return (!processor_ || processor_->rendererStarted());
-}
-
 void EarBinauralMonitoringAudioProcessor::parameterValueChanged(
   int parameterIndex, float newValue) {
   if(parameterIndex >= 4 && parameterIndex <= 12) {
