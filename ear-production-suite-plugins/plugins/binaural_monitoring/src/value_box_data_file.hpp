@@ -17,13 +17,13 @@ class ValueBoxDataFile : public Component {
   ValueBoxDataFile(){
     label_.setFont(EarFontsSingleton::instance().Label);
     label_.setColour(Label::textColourId, EarColours::Label);
-    label_.setText("BEAR Data File:",
+    label_.setText("HRTF Set:",
                    juce::NotificationType::dontSendNotification);
     label_.setJustificationType(Justification::left);
     addAndMakeVisible(label_);
 
     comboBox_ = std::make_shared<EarComboBox>();
-    comboBox_->setDefaultText("Select data file");
+    comboBox_->setDefaultText("Select file...");
     comboBox_->setCanClearSelection(false);
     addAndMakeVisible(comboBox_.get());
   }
@@ -42,7 +42,7 @@ class ValueBoxDataFile : public Component {
   std::shared_ptr<EarComboBox> getDataFileComboBox() { return comboBox_; }
 
  private:
-  const float labelWidth_ = 115.f;
+  const float labelWidth_ = 85.f;
   const float rowHeight_ = 30.f;
   const float margin_ = 10.f;
 

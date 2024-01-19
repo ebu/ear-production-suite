@@ -347,7 +347,7 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
         rendererStatusLabelLocked->setColour(
             juce::Label::textColourId,
             ear::plugin::ui::EarColours::StatusWarning);
-        juce::String msg("BEAR did not accept listener orientation data: ");
+        juce::String msg("Renderer did not accept listener orientation data: ");
         msg += juce::String(bearStatus.listenerDataSetErrorDesc);
         rendererStatusLabelLocked->setText(
             msg, juce::NotificationType::dontSendNotification);
@@ -356,12 +356,12 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
         rendererStatusLabelLocked->setColour(
             juce::Label::textColourId, ear::plugin::ui::EarColours::Label);
         rendererStatusLabelLocked->setText(
-            "BEAR running...", juce::NotificationType::dontSendNotification);
+            "Running...", juce::NotificationType::dontSendNotification);
       }
     } else if (bearStatus.startupSuccess == BearStatusStates::FAILED) {
       rendererStatusLabelLocked->setColour(
           juce::Label::textColourId, ear::plugin::ui::EarColours::StatusBad);
-      juce::String msg("BEAR startup failed: ");
+      juce::String msg("Renderer startup failed: ");
       msg += juce::String(bearStatus.startupErrorDesc) + " (";
       auto dataFile = bearStatus.startupConfig.get_data_path();
       removePath(dataFile);
@@ -374,7 +374,7 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
       rendererStatusLabelLocked->setColour(
           juce::Label::textColourId, ear::plugin::ui::EarColours::StatusWarning);
       rendererStatusLabelLocked->setText(
-          "BEAR not started.",
+          "Renderer not started.",
           juce::NotificationType::dontSendNotification);
     } else {
       // Unimplemented case
@@ -398,7 +398,7 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
 }
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusRestarting() {
-  setRendererStatus(juce::String("BEAR starting..."));
+  setRendererStatus(juce::String("Renderer starting..."));
 }
 
 void BinauralMonitoringJuceFrontendConnector::setDataFile(
