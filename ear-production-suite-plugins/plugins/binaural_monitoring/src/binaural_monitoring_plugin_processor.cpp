@@ -236,6 +236,9 @@ void EarBinauralMonitoringAudioProcessor::restartBearProcessor(
     if (bearDataFile) {
       dataFilePath = bearDataFile->fullPath.getFullPathName().toStdString();
     }
+    if (connector_) {
+      connector_->setRendererStatusRestarting();
+    }
     processor_ =
         std::make_unique<ear::plugin::BinauralMonitoringAudioProcessor>(
             MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, MAX_DAW_CHANNELS, samplerate_,
