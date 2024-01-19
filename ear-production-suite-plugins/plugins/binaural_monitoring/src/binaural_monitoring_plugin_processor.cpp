@@ -391,7 +391,7 @@ void EarBinauralMonitoringAudioProcessor::processBlock(
     std::lock_guard<std::mutex> lock(processorMutex_);
 
     // Check BEAR has started - if not, we still want to zero output to make problem obvious
-    if (!processor_ || processor_->rendererStarted()) {
+    if (!processor_ || !processor_->rendererStarted()) {
       buffer.clear();
       return;
     }
