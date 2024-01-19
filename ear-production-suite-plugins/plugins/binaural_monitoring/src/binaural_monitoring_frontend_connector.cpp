@@ -223,7 +223,11 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
     std::shared_ptr<Label> label) {
   rendererStatusLabel_ = label;
-  setRendererStatus(cachedBearStatus_);
+  if(cachedBearStatusOverride_.has_value()){
+    setRendererStatus(cachedBearStatusOverride_.value());
+  } else {
+    setRendererStatus(cachedBearStatus_);
+  }
 }
 
 void BinauralMonitoringJuceFrontendConnector::setListenerOrientationInstance(
@@ -378,6 +382,23 @@ void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
     }
   }
   cachedBearStatus_ = bearStatus;
+  cachedBearStatusOverride_.reset();
+}
+
+void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
+    const juce::String& statusText) {
+  if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
+    rendererStatusLabelLocked->setColour(juce::Label::textColourId,
+                                         ear::plugin::ui::EarColours::Label);
+    rendererStatusLabelLocked->setText(
+        statusText, juce::NotificationType::dontSendNotification);
+  }
+
+  cachedBearStatusOverride_ = statusText;
+}
+
+void BinauralMonitoringJuceFrontendConnector::setRendererStatusRestarting() {
+  setRendererStatus(juce::String("BEAR starting..."));
 }
 
 void BinauralMonitoringJuceFrontendConnector::setDataFile(
