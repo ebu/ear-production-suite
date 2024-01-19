@@ -215,12 +215,16 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
         return a->filename.compareIgnoreCase(b->filename) < 0;
       });
   for (const auto& df : dfs) {
-    juce::String txt(df->filename);
-    if (df->label.isNotEmpty()) {
-      txt += "      (" + df->label + ")";
+    juce::String txt;
+    if (!df->isBearRelease) {
+      txt = "[CUSTOM]   ";
     }
-    if (df->isBearRelease) {
-      txt += "      [RELEASED]";
+    if (df->label.isEmpty()) {
+      // use filename - will be an unusual case in future
+      txt += df->filename;
+    } else {
+      txt += df->label;
+      txt += "   (" + df->filename + ")";
     }
     auto entry = comboBox->addTextEntry(txt, df->filename);
     entry->setLightFont(!df->isBearRelease);
