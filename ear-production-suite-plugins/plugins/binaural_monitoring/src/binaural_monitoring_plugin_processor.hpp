@@ -84,7 +84,6 @@ class EarBinauralMonitoringAudioProcessor
     return connector_.get();
   }
 
-  bool rendererStarted();
   std::unique_ptr<ear::plugin::DataFileManager> dataFileManager;
 
  protected:
