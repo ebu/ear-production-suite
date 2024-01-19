@@ -4,6 +4,7 @@
 #include "components/ear_inverted_slider.hpp"
 #include "detail/weak_ptr_helpers.hpp"
 
+#include <algorithm>
 #include <cassert>
 
 namespace {
@@ -203,7 +204,17 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
   dataFileComboBox_ = comboBox;
   p_->dataFileManager->updateAvailableFiles();
   comboBox->clearEntries();
-  for (const auto& df : p_->dataFileManager->getAvailableDataFiles()) {
+  auto dfs = p_->dataFileManager->getAvailableDataFiles();
+  std::sort(
+      dfs.begin(), dfs.end(),
+      [](const std::shared_ptr<ear::plugin::DataFileManager::DataFile>& a,
+         const std::shared_ptr<ear::plugin::DataFileManager::DataFile>& b) {
+        if (a->isBearRelease != b->isBearRelease) {
+          return a->isBearRelease;
+        }
+        return a->filename.compareIgnoreCase(b->filename) < 0;
+      });
+  for (const auto& df : dfs) {
     juce::String txt(df->filename);
     if (df->label.isNotEmpty()) {
       txt += "      (" + df->label + ")";
