@@ -50,6 +50,14 @@ void EarComboBoxEntry::paint(Graphics& g) {
 	}
 }
 
+void EarComboBoxEntry::resizeForWidth(int width)
+{
+	// Default behaviour is default height unaffected by drawable width
+	// ... Do Nothing
+	// Inheritors can override this if (for example) multiline text is used
+	// and required height in a popup entry is affected by available width
+}
+
 EarComboBoxTextEntry::EarComboBoxTextEntry(const String& text, const juce::var& id)
 	: EarComboBoxEntry(id), text_(text) {
 	setColour(textColourId, EarColours::ComboBoxText);
@@ -91,6 +99,31 @@ void EarComboBoxTextEntry::drawEntryInButton(Graphics& g,
 	g.setFont(EarFontsSingleton::instance().Items);
 	g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(28),
 		Justification::left);
+}
+
+EarComboBoxTextWithSubtextEntry::EarComboBoxTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id)
+	: EarComboBoxTextEntry(text, id), subtext_(subtext) {
+}
+
+void EarComboBoxTextWithSubtextEntry::setSubtext(const String& text) { subtext_ = text; }
+String EarComboBoxTextWithSubtextEntry::getSubtext() const { return subtext_; }
+
+void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
+{
+	auto h = heightListEntryText;
+	// TODO- add to h the height of the area required to draw the subtext
+	this->setSize(width, h);
+}
+
+void EarComboBoxTextWithSubtextEntry::drawEntryInList(Graphics& g, juce::Rectangle<int> area)
+{
+	auto textArea = area.removeFromTop(heightListEntryText);
+	EarComboBoxTextEntry::drawEntryInList(g, textArea);
+	// TODO - here we use the rest of `area` to draw the subtext.
+	g.setColour(findColour(textColourId).withBrightness(0.5));
+	g.setFont(EarFontsSingleton::instance().ItemsSubtext);
+	g.drawText(subtext_, area.withTrimmedLeft(28).withTrimmedRight(14),
+			Justification::left);
 }
 
 EarComboBoxSectionEntry::EarComboBoxSectionEntry(const String& text, const juce::var& id)
@@ -521,6 +554,14 @@ EarComboBoxEntry* EarComboBox::addEntry(std::unique_ptr<EarComboBoxEntry> entry)
 
 EarComboBoxTextEntry* EarComboBox::addTextEntry(const String& text, const juce::var& id) {
 	auto uptr = std::make_unique<EarComboBoxTextEntry>(text, id);
+	auto rawptr = uptr.get();
+	addEntry(std::move(uptr));
+	return rawptr;
+}
+
+EarComboBoxTextEntry* EarComboBox::addTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id)
+{
+	auto uptr = std::make_unique<EarComboBoxTextWithSubtextEntry>(text, subtext, id);
 	auto rawptr = uptr.get();
 	addEntry(std::move(uptr));
 	return rawptr;
