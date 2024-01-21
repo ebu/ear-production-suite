@@ -120,6 +120,10 @@ StringArray EarComboBoxTextWithSubtextEntry::getSubtext() const { return origina
 
 void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
 {
+	// Subtract expected line padding to get true available width
+	width -= padLeftListEntrySubtext_;
+	width -= padRightListEntrySubtext_;
+	// Calc req height
 	auto h = heightListEntryText_;
 	if (width != structuredSubtextWidth_) {
 		// generate structuredSubtext_ from originalSubtext_ to fit `width`
