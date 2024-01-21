@@ -169,7 +169,7 @@ void EarComboBoxTextWithSubtextEntry::drawEntryInList(Graphics& g, juce::Rectang
 {
 	auto textArea = area.removeFromTop(heightListEntryText_);
 	EarComboBoxTextEntry::drawEntryInList(g, textArea);
-	g.setColour(findColour(textColourId).withBrightness(0.5));
+	g.setColour(findColour(textColourId).withBrightness(0.75));
 	g.setFont(EarFontsSingleton::instance().ItemsSubtext);
 	for (auto const& line : structuredSubtext_) {
 		auto lineArea = area.removeFromTop(heightListEntrySubtextLine_);
