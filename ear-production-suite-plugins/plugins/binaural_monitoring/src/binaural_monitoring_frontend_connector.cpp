@@ -226,16 +226,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
       txt += df->label;
       txt += "   (" + df->filename + ")";
     }
-    juce::String t{
-        "0jhvkfhyfv,jhgkyhgvjhv 1lkjhgbj\nhbljhb 2lkjhkjhblkjnikhbjlhb "
-        "3lkblkjblkjhb 4hjvjlkhvljhbvhgcv,jhbkjhvkjhvjkhv "
-        "5kjhfkjhvjhbjhvkjhvkjhvhjvkjhvjhvkjhvkjhvjhvjnjhbkjhbkjhbky "
-        "6jhbvkjhvkhgvjhgkvkhbvjhbvkjhgvkjblhvjhblkubyhbybiubikjnliuniubuyghlkj"
-        "bl"
-        "uihiubuyhbjkjnliubiuybuyvlbkjnbknbjhviuyhiunlkjjbvujhvliuhliuhlijhblkj"
-        "nb"
-        "jbvkhblkjb 7hyvjhvjhv 8hbvjhvjhv 9dsaf "};
-    auto entry = comboBox->addTextWithSubtextEntry(txt, t, df->fullPath.getFullPathName());
+    auto entry = comboBox->addTextWithSubtextEntry(txt, df->fullPath.getFullPathName(), df->fullPath.getFullPathName());
     entry->setLightFont(!df->isBearRelease);
   }
   if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {
