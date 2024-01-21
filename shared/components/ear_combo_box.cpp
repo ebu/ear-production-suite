@@ -101,29 +101,81 @@ void EarComboBoxTextEntry::drawEntryInButton(Graphics& g,
 		Justification::left);
 }
 
-EarComboBoxTextWithSubtextEntry::EarComboBoxTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id)
-	: EarComboBoxTextEntry(text, id), subtext_(subtext) {
+EarComboBoxTextWithSubtextEntry::EarComboBoxTextWithSubtextEntry(const String& text, const StringArray& subtext, const juce::var& id)
+	: EarComboBoxTextEntry(text, id), originalSubtext_(subtext), structuredSubtext_(subtext){
+	resizeForWidth(getWidth());
 }
 
-void EarComboBoxTextWithSubtextEntry::setSubtext(const String& text) { subtext_ = text; }
-String EarComboBoxTextWithSubtextEntry::getSubtext() const { return subtext_; }
+EarComboBoxTextWithSubtextEntry::EarComboBoxTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id)
+	: EarComboBoxTextWithSubtextEntry(text, StringArray{ subtext }, id) {
+}
+
+void EarComboBoxTextWithSubtextEntry::setSubtext(const StringArray& text) {
+	originalSubtext_ = text; 
+	structuredSubtext_ = text;
+	structuredSubtextWidth_ = 0;
+	resizeForWidth(getWidth());
+}
+StringArray EarComboBoxTextWithSubtextEntry::getSubtext() const { return originalSubtext_; }
 
 void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
 {
-	auto h = heightListEntryText;
-	// TODO- add to h the height of the area required to draw the subtext
+	auto h = heightListEntryText_;
+	if (width != structuredSubtextWidth_) {
+		// generate structuredSubtext_ from originalSubtext_ to fit `width`
+		structuredSubtext_.clear();
+		StringArray temp;
+		/// Split array elms by existing new lines
+		for (auto const& str : originalSubtext_) {
+			for (auto const& line : StringArray::fromLines(str)) {
+				temp.add(line);
+			}
+		}
+		/// For each line (elm in temp) iteratively find spaces and measure text size up to there.
+		/// as soon as it exceeds "width", push the line before the word was added and begin again.
+		auto font = EarFontsSingleton::instance().ItemsSubtext;
+		for (auto line : temp) {
+			int sp = 0;
+			while (sp < line.length()) {
+				int nextSp = line.indexOfChar(sp + 1, ' ');
+				if (nextSp < 0) {
+					structuredSubtext_.add(line);
+					break;
+				}
+				auto w = font.getStringWidth(line.substring(0, nextSp));
+				// if wider than allowable width, crop at the last found space.
+				// if there was no last found space, this is a word longer than
+				// allowable. Pass through - it will be caught and stored next 
+				// wholly in the next iter
+				if (sp > 0 && w > width) {
+					structuredSubtext_.add(line.substring(0, sp));
+					line = line.substring(sp + 1);
+					sp = 0;
+				}
+				else {
+					sp = nextSp;
+				}
+			}
+		}
+		structuredSubtextWidth_ = width;
+	}
+	// add height of all lines
+	h += structuredSubtext_.size() * heightListEntrySubtextLine_;
+	h += heightFinalPad_;
 	this->setSize(width, h);
 }
 
 void EarComboBoxTextWithSubtextEntry::drawEntryInList(Graphics& g, juce::Rectangle<int> area)
 {
-	auto textArea = area.removeFromTop(heightListEntryText);
+	auto textArea = area.removeFromTop(heightListEntryText_);
 	EarComboBoxTextEntry::drawEntryInList(g, textArea);
-	// TODO - here we use the rest of `area` to draw the subtext.
 	g.setColour(findColour(textColourId).withBrightness(0.5));
 	g.setFont(EarFontsSingleton::instance().ItemsSubtext);
-	g.drawText(subtext_, area.withTrimmedLeft(28).withTrimmedRight(14),
+	for (auto const& line : structuredSubtext_) {
+		auto lineArea = area.removeFromTop(heightListEntrySubtextLine_);
+		g.drawText(line, lineArea.withTrimmedLeft(28).withTrimmedRight(14),
 			Justification::left);
+	}
 }
 
 EarComboBoxSectionEntry::EarComboBoxSectionEntry(const String& text, const juce::var& id)
@@ -255,6 +307,9 @@ void EarComboBoxPopup::show() {
 	}
 	parent_->addChildComponent(this);
 
+	for (std::unique_ptr<EarComboBoxEntry>& entry : entries_) {
+		entry->resizeForWidth(comboBox_->getWidth());
+	}
 	listView_->setSize(comboBox_->getWidth(), getHeightOfAllEntries());
 	auto listViewBounds = listView_->getLocalBounds();
 	listViewBounds.removeFromTop(padding_);

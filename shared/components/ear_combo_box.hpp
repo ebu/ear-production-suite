@@ -74,17 +74,22 @@ private:
 
 class EarComboBoxTextWithSubtextEntry : public EarComboBoxTextEntry {
 public:
+	EarComboBoxTextWithSubtextEntry(const String& text = "", const StringArray& subtext = {}, const juce::var& id = juce::var());
 	EarComboBoxTextWithSubtextEntry(const String& text = "", const String& subtext = "", const juce::var& id = juce::var());
 
-	void setSubtext(const String& text);
-	String getSubtext() const;
+	void setSubtext(const StringArray& text);
+	StringArray getSubtext() const;
 
 	virtual void resizeForWidth(int width) override;
 	virtual void drawEntryInList(Graphics& g, juce::Rectangle<int> area) override;
 
 private:
-	String subtext_;
-	const int heightListEntryText{ 30 };
+	StringArray originalSubtext_;
+	StringArray structuredSubtext_;
+	int structuredSubtextWidth_{ 0 };
+	const int heightListEntryText_{ 30 };
+	const int heightListEntrySubtextLine_{ 16 };
+	const int heightFinalPad_{ 4 };
 };
 
 class EarComboBoxColourEntry : public EarComboBoxEntry {
