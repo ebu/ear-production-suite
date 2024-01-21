@@ -70,6 +70,7 @@ public:
 private:
 	String text_;
 	bool lightFont{ false };
+	const int padEntryText_{ 14 };
 };
 
 class EarComboBoxTextWithSubtextEntry : public EarComboBoxTextEntry {
@@ -90,6 +91,8 @@ private:
 	const int heightListEntryText_{ 30 };
 	const int heightListEntrySubtextLine_{ 16 };
 	const int heightFinalPad_{ 4 };
+	const int padLeftListEntrySubtext_{ 28 };
+	const int padRightListEntrySubtext_{ 14 };
 };
 
 class EarComboBoxColourEntry : public EarComboBoxEntry {

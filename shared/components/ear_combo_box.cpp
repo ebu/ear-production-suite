@@ -89,7 +89,7 @@ void EarComboBoxTextEntry::drawEntryInList(Graphics& g,
 	else {
 		g.setFont(EarFontsSingleton::instance().Items);
 	}
-	g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(14),
+	g.drawText(text_, area.withTrimmedLeft(padEntryText_).withTrimmedRight(padEntryText_),
 		Justification::left);
 }
 
@@ -97,7 +97,7 @@ void EarComboBoxTextEntry::drawEntryInButton(Graphics& g,
 	juce::Rectangle<int> area) {
 	g.setColour(findColour(textColourId));
 	g.setFont(EarFontsSingleton::instance().Items);
-	g.drawText(text_, area.withTrimmedLeft(14).withTrimmedRight(28),
+	g.drawText(text_, area.withTrimmedLeft(padEntryText_).withTrimmedRight(padEntryText_ * 2),
 		Justification::left);
 }
 
@@ -173,7 +173,7 @@ void EarComboBoxTextWithSubtextEntry::drawEntryInList(Graphics& g, juce::Rectang
 	g.setFont(EarFontsSingleton::instance().ItemsSubtext);
 	for (auto const& line : structuredSubtext_) {
 		auto lineArea = area.removeFromTop(heightListEntrySubtextLine_);
-		g.drawText(line, lineArea.withTrimmedLeft(28).withTrimmedRight(14),
+		g.drawText(line, lineArea.withTrimmedLeft(padLeftListEntrySubtext_).withTrimmedRight(padRightListEntrySubtext_),
 			Justification::left);
 	}
 }
