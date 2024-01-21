@@ -30,6 +30,7 @@ public:
 
 	void paint(Graphics& g) override;
 
+	virtual void resizeForWidth(int width);
 	virtual void drawEntryInList(Graphics& g, juce::Rectangle<int> area) = 0;
 	virtual void drawEntryInButton(Graphics& g, juce::Rectangle<int> area) = 0;
 
@@ -69,6 +70,21 @@ public:
 private:
 	String text_;
 	bool lightFont{ false };
+};
+
+class EarComboBoxTextWithSubtextEntry : public EarComboBoxTextEntry {
+public:
+	EarComboBoxTextWithSubtextEntry(const String& text = "", const String& subtext = "", const juce::var& id = juce::var());
+
+	void setSubtext(const String& text);
+	String getSubtext() const;
+
+	virtual void resizeForWidth(int width) override;
+	virtual void drawEntryInList(Graphics& g, juce::Rectangle<int> area) override;
+
+private:
+	String subtext_;
+	const int heightListEntryText{ 30 };
 };
 
 class EarComboBoxColourEntry : public EarComboBoxEntry {
@@ -330,6 +346,7 @@ public:
 
 	EarComboBoxEntry* addEntry(std::unique_ptr<EarComboBoxEntry> entry);
 	EarComboBoxTextEntry* addTextEntry(const String& text, const juce::var& id = juce::var());
+	EarComboBoxTextEntry* addTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id = juce::var());
 	EarComboBoxColourEntry* addColourEntry(const Colour& colour, const juce::var& id = juce::var());
 	EarComboBoxSectionEntry* addSectionEntry(const String& text, const juce::var& id = juce::var());
 
