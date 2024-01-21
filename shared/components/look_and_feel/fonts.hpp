@@ -15,6 +15,7 @@ struct EarFonts {
         Label(font::RobotoSingleton::instance().getRegular(14.f)),
         Items(font::RobotoSingleton::instance().getMedium(14.f)),
         ItemsLight(font::RobotoSingleton::instance().getLight(14.f)),
+        ItemsSubtext(font::RobotoSingleton::instance().getLight(10.f)),
         Values(font::RobotoSingleton::instance().getMedium(12.f)),
         Description(font::RobotoSingleton::instance().getLight(12.f)),
         Units(font::RobotoSingleton::instance().getMedium(10.f)),
@@ -27,6 +28,7 @@ struct EarFonts {
   const Font Label;
   const Font Items;
   const Font ItemsLight;
+  const Font ItemsSubtext;
   const Font Values;
   const Font Description;
   const Font Units;
