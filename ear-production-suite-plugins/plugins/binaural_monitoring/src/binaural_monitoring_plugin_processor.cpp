@@ -35,17 +35,6 @@ struct BufferTraits<juce::AudioBuffer<float>> {
   }
 };
 
-juce::File getBearDataFileDirectory(){
-  auto vstPath = juce::File::getSpecialLocation(
-      juce::File::SpecialLocationType::currentExecutableFile);
-  vstPath = vstPath.getParentDirectory();
-#ifdef __APPLE__
-  vstPath = vstPath.getParentDirectory();
-  vstPath = vstPath.getChildFile("Resources");
-#endif
-  return vstPath;
-};
-
 }  // namespace plugin
 }  // namespace ear
 
@@ -57,9 +46,8 @@ using namespace ear::plugin;
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
-  dataFileManager = std::make_unique<ear::plugin::DataFileManager>(
-      getBearDataFileDirectory());
-  dataFileManager->onSelectedDataFileChange(
+
+  dataFileManager.onSelectedDataFileChange(
       [this](std::shared_ptr<ear::plugin::DataFileManager::DataFile> df) {
         writeConfigFile();
         restartBearProcessor();
@@ -226,7 +214,7 @@ void EarBinauralMonitoringAudioProcessor::restartBearProcessor(
   std::lock_guard<std::mutex> lock(processorMutex_);
   if (!onlyOnConfigChange || !processor_ ||
       !processor_->configMatches(samplerate_, blocksize_)) {
-    auto bearDataFile = dataFileManager->getSelectedDataFileInfo();
+    auto bearDataFile = dataFileManager.getSelectedDataFileInfo();
     std::string dataFilePath;
     if (bearDataFile) {
       dataFilePath = bearDataFile->fullPath.getFullPathName().toStdString();
@@ -260,8 +248,8 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
     *oscInvertQuatZ_ = props.getBoolValue("oscInvertQuatZ", false);
     auto selectedDataFile = props.getValue("bearPreferredDataFile");
     if (selectedDataFile.isEmpty() ||
-        !dataFileManager->setSelectedDataFile(selectedDataFile)) {
-      dataFileManager->setSelectedDataFileDefault();
+        !dataFileManager.setSelectedDataFile(selectedDataFile)) {
+      dataFileManager.setSelectedDataFileDefault();
     }
     configRestoreState = ConfigRestoreState::RESTORED;
     return true;
@@ -284,7 +272,7 @@ bool EarBinauralMonitoringAudioProcessor::writeConfigFile()
   props.setValue("oscInvertQuatX", (bool)*oscInvertQuatX_);
   props.setValue("oscInvertQuatY", (bool)*oscInvertQuatY_);
   props.setValue("oscInvertQuatZ", (bool)*oscInvertQuatZ_);
-  if (auto selectedDataFile = dataFileManager->getSelectedDataFileInfo()) {
+  if (auto selectedDataFile = dataFileManager.getSelectedDataFileInfo()) {
     props.setValue("bearPreferredDataFile", selectedDataFile->filename);
   }
   return props.save();
