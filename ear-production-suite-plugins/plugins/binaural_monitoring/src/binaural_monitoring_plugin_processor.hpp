@@ -84,7 +84,7 @@ class EarBinauralMonitoringAudioProcessor
     return connector_.get();
   }
 
-  std::unique_ptr<ear::plugin::DataFileManager> dataFileManager;
+  ear::plugin::DataFileManager dataFileManager;
 
  protected:
   void parameterValueChanged(int parameterIndex, float newValue) override;
