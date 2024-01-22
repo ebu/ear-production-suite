@@ -149,7 +149,7 @@ void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
 				auto w = font.getStringWidth(line.substring(0, nextSp));
 				// if wider than allowable width, crop at the last found space.
 				// if there was no last found space, this is a word longer than
-				// allowable. Pass through - it will be caught and stored next 
+				// allowable. Pass through - it will be caught and stored 
 				// wholly in the next iter
 				if (sp > 0 && w > width) {
 					structuredSubtext_.add(line.substring(0, sp));
