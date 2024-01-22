@@ -226,7 +226,12 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
       txt += df->label;
       txt += "   (" + df->filename + ")";
     }
-    auto entry = comboBox->addTextWithSubtextEntry(txt, df->fullPath.getFullPathName(), df->fullPath.getFullPathName());
+    juce::StringArray subtexts;
+    if (!df->description.isEmpty()) {
+      subtexts.add(df->description);
+    }
+    subtexts.add(juce::String(df->fullPath.getFullPathName()));
+    auto entry = comboBox->addTextWithSubtextEntry(txt, subtexts, df->fullPath.getFullPathName());
     entry->setLightFont(!df->isBearRelease);
   }
   if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {

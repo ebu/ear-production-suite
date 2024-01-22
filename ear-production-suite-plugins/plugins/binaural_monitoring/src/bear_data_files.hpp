@@ -15,6 +15,7 @@ class DataFileManager {
     juce::String filename;
     juce::File fullPath;
     juce::String label;
+    juce::String description;
     bool isBearRelease{false};
   };
 
