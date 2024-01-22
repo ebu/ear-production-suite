@@ -620,6 +620,11 @@ EarComboBoxTextEntry* EarComboBox::addTextEntry(const String& text, const juce::
 
 EarComboBoxTextEntry* EarComboBox::addTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id)
 {
+	return addTextWithSubtextEntry(text, juce::StringArray{ subtext }, id);
+}
+
+EarComboBoxTextEntry* EarComboBox::addTextWithSubtextEntry(const String& text, const StringArray& subtext, const juce::var& id)
+{
 	auto uptr = std::make_unique<EarComboBoxTextWithSubtextEntry>(text, subtext, id);
 	auto rawptr = uptr.get();
 	addEntry(std::move(uptr));
