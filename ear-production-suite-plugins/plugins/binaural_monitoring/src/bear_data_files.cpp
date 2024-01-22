@@ -111,10 +111,6 @@ std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(cons
   return it == availableDataFiles_.end() ? nullptr : *it;
 }
 
-bool DataFileManager::dataFileAvailable(const juce::String& filename) {
-  return getDataFileInfo(filename) != nullptr;
-}
-
 void DataFileManager::onSelectedDataFileChange(
     std::function<void(std::shared_ptr<DataFile>)> callback) {
   selectedDataFileChangeCallback_ = callback;
