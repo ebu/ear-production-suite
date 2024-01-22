@@ -273,7 +273,7 @@ bool EarBinauralMonitoringAudioProcessor::writeConfigFile()
   props.setValue("oscInvertQuatY", (bool)*oscInvertQuatY_);
   props.setValue("oscInvertQuatZ", (bool)*oscInvertQuatZ_);
   if (auto selectedDataFile = dataFileManager.getSelectedDataFileInfo()) {
-    props.setValue("bearPreferredDataFile", selectedDataFile->filename);
+    props.setValue("bearPreferredDataFile", selectedDataFile->fullPath.getFullPathName());
   }
   return props.save();
 }
