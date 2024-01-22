@@ -226,7 +226,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
       txt += df->label;
       txt += "   (" + df->filename + ")";
     }
-    auto entry = comboBox->addTextEntry(txt, df->filename);
+    auto entry = comboBox->addTextEntry(txt, df->fullPath.getFullPathName());
     entry->setLightFont(!df->isBearRelease);
   }
   if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {
