@@ -230,7 +230,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
     entry->setLightFont(!df->isBearRelease);
   }
   if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {
-    comboBox->setSelectedId(df->filename,
+    comboBox->setSelectedId(df->fullPath.getFullPathName(),
                             juce::NotificationType::dontSendNotification);
   }
 }
