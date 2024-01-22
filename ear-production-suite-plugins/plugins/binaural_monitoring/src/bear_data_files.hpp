@@ -25,7 +25,6 @@ class DataFileManager {
   bool setSelectedDataFile(const juce::String& filename);
   bool setSelectedDataFileDefault();
   std::shared_ptr<DataFile> getDataFileInfo(const juce::String& filename);
-  bool dataFileAvailable(const juce::String& filename);
   void onSelectedDataFileChange(
       std::function<void(std::shared_ptr<DataFile>)> callback);
 
