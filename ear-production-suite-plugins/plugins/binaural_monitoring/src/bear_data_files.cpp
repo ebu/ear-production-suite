@@ -7,13 +7,24 @@ bool operator==(const ear::plugin::DataFileManager::DataFile& lhs,
   return (lhs.filename == rhs.filename) && (lhs.fullPath == rhs.fullPath) &&
          (lhs.isBearRelease == rhs.isBearRelease) && (lhs.label == rhs.label);
 }
+
+juce::File getBearDataFileDirectory() {
+  auto vstPath = juce::File::getSpecialLocation(
+      juce::File::SpecialLocationType::currentExecutableFile);
+  vstPath = vstPath.getParentDirectory();
+#ifdef __APPLE__
+  vstPath = vstPath.getParentDirectory();
+  vstPath = vstPath.getChildFile("Resources");
+#endif
+  return vstPath;
+};
+
 }
 
 namespace ear {
 namespace plugin {
 
-DataFileManager::DataFileManager(const juce::File& path) {
-  path_ = path;
+DataFileManager::DataFileManager() {
   updateAvailableFiles();
 }
 
@@ -21,7 +32,8 @@ void DataFileManager::updateAvailableFiles() {
   // Start a new vec and copy existing shared_ptrs of unchanged files 
   // This retains shared_ptrs unlike clear() and rebuild
   std::vector<std::shared_ptr<DataFileManager::DataFile>> dfs;
-  auto files = path_.findChildFiles(juce::File::TypesOfFileToFind::findFiles,
+  auto files = getBearDataFileDirectory().findChildFiles(
+      juce::File::TypesOfFileToFind::findFiles,
                                     false, "*.tf");
   for (const auto& file : files) {
     auto newDf = std::make_shared<DataFile>();
