@@ -187,9 +187,9 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZButton(
 void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
     std::shared_ptr<Component> comp) {
   dataFileComponent_ = comp;
-  p_->dataFileManager->updateAvailableFiles();
-  auto dfs = p_->dataFileManager->getAvailableDataFiles();
-  auto df = p_->dataFileManager->getSelectedDataFileInfo();
+  p_->dataFileManager.updateAvailableFiles();
+  auto dfs = p_->dataFileManager.getAvailableDataFiles();
+  auto df = p_->dataFileManager.getSelectedDataFileInfo();
   if (dfs.size() == 1 && df && dfs[0] == df && df->isBearRelease) {
     // Only 1 data file and it is a bear release. Don't show options.
     comp->setVisible(false);
@@ -202,9 +202,9 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
     std::shared_ptr<EarComboBox> comboBox) {
   comboBox->addListener(this);
   dataFileComboBox_ = comboBox;
-  p_->dataFileManager->updateAvailableFiles();
+  p_->dataFileManager.updateAvailableFiles();
   comboBox->clearEntries();
-  auto dfs = p_->dataFileManager->getAvailableDataFiles();
+  auto dfs = p_->dataFileManager.getAvailableDataFiles();
   std::sort(
       dfs.begin(), dfs.end(),
       [](const std::shared_ptr<ear::plugin::DataFileManager::DataFile>& a,
@@ -229,7 +229,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
     auto entry = comboBox->addTextEntry(txt, df->filename);
     entry->setLightFont(!df->isBearRelease);
   }
-  if (auto df = p_->dataFileManager->getSelectedDataFileInfo()) {
+  if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {
     comboBox->setSelectedId(df->filename,
                             juce::NotificationType::dontSendNotification);
   }
@@ -421,7 +421,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFile(
   if (auto cbLocked = dataFileComboBox_.lock()) {
     cbLocked->setSelectedId(dataFile, dontSendNotification);
   }
-  p_->dataFileManager->setSelectedDataFile(dataFile); // fires callback to restart bear
+  p_->dataFileManager.setSelectedDataFile(dataFile); // fires callback to restart bear
 }
 
 void BinauralMonitoringJuceFrontendConnector::orientationChange(
