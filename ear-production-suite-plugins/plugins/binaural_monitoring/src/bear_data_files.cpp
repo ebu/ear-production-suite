@@ -5,7 +5,8 @@ namespace {
 bool operator==(const ear::plugin::DataFileManager::DataFile& lhs,
                 const ear::plugin::DataFileManager::DataFile& rhs) {
   return (lhs.filename == rhs.filename) && (lhs.fullPath == rhs.fullPath) &&
-         (lhs.isBearRelease == rhs.isBearRelease) && (lhs.label == rhs.label);
+         (lhs.isBearRelease == rhs.isBearRelease) && (lhs.label == rhs.label) &&
+         (lhs.description == rhs.description);
 }
 
 juce::File getBearDataFileDirectory() {
@@ -68,6 +69,7 @@ void DataFileManager::updateAvailableFiles() {
           file.getFullPathName().toStdString());
       if (md.has_metadata()) {
         newDf->label = md.get_label();
+        newDf->description = md.get_description();
         newDf->isBearRelease = md.is_released();
       }
     } catch (std::exception) {
