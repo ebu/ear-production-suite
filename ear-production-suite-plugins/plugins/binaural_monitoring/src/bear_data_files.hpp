@@ -9,7 +9,7 @@ namespace plugin {
 
 class DataFileManager {
  public:
-  DataFileManager(const juce::File& path);
+  DataFileManager();
 
   struct DataFile {
     juce::String filename;
@@ -30,7 +30,6 @@ class DataFileManager {
       std::function<void(std::shared_ptr<DataFile>)> callback);
 
  private:
-  juce::File path_;
   std::shared_ptr<DataFile> selectedDataFile_;
   std::vector<std::shared_ptr<DataFile>> availableDataFiles_;
   std::function<void(std::shared_ptr<DataFile>)> selectedDataFileChangeCallback_;
