@@ -355,6 +355,7 @@ public:
 	EarComboBoxEntry* addEntry(std::unique_ptr<EarComboBoxEntry> entry);
 	EarComboBoxTextEntry* addTextEntry(const String& text, const juce::var& id = juce::var());
 	EarComboBoxTextEntry* addTextWithSubtextEntry(const String& text, const String& subtext, const juce::var& id = juce::var());
+	EarComboBoxTextEntry* addTextWithSubtextEntry(const String& text, const StringArray& subtext, const juce::var& id = juce::var());
 	EarComboBoxColourEntry* addColourEntry(const Colour& colour, const juce::var& id = juce::var());
 	EarComboBoxSectionEntry* addSectionEntry(const String& text, const juce::var& id = juce::var());
 
