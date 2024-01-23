@@ -40,9 +40,9 @@ namespace {
 				// take and store the section of line up to the last found space.
 				if (w > width) {
 					dstArr.add(line.substring(0, sp));
-					// Remove the stored section from the line being processed, inc space.
-					// Reset the space position to zero and rerun. 
-					line = line.substring(sp + 1);
+					// Remove the stored section from the line being processed, inc 
+					// spaces at wrapping point. Reset space position and rerun. 
+					line = line.substring(sp).trimStart();
 					sp = 0;
 				}
 				else {
