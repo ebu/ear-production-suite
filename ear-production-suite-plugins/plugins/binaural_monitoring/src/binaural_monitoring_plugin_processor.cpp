@@ -253,6 +253,8 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
     }
     configRestoreState = ConfigRestoreState::RESTORED;
     return true;
+  } else {
+      dataFileManager.setSelectedDataFileDefault();
   }
   configRestoreState = ConfigRestoreState::NOT_RESTORED;
   return false;
