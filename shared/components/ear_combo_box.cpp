@@ -131,9 +131,7 @@ void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
 		StringArray temp;
 		/// Split array elms by existing new lines
 		for (auto const& str : originalSubtext_) {
-			for (auto const& line : StringArray::fromLines(str)) {
-				temp.add(line);
-			}
+			temp.addLines(str);
 		}
 		/// For each line (elm in temp) iteratively find spaces and measure text size up to there.
 		/// as soon as it exceeds "width", push the line before the word was added and begin again.
