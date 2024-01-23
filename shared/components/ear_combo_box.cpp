@@ -7,6 +7,54 @@
 
 #include <vector>
 
+namespace {
+	void addWordwrappedLines(const juce::StringArray& srcArr, StringArray& dstArr, int width, const juce::Font& font) {
+		StringArray temp;
+		// Split array elms by existing new lines
+		for (auto const& str : srcArr) {
+			temp.addLines(str);
+		}
+		// For each line (elm in temp) iteratively find spaces and measure text size up to there.
+		// As soon as it exceeds "width", push the line before the word was added and begin again.
+		for (auto line : temp) {
+			int sp = 0;
+			while (sp < line.length()) {
+
+				int nextSp = line.indexOfChar(sp + 1, ' ');
+				if (nextSp < 0) {
+					// No more words - add what's left of the line.
+					dstArr.add(line);
+					break;
+				}
+
+				if (sp == 0) {
+					// Always allow the first word through, even if it is too long
+					// (JUCE will render it with trailing ellipsis anyway if it doesn't 
+					// fit given area, which is already a nice compromise)
+					sp = nextSp;
+					continue;
+				}
+
+				auto w = font.getStringWidth(line.substring(0, nextSp));
+				// If the line up to the next space would exceed the allowable width,
+				// take and store the section of line up to the last found space.
+				if (w > width) {
+					dstArr.add(line.substring(0, sp));
+					// Remove the stored section from the line being processed, inc space.
+					// Reset the space position to zero and rerun. 
+					line = line.substring(sp + 1);
+					sp = 0;
+				}
+				else {
+					// Didn't exceed width up to nextSp
+					// Start from there next iteration
+					sp = nextSp;
+				}
+			}
+		}
+	}
+}
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -123,45 +171,17 @@ void EarComboBoxTextWithSubtextEntry::resizeForWidth(int width)
 	// Subtract expected line padding to get true available width
 	width -= padLeftListEntrySubtext_;
 	width -= padRightListEntrySubtext_;
+
 	// Calc req height
 	auto h = heightListEntryText_;
 	if (width != structuredSubtextWidth_) {
-		// generate structuredSubtext_ from originalSubtext_ to fit `width`
+		// structuredSubtext_ is for wrong width... 
+		// Regenerate from originalSubtext_ to fit `width`
 		structuredSubtext_.clear();
-		StringArray temp;
-		/// Split array elms by existing new lines
-		for (auto const& str : originalSubtext_) {
-			temp.addLines(str);
-		}
-		/// For each line (elm in temp) iteratively find spaces and measure text size up to there.
-		/// as soon as it exceeds "width", push the line before the word was added and begin again.
-		auto font = EarFontsSingleton::instance().ItemsSubtext;
-		for (auto line : temp) {
-			int sp = 0;
-			while (sp < line.length()) {
-				int nextSp = line.indexOfChar(sp + 1, ' ');
-				if (nextSp < 0) {
-					structuredSubtext_.add(line);
-					break;
-				}
-				auto w = font.getStringWidth(line.substring(0, nextSp));
-				// if wider than allowable width, crop at the last found space.
-				// if there was no last found space, this is a word longer than
-				// allowable. Pass through - it will be caught and stored 
-				// wholly in the next iter
-				if (sp > 0 && w > width) {
-					structuredSubtext_.add(line.substring(0, sp));
-					line = line.substring(sp + 1);
-					sp = 0;
-				}
-				else {
-					sp = nextSp;
-				}
-			}
-		}
+		addWordwrappedLines(originalSubtext_, structuredSubtext_, width, EarFontsSingleton::instance().ItemsSubtext);
 		structuredSubtextWidth_ = width;
 	}
-	// add height of all lines
+	// Add height of all lines and set component height and width
 	h += structuredSubtext_.size() * heightListEntrySubtextLine_;
 	h += heightFinalPad_;
 	this->setSize(width, h);
