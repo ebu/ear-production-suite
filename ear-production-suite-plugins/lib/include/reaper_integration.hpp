@@ -36,9 +36,9 @@ inline bool registerPluginLoadWithExtension(
 inline uint32_t requestInstanceIdFromExtension(
     IReaperHostApplication* reaperHostPtr) {
   if(!reaperHostPtr) return 0;
-  uint32_t requestInputInstanceIdSig();
   auto requestInputInstanceIdPtr = reaperHostPtr->getReaperApi("requestInputInstanceId");
   if (!requestInputInstanceIdPtr) return 0;
-  auto requestInputInstanceId = reinterpret_cast<decltype(&requestInputInstanceIdSig)>(requestInputInstanceIdPtr);
+  using RequestInputInstanceIdSigT = uint32_t(*)();
+  auto requestInputInstanceId = reinterpret_cast<RequestInputInstanceIdSigT>(requestInputInstanceIdPtr);
   return requestInputInstanceId();
 }

@@ -26,7 +26,7 @@ inline int GetReaperChannelCount(void* reaperApiGetAppVersionFuncPtr) {
     if (!reaperApiGetAppVersionFuncPtr) {
         return MAX_DAW_CHANNELS;
     }
-    const char* GetAppVersionSig();
-    auto getAppVersion = reinterpret_cast<decltype(&GetAppVersionSig)>(reaperApiGetAppVersionFuncPtr);
+    using AppVersionT = char const* (*)();
+    auto getAppVersion = reinterpret_cast<AppVersionT>(reaperApiGetAppVersionFuncPtr);
     return GetReaperChannelCount(getAppVersion());
 }
