@@ -79,7 +79,6 @@ namespace admplug {
         std::vector<SearchCandidate> searchCriteria;
         int minPossible;
         int maxPossible;
-        int offset;
 
         std::vector<int> availableValues;
 
