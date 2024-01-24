@@ -168,6 +168,8 @@ class PipeEventDispatcher {
           pipeRemPostHandler_(Pipe(pipe), PipeEvent::postRemove);
         }
         break;
+      case NNG_PIPE_EV_NUM:
+        break;
     }
   }
   std::function<void(Pipe, PipeEvent event)> pipeAddPreHandler_;
