@@ -1,3 +1,8 @@
+function(set_includes_as_system tgt)
+    get_target_property(public_includes ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(${tgt} PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${public_includes}")
+endfunction()
+
 message(STATUS "Processing submodules...")
 
 ## Disable testing and reduce noise when building submodules
@@ -6,6 +11,7 @@ set(isTesting ${BUILD_TESTING})
 set(LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
 set(DEPRECATION_WARN ${CMAKE_WARN_DEPRECATED})
 if(QUIET_SUBMODULES)
+  add_compile_options("$<IF:$<CXX_COMPILER_ID:MSVC>,/w,-w>")
   set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
   set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "Enable cmake deprecation warnings")
 endif()
@@ -34,6 +40,11 @@ if((NOT DEFINED REAPPLY_VST3_PATCHES) OR (${REAPPLY_VST3_PATCHES}))
 endif()
 add_subdirectory(VST3)
 set_target_properties(base cmake_modules pluginterfaces sdk sdk_common sdk_hosting validator PROPERTIES FOLDER submodules/vst3)
+if(QUIET_SUBMODULES)
+set_includes_as_system(base)
+set_includes_as_system(sdk)
+set_includes_as_system(sdk_common)
+endif()
 
 # libear
 set(EAR_HIDE_INTERNAL_SYMBOLS OFF CACHE BOOL " " FORCE)
