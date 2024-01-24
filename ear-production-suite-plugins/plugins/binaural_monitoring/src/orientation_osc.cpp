@@ -8,7 +8,7 @@
 namespace ear {
 namespace plugin {
 
-const float oneRadInDegs = 180.f / juce::float_Pi;
+const float oneRadInDegs = 180.f / juce::MathConstants<float>::pi;
 
 ListenerOrientationOscReceiver::ListenerOrientationOscReceiver() {
   osc.addListener(this);

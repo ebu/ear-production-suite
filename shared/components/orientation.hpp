@@ -357,7 +357,7 @@ private:
 
       if (fabs(y) <= yRad) {
 
-        if (angle < (float_Pi / 2.f) || angle > 3.f * (float_Pi / 2.f)) {
+        if (angle < (MathConstants<float>::pi / 2.f) || angle > 3.f * (MathConstants<float>::pi / 2.f)) {
           intersection.x = xRad;
           intersection.y = y;
         } else {
@@ -367,7 +367,7 @@ private:
       } else {
         float x = yRad / tangent;
 
-          if (angle < float_Pi) {
+          if (angle < MathConstants<float>::pi) {
             intersection.x = x;
             intersection.y = yRad;
           } else {
