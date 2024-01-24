@@ -113,26 +113,26 @@ public:
     AdmVstExportSources(ReaperAPI const&api);
     ~AdmVstExportSources() {}
 
-    bool documentRequiresProgrammeTitles() { return true; }
-    bool documentRequiresContentTitles() { return true; }
+    bool documentRequiresProgrammeTitles() override { return true; }
+    bool documentRequiresContentTitles() override { return true; }
 
-    bool validForExport() { return candidatesForExport.size() > 0; }
+    bool validForExport() override { return candidatesForExport.size() > 0; }
     std::vector<std::shared_ptr<AdmVst>>* getAllFoundVsts() { return &allAdmVsts; }
 
-    int getSampleRate();
-    int getTotalExportChannels();
+    int getSampleRate() override;
+    int getTotalExportChannels() override;
 
-    void setRenderInProgress(bool state);
-    bool isFrameAvailable();
-    bool writeNextFrameTo(float* bufferWritePointer, bool skipFrameAvailableCheck = false);
+    void setRenderInProgress(bool state) override;
+    bool isFrameAvailable() override;
+    bool writeNextFrameTo(float* bufferWritePointer, bool skipFrameAvailableCheck = false) override;
 
-    std::shared_ptr<bw64::AxmlChunk> getAxmlChunk();
-    std::shared_ptr<bw64::ChnaChunk> getChnaChunk();
-    std::shared_ptr<adm::Document> getAdmDocument() { return admDocument; }
+    std::shared_ptr<bw64::AxmlChunk> getAxmlChunk() override;
+    std::shared_ptr<bw64::ChnaChunk> getChnaChunk() override;
+    std::shared_ptr<adm::Document> getAdmDocument() override { return admDocument; }
 
-    std::vector<std::string> generateExportInfoStrings() { return infoStrings; }
-    std::vector<std::string> generateExportErrorStrings() { return errorStrings; }
-    std::vector<std::string> generateExportWarningStrings() { return warningStrings; }
+    std::vector<std::string> generateExportInfoStrings() override { return infoStrings; }
+    std::vector<std::string> generateExportErrorStrings() override { return errorStrings; }
+    std::vector<std::string> generateExportWarningStrings() override { return warningStrings; }
 
     std::string getExportSourcesName() override {
         return std::string("ADM Export Source VSTs");

@@ -144,26 +144,26 @@ public:
 	EarVstExportSources(ReaperAPI const& api);
 	~EarVstExportSources() {};
 
-	bool documentRequiresProgrammeTitles() { return false; }
-	bool documentRequiresContentTitles() { return false; }
+	bool documentRequiresProgrammeTitles() override { return false; }
+	bool documentRequiresContentTitles() override { return false; }
 
-	bool validForExport() { return chosenCandidateForExport != nullptr; }
+	bool validForExport() override { return chosenCandidateForExport != nullptr; }
 	std::vector<std::shared_ptr<EarSceneMasterVst>>* getAllFoundVsts() { return &allEarSceneMasterVsts; }
 
-	int getSampleRate();
-	int getTotalExportChannels();
+	int getSampleRate() override;
+	int getTotalExportChannels() override;
 
-	void setRenderInProgress(bool state);
-	bool isFrameAvailable();
-	bool writeNextFrameTo(float* bufferWritePointer, bool skipFrameAvailableCheck = false);
+	void setRenderInProgress(bool state) override;
+	bool isFrameAvailable() override;
+	bool writeNextFrameTo(float* bufferWritePointer, bool skipFrameAvailableCheck = false) override;
 
-	std::shared_ptr<bw64::AxmlChunk> getAxmlChunk() { return axmlChunk; }
-	std::shared_ptr<bw64::ChnaChunk> getChnaChunk() { return chnaChunk; }
-	std::shared_ptr<adm::Document> getAdmDocument() { return admDocument; }
+	std::shared_ptr<bw64::AxmlChunk> getAxmlChunk() override { return axmlChunk; }
+	std::shared_ptr<bw64::ChnaChunk> getChnaChunk() override { return chnaChunk; }
+	std::shared_ptr<adm::Document> getAdmDocument() override { return admDocument; }
 
-	std::vector<std::string> generateExportInfoStrings() { return infoStrings; }
-	std::vector<std::string> generateExportErrorStrings() { return errorStrings; }
-	std::vector<std::string> generateExportWarningStrings() { return warningStrings; }
+	std::vector<std::string> generateExportInfoStrings() override { return infoStrings; }
+	std::vector<std::string> generateExportErrorStrings() override { return errorStrings; }
+	std::vector<std::string> generateExportWarningStrings() override { return warningStrings; }
 
 	std::string getExportSourcesName() override {
 		return std::string("EAR Scene VST");
