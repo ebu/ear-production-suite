@@ -29,7 +29,7 @@ find_package_handle_standard_args(JUCE
     # configure_file(${_JUCE_SUPPORT_RESOURCES}/juce/AppConfig.h.in ${_SUPPORT_PATH}/AppConfig.h)
     # configure_file(${_JUCE_SUPPORT_RESOURCES}/juce/JuceHeader.h.in ${_SUPPORT_PATH}/JuceHeader.h)
     # target_include_directories(Juce_core PRIVATE ${_SUPPORT_PATH})
-    target_include_directories(Juce::core INTERFACE ${JUCE_SDK_DIR}/modules)
+    target_include_directories(Juce::core SYSTEM INTERFACE ${JUCE_SDK_DIR}/modules)
     target_compile_features(Juce::core INTERFACE cxx_std_14)
     target_compile_definitions(Juce::core INTERFACE
                     $<$<CONFIG:DEBUG>:DEBUG>
