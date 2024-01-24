@@ -12,6 +12,8 @@
 #include "bear_data_files.hpp"
 #include "orientation_osc.hpp"
 
+#include <daw_channel_count.h>
+
 namespace ear {
 namespace plugin {
 namespace ui {
@@ -26,7 +28,8 @@ class BinauralMonitoringAudioProcessor;
 class EarBinauralMonitoringAudioProcessor
     : private AudioProcessorParameter::Listener,
       Timer,
-      public AudioProcessor {
+      public AudioProcessor,
+      public VST3ClientExtensions {
  public:
   EarBinauralMonitoringAudioProcessor();
   ~EarBinauralMonitoringAudioProcessor();
@@ -58,6 +61,8 @@ class EarBinauralMonitoringAudioProcessor
 
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
+
+  void setIHostApplication(Steinberg::FUnknown* unknown) override;
 
   std::weak_ptr<ear::plugin::LevelMeterCalculator> getLevelMeter() {
     return levelMeter_;
@@ -93,8 +98,6 @@ class EarBinauralMonitoringAudioProcessor
   void timerCallback() override;
 
  private:
-  BusesProperties _getBusProperties();
-
   AudioParameterBool* bypass_;
   AudioParameterFloat* yaw_;
   AudioParameterFloat* pitch_;
@@ -119,6 +122,7 @@ class EarBinauralMonitoringAudioProcessor
 
   int samplerate_{48000};
   int blocksize_{512};
+  int numDawChannels_{MAX_DAW_CHANNELS};
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
