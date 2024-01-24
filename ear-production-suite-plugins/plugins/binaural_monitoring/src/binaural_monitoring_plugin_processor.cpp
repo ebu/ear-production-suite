@@ -6,7 +6,8 @@
 #include "variable_block_adapter.hpp"
 #include <version/eps_version.h>
 #include <helper/resource_paths_juce-file.hpp>
-#include <daw_channel_count.h>
+#include "reaper_vst3_interfaces.h"
+#include "reaper_integration.hpp"
 
 #define DEFAULT_OSC_PORT 8000
 
@@ -45,7 +46,13 @@ using namespace ear::plugin;
 
 //==============================================================================
 EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
-    : AudioProcessor(_getBusProperties()) {
+    : AudioProcessor(BusesProperties()
+              .withInput("Input",
+                         AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS),
+                         true)
+              .withOutput("Output",
+                          AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS),
+                          true)) {
 
   dataFileManager.onSelectedDataFileChange(
       [this](ear::plugin::DataFileManager::DataFile const& df) {
@@ -198,17 +205,6 @@ void EarBinauralMonitoringAudioProcessor::timerCallback() {
   processor_->setIsPlaying(false);
 }
 
-//==============================================================================
-juce::AudioProcessor::BusesProperties
-EarBinauralMonitoringAudioProcessor::_getBusProperties() {
-  auto ret = BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true);
-  ret = ret.withOutput("Left Ear", AudioChannelSet::mono(), true);
-  ret = ret.withOutput("Right Ear", AudioChannelSet::mono(), true);
-  ret = ret.withOutput("(Unused)", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS-2), true);
-  return ret;
-}
-
 void EarBinauralMonitoringAudioProcessor::restartBearProcessor(
     bool onlyOnConfigChange) {
   std::lock_guard<std::mutex> lock(processorMutex_);
@@ -329,23 +325,10 @@ void EarBinauralMonitoringAudioProcessor::releaseResources() {
 bool EarBinauralMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
 
-  // Must accept default config specified in ctor
-
-  if(layouts.inputBuses.size() != 1)
-    return false;
-  if (layouts.inputBuses[0] !=
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
-    return false;
-
-  if(layouts.outputBuses.size() != 3)
-    return false;
-  if(layouts.outputBuses[0] != AudioChannelSet::mono())
-    return false;
-  if(layouts.outputBuses[1] != AudioChannelSet::mono())
-    return false;
-  if (layouts.outputBuses[2] !=
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - 2))
-    return false;
+  auto i = layouts.getMainInputChannels();
+  if (i != numDawChannels_) return false;
+  auto o = layouts.getMainOutputChannels();
+  if (o != numDawChannels_) return false;
 
   return true;
 }
@@ -523,6 +506,22 @@ void EarBinauralMonitoringAudioProcessor::setStateInformation(const void* data,
         }
       }
     }
+  }
+}
+
+void EarBinauralMonitoringAudioProcessor::setIHostApplication(
+    Steinberg::FUnknown* unknown) {
+  auto reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+  VST3ClientExtensions::setIHostApplication(unknown);
+  if (reaperHost) {
+    numDawChannels_ = DetermineChannelCount(reaperHost);
+    auto retI = setChannelLayoutOfBus(
+        true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+    auto retO = setChannelLayoutOfBus(
+        false, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+    backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
+        nullptr, numDawChannels_);
+    connector_->setListenerOrientationInstance(backend_->listenerOrientation);
   }
 }
 
