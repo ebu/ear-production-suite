@@ -223,6 +223,7 @@ bool BinauralMonitoringAudioProcessor::updateChannelCounts(
   } else {
     // Do immediate update
     bearRenderer->set_config_blocking(bearConfig);
+    return true;
   }
   return true;
 }
