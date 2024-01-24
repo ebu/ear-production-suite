@@ -1,7 +1,7 @@
 #ifndef PARAMETISED_H
 #define PARAMETISED_H
 
-#include <gmock/gmock.h>
+#include "../include_gmock.h"
 #include <parameter.h>
 #include <parametised.h>
 #include <plugin.h>

@@ -1,7 +1,7 @@
+#include "include_gmock.h"
 #include <array>
 #include <vector>
 #include <catch2/catch_all.hpp>
-#include <gmock/gmock.h>
 #include <bw64/bw64.hpp>
 #include <adm/document.hpp>
 #include <adm/utilities/object_creation.hpp>

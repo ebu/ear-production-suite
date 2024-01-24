@@ -1,6 +1,6 @@
 #include <functional>
 #include <catch2/catch_all.hpp>
-#include <gmock/gmock.h>
+#include "include_gmock.h"
 #include <adm/elements.hpp>
 #include "pluginsuite.h"
 #include "mediatrackelement.h"

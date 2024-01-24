@@ -1,5 +1,5 @@
 #include <chrono>
-#include <gmock/gmock.h>
+#include "include_gmock.h"
 #include <catch2/catch_all.hpp>
 
 #include <parameter.h>

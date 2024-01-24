@@ -1,5 +1,5 @@
+#include "include_gmock.h"
 #include <catch2/catch_all.hpp>
-#include <gmock/gmock.h>
 #include "reaperguid.h"
 
 using namespace admplug;

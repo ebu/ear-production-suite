@@ -1,4 +1,4 @@
-#include <gmock/gmock.h>
+#include "../include_gmock.h"
 #include <reaperapi.h>
 #include "reaperapivalues.h"
 #include "track.h"
