@@ -1,5 +1,5 @@
 #include <catch2/catch_all.hpp>
-#include <gmock/gmock.h>
+#include "include_gmock.h"
 #include <adm/utilities/object_creation.hpp>
 #include "projectnode.h"
 #include "nodefactory.h"

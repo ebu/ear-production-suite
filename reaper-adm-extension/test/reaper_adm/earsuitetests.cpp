@@ -1,5 +1,5 @@
 ﻿#include <catch2/catch_all.hpp>
-#include <gmock/gmock.h>
+#include "include_gmock.h"
 #include "mocks/reaperapi.h"
 #include "mocks/projectelements.h"
 #include "mocks/track.h"

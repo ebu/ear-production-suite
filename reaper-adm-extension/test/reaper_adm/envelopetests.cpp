@@ -1,6 +1,6 @@
 #include <catch2/catch_all.hpp>
 #include <chrono>
-#include <gmock/gmock.h>
+#include "include_gmock.h"
 #include "blockbuilders.h"
 #include "mocks/reaperapi.h"
 #include <automationenvelope.h>
