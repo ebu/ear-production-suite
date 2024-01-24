@@ -10,6 +10,7 @@
 #include "ui_event_dispatcher.hpp"
 #include "communication/metadata_thread.hpp"
 #include "auto_mode_controller.hpp"
+#include <daw_channel_count.h>
 
 namespace ear {
 namespace plugin {
@@ -22,7 +23,7 @@ class RestoredPendingStore;
 }  // namespace plugin
 }  // namespace ear
 
-class SceneAudioProcessor : public AudioProcessor {
+class SceneAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
  public:
   SceneAudioProcessor();
   ~SceneAudioProcessor();
@@ -62,6 +63,8 @@ class SceneAudioProcessor : public AudioProcessor {
 
   void setupBackend();
 
+  void setIHostApplication(Steinberg::FUnknown* unknown) override;
+
   ear::plugin::Metadata& metadata();
 
  private:
@@ -83,6 +86,7 @@ class SceneAudioProcessor : public AudioProcessor {
   SamplesSender* samplesSocket;
   bool sendSamplesToExtension{false};
   uint32_t samplerate_{0};
+  int numDawChannels_{MAX_DAW_CHANNELS};
 
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
   std::unique_ptr<ear::plugin::BackendSetupTimer> backendSetupTimer_;
