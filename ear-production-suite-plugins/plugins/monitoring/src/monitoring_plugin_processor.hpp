@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "components/level_meter_calculator.hpp"
+#include <daw_channel_count.h>
 
 namespace ear {
 namespace plugin {
@@ -33,7 +34,8 @@ inline bool operator!=(ProcessorConfig const& lhs, ProcessorConfig const rhs) {
   return !(lhs == rhs);
 }
 
-class EarMonitoringAudioProcessor : public AudioProcessor {
+class EarMonitoringAudioProcessor : public AudioProcessor,
+                                    public VST3ClientExtensions {
  public:
   EarMonitoringAudioProcessor();
   ~EarMonitoringAudioProcessor();
@@ -70,15 +72,17 @@ class EarMonitoringAudioProcessor : public AudioProcessor {
     return levelMeter_;
   };
 
+  void setIHostApplication(Steinberg::FUnknown* unknown) override;
+
  private:
-  BusesProperties _getBusProperties();
   void configureProcessor(const ProcessorConfig& config);
   ProcessorConfig processorConfig_{};
   std::unique_ptr<ear::plugin::MonitoringBackend> backend_;
   std::unique_ptr<ear::plugin::MonitoringAudioProcessor> processor_;
 
   int samplerate_;
-  int numOutputChannels_;
+  int numDawChannels_{MAX_DAW_CHANNELS};
+  int numOutputChannels_{0};
   std::shared_ptr<ear::plugin::LevelMeterCalculator> levelMeter_;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EarMonitoringAudioProcessor)
