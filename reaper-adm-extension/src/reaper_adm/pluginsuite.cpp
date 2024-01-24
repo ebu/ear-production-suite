@@ -43,7 +43,7 @@ admplug::UniqueValueAssigner::UniqueValueAssigner(UniqueValueAssigner::SearchCan
 }
 
 admplug::UniqueValueAssigner::UniqueValueAssigner(std::vector<UniqueValueAssigner::SearchCandidate> searchCriteria, int minVal, int maxVal, const ReaperAPI & api) :
-    searchCriteria{ searchCriteria }, offset{ offset }, minPossible{ minVal }, maxPossible{ maxVal }
+    searchCriteria{ searchCriteria }, minPossible{ minVal }, maxPossible{ maxVal }
 {
     // Must have search criteria
     assert(searchCriteria.size() > 0);
