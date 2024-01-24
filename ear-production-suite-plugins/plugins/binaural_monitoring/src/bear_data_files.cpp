@@ -24,6 +24,8 @@ juce::File getCustomDataFileDirectory() {
       juce::File::SpecialLocationType::currentExecutableFile);
   vstPath = vstPath.getParentDirectory();
 #ifdef __APPLE__
+  // vstPath is `EAR Binaural Monitoring.vst3/Contents/MacOS` - traverse up x3 to get to dir containing vst3 bundle
+  vstPath = vstPath.getParentDirectory();
   vstPath = vstPath.getParentDirectory();
   vstPath = vstPath.getParentDirectory();
 #endif
