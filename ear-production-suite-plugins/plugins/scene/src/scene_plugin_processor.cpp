@@ -8,7 +8,8 @@
 #include "metadata_event_dispatcher.hpp"
 #include "pending_store.hpp"
 #include "restored_pending_store.hpp"
-#include <daw_channel_count.h>
+#include "reaper_vst3_interfaces.h"
+#include "reaper_integration.hpp"
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
@@ -35,7 +36,7 @@ SceneAudioProcessor::SceneAudioProcessor()
   }
 
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(
-      MAX_DAW_CHANNELS, samplerate_);
+      numDawChannels_, samplerate_);
 
   samplesSocket = new SamplesSender();
   samplesSocket->open();
@@ -122,12 +123,10 @@ void SceneAudioProcessor::releaseResources() {}
 bool SceneAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
 
-  // Must accept default config specified in ctor
-
   if(layouts.inputBuses.size() != 1)
     return false;
   if (layouts.inputBuses[0] !=
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
+      AudioChannelSet::discreteChannels(numDawChannels_))
     return false;
 
   if(layouts.outputBuses.size() != 0)
@@ -150,7 +149,7 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     }
   } else {
     size_t sampleSize = sizeof(float);
-    uint8_t numChannels = MAX_DAW_CHANNELS;
+    uint8_t numChannels = numDawChannels_;
     size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize;
 
     auto msg = std::make_shared<NngMsg>(msg_size);
@@ -212,7 +211,7 @@ void SceneAudioProcessor::doSampleRateChecks() {
   auto curSampleRate = static_cast<int>(getSampleRate());
   if (samplerate_ != curSampleRate) {
     samplerate_ = curSampleRate;
-    levelMeter_->setup(MAX_DAW_CHANNELS, samplerate_);
+    levelMeter_->setup(numDawChannels_, samplerate_);
   }
 }
 
@@ -264,7 +263,7 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     future.get();
 
   } else if (cmd == commandSocket->Command::GetConfig) {
-    uint8_t numChannels = MAX_DAW_CHANNELS;
+    uint8_t numChannels = numDawChannels_;
     uint32_t sampleRate = samplerate_;
     commandSocket->sendInfo(numChannels, samplerate_);
 
@@ -293,6 +292,17 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
 void SceneAudioProcessor::setupBackend() {
   if (backend_) {
     backend_->setup();
+  }
+}
+
+void SceneAudioProcessor::setIHostApplication(Steinberg::FUnknown* unknown) {
+  auto reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+  VST3ClientExtensions::setIHostApplication(unknown);
+  if (reaperHost) {
+    numDawChannels_ = DetermineChannelCount(reaperHost);
+    auto ret = setChannelLayoutOfBus(
+        true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+    levelMeter_->setup(numDawChannels_, samplerate_);
   }
 }
 
