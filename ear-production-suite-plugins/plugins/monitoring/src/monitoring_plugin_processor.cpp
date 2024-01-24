@@ -2,7 +2,8 @@
 #include "monitoring_plugin_editor.hpp"
 #include "variable_block_adapter.hpp"
 
-#include <daw_channel_count.h>
+#include "reaper_vst3_interfaces.h"
+#include "reaper_integration.hpp"
 
 namespace ear {
 namespace plugin {
@@ -52,27 +53,35 @@ ear::Layout const& layout() {
   }
 }
 
-juce::AudioProcessor::BusesProperties
-EarMonitoringAudioProcessor::_getBusProperties() {
-  numOutputChannels_ = layout().channelNames().size();
-  auto ret = BusesProperties().withInput(
-      "Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true);
-  for (const std::string& name : layout().channelNames()) {
-    ret = ret.withOutput(name, AudioChannelSet::mono(), true);
-  }
-  ret = ret.withOutput(
-      "(Unused)",
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - numOutputChannels_),
-      true);
-  return ret;
+void EarMonitoringAudioProcessor::setIHostApplication(
+    Steinberg::FUnknown* unknown) {
+    auto reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+    VST3ClientExtensions::setIHostApplication(unknown);
+    if (reaperHost) {
+      numDawChannels_ = DetermineChannelCount(reaperHost);
+      auto retI = setChannelLayoutOfBus(
+          true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+      auto retO = setChannelLayoutOfBus(
+          false, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+      backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
+          nullptr, layout(), numDawChannels_);
+    }
 }
 
 //==============================================================================
 EarMonitoringAudioProcessor::EarMonitoringAudioProcessor()
-    : AudioProcessor(_getBusProperties()) {
+    : AudioProcessor(
+          BusesProperties()
+              .withInput("Input",
+                         AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS),
+                         true)
+              .withOutput("Output",
+                          AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS),
+                          true)) {
   auto speakerLayout = layout();
+  numOutputChannels_ = speakerLayout.channels().size();
   backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
-      nullptr, speakerLayout, MAX_DAW_CHANNELS);
+      nullptr, speakerLayout, numDawChannels_);
   levelMeter_ = std::make_shared<ear::plugin::LevelMeterCalculator>(0, 0);
   ProcessorConfig newConfig{getTotalNumInputChannels(),
                             getTotalNumOutputChannels(), 512,
@@ -131,24 +140,11 @@ void EarMonitoringAudioProcessor::releaseResources() {
 bool EarMonitoringAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
 
-  // Must accept default config specified in ctor
-
-  if(layouts.inputBuses.size() != 1)
+  auto i = layouts.getMainInputChannels();
+  if (i != numDawChannels_) 
     return false;
-  if (layouts.inputBuses[0] !=
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS))
-    return false;
-
-  auto outputBusCount = layouts.outputBuses.size();
-  auto expectedOutputBusCount = numOutputChannels_ + 1;
-  if(outputBusCount != expectedOutputBusCount)
-    return false;
-  for(int i = 0; i < numOutputChannels_; ++i) {
-    if(layouts.outputBuses[i] != AudioChannelSet::mono())
-      return false;
-  }
-  if (layouts.outputBuses[numOutputChannels_] !=
-      AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS - numOutputChannels_))
+  auto o = layouts.getMainOutputChannels();
+  if (o != numDawChannels_) 
     return false;
 
   return true;
