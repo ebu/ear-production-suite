@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "reaperapi.h"
-#include "progress/importlistener.h";
+#include "progress/importlistener.h"
 #include "plugin.h"
 #include "pluginregistry.h"
 #include "exportaction_admsource-earvst.h" // TODO - the fact we have to include an export header here probably means some stuff is defined in the wrong place
