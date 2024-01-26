@@ -12,7 +12,6 @@
 #include "binaural_monitoring_plugin_processor.hpp"
 #include "binaural_monitoring_audio_processor.hpp"
 #include <memory>
-#include <optional>
 
 namespace ear {
 namespace plugin {
@@ -83,7 +82,8 @@ class BinauralMonitoringJuceFrontendConnector
 
   // Renderer status and Data File setters
   void setRendererStatus(const ear::plugin::BearStatus& bearStatus);
-  void setRendererStatus(const juce::String& statusText);
+  void setRendererStatus(const juce::String& statusText,
+                         const juce::Colour& statusColour);
   void setRendererStatusRestarting();
   void setDataFile(const juce::String& dataFile);
 
@@ -145,8 +145,8 @@ class BinauralMonitoringJuceFrontendConnector
   bool cachedOscInvertQuatX_;
   bool cachedOscInvertQuatY_;
   bool cachedOscInvertQuatZ_;
-  ear::plugin::BearStatus cachedBearStatus_;
-  std::optional<juce::String> cachedBearStatusOverride_;
+  juce::String cachedBearStatusText_;
+  juce::Colour cachedBearStatusColour_;
 
   /// Listener Orientation Object
   std::shared_ptr<ListenerOrientation> listenerOrientation;
