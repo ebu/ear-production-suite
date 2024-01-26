@@ -238,11 +238,7 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusLabel(
     std::shared_ptr<Label> label) {
   rendererStatusLabel_ = label;
-  if(cachedBearStatusOverride_.has_value()){
-    setRendererStatus(cachedBearStatusOverride_.value());
-  } else {
-    setRendererStatus(cachedBearStatus_);
-  }
+  setRendererStatus(cachedBearStatusText_, cachedBearStatusColour_);
 }
 
 void BinauralMonitoringJuceFrontendConnector::setListenerOrientationInstance(
@@ -355,65 +351,54 @@ void BinauralMonitoringJuceFrontendConnector::setOscInvertQuatZ(bool invert) {
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
     const ear::plugin::BearStatus& bearStatus) {
-  if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
-    if (bearStatus.startupSuccess == BearStatusStates::SUCCEEDED) {
-      // Is running. See if accepting listener position data
-      if (bearStatus.listenerDataSetSuccess == BearStatusStates::FAILED) {
-        rendererStatusLabelLocked->setColour(
-            juce::Label::textColourId,
-            ear::plugin::ui::EarColours::StatusWarning);
-        juce::String msg("Renderer did not accept listener orientation data: ");
-        msg += juce::String(bearStatus.listenerDataSetErrorDesc);
-        rendererStatusLabelLocked->setText(
-            msg, juce::NotificationType::dontSendNotification);
-      } else {
-        // Other states (good or insignificant) for listener data - BEAR is running
-        rendererStatusLabelLocked->setColour(
-            juce::Label::textColourId, ear::plugin::ui::EarColours::Label);
-        rendererStatusLabelLocked->setText(
-            "Running...", juce::NotificationType::dontSendNotification);
-      }
-    } else if (bearStatus.startupSuccess == BearStatusStates::FAILED) {
-      rendererStatusLabelLocked->setColour(
-          juce::Label::textColourId, ear::plugin::ui::EarColours::StatusBad);
-      juce::String msg("Renderer startup failed: ");
-      msg += juce::String(bearStatus.startupErrorDesc) + " (";
-      auto dataFile = bearStatus.startupConfig.get_data_path();
-      removePath(dataFile);
-      msg += juce::String(dataFile) + ").";
-      rendererStatusLabelLocked->setText(
-          msg, juce::NotificationType::dontSendNotification);
-    } else if (bearStatus.startupSuccess == BearStatusStates::NOT_ATTEMPTED) {
-      // Unusual case - we should always expect a start attempt (class init)
-      assert(false);
-      rendererStatusLabelLocked->setColour(
-          juce::Label::textColourId, ear::plugin::ui::EarColours::StatusWarning);
-      rendererStatusLabelLocked->setText(
-          "Renderer not started.",
-          juce::NotificationType::dontSendNotification);
+
+  if (bearStatus.startupSuccess == BearStatusStates::SUCCEEDED) {
+    // Is running. See if accepting listener position data
+    if (bearStatus.listenerDataSetSuccess == BearStatusStates::FAILED) {
+      juce::String msg("Renderer did not accept listener orientation data: ");
+      msg += juce::String(bearStatus.listenerDataSetErrorDesc);
+      setRendererStatus(msg, ear::plugin::ui::EarColours::StatusWarning);
     } else {
-      // Unimplemented case
-      assert(false);
+      // Other states (good or insignificant) for listener data - BEAR is running
+      setRendererStatus("Running...", ear::plugin::ui::EarColours::Label);
     }
+
+  } else if (bearStatus.startupSuccess == BearStatusStates::FAILED) {
+    juce::String msg("Renderer startup failed: ");
+    msg += juce::String(bearStatus.startupErrorDesc) + " (";
+    auto dataFile = bearStatus.startupConfig.get_data_path();
+    removePath(dataFile);
+    msg += juce::String(dataFile) + ").";
+    setRendererStatus(msg, ear::plugin::ui::EarColours::StatusBad);
+
+  } else if (bearStatus.startupSuccess == BearStatusStates::NOT_ATTEMPTED) {
+    // Unusual case - we should always expect a start attempt (class init)
+    assert(false);
+    setRendererStatus("Renderer not started.",
+                      ear::plugin::ui::EarColours::StatusWarning);
+
+  } else {
+    // Unimplemented case
+    assert(false);
   }
-  cachedBearStatus_ = bearStatus;
-  cachedBearStatusOverride_.reset();
 }
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatus(
-    const juce::String& statusText) {
+    const juce::String& statusText, const juce::Colour& statusColour) {
   if (auto rendererStatusLabelLocked = rendererStatusLabel_.lock()) {
     rendererStatusLabelLocked->setColour(juce::Label::textColourId,
-                                         ear::plugin::ui::EarColours::Label);
+                                         statusColour);
     rendererStatusLabelLocked->setText(
         statusText, juce::NotificationType::dontSendNotification);
   }
 
-  cachedBearStatusOverride_ = statusText;
+  cachedBearStatusText_ = statusText;
+  cachedBearStatusColour_ = statusColour;
 }
 
 void BinauralMonitoringJuceFrontendConnector::setRendererStatusRestarting() {
-  setRendererStatus(juce::String("Renderer starting..."));
+  setRendererStatus(juce::String("Renderer starting..."),
+                    ear::plugin::ui::EarColours::Label);
 }
 
 void BinauralMonitoringJuceFrontendConnector::setDataFile(
