@@ -15,6 +15,7 @@
 #include "PluginProcessorUtils.h"
 #include <functional>
 #include <memory>
+#include <daw_channel_count.h>
 
 #define TRACK_STATE 0
 #define DEBUG_PARAMS 0
@@ -27,7 +28,8 @@
 
 class AdmStemPluginAudioProcessorEditor;
 
-class AdmStemPluginAudioProcessor  : public AudioProcessor
+class AdmStemPluginAudioProcessor  : public AudioProcessor,
+    public VST3ClientExtensions
 {
 public:
     AdmStemPluginAudioProcessor();
@@ -57,7 +59,6 @@ public:
     void setCurrentProgram (int index) override;
     const String getProgramName (int index) override;
     void changeProgramName (int index, const String& newName) override;
-    void numChannelsChanged() override;
 
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
@@ -79,8 +80,12 @@ public:
 
     void incomingMessage(std::shared_ptr<NngMsg> msg);
 
+    void setIHostApplication(Steinberg::FUnknown* unknown) override;
+
 private:
     AdmStemPluginAudioProcessorEditor* editor();
+
+    int numDawChannels_{ MAX_DAW_CHANNELS };
 
     int calcNumChannels();
     void updateNumChnsParam(bool force = false);
