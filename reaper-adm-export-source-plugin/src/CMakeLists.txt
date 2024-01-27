@@ -47,8 +47,9 @@ target_link_libraries(adm_export_source_VST3 PRIVATE
 
 target_include_directories(adm_export_source_VST3
     PRIVATE
+    ${CMAKE_SOURCE_DIR}/ear-production-suite-plugins/lib/include
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/submodules/readerwriterqueue>
-	$<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 target_compile_definitions(adm_export_source_VST3
