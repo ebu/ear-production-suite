@@ -1,14 +1,15 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
 #include <fstream>
-#include <daw_channel_count.h>
 #include <helper/adm_preset_definitions_helper.h>
+
+#include "reaper_vst3_interfaces.h"
+#include "reaper_integration.hpp"
 
 AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
   : AudioProcessor (BusesProperties()
-         .withInput("Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true)
-         .withOutput("Output", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true)
+         .withInput("Input", AudioChannelSet::discreteChannels(numDawChannels_), true)
      )
 #endif
 {
@@ -331,23 +332,10 @@ void AdmStemPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 #endif
 
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
 
     if (sendSamples) {
         size_t sampleSize = sizeof(float);
+        auto totalNumInputChannels  = getTotalNumInputChannels();
         uint8_t numChannels = numChnsParam->get();
         size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize; // Samples
         auto msg = std::make_shared<NngMsg>(msg_size);
@@ -384,21 +372,23 @@ void AdmStemPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool AdmStemPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    if (layouts.getMainOutputChannelSet() == AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS) &&
-        layouts.getMainInputChannelSet() == AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS)) {
-        return true;
-    }
-    return false;
+    auto i = layouts.getMainInputChannels();
+    if (i != numDawChannels_) return false;
+
+    return true;
 }
 #endif
 
-void AdmStemPluginAudioProcessor::numChannelsChanged(){
-    //auto busIn = this->getBus(true, 0)->getCurrentLayout().getDescription();
-    auto busChIn = this->getBus(true, 0)->getNumberOfChannels();
-    //auto busOut = this->getBus(false, 0)->getCurrentLayout().getDescription();
-    auto busChOut = this->getBus(false, 0)->getNumberOfChannels();
-
-    // TODO - do we actually need to do anything here? We used to warn if being fed less than the expected width of the ADM essense - would be a nice feature.
+void AdmStemPluginAudioProcessor::setIHostApplication(Steinberg::FUnknown* unknown)
+{
+    auto reaperHost = dynamic_cast<IReaperHostApplication*>(unknown);
+    VST3ClientExtensions::setIHostApplication(unknown);
+    if (reaperHost) {
+        numDawChannels_ = DetermineChannelCount(reaperHost);
+        auto retI = setChannelLayoutOfBus(
+            true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+        assert(retI);
+    }
 }
 
 AdmStemPluginAudioProcessorEditor* AdmStemPluginAudioProcessor::editor(){
