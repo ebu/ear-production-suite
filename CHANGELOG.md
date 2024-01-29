@@ -1,3 +1,15 @@
+Version 1.1.0
+
+* Support for 128 channels when using REAPER >=v7.0 [#244](https://github.com/ebu/ear-production-suite/issues/244) [#254](https://github.com/ebu/ear-production-suite/pull/254) [#267](https://github.com/ebu/ear-production-suite/pull/267)
+* Improve import support from third-party tools [#259](https://github.com/ebu/ear-production-suite/pull/259)
+* Support HRTF switching in Binaural Monitoring plugin [#266](https://github.com/ebu/ear-production-suite/pull/266)
+* Fix monitoring plugins not properly supporting shared inputs [#257](https://github.com/ebu/ear-production-suite/issues/257) [#258](https://github.com/ebu/ear-production-suite/pull/258)
+* Apply "version" attribute to ADM as required by ITU-R BS.2076-2 [#248](https://github.com/ebu/ear-production-suite/issues/248) [#255](https://github.com/ebu/ear-production-suite/pull/255)
+* Performance fix for envelope creation [#252](https://github.com/ebu/ear-production-suite/pull/252) 
+* Update BW64 lib for performance fixes [#260](https://github.com/ebu/ear-production-suite/issues/260)
+* Allow user to opt-out of update-checking during setup [#256](https://github.com/ebu/ear-production-suite/pull/256)
+* Warn user of impending FB360 and VISR support deprecation since these plugin suites are no longer maintained [#265](https://github.com/ebu/ear-production-suite/pull/265)
+
 Version 1.0.0
 
 * Setup Application included
