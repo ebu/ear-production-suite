@@ -192,7 +192,7 @@ A discussion community for users of the EPS is available on the <a href="https:/
       <div class="text_section">
         <p>Yes, although this is a feature for advanced users since it requires some pre-processing of the impulse responses. </p>
         <p>The Binaural Monitoring plug-in is based around <a href="https://tech.ebu.ch/publications/tech3396">BEAR (Binaural EBU ADM Renderer)</a> which uses it's own custom file format. There are various reasons for this explained in the guide linked below. Ultimately this requires a SOFA file to be converted using bespoke tool. The guide for this process is <a href="https://github.com/ebu/bear/blob/main/doc/ir_processing.md">available in the BEAR repository</a>. </p>
-        <p>Once you have generated a TF file for BEAR, this should be place alongside the EAR Binaural Monitoring plug-in. This will probably be `~/Library/Audio/Plug-ins/VST3` on MacOS, or `C:\Program Files\Common Files\VST3` in Windows. When the plug-in UI is then reopened, a drop-down box should appear at the top of the plug-in allowing you to select between HRTF sets.</p>
+        <p>Once you have generated a TF file for BEAR, this should be placed alongside the EAR Binaural Monitoring plug-in. This will probably be `~/Library/Audio/Plug-ins/VST3` on MacOS, or `C:\Program Files\Common Files\VST3` in Windows. When the plug-in UI is then reopened, a drop-down box should appear at the top of the plug-in allowing you to select between HRTF sets.</p>
       </div>
   </details>
   <details>
