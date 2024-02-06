@@ -2,10 +2,8 @@
 
 #include "helper/protobuf_utilities.hpp"
 #include "helper/adm_preset_definitions_helper.h"
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <string>
+#include <adm/detail/id_parser.hpp>
 
 namespace ear {
 namespace plugin {
@@ -30,14 +28,16 @@ struct EpsToEarMetadataConverter {
 
   static std::vector<ear::DirectSpeakersTypeMetadata> convert(
       const proto::DirectSpeakersTypeMetadata &epsMetadata) {
-    std::stringstream ss;
-    ss << "AP_0001" << std::setw(4) << std::setfill('0') << std::hex
-       << epsMetadata.packformatidvalue();
-    std::string audioPackFormatID{ ss.str() };
+
+    adm::AudioPackFormatId audioPackFormatID(
+        adm::TypeDefinition::DIRECT_SPEAKERS,
+        adm::AudioPackFormatIdValue(epsMetadata.packformatidvalue()));
+    auto audioPackFormatIDstr = adm::formatId(audioPackFormatID);
+
     std::vector<ear::DirectSpeakersTypeMetadata> earMetadata;
     for (auto epsSpeaker : epsMetadata.speakers()) {
       ear::DirectSpeakersTypeMetadata earSpeaker;
-      earSpeaker.audioPackFormatID = audioPackFormatID;
+      earSpeaker.audioPackFormatID = audioPackFormatIDstr;
       earSpeaker.position = ear::PolarSpeakerPosition(
           epsSpeaker.position().azimuth(), epsSpeaker.position().elevation(),
           epsSpeaker.position().distance());
