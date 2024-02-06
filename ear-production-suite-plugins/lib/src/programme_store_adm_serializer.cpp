@@ -16,29 +16,6 @@ using namespace ear::plugin;
 
 namespace {
 
-adm::AudioChannelFormatId genAudioChannelFormatId(int typedefinition, int value) {
-  std::stringstream ss;
-  ss << "AC_" 
-    << std::setw(4) << std::setfill('0') << std::hex << typedefinition
-    << std::setw(4) << std::setfill('0') << std::hex << value;
-  return adm::parseAudioChannelFormatId(ss.str());
-}
-
-adm::AudioPackFormatId genAudioPackFormatId(int typedefinition,
-                                                  int value) {
-  std::stringstream ss;
-  ss << "AP_" << std::setw(4) << std::setfill('0') << std::hex << typedefinition
-     << std::setw(4) << std::setfill('0') << std::hex << value;
-  return adm::parseAudioPackFormatId(ss.str());
-}
-
-template <typename T>
-std::string int_to_hex(T i, size_t size) {
-  std::stringstream stream;
-  stream << std::setfill('0') << std::setw(size) << std::hex << i;
-  return stream.str();
-}
-
 constexpr auto const ADM_DEFAULT_AZ = 0.0f;
 constexpr auto const ADM_DEFAULT_EL = 0.0f;
 // constexpr auto const ADM_DEFAULT_D = 0.f;
@@ -396,14 +373,25 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
 
     } 
     else if (metadata.has_hoa_metadata() || metadata.has_ds_metadata()) {
-      int pfIdVal = metadata.has_ds_metadata()
-                        ? metadata.ds_metadata().packformatidvalue()
-                        : metadata.hoa_metadata().packformatidvalue();
+
+      adm::AudioPackFormatId audioPackFormatID;
+      if (metadata.has_ds_metadata()) {
+        // DS
+        audioPackFormatID = adm::AudioPackFormatId(
+            adm::TypeDefinition::DIRECT_SPEAKERS,
+            adm::AudioPackFormatIdValue(
+                metadata.ds_metadata().packformatidvalue()));
+      } else {
+        // HOA
+        audioPackFormatID = adm::AudioPackFormatId(
+            adm::TypeDefinition::HOA,
+            adm::AudioPackFormatIdValue(
+                metadata.hoa_metadata().packformatidvalue()));
+       }
 
       auto presets = AdmPresetDefinitionsHelper::getSingleton();
       auto objectHolder = presets->addPresetDefinitionObjectTo(
-          doc, metadata.name(), genAudioPackFormatId(1, pfIdVal));
-
+            doc, metadata.name(), audioPackFormatID);
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
       content.addReference(objectHolder.audioObject);
