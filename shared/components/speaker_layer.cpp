@@ -184,7 +184,7 @@ void SpeakerLabelPlacement::drawSpeakers(Graphics& g, SpeakerLayer* layer) {
 
 void SpeakerLabelPlacement::sortSpeakers()
 {
-    std::sort(drawableSpeakers.begin(), drawableSpeakers.end(),
+    std::stable_sort(drawableSpeakers.begin(), drawableSpeakers.end(),
         [](const SpUi& a, const SpUi& b) {
             return a.spAz < b.spAz;
         }
