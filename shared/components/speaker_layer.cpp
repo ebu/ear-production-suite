@@ -193,67 +193,61 @@ void SpeakerLabelPlacement::sortSpeakers()
 
 void SpeakerLabelPlacement::processSpeaker(int spkIndex)
 {
-    if (tooCloseToPrev(spkIndex)) {
+    auto prvIndex = getPrevSpkIndex(spkIndex);
+    if (prvIndex >= 0 && prvIndex != spkIndex && 
+        tooClose(drawableSpeakers[spkIndex], drawableSpeakers[prvIndex])) {
         drawableSpeakers[spkIndex].inner = true;
         drawableSpeakers[spkIndex].labAz += bigAzNudge;
-        getPrevSpk(spkIndex)->labAz -= littleAzNudge;
+        drawableSpeakers[prvIndex].labAz -= littleAzNudge;
     }
 
-    if (tooCloseToNext(spkIndex)) {
+    auto nxtIndex = getNextSpkIndex(spkIndex);
+    if (nxtIndex >= 0 && nxtIndex != spkIndex &&
+        tooClose(drawableSpeakers[spkIndex], drawableSpeakers[nxtIndex])) {
         drawableSpeakers[spkIndex].inner = true;
         drawableSpeakers[spkIndex].labAz -= bigAzNudge;
-        getNextSpk(spkIndex)->labAz += littleAzNudge;
+        drawableSpeakers[nxtIndex].labAz += littleAzNudge;
     }
 }
 
-bool SpeakerLabelPlacement::tooCloseToNext(int spkIndex)
+bool SpeakerLabelPlacement::tooClose(const SpUi& spkA, const SpUi& spkB)
 {
-    auto spk = getNextSpk(spkIndex);
-    return tooClose(&drawableSpeakers[spkIndex], spk);
-}
-
-bool SpeakerLabelPlacement::tooCloseToPrev(int spkIndex)
-{
-    auto spk = getPrevSpk(spkIndex);
-    return tooClose(&drawableSpeakers[spkIndex], spk);
-}
-
-bool SpeakerLabelPlacement::tooClose(const SpUi* spkA, const SpUi* spkB)
-{
-    // Check there actually is a neighbour
-    if (!spkA || !spkB) return false;
-    // Check that the neighbour is on a separate ring
-    if (spkA->inner != spkB->inner) return false;
+    // If their labels are on seperate rings, they're not too close
+    if (spkA.inner != spkB.inner) return false;
     // Check angular distance between speakers
-    return angularDistance(*spkA, *spkB) < minAzDist;
+    return angularDistance(spkA, spkB) < minAzDist;
 }
 
 float SpeakerLabelPlacement::angularDistance(const SpUi& spkA, const SpUi& spkB)
 {
     float mid = std::max(spkA.spAz, spkB.spAz);
     float lower = std::min(spkA.spAz, spkB.spAz);
-    float upper = lower + 360.0;
+    float upper = lower + 360.f;
     return std::min(mid - lower, upper - mid);
 }
 
-SpeakerLabelPlacement::SpUi* SpeakerLabelPlacement::getNextSpk(int fromIndex)
+int SpeakerLabelPlacement::getNextSpkIndex(int fromIndex)
 {
-    if (drawableSpeakers.size() < 2) return nullptr;
+    bool oob = fromIndex < 0 || fromIndex > drawableSpeakers.size();
+    assert(!oob);
+    if (oob || drawableSpeakers.size() < 2) return -1;
     int index = fromIndex + 1;
     const int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
     if (index > lastIndex)
         index = 0;
-    return &drawableSpeakers[index];
+    return index;
 }
 
-SpeakerLabelPlacement::SpUi* SpeakerLabelPlacement::getPrevSpk(int fromIndex)
+int SpeakerLabelPlacement::getPrevSpkIndex(int fromIndex)
 {
-    if (drawableSpeakers.size() < 2) return nullptr;
+    bool oob = fromIndex < 0 || fromIndex > drawableSpeakers.size();
+    assert(!oob);
+    if (oob || drawableSpeakers.size() < 2) return -1;
     int index = fromIndex - 1;
     const int lastIndex = static_cast<int>(drawableSpeakers.size()) - 1;
     if (index < 0)
         index = lastIndex;
-    return &drawableSpeakers[index];
+    return index;
 }
 
 }  // namespace ui
