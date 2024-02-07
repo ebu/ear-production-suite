@@ -33,12 +33,10 @@ private:
     std::vector<SpUi> drawableSpeakers;
     void sortSpeakers();
     void processSpeaker(int spkIndex);
-    bool tooCloseToNext(int spkIndex);
-    bool tooCloseToPrev(int spkIndex);
-    bool tooClose(const SpUi* spkA, const SpUi* spkB);
+    bool tooClose(const SpUi& spkA, const SpUi& spkB);
     float angularDistance(const SpUi& spkA, const SpUi& spkB);
-    SpUi* getNextSpk(int fromIndex);
-    SpUi* getPrevSpk(int fromIndex);
+    int getNextSpkIndex(int fromIndex);
+    int getPrevSpkIndex(int fromIndex);
     const float minAzDist = 15.f;
     const float bigAzNudge = 10.f;
     const float littleAzNudge = 5.f;
