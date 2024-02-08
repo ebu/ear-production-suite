@@ -81,7 +81,7 @@ class ItemBuilder {
       auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
       auto pfData = commonDefinitionHelper->getPackFormatData(1, pfId);
       if (pfData) {
-        for (auto cfData : pfData->relatedChannelFormats) {
+        for (auto const& cfData : pfData->relatedChannelFormats) {
           auto newSpeaker = dsMeta->add_speakers();
           newSpeaker->set_id(cfData->idValue);
           newSpeaker->set_is_lfe(cfData->isLfe);
