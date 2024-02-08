@@ -11,8 +11,8 @@
 
 class AdmPresetDefinitionsHelper {
 public:
-	AdmPresetDefinitionsHelper();
-	~AdmPresetDefinitionsHelper();
+	AdmPresetDefinitionsHelper() = default;
+	~AdmPresetDefinitionsHelper() = default;
 
 	static std::shared_ptr<AdmPresetDefinitionsHelper> getSingleton();
 
