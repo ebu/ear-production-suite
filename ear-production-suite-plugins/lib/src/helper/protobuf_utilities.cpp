@@ -15,7 +15,7 @@ proto::DirectSpeakersTypeMetadata* convertPackFormatToEpsMetadata(
 
   auto pfData = commonDefinitionHelper->getPackFormatData(1, packFormatIdValue);
   if (pfData) {
-    for (auto cfData : pfData->relatedChannelFormats) {
+    for (auto const& cfData : pfData->relatedChannelFormats) {
       auto newSpeaker = ds_metadata->add_speakers();
       newSpeaker->set_id(cfData->idValue);
       newSpeaker->set_is_lfe(cfData->isLfe);

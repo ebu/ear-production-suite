@@ -100,7 +100,7 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 
 	holder.audioObject->addReference(holder.audioPackFormat);
 	if (pfData) {
-		for (auto cfData : pfData->relatedChannelFormats) {
+		for (auto const& cfData : pfData->relatedChannelFormats) {
 			if (!forSingleCfIdValue.has_value() || forSingleCfIdValue.value() == cfData->idValue) {
 				auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
 				auto cf = document->lookup(cfId);
