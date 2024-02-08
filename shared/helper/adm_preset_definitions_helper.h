@@ -35,8 +35,8 @@ public:
 		float elevation{ 0.f };
 		float distance{ 1.f	};
 
-		bool isCommonDefinition();
-		std::string getBestSpeakerLabel();
+		const bool isCommonDefinition();
+		const std::string getBestSpeakerLabel();
 
 	private:
 		void setItuLabels();
@@ -63,7 +63,7 @@ public:
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
 		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
 
-		bool isCommonDefinition();
+		const bool isCommonDefinition();
 
 	private:
 		void setLabels();
