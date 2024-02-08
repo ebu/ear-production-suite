@@ -45,14 +45,6 @@ namespace {
 	}
 }
 
-AdmPresetDefinitionsHelper::AdmPresetDefinitionsHelper()
-{
-}
-
-AdmPresetDefinitionsHelper::~AdmPresetDefinitionsHelper()
-{
-}
-
 std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingleton()
 {
 	static auto instance = std::make_shared<AdmPresetDefinitionsHelper>();
