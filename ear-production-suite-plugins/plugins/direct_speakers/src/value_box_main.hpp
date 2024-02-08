@@ -58,7 +58,7 @@ class ValueBoxMain : public Component {
 
     auto tdData = AdmPresetDefinitionsHelper::getSingleton()->getTypeDefinitionData(1);
     auto pfDatas = tdData->relatedPackFormats;
-    std::sort(
+    std::stable_sort(
         pfDatas.begin(), pfDatas.end(),
         [](const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& a,
            const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& b) {
