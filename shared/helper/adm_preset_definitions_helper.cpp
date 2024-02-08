@@ -448,12 +448,12 @@ AdmPresetDefinitionsHelper::ChannelFormatData::~ChannelFormatData()
 {
 }
 
-bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
+const bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
 {
 	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
 
-std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel()
+const std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel()
 {
 	if (legacySpeakerLabel.has_value())
 		return legacySpeakerLabel.value();
@@ -509,7 +509,7 @@ AdmPresetDefinitionsHelper::PackFormatData::~PackFormatData()
 {
 }
 
-bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition()
+const bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition()
 {
 	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
