@@ -1,9 +1,6 @@
 #pragma once
 
-#include <string>
 #include <vector>
-#include <algorithm>
-#include <optional>
 
 namespace ear {
 namespace plugin {
