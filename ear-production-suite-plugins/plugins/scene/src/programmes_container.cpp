@@ -9,6 +9,7 @@
 #include "components/overlay.hpp"
 #include "communication/common_types.hpp"
 #include <google/protobuf/util/message_differencer.h>
+#include <algorithm>
 
 namespace {
 
@@ -23,18 +24,14 @@ ComponentType* getAncestorComponentOfType(Component* startingComponent) {
   return nullptr;
 }
 
-bool matchingSpeakers(const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& a, const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& b)
-{
-  if (a.size() != b.size()) return false;
-  for (int i = 0; i < a.size(); ++i) {
-    if(!google::protobuf::util::MessageDifferencer::Equals(
-        a[i], b[i])) return false;
-  }
-  return true;
+bool matchingSpeakers(
+    const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& a,
+    const google::protobuf::RepeatedPtrField<ear::plugin::proto::Speaker>& b) {
+  return std::equal(a.begin(), a.end(), b.begin(), b.end(),
+             google::protobuf::util::MessageDifferencer::Equals);
 }
 
 }
-
 
 using namespace ear::plugin::ui;
 using namespace ear::plugin;
