@@ -56,8 +56,8 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
 
     auto elementRelationships = processor.admPresetDefinitions.getElementRelationships();
 
-    for(auto const&[id, tdData] : elementRelationships) {
-        typeDefinitionSelector.addTextEntry(tdData->name, id);
+    for(auto const& tdData : elementRelationships) {
+        typeDefinitionSelector.addTextEntry(tdData->name, tdData->id);
     }
     typeDefinitionSelector.onValueChange = [this](int){ comboBoxStateChanged(&typeDefinitionSelector);  };
     typeDefinitionSelector.setDefaultText("Select Type Definition"); // Should never see this text!!
