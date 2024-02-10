@@ -114,7 +114,7 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 	return holder;
 }
 
-std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> AdmPresetDefinitionsHelper::getElementRelationships()
+std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> AdmPresetDefinitionsHelper::getElementRelationships()
 {
 	if (!presetDefinitions) {
 		//presetDefinitions = adm::getCommonDefinitions();
@@ -122,6 +122,7 @@ std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> A
 		presetDefinitions = adm::parseXml(xmlIs, adm::xml::ParserOptions::recursive_node_search); // will also add common defs
 		populateElementRelationshipsFor(adm::TypeDefinition::UNDEFINED);
 		populateElementRelationshipsFor(adm::TypeDefinition::OBJECTS);
+		populateElementRelationshipsFor(adm::TypeDefinition::MATRIX);
 		populateElementRelationshipsFor(adm::TypeDefinition::DIRECT_SPEAKERS);
 		populateElementRelationshipsFor(adm::TypeDefinition::HOA);
 		populateElementRelationshipsFor(adm::TypeDefinition::BINAURAL);
@@ -132,9 +133,10 @@ std::map<int, std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> A
 std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData> AdmPresetDefinitionsHelper::getTypeDefinitionData(int tdId)
 {
 	getElementRelationships(); // Ensures populated
-	auto it = typeDefinitionDatas.find(tdId);
-	if (it == typeDefinitionDatas.end()) return nullptr;
-	return it->second;
+	if (tdId < 0 || tdId >= typeDefinitionDatas.size()) {
+		return nullptr;
+	}
+	return typeDefinitionDatas[tdId];
 }
 
 std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatData(int tdId, int pfId)
@@ -276,10 +278,13 @@ void AdmPresetDefinitionsHelper::populateElementRelationshipsFor(adm::TypeDescri
 			// Find Channel formats
 			recursePackFormatsForChannelFormats(pf, pfData);
 
-			tdData->relatedPackFormats.push_back(pfData);
+			tdData->relatedPackFormats.emplace_back(std::move(pfData));
 		}
 	}
-	typeDefinitionDatas.insert(std::make_pair(tdData->id, tdData));
+	if (tdData->id >= typeDefinitionDatas.size()) {
+		typeDefinitionDatas.resize(tdData->id + 1, nullptr);
+	}
+	typeDefinitionDatas[tdData->id] = std::move(tdData);
 }
 
 void AdmPresetDefinitionsHelper::recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData)
