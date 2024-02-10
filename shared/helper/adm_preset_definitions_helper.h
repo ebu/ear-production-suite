@@ -5,8 +5,6 @@
 #include <memory>
 #include <string>
 #include <optional>
-#include <vector>
-#include <map>
 #include <adm/adm.hpp>
 
 class AdmPresetDefinitionsHelper {
@@ -95,7 +93,7 @@ public:
 		const adm::AudioPackFormatId packFormatId,
 		std::optional<int> forSingleCfIdValue = {});
 
-	std::map<int, std::shared_ptr<TypeDefinitionData>> getElementRelationships();
+	std::vector<std::shared_ptr<TypeDefinitionData>> getElementRelationships();
 
 	std::shared_ptr<TypeDefinitionData> getTypeDefinitionData(int tdId);
 	std::shared_ptr<PackFormatData> getPackFormatData(int tdId, int pfId);
@@ -112,5 +110,5 @@ private:
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
 	bool isEquivalentByProperties(std::shared_ptr<const adm::AudioChannelFormat> cfA, std::shared_ptr<const adm::AudioChannelFormat> cfB);
 	std::shared_ptr<adm::Document> presetDefinitions;
-	std::map<int, std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas;
+	std::vector<std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas{ 6, nullptr }; // last elm index 5 (highest TD)
 };

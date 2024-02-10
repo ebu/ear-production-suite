@@ -63,8 +63,8 @@ class ValueBoxMain : public Component {
     auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
     auto elementRelationships =
         commonDefinitionHelper->getElementRelationships();
-    for (auto const& [id, tdData] : elementRelationships) {
-      if (id == 4) {
+    for (auto const& tdData : elementRelationships) {
+      if (tdData->id == 4) {
         auto packData = tdData->relatedPackFormats;
         for (auto const& pfData : packData) {
           auto entry = hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
