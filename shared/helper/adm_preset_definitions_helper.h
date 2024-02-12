@@ -33,7 +33,7 @@ public:
 		float elevation{ 0.f };
 		float distance{ 1.f	};
 
-		const bool isCommonDefinition();
+		const bool isCommonDefinition() const;
 		const std::string getBestSpeakerLabel();
 
 	private:
@@ -61,7 +61,7 @@ public:
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
 		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
 
-		const bool isCommonDefinition();
+		const bool isCommonDefinition() const;
 
 	private:
 		void setLabels();
@@ -96,11 +96,11 @@ public:
 	std::vector<std::shared_ptr<TypeDefinitionData const>> getElementRelationships();
 
 	std::shared_ptr<TypeDefinitionData const> getTypeDefinitionData(int tdId);
-	std::shared_ptr<PackFormatData> getPackFormatData(int tdId, int pfId);
-	std::shared_ptr<ChannelFormatData> getChannelFormatData(int tdId, int pfId, int cfId);
+	std::shared_ptr<PackFormatData const> getPackFormatData(int tdId, int pfId);
+	std::shared_ptr<ChannelFormatData const> getChannelFormatData(int tdId, int pfId, int cfId);
 
-	std::shared_ptr<PackFormatData> getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat);
-	std::shared_ptr<PackFormatData> getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat);
+	std::shared_ptr<PackFormatData const> getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat);
+	std::shared_ptr<PackFormatData const> getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat);
 
 	static bool isCommonDefinition(int idValue);
 	static std::shared_ptr<adm::AudioPackFormat> copyMissingTreeElms(std::shared_ptr<adm::AudioPackFormat> srcPf, std::shared_ptr<adm::Document> dstDoc);
