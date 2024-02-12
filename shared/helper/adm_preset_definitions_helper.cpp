@@ -114,7 +114,7 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 	return holder;
 }
 
-std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> AdmPresetDefinitionsHelper::getElementRelationships()
+std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const>> AdmPresetDefinitionsHelper::getElementRelationships()
 {
 	if (!presetDefinitions) {
 		//presetDefinitions = adm::getCommonDefinitions();
@@ -130,7 +130,7 @@ std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData>> Adm
 	return typeDefinitionDatas;
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData> AdmPresetDefinitionsHelper::getTypeDefinitionData(int tdId)
+std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const> AdmPresetDefinitionsHelper::getTypeDefinitionData(int tdId)
 {
 	getElementRelationships(); // Ensures populated
 	if (tdId < 0 || tdId >= typeDefinitionDatas.size()) {
