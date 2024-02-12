@@ -60,8 +60,8 @@ class ValueBoxMain : public Component {
     auto pfDatas = tdData->relatedPackFormats;
     std::stable_sort(
         pfDatas.begin(), pfDatas.end(),
-        [](const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& a,
-           const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData>& b) {
+        [](const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const>& a,
+           const std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const>& b) {
           if (a->isCommonDefinition() != b->isCommonDefinition()) {
             return a->isCommonDefinition() > b->isCommonDefinition();
           }
