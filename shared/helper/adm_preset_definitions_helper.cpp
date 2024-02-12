@@ -78,7 +78,7 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 	holder.audioObject->addReference(holder.audioPackFormat);
 	if (pfData) {
 		for (auto const& cfData : pfData->relatedChannelFormats) {
-			if (!forSingleCfIdValue.has_value() || forSingleCfIdValue.value() == cfData->idValue) {
+			if (!forSingleCfIdValue || *forSingleCfIdValue == cfData->idValue) {
 				auto cfId = cfData->channelFormat->get<adm::AudioChannelFormatId>();
 				auto cf = document->lookup(cfId);
 				if (!cf) {
@@ -344,10 +344,10 @@ const bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition() c
 
 const std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel() const
 {
-	if (legacySpeakerLabel.has_value())
-		return legacySpeakerLabel.value();
-	if (ituLabel.has_value())
-		return ituLabel.value();
+	if (legacySpeakerLabel)
+		return *legacySpeakerLabel;
+	if (ituLabel)
+		return *ituLabel;
 	if (speakerLabels.size() > 0)
 		return speakerLabels[0];
 	return name;
@@ -414,7 +414,7 @@ void AdmPresetDefinitionsHelper::PackFormatData::setLabels()
 		}
 	}
 
-	niceName = ituLabel.has_value() ? ituLabel.value() : name;
+	niceName = ituLabel ? *ituLabel : name;
 	std::replace(niceName.begin(), niceName.end(), '_', ' ');
 	assert(niceName.length() > 0);
 	niceName[0] = toupper(niceName[0]);
