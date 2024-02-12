@@ -67,7 +67,7 @@ public:
 
 private:
     float distanceToEdge(float width, float height, float angleDegrees);
-    std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> pfData;
+    std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> pfData;
 
     Layer layer_;
     SpeakerLabelPlacement speakerPlacement_{};
