@@ -183,7 +183,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefin
 	auto cfs = packFormat->getReferences<adm::AudioChannelFormat>();
 	for (auto cf : cfs) {
 		auto cfIdValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
-		cfsToFind.push_back(std::make_pair(cfIdValue, cf));
+		cfsToFind.emplace_back(cfIdValue, std::move(cf));
 	}
 
 	auto td = packFormat->get<adm::TypeDescriptor>().get();
