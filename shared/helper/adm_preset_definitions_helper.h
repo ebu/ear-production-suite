@@ -108,7 +108,6 @@ public:
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
-	bool isEquivalentByProperties(std::shared_ptr<const adm::AudioChannelFormat> cfA, std::shared_ptr<const adm::AudioChannelFormat> cfB);
 	std::shared_ptr<adm::Document> presetDefinitions;
 	std::vector<std::shared_ptr<TypeDefinitionData const>> typeDefinitionDatas{ 6, nullptr }; // last elm index 5 (highest TD)
 };
