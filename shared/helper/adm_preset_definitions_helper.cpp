@@ -69,7 +69,6 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 		if (pfData->isCommonDefinition()) {
 			// common def but not already in doc
 			adm::addCommonDefinitionsTo(document);
-			auto pfData = getPackFormatData(td, pfIdVal);
 		}
 
 		// It's a supplementary definition - add the necessary PF/CF tree
