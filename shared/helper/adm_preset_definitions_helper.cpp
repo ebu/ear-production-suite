@@ -2,13 +2,12 @@
 #include <adm/common_definitions.hpp>
 #include <adm/parse.hpp>
 #include <algorithm>
-#include <string>
 #include <string_view>
 #include <sstream>
-#include <vector>
 #include <helper/container_helpers.hpp>
 #include <helper/supplementary_definitions.hpp>
 #include <helper/cartesianspeakerlayouts.h>
+#include <helper/adm_equality_helpers.h>
 
 namespace {
 	std::vector<std::string_view> splitString(const std::string& input, char delimiter, size_t maxElements) {
@@ -29,19 +28,6 @@ namespace {
 		result.push_back(str.substr(start));
 
 		return result;
-	}
-
-	template <typename Prop, typename Elm>
-	bool matchingProp(const Elm& elmA, const Elm& elmB) {
-		bool hasProp = elmA.template has<Prop>();
-		if (hasProp != elmB.template has<Prop>())
-			return false;
-		if (hasProp) {
-			auto valA = elmA.template get<Prop>();
-			auto valB = elmB.template get<Prop>();
-			if (valA != valB) return false;
-		}
-		return true;
 	}
 }
 
@@ -217,7 +203,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefin
 				}
 				// Custom CF's must be matched by properties, because they won't have consistent ID's
 				else {
-					if (!isEquivalentByProperties(pfDataCfDatas[i]->channelFormat, cfsToFind[i].second)) {
+					if (!adm::helpers::equality::isEquivalentByProperties(pfDataCfDatas[i]->channelFormat, cfsToFind[i].second)) {
 						matching = false;
 						break;
 					}
@@ -301,99 +287,6 @@ void AdmPresetDefinitionsHelper::recursePackFormatsForChannelFormats(std::shared
 		auto cfData = std::make_shared<ChannelFormatData>(cf, fromPackFormat);
 		forPackFormatData->relatedChannelFormats.push_back(cfData);
 	}
-}
-
-bool AdmPresetDefinitionsHelper::isEquivalentByProperties(std::shared_ptr<const adm::AudioChannelFormat> cfA, std::shared_ptr<const adm::AudioChannelFormat> cfB)
-{
-	auto td = cfA->get<adm::TypeDescriptor>();
-	if (td != cfB->get<adm::TypeDescriptor>())
-		return false;
-
-	// TODO: only support matching up DS AudioChannelFormats for now
-	if (td == adm::TypeDefinition::DIRECT_SPEAKERS) {
-		auto bfsA = cfA->getElements<adm::AudioBlockFormatDirectSpeakers>();
-		auto bfsB = cfB->getElements<adm::AudioBlockFormatDirectSpeakers>();
-		if (bfsA.size() != 1 || bfsB.size() != 1)
-			return false;
-		auto bfA = bfsA[0];
-		auto bfB = bfsB[0];
-
-		auto slsA = bfA.get<adm::SpeakerLabels>();
-		auto slsB = bfB.get<adm::SpeakerLabels>();
-		if (slsA.size() != slsB.size())
-			return false;
-		for (int i = 0; i < slsA.size(); ++i) {
-			if (slsA[i] != slsB[i])
-				return false;
-		}
-
-		if (!matchingProp<adm::Importance>(bfA, bfB)) return false;
-		if (!matchingProp<adm::HeadLocked>(bfA, bfB)) return false;
-
-		if (bfA.has<adm::Gain>() != bfB.has<adm::Gain>()) 
-			return false;
-		if (bfA.has<adm::Gain>()) {
-			if (bfA.get<adm::Gain>().get() != bfB.get<adm::Gain>().get())
-				return false;
-		}
-
-		if (bfA.has<adm::HeadphoneVirtualise>() != bfB.has<adm::HeadphoneVirtualise>())
-			return false;
-		if (bfA.has<adm::HeadphoneVirtualise>()) {
-			auto hpvA = bfA.get<adm::HeadphoneVirtualise>();
-			auto hpvB = bfB.get<adm::HeadphoneVirtualise>();
-			if (!matchingProp<adm::Bypass>(hpvA, hpvB))	return false;
-			if (!matchingProp<adm::DirectToReverberantRatio>(hpvA, hpvB)) return false;
-		}
-
-		if (bfA.has<adm::SphericalSpeakerPosition>() && bfB.has<adm::SphericalSpeakerPosition>()) {
-
-			auto spA = bfA.get<adm::SphericalSpeakerPosition>();
-			auto spB = bfB.get<adm::SphericalSpeakerPosition>();
-			if (!matchingProp<adm::Azimuth>(spA, spB)) return false;
-			if (!matchingProp<adm::AzimuthMin>(spA, spB)) return false;
-			if (!matchingProp<adm::AzimuthMax>(spA, spB)) return false;
-			if (!matchingProp<adm::Elevation>(spA, spB)) return false;
-			if (!matchingProp<adm::ElevationMin>(spA, spB)) return false;
-			if (!matchingProp<adm::ElevationMax>(spA, spB)) return false;
-			if (!matchingProp<adm::Distance>(spA, spB)) return false;
-			if (!matchingProp<adm::DistanceMin>(spA, spB)) return false;
-			if (!matchingProp<adm::DistanceMax>(spA, spB)) return false;
-
-			auto selA = spA.get<adm::ScreenEdgeLock>();
-			auto selB = spB.get<adm::ScreenEdgeLock>();
-			if (!matchingProp<adm::HorizontalEdge>(selA, selB)) return false;
-			if (!matchingProp<adm::VerticalEdge>(selA, selB)) return false;
-
-		}
-		else if (bfA.has<adm::CartesianSpeakerPosition>() && bfB.has<adm::CartesianSpeakerPosition>()) {
-
-			auto spA = bfA.get<adm::CartesianSpeakerPosition>();
-			auto spB = bfB.get<adm::CartesianSpeakerPosition>();
-			if (!matchingProp<adm::X>(spA, spB)) return false;
-			if (!matchingProp<adm::XMin>(spA, spB)) return false;
-			if (!matchingProp<adm::XMax>(spA, spB)) return false;
-			if (!matchingProp<adm::Y>(spA, spB)) return false;
-			if (!matchingProp<adm::YMin>(spA, spB)) return false;
-			if (!matchingProp<adm::YMax>(spA, spB)) return false;
-			if (!matchingProp<adm::Z>(spA, spB)) return false;
-			if (!matchingProp<adm::ZMin>(spA, spB)) return false;
-			if (!matchingProp<adm::ZMax>(spA, spB)) return false;
-
-			auto selA = spA.get<adm::ScreenEdgeLock>();
-			auto selB = spB.get<adm::ScreenEdgeLock>();
-			if (!matchingProp<adm::HorizontalEdge>(selA, selB)) return false;
-			if (!matchingProp<adm::VerticalEdge>(selA, selB)) return false;
-
-		}
-		else {
-			return false;
-		}
-
-		return true;
-	}
-
-	return false;
 }
 
 
