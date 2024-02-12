@@ -450,7 +450,7 @@ const bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition() c
 	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
 
-const std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel()
+const std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerLabel() const
 {
 	if (legacySpeakerLabel.has_value())
 		return legacySpeakerLabel.value();

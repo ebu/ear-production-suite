@@ -34,7 +34,7 @@ public:
 		float distance{ 1.f	};
 
 		const bool isCommonDefinition() const;
-		const std::string getBestSpeakerLabel();
+		const std::string getBestSpeakerLabel() const;
 
 	private:
 		void setItuLabels();
@@ -59,7 +59,7 @@ public:
 		std::optional<std::string> ituLabel;
 		std::optional<std::string> ituStandard;
 		std::shared_ptr<adm::AudioPackFormat> packFormat;
-		std::vector<std::shared_ptr<ChannelFormatData>> relatedChannelFormats;
+		std::vector<std::shared_ptr<ChannelFormatData const>> relatedChannelFormats;
 
 		const bool isCommonDefinition() const;
 
@@ -71,7 +71,7 @@ public:
 		int id{ 0 };
 		adm::TypeDescriptor typeDescriptor;
 		std::string name;
-		std::vector<std::shared_ptr<PackFormatData>> relatedPackFormats;
+		std::vector<std::shared_ptr<PackFormatData const>> relatedPackFormats;
 	};
 
 	struct ChannelTrackAssociation {
