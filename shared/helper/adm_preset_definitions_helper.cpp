@@ -139,7 +139,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const> AdmPresetD
 	return typeDefinitionDatas[tdId];
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatData(int tdId, int pfId)
+std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefinitionsHelper::getPackFormatData(int tdId, int pfId)
 {
 	auto td = getTypeDefinitionData(tdId);
 	if (!td) return nullptr;
@@ -149,7 +149,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 	return nullptr;
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper::ChannelFormatData> AdmPresetDefinitionsHelper::getChannelFormatData(int tdId, int pfId, int cfId)
+std::shared_ptr<AdmPresetDefinitionsHelper::ChannelFormatData const> AdmPresetDefinitionsHelper::getChannelFormatData(int tdId, int pfId, int cfId)
 {
 	auto pf = getPackFormatData(tdId, pfId);
 	if (!pf) return nullptr;
@@ -159,7 +159,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::ChannelFormatData> AdmPresetDefiniti
 	return nullptr;
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat)
+std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefinitionsHelper::getPackFormatData(std::shared_ptr<const adm::AudioPackFormat> packFormat)
 {
 	if (!packFormat) return nullptr;
 
@@ -190,7 +190,7 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitions
 	return nullptr;
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData> AdmPresetDefinitionsHelper::getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat)
+std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefinitionsHelper::getPackFormatDataByMatchingChannels(std::shared_ptr<const adm::AudioPackFormat> packFormat)
 {
 	if(!packFormat) return nullptr;
 
@@ -445,7 +445,7 @@ AdmPresetDefinitionsHelper::ChannelFormatData::~ChannelFormatData()
 {
 }
 
-const bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition()
+const bool AdmPresetDefinitionsHelper::ChannelFormatData::isCommonDefinition() const
 {
 	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
@@ -506,7 +506,7 @@ AdmPresetDefinitionsHelper::PackFormatData::~PackFormatData()
 {
 }
 
-const bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition()
+const bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition() const
 {
 	return AdmPresetDefinitionsHelper::isCommonDefinition(idValue);
 }
