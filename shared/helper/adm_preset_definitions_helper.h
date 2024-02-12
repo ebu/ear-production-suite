@@ -93,9 +93,9 @@ public:
 		const adm::AudioPackFormatId packFormatId,
 		std::optional<int> forSingleCfIdValue = {});
 
-	std::vector<std::shared_ptr<TypeDefinitionData>> getElementRelationships();
+	std::vector<std::shared_ptr<TypeDefinitionData const>> getElementRelationships();
 
-	std::shared_ptr<TypeDefinitionData> getTypeDefinitionData(int tdId);
+	std::shared_ptr<TypeDefinitionData const> getTypeDefinitionData(int tdId);
 	std::shared_ptr<PackFormatData> getPackFormatData(int tdId, int pfId);
 	std::shared_ptr<ChannelFormatData> getChannelFormatData(int tdId, int pfId, int cfId);
 
@@ -110,5 +110,5 @@ private:
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
 	bool isEquivalentByProperties(std::shared_ptr<const adm::AudioChannelFormat> cfA, std::shared_ptr<const adm::AudioChannelFormat> cfB);
 	std::shared_ptr<adm::Document> presetDefinitions;
-	std::vector<std::shared_ptr<TypeDefinitionData>> typeDefinitionDatas{ 6, nullptr }; // last elm index 5 (highest TD)
+	std::vector<std::shared_ptr<TypeDefinitionData const>> typeDefinitionDatas{ 6, nullptr }; // last elm index 5 (highest TD)
 };
