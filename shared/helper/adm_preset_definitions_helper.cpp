@@ -30,6 +30,22 @@ namespace {
 
 		return result;
 	}
+
+	bool getItuUrnDetails(const std::string& possItuUrn, const std::string& onlyForLabelType,
+		std::optional<std::string>& outItuStandard, std::optional<std::string>& outItuLabel)
+	{
+		if (possItuUrn.compare(0, 11, "urn:itu:bs:") == 0) {
+			auto sections = splitString(possItuUrn, ':', 7);
+			assert(sections.size() >= 7);
+			// we already know the first 3 elms are "urn", "itu", "bs"
+			if (sections.size() >= 7 && sections[5] == onlyForLabelType) {
+				outItuStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
+				outItuLabel = std::string(sections[6]);
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingleton()
@@ -355,16 +371,10 @@ const std::string AdmPresetDefinitionsHelper::ChannelFormatData::getBestSpeakerL
 
 void AdmPresetDefinitionsHelper::ChannelFormatData::setItuLabels()
 {
+	const std::string ituLabelType{ "speaker" };
 	for (auto const& speakerLabel : speakerLabels) {
-		if (speakerLabel.compare(0, 11, "urn:itu:bs:") == 0){
-			auto sections = splitString(speakerLabel, ':', 7);
-			// we already know the first 3 elms are "urn", "itu", "bs"
-			assert(sections.size() >= 7);
-			if (sections.size() >= 7 && sections[5] == "speaker") {
-				ituStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
-				ituLabel = std::string(sections[6]);
-				return;
-			}
+		if (getItuUrnDetails(speakerLabel, ituLabelType, ituStandard, ituLabel)) {
+			break;
 		}
 	}
 }
@@ -406,15 +416,8 @@ const bool AdmPresetDefinitionsHelper::PackFormatData::isCommonDefinition() cons
 
 void AdmPresetDefinitionsHelper::PackFormatData::setLabels()
 {
-	if (name.compare(0, 11, "urn:itu:bs:") == 0) {
-		auto sections = splitString(name, ':', 7);
-		// we already know the first 3 elms are "urn", "itu", "bs"
-		if (sections[5] == "pack") {
-			ituStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
-			ituLabel = std::string(sections[6]);
-		}
-	}
-
+	const std::string ituLabelType{ "pack" };
+	getItuUrnDetails(name, ituLabelType, ituStandard, ituLabel);
 	niceName = ituLabel ? *ituLabel : name;
 	std::replace(niceName.begin(), niceName.end(), '_', ' ');
 	assert(niceName.length() > 0);
