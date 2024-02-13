@@ -290,14 +290,13 @@ void AdmPresetDefinitionsHelper::recursePackFormatsForChannelFormats(std::shared
 
 
 
-AdmPresetDefinitionsHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<adm::AudioChannelFormat> cf, std::shared_ptr<adm::AudioPackFormat> fromPackFormat)
+AdmPresetDefinitionsHelper::ChannelFormatData::ChannelFormatData(std::shared_ptr<adm::AudioChannelFormat> cf, std::shared_ptr<adm::AudioPackFormat> fromPackFormat) :
+	idValue{ static_cast<int>(cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get()) },
+	fullId{ adm::formatId(cf->get<adm::AudioChannelFormatId>()) },
+	name{ cf->get<adm::AudioChannelFormatName>().get() },
+	channelFormat{ cf },
+	immediatePackFormat{ fromPackFormat }
 {
-	idValue = cf->get<adm::AudioChannelFormatId>().get<adm::AudioChannelFormatIdValue>().get();
-	fullId = adm::formatId(cf->get<adm::AudioChannelFormatId>());
-	name = cf->get<adm::AudioChannelFormatName>().get();
-	channelFormat = cf;
-	immediatePackFormat = fromPackFormat;
-
 	if (cf->has<adm::Frequency>()) {
 		auto freq = cf->get<adm::Frequency>();
 		isLfe = adm::isLowPass(freq);
@@ -385,12 +384,12 @@ void AdmPresetDefinitionsHelper::ChannelFormatData::setLegacySpeakerLabel()
 	}
 }
 
-AdmPresetDefinitionsHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::AudioPackFormat> pf)
+AdmPresetDefinitionsHelper::PackFormatData::PackFormatData(std::shared_ptr<adm::AudioPackFormat> pf) :
+	idValue{ static_cast<int>(pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get()) },
+	fullId{ adm::formatId(pf->get<adm::AudioPackFormatId>()) },
+	name{ pf->get<adm::AudioPackFormatName>().get() },
+	packFormat{ pf }
 {
-	idValue = pf->get<adm::AudioPackFormatId>().get<adm::AudioPackFormatIdValue>().get();
-	fullId = adm::formatId(pf->get<adm::AudioPackFormatId>());
-	name = pf->get<adm::AudioPackFormatName>().get();
-	packFormat = pf;
 	setLabels();
 }
 
