@@ -289,8 +289,6 @@ void ear::plugin::ui::ProgrammesContainer::updateMeter(const proto::InputItemMet
       auto packFormatId = item.hoa_metadata().packformatidvalue();
       if(packFormatId >= 0) {
         auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-        auto elementRelationships =
-          commonDefinitionHelper->getElementRelationships();
         auto pfData =
           commonDefinitionHelper->getPackFormatData(4, packFormatId);
         if(pfData) {

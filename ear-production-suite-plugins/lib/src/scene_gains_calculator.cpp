@@ -51,9 +51,7 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
       directSpeakersCalculator_{outputLayout},
       hoaCalculator_{outputLayout},
       totalOutputChannels{static_cast<int>(outputLayout.channels().size())},
-      totalInputChannels{inputChannelCount} {
-  commonDefinitionHelper_.getElementRelationships();
-}
+      totalInputChannels{inputChannelCount} {}
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
   // Called by NNG callback on thread with small stack.
