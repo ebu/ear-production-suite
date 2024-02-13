@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string_view>
 #include <sstream>
+#include <cassert>
 #include <helper/container_helpers.hpp>
 #include <helper/supplementary_definitions.hpp>
 #include <helper/cartesianspeakerlayouts.h>
@@ -358,7 +359,8 @@ void AdmPresetDefinitionsHelper::ChannelFormatData::setItuLabels()
 		if (speakerLabel.compare(0, 11, "urn:itu:bs:") == 0){
 			auto sections = splitString(speakerLabel, ':', 7);
 			// we already know the first 3 elms are "urn", "itu", "bs"
-			if (sections[5] == "speaker") {
+			assert(sections.size() >= 7);
+			if (sections.size() >= 7 && sections[5] == "speaker") {
 				ituStandard = std::string("BS.").append(sections[3]).append("-").append(sections[4]);
 				ituLabel = std::string(sections[6]);
 				return;
