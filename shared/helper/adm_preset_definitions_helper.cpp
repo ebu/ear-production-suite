@@ -48,6 +48,18 @@ namespace {
 	}
 }
 
+AdmPresetDefinitionsHelper::AdmPresetDefinitionsHelper()
+{
+	std::istringstream xmlIs{ xmlSupplementaryDefinitions };
+	presetDefinitions = adm::parseXml(xmlIs, adm::xml::ParserOptions::recursive_node_search); // will also add common defs
+	populateElementRelationshipsFor(adm::TypeDefinition::UNDEFINED);
+	populateElementRelationshipsFor(adm::TypeDefinition::OBJECTS);
+	populateElementRelationshipsFor(adm::TypeDefinition::MATRIX);
+	populateElementRelationshipsFor(adm::TypeDefinition::DIRECT_SPEAKERS);
+	populateElementRelationshipsFor(adm::TypeDefinition::HOA);
+	populateElementRelationshipsFor(adm::TypeDefinition::BINAURAL);
+}
+
 std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingleton()
 {
 	static auto instance = std::make_shared<AdmPresetDefinitionsHelper>();
@@ -129,23 +141,11 @@ AdmPresetDefinitionsHelper::getDocumentAudioPackFormat(std::shared_ptr<adm::Docu
 
 std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const>> AdmPresetDefinitionsHelper::getElementRelationships()
 {
-	if (!presetDefinitions) {
-		//presetDefinitions = adm::getCommonDefinitions();
-		std::istringstream xmlIs { xmlSupplementaryDefinitions };
-		presetDefinitions = adm::parseXml(xmlIs, adm::xml::ParserOptions::recursive_node_search); // will also add common defs
-		populateElementRelationshipsFor(adm::TypeDefinition::UNDEFINED);
-		populateElementRelationshipsFor(adm::TypeDefinition::OBJECTS);
-		populateElementRelationshipsFor(adm::TypeDefinition::MATRIX);
-		populateElementRelationshipsFor(adm::TypeDefinition::DIRECT_SPEAKERS);
-		populateElementRelationshipsFor(adm::TypeDefinition::HOA);
-		populateElementRelationshipsFor(adm::TypeDefinition::BINAURAL);
-	}
 	return typeDefinitionDatas;
 }
 
 std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const> AdmPresetDefinitionsHelper::getTypeDefinitionData(int tdId)
 {
-	getElementRelationships(); // Ensures populated
 	if (tdId < 0 || tdId >= typeDefinitionDatas.size()) {
 		return nullptr;
 	}

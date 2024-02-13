@@ -61,16 +61,9 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(hoaTypeLabel_.get());
 
     auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-    auto elementRelationships =
-        commonDefinitionHelper->getElementRelationships();
-    for (auto const& tdData : elementRelationships) {
-      if (tdData->id == 4) {
-        auto packData = tdData->relatedPackFormats;
-        for (auto const& pfData : packData) {
-          auto entry = hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
-          entry->setLightFont(!pfData->isCommonDefinition());
-        }
-      }
+    for (auto const& pfData : commonDefinitionHelper->getTypeDefinitionData(4)->relatedPackFormats) {
+      auto entry = hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
+      entry->setLightFont(!pfData->isCommonDefinition());
     }
 
     hoaTypeComboBox_->setDefaultText("Select HOA Type");

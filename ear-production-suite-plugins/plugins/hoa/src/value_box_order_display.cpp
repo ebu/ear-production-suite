@@ -76,7 +76,6 @@ void ValueBoxOrderDisplay::clearHoaSetup() {
 void ValueBoxOrderDisplay::setHoaType(int hoaId) {
   clearHoaSetup();
   auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-  auto elementRelationships = commonDefinitionHelper->getElementRelationships();
   auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
   size_t cfCount(0);
   if (pfData) {
