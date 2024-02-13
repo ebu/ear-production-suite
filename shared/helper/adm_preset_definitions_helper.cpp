@@ -217,28 +217,25 @@ std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const> AdmPresetDefin
 	auto td = packFormat->get<adm::TypeDescriptor>().get();
 	for (auto pfData : getTypeDefinitionData(td)->relatedPackFormats) {
 		auto pfDataCfDatas = pfData->relatedChannelFormats;
-		if (pfDataCfDatas.size() == cfsToFind.size()) {
-			bool matching = true;
-			// Ordering must also be exact
-			for (int i = 0; i < pfDataCfDatas.size(); ++i) {
+		// CF Ordering must also be exact
+		auto matching = std::equal(
+			pfDataCfDatas.begin(), pfDataCfDatas.end(),
+			cfsToFind.begin(), cfsToFind.end(),
+			[this](auto const& presetData, auto const& toFind) {
+			auto const& [idToFind, channelFormatToFind] = toFind; // this just decomposes the std::pair
+
+			if (isCommonDefinition(idToFind)) {
 				// Common Defs must always be matched by ID, because they're consistent
-				if (isCommonDefinition(cfsToFind[i].first)) {
-					if (pfDataCfDatas[i]->idValue != cfsToFind[i].first) {
-						matching = false;
-						break;
-					}
-				}
+				return presetData->idValue == idToFind;
+			}
+			else {
 				// Custom CF's must be matched by properties, because they won't have consistent ID's
-				else {
-					if (!adm::helpers::equality::isEquivalentByProperties(pfDataCfDatas[i]->channelFormat, cfsToFind[i].second)) {
-						matching = false;
-						break;
-					}
-				}
+				return adm::helpers::equality::isEquivalentByProperties(presetData->channelFormat, channelFormatToFind);
 			}
-			if (matching) {
-				return pfData;
-			}
+		});
+
+		if (matching) {
+			return pfData;
 		}
 	}
 
