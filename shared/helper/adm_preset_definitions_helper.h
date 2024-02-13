@@ -10,7 +10,7 @@
 
 class AdmPresetDefinitionsHelper {
 public:
-	AdmPresetDefinitionsHelper() = default;
+	AdmPresetDefinitionsHelper();
 	~AdmPresetDefinitionsHelper() = default;
 
 	static std::shared_ptr<AdmPresetDefinitionsHelper> getSingleton();
@@ -95,7 +95,6 @@ public:
 		std::optional<int> forSingleCfIdValue = {});
 
 	std::vector<std::shared_ptr<TypeDefinitionData const>> getElementRelationships();
-
 	std::shared_ptr<TypeDefinitionData const> getTypeDefinitionData(int tdId);
 	std::shared_ptr<PackFormatData const> getPackFormatData(int tdId, int pfId);
 	std::shared_ptr<ChannelFormatData const> getChannelFormatData(int tdId, int pfId, int cfId);

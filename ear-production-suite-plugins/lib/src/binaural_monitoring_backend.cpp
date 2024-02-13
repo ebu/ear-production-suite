@@ -38,9 +38,6 @@ BinauralMonitoringBackend::BinauralMonitoringBackend(
   activeObjectIds.reserve(inputChannelCount);
   activeHoaIds.reserve(inputChannelCount);
 
-  commonDefinitionHelper
-      .getElementRelationships();  // Save doing it later in time-critical calls
-
   allActiveIds.reserve(inputChannelCount);
 
   controlConnection_.logger(logger_);
