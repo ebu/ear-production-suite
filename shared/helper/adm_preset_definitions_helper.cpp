@@ -68,35 +68,10 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 {
 	ObjectHolder holder;
 	holder.audioObject = existingAudioObject;
-
-	auto td = packFormatId.get<adm::TypeDescriptor>().get();
-	auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
-	auto pfData = getPackFormatData(td, pfIdVal);
-	holder.audioPackFormat = document->lookup(packFormatId);
-
-	if (!holder.audioPackFormat) {
-		if (!pfData) {
-			// not a preset (not a common def or supplementary def)
-			std::stringstream ss;
-			ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
-				<< "\" not found in Preset Definitions. Can't author ADM.";
-			throw adm::error::AdmException(ss.str());
-		}
-
-		if (pfData->isCommonDefinition()) {
-			// common def but not already in doc
-			adm::addCommonDefinitionsTo(document);
-			holder.audioPackFormat = document->lookup(packFormatId);
-			// should never be null - common defs are common
-			assert(holder.audioPackFormat);
-		}
-		else {
-			// it's a supplementary definition - add the necessary PF/CF tree
-			holder.audioPackFormat = copyMissingTreeElms(pfData->packFormat, document);
-		}
-	}
-
+	auto [audioPackFormat, pfData] = getDocumentAudioPackFormat(document, packFormatId);
+	holder.audioPackFormat = audioPackFormat;
 	holder.audioObject->addReference(holder.audioPackFormat);
+
 	if (pfData) {
 		for (auto const& cfData : pfData->relatedChannelFormats) {
 			if (!forSingleCfIdValue || *forSingleCfIdValue == cfData->idValue) {
@@ -118,6 +93,38 @@ AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::setupPreset
 	}
 	document->add(holder.audioObject);
 	return holder;
+}
+
+std::tuple<std::shared_ptr<adm::AudioPackFormat>, std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const>>  
+AdmPresetDefinitionsHelper::getDocumentAudioPackFormat(std::shared_ptr<adm::Document> document, const adm::AudioPackFormatId packFormatId)
+{
+	auto td = packFormatId.get<adm::TypeDescriptor>().get();
+	auto pfIdVal = packFormatId.get<adm::AudioPackFormatIdValue>().get();
+	auto pfData = getPackFormatData(td, pfIdVal);
+
+	if (!pfData) {
+		// not a preset (not a common def or supplementary def)
+		std::stringstream ss;
+		ss << "AudioPackFormatId \"" << adm::formatId(packFormatId)
+			<< "\" not found in Preset Definitions. Can't author ADM.";
+		throw adm::error::AdmException(ss.str());
+	}
+
+	auto audioPackFormat = document->lookup(packFormatId);
+	if (!audioPackFormat) {
+		if (pfData->isCommonDefinition()) {
+			// common def but not already in doc
+			adm::addCommonDefinitionsTo(document);
+			audioPackFormat = document->lookup(packFormatId);
+			// should never be null - common defs are common
+			assert(audioPackFormat);
+		}
+		else {
+			// it's a supplementary definition - add the necessary PF/CF tree
+			audioPackFormat = copyMissingTreeElms(pfData->packFormat, document);
+		}
+	}
+	return std::make_tuple(audioPackFormat, pfData);
 }
 
 std::vector<std::shared_ptr<AdmPresetDefinitionsHelper::TypeDefinitionData const>> AdmPresetDefinitionsHelper::getElementRelationships()

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <optional>
+#include <tuple>
 #include <adm/adm.hpp>
 
 class AdmPresetDefinitionsHelper {
@@ -108,6 +109,11 @@ public:
 private:
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
+	std::tuple<std::shared_ptr<adm::AudioPackFormat>, 
+		std::shared_ptr<AdmPresetDefinitionsHelper::PackFormatData const>> 
+		getDocumentAudioPackFormat(std::shared_ptr<adm::Document> document,
+		const adm::AudioPackFormatId packFormatId);
+
 	std::shared_ptr<adm::Document> presetDefinitions;
 	std::vector<std::shared_ptr<TypeDefinitionData const>> typeDefinitionDatas{ 6, nullptr }; // last elm index 5 (highest TD)
 };
