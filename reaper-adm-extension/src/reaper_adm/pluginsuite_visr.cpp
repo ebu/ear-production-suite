@@ -83,7 +83,7 @@ namespace {
             vst.setAdmTypeDefinition(td);
 
             // Set PackFormat and ChannelFormat. Only supporting Preset Definitions. Set defaults if not Preset Definition.
-            auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(packFormat);
+            auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(packFormat);
             vst.setAdmPackFormat(pfData ? pfData->idValue : ADM_VST_PACKFORMAT_UNSET_ID);
             vst.setAdmChannelFormat(ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID);
         }
@@ -297,7 +297,7 @@ void VisrPluginSuite::onDirectSpeakersAutomation(DirectSpeakersAutomation const&
     configureAdmExportVst(automationNode, *track, api);
 
     if(automationNode.channel().channelFormat()) {
-        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(automationNode.channel().packFormat());
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(automationNode.channel().packFormat());
         if (pfData) {
             auto& commonTrack = getCommonTrack(automationNode, api);
             track->routeTo(commonTrack, 1, automationNode.channelIndex());

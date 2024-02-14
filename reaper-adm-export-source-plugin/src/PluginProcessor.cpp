@@ -2,6 +2,7 @@
 #include "PluginProcessor.h"
 #include <fstream>
 #include <daw_channel_count.h>
+#include <helper/adm_preset_definitions_helper.h>
 
 AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -209,6 +210,7 @@ int AdmStemPluginAudioProcessor::calcNumChannels()
     auto selPf = admPackFormatParam->get();
     auto selCf = admChannelFormatParam->get();
 
+    auto& admPresetDefinitions = AdmPresetDefinitionsHelper::getSingleton();
     auto packFormatData = admPresetDefinitions.getPackFormatData(selTd, selPf);
     if(!packFormatData) return 0;
 
@@ -235,6 +237,7 @@ void AdmStemPluginAudioProcessor::updateAdmParameters(bool force)
     int valTypeDefinition = desiredTypeDefinition;
     int valPackFormat = PACKFORMAT_UNSET_ID;
     int valChannelFormat = CHANNELFORMAT_ALLCHANNELS_ID;
+    auto& admPresetDefinitions = AdmPresetDefinitionsHelper::getSingleton();
 
     if(admPresetDefinitions.getPackFormatData(valTypeDefinition, desiredPackFormat)) {
         valPackFormat = desiredPackFormat;

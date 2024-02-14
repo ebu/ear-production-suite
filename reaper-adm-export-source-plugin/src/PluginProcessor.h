@@ -12,7 +12,6 @@
 
 #include "helper/nng_wrappers.h"
 #include "JuceHeader_Wrapper.h"
-#include "helper/adm_preset_definitions_helper.h"
 #include "PluginProcessorUtils.h"
 #include <functional>
 #include <memory>
@@ -79,8 +78,6 @@ public:
     void admChannelFormatChanged();
 
     void incomingMessage(std::shared_ptr<NngMsg> msg);
-
-    AdmPresetDefinitionsHelper admPresetDefinitions{};
 
 private:
     AdmStemPluginAudioProcessorEditor* editor();

@@ -67,7 +67,7 @@ EarMonitoringAudioProcessorEditor::EarMonitoringAudioProcessorEditor(
   auto apfid = adm::parseAudioPackFormatId(AUDIO_PACK_FORMAT_ID);
   auto idValue = apfid.get<adm::AudioPackFormatIdValue>().get();
   auto typeDef = apfid.get<adm::TypeDescriptor>().get();
-  auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(
+  auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
       typeDef, idValue);
   if (pfData) {
     for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {

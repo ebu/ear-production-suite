@@ -10,10 +10,12 @@
 
 class AdmPresetDefinitionsHelper {
 public:
-	AdmPresetDefinitionsHelper();
-	~AdmPresetDefinitionsHelper() = default;
+	static AdmPresetDefinitionsHelper& getSingleton();
 
-	static std::shared_ptr<AdmPresetDefinitionsHelper> getSingleton();
+	AdmPresetDefinitionsHelper(AdmPresetDefinitionsHelper const&) = delete;             // copy ctor
+	AdmPresetDefinitionsHelper(AdmPresetDefinitionsHelper&&) = delete;                  // move ctor
+	AdmPresetDefinitionsHelper& operator=(AdmPresetDefinitionsHelper const&) = delete;	// copy assign
+	AdmPresetDefinitionsHelper& operator=(AdmPresetDefinitionsHelper&&) = delete;       // move assign
 
 	class ChannelFormatData {
 	public:
@@ -106,6 +108,8 @@ public:
 	static std::shared_ptr<adm::AudioPackFormat> copyMissingTreeElms(std::shared_ptr<adm::AudioPackFormat> srcPf, std::shared_ptr<adm::Document> dstDoc);
 
 private:
+	AdmPresetDefinitionsHelper();
+
 	void populateElementRelationshipsFor(adm::TypeDescriptor);
 	void recursePackFormatsForChannelFormats(std::shared_ptr<adm::AudioPackFormat> fromPackFormat, std::shared_ptr<PackFormatData> forPackFormatData);
 	std::tuple<std::shared_ptr<adm::AudioPackFormat>, 

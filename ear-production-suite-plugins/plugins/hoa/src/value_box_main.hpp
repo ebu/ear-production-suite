@@ -60,8 +60,9 @@ class ValueBoxMain : public Component {
     hoaTypeLabel_->setJustificationType(Justification::right);
     addAndMakeVisible(hoaTypeLabel_.get());
 
-    auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-    for (auto const& pfData : commonDefinitionHelper->getTypeDefinitionData(4)->relatedPackFormats) {
+    auto& admPresetDefinitions = AdmPresetDefinitionsHelper::getSingleton();
+    for (auto const& pfData :
+         admPresetDefinitions.getTypeDefinitionData(4)->relatedPackFormats) {
       auto entry = hoaTypeComboBox_->addTextEntry(pfData->niceName, pfData->idValue);
       entry->setLightFont(!pfData->isCommonDefinition());
     }

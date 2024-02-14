@@ -75,8 +75,8 @@ void ValueBoxOrderDisplay::clearHoaSetup() {
 
 void ValueBoxOrderDisplay::setHoaType(int hoaId) {
   clearHoaSetup();
-  auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-  auto pfData = commonDefinitionHelper->getPackFormatData(4, hoaId);
+  auto pfData =
+      AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(4, hoaId);
   size_t cfCount(0);
   if (pfData) {
     cfCount = static_cast<size_t>(pfData->relatedChannelFormats.size());

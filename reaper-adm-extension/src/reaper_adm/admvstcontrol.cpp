@@ -149,7 +149,7 @@ bool AdmVst::isUsingPresetDefinition()
 {
     auto td = getAdmTypeDefinition();
     auto pfId = getAdmPackFormat();
-    auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(td, pfId);
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(td, pfId);
     return pfData != nullptr;
 }
 

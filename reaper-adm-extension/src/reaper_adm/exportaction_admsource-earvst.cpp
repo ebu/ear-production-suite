@@ -225,7 +225,7 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                 admElements->audioObject->set(adm::Duration{ duration });
             }
 
-            const bool isPresetDef = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(admElements->audioPackFormat) != nullptr;
+            const bool isPresetDef = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(admElements->audioPackFormat) != nullptr;
             const bool isObjectType = admElements->typeDescriptor == adm::TypeDefinition::OBJECTS;
 
             if (!isPresetDef) {

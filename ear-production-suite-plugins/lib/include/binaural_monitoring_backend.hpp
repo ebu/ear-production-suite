@@ -6,7 +6,6 @@
 #include "ear-plugin-base/export.h"
 #include "scene_gains_calculator.hpp"
 #include "listener_orientation.hpp"
-#include "helper/adm_preset_definitions_helper.h"
 
 #include <string>
 #include <memory>
@@ -102,9 +101,6 @@ class BinauralMonitoringBackend {
   ui::MonitoringFrontendBackendConnector* frontendConnector_;
   std::unique_ptr<communication::MonitoringMetadataReceiver> metadataReceiver_;
   communication::MonitoringControlConnection controlConnection_;
-
-  std::mutex commonDefinitionHelperMutex_;
-  AdmPresetDefinitionsHelper commonDefinitionHelper{};
 
   bool isExporting_{ false };
 };

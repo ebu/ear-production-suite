@@ -150,15 +150,12 @@ BinauralMonitoringBackend::getLatestHoaTypeMetadata(ConnId id) {
   if (!epsMD || !epsMD->has_hoa_metadata()) {
     return std::optional<HoaEarMetadataAndRouting>();
   }
-  {
-    std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-    setInMap<ConnId, HoaEarMetadataAndRouting>(
-        latestHoaTypeMetadata, id,
-        HoaEarMetadataAndRouting{
-            epsMD->has_routing() ? epsMD->routing() : -1,
-            EpsToEarMetadataConverter::convert(epsMD->hoa_metadata(),
-                                               commonDefinitionHelper)});
-  }
+
+  setInMap<ConnId, HoaEarMetadataAndRouting>(
+      latestHoaTypeMetadata, id,
+      HoaEarMetadataAndRouting{
+          epsMD->has_routing() ? epsMD->routing() : -1,
+          EpsToEarMetadataConverter::convert(epsMD->hoa_metadata())});
 
   earMD = getValuePointerFromMap<ConnId, HoaEarMetadataAndRouting>(
       latestHoaTypeMetadata, id);
@@ -226,15 +223,14 @@ void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
     }
     if (item.has_hoa_metadata()) {
       auto hoaId = item.hoa_metadata().packformatidvalue();
-      {
-        std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-        // TODO: May need to revisit later -
-        //       this is a high-frequency call but may be slow to to execute
-        auto pfData = commonDefinitionHelper.getPackFormatData(4, hoaId);
-        if (pfData) {
-          auto cfCount = pfData->relatedChannelFormats.size();
-          totalHoaChannels += cfCount;
-        }
+      // TODO: May need to revisit later -
+      //       this is a high-frequency call but may be slow to to execute
+      auto pfData =
+          AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(4,
+                                                                       hoaId);
+      if (pfData) {
+        auto cfCount = pfData->relatedChannelFormats.size();
+        totalHoaChannels += cfCount;
       }
     }
   }
