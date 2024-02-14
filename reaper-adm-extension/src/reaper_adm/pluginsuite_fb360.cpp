@@ -88,10 +88,11 @@ namespace {
             auto td = packFormat->get<adm::TypeDescriptor>().get();
             vst.setAdmTypeDefinition(td);
 
-            auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(packFormat);
+            auto& admPresetDefinitions = AdmPresetDefinitionsHelper::getSingleton();
+            auto pfData = admPresetDefinitions.getPackFormatData(packFormat);
             if(packFormatIdValueOverride > 0) {
                 // Overridden - pull out correct pack
-                pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(td, packFormatIdValueOverride);
+                pfData = admPresetDefinitions.getPackFormatData(td, packFormatIdValueOverride);
             }
 
             // Set PackFormat and ChannelFormat. Only supporting Preset Definitions. Set defaults if not Preset Definition.
@@ -295,7 +296,7 @@ void Facebook360PluginSuite::onDirectSpeakersAutomation(const DirectSpeakersAuto
     auto trackWidth = static_cast<int>(take->channelCount());
     track->setChannelCount(trackWidth);
 
-    auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(directAutomation.channel().packFormat());
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(directAutomation.channel().packFormat());
     if (pfData) {
         int fxNum = api.TrackFX_AddByActualName(track->get(), AdmVst::getVstNameStr()->c_str(), false, TrackFXAddMode::QueryPresence);
         if(fxNum < 0) {
@@ -331,7 +332,7 @@ void Facebook360PluginSuite::onHoaAutomation(const HoaAutomation & hoaAutomation
     if(applyFXPreset(hoaAutomation, api)) {
 
         // Configure plug-ins
-        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(hoaAutomation.channel().packFormat());
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(hoaAutomation.channel().packFormat());
         if (pfData) {
             configureAdmExportVst(hoaAutomation, *track, api);
 

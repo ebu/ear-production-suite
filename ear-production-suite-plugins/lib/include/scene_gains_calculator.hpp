@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "helper/adm_preset_definitions_helper.h"
 
 namespace ear {
 namespace plugin {
@@ -44,9 +43,6 @@ class SceneGainsCalculator {
   ear::GainCalculatorHOA hoaCalculator_;
 
   std::map<communication::ConnectionId, ItemGains> routingCache_;
-
-  std::mutex commonDefinitionHelperMutex_;
-  AdmPresetDefinitionsHelper commonDefinitionHelper_{};
 };
 
 }  // namespace plugin

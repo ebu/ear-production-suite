@@ -151,10 +151,7 @@ void SceneGainsCalculator::addOrUpdateItem(const proto::MonitoringItemMetadata &
 
   if(item.has_hoa_metadata()) {
     ear::HOATypeMetadata earMetadata;
-    {
-      std::lock_guard<std::mutex> lock(commonDefinitionHelperMutex_);
-      earMetadata = EpsToEarMetadataConverter::convert(item.hoa_metadata(), commonDefinitionHelper_);
-    }
+    earMetadata = EpsToEarMetadataConverter::convert(item.hoa_metadata());
     routing->inputStartingChannel = item.routing();
     int inputChannelCount = static_cast<int>(earMetadata.degrees.size());
     resizeGainTables(*routing, inputChannelCount, totalOutputChannels);

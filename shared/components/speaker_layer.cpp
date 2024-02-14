@@ -26,7 +26,7 @@ void SpeakerLayer::clearSpeakerSetup() {
 }
 
 void SpeakerLayer::setSpeakerSetupPackFormat(int pfId) {
-    pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, pfId);
+    pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(1, pfId);
     repaint();
 }
 
