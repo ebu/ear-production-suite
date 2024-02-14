@@ -60,10 +60,10 @@ AdmPresetDefinitionsHelper::AdmPresetDefinitionsHelper()
 	populateElementRelationshipsFor(adm::TypeDefinition::BINAURAL);
 }
 
-std::shared_ptr<AdmPresetDefinitionsHelper> AdmPresetDefinitionsHelper::getSingleton()
+AdmPresetDefinitionsHelper& AdmPresetDefinitionsHelper::getSingleton()
 {
-	static auto instance = std::make_shared<AdmPresetDefinitionsHelper>();
-	return instance;
+	static auto* instance = new AdmPresetDefinitionsHelper();
+	return *instance;
 }
 
 AdmPresetDefinitionsHelper::ObjectHolder AdmPresetDefinitionsHelper::addPresetDefinitionObjectTo(

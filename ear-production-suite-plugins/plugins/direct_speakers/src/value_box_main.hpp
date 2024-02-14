@@ -56,7 +56,7 @@ class ValueBoxMain : public Component {
     addAndMakeVisible(speakerSetupLabel_.get());
     speakerSetupsComboBox_->setDefaultText("Select speaker layout");
 
-    auto tdData = AdmPresetDefinitionsHelper::getSingleton()->getTypeDefinitionData(1);
+    auto tdData = AdmPresetDefinitionsHelper::getSingleton().getTypeDefinitionData(1);
     auto pfDatas = tdData->relatedPackFormats;
     std::stable_sort(
         pfDatas.begin(), pfDatas.end(),

@@ -387,10 +387,10 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
             adm::TypeDefinition::HOA,
             adm::AudioPackFormatIdValue(
                 metadata.hoa_metadata().packformatidvalue()));
-       }
+      }
 
-      auto presets = AdmPresetDefinitionsHelper::getSingleton();
-      auto objectHolder = presets->addPresetDefinitionObjectTo(
+      auto objectHolder = AdmPresetDefinitionsHelper::getSingleton()
+                               .addPresetDefinitionObjectTo(
             doc, metadata.name(), audioPackFormatID);
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);

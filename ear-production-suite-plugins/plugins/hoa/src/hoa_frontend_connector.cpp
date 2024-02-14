@@ -168,7 +168,7 @@ void HoaJuceFrontendConnector::setHoaType(int hoaType) {
 
   auto packFormatIdValue = p_->getPackFormatIdValue()->get();
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
-    auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
         4, packFormatIdValue);
     size_t cfCount{0};
 

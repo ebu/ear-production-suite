@@ -129,7 +129,6 @@ auto createAdmDocument() {
 }
 
 auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, const std::string &pfIdStr) {
-    auto helper = AdmPresetDefinitionsHelper::getSingleton();
     auto obj = adm::AudioObject::create(adm::AudioObjectName("AO"));
     auto pfId = adm::parseAudioPackFormatId(pfIdStr);
     doc->add(obj);
@@ -138,7 +137,7 @@ auto createElementsFromCommonDefinition(std::shared_ptr<adm::Document> doc, cons
     auto pf = doc->lookup(pfId);
     obj->addReference(pf);
     //Use helper to recurse all nested PFs
-    auto pfData = helper->getPackFormatData(tdVal, pfIdVal);
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(tdVal, pfIdVal);
     auto cfs = pf->getReferences<adm::AudioChannelFormat>();
     for(auto relCf : pfData->relatedChannelFormats) {
         // Need the doc instance of the CF, not the helpers

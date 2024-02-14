@@ -1,7 +1,7 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
-#include "components/version_label.hpp"
-
+#include <components/version_label.hpp>
+#include <helper/adm_preset_definitions_helper.h>
 #include <chrono>
 
 using namespace ear::plugin::ui;
@@ -54,7 +54,7 @@ AdmStemPluginAudioProcessorEditor::AdmStemPluginAudioProcessorEditor (AdmStemPlu
     channelFormatLabel.setJustificationType(Justification::right);
     addAndMakeVisible(channelFormatLabel);
 
-    auto elementRelationships = processor.admPresetDefinitions.getElementRelationships();
+    auto elementRelationships = AdmPresetDefinitionsHelper::getSingleton().getElementRelationships();
 
     for(auto const& tdData : elementRelationships) {
         typeDefinitionSelector.addTextEntry(tdData->name, tdData->id);
@@ -175,7 +175,7 @@ void AdmStemPluginAudioProcessorEditor::updateComboBoxOptions(int tdId, int pfId
         channelFormatSelector.setDefaultText("Select Pack Format");
     }
 
-    auto typeDefinitionData = processor.admPresetDefinitions.getTypeDefinitionData(tdId);
+    auto typeDefinitionData = AdmPresetDefinitionsHelper::getSingleton().getTypeDefinitionData(tdId);
 
     if(typeDefinitionData) {
         for(auto& pfData : typeDefinitionData->relatedPackFormats) {

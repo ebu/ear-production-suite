@@ -182,7 +182,7 @@ void DirectSpeakersJuceFrontendConnector::setSpeakerSetupPackFormat(
   if (auto speakerSetupsComboBoxLocked = speakerSetupsComboBox_.lock())
     speakerSetupsComboBoxLocked->setSelectedId(speakerSetupPackFormatIdValue,
                                              dontSendNotification);
-  auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(
+  auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
       1, cachedPackFormatId_);
   if (auto routingComboBoxLocked = routingComboBox_.lock()) {
     int layoutSize = pfData ? pfData->relatedChannelFormats.size() : 0;

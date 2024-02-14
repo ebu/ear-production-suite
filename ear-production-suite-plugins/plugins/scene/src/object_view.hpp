@@ -224,16 +224,16 @@ class ObjectView : public ElementView,
     juce::String metadataLabelText;
     if (data_.item.has_ds_metadata()) {
       metadataLabelText = "DirectSpeakers";
-      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-      auto pfData = commonDefinitionHelper->getPackFormatData(
+      auto pfData =
+          AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
         1, data_.item.ds_metadata().packformatidvalue());
       if (pfData) {
         metadataLabelText = pfData->niceName;
       }
     } else if (data_.item.has_hoa_metadata()) {
       metadataLabelText = "HOA";
-      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-      auto pfData = commonDefinitionHelper->getPackFormatData(
+      auto pfData =
+          AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
         4, data_.item.hoa_metadata().packformatidvalue());
       if (pfData) {
         int cfCount = pfData->relatedChannelFormats.size();

@@ -8,12 +8,11 @@ namespace proto {
 
 proto::DirectSpeakersTypeMetadata* convertPackFormatToEpsMetadata(
     int packFormatIdValue) {
-  auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-
   auto ds_metadata = new proto::DirectSpeakersTypeMetadata();
   ds_metadata->set_packformatidvalue(packFormatIdValue);
 
-  auto pfData = commonDefinitionHelper->getPackFormatData(1, packFormatIdValue);
+  auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
+      1, packFormatIdValue);
   if (pfData) {
     for (auto const& cfData : pfData->relatedChannelFormats) {
       auto newSpeaker = ds_metadata->add_speakers();

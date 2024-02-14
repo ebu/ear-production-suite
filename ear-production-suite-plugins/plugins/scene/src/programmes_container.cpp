@@ -288,9 +288,9 @@ void ear::plugin::ui::ProgrammesContainer::updateMeter(const proto::InputItemMet
        oldItem.hoa_metadata().packformatidvalue() != item.hoa_metadata().packformatidvalue()) {
       auto packFormatId = item.hoa_metadata().packformatidvalue();
       if(packFormatId >= 0) {
-        auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
         auto pfData =
-          commonDefinitionHelper->getPackFormatData(4, packFormatId);
+            AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
+                4, packFormatId);
         if(pfData) {
           updateRequired = true;
           channelCount =

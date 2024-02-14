@@ -78,8 +78,9 @@ class ItemBuilder {
     ItemBuilder& withDsPackFormat(int pfId) {
       auto dsMeta = metadata_.mutable_ds_metadata();
       dsMeta->set_packformatidvalue(pfId);
-      auto commonDefinitionHelper = AdmPresetDefinitionsHelper::getSingleton();
-      auto pfData = commonDefinitionHelper->getPackFormatData(1, pfId);
+      auto pfData =
+          AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(1,
+                                                                        pfId);
       if (pfData) {
         for (auto const& cfData : pfData->relatedChannelFormats) {
           auto newSpeaker = dsMeta->add_speakers();

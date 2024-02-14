@@ -129,7 +129,7 @@ std::vector<int> determineUsedDirectSpeakersTrackMappingValues(PluginInstance& p
     assert(packFormatId.has_value());
 
     if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
-        auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, *packFormatId);
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(1, *packFormatId);
         if (pfData) {
             int trackWidth = pfData->relatedChannelFormats.size();
             for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
@@ -153,7 +153,7 @@ std::vector<int> determineUsedHoaTrackMappingValues(PluginInstance& plugin) {
 	assert(packFormatId.has_value());
 
 	if (trackMapping.has_value() && *trackMapping >= 0 && packFormatId.has_value()) {
-		auto pfData = AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(4, *packFormatId);
+		auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(4, *packFormatId);
 		if(pfData) {
 			int trackWidth = pfData->relatedChannelFormats.size();
 			for (int channelCounter = 0; channelCounter < trackWidth; channelCounter++) {
@@ -419,8 +419,7 @@ void EARPluginSuite::onCreateDirectTrack(TrackElement & trackElement, const Reap
     if(automationElements.size() > 0) {
         auto channel = automationElements.front()->channel();
         auto packFormat = channel.packFormat();
-        auto defs = AdmPresetDefinitionsHelper::getSingleton();
-        auto pfData = defs->getPackFormatData(packFormat);
+        auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(packFormat);
 
         if(pfData) {
             int32_t routingToScene = -1;

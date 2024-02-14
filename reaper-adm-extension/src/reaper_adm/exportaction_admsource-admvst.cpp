@@ -413,15 +413,15 @@ void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api, std::
 	int channelFormatIdValue = admExportVst->getAdmChannelFormat();
 	assert(packFormatIdValue != ADM_VST_PACKFORMAT_UNSET_ID);
 
-	auto presets = AdmPresetDefinitionsHelper::getSingleton();
-	auto pfData = presets->getPackFormatData(typeDefinitionValue, packFormatIdValue);
+	auto& presets = AdmPresetDefinitionsHelper::getSingleton();
+	auto pfData = presets.getPackFormatData(typeDefinitionValue, packFormatIdValue);
 
 	if (pfData) {
 		std::optional<int> specificCfIdValue;
 		if (channelFormatIdValue != ADM_VST_CHANNELFORMAT_ALLCHANNELS_ID)
 			specificCfIdValue = channelFormatIdValue;
 
-		auto holder = presets->setupPresetDefinitionObject(parentDocument, audioObject,
+		auto holder = presets.setupPresetDefinitionObject(parentDocument, audioObject,
 			pfData->packFormat->get<adm::AudioPackFormatId>(), specificCfIdValue);
 
 		audioPackFormat = holder.audioPackFormat;

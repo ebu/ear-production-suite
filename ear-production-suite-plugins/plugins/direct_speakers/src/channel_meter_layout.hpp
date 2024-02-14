@@ -95,7 +95,7 @@ class ChannelMeterLayout : public Component {
   void setSpeakerSetupPackFormat(int pfId) {
     clearSpeakerSetup();
     auto pfData =
-        AdmPresetDefinitionsHelper::getSingleton()->getPackFormatData(1, pfId);
+        AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(1, pfId);
     if (pfData) {
       for (int i = 0; i < pfData->relatedChannelFormats.size(); ++i) {
         auto cfData = pfData->relatedChannelFormats[i];

@@ -3,6 +3,7 @@
 #include "helper/protobuf_utilities.hpp"
 #include "helper/adm_preset_definitions_helper.h"
 #include <string>
+#include <memory>
 #include <adm/detail/id_parser.hpp>
 
 namespace ear {
@@ -54,11 +55,9 @@ struct EpsToEarMetadataConverter {
     return earMetadata;
   }
   static ear::HOATypeMetadata convert(
-      const proto::HoaTypeMetadata &epsMetadata,
-      AdmPresetDefinitionsHelper &commonDefinitionHelper) {
-    auto pfData = commonDefinitionHelper.getPackFormatData(
+      const proto::HoaTypeMetadata &epsMetadata) {
+    auto pfData = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(
         4, epsMetadata.packformatidvalue());
-
     ear::HOATypeMetadata earMetadata;
 
     if (pfData) {
