@@ -1,8 +1,8 @@
 #pragma once
 #include "JuceHeader.h"
-#include <memory>
 #include <vector>
 #include <functional>
+#include <boost/container/flat_map.hpp>
 
 namespace ear {
 namespace plugin {
@@ -17,25 +17,38 @@ class DataFileManager {
     juce::String label;
     juce::String description;
     bool isBearRelease{false};
+    friend bool operator<(DataFile const& lhs, DataFile const& rhs){
+      return lhs.fullPath.getFileName().compareIgnoreCase(rhs.fullPath.getFileName()) < 0;
+    }
+    friend bool operator==(DataFile const& lhs, DataFile const& rhs) {
+      return lhs.fullPath.getFileName().compareIgnoreCase(rhs.fullPath.getFileName()) == 0;
+    }
+    friend bool operator!=(DataFile const& lhs, DataFile const& rhs) {
+      return !(lhs == rhs);
+    }
   };
 
+  bool onlyContainsDefault() const;
   void updateAvailableFiles();
-  std::shared_ptr<DataFile> getSelectedDataFileInfo();
-  std::vector<std::shared_ptr<DataFile>> getAvailableDataFiles();
-  int getAvailableDataFilesCount();
+  std::optional<DataFile> getSelectedDataFileInfo() const;
+  std::vector<DataFile> getAvailableDataFiles() const;
   bool setSelectedDataFile(const juce::String& fullPath);
-  bool setSelectedDataFile(const juce::File& fullPath);
   bool setSelectedDataFileDefault();
-  std::shared_ptr<DataFile> getDataFileInfo(const juce::String& fullPath);
-  std::shared_ptr<DataFile> getDataFileInfo(const juce::File& fullPath);
   void onSelectedDataFileChange(
-      std::function<void(std::shared_ptr<DataFile>)> callback);
+      std::function<void(DataFile const&)> callback);
+  using FileMap = boost::container::flat_map<juce::File, DataFile>;
 
  private:
+  void setSelectedDataFile(DataFile const& file);
+  std::size_t getAvailableDataFilesCount() const;
+  bool setSelectedDataFile(const juce::File& fullPath);
+  std::optional<DataFile> getDataFileInfo(const juce::File& fullPath) const;
   juce::Array<juce::File> bearReleaseFiles_;
-  std::shared_ptr<DataFile> selectedDataFile_;
-  std::vector<std::shared_ptr<DataFile>> availableDataFiles_;
-  std::function<void(std::shared_ptr<DataFile>)> selectedDataFileChangeCallback_;
+  std::optional<DataFile> selectedDataFile_;
+  FileMap releasedDataFiles;
+  FileMap customDataFiles;
+
+  std::function<void(DataFile const&)> selectedDataFileChangeCallback_;
 };
 
 }  // namespace plugin

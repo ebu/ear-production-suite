@@ -2,13 +2,6 @@
 #include <bear/api.hpp>
 
 namespace {
-bool operator==(const ear::plugin::DataFileManager::DataFile& lhs,
-                const ear::plugin::DataFileManager::DataFile& rhs) {
-  return (lhs.filename == rhs.filename) && (lhs.fullPath == rhs.fullPath) &&
-         (lhs.isBearRelease == rhs.isBearRelease) && (lhs.label == rhs.label) &&
-         (lhs.description == rhs.description);
-}
-
 juce::File getBearDataFileDirectory() {
   auto vstPath = juce::File::getSpecialLocation(
       juce::File::SpecialLocationType::currentExecutableFile);
@@ -37,67 +30,88 @@ juce::File getCustomDataFileDirectory() {
 
 namespace ear {
 namespace plugin {
-
 DataFileManager::DataFileManager() {
   bearReleaseFiles_.add(
       getBearDataFileDirectory().getChildFile(BEAR_DATA_FILE));
   updateAvailableFiles();
 }
 
-void DataFileManager::updateAvailableFiles() {
-  // Start a new vec and copy existing shared_ptrs of unchanged files 
-  // This retains shared_ptrs unlike clear() and rebuild
-  std::vector<std::shared_ptr<DataFileManager::DataFile>> dfs;
-  // Lookup tfs where we expect to find custom files
-  auto files = getCustomDataFileDirectory().findChildFiles(
-      juce::File::TypesOfFileToFind::findFiles,
-                                    false, "*.tf");
-  // add our expected released files
-  for(auto const& bearReleaseFile : bearReleaseFiles_) {
-    if (bearReleaseFile.existsAsFile()) {
-      // note that in win, the released bear dir is the same as the custom
-      // dir, so we might have already found this with findChildFiles
-      files.addIfNotAlreadyThere(bearReleaseFile);
+namespace {
+void setFromMetadata(DataFileManager::DataFile& dataFile) {
+  try {
+    auto md = bear::DataFileMetadata::read_from_file(
+        dataFile.fullPath.getFullPathName().toStdString());
+    if (md.has_metadata()) {
+      dataFile.label = md.get_label();
+      dataFile.description = md.get_description();
+      dataFile.isBearRelease = md.is_released();
     }
   }
-  for (const auto& file : files) {
-    auto newDf = std::make_shared<DataFile>();
-    newDf->fullPath = file;
-    newDf->filename = file.getFileName();
-    try {
-      auto md = bear::DataFileMetadata::read_from_file(
-          file.getFullPathName().toStdString());
-      if (md.has_metadata()) {
-        newDf->label = md.get_label();
-        newDf->description = md.get_description();
-        newDf->isBearRelease = md.is_released();
-      }
-    } catch (std::exception) {
-    }
-    // Use the existing struct where possible (exists and is identical)
-    // -- this retains the same inst and shared_ptr
-    auto existingDf = getDataFileInfo(file.getFileName());
-    if (existingDf && *existingDf == *newDf) {
-      dfs.push_back(existingDf);
-    } else {
-      dfs.push_back(newDf);
-    }
+  catch(std::exception const&) {
+    // What are we (not) handling here?
   }
-  availableDataFiles_ = dfs;
 }
 
-std::shared_ptr<DataFileManager::DataFile>
-DataFileManager::getSelectedDataFileInfo() {
+void updateFile(juce::File const& file, DataFileManager::FileMap& file_map,
+                bool released) {
+  auto [it, success] = file_map.insert(
+      {file, DataFileManager::DataFile{.filename = file.getFileName(),
+                                       .fullPath = file,
+                                       .label = "",
+                                       .description = "",
+                                       .isBearRelease = released}});
+  if (success) {  // not already added
+    setFromMetadata(it->second);
+  }
+}
+}  // namespace
+
+bool DataFileManager::onlyContainsDefault() const {
+  return customDataFiles.empty() && releasedDataFiles.size() == 1u;
+}
+
+void DataFileManager::updateAvailableFiles() {
+  // add our expected released files
+  for (auto const& file : bearReleaseFiles_) {
+    if (file.existsAsFile()) {
+      updateFile(file, releasedDataFiles, true);
+    }
+  }
+
+  auto custom_files = getCustomDataFileDirectory().findChildFiles(
+      juce::File::TypesOfFileToFind::findFiles, false, "*.tf");
+  for (const auto& file : custom_files) {
+    if (!releasedDataFiles.contains(file)) {  // on windows the custom / release
+                                              // dirs are the same
+      updateFile(file, customDataFiles, false);
+    }
+  }
+}
+
+std::optional<DataFileManager::DataFile>
+DataFileManager::getSelectedDataFileInfo() const {
   return selectedDataFile_;
 }
 
-std::vector<std::shared_ptr<DataFileManager::DataFile>>
-DataFileManager::getAvailableDataFiles() {
-  return availableDataFiles_;
+std::vector<DataFileManager::DataFile>
+DataFileManager::getAvailableDataFiles() const {
+  std::vector<DataFile> files;
+  files.reserve(getAvailableDataFilesCount());
+  auto fileExtractor = [](auto const& file) { return file.second; };
+  std::transform(releasedDataFiles.begin(), releasedDataFiles.end(), std::back_inserter(files), fileExtractor);
+  std::transform(customDataFiles.begin(), customDataFiles.end(), std::back_inserter(files), fileExtractor);
+  return files;
 }
 
-int DataFileManager::getAvailableDataFilesCount() {
-  return availableDataFiles_.size();
+std::size_t DataFileManager::getAvailableDataFilesCount() const {
+  return releasedDataFiles.size() + customDataFiles.size();
+}
+
+void DataFileManager::setSelectedDataFile(DataFile const& file) {
+  if(!selectedDataFile_ || file != *selectedDataFile_) {
+    selectedDataFile_ = file;
+    selectedDataFileChangeCallback_(file);
+  }
 }
 
 bool DataFileManager::setSelectedDataFile(const juce::String& fullPath) {
@@ -105,46 +119,45 @@ bool DataFileManager::setSelectedDataFile(const juce::String& fullPath) {
 }
 
 bool DataFileManager::setSelectedDataFile(const juce::File& fullPath) {
-  auto found = getDataFileInfo(fullPath);
-  if (found == nullptr) return false;
-  if (found != selectedDataFile_) {
-    selectedDataFile_ = found;
-    if (selectedDataFileChangeCallback_) {
-      selectedDataFileChangeCallback_(selectedDataFile_);
-    }
+  auto const found = getDataFileInfo(fullPath);
+  if (found) {
+    setSelectedDataFile(*found);
   }
-  return true;
+  return static_cast<bool>(found);
 }
 
 bool DataFileManager::setSelectedDataFileDefault() { 
   updateAvailableFiles();
-  // look for any released by order
-  for (auto const& bearReleaseFile : bearReleaseFiles_) {
-    if (setSelectedDataFile(bearReleaseFile)) {
-      return true;
-    }
+  auto found = false;
+  if(!releasedDataFiles.empty()) {
+    setSelectedDataFile(releasedDataFiles.begin()->second);
+    found = true;
   }
-  return false;
+  return found;
 }
 
-std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(
-    const juce::String& fullPath) {
-  return getDataFileInfo(juce::File(fullPath));
+namespace {
+  std::optional<DataFileManager::DataFile> getDataFile(DataFileManager::FileMap const& map, juce::File const& file) {
+    std::optional<DataFileManager::DataFile> dataFile;
+  if(auto it = map.find(file); it != map.end()) {
+    dataFile = it->second;
+  }
+  return dataFile;
+  }
 }
 
-std::shared_ptr<DataFileManager::DataFile> DataFileManager::getDataFileInfo(
-    const juce::File& fullPath) {
-  auto it = std::find_if(availableDataFiles_.begin(), availableDataFiles_.end(),
-                         [&fullPath](const std::shared_ptr<DataFile>& elm) {
-                           return elm->fullPath == fullPath;
-                         });
-
-  return it == availableDataFiles_.end() ? nullptr : *it;
+std::optional<DataFileManager::DataFile> DataFileManager::getDataFileInfo(
+    const juce::File& fullPath) const {
+  auto file = getDataFile(releasedDataFiles, fullPath);
+  if(!file) {
+    file = getDataFile(customDataFiles, fullPath);
+  }
+  return file;
 }
 
 void DataFileManager::onSelectedDataFileChange(
-    std::function<void(std::shared_ptr<DataFile>)> callback) {
-  selectedDataFileChangeCallback_ = callback;
+    std::function<void(DataFile const&)> callback) {
+  selectedDataFileChangeCallback_ = std::move(callback);
 }
 
 }  // namespace plugin
