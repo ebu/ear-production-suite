@@ -48,7 +48,7 @@ EarBinauralMonitoringAudioProcessor::EarBinauralMonitoringAudioProcessor()
     : AudioProcessor(_getBusProperties()) {
 
   dataFileManager.onSelectedDataFileChange(
-      [this](std::shared_ptr<ear::plugin::DataFileManager::DataFile> df) {
+      [this](ear::plugin::DataFileManager::DataFile const& df) {
         writeConfigFile();
         restartBearProcessor();
       });
