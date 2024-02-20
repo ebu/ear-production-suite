@@ -188,13 +188,36 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
     std::shared_ptr<Component> comp) {
   dataFileComponent_ = comp;
   p_->dataFileManager.updateAvailableFiles();
-  auto dfs = p_->dataFileManager.getAvailableDataFiles();
-  auto df = p_->dataFileManager.getSelectedDataFileInfo();
-  if (dfs.size() == 1 && df && dfs[0] == df && df->isBearRelease) {
-    // Only 1 data file and it is a bear release. Don't show options.
+  if (p_->dataFileManager.onlyContainsDefault()) {
     comp->setVisible(false);
   } else {
     comp->setVisible(true);
+  }
+}
+
+namespace {
+  juce::String getDataFileLabelText(DataFileManager::DataFile const& file) {
+    juce::String txt;
+    if (!file.isBearRelease) {
+      txt = "[CUSTOM]   ";
+    }
+    if (file.label.isEmpty()) {
+      // use filename - will be an unusual case in future
+      txt += file.filename;
+    } else {
+      txt += file.label;
+      txt += "   (" + file.filename + ")";
+    }
+    return txt;
+  }
+
+  juce::StringArray getDataFileLabelSubText(DataFileManager::DataFile const& file) {
+    juce::StringArray subtexts;
+    if (!file.description.isEmpty()) {
+      subtexts.add(file.description);
+    }
+    subtexts.add(juce::String(file.fullPath.getFullPathName()));
+    return subtexts;
   }
 }
 
@@ -205,34 +228,12 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComboBox(
   p_->dataFileManager.updateAvailableFiles();
   comboBox->clearEntries();
   auto dfs = p_->dataFileManager.getAvailableDataFiles();
-  std::sort(
-      dfs.begin(), dfs.end(),
-      [](const std::shared_ptr<ear::plugin::DataFileManager::DataFile>& a,
-         const std::shared_ptr<ear::plugin::DataFileManager::DataFile>& b) {
-        if (a->isBearRelease != b->isBearRelease) {
-          return a->isBearRelease;
-        }
-        return a->filename.compareIgnoreCase(b->filename) < 0;
-      });
   for (const auto& df : dfs) {
-    juce::String txt;
-    if (!df->isBearRelease) {
-      txt = "[CUSTOM]   ";
-    }
-    if (df->label.isEmpty()) {
-      // use filename - will be an unusual case in future
-      txt += df->filename;
-    } else {
-      txt += df->label;
-      txt += "   (" + df->filename + ")";
-    }
-    juce::StringArray subtexts;
-    if (!df->description.isEmpty()) {
-      subtexts.add(df->description);
-    }
-    subtexts.add(juce::String(df->fullPath.getFullPathName()));
-    auto entry = comboBox->addTextWithSubtextEntry(txt, subtexts, df->fullPath.getFullPathName());
-    entry->setLightFont(!df->isBearRelease);
+    auto entry = comboBox->addTextWithSubtextEntry(
+      getDataFileLabelText(df),
+      getDataFileLabelSubText(df),
+      df.fullPath.getFullPathName());
+    entry->setLightFont(!df.isBearRelease);
   }
   if (auto df = p_->dataFileManager.getSelectedDataFileInfo()) {
     comboBox->setSelectedId(df->fullPath.getFullPathName(),
