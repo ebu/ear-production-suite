@@ -2,6 +2,7 @@
 #include "JuceHeader.h"
 #include <vector>
 #include <functional>
+#include <optional>
 #include <boost/container/flat_map.hpp>
 
 namespace ear {
