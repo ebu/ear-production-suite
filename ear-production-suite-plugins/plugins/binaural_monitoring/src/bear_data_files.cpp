@@ -48,7 +48,11 @@ void setFromMetadata(DataFileManager::DataFile& dataFile) {
     }
   }
   catch(std::exception const&) {
-    // What are we (not) handling here?
+    // `read_from_file` could throw if;
+    // - the file does not exist
+    // - the file is not a valid tensorfile
+    // - the metadata within the file is not of the expected structure
+    // In all these cases, and any other, silently skip metadata extraction
   }
 }
 
