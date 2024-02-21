@@ -1,7 +1,3 @@
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(SOURCES_BINAURAL_MONITORING
 	${EPS_SHARED_DIR}/binary_data.cpp
 	${EPS_SHARED_DIR}/components/look_and_feel/slider.cpp
