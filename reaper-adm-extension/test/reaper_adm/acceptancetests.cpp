@@ -329,8 +329,8 @@ namespace {
         EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, _)).WillRepeatedly(Return(0));
         EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME), false, 0)).WillOnce(Return(1)).WillRepeatedly(Return(-1));
         EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(ADM_VST_PLUGIN_NAME), false, 0)).WillOnce(Return(0)).WillRepeatedly(Return(-1));
-        char* notNothing = "not_nothing";
-        char* isNothing = "";
+        const char* notNothing{ "not_nothing" };
+        const char* isNothing{ "" };
         EXPECT_CALL(api, TrackFX_GetPreset(_, 1, _, _)).WillOnce(DoAll(SetArgumentPointee<2>(*isNothing), Return(true))).WillRepeatedly(DoAll(SetArgumentPointee<2>(*notNothing), Return(true)));
         EXPECT_CALL(api, TrackFX_SetPreset(_, _, _)).Times(expectedHoaObjects);
     }
