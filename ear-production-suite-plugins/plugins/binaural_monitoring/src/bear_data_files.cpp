@@ -48,11 +48,19 @@ void setFromMetadata(DataFileManager::DataFile& dataFile) {
     }
   }
   catch(std::exception const&) {
-    // `read_from_file` could throw if;
-    // - the file does not exist
-    // - the file is not a valid tensorfile
-    // - the metadata within the file is not of the expected structure
-    // In all these cases, and any other, silently skip metadata extraction
+    /* 
+    `read_from_file` could throw if;
+     - the file does not exist, or otherwise unreadable
+     - the file is not a valid tensorfile
+     - the metadata within the file is not of the expected structure
+    In all these cases, and any other, silently skip metadata extraction
+    
+    Note that a file with bad metadata may still be a usable filter set
+    so we don't want to strike it off yet, nor is it worth doing deeper 
+    checks here... the user can still select it as the processor will 
+    catch unusable files (unreadable/invalid/corrupt etc) anyway when 
+    it tries to start BEAR with it, and will report the actual error.
+    */
   }
 }
 
