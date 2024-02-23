@@ -188,7 +188,8 @@ void BinauralMonitoringJuceFrontendConnector::setDataFileComponent(
     std::shared_ptr<Component> comp) {
   dataFileComponent_ = comp;
   p_->dataFileManager.updateAvailableFiles();
-  if (p_->dataFileManager.onlyContainsDefault()) {
+  if (p_->dataFileManager.onlyContainsDefault() &&
+      p_->dataFileManager.defaultIsSelected()) {
     comp->setVisible(false);
   } else {
     comp->setVisible(true);

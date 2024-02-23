@@ -30,6 +30,7 @@ class DataFileManager {
   };
 
   bool onlyContainsDefault() const;
+  bool defaultIsSelected() const;
   void updateAvailableFiles();
   std::optional<DataFile> getSelectedDataFileInfo() const;
   std::vector<DataFile> getAvailableDataFiles() const;
