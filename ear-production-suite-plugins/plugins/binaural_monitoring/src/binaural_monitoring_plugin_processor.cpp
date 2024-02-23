@@ -247,9 +247,10 @@ bool EarBinauralMonitoringAudioProcessor::readConfigFile() {
     *oscInvertQuatY_ = props.getBoolValue("oscInvertQuatY", false);
     *oscInvertQuatZ_ = props.getBoolValue("oscInvertQuatZ", false);
     auto selectedDataFile = props.getValue("bearPreferredDataFile");
-    if (selectedDataFile.isEmpty() ||
-        !dataFileManager.setSelectedDataFile(selectedDataFile)) {
+    if (selectedDataFile.isEmpty()){
       dataFileManager.setSelectedDataFileDefault();
+    } else {
+      dataFileManager.setSelectedDataFile(selectedDataFile); // Attempt even if no longer exists
     }
     configRestoreState = ConfigRestoreState::RESTORED;
     return true;
