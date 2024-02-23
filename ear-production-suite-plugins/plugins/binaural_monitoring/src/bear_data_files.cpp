@@ -72,9 +72,7 @@ void updateFile(juce::File const& file, DataFileManager::FileMap& file_map,
                                        .label = "",
                                        .description = "",
                                        .isBearRelease = released}});
-  if (success) {  // not already added
-    setFromMetadata(it->second);
-  }
+  setFromMetadata(it->second);
 }
 }  // namespace
 
@@ -83,6 +81,9 @@ bool DataFileManager::onlyContainsDefault() const {
 }
 
 void DataFileManager::updateAvailableFiles() {
+  releasedDataFiles.clear();
+  customDataFiles.clear();
+
   // add our expected released files
   for (auto const& file : bearReleaseFiles_) {
     if (file.existsAsFile()) {
