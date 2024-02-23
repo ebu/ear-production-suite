@@ -65,14 +65,13 @@ void setFromMetadata(DataFileManager::DataFile& dataFile) {
 }
 
 void updateFile(juce::File const& file, DataFileManager::FileMap& file_map,
-                bool released) {
-  auto [it, success] = file_map.insert(
-      {file, DataFileManager::DataFile{.filename = file.getFileName(),
-                                       .fullPath = file,
-                                       .label = "",
-                                       .description = "",
-                                       .isBearRelease = released}});
-  setFromMetadata(it->second);
+                bool mustBeRelease) {
+  DataFileManager::DataFile df{.filename = file.getFileName(),
+                               .fullPath = file};
+  setFromMetadata(df);
+  if (!mustBeRelease || df.isBearRelease) {
+    file_map.insert({file, std::move(df)});
+  }
 }
 }  // namespace
 
