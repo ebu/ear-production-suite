@@ -80,6 +80,11 @@ bool DataFileManager::onlyContainsDefault() const {
   return customDataFiles.empty() && releasedDataFiles.size() == 1u;
 }
 
+bool DataFileManager::defaultIsSelected() const {
+  return selectedDataFile_.has_value() &&
+         releasedDataFiles.contains(selectedDataFile_->fullPath);
+}
+
 void DataFileManager::updateAvailableFiles() {
   releasedDataFiles.clear();
   customDataFiles.clear();
