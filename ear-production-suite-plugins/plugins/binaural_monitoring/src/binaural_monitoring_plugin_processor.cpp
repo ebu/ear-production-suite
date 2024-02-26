@@ -9,6 +9,8 @@
 #include "reaper_vst3_interfaces.h"
 #include "reaper_integration.hpp"
 
+#include <cassert>
+
 #define DEFAULT_OSC_PORT 8000
 
 namespace ear {
@@ -519,6 +521,7 @@ void EarBinauralMonitoringAudioProcessor::setIHostApplication(
         true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
     auto retO = setChannelLayoutOfBus(
         false, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+    assert(retI && retO);
     backend_ = std::make_unique<ear::plugin::BinauralMonitoringBackend>(
         nullptr, numDawChannels_);
     connector_->setListenerOrientationInstance(backend_->listenerOrientation);
