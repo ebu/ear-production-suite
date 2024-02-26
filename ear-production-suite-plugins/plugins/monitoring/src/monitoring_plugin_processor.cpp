@@ -5,6 +5,8 @@
 #include "reaper_vst3_interfaces.h"
 #include "reaper_integration.hpp"
 
+#include <cassert>
+
 namespace ear {
 namespace plugin {
 template <>
@@ -63,6 +65,7 @@ void EarMonitoringAudioProcessor::setIHostApplication(
           true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
       auto retO = setChannelLayoutOfBus(
           false, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+      assert(retI && retO);
       backend_ = std::make_unique<ear::plugin::MonitoringBackend>(
           nullptr, layout(), numDawChannels_);
     }

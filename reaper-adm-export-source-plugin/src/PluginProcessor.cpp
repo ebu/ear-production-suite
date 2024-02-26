@@ -373,9 +373,7 @@ void AdmStemPluginAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 bool AdmStemPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     auto i = layouts.getMainInputChannels();
-    if (i != numDawChannels_) return false;
-
-    return true;
+    return i == numDawChannels_;
 }
 #endif
 
