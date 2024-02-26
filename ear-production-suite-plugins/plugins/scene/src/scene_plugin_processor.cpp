@@ -2,7 +2,6 @@
 #include "scene_plugin_editor.hpp"
 #include <adm/write.hpp>
 #include "programme_store_adm_serializer.hpp"
-#include <future>
 #include <programme_store.pb.h>
 #include "scene_backend.hpp"
 #include "metadata_event_dispatcher.hpp"
@@ -10,6 +9,9 @@
 #include "restored_pending_store.hpp"
 #include "reaper_vst3_interfaces.h"
 #include "reaper_integration.hpp"
+
+#include <future>
+#include <cassert>
 
 SceneAudioProcessor::SceneAudioProcessor()
     : AudioProcessor(
@@ -302,6 +304,7 @@ void SceneAudioProcessor::setIHostApplication(Steinberg::FUnknown* unknown) {
     numDawChannels_ = DetermineChannelCount(reaperHost);
     auto ret = setChannelLayoutOfBus(
         true, 0, AudioChannelSet::discreteChannels(numDawChannels_));
+    assert(ret);
     levelMeter_->setup(numDawChannels_, samplerate_);
   }
 }
