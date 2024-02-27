@@ -144,7 +144,7 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     }
   } else {
     size_t sampleSize = sizeof(float);
-    uint8_t numChannels = numDawChannels_;
+    uint8_t numChannels = MAX_DAW_CHANNELS;
     size_t msg_size = buffer.getNumSamples() * numChannels * sampleSize;
 
     auto msg = std::make_shared<NngMsg>(msg_size);
@@ -156,9 +156,12 @@ void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
     int bufferChannels = buffer.getNumChannels();
     int bufferSamplesPerChannel = buffer.getNumSamples();
 
+    // TODO: We could do with a better system than sending channels of blanks,
+    // but at least this way we don't need to worry about DAW channel limits 
+    // and routings in to the Scene.
     for (int sample = 0; sample < bufferSamplesPerChannel; ++sample) {
       for (int channel = 0; channel < numChannels; ++channel) {
-        curSample = buffer.getSample(channel, sample);
+        curSample = channel < bufferChannels? buffer.getSample(channel, sample) : 0.f;
         assert(msgPosOffset + sampleSize <= msg_size);
         memcpy(msgPosPtr + msgPosOffset, &curSample, sampleSize);
         msgPosOffset += sampleSize;
