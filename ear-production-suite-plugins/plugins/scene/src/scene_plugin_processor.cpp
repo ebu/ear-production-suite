@@ -125,16 +125,9 @@ void SceneAudioProcessor::releaseResources() {}
 bool SceneAudioProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
 
-  if(layouts.inputBuses.size() != 1)
-    return false;
-  if (layouts.inputBuses[0] !=
-      AudioChannelSet::discreteChannels(numDawChannels_))
-    return false;
+  auto i = layouts.getMainInputChannels();
+  return i == numDawChannels_;
 
-  if(layouts.outputBuses.size() != 0)
-    return false;
-
-  return true;
 }
 
 void SceneAudioProcessor::processBlock(AudioBuffer<float>& buffer,
