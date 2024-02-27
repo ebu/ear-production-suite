@@ -68,7 +68,7 @@ std::vector<std::string> AdmExportHandler::generateExportWarningStrings()
     auto admExportSources = getAdmExportSources();
     std::vector<std::string> msgs;
 
-    if (admExportVstSources) {
+    if (admExportVstSources && admExportVstSources->getAllFoundVsts()->size() > 0) {
         msgs.push_back(pluginDeprecationMessage);
     }
 
