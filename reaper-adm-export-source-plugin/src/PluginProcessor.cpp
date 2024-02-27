@@ -9,7 +9,7 @@
 AdmStemPluginAudioProcessor::AdmStemPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
   : AudioProcessor (BusesProperties()
-         .withInput("Input", AudioChannelSet::discreteChannels(numDawChannels_), true)
+         .withInput("Input", AudioChannelSet::discreteChannels(MAX_DAW_CHANNELS), true)
      )
 #endif
 {
