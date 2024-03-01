@@ -25,21 +25,7 @@ For Windows, extract the contents of the downloaded package to a temporary locat
 
 ### Manual Install
 
-After download, copy the `ear-production-suite` folder and the `ADM Export Source` plugin to the correct folder as shown in the following table.
-
-| System                    | Folder                                   |
-| ------------------------- | ---------------------------------------- |
-| macOS                     | ~/Library/Audio/Plug-ins/VST3            |
-| Windows                   | C:\Program Files\Common Files\VST3       |
-| Linux                     | ~/.vst3                                  |
-
-To install the extension, you must copy the dynamic library `reaper_adm` from the `UserPlugins` directory of the downloaded package to your REAPER resource path. 
-
-You can open this resource folder from within REAPER via 
-
-```
-[Options] -> [Show REAPER resource path in explorer/finder...]
-```
+Please refer to `README.pdf`, which is available in the root of the Release packages or within the `packaging` subdirectory of this repository.
 
 ## Building from source
 
