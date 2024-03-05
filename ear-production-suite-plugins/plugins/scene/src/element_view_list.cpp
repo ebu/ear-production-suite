@@ -1,5 +1,3 @@
-#pragma once
-
 #include "JuceHeader.h"
 
 #include "element_view_list.hpp"
