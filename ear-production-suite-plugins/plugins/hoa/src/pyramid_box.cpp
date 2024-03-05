@@ -1,5 +1,3 @@
-#pragma once
-
 #include "pyramid_box.hpp"
 
 #include "components/look_and_feel/colours.hpp"

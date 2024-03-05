@@ -1,5 +1,3 @@
-#pragma once
-
 #include "element_view.hpp"
 
 #include "../../shared/components/look_and_feel/colours.hpp"

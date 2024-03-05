@@ -1,5 +1,3 @@
-#pragma once
-
 #include "elements_container.hpp"
 
 #include "helper/move.hpp"

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "speaker_layer.hpp"
 
 namespace ear {
