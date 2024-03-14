@@ -16,3 +16,7 @@ reaper-adm-extension/test/reaper_adm/data/UserPlugins/
 shared/version/eps_version.cpp
 submodules/visr
 submodules/VST3
+packaging/codesign/*.dmg
+packaging/codesign/*.tar
+packaging/codesign/*.zip
+packaging/codesign/tmp
