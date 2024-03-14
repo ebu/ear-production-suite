@@ -37,8 +37,9 @@ namespace {
         // Same as exe dir
         return File::getSpecialLocation(File::SpecialLocationType::currentExecutableFile).getParentDirectory();
 #elif __APPLE__
-        // Same as dir containing bundle
-        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory();
+        // For mac, these are in "Resources" directory of Setup bundle
+        return  File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile)
+            .getChildFile("Contents").getChildFile("Resources");
 #else
         throw std::runtime_error("Unsupported OS");
 #endif
