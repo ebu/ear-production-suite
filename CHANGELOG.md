@@ -1,3 +1,7 @@
+Version 1.1.0b
+
+* Fix installation on MacOS where Gatekeeper enforces translocation [#273](https://github.com/ebu/ear-production-suite/pull/273)
+
 Version 1.1.0
 
 * Support for 128 channels when using REAPER >=v7.0 [#244](https://github.com/ebu/ear-production-suite/issues/244) [#254](https://github.com/ebu/ear-production-suite/pull/254) [#267](https://github.com/ebu/ear-production-suite/pull/267)
