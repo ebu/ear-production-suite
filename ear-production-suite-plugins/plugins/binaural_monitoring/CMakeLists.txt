@@ -65,7 +65,7 @@ add_juce_vst3_plugin(
 	DISPLAY_NAME "EAR Binaural Monitoring"
 	DESCRIPTION "The binaural monitoring plugin"
 	OUTPUT_NAME "EAR Binaural Monitoring")
-	
+set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
 target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base ear-version bear)
 install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 

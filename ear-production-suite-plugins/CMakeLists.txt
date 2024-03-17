@@ -49,6 +49,7 @@ endif()
 
 add_subdirectory(lib)
 add_subdirectory(plugins)
+set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
 add_subdirectory(tools)
 add_subdirectory(packaging)
 if(EAR_PLUGINS_UNIT_TESTS)

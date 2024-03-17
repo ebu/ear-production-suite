@@ -97,7 +97,7 @@ add_juce_vst3_plugin(scene
   DISPLAY_NAME "EAR Scene"
   DESCRIPTION "The scene plugin"
   OUTPUT_NAME "EAR Scene")
-  
+set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
 target_link_libraries(scene_VST3 PRIVATE ear-plugin-base ear-version)
 install_juce_vst3_plugin(scene "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 

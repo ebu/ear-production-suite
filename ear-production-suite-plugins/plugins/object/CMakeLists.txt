@@ -73,7 +73,7 @@ add_juce_vst3_plugin(object
   DISPLAY_NAME "EAR Object"
   DESCRIPTION "The metadata input plugin for objects"
   OUTPUT_NAME "EAR Object")
-  
+set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
 target_include_directories(object_VST3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(object_VST3 PRIVATE ear-plugin-base ear-version)
 install_juce_vst3_plugin(object "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")

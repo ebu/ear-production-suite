@@ -68,7 +68,7 @@ add_juce_vst3_plugin(hoa
   DISPLAY_NAME "EAR HOA" 
   DESCRIPTION "The metadata input plugin for scene-based audio"
   OUTPUT_NAME "EAR HOA")
-  
+set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
 target_link_libraries(hoa_VST3 PRIVATE ear-plugin-base ear-version)
 
 install_juce_vst3_plugin(hoa "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
