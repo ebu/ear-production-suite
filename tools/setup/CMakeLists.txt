@@ -91,6 +91,57 @@ add_custom_command(TARGET setup PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/helpers/gen_license_header.cmake
 	)
 
+if(APPLE)
+
+    # Setup needs all the bits of the EPS in the Resources of the bundle to work
+    # - copy all in to the bundle as a post-build step which will allow for testing without needing packaging
+    
+    add_dependencies(setup ${EPS_PLUGIN_TARGETS})
+    add_dependencies(setup adm_export_source_VST3)
+    add_dependencies(setup project_upgrade_gui project_upgrade)
+    add_dependencies(setup reaper_adm)
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:adm_export_source_VST3> $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/VST3/$<TARGET_BUNDLE_DIR_NAME:adm_export_source_VST3>
+    )
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:project_upgrade_gui> $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/Tools/$<TARGET_BUNDLE_DIR_NAME:project_upgrade_gui>
+    )
+
+    foreach(TGT IN LISTS EPS_PLUGIN_TARGETS)
+        add_custom_command(TARGET setup POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_BUNDLE_DIR:${TGT}> $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/VST3/ear-production-suite/$<TARGET_BUNDLE_DIR_NAME:${TGT}>
+        )
+    endforeach()
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:project_upgrade> $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/Tools/
+    )
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:reaper_adm> $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/UserPlugins/$<TARGET_FILE_NAME:reaper_adm>
+    )
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/reaper-adm-extension/src/reaper_adm/ADMPresets $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/UserPlugins/ADMPresets
+    )
+
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/packaging/Templates $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/Templates
+    )
+
+    # Setup requires LICENSE.pdf and README.pdf but these only get generated during packaging
+    # Just put blank files in for now
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E touch $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/LICENSE.pdf
+    )
+    add_custom_command(TARGET setup POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E touch $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/README.pdf
+    )
+
+endif()
+
 set_target_properties(setup PROPERTIES FOLDER tools)
 target_link_libraries(setup PRIVATE Juce::core ear-version)
 target_include_directories(setup PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${EPS_SHARED_DIR})
