@@ -31,17 +31,6 @@ add_custom_target(generate-package-docs
             "${CMAKE_CURRENT_LIST_DIR}/LICENSE.pdf"
         )
 
-install(DIRECTORY 
-		Templates 
-		DESTINATION
-		.)
-
-install(FILES
-        README.pdf
-        LICENSE.pdf
-        DESTINATION
-        .)
-
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 	if(WIN32)
 		install(FILES
@@ -56,11 +45,29 @@ if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 			.)
 endif()
 
-install(TARGETS
-        project_upgrade
-        project_upgrade_gui
+install(FILES
+        README.pdf
+        LICENSE.pdf
         DESTINATION
-        ./Tools)
+        .)
+        
+if(APPLE)
+    install(FILES
+            README.pdf
+            LICENSE.pdf
+            DESTINATION
+            "./Setup\ EAR\ Production\ Suite.app/Content/Resources")
+else()
+    install(DIRECTORY 
+            Templates 
+            DESTINATION
+            .)
+    install(TARGETS
+            project_upgrade
+            project_upgrade_gui
+            DESTINATION
+            ./Tools)
+endif()
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_NAME "EAR Production Suite")
