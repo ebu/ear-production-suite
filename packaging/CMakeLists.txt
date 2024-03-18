@@ -42,7 +42,7 @@ if(APPLE)
             README.pdf
             LICENSE.pdf
             DESTINATION
-            "./Setup\ EAR\ Production\ Suite.app/Content/Resources")
+            "./Setup\ EAR\ Production\ Suite.app/Contents/Resources")
     install(TARGETS
             setup
             DESTINATION

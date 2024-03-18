@@ -150,7 +150,7 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}\n")
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
           if(APPLE)
-              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}/Setup\ EAR\ Production\ Suite.app/Content/Resources\n")
+              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}/Setup\ EAR\ Production\ Suite.app/Contents/Resources\n")
           else()
               file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
           endif()
