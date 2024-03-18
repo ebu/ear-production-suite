@@ -11,7 +11,7 @@ on:
 
 jobs:
   gendocs:
-    name: gen_docs
+    name: Generate PDF Documents
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
