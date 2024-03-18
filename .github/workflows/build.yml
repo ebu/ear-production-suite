@@ -33,7 +33,7 @@ jobs:
           build_html: false
           
       - name: Upload PDFs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: pdfs
           path: packaging/pdfs
@@ -103,9 +103,9 @@ jobs:
           fetch-depth: 0
           
       - name: Download generated PDFs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v2
         with:
-          name: pdfs
+          name: 'pdfs'
           path: packaging
       - name: Display structure of downloaded files
         run: ls packaging
