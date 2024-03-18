@@ -40,7 +40,7 @@ jobs:
         uses: baileyjm02/markdown-to-pdf@v1
         with:
           input_dir: packaging
-          output_dir: packaging
+          output_dir: packaging/pdfs
           build_html: false
           
       - name: List contents of packaging directory
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: docs
-          path: packaging
+          path: packaging/pdfs
           
   # build:
     # name: ${{ matrix.config.name }}
