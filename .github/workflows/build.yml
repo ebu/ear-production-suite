@@ -149,7 +149,12 @@ jobs:
           file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
-
+          if(APPLE)
+              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}/../..\n")
+          else()
+              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}\n")
+          endif()
+          
       - name: 'Windows: set up developer environment'
         uses: ilammy/msvc-dev-cmd@v1
         if: matrix.config.os == 'windows-latest'
@@ -202,7 +207,7 @@ jobs:
 
       - name: 'unix: Tar output dir.'
         if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
-        run: tar -cvf ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar -C ${{ steps.cmake_install_prefix.outputs.install_prefix }} .
+        run: tar -cvf ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar -C ${{ steps.cmake_install_prefix.outputs.install_prefix_setup }} .
                   
       - name: 'unix: Upload Tar as build artifact.'
         if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
@@ -216,7 +221,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
-          path: ${{ steps.cmake_install_prefix.outputs.install_prefix }}
+          path: ${{ steps.cmake_install_prefix.outputs.install_prefix_setup }}
 
       - name: 'Windows Disk Space'
         if: matrix.config.os == 'windows-latest'

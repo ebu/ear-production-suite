@@ -91,7 +91,7 @@ add_custom_command(TARGET setup PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/helpers/gen_license_header.cmake
 	)
 
-if(APPLE)
+if(APPLE AND NOT EPS_CI)
 
     # Setup needs all the bits of the EPS in the Resources of the bundle to work
     # - copy all in to the bundle as a post-build step which will allow for testing without needing packaging
