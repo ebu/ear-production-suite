@@ -72,6 +72,13 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          
+      - name: Print current working directory
+        run: |
+          pwd
+      - name: List contents of current directory
+        run: |
+          ls -al
 
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
