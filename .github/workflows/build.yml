@@ -78,7 +78,7 @@ jobs:
           pwd
       - name: List contents of current directory
         run: |
-          ls -al
+          ls
           
       - name: Generate readme.md from readme.md.in
         shell: cmake -P {0}
