@@ -47,6 +47,11 @@ if(APPLE)
             setup
             DESTINATION
             ../../../)
+    install(TARGETS
+            project_upgrade
+            project_upgrade_gui
+            DESTINATION
+            ./Tools)
 elseif(WIN32)
     install(FILES
             install_list.xml
