@@ -79,6 +79,19 @@ jobs:
       - name: List contents of current directory
         run: |
           ls -al
+          
+      - name: Generate readme.md from readme.md.in
+        shell: cmake -P {0}
+        run: |
+          file(READ CHANGELOG.md CHANGELOG ENCODING UTF-8)
+          configure_file(packaging/README.md.in packaging/README.md @ONLY)
+          
+      - name: 'Generate PDFs'
+      - uses: baileyjm02/markdown-to-pdf@v1
+        with:
+          input_dir: packaging
+          output_dir: packaging
+          build_html: false
 
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
