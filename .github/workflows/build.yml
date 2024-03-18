@@ -10,7 +10,7 @@ on:
       - '*'
 
 jobs:
-..gendocs:
+  gendocs:
     name: gen_docs
     runs-on: ubuntu-latest
     steps:
