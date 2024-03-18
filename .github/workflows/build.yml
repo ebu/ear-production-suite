@@ -87,7 +87,7 @@ jobs:
           configure_file(packaging/README.md.in packaging/README.md @ONLY)
           
       - name: 'Generate PDFs'
-      - uses: baileyjm02/markdown-to-pdf@v1
+        uses: baileyjm02/markdown-to-pdf@v1
         with:
           input_dir: packaging
           output_dir: packaging
