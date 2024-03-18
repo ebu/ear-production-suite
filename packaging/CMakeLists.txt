@@ -30,29 +30,40 @@ add_custom_target(generate-package-docs
             "${CMAKE_CURRENT_LIST_DIR}/README.pdf"
             "${CMAKE_CURRENT_LIST_DIR}/LICENSE.pdf"
         )
-
+        
+# Common Files (all OS)
+# note: '.' is "Setup EAR Production Suite.app/Contents/Resources" on MacOS
 install(FILES
         README.pdf
         LICENSE.pdf
         DESTINATION
         .)
+install(TARGETS
+        project_upgrade
+        project_upgrade_gui
+        DESTINATION
+        ./Tools)
+install(DIRECTORY 
+        Templates 
+        DESTINATION
+        .)
 
 if(APPLE)
+    # '.' is currectly Resources dir. Need these installing at base dir too.
     install(FILES
             README.pdf
             LICENSE.pdf
             DESTINATION
             ../../../)
+    # Back-up to base dir for setup install location
     install(TARGETS
             setup
             DESTINATION
             ../../../)
-    install(TARGETS
-            project_upgrade
-            project_upgrade_gui
-            DESTINATION
-            ./Tools)
-elseif(WIN32)
+endif()
+
+if(WIN32)
+    # Win tidies manifests in to a subdir. Note MacOS doesn't need as already has manifests in bundle (as a build-time copy step).
     install(FILES
             install_list.xml
             uninstall_list.xml
@@ -62,25 +73,6 @@ elseif(WIN32)
             setup
             DESTINATION
             .)
-    install(DIRECTORY 
-            Templates 
-            DESTINATION
-            .)
-    install(TARGETS
-            project_upgrade
-            project_upgrade_gui
-            DESTINATION
-            ./Tools)
-else()
-    install(DIRECTORY 
-            Templates 
-            DESTINATION
-            .)
-    install(TARGETS
-            project_upgrade
-            project_upgrade_gui
-            DESTINATION
-            ./Tools)
 endif()
 
 set(CPACK_GENERATOR "ZIP")
