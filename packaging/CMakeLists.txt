@@ -31,32 +31,41 @@ add_custom_target(generate-package-docs
             "${CMAKE_CURRENT_LIST_DIR}/LICENSE.pdf"
         )
 
-if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	if(WIN32)
-		install(FILES
-				install_list.xml
-				uninstall_list.xml
-				DESTINATION
-				./SetupFiles)
-	endif()
-	install(TARGETS
-			setup
-			DESTINATION
-			.)
-endif()
-
 install(FILES
         README.pdf
         LICENSE.pdf
         DESTINATION
         .)
-        
+
 if(APPLE)
     install(FILES
             README.pdf
             LICENSE.pdf
             DESTINATION
             "./Setup\ EAR\ Production\ Suite.app/Content/Resources")
+    install(TARGETS
+            setup
+            DESTINATION
+            ../../../)
+elseif(WIN32)
+    install(FILES
+            install_list.xml
+            uninstall_list.xml
+            DESTINATION
+            ./SetupFiles)
+    install(TARGETS
+            setup
+            DESTINATION
+            .)
+    install(DIRECTORY 
+            Templates 
+            DESTINATION
+            .)
+    install(TARGETS
+            project_upgrade
+            project_upgrade_gui
+            DESTINATION
+            ./Tools)
 else()
     install(DIRECTORY 
             Templates 
