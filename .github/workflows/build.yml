@@ -147,12 +147,12 @@ jobs:
           file(TO_CMAKE_PATH "$ENV{RUNNER_WORKSPACE}" RUNNER_WORKSPACE)
           set(INSTALL_DIR "${NAME_NO_SPACES}")
           file(TO_NATIVE_PATH "${RUNNER_WORKSPACE}/${INSTALL_DIR}" PREFIX)
-          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}\n")
           file(APPEND "$ENV{GITHUB_OUTPUT}" "install_dir=${INSTALL_DIR}\n")
           if(APPLE)
-              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}/../..\n")
+              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}/Setup\ EAR\ Production\ Suite.app/Content/Resources\n")
           else()
-              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix_setup=${PREFIX}\n")
+              file(APPEND "$ENV{GITHUB_OUTPUT}" "install_prefix=${PREFIX}\n")
           endif()
           
       - name: 'Windows: set up developer environment'
