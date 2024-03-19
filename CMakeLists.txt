@@ -52,7 +52,7 @@ set(EPS_SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shared)
 set(JUCE_SUPPORT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/shared/resources)
 add_subdirectory(${EPS_SHARED_DIR}/version)
 
-set(EPS_PLUGIN_TARGETS)
+set(EPS_PLUGIN_TARGETS "" CACHE INTERNAL "")
 add_subdirectory(ear-production-suite-plugins)
 add_subdirectory(reaper-adm-extension)
 add_subdirectory(reaper-adm-export-source-plugin)

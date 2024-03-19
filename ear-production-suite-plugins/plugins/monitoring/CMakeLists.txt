@@ -45,19 +45,20 @@ function(add_monitoring_plugin SPEAKER_LAYOUT SPEAKER_LAYOUT_NAME AUDIO_PACK_FOR
   add_juce_vst3_plugin(
     ear_monitoring_${SPEAKER_LAYOUT}
     SOURCES ${SOURCES_MONITORING} ${HEADERS_MONITORING}
-	CODE_SUFFIX ${PLUGIN_CODE_SUFFIX}
+    CODE_SUFFIX ${PLUGIN_CODE_SUFFIX}
     DISPLAY_NAME "EAR Monitoring ${SPEAKER_LAYOUT}"
     DESCRIPTION "The monitoring plugin (${SPEAKER_LAYOUT})"
     OUTPUT_NAME "EAR Monitoring ${SPEAKER_LAYOUT}"
     IDE_FOLDER ${IDE_FOLDER_PLUGINS}
-  )
-  set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
+    IS_EPS_PLUGIN ON)
+
   target_compile_definitions(
     ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE
     SPEAKER_LAYOUT="${SPEAKER_LAYOUT}"
     SPEAKER_LAYOUT_NAME="${SPEAKER_LAYOUT_NAME}"
-	AUDIO_PACK_FORMAT_ID="${AUDIO_PACK_FORMAT_ID}"
+    AUDIO_PACK_FORMAT_ID="${AUDIO_PACK_FORMAT_ID}"
     )
+
   target_link_libraries(ear_monitoring_${SPEAKER_LAYOUT}_VST3 PRIVATE ear-plugin-base ear-version)
   install_juce_vst3_plugin(ear_monitoring_${SPEAKER_LAYOUT} "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 endfunction()
@@ -76,4 +77,3 @@ if(EAR_PLUGINS_BUILD_ALL_MONITORING_PLUGINS)
   add_monitoring_plugin("4+7+0" "7.1+4H" "AP_00010017" "A9")
   add_monitoring_plugin("2+7+0" "7.1+2H" "AP_00010016" "AA")
 endif()
-set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)

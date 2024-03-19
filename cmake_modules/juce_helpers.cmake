@@ -1,6 +1,6 @@
 function(add_juce_vst3_plugin PLUGIN_NAME)
   set(options)
-  set(oneValueArgs IDE_FOLDER DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_PREFIX CODE_SUFFIX)
+  set(oneValueArgs IDE_FOLDER DESCRIPTION DISPLAY_NAME OUTPUT_NAME CODE_PREFIX CODE_SUFFIX IS_EPS_PLUGIN)
   set(multiValueArgs SOURCES)
   cmake_parse_arguments(PLUGIN "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
@@ -38,9 +38,10 @@ function(add_juce_vst3_plugin PLUGIN_NAME)
   target_include_directories(${PLUGIN_NAME}_VST3 PRIVATE ${_SUPPORT_PATH}/ ${EPS_SHARED_DIR})
   target_link_libraries(${PLUGIN_NAME}_VST3 PRIVATE Juce::VST3)
 
-  set(EPS_PLUGIN_TARGETS_COPY ${EPS_PLUGIN_TARGETS})
-  list(APPEND EPS_PLUGIN_TARGETS_COPY ${PLUGIN_NAME}_VST3 )
-  set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS_COPY} PARENT_SCOPE)
+  if(PLUGIN_IS_EPS_PLUGIN)
+    list(APPEND EPS_PLUGIN_TARGETS ${PLUGIN_NAME}_VST3)
+    set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} CACHE INTERNAL "")
+  endif()
 
   set_target_properties(${PLUGIN_NAME}_VST3 PROPERTIES
     BUNDLE TRUE

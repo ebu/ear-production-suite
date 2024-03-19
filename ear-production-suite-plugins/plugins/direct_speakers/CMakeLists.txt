@@ -71,8 +71,9 @@ add_juce_vst3_plugin(direct_speakers
   CODE_SUFFIX "10"
   DISPLAY_NAME "EAR DirectSpeakers" 
   DESCRIPTION "The metadata input plugin for channel-based audio"
-  OUTPUT_NAME "EAR DirectSpeakers")
-set(EPS_PLUGIN_TARGETS ${EPS_PLUGIN_TARGETS} PARENT_SCOPE)
+  OUTPUT_NAME "EAR DirectSpeakers"
+  IS_EPS_PLUGIN ON)
+
 target_link_libraries(direct_speakers_VST3 PRIVATE ear-plugin-base ear-version)
 target_compile_definitions(direct_speakers_VST3 PRIVATE USE_NEW_DESIGN)
 
