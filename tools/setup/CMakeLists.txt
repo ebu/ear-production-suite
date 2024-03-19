@@ -48,13 +48,14 @@ set(SOURCES_SETUP
 
 source_group("Header Files" FILES ${HEADERS_SETUP})
 
+target_sources(setup
+    PRIVATE
+    ${HEADERS_SETUP}
+    ${SOURCES_SETUP}
+)
+
 if(APPLE)
-	target_sources(setup
-		PRIVATE
-		${HEADERS_SETUP}
-		${SOURCES_SETUP}
-		icon.icns
-	)
+	target_sources(setup PRIVATE icon.icns)
 	set_target_properties(setup PROPERTIES
         OUTPUT_NAME "Setup EAR Production Suite"
         XCODE_ATTRIBUTE_EXECUTABLE_NAME "Setup EAR Production Suite"
@@ -68,6 +69,7 @@ if(APPLE)
 	    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/packaging/uninstall_list.xml $<TARGET_FILE_DIR:setup>/../Resources/uninstall_list.xml
 	)
 endif()
+
 if(WIN32)
 	target_sources(setup
 		PRIVATE
