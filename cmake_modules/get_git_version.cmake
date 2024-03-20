@@ -19,12 +19,14 @@ endfunction()
 function(update_version_from_git NUMERIC_VERSION DESCRIPTIVE_VERSION)
   find_package(Git)
   if(Git_FOUND)
+  
+    #TODO: This is very similar to code in shared/version/gen_version.cmake - consolidate!
 
     git_describe(_GIT_REVISION --tags --abbrev=4 --dirty --match v[0-9]*)
     string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${_GIT_REVISION}")
     string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${_GIT_REVISION}")
     string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${_GIT_REVISION}")
-    string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+-(.*)" "\\1" VERSION_TWEAK "${_GIT_REVISION}")
+    string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_TWEAK "${_GIT_REVISION}")
   
     if(_GIT_REVISION)
       set(${NUMERIC_VERSION}_MAJOR ${VERSION_MAJOR} PARENT_SCOPE)
@@ -36,7 +38,7 @@ function(update_version_from_git NUMERIC_VERSION DESCRIPTIVE_VERSION)
 	
       if(NOT VERSION_TWEAK STREQUAL _GIT_REVISION)
         # Tweak is present
-        set(${DESCRIPTIVE_VERSION} "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" PARENT_SCOPE)		
+        set(${DESCRIPTIVE_VERSION} "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}" PARENT_SCOPE)		
         if(VERSION_TWEAK MATCHES "^[0-9]+$")	  
           # Tweak is numeric
           set(${NUMERIC_VERSION}_TWEAK ${VERSION_TWEAK} PARENT_SCOPE)

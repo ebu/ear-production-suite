@@ -32,10 +32,12 @@ if(Git_FOUND)
   string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${_GIT_REVISION}")
   string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${_GIT_REVISION}")
   string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${_GIT_REVISION}")
-  string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+-(.*)" "\\1" VERSION_TWEAK "${_GIT_REVISION}")
+  string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_TWEAK "${_GIT_REVISION}")
   message(STATUS "Version info from Git: " ${_GIT_REVISION})
  
   if(_GIT_REVISION)
+  
+    #TODO: This is very similar to code in cmake_modules/get_git_version.cmake - consolidate!
 
     set(DESCRIPTIVE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
     set(NUMERIC_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
@@ -43,7 +45,7 @@ if(Git_FOUND)
 
     if(NOT VERSION_TWEAK STREQUAL _GIT_REVISION)
       # Tweak is present
-      set(DESCRIPTIVE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" )		
+      set(DESCRIPTIVE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}" )		
       if(VERSION_TWEAK MATCHES "^[0-9]+$")	  
         # Tweak is numeric
         set(NUMERIC_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_TWEAK}" )

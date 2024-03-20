@@ -64,8 +64,9 @@ add_juce_vst3_plugin(
 	CODE_SUFFIX "F0" # Speaker Monitoring suffixes start from A0 and increment. For bin, lets use F0 (Note FF is scene)
 	DISPLAY_NAME "EAR Binaural Monitoring"
 	DESCRIPTION "The binaural monitoring plugin"
-	OUTPUT_NAME "EAR Binaural Monitoring")
-	
+	OUTPUT_NAME "EAR Binaural Monitoring"
+	IS_EPS_PLUGIN ON)
+
 target_link_libraries(ear_binaural_monitoring_VST3 PRIVATE ear-plugin-base ear-version bear)
 install(TARGETS ear_binaural_monitoring_VST3 COMPONENT Plugins DESTINATION "${EPS_PLUGIN_INSTALL_PREFIX}ear-production-suite")
 

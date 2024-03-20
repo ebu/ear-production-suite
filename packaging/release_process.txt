@@ -11,9 +11,10 @@ Tag it with version (e.g, git tag -a v0.8.0-EPS-beta -m "v0.8.0 beta release")
 Push tag (e.g, git push origin v0.8.0-EPS-beta)
 Close all PRs and related issues
 Allow CI to build it
-Download MacOS "universal" artefact and Windows artefact
+Download MacOS "universal" artefact, Windows artefact, and Linux artefact
 For MacOS artefact: Sign it, Notorise it, and staple
 Create a release from the tag on GitHub - include change summary in notes
 Upload signed MacOS version as release asset
 Upload Windows version as release asset
-Update website + push
+Upload Linux version as release asset
+Update website (version_info.json) + push
