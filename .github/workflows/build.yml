@@ -10,9 +10,38 @@ on:
       - '*'
 
 jobs:
+  gendocs:
+    name: Generate PDF Documents
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Generate readme.md from readme.md.in
+        shell: cmake -P {0}
+        run: |
+          file(READ CHANGELOG.md CHANGELOG ENCODING UTF-8)
+          configure_file(packaging/README.md.in packaging/README.md @ONLY)
+          
+      - name: Generate PDFs
+        uses: baileyjm02/markdown-to-pdf@v1
+        with:
+          input_dir: packaging
+          output_dir: packaging/pdfs
+          build_html: false
+          
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdfs
+          path: packaging/pdfs
+          
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    needs: gendocs
     env:
       CCACHE_WIN_VERSION: 4.2.1
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -72,7 +101,15 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
+          
+      - name: Download generated PDFs
+        uses: actions/download-artifact@v2
+        with:
+          name: 'pdfs'
+          path: packaging
+      - name: Display structure of downloaded files
+        run: ls packaging
+        
       - name: 'Install ninja-build tool.'
         uses: seanmiddleditch/gha-setup-ninja@v3
 

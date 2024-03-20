@@ -4,8 +4,6 @@ Merge all changes in to main
 Update ./CHANGELOG.md
 Update version in ./CMakeLists.txt and ./vcpkg.json
 Update ./packaging/README.md.in (version number and summary)
-Rerun Configure and Generate in CMake (forces recreation of README.md in build directory from template) 
-Regenerate PDFs by building target "generate-package-docs" (project files must have been generated with CMake variable EPS_BUILD_PACKAGE=ON)
 Commit all, and push
 Tag it with version (e.g, git tag -a v0.8.0-EPS-beta -m "v0.8.0 beta release")
 Push tag (e.g, git push origin v0.8.0-EPS-beta)
