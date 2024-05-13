@@ -1,6 +1,7 @@
 #include "communication/monitoring_metadata_receiver.hpp"
 #include "scene_store.pb.h"
 #include <functional>
+#include <future>
 
 namespace ear {
 namespace plugin {
@@ -62,7 +63,12 @@ void MonitoringMetadataReceiver::handleReceive(std::error_code ec,
       if (!sceneStore.ParseFromArray(message.data(), message.size())) {
         throw std::runtime_error("Failed to parse Scene Object");
       }
-      handler_(std::move(sceneStore));
+      // Called by NNG callback on thread with small stack.
+      // Launch task in another thread to overcome stack limitation.
+      auto future = std::async(std::launch::async, [this, sceneStore]() {
+        handler_(sceneStore);
+      });
+      future.get();
     } catch (const std::runtime_error& e) {
       EAR_LOGGER_ERROR(
           logger_, "Failed to parse and dispatch scene metadata: {}", e.what());

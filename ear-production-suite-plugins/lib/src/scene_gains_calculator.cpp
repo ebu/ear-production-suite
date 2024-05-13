@@ -2,9 +2,7 @@
 #include "ear/metadata.hpp"
 #include "helper/eps_to_ear_metadata_converter.hpp"
 #include "helper/container_helpers.hpp"
-#include <future>
 #include <algorithm>
-
 
 namespace {
 
@@ -54,40 +52,32 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
       totalInputChannels{inputChannelCount} {}
 
 bool SceneGainsCalculator::update(proto::SceneStore store) {
-  // Called by NNG callback on thread with small stack.
-  // Launch task in another thread to overcome stack limitation.
-  auto future = std::async(std::launch::async, [this, store]() {
-
-    // First figure out what we need to process updates for
-    std::vector<communication::ConnectionId> cachedIdsChecklist;
-    cachedIdsChecklist.reserve(routingCache_.size());
-    for(auto const&[key, val] : routingCache_) {
-      cachedIdsChecklist.push_back(key);
-    }
-    /// Check-off found items, and also delete changed items from routing cache to be re-evaluated
-    for(const auto& item : store.monitoring_items()) {
-      auto itemId = communication::ConnectionId{ item.connection_id() };
-      cachedIdsChecklist.erase(std::remove(cachedIdsChecklist.begin(), cachedIdsChecklist.end(), itemId), cachedIdsChecklist.end());
-      if(item.changed()) {
-        removeItem(itemId);
-      }
-    }
-    /// Delete removed items from routing cache  (i.e, those that weren't checked-off and therefore remain in cachedIdsChecklist)
-    for(const auto& itemId : cachedIdsChecklist) {
+  // First figure out what we need to process updates for
+  std::vector<communication::ConnectionId> cachedIdsChecklist;
+  cachedIdsChecklist.reserve(routingCache_.size());
+  for(auto const&[key, val] : routingCache_) {
+    cachedIdsChecklist.push_back(key);
+  }
+  /// Check-off found items, and also delete changed items from routing cache to be re-evaluated
+  for(const auto& item : store.monitoring_items()) {
+    auto itemId = communication::ConnectionId{ item.connection_id() };
+    cachedIdsChecklist.erase(std::remove(cachedIdsChecklist.begin(), cachedIdsChecklist.end(), itemId), cachedIdsChecklist.end());
+    if(item.changed()) {
       removeItem(itemId);
     }
+  }
+  /// Delete removed items from routing cache  (i.e, those that weren't checked-off and therefore remain in cachedIdsChecklist)
+  for(const auto& itemId : cachedIdsChecklist) {
+    removeItem(itemId);
+  }
 
-    // Now get the gain updates we need
-    for(const auto& item : store.monitoring_items()) {
-      /// If it's not in routingCache_, it's new or changed, so needs re-evaluating
-      if(!mapHasKey(routingCache_, communication::ConnectionId{ item.connection_id() })) {
-        addOrUpdateItem(item);
-      }
+  // Now get the gain updates we need
+  for(const auto& item : store.monitoring_items()) {
+    /// If it's not in routingCache_, it's new or changed, so needs re-evaluating
+    if(!mapHasKey(routingCache_, communication::ConnectionId{ item.connection_id() })) {
+      addOrUpdateItem(item);
     }
-
-  });
-
-  future.get();
+  }
 
   return true;
 }
