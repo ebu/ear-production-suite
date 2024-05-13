@@ -65,10 +65,10 @@ void MonitoringMetadataReceiver::handleReceive(std::error_code ec,
       }
       // Called by NNG callback on thread with small stack.
       // Launch task in another thread to overcome stack limitation.
-      auto future = std::async(std::launch::async, [this, sceneStore]() {
+      auto future = std::async(std::launch::async, [this, sceneStore = std::move(sceneStore)]() {
         handler_(sceneStore);
       });
-      future.get();
+      future.get(); //blocking
     } catch (const std::runtime_error& e) {
       EAR_LOGGER_ERROR(
           logger_, "Failed to parse and dispatch scene metadata: {}", e.what());
