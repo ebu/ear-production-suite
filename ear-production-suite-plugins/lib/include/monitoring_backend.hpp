@@ -35,11 +35,11 @@ class MonitoringBackend {
   bool isExporting() { return isExporting_; }
 
  private:
-  void onSceneReceived(proto::SceneStore store);
+  void onSceneReceived(const proto::SceneStore& store);
   void onConnection(communication::ConnectionId connectionId,
                     const std::string& streamEndpoint);
   void onConnectionLost();
-  void updateActiveGains(proto::SceneStore store);
+  void updateActiveGains(const proto::SceneStore& store);
 
   std::shared_ptr<spdlog::logger> logger_;
   std::mutex gainsMutex_;

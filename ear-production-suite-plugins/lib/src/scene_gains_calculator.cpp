@@ -51,7 +51,7 @@ SceneGainsCalculator::SceneGainsCalculator(ear::Layout outputLayout,
       totalOutputChannels{static_cast<int>(outputLayout.channels().size())},
       totalInputChannels{inputChannelCount} {}
 
-bool SceneGainsCalculator::update(proto::SceneStore store) {
+bool SceneGainsCalculator::update(const proto::SceneStore& store) {
   // First figure out what we need to process updates for
   std::vector<communication::ConnectionId> cachedIdsChecklist;
   cachedIdsChecklist.reserve(routingCache_.size());

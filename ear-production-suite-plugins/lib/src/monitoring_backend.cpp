@@ -47,9 +47,9 @@ MonitoringBackend::~MonitoringBackend() {
   controlConnection_.onConnectionEstablished(nullptr);
 }
 
-void MonitoringBackend::onSceneReceived(proto::SceneStore store) {
+void MonitoringBackend::onSceneReceived(const proto::SceneStore& store) {
   isExporting_ = store.has_is_exporting() && store.is_exporting();
-  updateActiveGains(std::move(store));
+  updateActiveGains(store);
 }
 
 GainHolder MonitoringBackend::currentGains() {
@@ -57,10 +57,10 @@ GainHolder MonitoringBackend::currentGains() {
   return gains_;
 }
 
-void MonitoringBackend::updateActiveGains(proto::SceneStore store) {
+void MonitoringBackend::updateActiveGains(const proto::SceneStore& store) {
   {
     std::lock_guard<std::mutex> lock(gainsCalculatorMutex_);
-    gainsCalculator_.update(std::move(store));
+    gainsCalculator_.update(store);
   }
   {
     std::lock_guard<std::mutex> lock(gainsMutex_);

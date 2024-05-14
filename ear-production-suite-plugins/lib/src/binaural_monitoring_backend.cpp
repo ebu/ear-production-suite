@@ -200,7 +200,8 @@ BinauralMonitoringBackend::getLatestObjectsTypeMetadata(ConnId id) {
   return std::optional<ObjectsEarMetadataAndRouting>();
 }
 
-void BinauralMonitoringBackend::onSceneReceived(proto::SceneStore store) {
+void BinauralMonitoringBackend::onSceneReceived(
+    const proto::SceneStore& store) {
   isExporting_ = store.has_is_exporting() && store.is_exporting();
 
   size_t totalDsChannels = 0;

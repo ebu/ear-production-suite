@@ -65,7 +65,7 @@ void MonitoringMetadataReceiver::handleReceive(std::error_code ec,
       }
       // Called by NNG callback on thread with small stack.
       // Launch task in another thread to overcome stack limitation.
-      auto future = std::async(std::launch::async, [this, sceneStore = std::move(sceneStore)]() {
+      auto future = std::async(std::launch::async, [this, sceneStore]() {
         handler_(sceneStore);
       });
       future.get(); //blocking

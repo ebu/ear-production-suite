@@ -68,7 +68,7 @@ class BinauralMonitoringBackend {
   bool isExporting() { return isExporting_; }
 
  private:
-  void onSceneReceived(proto::SceneStore store);
+  void onSceneReceived(const proto::SceneStore& store);
   void onConnection(communication::ConnectionId connectionId,
                     const std::string& streamEndpoint);
   void onConnectionLost();

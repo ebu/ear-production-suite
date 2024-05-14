@@ -27,7 +27,7 @@ struct ItemGains {
 class SceneGainsCalculator {
  public:
   SceneGainsCalculator(Layout outputLayout, int inputChannelCount);
-  bool update(proto::SceneStore store);
+  bool update(const proto::SceneStore &store);
   Eigen::MatrixXf directGains();
   Eigen::MatrixXf diffuseGains();
 
