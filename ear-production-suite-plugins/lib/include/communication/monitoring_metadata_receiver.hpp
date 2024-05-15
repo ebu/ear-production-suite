@@ -14,7 +14,7 @@ class SceneStore;
 namespace communication {
 class MonitoringMetadataReceiver {
  public:
-  using RequestHandler = std::function<void(proto::SceneStore)>;
+  using RequestHandler = std::function<void(const proto::SceneStore& store)>;
   MonitoringMetadataReceiver(std::shared_ptr<spdlog::logger> logger = nullptr);
   ~MonitoringMetadataReceiver();
   MonitoringMetadataReceiver(const MonitoringMetadataReceiver&) = delete;
