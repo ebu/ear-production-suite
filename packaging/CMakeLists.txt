@@ -17,9 +17,11 @@ function(check_commit_timestamp_not_after SOURCE_FILE DEST_FILE)
     endif()
 endfunction()
 
-check_commit_timestamp_not_after(LICENSE.md LICENSE.pdf)
-check_commit_timestamp_not_after(${PROJECT_SOURCE_DIR}/CHANGELOG.md README.pdf)
-check_commit_timestamp_not_after(README.md.in README.pdf)
+if(NOT EPS_CI) # This prevents build failure if the runner generating the docs has a system time behind the system used to modify the MDs
+    check_commit_timestamp_not_after(LICENSE.md LICENSE.pdf)
+    check_commit_timestamp_not_after(${PROJECT_SOURCE_DIR}/CHANGELOG.md README.pdf)
+    check_commit_timestamp_not_after(README.md.in README.pdf)
+endif()
 
 add_custom_target(generate-package-docs
         COMMAND
