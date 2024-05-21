@@ -954,56 +954,32 @@ int admplug::ReaperAPIImpl::GetDawChannelCount() const
     return GetReaperChannelCount(GetAppVersion());
 }
 
-bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
+bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fxNum, std::string& name) const
 {
-    // Note that;
-    // TrackFX_GetNamedConfigParm( track, 0, "fx_name" )
-    // can get the pre-aliased name but is only supported from v6.37
-    // Also does not support FX renamed in FX selection window
-    // (although neither does this)
-
-    auto chunk = GetTrackStateChunkStr(track);
-
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
-    if (fx >= vst3Elements.size()) {
-        return false;
-    }
-
-    const int nameSectionNum = 0;
-
-    auto vst3Sections = SplitVSTElement(vst3Elements[fx].second, true, false);
-    if (vst3Sections.size() <= nameSectionNum) {
-        return false;
-    }
-
-    name = vst3Sections[nameSectionNum];;
+    const size_t fxNameMaxLen = 1024; // Should be plenty
+    char fxName[fxNameMaxLen];
+    auto fxNameRes = TrackFX_GetNamedConfigParm(track, fxNum, "fx_name", fxName, fxNameMaxLen);
+    if (!fxNameRes) return false;
+    name = std::string{ fxName, strnlen(fxName, fxNameMaxLen) };
     return true;
 }
 
 std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaTrack* track) const
 {
-    // Only gets and parses state chunk once
-    // More efficient when you want to query every plugin on the track
-
-    std::vector<std::string> names;
-
-    auto chunk = GetTrackStateChunkStr(track);
-
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
-
-    const int nameSectionNum = 0;
-
-    for (auto const& elmPair : vst3Elements) {
-        auto vst3Sections = SplitVSTElement(elmPair.second, true, false);
-        if (vst3Sections.size() <= nameSectionNum) {
-            names.push_back("");
+    std::vector<std::string> fxNames;
+    auto numFx = TrackFX_GetCount(track);
+    for (int fxNum = 0; fxNum < numFx; fxNum++) {
+        const size_t fxNameMaxLen = 1024; // Should be plenty
+        char fxName[fxNameMaxLen];
+        auto fxNameRes = TrackFX_GetNamedConfigParm(track, fxNum, "fx_name", fxName, fxNameMaxLen);
+        if (fxNameRes) {
+            fxNames.push_back(std::string{ fxName, strnlen(fxName, fxNameMaxLen) });
         }
         else {
-            names.push_back(vst3Sections[nameSectionNum]);
+            fxNames.push_back("");
         }
     }
-
-    return names;
+    return fxNames;
 }
 
 void admplug::ReaperAPIImpl::CleanFXName(std::string& fxName) const
