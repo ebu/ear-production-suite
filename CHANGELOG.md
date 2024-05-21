@@ -1,3 +1,7 @@
+UNRELEASED
+
+* Fix occasional crash bug in start up of Binaural Monitoring plugin [#277](https://github.com/ebu/ear-production-suite/issues/277) [#278](https://github.com/ebu/ear-production-suite/pull/278)
+
 Version 1.1.0b
 
 * Fix installation on MacOS where Gatekeeper enforces translocation [#273](https://github.com/ebu/ear-production-suite/pull/273)
