@@ -1,6 +1,8 @@
 UNRELEASED
+Note: This release bumps the minimum required REAPER version from v6.11 to v6.37
 
 * Fix occasional crash bug in start up of Binaural Monitoring plugin [#277](https://github.com/ebu/ear-production-suite/issues/277) [#278](https://github.com/ebu/ear-production-suite/pull/278)
+* Fix fail to render when non-VST plugins are in FX chains [#279](https://github.com/ebu/ear-production-suite/issues/279) [#280](https://github.com/ebu/ear-production-suite/pull/280)
 
 Version 1.1.0b
 
