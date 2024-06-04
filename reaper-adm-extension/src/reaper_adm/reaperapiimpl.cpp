@@ -824,186 +824,37 @@ std::optional<std::pair<double, double>> admplug::ReaperAPIImpl::getTrackAudioBo
     return std::optional<std::pair<double, double>>();
 }
 
-std::vector<std::pair<int, std::string>> admplug::ReaperAPIImpl::GetVSTElementsFromTrackStateChunk(const std::string& fullChunk) const
-{
-    std::vector<std::pair<int, std::string>> vst3Elements;
-
-    const std::vector<char> quoteMarks{ '\'', '`', '"' };
-    int elmStart = -1;
-
-    for (int pos = 0; pos < fullChunk.length(); ++pos) {
-
-        bool escapedQuote = false;
-        for (auto quote : quoteMarks) {
-            if (fullChunk[pos] == quote) {
-                // Entered a quote mark
-                if (pos == fullChunk.length() - 1) {
-                    // Already at EOF - don't attempt to find
-                    escapedQuote = true;
-                    break;
-                }
-                // Find end quote mark
-                auto newPos = fullChunk.find(quote, pos + 1);
-                if (newPos == std::string::npos) {
-                    // End not found to EOF - abort
-                    escapedQuote = true;
-                    break;
-                }
-                pos = newPos;
-            }
-        }
-        if (escapedQuote) {
-            break;
-        }
-
-        if (elmStart == -1) {
-            // Not in an element - check if at start of one
-            if (fullChunk.substr(pos, 5) == "<VST ") {
-                elmStart = pos;
-            }
-        }
-        else {
-            // In an element - check if at end
-            if (fullChunk.substr(pos, 1) == ">") {
-                vst3Elements.push_back(std::make_pair(
-                    elmStart,
-                    fullChunk.substr(elmStart, pos - elmStart + 1))
-                );
-                elmStart = -1;
-            }
-        }
-    }
-
-    return vst3Elements;
-}
-
-std::vector<std::string> admplug::ReaperAPIImpl::SplitVSTElement(const std::string& elm, bool stripBoundingQuotes, bool includeSeperators) const
-{
-    std::vector<std::string> sec;
-
-    const std::vector<char> quoteMarks{ '\'', '`', '"' };
-    const std::vector<char> splitMarks{ ' ', '\r', '\n' };
-    int secStart = 5;
-
-    for (int pos = 5; pos < elm.length(); ++pos) {
-
-        bool escapedQuote = false;
-        for (auto quote : quoteMarks) {
-            if (elm[pos] == quote) {
-                // Entered a quote mark
-                if (pos == elm.length() - 1) {
-                    // Already at EOF - don't attempt to find
-                    escapedQuote = true;
-                    break;
-                }
-                // Find end quote mark
-                auto newPos = elm.find(quote, pos + 1);
-                if (newPos == std::string::npos) {
-                    // End not found to EOF - abort
-                    escapedQuote = true;
-                    break;
-                }
-                pos = newPos;
-            }
-        }
-        if (escapedQuote) {
-            break;
-        }
-
-        for (auto splitMark : splitMarks) {
-            if (elm[pos] == splitMark) {
-                // Close this section and start a new one
-                sec.push_back(elm.substr(secStart, pos - secStart));
-                if (includeSeperators) {
-                    sec.push_back(std::string{ splitMark });
-                }
-                secStart = pos + 1;
-                break;
-            }
-        }
-    }
-
-    if (stripBoundingQuotes) {
-        for (auto& s : sec) {
-            if (s.length() >= 2) {
-                for (auto quote : quoteMarks) {
-                    if (s[0] == quote && s[s.length() - 1] == quote) {
-                        s = s.substr(1, s.length() - 2);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return sec;
-}
-
-std::string admplug::ReaperAPIImpl::GetTrackStateChunkStr(MediaTrack* track) const
-{
-    const size_t chunkMaxLen = 65535; // Should be plenty
-    char chunk[chunkMaxLen];
-    auto res = GetTrackStateChunk(track, chunk, chunkMaxLen, false);
-    if (!res) return std::string();
-    std::string fullChunk{ chunk, strnlen(chunk, chunkMaxLen) };
-    return fullChunk;
-}
-
 int admplug::ReaperAPIImpl::GetDawChannelCount() const
 {
     return GetReaperChannelCount(GetAppVersion());
 }
 
-bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fx, std::string& name) const
+bool admplug::ReaperAPIImpl::TrackFX_GetActualFXName(MediaTrack* track, int fxNum, std::string& name) const
 {
-    // Note that;
-    // TrackFX_GetNamedConfigParm( track, 0, "fx_name" )
-    // can get the pre-aliased name but is only supported from v6.37
-    // Also does not support FX renamed in FX selection window
-    // (although neither does this)
-
-    auto chunk = GetTrackStateChunkStr(track);
-
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
-    if (fx >= vst3Elements.size()) {
-        return false;
-    }
-
-    const int nameSectionNum = 0;
-
-    auto vst3Sections = SplitVSTElement(vst3Elements[fx].second, true, false);
-    if (vst3Sections.size() <= nameSectionNum) {
-        return false;
-    }
-
-    name = vst3Sections[nameSectionNum];;
+    const size_t fxNameMaxLen = 1024; // Should be plenty
+    char fxName[fxNameMaxLen];
+    auto fxNameRes = TrackFX_GetNamedConfigParm(track, fxNum, "fx_name", fxName, fxNameMaxLen);
+    if (!fxNameRes) return false;
+    name = std::string{ fxName, strnlen(fxName, fxNameMaxLen) };
     return true;
 }
 
 std::vector<std::string> admplug::ReaperAPIImpl::TrackFX_GetActualFXNames(MediaTrack* track) const
 {
-    // Only gets and parses state chunk once
-    // More efficient when you want to query every plugin on the track
-
-    std::vector<std::string> names;
-
-    auto chunk = GetTrackStateChunkStr(track);
-
-    auto vst3Elements = GetVSTElementsFromTrackStateChunk(chunk);
-
-    const int nameSectionNum = 0;
-
-    for (auto const& elmPair : vst3Elements) {
-        auto vst3Sections = SplitVSTElement(elmPair.second, true, false);
-        if (vst3Sections.size() <= nameSectionNum) {
-            names.push_back("");
+    std::vector<std::string> fxNames;
+    auto numFx = TrackFX_GetCount(track);
+    for (int fxNum = 0; fxNum < numFx; fxNum++) {
+        const size_t fxNameMaxLen = 1024; // Should be plenty
+        char fxName[fxNameMaxLen];
+        auto fxNameRes = TrackFX_GetNamedConfigParm(track, fxNum, "fx_name", fxName, fxNameMaxLen);
+        if (fxNameRes) {
+            fxNames.push_back(std::string{ fxName, strnlen(fxName, fxNameMaxLen) });
         }
         else {
-            names.push_back(vst3Sections[nameSectionNum]);
+            fxNames.push_back("");
         }
     }
-
-    return names;
+    return fxNames;
 }
 
 void admplug::ReaperAPIImpl::CleanFXName(std::string& fxName) const
