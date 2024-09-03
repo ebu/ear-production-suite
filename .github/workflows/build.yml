@@ -103,7 +103,7 @@ jobs:
           fetch-depth: 0
           
       - name: Download generated PDFs
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: 'pdfs'
           path: packaging
@@ -275,12 +275,12 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: 'macOS_Latest_Clang_x64'
           path: 'macOS_Latest_Clang_x64'
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: 'macOS_Latest_Clang_arm64'
           path: 'macOS_Latest_Clang_arm64'
