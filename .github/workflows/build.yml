@@ -33,7 +33,7 @@ jobs:
           build_html: false
           
       - name: Upload PDFs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: pdfs
           path: packaging/pdfs
@@ -103,7 +103,7 @@ jobs:
           fetch-depth: 0
           
       - name: Download generated PDFs
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: 'pdfs'
           path: packaging
@@ -248,14 +248,14 @@ jobs:
                   
       - name: 'unix: Upload Tar as build artifact.'
         if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar 
           
       - name: 'Windows: Upload output dir as build artifact.'
         if: ${{ matrix.config.package && matrix.config.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix_setup }}
@@ -275,12 +275,12 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: 'macOS_Latest_Clang_x64'
           path: 'macOS_Latest_Clang_x64'
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: 'macOS_Latest_Clang_arm64'
           path: 'macOS_Latest_Clang_arm64'
@@ -352,7 +352,7 @@ jobs:
       - name: 'tar ub'
         run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4.4.3
         with:
           name: 'macOS_Latest_Clang_universal'
           path: 'macOS_Latest_Clang_universal.tar'
