@@ -7,18 +7,6 @@
   <InstallItem Source="UserPlugins/reaper_adm.dylib">
     <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/reaper_adm.dylib"/>
   </InstallItem>
-  <InstallItem Source="UserPlugins/ADMPresets/FB360/ambix1stOrder.vstpreset">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
-  </InstallItem>
-  <InstallItem Source="UserPlugins/ADMPresets/FB360/ambix2ndOrder.vstpreset">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
-  </InstallItem>
-  <InstallItem Source="UserPlugins/ADMPresets/FB360/FuMa1stOrder.vstpreset">
-    <MacOS Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
-    <Windows Destination="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
-  </InstallItem>
   <InstallItem Source="VST3/ADM Export Source.vst3">
     <MacOS Destination="[VST3-INSTALL-DIR]/ADM Export Source.vst3"/>
     <Windows Destination="[VST3-INSTALL-DIR]/ADM Export Source.vst3"/>
