@@ -3,7 +3,6 @@
 
 #include "exportaction_admsource-admvst.h"
 #include "exportaction_admsource-earvst.h"
-#include "plugin_deprecation_warning.h"
 
 void AdmExportHandler::repopulate(ReaperAPI const & api)
 {
@@ -67,10 +66,6 @@ std::vector<std::string> AdmExportHandler::generateExportWarningStrings()
     // Collates warning strings from IExportSources and adds an additional one if there are different types of IExportSources present
     auto admExportSources = getAdmExportSources();
     std::vector<std::string> msgs;
-
-    if (admExportVstSources && admExportVstSources->getAllFoundVsts()->size() > 0) {
-        msgs.push_back(pluginDeprecationMessage);
-    }
 
     if(earSceneMasterVstSources && earSceneMasterVstSources->validForExport() && admExportVstSources && admExportVstSources->validForExport()) {
         msgs.push_back(std::string("Multiple Types of Export Source!"));
