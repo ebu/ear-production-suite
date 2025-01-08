@@ -12,7 +12,6 @@
 #include "pluginsuite.h"
 #include "pluginregistry.h"
 #include "pluginsuite_ear.h"
-#include "plugin_deprecation_warning.h"
 #include <update_check.h>
 #include <version/eps_version.h>
 #include <helper/native_message_box.hpp>
@@ -297,8 +296,6 @@ extern "C" {
             std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
             [pluginSuite](ReaperAPI& api, ImportAction& importer) {
 
-            pluginDeprecationWarning(pluginSuite, api);
-
             api.Main_openProject("template:"); // This will TRY to start a blank project, but it will replace the current project if successful, so the user is prompted with the save dialog: yes, no, CANCEL
             auto res = api.IsProjectDirty(nullptr); // If the project is still dirty (1), the user must have canceled! (yes/no would save/not save and start a new clean project)
             if(res == 0) {
@@ -353,8 +350,6 @@ extern "C" {
             actionSID.c_str(),
             std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
             [pluginSuite](ReaperAPI& api, ImportAction& importer) {
-
-            pluginDeprecationWarning(pluginSuite, api);
 
             char filename[4096];
             api.GetProjectPath(filename, 4096);
