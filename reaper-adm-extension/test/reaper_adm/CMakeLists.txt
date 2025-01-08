@@ -11,7 +11,7 @@ target_sources(testreaper_adm
        nodetests.cpp
        projecttreetests.cpp
        outertests.cpp
-       #pluginsuitetests.cpp
+       pluginsuitetests.cpp
        mediatrackelementtests.cpp
        mediatakeelementtests.cpp
        objectautomationelementtests.cpp
