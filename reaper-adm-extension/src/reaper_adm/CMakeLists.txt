@@ -256,5 +256,3 @@ if(WIN32)
 				${win_install_dir}
 			OPTIONAL)
 endif()
-
-install(DIRECTORY ADMPresets COMPONENT Extension DESTINATION $<$<PLATFORM_ID:Windows>:${win_install_dir}>$<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>)
