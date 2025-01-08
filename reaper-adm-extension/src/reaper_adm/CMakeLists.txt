@@ -59,8 +59,6 @@ set(EXTENSION_SOURCES
 	pluginregistry.cpp
 	pluginsuite.cpp
 	pluginsuite_ear.cpp
-	pluginsuite_fb360.cpp
-	pluginsuite_visr.cpp
 	projectelements.cpp
 	projectnode.cpp
 	projecttree.cpp
@@ -139,8 +137,6 @@ set(EXTENSION_HEADERS
 	pluginregistry.h
 	pluginsuite.h
 	pluginsuite_ear.h
-	pluginsuite_fb360.h
-	pluginsuite_visr.h
 	projectelements.h
 	projectnode.h
 	projecttree.h

@@ -331,7 +331,10 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
 {
     auto take = trackElement.getTakeElement();
     TrackInfo trackInfo;
-    auto channelCount = static_cast<int>(take->channelCount());
+    int channelCount{ 0 };
+    if (take) {
+      channelCount = static_cast<int>(take->channelCount());
+    }
 
     if(mapHasKey(takesOnTracks, take)) {
         trackInfo = getValueFromMap(takesOnTracks, take);
@@ -359,7 +362,10 @@ void admplug::EARPluginSuite::onCreateObjectTrack(admplug::TrackElement & trackE
     }
 
     auto automationElements = trackElement.getAutomationElements();
-    auto takeChannels = take->channelsOfOriginal();
+    std::vector<int> takeChannels;
+    if (take) {
+      takeChannels = take->channelsOfOriginal();
+    }
     for(auto const& automationElement : automationElements) {
         auto aeChannelOfOriginal = automationElement->channel().channelOfOriginal();
         for(int chOffset = 0; chOffset < takeChannels.size(); chOffset++) {
