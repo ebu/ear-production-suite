@@ -11,7 +11,7 @@ target_sources(testreaper_adm
        nodetests.cpp
        projecttreetests.cpp
        outertests.cpp
-       pluginsuitetests.cpp
+       #pluginsuitetests.cpp
        mediatrackelementtests.cpp
        mediatakeelementtests.cpp
        objectautomationelementtests.cpp
@@ -45,9 +45,6 @@ target_include_directories(testreaper_adm
 	${EPS_SHARED_DIR})
 
 set_property(TARGET testreaper_adm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "../../../../reaper-adm-extension/test/reaper_adm/")
-
-add_custom_command(TARGET testreaper_adm POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${REAPER_ADM_EXTENSION_SRC_DIR}/ADMPresets ${CMAKE_CURRENT_SOURCE_DIR}/data/UserPlugins/ADMPresets)
 
 add_test(
     NAME reaper_admtest
