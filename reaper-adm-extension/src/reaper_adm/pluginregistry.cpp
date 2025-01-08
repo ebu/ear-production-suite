@@ -20,7 +20,7 @@ void admplug::PluginRegistry::repopulateInstalledPlugins(bool warnOnFailure, con
       std::string filePath{vstIniPath + fileName};
       std::ifstream ifs{filePath};
 
-      // Next, parse the fileName... CSV, 3 part; filename + "=" + uid??, uid???, name (e.g,  VISR SceneMasterVST (visr) (64ch)) - we might need to do some lazy matching on that... (e.g, end bit probably isn't expected)
+      // Next, parse the fileName... CSV, 3 part; filename + "=" + uid??, uid???, name (e.g,  EAR Object (EBU), EAR Binaural Monitoring (EBU) (128ch)) - we might need to do some lazy matching on that... (e.g, end bit probably isn't expected)
       if (ifs) {
         fileFound = true;
         std::string line;

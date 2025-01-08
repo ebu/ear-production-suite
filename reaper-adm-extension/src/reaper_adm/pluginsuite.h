@@ -60,7 +60,7 @@ namespace admplug {
 
     class UniqueValueAssigner {
         // This class handles cases where each plugin should be assigned a unique value for a certain parameter
-        // (see objectId for VISR, or trackMapping for EAR)
+        // (e.g, trackMapping for EAR)
 
     public:
         struct SearchCandidate {
