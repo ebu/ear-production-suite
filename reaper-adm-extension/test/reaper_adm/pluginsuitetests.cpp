@@ -29,10 +29,6 @@ using ::testing::InSequence;
 using namespace admplug::testing;
 
 TEST_CASE("EAR plugin suite") {
-  auto const SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX{ 0 };
-  auto const SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX{ 1 };
-  auto const SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX{ 2 };
-
   EARPluginSuite pluginSuite;
   NiceMock<MockReaperAPI> api;
 

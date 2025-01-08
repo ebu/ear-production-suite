@@ -36,11 +36,6 @@ using ::testing::DoAll;
 using ::testing::SetArgumentPointee;
 
 namespace {
-    int constexpr SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX{ 0 };
-    int constexpr SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX{ 1 };
-    int constexpr SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX{ 2 };
-    auto constexpr SPATIALISER_PLUGIN_NAME{ "FB360 Spatialiser (ambiX)" };
-    auto constexpr CONTROL_PLUGIN_NAME{ "FB360 Control (ambiX)" };
     int constexpr ADM_VST_COMMANDPORT_PARAMETER_INDEX{ 0 };
     int constexpr ADM_VST_SAMPLESPORT_PARAMETER_INDEX{ 1 };
     int constexpr ADM_VST_INCLUDEINADM_PARAMETER_INDEX{ 2 };
@@ -57,13 +52,10 @@ namespace {
     struct FakeTracks {
         explicit FakeTracks(FakePtrFactory& fakePtr) :
             renderer{fakePtr.get<MediaTrack>()},
-            submix{fakePtr.get<MediaTrack>()},
-            directSpeakers{fakePtr.get<MediaTrack>()} {}
+            submix{fakePtr.get<MediaTrack>()} {}
 
         MediaTrack* renderer{};
         MediaTrack* submix{};
-
-        MediaTrack* directSpeakers{}; // Used as a bus of directspeakers channels by FB360
     };
 
     struct FakeEnvelopes {
@@ -149,16 +141,12 @@ namespace {
             return contains(fake.tracksWithItems, tr);
         });
         ON_CALL(api, AddTakeToMediaItem(fake.mediaItem)).WillByDefault(Return(fake.take));
-        ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_AZIMUTH_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.azimuth));
-        ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_ELEVATION_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.elevation));
-        ON_CALL(api, getPluginEnvelope(_, _, SPATIALISER_PLUGIN_DISTANCE_PARAMETER_INDEX)).WillByDefault(Return(fake.envelopeFor.distance));
         ON_CALL(api, SetMediaItemTake_Source(fake.take, fake.source)).WillByDefault(Return(true));
         ON_CALL(api, CreateTrackSend(_, _)).WillByDefault(Return(fake.sendIndex));
         ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_SCENE_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_DEFAULT_MONITORING_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
         ON_CALL(api, TrackFX_AddByActualName(_, StrEq(ADM_VST_PLUGIN_NAME), _, _)).WillByDefault(Return(0));
-        ON_CALL(api, TrackFX_AddByActualName(_, StrEq(SPATIALISER_PLUGIN_NAME), _, _)).WillByDefault(Return(1));
         ON_CALL(api, TrackFX_GetCount(_)).WillByDefault(Return(2)); // Object VST and ADM VST
         ON_CALL(api, GetTrackEnvelopeByName(_, StrEq("Volume"))).WillByDefault(Return(fake.envelopeFor.volume));
         ON_CALL(api, CountTracks(_)).WillByDefault(Return(2));
@@ -226,7 +214,7 @@ namespace {
             }
         }
 
-        SECTION("Instantiates a spatialiser plugin on the object track and a control plugin on the render bus") {
+        SECTION("Instantiates a Input plugin on the object track and a control plugin on the render bus") {
             EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, TrackFXAddMode::QueryPresence)).Times(AnyNumber());
             EXPECT_CALL(api, TrackFX_AddByActualName(_, _, _, TrackFXAddMode::CreateIfMissing)).Times(AnyNumber());
             EXPECT_CALL(api, TrackFX_AddByActualName(_, StrEq(EAR_OBJECT_PLUGIN_NAME), _, TrackFXAddMode::CreateNew)).Times(expectedObjectPlugins);
@@ -281,12 +269,6 @@ TEST_CASE("Check required plug-ins are available") {
     // - it makes sure the dummy reaper-vstplugins64.ini data includes all the plug-ins we will need.
     //   (otherwise it can be difficult to track down why tests are failing)
     std::vector<std::string> reqPlugins{
-        "FB360 Control (ambiX)",
-        "FB360 Converter (ambiX)",
-        "FB360 Spatialiser (ambiX)",
-        "VISR ObjectEditor",
-        "VISR SceneMaster",
-        "VISR LoudspeakerRenderer",
         "ADM Export Source"
     };
     ASSERT_TRUE(registry->checkPluginsAvailable(reqPlugins, api));
