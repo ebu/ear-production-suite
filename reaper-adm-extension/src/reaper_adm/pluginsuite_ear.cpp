@@ -237,8 +237,6 @@ const char* EARPluginSuite::HOA_METADATA_PLUGIN_NAME = "EAR HOA";
 const char* EARPluginSuite::SCENEMASTER_PLUGIN_NAME = "EAR Scene";
 const char* EARPluginSuite::RENDERER_PLUGIN_NAME = "EAR Monitoring 0+2+0";
 
-bool EARPluginSuite::registered = PluginRegistry::getInstance()->registerSupportedPluginSuite("EAR", std::make_shared<EARPluginSuite>());
-
 EARPluginSuite::EARPluginSuite() :
 	objectTrackMappingParameter{ createPluginParameter(static_cast<int>(EarObjectParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },
 	directSpeakersTrackMappingParameter{ createPluginParameter(static_cast<int>(EarDirectSpeakersParameters::TRACK_MAPPING), {TRACK_MAPPING_MIN, TRACK_MAPPING_MAX}) },

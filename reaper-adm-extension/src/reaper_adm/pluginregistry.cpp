@@ -8,6 +8,8 @@
 
 using namespace admplug;
 
+const std::shared_ptr<EARPluginSuite> admplug::PluginRegistry::earPluginSuite = std::make_shared<EARPluginSuite>();
+
 void admplug::PluginRegistry::repopulateInstalledPlugins(bool warnOnFailure, const ReaperAPI &api)
 {
     installedPlugins.clear();
@@ -91,12 +93,3 @@ std::shared_ptr<PluginRegistry> PluginRegistry::getInstance() {
     static auto instance = std::make_shared<PluginRegistry>();
     return instance;
 }
-
-bool PluginRegistry::registerSupportedPluginSuite(std::string name, std::shared_ptr<PluginSuite> pluginSuite) {
-    if (auto it = pluginSuites.find(name); it == pluginSuites.end())
-    {
-        pluginSuites[name] = pluginSuite;
-        return true;
-    }
-    return false;
-};

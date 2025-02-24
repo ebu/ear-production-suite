@@ -11,7 +11,6 @@
 #include "exportaction.h"
 #include "pluginsuite.h"
 #include "pluginregistry.h"
-#include "pluginsuite_ear.h"
 #include <update_check.h>
 #include <version/eps_version.h>
 #include <helper/native_message_box.hpp>
@@ -101,7 +100,6 @@ extern "C" {
     auto reaperMainMenu = std::dynamic_pointer_cast<RawMenu>(reaper->getMenu(MenuID::MAIN_MENU));
     assert(reaperMainMenu);
     auto pluginRegistry = PluginRegistry::getInstance();
-    int actionCounter = 0;
 
     // Item right-click menu
 
@@ -121,30 +119,26 @@ extern "C" {
     };
     admContextMenu->updateCallback = admContextMenuUpdateCallback;
 
-    for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Explode using ");
-        actionName += pluginSuite.first;
-        std::string actionSID("ADM_EXPLODE_");
-        actionSID += std::to_string(actionCounter++);
+    std::string explodeActionName("Explode to Takes");
+    std::string explodeActionSID("ADM_EXPLODE");
 
-        auto explodeAction = std::make_shared<StatefulAction<ImportAction>> (
-            actionName.c_str(),
-            actionSID.c_str(),
-            std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
-            [pluginSuite](ReaperAPI& api, ImportAction& importer) {
-                auto mediaItem = api.GetSelectedMediaItem(0, 0);
-                if (mediaItem) {
-                    importer.import(mediaItem, api);
-                }
-                else {
-                    api.ShowMessageBox("Please select a source before running this action.", "ADM: Explode to Takes", 0);
-                }
-            });
-        explodeAction->setEnabled(pluginSuite.second->pluginSuiteUsable(*api));
-        auto explodeId = reaper->addAction(explodeAction);
-        auto explodeItem = std::make_unique<MenuAction>(actionName.c_str(), explodeId);
-        admContextMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
-    }
+    auto explodeAction = std::make_shared<StatefulAction<ImportAction>> (
+      explodeActionName.c_str(),
+      explodeActionSID.c_str(),
+        std::make_unique<ImportAction>(hInstance, rec->hwnd_main, PluginRegistry::earPluginSuite),
+        [](ReaperAPI& api, ImportAction& importer) {
+            auto mediaItem = api.GetSelectedMediaItem(0, 0);
+            if (mediaItem) {
+                importer.import(mediaItem, api);
+            }
+            else {
+                api.ShowMessageBox("Please select a source before running this action.", "ADM: Explode to Takes", 0);
+            }
+        });
+    explodeAction->setEnabled(PluginRegistry::earPluginSuite->pluginSuiteUsable(*api));
+    auto explodeActionId = reaper->addAction(explodeAction);
+    auto explodeActionItem = std::make_unique<MenuAction>(explodeActionName.c_str(), explodeActionId);
+    admContextMenu->insert(std::move(explodeActionItem), std::make_shared<EndOffset>(0));
 
     auto mediaContextMenu = reaper->getMenu(MenuID::MEDIA_ITEM_CONTEXT);
     mediaContextMenu->insert(
@@ -280,108 +274,89 @@ extern "C" {
 
     // File menu
 
-    auto admFileMenu = std::make_unique<SubMenu>("Create project from ADM BW64 file");
-    auto admFileMenuUpdateCallback = [api](MenuItem& item) {};
-    admFileMenu->updateCallback = admFileMenuUpdateCallback;
+    std::string createActionName("Create project from ADM BW64 file");
+    std::string createActionSID("ADM_CREATE_PROJECT");
 
-    for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Create using ");
-        actionName += pluginSuite.first;
-        std::string actionSID("ADM_CREATE_PROJECT_");
-        actionSID += std::to_string(actionCounter++);
+    auto createAction = std::make_shared<StatefulAction<ImportAction>> (
+        createActionName.c_str(),
+        createActionSID.c_str(),
+        std::make_unique<ImportAction>(hInstance, rec->hwnd_main, PluginRegistry::earPluginSuite),
+        [](ReaperAPI& api, ImportAction& importer) {
 
-        auto explodeAction = std::make_shared<StatefulAction<ImportAction>> (
-            actionName.c_str(),
-            actionSID.c_str(),
-            std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
-            [pluginSuite](ReaperAPI& api, ImportAction& importer) {
-
-            api.Main_openProject("template:"); // This will TRY to start a blank project, but it will replace the current project if successful, so the user is prompted with the save dialog: yes, no, CANCEL
-            auto res = api.IsProjectDirty(nullptr); // If the project is still dirty (1), the user must have canceled! (yes/no would save/not save and start a new clean project)
-            if(res == 0) {
-                char filename[4096];
-                api.GetProjectPath(filename, 4096);
-                auto filenameStr = std::string(filename);
-                filenameStr += "/.wav";
-                memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-                if(api.GetUserFileNameForRead(filename, "ADM BW64 File to Open", "wav")) {
-                    filenameStr = std::string(filename);
-                    std::string errOut;
-                    if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr, &errOut)) {
-                        importer.import(filenameStr, api);
-                    } else {
-                        std::string errMsg{ "Error: This file can not be imported.\n\nResponse: " };
-                        errMsg += errOut;
-                        api.ShowMessageBox(errMsg.c_str(), "ADM Open", 0);
-                    }
-                }
-            }
-        });
-        explodeAction->setEnabled(pluginSuite.second->pluginSuiteUsable(*api));
-        auto explodeId = reaper->addAction(explodeAction);
-        auto explodeItem = std::make_unique<MenuAction>(actionName.c_str(), explodeId);
-        admFileMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
-    }
-
-  auto projectTemplateString = "Project &templates";
-  auto admFileMenuInserter = std::make_shared<BeforeNamedItem>(
-      projectTemplateString, "MENU_102",
-      defaultMenuPositions.at(projectTemplateString), *api);
-  auto reaperFileMenu = reaperMainMenu->getMenuByText(
-      "&File", "common", defaultMenuPositions.at("&File"), *api);
-    assert(reaperFileMenu);
-  reaperFileMenu->insert(std::move(admFileMenu), admFileMenuInserter);
-  reaperFileMenu->init();
-
-    // Insert menu
-
-    auto admInsertMenu = std::make_unique<SubMenu>("Import ADM BW64 file in to current project");
-    auto admInsertMenuUpdateCallback = [api](MenuItem& item) {};
-    admInsertMenu->updateCallback = admInsertMenuUpdateCallback;
-
-    for (auto& pluginSuite : *pluginRegistry->getPluginSuites()) {
-        std::string actionName("Import using ");
-        actionName += pluginSuite.first;
-        std::string actionSID("ADM_IMPORT_");
-        actionSID += std::to_string(actionCounter++);
-
-        auto explodeAction = std::make_shared<StatefulAction<ImportAction>> (
-            actionName.c_str(),
-            actionSID.c_str(),
-            std::make_unique<ImportAction>(hInstance, rec->hwnd_main, pluginSuite.second),
-            [pluginSuite](ReaperAPI& api, ImportAction& importer) {
-
+        api.Main_openProject("template:"); // This will TRY to start a blank project, but it will replace the current project if successful, so the user is prompted with the save dialog: yes, no, CANCEL
+        auto res = api.IsProjectDirty(nullptr); // If the project is still dirty (1), the user must have canceled! (yes/no would save/not save and start a new clean project)
+        if(res == 0) {
             char filename[4096];
             api.GetProjectPath(filename, 4096);
             auto filenameStr = std::string(filename);
             filenameStr += "/.wav";
             memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
-            if (api.GetUserFileNameForRead(filename, "ADM BW64 File to Import", "wav")) {
+            if(api.GetUserFileNameForRead(filename, "ADM BW64 File to Open", "wav")) {
                 filenameStr = std::string(filename);
                 std::string errOut;
-                if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr), &errOut) {
+                if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr, &errOut)) {
                     importer.import(filenameStr, api);
                 } else {
                     std::string errMsg{ "Error: This file can not be imported.\n\nResponse: " };
                     errMsg += errOut;
-                    api.ShowMessageBox(errMsg.c_str(), "ADM Import", 0);
+                    api.ShowMessageBox(errMsg.c_str(), "ADM Open", 0);
                 }
             }
-        });
-        explodeAction->setEnabled(pluginSuite.second->pluginSuiteUsable(*api));
-        auto explodeId = reaper->addAction(explodeAction);
-        auto explodeItem = std::make_unique<MenuAction>(actionName.c_str(), explodeId);
-        admInsertMenu->insert(std::move(explodeItem), std::make_shared<EndOffset>(0));
-    }
+        }
+    });
+    createAction->setEnabled(PluginRegistry::earPluginSuite->pluginSuiteUsable(*api));
+    auto createActionId = reaper->addAction(createAction);
+    auto createActionItem = std::make_unique<MenuAction>(createActionName.c_str(), createActionId);
 
-  auto reaperInsertMenu = reaperMainMenu->getMenuByText(
-      "&Insert", "common", defaultMenuPositions.at("&Insert"), *api);
-  assert(reaperInsertMenu);
-  reaperInsertMenu->insert(std::move(admInsertMenu),
-                           std::make_shared<AfterNamedItem>(
+    auto projectTemplateString = "Project &templates";
+    auto admFileMenuInserter = std::make_shared<BeforeNamedItem>(
+        projectTemplateString, "MENU_102",
+        defaultMenuPositions.at(projectTemplateString), *api);
+    auto reaperFileMenu = reaperMainMenu->getMenuByText(
+        "&File", "common", defaultMenuPositions.at("&File"), *api);
+      assert(reaperFileMenu);
+    reaperFileMenu->insert(std::move(createActionItem), admFileMenuInserter);
+    reaperFileMenu->init();
+
+    // Insert menu
+
+    std::string importActionName("Import ADM BW64 file in to current project");
+    std::string importActionSID("ADM_IMPORT");
+
+    auto importAction = std::make_shared<StatefulAction<ImportAction>> (
+      importActionName.c_str(),
+      importActionSID.c_str(),
+        std::make_unique<ImportAction>(hInstance, rec->hwnd_main, PluginRegistry::earPluginSuite),
+        [](ReaperAPI& api, ImportAction& importer) {
+
+        char filename[4096];
+        api.GetProjectPath(filename, 4096);
+        auto filenameStr = std::string(filename);
+        filenameStr += "/.wav";
+        memcpy(filename, filenameStr.data(), filenameStr.length() + 1);
+        if (api.GetUserFileNameForRead(filename, "ADM BW64 File to Import", "wav")) {
+            filenameStr = std::string(filename);
+            std::string errOut;
+            if(ImportAction::canMediaExplode_QuickCheck(api, filenameStr), &errOut) {
+                importer.import(filenameStr, api);
+            } else {
+                std::string errMsg{ "Error: This file can not be imported.\n\nResponse: " };
+                errMsg += errOut;
+                api.ShowMessageBox(errMsg.c_str(), "ADM Import", 0);
+            }
+        }
+    });
+    importAction->setEnabled(PluginRegistry::earPluginSuite->pluginSuiteUsable(*api));
+    auto importActionId = reaper->addAction(importAction);
+    auto importActionItem = std::make_unique<MenuAction>(importActionName.c_str(), importActionId);
+
+    auto reaperInsertMenu = reaperMainMenu->getMenuByText(
+        "&Insert", "common", defaultMenuPositions.at("&Insert"), *api);
+    assert(reaperInsertMenu);
+    reaperInsertMenu->insert(std::move(importActionItem),
+                             std::make_shared<AfterNamedItem>(
                                "Empty item", "MENU_102",
                                defaultMenuPositions.at("Empty item"), *api));
-    assert(reaperInsertMenu);
     reaperInsertMenu->init();
 
     return 1;
