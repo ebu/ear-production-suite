@@ -598,13 +598,9 @@ void AdmVstExporter::addBlockFormatsToChannelFormat(std::optional<std::vector<st
 std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> AdmVstExporter::getTypeSupportingPlugins(const ReaperAPI& api, adm::TypeDescriptor typeDef, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins)
 {
 	std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> pluginIndices;
-	auto pluginSuites = PluginRegistry::getInstance()->getPluginSuites();
 
-	std::map<std::string, std::shared_ptr<admplug::PluginSuite>>::iterator it;
-	for (it = pluginSuites->begin(); it != pluginSuites->end(); it++) {
 
-		std::shared_ptr<admplug::PluginSuite> pluginSuite = it->second;
-		auto spatialisationPluginNameForType = pluginSuite->getSpatialisationPluginNameFor(typeDef);
+		auto spatialisationPluginNameForType = PluginRegistry::earPluginSuite->getSpatialisationPluginNameFor(typeDef);
 
 		if (spatialisationPluginNameForType.has_value()) {
 			auto pluginMatches = admExportVst->getTrackInstance().getPlugins(*spatialisationPluginNameForType);
@@ -614,13 +610,12 @@ std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInst
 					bool shouldIgnore = ignorePlugins ? (ignorePlugins->find(index) != ignorePlugins->end()) : false;
 					if (!shouldIgnore) {
 						auto pluginInstShare = std::make_shared<PluginInstance>(pluginInst->getTrackInstance().get(), pluginInst->getPluginIndex(), api);
-						auto suitePluginPair = std::make_pair(pluginSuite, pluginInstShare);
+						auto suitePluginPair = std::make_pair(PluginRegistry::earPluginSuite, pluginInstShare);
 						pluginIndices.insert(std::make_pair(index, suitePluginPair));
 					}
 				}
 			}
 		}
-	}
 
 	return pluginIndices;
 }

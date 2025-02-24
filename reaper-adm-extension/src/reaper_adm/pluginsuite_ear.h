@@ -115,6 +115,5 @@ private:
 	std::string originalAdmDocument;
 	bool sceneMasterAlreadyExisted{ false };
 
-	static bool registered;
 };
 }
