@@ -76,18 +76,21 @@ public:
 
 private:
     void assignAdmMetadata(ReaperAPI const& api);
-    std::shared_ptr<AdmSubgraphElements> newAdmSubgraph(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* plugin, std::string suffix = std::string(), adm::FormatDescriptor format = adm::FormatDefinition::PCM);
-    void newAdmPresetDefinitionReference(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin);
-    TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const & api);
-    std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const & api);
+    //std::shared_ptr<AdmSubgraphElements> newAdmSubgraph(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* plugin, std::string suffix = std::string(), adm::FormatDescriptor format = adm::FormatDefinition::PCM);
+    std::shared_ptr<AdmSubgraphElements> newAdmSubgraph(ReaperAPI const& api);
+    //void newAdmPresetDefinitionReference(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin);
+    void newAdmPresetDefinitionReference(ReaperAPI const& api);
+    //TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const & api);
+    //std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const & api);
 
-    bool checkPluginPositions(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst);
-    void createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api);
+    //bool checkPluginPositions(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst);
+    //void createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api);
+    void createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api);
     template<typename AudioBlockFormatType>
     void addBlockFormatsToChannelFormat(std::optional<std::vector<std::shared_ptr<AudioBlockFormatType>>> blocks, std::shared_ptr<AdmSubgraphElements> subgraph);
 
-    std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> getTypeSupportingPlugins(const ReaperAPI &api, adm::TypeDescriptor typeDef, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins = nullptr);
-    std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> getTypeSupportingPlugins(const ReaperAPI &api, std::vector<adm::TypeDescriptor> typeDefs, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins = nullptr);
+    //std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> getTypeSupportingPlugins(const ReaperAPI &api, adm::TypeDescriptor typeDef, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins = nullptr);
+    //std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> getTypeSupportingPlugins(const ReaperAPI &api, std::vector<adm::TypeDescriptor> typeDefs, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins = nullptr);
 
     std::shared_ptr<AdmVst> admExportVst;
     std::shared_ptr<adm::Document> parentDocument;
