@@ -304,89 +304,19 @@ void AdmVstExporter::assignAdmMetadata(ReaperAPI const& api)
 		return;
 	}
 
-	/*
-	auto thisType = admExportVst->getAdmType();
-	auto otherTypes = getAdmTypeDefinitionsExcluding(thisType);
-
-	auto supportingPlugins = getTypeSupportingPlugins(api, thisType);
-	auto unsupportingPlugins = getTypeSupportingPlugins(api, otherTypes, &supportingPlugins);
-
-	auto trackInst = admExportVst->getTrackInstance();
-	std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>* chosenPlugin = nullptr;
-	if (supportingPlugins.size() > 0) {
-		chosenPlugin = &(supportingPlugins.begin()->second);
-	}
-	*/
-
 	if (admExportVst->isUsingPresetDefinition()) {
-		// Preset definitions (directspeakers, hoa) may not need spatialising so it's acceptable to not provide a plugin
-
-		/*
-		if (chosenPlugin) {
-			newAdmPresetDefinitionReference(api, chosenPlugin->first, chosenPlugin->second.get());
-		}
-		else {
-			newAdmPresetDefinitionReference(api, nullptr, nullptr);
-		}
-		*/
+		// Probably DS/HOA
 		newAdmPresetDefinitionReference(api);
-
 	}
-	/*
-	else if (chosenPlugin) {
-		newAdmSubgraph(api, chosenPlugin->first, chosenPlugin->second.get());
-
-	}
-	*/
 	else {
-		/*
-		// ERROR - Require a spatialisation plugin and none were present
-		std::string errorMessage{ "Track '" };
-		errorMessage += admExportVst->getTrackInstance().getName();
-		errorMessage += "' has no supported spatialisation plugin for object type specified by ";
-		errorMessage += *AdmVst::getVstNameStr();
-		errorMessage += " plugin.";
-		admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-		*/
+		// Probably Obj
 		// We can still generate ADM - just no blocks - default initial block will be created
-		//newAdmSubgraph(api, nullptr, nullptr);
 		newAdmSubgraph(api);
 	}
-	/*
-	if (supportingPlugins.size() > 1) {
-		// WARNING - Multiple spatalisation plugins on track - can not determine which to use! (we used first one)
-		std::optional<std::string> pluginName = chosenPlugin ? chosenPlugin->second->getPluginName() : std::optional<std::string>();
-
-		std::string errorMessage{ "Track '" };
-		errorMessage += trackInst.getName();
-		errorMessage += "' has multiple supported spatialisation plugins for object type specified by ";
-		errorMessage += *AdmVst::getVstNameStr();
-		errorMessage += " plugin. Using parameter data from first instance";
-		if (pluginName.has_value()) {
-			errorMessage += " of '";
-			errorMessage += *pluginName;
-			errorMessage += "'";
-		}
-		errorMessage += ".";
-		admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-	}
-
-	if (unsupportingPlugins.size() > 0) {
-		// WARNING - Spatalisation plugins on track suitable for different objectType to that specified in ADM VST. They are ignored.
-		std::string errorMessage{ "Track '" };
-		errorMessage += admExportVst->getTrackInstance().getName();
-		errorMessage += "' contains spatialisation plugins for a different object type to that specified by ";
-		errorMessage += *AdmVst::getVstNameStr();
-		errorMessage += " plugin.";
-		admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-	}
-	*/
 }
 
-//std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin, std::string suffix, adm::FormatDescriptor format)
 std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI const& api)
 {
-	//if (suffix.length() == 0) suffix = std::to_string(admSubgraphs.size());
 	auto suffix = std::to_string(admSubgraphs.size());
 	suffix.insert(0, "_");
 
@@ -410,18 +340,11 @@ std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI co
 	subgraph->audioTrackUid->setReference(subgraph->audioChannelFormat);
 	subgraph->audioTrackUid->setReference(audioPackFormat);
 
-	/*
-	if (pluginSuite && spatPlugin) {
-		checkPluginPositions(pluginSuite, spatPlugin);
-	}
-	createAndAddAudioBlocks(objectType, pluginSuite, spatPlugin, subgraph, api);
-	*/
 	createAndAddAudioBlocks(objectType, subgraph, api);
 
 	return subgraph;
 }
 
-//void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* spatPlugin)
 void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api)
 {
 	auto typeDefinition = admExportVst->getAdmType();
@@ -451,111 +374,13 @@ void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api)
 			admSubgraphs.push_back(subgraph);
 		}
 	}
-	/*
-	if (pluginSuite && spatPlugin) {
-		// TODO checkPluginParamsMatchPresetDefinition(chosenPlugin, commondef);
-		checkPluginPositions(pluginSuite, spatPlugin);
-	}
-	*/
 }
 
-/*
-TrackEnvelope* AdmVstExporter::getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api)
-{
-	MediaTrack* track = pluginInst->getTrackInstance().get();
-
-	// Plugin Parameters
-	if (auto param = pluginSuite->getPluginParameterFor(admParameter)) {
-		return api.GetFXEnvelope(track, pluginInst->getPluginIndex(), param->index(), false);
-	}
-
-	// Track Parameters
-	switch (admParameter) {
-	case AdmParameter::OBJECT_GAIN:
-		return api.GetTrackEnvelopeByName(track, "Volume");
-		break;
-	}
-
-	return nullptr;
-}
-
-std::optional<double> AdmVstExporter::getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api)
-{
-	MediaTrack* track = pluginInst->getTrackInstance().get();
-
-	// Plugin Parameters
-	if (auto param = pluginSuite->getPluginParameterFor(admParameter)) {
-		return pluginInst->getParameterWithConvert(*param);
-	}
-
-	// Track Parameters
-	double val;
-	switch (admParameter) {
-	case AdmParameter::OBJECT_GAIN:
-		if (api.GetTrackUIVolPan(track, &val, nullptr)) {
-			return std::optional<double>(val);
-		}
-		break;
-	}
-	return std::optional<double>();
-}
-
-bool AdmVstExporter::checkPluginPositions(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst)
-{
-	auto spatialisationPluginName = pluginInst->getPluginName();
-	assert(spatialisationPluginName);
-
-	if (spatialisationPluginName) {
-		if (pluginSuite->pluginSuiteRequiresAdmExportVst() == PluginSuite::RequiresAdmExportVst::NONE) {
-			std::string errorMessage{ "Plugin '" };
-			errorMessage += *spatialisationPluginName;
-			errorMessage += "' on track '";
-			errorMessage += admExportVst->getTrackInstance().getName();
-			errorMessage += "' does not require an instance of  ";
-			errorMessage += *AdmVst::getVstNameStr();
-			errorMessage += " plugin.";
-			admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-			return false;
-		}
-		else if (pluginSuite->pluginSuiteRequiresAdmExportVst() == PluginSuite::RequiresAdmExportVst::PRE_SPATIALISATION &&
-			pluginInst->getPluginIndex() < admExportVst->getPluginIndex()) {
-			std::string errorMessage{ "The " };
-			errorMessage += *AdmVst::getVstNameStr();
-			errorMessage += " plugin on track '";
-			errorMessage += admExportVst->getTrackInstance().getName();
-			errorMessage += "' should be placed BEFORE '";
-			errorMessage += *spatialisationPluginName;
-			errorMessage += "'.";
-			admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-			return false;
-		}
-		else if (pluginSuite->pluginSuiteRequiresAdmExportVst() == PluginSuite::RequiresAdmExportVst::POST_SPATIALISATION &&
-			pluginInst->getPluginIndex() > admExportVst->getPluginIndex()) {
-			std::string errorMessage{ "The " };
-			errorMessage += *AdmVst::getVstNameStr();
-			errorMessage += "' plugin on track '";
-			errorMessage += admExportVst->getTrackInstance().getName();
-			errorMessage += "' should be placed AFTER '";
-			errorMessage += *spatialisationPluginName;
-			errorMessage += "'.";
-			admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-			return false;
-		}
-		return true;
-	}
-	else {
-		std::string errorMessage{ "Spatialisation plugin on track '" };
-		errorMessage += admExportVst->getTrackInstance().getName();
-		errorMessage += "' could not be determined.";
-		admAuthoringErrors.push_back(AdmAuthoringError(errorMessage));
-		return false;
-	}
-}
-*/
-
-//void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api)
 void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api)
 {
+		// Only needs doing for Object type - other types use presets (common defs)
+		if (typeDescriptor != adm::TypeDefinition::OBJECTS) return;
+
     auto start = std::chrono::nanoseconds::zero();
     auto duration = toNs(api.GetProjectLength(nullptr));
 
@@ -568,46 +393,9 @@ void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor,
     }
 
     auto cumulatedPointData = CumulatedPointData(start, start + duration);
+		// Without a plugin instance, we'll just generate default block
+    addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(nullptr, nullptr, api), subgraph);
 
-		/*
-    if(pluginSuite && pluginInst) {
-        // Get all values for all parameters, whether automated or not.
-        for(int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
-            auto admParameter = (AdmParameter)admParameterIndex;
-            auto param = pluginSuite->getParameterFor(admParameter);
-            auto env = getEnvelopeFor(pluginSuite, pluginInst, admParameter, api);
-
-            if(param && env) {
-                // We have an envelope for this ADM parameter
-                auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
-                admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
-
-            } else if(auto val = getValueFor(pluginSuite, pluginInst, admParameter, api)) {
-                // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
-                // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
-                auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-                admAuthoringErrors.insert(admAuthoringErrors.end(), newErrors.begin(), newErrors.end());
-            }
-        }
-    }
-		*/
-
-    if(typeDescriptor == adm::TypeDefinition::OBJECTS) {
-        addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(nullptr, nullptr, api), subgraph);
-        //addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst, api), subgraph);
-    }
-    else if(typeDescriptor == adm::TypeDefinition::DIRECT_SPEAKERS) {
-        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-    }
-    else if(typeDescriptor == adm::TypeDefinition::HOA) {
-        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-    }
-    else if(typeDescriptor == adm::TypeDefinition::BINAURAL) {
-        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-    }
-    else if(typeDescriptor == adm::TypeDefinition::MATRIX) {
-        // TODO - no need to support just yet as we only support common definitions and objects in the ADM VST
-    }
 }
 
 template<typename AudioBlockFormatType>
@@ -619,44 +407,7 @@ void AdmVstExporter::addBlockFormatsToChannelFormat(std::optional<std::vector<st
 	}
 }
 
-/*
-std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> AdmVstExporter::getTypeSupportingPlugins(const ReaperAPI& api, adm::TypeDescriptor typeDef, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins)
-{
-	std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> pluginIndices;
 
-
-		auto spatialisationPluginNameForType = PluginRegistry::earPluginSuite->getSpatialisationPluginNameFor(typeDef);
-
-		if (spatialisationPluginNameForType.has_value()) {
-			auto pluginMatches = admExportVst->getTrackInstance().getPlugins(*spatialisationPluginNameForType);
-			for (auto& plugin : pluginMatches) {
-				if (auto pluginInst = dynamic_cast<PluginInstance*>(plugin.get())) {
-					int index = pluginInst->getPluginIndex();
-					bool shouldIgnore = ignorePlugins ? (ignorePlugins->find(index) != ignorePlugins->end()) : false;
-					if (!shouldIgnore) {
-						auto pluginInstShare = std::make_shared<PluginInstance>(pluginInst->getTrackInstance().get(), pluginInst->getPluginIndex(), api);
-						auto suitePluginPair = std::make_pair(PluginRegistry::earPluginSuite, pluginInstShare);
-						pluginIndices.insert(std::make_pair(index, suitePluginPair));
-					}
-				}
-			}
-		}
-
-	return pluginIndices;
-}
-
-std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> AdmVstExporter::getTypeSupportingPlugins(const ReaperAPI& api, std::vector<adm::TypeDescriptor> typeDefs, std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>>* ignorePlugins)
-{
-	std::map<int, std::pair<std::shared_ptr<PluginSuite>, std::shared_ptr<PluginInstance>>> resultsList{};
-
-	for (auto& typeDef : typeDefs) {
-		auto newResults = getTypeSupportingPlugins(api, typeDef, ignorePlugins);
-		resultsList.insert(newResults.begin(), newResults.end());
-	}
-
-	return resultsList;
-}
-*/
 
 AdmVstCommunicator* AdmVstExporter::getCommunicator(bool mustExist) {
 	if (mustExist && !isCommunicatorPresent()) obtainCommunicator();
