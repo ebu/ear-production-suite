@@ -2,12 +2,6 @@
 
 <UninstallList>
 
-  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix1stOrder.vstpreset"/>
-  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/ambix2ndOrder.vstpreset"/>
-  <File Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360/FuMa1stOrder.vstpreset"/>
-  <Directory Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets/FB360"/>
-  <Directory Path="[USERPLUGINS-INSTALL-DIR]/ADMPresets"/>
-  
   <File Path="[EPS-EXTRAS-DIR]/LICENSE.pdf"/>
   <File Path="[EPS-EXTRAS-DIR]/README.pdf"/>
   
