@@ -70,7 +70,6 @@ set(EXTENSION_SOURCES
 	reaperhost.cpp
 	track.cpp
 	update_check.cpp
-	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
 	progress/importprogress.cpp
@@ -155,7 +154,6 @@ set(EXTENSION_HEADERS
 	track.h
 	update_check.h
 	win_mem_debug.h
-	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
 	progress/importlistener.h
 	progress/importprogress.h
