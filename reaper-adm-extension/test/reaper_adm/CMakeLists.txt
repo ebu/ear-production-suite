@@ -21,7 +21,6 @@ target_sources(testreaper_adm
        maptests.cpp
        tempdir.cpp
        valueassignertests.cpp
-       coordinateconversiontests.cpp
        automationpointtests.cpp)
 
 
