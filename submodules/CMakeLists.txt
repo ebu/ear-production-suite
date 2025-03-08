@@ -57,11 +57,18 @@ set(BUILD_SHARED_LIBS OFF)
 
 #libadm
 set(BUILD_TESTING OFF)
+set(BUILD_SHARED_LIBS OFF)
 set(UNIT_TESTS OFF CACHE BOOL "libadm unit tests" FORCE)
 set(ADM_HIDE_INTERNAL_SYMBOLS OFF CACHE BOOL "hide libadm symbols by default" FORCE)
 set(ADM_EXAMPLES OFF CACHE BOOL "Build ADM examples" FORCE)
 add_subdirectory(libadm)
 set_target_properties(adm PROPERTIES FOLDER submodules/libadm)
+
+#AdmCoordConv
+set(BUILD_TESTS OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(adm_coordinate_conversion)
+set_target_properties(AdmCoordConv PROPERTIES FOLDER submodules/AdmCoordConv)
 
 #libbw64
 add_subdirectory(libbw64)
