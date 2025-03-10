@@ -67,7 +67,7 @@ set_target_properties(adm PROPERTIES FOLDER submodules/libadm)
 #AdmCoordConv
 set(BUILD_TESTS OFF)
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(adm_coordinate_conversion)
+add_subdirectory(adm_coordinate_conversion EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents AdmCoordConv default install behaviour)
 set_target_properties(AdmCoordConv PROPERTIES FOLDER submodules/AdmCoordConv)
 
 #libbw64
