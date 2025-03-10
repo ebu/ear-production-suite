@@ -197,9 +197,11 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
 
     // Our dialog displayed - reset all vars (might not be the first time around)
+    lastFoundHwnd.reset();
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
+    normalizeCheckboxControlHwnd.reset();
     normalizeControlHwnd.reset();
     secondPassControlHwnd.reset();
     monoToMonoControlHwnd.reset();
@@ -307,6 +309,17 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3){
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
+                if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3) {
+                    // This control has a seperate, unlabeled checkbox before it - see if we just passed it
+                    if (lastFoundHwnd &&
+                      getControlType(*lastFoundHwnd) == BUTTON &&
+                      getWindowText(*lastFoundHwnd) == "") {
+                        normalizeCheckboxControlHwnd = lastFoundHwnd;
+                        normalizeCheckboxLastState = getCheckboxState(*lastFoundHwnd);
+                        setCheckboxState(*lastFoundHwnd, false);
+                        EnableWindow(*lastFoundHwnd, false);
+                    }
+                }
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
@@ -367,6 +380,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
 
     }
 
+    lastFoundHwnd = hwnd;
     return true; // MUST return true to continue iterating through controls
 }
 
@@ -542,6 +556,10 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if (preserveSampleRateControlHwnd) {
           EnableWindow(*preserveSampleRateControlHwnd, true);
           setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
+        }
+        if (normalizeCheckboxControlHwnd) {
+          EnableWindow(*normalizeCheckboxControlHwnd, true);
+          setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
         }
 
         // NOTE: Sample Rate and Channels controls are;
