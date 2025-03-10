@@ -54,6 +54,7 @@ private:
     std::optional<HWND> resampleModeControlHwnd{};
     std::optional<HWND> monoToMonoControlHwnd{};
     std::optional<HWND> multiToMultiControlHwnd{};
+    std::optional<HWND> preserveSampleRateControlHwnd{};
     bool sampleRateControlSetError{false};
     bool channelsControlSetError{false};
 
@@ -62,6 +63,7 @@ private:
     bool secondPassLastState{ false };
     bool monoToMonoLastState{ false };
     bool multiToMultiLastState{ false };
+    bool preserveSampleRateLastState{ false };
 
     std::shared_ptr<AdmExportHandler> admExportHandler;
 
@@ -77,6 +79,7 @@ private:
     std::string EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION{ "8000" };
     std::string EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
     std::string EXPECTED_PRESETS_BUTTON_TEXT{ "Presets" };
+    std::string EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT{ "Preserve source media sample rate if possible" };
     std::string EXPECTED_NORMALIZE_BUTTON_TEXT1{ "Normalize/Limit..." };
     std::string EXPECTED_NORMALIZE_BUTTON_TEXT2{ "Normalize/Limit/Fade" }; // Changed to include fade at ~v6.64
     std::string EXPECTED_NORMALIZE_BUTTON_TEXT3{ "Normalize/fade" }; // Changed to remove limit at ~v7.34

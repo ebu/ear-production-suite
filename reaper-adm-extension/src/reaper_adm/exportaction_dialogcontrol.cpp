@@ -183,6 +183,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION, reaperApi);
     localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
     localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_NORMALIZE_BUTTON_TEXT1, reaperApi);
     localise(EXPECTED_NORMALIZE_BUTTON_TEXT2, reaperApi);
     localise(EXPECTED_NORMALIZE_BUTTON_TEXT3, reaperApi);
@@ -203,6 +204,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     secondPassControlHwnd.reset();
     monoToMonoControlHwnd.reset();
     multiToMultiControlHwnd.reset();
+    preserveSampleRateControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
@@ -327,6 +329,12 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 multiToMultiLastState = getCheckboxState(hwnd);
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
+            }
+            if (winStr == EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT) {
+              preserveSampleRateControlHwnd = hwnd;
+              preserveSampleRateLastState = getCheckboxState(hwnd);
+              setCheckboxState(hwnd, false);
+              EnableWindow(hwnd, false);
             }
         }
 
@@ -530,6 +538,10 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(multiToMultiControlHwnd) {
             EnableWindow(*multiToMultiControlHwnd, true);
             setCheckboxState(*multiToMultiControlHwnd, multiToMultiLastState);
+        }
+        if (preserveSampleRateControlHwnd) {
+          EnableWindow(*preserveSampleRateControlHwnd, true);
+          setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
         }
 
         // NOTE: Sample Rate and Channels controls are;
