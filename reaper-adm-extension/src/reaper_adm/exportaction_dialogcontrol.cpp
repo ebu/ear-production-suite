@@ -538,7 +538,6 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         // Reenable the controls we disabled.
         if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
-        if(normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
 
         if(secondPassControlHwnd) {
@@ -557,9 +556,15 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
           EnableWindow(*preserveSampleRateControlHwnd, true);
           setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
         }
-        if (normalizeCheckboxControlHwnd) {
-          EnableWindow(*normalizeCheckboxControlHwnd, true);
-          setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
+        if (normalizeControlHwnd) {
+          if (normalizeCheckboxControlHwnd) {
+            EnableWindow(*normalizeCheckboxControlHwnd, true);
+            setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
+            EnableWindow(*normalizeControlHwnd, normalizeCheckboxLastState); // Only reenable if last state was checked
+          }
+          else {
+            EnableWindow(*normalizeControlHwnd, true);
+          }
         }
 
         // NOTE: Sample Rate and Channels controls are;
