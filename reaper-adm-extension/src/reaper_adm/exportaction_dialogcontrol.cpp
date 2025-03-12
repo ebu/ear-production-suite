@@ -8,6 +8,7 @@
 #include <helper/char_encoding.hpp>
 
 #define TIMER_ID 1
+#define BM_CLICK 0x00F5
 
 namespace {
 
