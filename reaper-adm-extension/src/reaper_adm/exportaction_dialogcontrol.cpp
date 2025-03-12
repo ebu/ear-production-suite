@@ -293,12 +293,31 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
 BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                                                              // Prepare Render Dialog Control for ADM export.
                                                                                                              // This will involve fixing some values and disabling those controls
-    auto controlType = UNKNOWN;
+    ControlType controlType = UNKNOWN;
 
     if (hwnd && IsWindow(hwnd))
     {
         controlType = getControlType(hwnd);
         std::string winStr = getWindowText(hwnd);
+
+        auto id = GetWindowLong(hwnd, GWL_ID);
+        if (id == 1067) {
+          assert(controlType == BUTTON);
+          assert(winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 ||
+            winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
+            winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3);
+          normalizeControlHwnd = hwnd;
+          EnableWindow(hwnd, false);
+        }
+        if (id == 1069) {
+          assert(controlType == BUTTON);
+          assert(winStr == "");
+          normalizeCheckboxControlHwnd = hwnd;
+          normalizeCheckboxLastState = getCheckboxState(hwnd);
+          setCheckboxState(hwnd, false);
+          EnableWindow(hwnd, false);
+        }
+
 
         if (controlType == BUTTON) {
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
@@ -306,6 +325,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
+            /*
             if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || 
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3){
@@ -324,6 +344,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
+            */
             if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
                 // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
                 // Could probably be recified, but disable as quick fix for now
