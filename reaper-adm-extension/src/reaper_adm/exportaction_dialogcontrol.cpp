@@ -180,7 +180,10 @@ void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 #ifdef WIN32
     SendMessage(hwnd, BM_CLICK, 0, 0);
 #else
+    auto parentHwnd = GetParent(hwnd);
+    auto controlId = GetWindowLong(hwnd, GWL_ID);
     SendMessage(hwnd, BM_SETCHECK, state ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendMessage(parentHwnd, WM_COMMAND, MAKELONG(controlId, BN_CLICKED), (LPARAM)hwnd);
 #endif
 }
 
