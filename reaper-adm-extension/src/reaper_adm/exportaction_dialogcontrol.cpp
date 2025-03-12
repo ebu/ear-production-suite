@@ -204,6 +204,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
     normalizeCheckboxControlHwnd.reset();
+    normalizeControlHwnd.reset();
     secondPassControlHwnd.reset();
     monoToMonoControlHwnd.reset();
     multiToMultiControlHwnd.reset();
@@ -347,9 +348,16 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
               EnableWindow(hwnd, false);
             }
             // Normalise button text changes depending on what options are enabled. Lets check ID instead.
-            // We don't need to control this - just read it's text.
             if (id == EXPECTED_NORMALIZE_BUTTON_ID) {
-              normalisationOptionsEnabled = winStr.ends_with("  ON");
+              // We only disable the button if there isn't a checkbox (otherwise the checkbox handles state and disables normalisation),
+              // and if no normalisation is set, otherwise we have to leave so the user can switch normalisation off.
+              if (!normalizeCheckboxControlHwnd.has_value()) {
+                normalisationOptionsEnabled = winStr.ends_with(" ON");
+                if (!normalisationOptionsEnabled) {
+                  normalizeControlHwnd = hwnd;
+                  EnableWindow(hwnd, false);
+                }
+              }
             }
         }
 
@@ -497,6 +505,9 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(!allControlsSuccessful) {
             infoPaneText = "WARNING: Unable to takeover all render controls. REAPER version may be unsupported and render may fail.\r\n\r\n" + infoPaneText;
         }
+        if (normalisationOptionsEnabled) {
+          infoPaneText = "WARNING: Built-in normalisation is not compatible with object-based audio. Render will fail. Please disable any normalisation/limiting/fade.\r\n\r\n" + infoPaneText;
+        }
 
         SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), LPCSTR(infoPaneText.c_str()));
         EnableWindow(GetDlgItem(hwndDlg, IDC_BUTTON_REFRESH), true);
@@ -541,6 +552,7 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
+        if (normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
 
         if(secondPassControlHwnd) {
             EnableWindow(*secondPassControlHwnd, true);

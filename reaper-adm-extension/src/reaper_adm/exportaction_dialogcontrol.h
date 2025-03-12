@@ -51,6 +51,7 @@ private:
     std::optional<HWND> channelsLabelHwnd{};
     std::optional<HWND> secondPassControlHwnd{};
     std::optional<HWND> normalizeCheckboxControlHwnd{};
+    std::optional<HWND> normalizeControlHwnd{};
     std::optional<HWND> resampleModeControlHwnd{};
     std::optional<HWND> monoToMonoControlHwnd{};
     std::optional<HWND> multiToMultiControlHwnd{};
