@@ -293,12 +293,13 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
 BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                                                              // Prepare Render Dialog Control for ADM export.
                                                                                                              // This will involve fixing some values and disabling those controls
-    auto controlType = UNKNOWN;
+    ControlType controlType = UNKNOWN;
 
     if (hwnd && IsWindow(hwnd))
     {
         controlType = getControlType(hwnd);
         std::string winStr = getWindowText(hwnd);
+        auto id = GetWindowLong(hwnd, GWL_ID);
 
         if (controlType == BUTTON) {
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
@@ -306,6 +307,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
+
             if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || 
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
               winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3){
@@ -324,6 +326,22 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
+            // Normalise button text changes depending on what options are enabled.
+            // Lets check ID too
+            if (id == EXPECTED_NORMALIZE_BUTTON_ID && !normalizeControlHwnd.has_value()) {
+              normalizeControlHwnd = hwnd;
+              EnableWindow(hwnd, false);
+            }
+            // Normalise checkbox has no text, and order of control enumeration may not be reliable.
+            // Lets check ID too
+            if (id == EXPECTED_NORMALIZE_CHECKBOX_ID && !normalizeCheckboxControlHwnd.has_value()) {
+              assert(winStr == "");
+              normalizeCheckboxControlHwnd = hwnd;
+              normalizeCheckboxLastState = getCheckboxState(hwnd);
+              setCheckboxState(hwnd, false);
+              EnableWindow(hwnd, false);
+            }
+
             if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
                 // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
                 // Could probably be recified, but disable as quick fix for now
@@ -363,7 +381,8 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
             auto itemText = getComboBoxItemText(hwnd);
             // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
-            if(itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
+            // Not totally reliable as these options change, so use ID too
+            if(id == EXPECTED_RESAMPLE_MODE_COMBO_ID || itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
                 resampleModeControlHwnd = hwnd;
                 auto editControl = getComboBoxEdit(hwnd);
                 EnableWindow(editControl, false);
