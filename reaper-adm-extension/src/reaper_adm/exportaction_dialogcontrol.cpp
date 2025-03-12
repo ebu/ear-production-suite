@@ -174,6 +174,9 @@ bool RenderDialogState::getCheckboxState(HWND hwnd)
 
 void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 {
+    auto currentState = getCheckboxState(hwnd);
+    if (state == currentState) return;
+    SendMessage(hwnd, BM_CLICK, 0, 0); // Have to simulate a click in case it has a listener attached to it
     SendMessage(hwnd, BM_SETCHECK, state? BST_CHECKED : BST_UNCHECKED, 0);
 }
 
