@@ -36,3 +36,6 @@
 [submodule "submodules/bear"]
 	path = submodules/bear
 	url = https://github.com/ebu/bear.git
+[submodule "submodules/adm_coordinate_conversion"]
+	path = submodules/adm_coordinate_conversion
+	url = https://github.com/ebu/adm_coordinate_conversion.git

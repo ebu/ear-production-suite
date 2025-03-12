@@ -1,4 +1,4 @@
-#include "coordinate_conversion/coord_conv.hpp"
+#include <adm_coord_conv/adm_coord_conv.hpp>
 #include "admextraction.h"
 
 using namespace admplug::detail;
@@ -22,16 +22,38 @@ bool RoomCartesianToSpherical::hasExtent() {
            block.has<adm::Depth>();
 }
 
+
 void RoomCartesianToSpherical::calculate() {
     if(!position && block.has<adm::CartesianPosition>()) {
-        auto inputPosition = block.get<adm::CartesianPosition>();
-        if(hasExtent()) {
-            auto inputExtent = std::make_tuple(getValueOrDefault<adm::Width>(),
-                                               getValueOrDefault<adm::Height>(),
-                                               getValueOrDefault<adm::Depth>());
-            std::tie(position, extent) = adm::cartToPolar(std::make_tuple(inputPosition, inputExtent));
-        } else {
-            position = adm::pointCartToPolar(inputPosition);
+
+        auto admInputPosition = block.get<adm::CartesianPosition>();
+        adm::coords::CartesianSource inputSource{ {
+          admInputPosition.get<adm::X>().get(),
+          admInputPosition.get<adm::Y>().get(),
+          admInputPosition.get<adm::Z>().get()
+        } };
+
+        if (hasExtent()) {
+          inputSource.extent = adm::coords::CartesianExtent{
+            getValueOrDefault<adm::Width>().get(),
+            getValueOrDefault<adm::Height>().get(),
+            getValueOrDefault<adm::Depth>().get()
+          };
+        }
+
+        auto convSource = adm::coords::convert(inputSource);
+        position = adm::SphericalPosition(
+          adm::Azimuth(convSource.position.azimuth),
+          adm::Elevation(convSource.position.elevation),
+          adm::Distance(convSource.position.distance)
+        );
+
+        if (convSource.extent.has_value()) {
+          extent = std::make_tuple(
+            adm::Width(convSource.extent->width),
+            adm::Height(convSource.extent->height),
+            adm::Depth(convSource.extent->depth)
+          );
         }
     }
 }
@@ -59,8 +81,20 @@ RoomCartesianToSphericalSpeaker::RoomCartesianToSphericalSpeaker(
 
 void RoomCartesianToSphericalSpeaker::calculate() {
     if(!position) {
-        auto inputPosition = block.get<adm::CartesianSpeakerPosition>();
-        position = adm::pointCartToPolar(inputPosition);
+
+        auto admInputPosition = block.get<adm::CartesianSpeakerPosition>();
+        adm::coords::CartesianPosition inputPosition{
+          getParamValueOrZero<adm::X>(admInputPosition),
+          getParamValueOrZero<adm::Y>(admInputPosition),
+          getParamValueOrZero<adm::Z>(admInputPosition)
+        };
+
+        auto convPosition = adm::coords::convert(inputPosition);
+        position = adm::SphericalSpeakerPosition(
+          adm::Azimuth(convPosition.azimuth),
+          adm::Elevation(convPosition.elevation),
+          adm::Distance(convPosition.distance)
+        );
     }
 }
 
