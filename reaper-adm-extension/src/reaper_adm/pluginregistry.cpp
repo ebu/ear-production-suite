@@ -8,6 +8,8 @@
 
 using namespace admplug;
 
+const std::shared_ptr<EARPluginSuite> admplug::PluginRegistry::earPluginSuite = std::make_shared<EARPluginSuite>();
+
 void admplug::PluginRegistry::repopulateInstalledPlugins(bool warnOnFailure, const ReaperAPI &api)
 {
     installedPlugins.clear();
@@ -20,7 +22,7 @@ void admplug::PluginRegistry::repopulateInstalledPlugins(bool warnOnFailure, con
       std::string filePath{vstIniPath + fileName};
       std::ifstream ifs{filePath};
 
-      // Next, parse the fileName... CSV, 3 part; filename + "=" + uid??, uid???, name (e.g,  VISR SceneMasterVST (visr) (64ch)) - we might need to do some lazy matching on that... (e.g, end bit probably isn't expected)
+      // Next, parse the fileName... CSV, 3 part; filename + "=" + uid??, uid???, name (e.g,  EAR Object (EBU), EAR Binaural Monitoring (EBU) (128ch)) - we might need to do some lazy matching on that... (e.g, end bit probably isn't expected)
       if (ifs) {
         fileFound = true;
         std::string line;
@@ -91,12 +93,3 @@ std::shared_ptr<PluginRegistry> PluginRegistry::getInstance() {
     static auto instance = std::make_shared<PluginRegistry>();
     return instance;
 }
-
-bool PluginRegistry::registerSupportedPluginSuite(std::string name, std::shared_ptr<PluginSuite> pluginSuite) {
-    if (auto it = pluginSuites.find(name); it == pluginSuites.end())
-    {
-        pluginSuites[name] = pluginSuite;
-        return true;
-    }
-    return false;
-};

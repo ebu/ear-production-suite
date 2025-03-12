@@ -126,10 +126,6 @@ if(APPLE AND NOT EPS_CI)
     )
 
     add_custom_command(TARGET setup POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/reaper-adm-extension/src/reaper_adm/ADMPresets $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/UserPlugins/ADMPresets
-    )
-
-    add_custom_command(TARGET setup POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/packaging/Templates $<TARGET_BUNDLE_CONTENT_DIR:setup>/Resources/Templates
     )
 
