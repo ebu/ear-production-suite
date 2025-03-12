@@ -8,7 +8,6 @@
 #include <helper/char_encoding.hpp>
 
 #define TIMER_ID 1
-#define BM_CLICK 0x00F5
 
 namespace {
 
@@ -177,8 +176,13 @@ void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 {
     auto currentState = getCheckboxState(hwnd);
     if (state == currentState) return;
-    SendMessage(hwnd, BM_CLICK, 0, 0); // Have to simulate a click in case it has a listener attached to it
-    SendMessage(hwnd, BM_SETCHECK, state? BST_CHECKED : BST_UNCHECKED, 0);
+    // Have to simulate a click in case it has a listener attached to it
+#ifdef WIN32
+    SendMessage(hwnd, BM_CLICK, 0, 0);
+#else
+    buttonWindowProc(hwnd, WM_LBUTTONDOWN, 0, 0);
+    buttonWindowProc(hwnd, WM_LBUTTONUP, 0, 0);
+#endif
 }
 
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
