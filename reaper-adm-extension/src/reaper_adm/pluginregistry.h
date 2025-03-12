@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "pluginsuite_ear.h"
 
 namespace admplug {
     class PluginSuite;
@@ -19,17 +20,14 @@ namespace admplug {
         PluginRegistry(PluginRegistry const&) = delete;
         void operator=(PluginRegistry const&) = delete;
 
-        std::map<std::string, std::shared_ptr<PluginSuite>>* getPluginSuites() { return &pluginSuites; }
-
         void repopulateInstalledPlugins(bool warnOnFailure, const ReaperAPI &api);
         bool checkPluginAvailable(std::string pluginName, const ReaperAPI &api, bool rescanPluginsAtStart = false, bool rescanPluginsOnFirstFail = true);
         bool checkPluginsAvailable(std::vector<std::string> pluginNames, const ReaperAPI & api, bool rescanPluginsAtStart = false, bool rescanPluginsOnFirstFail = true);
 
         static std::shared_ptr<PluginRegistry> getInstance();
-        bool registerSupportedPluginSuite(std::string name, std::shared_ptr<PluginSuite> pluginSuite);
+        static const std::shared_ptr<EARPluginSuite> earPluginSuite;
 
     private:
-        std::map<std::string, std::shared_ptr<PluginSuite>> pluginSuites;
         std::vector<std::string> installedPlugins;
         bool repopulateInstalledPlugins_FailureWarningSent;
 

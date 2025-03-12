@@ -1,9 +1,12 @@
 UNRELEASED
-Note: This release bumps the minimum required REAPER version from v6.11 to v6.37
+
+ _Note: This release bumps the minimum required REAPER version from v6.11 to v6.37. This release also removes support for 3rd-party plugin suites (FB360/VISR) since this feature is rarely used and maintaining the code to support them adds significant development overhead._
 
 * Fix occasional crash bug in start up of Binaural Monitoring plugin [#277](https://github.com/ebu/ear-production-suite/issues/277) [#278](https://github.com/ebu/ear-production-suite/pull/278)
 * Fix fail to render when non-VST plugins are in FX chains [#279](https://github.com/ebu/ear-production-suite/issues/279) [#280](https://github.com/ebu/ear-production-suite/pull/280)
 * Update BEAR [#287](https://github.com/ebu/ear-production-suite/pull/287)
+* Use ADM Coordinate Conversion lib over internal implementation [#293](https://github.com/ebu/ear-production-suite/issues/293) [#295](https://github.com/ebu/ear-production-suite/pull/295)
+* Remove support for 3rd-party plugin suites [#289](https://github.com/ebu/ear-production-suite/pull/289)
 * Update render dialog code to support latest version of REAPER (v7.34) [#296](https://github.com/ebu/ear-production-suite/issues/296) [#297](https://github.com/ebu/ear-production-suite/pull/297)
 
 Version 1.1.0b

@@ -59,8 +59,6 @@ set(EXTENSION_SOURCES
 	pluginregistry.cpp
 	pluginsuite.cpp
 	pluginsuite_ear.cpp
-	pluginsuite_fb360.cpp
-	pluginsuite_visr.cpp
 	projectelements.cpp
 	projectnode.cpp
 	projecttree.cpp
@@ -70,7 +68,6 @@ set(EXTENSION_SOURCES
 	reaperhost.cpp
 	track.cpp
 	update_check.cpp
-	coordinate_conversion/coord_conv.cpp
 	progress/importdialog.cpp
 	progress/importlistener.cpp
 	progress/importprogress.cpp
@@ -139,8 +136,6 @@ set(EXTENSION_HEADERS
 	pluginregistry.h
 	pluginsuite.h
 	pluginsuite_ear.h
-	pluginsuite_fb360.h
-	pluginsuite_visr.h
 	projectelements.h
 	projectnode.h
 	projecttree.h
@@ -155,7 +150,6 @@ set(EXTENSION_HEADERS
 	track.h
 	update_check.h
 	win_mem_debug.h
-	coordinate_conversion/coord_conv.hpp
 	progress/importdialog.h
 	progress/importlistener.h
 	progress/importprogress.h
@@ -201,6 +195,7 @@ target_include_directories(reaper_adm_object
     $<TARGET_PROPERTY:WDL::swell,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:IRT::bw64,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:adm,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:AdmCoordConv,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:nng::nng,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:Juce::core,INTERFACE_INCLUDE_DIRECTORIES>
     ${EPS_SHARED_DIR}
@@ -211,6 +206,7 @@ target_link_libraries(reaper_adm_dependencies
       $<TARGET_OBJECTS:reaper_adm_object>
       IRT::bw64
       adm
+      AdmCoordConv
       WDL::swell
       Boost::filesystem
       nng::nng
@@ -260,5 +256,3 @@ if(WIN32)
 				${win_install_dir}
 			OPTIONAL)
 endif()
-
-install(DIRECTORY ADMPresets COMPONENT Extension DESTINATION $<$<PLATFORM_ID:Windows>:${win_install_dir}>$<$<PLATFORM_ID:Darwin>:${macos_install_dir}>$<$<PLATFORM_ID:Linux>:${linux_install_dir}>)
