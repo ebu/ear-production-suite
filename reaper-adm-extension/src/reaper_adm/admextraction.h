@@ -63,6 +63,14 @@ auto getAdmComponent(adm::AudioBlockFormatDirectSpeakers const& block) {
     return getOptionalAdmComponent<adm::AudioBlockFormatDirectSpeakers, ParameterChain...>(block);
 }
 
+template<typename Param, typename T>
+float getParamValueOrZero(T const& element) {
+  if (element.template has<Param>()) {
+    return element.template get<Param>().get();
+  }
+  return 0;
+}
+
 using ns = std::chrono::nanoseconds;
 
 template<typename TimedParameterT, typename BlockT>
