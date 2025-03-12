@@ -174,7 +174,13 @@ bool RenderDialogState::getCheckboxState(HWND hwnd)
 
 void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
 {
-    SendMessage(hwnd, BM_SETCHECK, state? BST_CHECKED : BST_UNCHECKED, 0);
+    auto currentState = getCheckboxState(hwnd);
+    if (state == currentState) return;
+    // Have to simulate a click in case it has a listener attached to it
+    auto parentHwnd = GetParent(hwnd);
+    auto controlId = GetWindowLong(hwnd, GWL_ID);
+    SendMessage(hwnd, BM_SETCHECK, state ? BST_CHECKED : BST_UNCHECKED, 0);
+    SendMessage(parentHwnd, WM_COMMAND, MAKELONG(controlId, BN_CLICKED), (LPARAM)hwnd);
 }
 
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
@@ -184,9 +190,6 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
     localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
     localise(EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT, reaperApi);
-    localise(EXPECTED_NORMALIZE_BUTTON_TEXT1, reaperApi);
-    localise(EXPECTED_NORMALIZE_BUTTON_TEXT2, reaperApi);
-    localise(EXPECTED_NORMALIZE_BUTTON_TEXT3, reaperApi);
     localise(EXPECTED_SECOND_PASS_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MONO2MONO_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MULTI2MULTI_CHECKBOX_TEXT, reaperApi);
@@ -197,7 +200,6 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
 
     // Our dialog displayed - reset all vars (might not be the first time around)
-    lastFoundButtonHwnd.reset();
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
@@ -213,6 +215,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     resampleModeControlHwnd.reset();
     sampleRateControlSetError = false;
     channelsControlSetError = false;
+    normalisationOptionsEnabled = false;
     sampleRateLastOption.clear();
     channelsLastOption.clear();
 
@@ -285,6 +288,17 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
             }
         }
 
+        if (controlType == BUTTON) {
+          // Normalise checkbox has no text, and order of control enumeration may not be reliable. Lets check ID.
+          // Do this in first pass as we don't want to disable the normalisation button if the checkbox isn't present.
+          if (GetWindowLong(hwnd, GWL_ID) == EXPECTED_NORMALIZE_CHECKBOX_ID) {
+            assert(getWindowText(hwnd) == "");
+            normalizeCheckboxControlHwnd = hwnd;
+            normalizeCheckboxLastState = getCheckboxState(hwnd);
+            setCheckboxState(hwnd, false);
+            EnableWindow(hwnd, false);
+          }
+        }
     }
 
     return true; // MUST return true to continue iterating through controls
@@ -307,41 +321,6 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
-
-            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || 
-              winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
-              winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3){
-                // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
-                if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3) {
-                    // This control has a seperate, unlabeled checkbox before it - see if we just passed it
-                    if (lastFoundButtonHwnd &&
-                      getControlType(*lastFoundButtonHwnd) == BUTTON &&
-                      getWindowText(*lastFoundButtonHwnd) == "") {
-                        normalizeCheckboxControlHwnd = lastFoundButtonHwnd;
-                        normalizeCheckboxLastState = getCheckboxState(*lastFoundButtonHwnd);
-                        setCheckboxState(*lastFoundButtonHwnd, false);
-                        EnableWindow(*lastFoundButtonHwnd, false);
-                    }
-                }
-                normalizeControlHwnd = hwnd;
-                EnableWindow(hwnd, false);
-            }
-            // Normalise button text changes depending on what options are enabled.
-            // Lets check ID too
-            if (id == EXPECTED_NORMALIZE_BUTTON_ID && !normalizeControlHwnd.has_value()) {
-              normalizeControlHwnd = hwnd;
-              EnableWindow(hwnd, false);
-            }
-            // Normalise checkbox has no text, and order of control enumeration may not be reliable.
-            // Lets check ID too
-            if (id == EXPECTED_NORMALIZE_CHECKBOX_ID && !normalizeCheckboxControlHwnd.has_value()) {
-              assert(winStr == "");
-              normalizeCheckboxControlHwnd = hwnd;
-              normalizeCheckboxLastState = getCheckboxState(hwnd);
-              setCheckboxState(hwnd, false);
-              EnableWindow(hwnd, false);
-            }
-
             if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
                 // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
                 // Could probably be recified, but disable as quick fix for now
@@ -367,6 +346,18 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
               preserveSampleRateLastState = getCheckboxState(hwnd);
               setCheckboxState(hwnd, false);
               EnableWindow(hwnd, false);
+            }
+            // Normalise button text changes depending on what options are enabled. Lets check ID instead.
+            if (id == EXPECTED_NORMALIZE_BUTTON_ID) {
+              // We only disable the button if there isn't a checkbox (otherwise the checkbox handles state and disables normalisation),
+              // and if no normalisation is set, otherwise we have to leave so the user can switch normalisation off.
+              if (!normalizeCheckboxControlHwnd.has_value()) {
+                normalisationOptionsEnabled = winStr.ends_with(" ON");
+                if (!normalisationOptionsEnabled) {
+                  normalizeControlHwnd = hwnd;
+                  EnableWindow(hwnd, false);
+                }
+              }
             }
         }
 
@@ -400,9 +391,6 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
 
     }
 
-    if (controlType == BUTTON) {
-        lastFoundButtonHwnd = hwnd;
-    }
     return true; // MUST return true to continue iterating through controls
 }
 
@@ -517,6 +505,9 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(!allControlsSuccessful) {
             infoPaneText = "WARNING: Unable to takeover all render controls. REAPER version may be unsupported and render may fail.\r\n\r\n" + infoPaneText;
         }
+        if (normalisationOptionsEnabled) {
+          infoPaneText = "WARNING: Built-in normalisation is not compatible with object-based audio. Render will fail. Please disable any normalisation/limiting/fade.\r\n\r\n" + infoPaneText;
+        }
 
         SetWindowText(GetDlgItem(hwndDlg, IDC_INFOPANE), LPCSTR(infoPaneText.c_str()));
         EnableWindow(GetDlgItem(hwndDlg, IDC_BUTTON_REFRESH), true);
@@ -561,6 +552,7 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
+        if (normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
 
         if(secondPassControlHwnd) {
             EnableWindow(*secondPassControlHwnd, true);
@@ -578,15 +570,9 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
           EnableWindow(*preserveSampleRateControlHwnd, true);
           setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
         }
-        if (normalizeControlHwnd) {
-          if (normalizeCheckboxControlHwnd) {
-            EnableWindow(*normalizeCheckboxControlHwnd, true);
-            setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
-            EnableWindow(*normalizeControlHwnd, normalizeCheckboxLastState); // Only reenable if last state was checked
-          }
-          else {
-            EnableWindow(*normalizeControlHwnd, true);
-          }
+        if (normalizeCheckboxControlHwnd) {
+          EnableWindow(*normalizeCheckboxControlHwnd, true);
+          setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
         }
 
         // NOTE: Sample Rate and Channels controls are;
