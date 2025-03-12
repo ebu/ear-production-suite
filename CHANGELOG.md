@@ -7,6 +7,7 @@ UNRELEASED
 * Update BEAR [#287](https://github.com/ebu/ear-production-suite/pull/287)
 * Use ADM Coordinate Conversion lib over internal implementation [#293](https://github.com/ebu/ear-production-suite/issues/293) [#295](https://github.com/ebu/ear-production-suite/pull/295)
 * Remove support for 3rd-party plugin suites [#289](https://github.com/ebu/ear-production-suite/pull/289)
+* Update render dialog code to support latest version of REAPER (v7.34) [#296](https://github.com/ebu/ear-production-suite/issues/296) [#297](https://github.com/ebu/ear-production-suite/pull/297)
 
 Version 1.1.0b
 

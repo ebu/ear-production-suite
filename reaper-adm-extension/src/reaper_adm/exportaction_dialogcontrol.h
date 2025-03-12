@@ -43,6 +43,8 @@ private:
     std::shared_ptr<ReaperAPI> reaperApi;
     REAPER_PLUGIN_HINSTANCE reaperInst;
 
+    std::optional<HWND> lastFoundButtonHwnd{};
+
     std::optional<HWND> boundsControlHwnd{};
     std::optional<HWND> sourceControlHwnd{};
     std::optional<HWND> presetsControlHwnd{};
@@ -50,10 +52,12 @@ private:
     std::optional<HWND> channelsControlHwnd{};
     std::optional<HWND> channelsLabelHwnd{};
     std::optional<HWND> secondPassControlHwnd{};
+    std::optional<HWND> normalizeCheckboxControlHwnd{};
     std::optional<HWND> normalizeControlHwnd{};
     std::optional<HWND> resampleModeControlHwnd{};
     std::optional<HWND> monoToMonoControlHwnd{};
     std::optional<HWND> multiToMultiControlHwnd{};
+    std::optional<HWND> preserveSampleRateControlHwnd{};
     bool sampleRateControlSetError{false};
     bool channelsControlSetError{false};
 
@@ -62,6 +66,8 @@ private:
     bool secondPassLastState{ false };
     bool monoToMonoLastState{ false };
     bool multiToMultiLastState{ false };
+    bool preserveSampleRateLastState{ false };
+    bool normalizeCheckboxLastState{ false };
 
     std::shared_ptr<AdmExportHandler> admExportHandler;
 
@@ -77,8 +83,12 @@ private:
     std::string EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION{ "8000" };
     std::string EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
     std::string EXPECTED_PRESETS_BUTTON_TEXT{ "Presets" };
+    std::string EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT{ "Preserve source media sample rate if possible" };
     std::string EXPECTED_NORMALIZE_BUTTON_TEXT1{ "Normalize/Limit..." };
     std::string EXPECTED_NORMALIZE_BUTTON_TEXT2{ "Normalize/Limit/Fade" }; // Changed to include fade at ~v6.64
+    std::string EXPECTED_NORMALIZE_BUTTON_TEXT3{ "Normalize/fade" }; // Changed to remove limit at ~v7.34 - includes an unlabelled checkbox alongside
+    const int EXPECTED_NORMALIZE_BUTTON_ID{ 1067 };
+    const int EXPECTED_NORMALIZE_CHECKBOX_ID{ 1069 };
     std::string EXPECTED_SECOND_PASS_CHECKBOX_TEXT{ "2nd pass render" };
     std::string EXPECTED_MONO2MONO_CHECKBOX_TEXT{ "Tracks with only mono media to mono files" };
     std::string EXPECTED_MULTI2MULTI_CHECKBOX_TEXT{ "Multichannel tracks to multichannel files" };
@@ -87,6 +97,7 @@ private:
     std::string EXPECTED_CHANNEL_COUNT_LABEL_TEXT{ "Channels:" };
     std::string REQUIRED_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
     std::string EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION{ "Point Sampling (lowest quality, retro)" };
+    const int EXPECTED_RESAMPLE_MODE_COMBO_ID{ 1000 };
 
 };
 

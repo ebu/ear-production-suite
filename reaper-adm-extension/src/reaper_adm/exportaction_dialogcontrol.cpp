@@ -183,8 +183,10 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION, reaperApi);
     localise(EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION, reaperApi);
     localise(EXPECTED_PRESETS_BUTTON_TEXT, reaperApi);
+    localise(EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_NORMALIZE_BUTTON_TEXT1, reaperApi);
     localise(EXPECTED_NORMALIZE_BUTTON_TEXT2, reaperApi);
+    localise(EXPECTED_NORMALIZE_BUTTON_TEXT3, reaperApi);
     localise(EXPECTED_SECOND_PASS_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MONO2MONO_CHECKBOX_TEXT, reaperApi);
     localise(EXPECTED_MULTI2MULTI_CHECKBOX_TEXT, reaperApi);
@@ -195,13 +197,16 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
 
     // Our dialog displayed - reset all vars (might not be the first time around)
+    lastFoundButtonHwnd.reset();
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
+    normalizeCheckboxControlHwnd.reset();
     normalizeControlHwnd.reset();
     secondPassControlHwnd.reset();
     monoToMonoControlHwnd.reset();
     multiToMultiControlHwnd.reset();
+    preserveSampleRateControlHwnd.reset();
     sampleRateControlHwnd.reset();
     channelsControlHwnd.reset();
     channelsLabelHwnd.reset();
@@ -288,11 +293,13 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
 BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                                                              // Prepare Render Dialog Control for ADM export.
                                                                                                              // This will involve fixing some values and disabling those controls
+    ControlType controlType = UNKNOWN;
 
     if (hwnd && IsWindow(hwnd))
     {
+        controlType = getControlType(hwnd);
         std::string winStr = getWindowText(hwnd);
-        auto controlType = getControlType(hwnd);
+        auto id = GetWindowLong(hwnd, GWL_ID);
 
         if (controlType == BUTTON) {
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
@@ -300,11 +307,41 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
-            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2){
+
+            if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT1 || 
+              winStr == EXPECTED_NORMALIZE_BUTTON_TEXT2 ||
+              winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3){
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
+                if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3) {
+                    // This control has a seperate, unlabeled checkbox before it - see if we just passed it
+                    if (lastFoundButtonHwnd &&
+                      getControlType(*lastFoundButtonHwnd) == BUTTON &&
+                      getWindowText(*lastFoundButtonHwnd) == "") {
+                        normalizeCheckboxControlHwnd = lastFoundButtonHwnd;
+                        normalizeCheckboxLastState = getCheckboxState(*lastFoundButtonHwnd);
+                        setCheckboxState(*lastFoundButtonHwnd, false);
+                        EnableWindow(*lastFoundButtonHwnd, false);
+                    }
+                }
                 normalizeControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
+            // Normalise button text changes depending on what options are enabled.
+            // Lets check ID too
+            if (id == EXPECTED_NORMALIZE_BUTTON_ID && !normalizeControlHwnd.has_value()) {
+              normalizeControlHwnd = hwnd;
+              EnableWindow(hwnd, false);
+            }
+            // Normalise checkbox has no text, and order of control enumeration may not be reliable.
+            // Lets check ID too
+            if (id == EXPECTED_NORMALIZE_CHECKBOX_ID && !normalizeCheckboxControlHwnd.has_value()) {
+              assert(winStr == "");
+              normalizeCheckboxControlHwnd = hwnd;
+              normalizeCheckboxLastState = getCheckboxState(hwnd);
+              setCheckboxState(hwnd, false);
+              EnableWindow(hwnd, false);
+            }
+
             if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
                 // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
                 // Could probably be recified, but disable as quick fix for now
@@ -325,6 +362,12 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
+            if (winStr == EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT) {
+              preserveSampleRateControlHwnd = hwnd;
+              preserveSampleRateLastState = getCheckboxState(hwnd);
+              setCheckboxState(hwnd, false);
+              EnableWindow(hwnd, false);
+            }
         }
 
         if (controlType == TEXT || controlType == EDITABLECOMBO) {
@@ -338,7 +381,8 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         if (controlType == COMBOBOX || controlType == EDITABLECOMBO) {
             auto itemText = getComboBoxItemText(hwnd);
             // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
-            if(itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
+            // Not totally reliable as these options change, so use ID too
+            if(id == EXPECTED_RESAMPLE_MODE_COMBO_ID || itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
                 resampleModeControlHwnd = hwnd;
                 auto editControl = getComboBoxEdit(hwnd);
                 EnableWindow(editControl, false);
@@ -356,6 +400,9 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
 
     }
 
+    if (controlType == BUTTON) {
+        lastFoundButtonHwnd = hwnd;
+    }
     return true; // MUST return true to continue iterating through controls
 }
 
@@ -513,7 +560,6 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         // Reenable the controls we disabled.
         if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
         if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
-        if(normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
         if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
 
         if(secondPassControlHwnd) {
@@ -527,6 +573,20 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         if(multiToMultiControlHwnd) {
             EnableWindow(*multiToMultiControlHwnd, true);
             setCheckboxState(*multiToMultiControlHwnd, multiToMultiLastState);
+        }
+        if (preserveSampleRateControlHwnd) {
+          EnableWindow(*preserveSampleRateControlHwnd, true);
+          setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
+        }
+        if (normalizeControlHwnd) {
+          if (normalizeCheckboxControlHwnd) {
+            EnableWindow(*normalizeCheckboxControlHwnd, true);
+            setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
+            EnableWindow(*normalizeControlHwnd, normalizeCheckboxLastState); // Only reenable if last state was checked
+          }
+          else {
+            EnableWindow(*normalizeControlHwnd, true);
+          }
         }
 
         // NOTE: Sample Rate and Channels controls are;
