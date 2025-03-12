@@ -43,7 +43,7 @@ private:
     std::shared_ptr<ReaperAPI> reaperApi;
     REAPER_PLUGIN_HINSTANCE reaperInst;
 
-    std::optional<HWND> lastFoundHwnd{};
+    std::optional<HWND> lastFoundButtonHwnd{};
 
     std::optional<HWND> boundsControlHwnd{};
     std::optional<HWND> sourceControlHwnd{};

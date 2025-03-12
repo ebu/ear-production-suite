@@ -197,7 +197,7 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
 
     // Our dialog displayed - reset all vars (might not be the first time around)
-    lastFoundHwnd.reset();
+    lastFoundButtonHwnd.reset();
     boundsControlHwnd.reset();
     sourceControlHwnd.reset();
     presetsControlHwnd.reset();
@@ -293,11 +293,12 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
 BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lParam) { // Caps BOOL is actually int for EnumChildWindows compatibility
                                                                                                              // Prepare Render Dialog Control for ADM export.
                                                                                                              // This will involve fixing some values and disabling those controls
+    auto controlType = UNKNOWN;
 
     if (hwnd && IsWindow(hwnd))
     {
+        controlType = getControlType(hwnd);
         std::string winStr = getWindowText(hwnd);
-        auto controlType = getControlType(hwnd);
 
         if (controlType == BUTTON) {
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
@@ -311,13 +312,13 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
                 // This is the normalization config which will not work for this as we don't use the sink feed anyway - disable it
                 if (winStr == EXPECTED_NORMALIZE_BUTTON_TEXT3) {
                     // This control has a seperate, unlabeled checkbox before it - see if we just passed it
-                    if (lastFoundHwnd &&
-                      getControlType(*lastFoundHwnd) == BUTTON &&
-                      getWindowText(*lastFoundHwnd) == "") {
-                        normalizeCheckboxControlHwnd = lastFoundHwnd;
-                        normalizeCheckboxLastState = getCheckboxState(*lastFoundHwnd);
-                        setCheckboxState(*lastFoundHwnd, false);
-                        EnableWindow(*lastFoundHwnd, false);
+                    if (lastFoundButtonHwnd &&
+                      getControlType(*lastFoundButtonHwnd) == BUTTON &&
+                      getWindowText(*lastFoundButtonHwnd) == "") {
+                        normalizeCheckboxControlHwnd = lastFoundButtonHwnd;
+                        normalizeCheckboxLastState = getCheckboxState(*lastFoundButtonHwnd);
+                        setCheckboxState(*lastFoundButtonHwnd, false);
+                        EnableWindow(*lastFoundButtonHwnd, false);
                     }
                 }
                 normalizeControlHwnd = hwnd;
@@ -380,7 +381,9 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
 
     }
 
-    lastFoundHwnd = hwnd;
+    if (controlType == BUTTON) {
+        lastFoundButtonHwnd = hwnd;
+    }
     return true; // MUST return true to continue iterating through controls
 }
 
