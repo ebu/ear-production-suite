@@ -177,14 +177,10 @@ void RenderDialogState::setCheckboxState(HWND hwnd, bool state)
     auto currentState = getCheckboxState(hwnd);
     if (state == currentState) return;
     // Have to simulate a click in case it has a listener attached to it
-#ifdef WIN32
-    SendMessage(hwnd, BM_CLICK, 0, 0);
-#else
     auto parentHwnd = GetParent(hwnd);
     auto controlId = GetWindowLong(hwnd, GWL_ID);
     SendMessage(hwnd, BM_SETCHECK, state ? BST_CHECKED : BST_UNCHECKED, 0);
     SendMessage(parentHwnd, WM_COMMAND, MAKELONG(controlId, BN_CLICKED), (LPARAM)hwnd);
-#endif
 }
 
 void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
