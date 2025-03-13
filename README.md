@@ -70,7 +70,7 @@ The location of the installed REAPER extension will be
 ```
 
 ### Windows
-[Microsoft Visual Studio 2019](https://visualstudio.microsoft.com/vs/), installed with C++ support provides a suitable compiler. 
+[Microsoft Visual Studio 2022](https://visualstudio.microsoft.com/vs/), installed with C++ support provides a suitable compiler. 
 
 You'll need to install [CMake](https://www.cmake.org) and [Ninja](https://ninja-build.org/) manually, add their installation locations to your PATH. Then, execute the following steps from a Visual Studio x64 developer command prompt.
 
