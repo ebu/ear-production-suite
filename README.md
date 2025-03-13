@@ -33,8 +33,8 @@ Please refer to `README.pdf`, which is available in the root of the Release pack
 
 The recommended way to build the plugins is via CMake's preset mechanism. Before you can make use of that you'll need a few tools.
 
-- Compiler with C++14 support
-- [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.8 or higher for manual build)
+- Compiler with C++20 support
+- [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.14 or higher for manual build)
 - [Ninja](https://ninja-build.org/)
 
 ### MacOS
