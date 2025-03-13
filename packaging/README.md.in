@@ -54,7 +54,7 @@ You may install the EPS manually if you prefer (note that this is the only optio
     - Windows: `C:\Program Files\Common Files\VST3\`
     - MacOS: `~/Library/Audio/Plug-Ins/VST3/`
     - Linux: `~/.vst3/`
-4. From the release package, copy the REAPER ADM **Extension** from the `UserPlugins` directory of the package (or within `Setup EAR Production Suite.app/Contents/Resources` on MacOS) into the REAPER UserPlugins folder. Ensure you include the `ADMPresets` subdirectory.
+4. From the release package, copy the REAPER ADM **Extension** from the `UserPlugins` directory of the package (or within `Setup EAR Production Suite.app/Contents/Resources` on MacOS) into the REAPER UserPlugins folder.
     - Windows: `C:\Users\(username)\AppData\Roaming\REAPER\UserPlugins\`
           Note: If you have a previous version of the REAPER Extension installed to `C:\Program Files\REAPER (x64)\Plugins\reaper_adm.dll`, then this should be deleted on installation of the latest version.
     - MacOS: `~/Library/Application Support/REAPER/UserPlugins/`
