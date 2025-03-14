@@ -13,8 +13,10 @@ Please refer to the `v1.1.0b` release for an example of how the various steps be
 
 - Check and update copyright years in `./COPYRIGHT.txt` and `./packaging/LICENSE.md` 
 
+- If your changes introduce new files to the package, ensure you have updated `./packaging/install_list.xml` and `./packaging/uninstall_list.xml`
+
 - Update version in `./CMakeLists.txt` 
-  - This will be set as something like `set(EPS_VERSION_BASE 1.2.0)` (for v1.2.0) near the top top of file. Note that this variable must only be numeric, so do not apply any non-numeric suffixes here.
+  - This will be set as something like `set(EPS_VERSION_BASE 1.2.0)` (for v1.2.0) near the top of the file. Note that this variable must only be numeric, so do not apply any non-numeric suffixes here.
 
 - Update version in `./vcpkg.json` 
   - Set the `"version"` field. E.g, `"version": "1.2.0",`. Again, do not apply any non-numeric suffixes here.
@@ -63,10 +65,10 @@ Please refer to the `v1.1.0b` release for an example of how the various steps be
   - The data used to set link addresses and page text etc is stored in `./docs/version_info.json` - this should be the only file you need to change to update the website. This file is also requested and parsed by existing installations of the EPS for the update check functionality. 
   - The fields within this file are fairly self-explanatory and usage examples can be found in the commit history. A quick reference;
     - `"version"` - STRING; complete version, can include suffix. E.g, `"v1.2.0"`, `"v1.1.0b"`
-    - `"version_major"`, `"version_minor"`, `"version_revision"` - INTEGER; breakdown of version numerals
+    - `"version_major"`, `"version_minor"`, `"version_revision"` - INTEGER; breakdown of version numerals, used for version comparison for update check.
     - `"version_suffix"` - STRING; not used as part of version comparison for update check. Set as empty string (i.e, `""`) if not required!
     - `"version_date"` - STRING; nicely formatted date string for use on main page, e.g, `"20th March 2024"`
     - `"version_day"`, `"version_month"`, `"version_year"` - INTEGER; day, month and year. Year should be 4 figures.
     - `"download_macos_universal_url"`, `"download_windows_url"`, `"download_linux_url"` - STRING; download URLs of release assets, usually along the lines of `"https://github.com/ebu/ear-production-suite/releases/download/v1.1.0b-EPS/EPS_1_1_0b_macos_universal.dmg"`
     - `"readme_url"`, `"license_url"` - STRING; download URLs of release docs, usually along the lines of `"https://github.com/ebu/ear-production-suite/releases/download/v1.1.0b-EPS/LICENSE.pdf"`
-    - `"license_type"`, `"license_type_long"` - STRING; license type in short form and long for to populate page text
+    - `"license_type"`, `"license_type_long"` - STRING; license type in short form and long form to populate page text
