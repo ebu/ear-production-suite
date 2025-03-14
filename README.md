@@ -33,8 +33,8 @@ Please refer to `README.pdf`, which is available in the root of the Release pack
 
 The recommended way to build the plugins is via CMake's preset mechanism. Before you can make use of that you'll need a few tools.
 
-- Compiler with C++14 support
-- [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.8 or higher for manual build)
+- Compiler with C++20 support
+- [CMake](https://www.cmake.org) build system (version 3.21.0 or higher for `--preset` support, 3.14 or higher for manual build)
 - [Ninja](https://ninja-build.org/)
 
 ### MacOS
@@ -70,7 +70,7 @@ The location of the installed REAPER extension will be
 ```
 
 ### Windows
-[Microsoft Visual Studio 2019](https://visualstudio.microsoft.com/vs/), installed with C++ support provides a suitable compiler. 
+[Microsoft Visual Studio 2022](https://visualstudio.microsoft.com/vs/), installed with C++ support provides a suitable compiler. 
 
 You'll need to install [CMake](https://www.cmake.org) and [Ninja](https://ninja-build.org/) manually, add their installation locations to your PATH. Then, execute the following steps from a Visual Studio x64 developer command prompt.
 
