@@ -103,16 +103,20 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     }
 
     // Start writing
-    auto chna = admExportSources->getChnaChunk();
-    auto axml = admExportSources->getAxmlChunk();
+    auto [axml, chna] = getAdmChunks(*admExportSources);
     try {
-        writer = bw64::writeFile(admFilename, totalChannels, sRate, 24, chna, axml);
+        writer = bw64::writeFile(admFilename, totalChannels, sRate, bitDepth, chna, axml);
     } catch (std::runtime_error const& e) {
         errors.push_back(std::string("Error: Unable to open output file for writing: ") + e.what());
     }
-
+    
     // Start Renders
     admExportSources->setRenderInProgress(true);
+}
+
+std::pair<std::shared_ptr<bw64::AxmlChunk>, std::shared_ptr<bw64::ChnaChunk>>
+PCM_sink_adm::getAdmChunks(IExportSources& export_sources) {
+    return {export_sources.getAxmlChunk(), export_sources.getChnaChunk()};
 }
 
 PCM_sink_adm::~PCM_sink_adm()

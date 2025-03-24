@@ -26,6 +26,9 @@ public:
     //void GetPeakInfo(PCM_source_peaktransfer_t *block);
     //virtual int Extended(int call, void *parm1, void *parm2, void *parm3) override;
 
+protected:
+    std::pair<std::shared_ptr<bw64::AxmlChunk>, std::shared_ptr<bw64::ChnaChunk>> getAdmChunks(IExportSources& export_sources);
+
 private:
     std::shared_ptr<ReaperAPI> api;
 
