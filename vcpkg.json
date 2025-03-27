@@ -23,6 +23,7 @@
     "boost-program-options",
     "boost-property-tree",
     "boost-range",
+    "boost-rational",
     "boost-smart-ptr",
     "boost-test",
     "boost-timer",
