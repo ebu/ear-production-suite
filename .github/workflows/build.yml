@@ -68,13 +68,13 @@ jobs:
             os: macos-latest
             package: true
             cmake_preset: "macos-packaging-release"
-            vcpkg_triplet: x64-osx-10_13
+            vcpkg_triplet: x64-osx-10-13
             test: true
           - name: "macOS Latest Clang arm64"
             os: macos-latest
             package: true
             cmake_preset: "macos-arm64-packaging-release"
-            vcpkg_triplet: arm64-osx-11_0
+            vcpkg_triplet: arm64-osx-11-0
             test: false
           - name: "Ubuntu 20.04"
             os: ubuntu-20.04
