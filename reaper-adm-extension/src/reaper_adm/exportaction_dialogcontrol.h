@@ -9,6 +9,7 @@
 #include "reaperapi.h"
 #include "reaper_plugin.h"
 #include "exportaction_admsourcescontainer.h"
+#include "export_dialog/render_dialog_modifier.hpp"
 
 using namespace admplug;
 
@@ -45,33 +46,10 @@ private:
     bool getCheckboxState(HWND hwnd);
     void setCheckboxState(HWND hwnd, bool state);
 
+    RenderDialogModifier::ControlsState controls{};
+
     std::shared_ptr<ReaperAPI> reaperApi;
     REAPER_PLUGIN_HINSTANCE reaperInst;
-
-    std::optional<HWND> boundsControlHwnd{};
-    std::optional<HWND> sourceControlHwnd{};
-    std::optional<HWND> presetsControlHwnd{};
-    std::optional<HWND> sampleRateControlHwnd{};
-    std::optional<HWND> channelsControlHwnd{};
-    std::optional<HWND> channelsLabelHwnd{};
-    std::optional<HWND> secondPassControlHwnd{};
-    std::optional<HWND> normalizeCheckboxControlHwnd{};
-    std::optional<HWND> normalizeControlHwnd{};
-    std::optional<HWND> resampleModeControlHwnd{};
-    std::optional<HWND> monoToMonoControlHwnd{};
-    std::optional<HWND> multiToMultiControlHwnd{};
-    std::optional<HWND> preserveSampleRateControlHwnd{};
-    bool sampleRateControlSetError{false};
-    bool channelsControlSetError{false};
-    bool normalisationOptionsEnabled{false};
-
-    std::string sampleRateLastOption{};
-    std::string channelsLastOption{};
-    bool secondPassLastState{ false };
-    bool monoToMonoLastState{ false };
-    bool multiToMultiLastState{ false };
-    bool preserveSampleRateLastState{ false };
-    bool normalizeCheckboxLastState{ false };
 
     std::shared_ptr<AdmExportHandler> admExportHandler;
 

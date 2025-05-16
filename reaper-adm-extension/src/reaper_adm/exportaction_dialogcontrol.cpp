@@ -203,24 +203,24 @@ void RenderDialogState::startPreparingRenderControls(HWND hwndDlg)
     localise(EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION, reaperApi);
 
     // Our dialog displayed - reset all vars (might not be the first time around)
-    boundsControlHwnd.reset();
-    sourceControlHwnd.reset();
-    presetsControlHwnd.reset();
-    normalizeCheckboxControlHwnd.reset();
-    normalizeControlHwnd.reset();
-    secondPassControlHwnd.reset();
-    monoToMonoControlHwnd.reset();
-    multiToMultiControlHwnd.reset();
-    preserveSampleRateControlHwnd.reset();
-    sampleRateControlHwnd.reset();
-    channelsControlHwnd.reset();
-    channelsLabelHwnd.reset();
-    resampleModeControlHwnd.reset();
-    sampleRateControlSetError = false;
-    channelsControlSetError = false;
-    normalisationOptionsEnabled = false;
-    sampleRateLastOption.clear();
-    channelsLastOption.clear();
+    controls.boundsControlHwnd.reset();
+    controls.sourceControlHwnd.reset();
+    controls.presetsControlHwnd.reset();
+    controls.normalizeCheckboxControlHwnd.reset();
+    controls.normalizeControlHwnd.reset();
+    controls.secondPassControlHwnd.reset();
+    controls.monoToMonoControlHwnd.reset();
+    controls.multiToMultiControlHwnd.reset();
+    controls.preserveSampleRateControlHwnd.reset();
+    controls.sampleRateControlHwnd.reset();
+    controls.channelsControlHwnd.reset();
+    controls.channelsLabelHwnd.reset();
+    controls.resampleModeControlHwnd.reset();
+    controls.sampleRateControlSetError = false;
+    controls.channelsControlSetError = false;
+    controls.normalisationOptionsEnabled = false;
+    controls.sampleRateLastOption.clear();
+    controls.channelsLastOption.clear();
 
     startedPrepareDialogControls = true; // Prevents paint message relauching this
     EnableWindow(GetDlgItem(hwndDlg, IDC_BUTTON_REFRESH), false);
@@ -244,7 +244,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
         if (controlType == COMBOBOX) {
             // See if this is the 'Source' dropdown by setting it to the option we want - if successful, it was, and so disable it
             if (selectInComboBox(hwnd, REQUIRED_SOURCE_COMBO_OPTION) != CB_ERR) {
-                sourceControlHwnd = hwnd;
+                controls.sourceControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
         }
@@ -257,20 +257,20 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
             auto itemText = getComboBoxItemText(hwnd);
             // See if this is the sample rate dropdown by seeing if the first item is EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION
             if(itemText == EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION){
-                sampleRateControlHwnd = hwnd;
+                controls.sampleRateControlHwnd = hwnd;
                 auto editControl = getComboBoxEdit(hwnd);
                 auto currentOption = getWindowText(editControl);
-                if(sampleRateLastOption.length() == 0 && currentOption.length() > 0){
-                    sampleRateLastOption = currentOption;
+                if(controls.sampleRateLastOption.length() == 0 && currentOption.length() > 0){
+                    controls.sampleRateLastOption = currentOption;
                 }
                 if(admExportHandler && admExportHandler->getAdmExportSources()) {
                     int sRate = admExportHandler->getAdmExportSources()->getSampleRate();
                     if(sRate > 0) {
                         auto sr = std::to_string(sRate);
-                        auto comboControl = *sampleRateControlHwnd;
-                        sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
+                        auto comboControl = *controls.sampleRateControlHwnd;
+                        controls.sampleRateControlSetError |= (selectInComboBox(comboControl, sr) == CB_ERR);
                         auto editControl = getComboBoxEdit(comboControl);
-                        sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
+                        controls.sampleRateControlSetError |= (SetWindowText(editControl, sr.c_str()) == 0);
                         UpdateWindow(editControl);
                     }
                 }
@@ -279,13 +279,13 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
             }
             // See if this is the channels dropdown by seeing if the first item is EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION
             if(itemText ==  EXPECTED_FIRST_CHANNEL_COUNT_COMBO_OPTION){
-                channelsControlHwnd = hwnd;
+                controls.channelsControlHwnd = hwnd;
                 auto editControl = getComboBoxEdit(hwnd);
                 auto currentOption = getWindowText(editControl);
-                if(channelsLastOption.length() == 0 && currentOption.length() > 0){
-                    channelsLastOption = currentOption;
+                if(controls.channelsLastOption.length() == 0 && currentOption.length() > 0){
+                    controls.channelsLastOption = currentOption;
                 }
-                channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
+                controls.channelsControlSetError |= (selectInComboBox(hwnd, REQUIRED_CHANNEL_COUNT_COMBO_OPTION) == CB_ERR);
                 UpdateWindow(editControl);
                 ShowWindow(hwnd, SW_HIDE);
             }
@@ -296,8 +296,8 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass1(HWND hwnd, LPARAM lP
           // Do this in first pass as we don't want to disable the normalisation button if the checkbox isn't present.
           if (GetWindowLong(hwnd, GWL_ID) == EXPECTED_NORMALIZE_CHECKBOX_ID) {
             assert(getWindowText(hwnd) == "");
-            normalizeCheckboxControlHwnd = hwnd;
-            normalizeCheckboxLastState = getCheckboxState(hwnd);
+            controls.normalizeCheckboxControlHwnd = hwnd;
+            controls.normalizeCheckboxLastState = getCheckboxState(hwnd);
             setCheckboxState(hwnd, false);
             EnableWindow(hwnd, false);
           }
@@ -321,32 +321,32 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         if (controlType == BUTTON) {
             if (winStr == EXPECTED_PRESETS_BUTTON_TEXT){
                 // This is the presets button which could be used to override our forced settings - disable it
-                presetsControlHwnd = hwnd;
+                controls.presetsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
             if (winStr == EXPECTED_SECOND_PASS_CHECKBOX_TEXT){
                 // 2nd pass render causes a mismatch between expected number of received block and actual number of received blocks (double)
                 // Could probably be recified, but disable as quick fix for now
-                secondPassControlHwnd = hwnd;
-                secondPassLastState = getCheckboxState(hwnd);
+                controls.secondPassControlHwnd = hwnd;
+                controls.secondPassLastState = getCheckboxState(hwnd);
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
             if (winStr == EXPECTED_MONO2MONO_CHECKBOX_TEXT){
-                monoToMonoControlHwnd = hwnd;
-                monoToMonoLastState = getCheckboxState(hwnd);
+                controls.monoToMonoControlHwnd = hwnd;
+                controls.monoToMonoLastState = getCheckboxState(hwnd);
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
             if (winStr == EXPECTED_MULTI2MULTI_CHECKBOX_TEXT){
-                multiToMultiControlHwnd = hwnd;
-                multiToMultiLastState = getCheckboxState(hwnd);
+                controls.multiToMultiControlHwnd = hwnd;
+                controls.multiToMultiLastState = getCheckboxState(hwnd);
                 setCheckboxState(hwnd, false);
                 EnableWindow(hwnd, false);
             }
             if (winStr == EXPECTED_PRESERVE_SAMPLE_RATE_CHECKBOX_TEXT) {
-              preserveSampleRateControlHwnd = hwnd;
-              preserveSampleRateLastState = getCheckboxState(hwnd);
+              controls.preserveSampleRateControlHwnd = hwnd;
+              controls.preserveSampleRateLastState = getCheckboxState(hwnd);
               setCheckboxState(hwnd, false);
               EnableWindow(hwnd, false);
             }
@@ -354,10 +354,10 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             if (id == EXPECTED_NORMALIZE_BUTTON_ID) {
               // We only disable the button if there isn't a checkbox (otherwise the checkbox handles state and disables normalisation),
               // and if no normalisation is set, otherwise we have to leave so the user can switch normalisation off.
-              if (!normalizeCheckboxControlHwnd.has_value()) {
-                normalisationOptionsEnabled = winStr.ends_with(" ON");
-                if (!normalisationOptionsEnabled) {
-                  normalizeControlHwnd = hwnd;
+              if (!controls.normalizeCheckboxControlHwnd.has_value()) {
+                controls.normalisationOptionsEnabled = winStr.ends_with(" ON");
+                if (!controls.normalisationOptionsEnabled) {
+                  controls.normalizeControlHwnd = hwnd;
                   EnableWindow(hwnd, false);
                 }
               }
@@ -367,7 +367,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         if (controlType == TEXT || controlType == EDITABLECOMBO) {
             if (winStr == EXPECTED_CHANNEL_COUNT_LABEL_TEXT){
                 // This is the label for the channel count combobox - hide it
-                channelsLabelHwnd = hwnd;
+                controls.channelsLabelHwnd = hwnd;
                 ShowWindow(hwnd, SW_HIDE);
             }
         }
@@ -377,7 +377,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
             // See if this is the resample mode dropdown by seeing if the first item is EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION
             // Not totally reliable as these options change, so use ID too
             if(id == EXPECTED_RESAMPLE_MODE_COMBO_ID || itemText == EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION) {
-                resampleModeControlHwnd = hwnd;
+                controls.resampleModeControlHwnd = hwnd;
                 auto editControl = getComboBoxEdit(hwnd);
                 EnableWindow(editControl, false);
                 UpdateWindow(editControl);
@@ -387,7 +387,7 @@ BOOL CALLBACK RenderDialogState::prepareRenderControl_pass2(HWND hwnd, LPARAM lP
         if (controlType == COMBOBOX) {
             // See if this is the 'Bounds' dropdown by setting it to the option we want - if successful, it was, and so disable it
             if (selectInComboBox(hwnd, REQUIRED_BOUNDS_COMBO_OPTION) != CB_ERR){
-                boundsControlHwnd = hwnd;
+                controls.boundsControlHwnd = hwnd;
                 EnableWindow(hwnd, false);
             }
         }
@@ -560,8 +560,8 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
             windowTitle = getWindowText(renderDialogHandle);
         }
 
-        sampleRateControlSetError = false;
-        channelsControlSetError = false;
+        controls.sampleRateControlSetError = false;
+        controls.channelsControlSetError = false;
         
         admExportHandler = std::make_shared<AdmExportHandler>();
         admExportHandler->repopulate(*reaperApi);
@@ -573,17 +573,17 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 
         auto infoPaneText = getAdmExportVstsInfoString();
         // Note that some controls are not checked as they are not present in all versions of REAPER anyway, so it's OK for them to be missing
-        bool allControlsSuccessful = boundsControlHwnd.has_value() &&
-            sourceControlHwnd.has_value() &&
-            presetsControlHwnd.has_value() &&
-            sampleRateControlHwnd.has_value() &&
-            channelsControlHwnd.has_value() &&
-            channelsLabelHwnd.has_value() &&
-            !sampleRateControlSetError && !channelsControlSetError;
+        bool allControlsSuccessful = controls.boundsControlHwnd.has_value() &&
+            controls.sourceControlHwnd.has_value() &&
+            controls.presetsControlHwnd.has_value() &&
+            controls.sampleRateControlHwnd.has_value() &&
+            controls.channelsControlHwnd.has_value() &&
+            controls.channelsLabelHwnd.has_value() &&
+            !controls.sampleRateControlSetError && !controls.channelsControlSetError;
         if(!allControlsSuccessful) {
             infoPaneText = "WARNING: Unable to takeover all render controls. REAPER version may be unsupported and render may fail.\r\n\r\n" + infoPaneText;
         }
-        if (normalisationOptionsEnabled) {
+        if (controls.normalisationOptionsEnabled) {
           infoPaneText = "WARNING: Built-in normalisation is not compatible with object-based audio. Render will fail. Please disable any normalisation/limiting/fade.\r\n\r\n" + infoPaneText;
         }
 
@@ -633,59 +633,59 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
     case WM_DESTROY:
     {
         // Reenable the controls we disabled.
-        if(boundsControlHwnd) EnableWindow(*boundsControlHwnd, true);
-        if(presetsControlHwnd) EnableWindow(*presetsControlHwnd, true);
-        if(sourceControlHwnd) EnableWindow(*sourceControlHwnd, true);
-        if (normalizeControlHwnd) EnableWindow(*normalizeControlHwnd, true);
+        if(controls.boundsControlHwnd) EnableWindow(*controls.boundsControlHwnd, true);
+        if(controls.presetsControlHwnd) EnableWindow(*controls.presetsControlHwnd, true);
+        if(controls.sourceControlHwnd) EnableWindow(*controls.sourceControlHwnd, true);
+        if (controls.normalizeControlHwnd) EnableWindow(*controls.normalizeControlHwnd, true);
 
-        if(secondPassControlHwnd) {
-            EnableWindow(*secondPassControlHwnd, true);
-            setCheckboxState(*secondPassControlHwnd, secondPassLastState);
+        if(controls.secondPassControlHwnd) {
+            EnableWindow(*controls.secondPassControlHwnd, true);
+            setCheckboxState(*controls.secondPassControlHwnd, controls.secondPassLastState);
         }
-        if(monoToMonoControlHwnd) {
-            EnableWindow(*monoToMonoControlHwnd, true);
-            setCheckboxState(*monoToMonoControlHwnd, monoToMonoLastState);
+        if(controls.monoToMonoControlHwnd) {
+            EnableWindow(*controls.monoToMonoControlHwnd, true);
+            setCheckboxState(*controls.monoToMonoControlHwnd, controls.monoToMonoLastState);
         }
-        if(multiToMultiControlHwnd) {
-            EnableWindow(*multiToMultiControlHwnd, true);
-            setCheckboxState(*multiToMultiControlHwnd, multiToMultiLastState);
+        if(controls.multiToMultiControlHwnd) {
+            EnableWindow(*controls.multiToMultiControlHwnd, true);
+            setCheckboxState(*controls.multiToMultiControlHwnd, controls.multiToMultiLastState);
         }
-        if (preserveSampleRateControlHwnd) {
-          EnableWindow(*preserveSampleRateControlHwnd, true);
-          setCheckboxState(*preserveSampleRateControlHwnd, preserveSampleRateLastState);
+        if (controls.preserveSampleRateControlHwnd) {
+          EnableWindow(*controls.preserveSampleRateControlHwnd, true);
+          setCheckboxState(*controls.preserveSampleRateControlHwnd, controls.preserveSampleRateLastState);
         }
-        if (normalizeCheckboxControlHwnd) {
-          EnableWindow(*normalizeCheckboxControlHwnd, true);
-          setCheckboxState(*normalizeCheckboxControlHwnd, normalizeCheckboxLastState);
+        if (controls.normalizeCheckboxControlHwnd) {
+          EnableWindow(*controls.normalizeCheckboxControlHwnd, true);
+          setCheckboxState(*controls.normalizeCheckboxControlHwnd, controls.normalizeCheckboxLastState);
         }
 
         // NOTE: Sample Rate and Channels controls are;
         //       EDITABLECOMBO in REAPER <=6.11
         //       COMBOBOX in REAPER >=6.12
 
-        if(sampleRateControlHwnd) {
-            auto editControl = getComboBoxEdit(*sampleRateControlHwnd);
-            if(sampleRateLastOption.length() > 0) {
-                selectInComboBox(*sampleRateControlHwnd, sampleRateLastOption);
-                SetWindowText(editControl, sampleRateLastOption.c_str());
+        if(controls.sampleRateControlHwnd) {
+            auto editControl = getComboBoxEdit(*controls.sampleRateControlHwnd);
+            if(controls.sampleRateLastOption.length() > 0) {
+                selectInComboBox(*controls.sampleRateControlHwnd, controls.sampleRateLastOption);
+                SetWindowText(editControl, controls.sampleRateLastOption.c_str());
             }
             EnableWindow(editControl, true);
             UpdateWindow(editControl);
         }
-        if(channelsControlHwnd) {
-            auto editControl = getComboBoxEdit(*channelsControlHwnd);
-            if(channelsLastOption.length() > 0){
-                selectInComboBox(*channelsControlHwnd, channelsLastOption);
-                SetWindowText(editControl, channelsLastOption.c_str());
+        if(controls.channelsControlHwnd) {
+            auto editControl = getComboBoxEdit(*controls.channelsControlHwnd);
+            if(controls.channelsLastOption.length() > 0){
+                selectInComboBox(*controls.channelsControlHwnd, controls.channelsLastOption);
+                SetWindowText(editControl, controls.channelsLastOption.c_str());
             }
             UpdateWindow(editControl);
-            ShowWindow(*channelsControlHwnd, SW_SHOW);
+            ShowWindow(*controls.channelsControlHwnd, SW_SHOW);
         }
-        if(channelsLabelHwnd) {
-            ShowWindow(*channelsLabelHwnd, SW_SHOW);
+        if(controls.channelsLabelHwnd) {
+            ShowWindow(*controls.channelsLabelHwnd, SW_SHOW);
         }
-        if(resampleModeControlHwnd) {
-            auto editControl = getComboBoxEdit(*resampleModeControlHwnd);
+        if(controls.resampleModeControlHwnd) {
+            auto editControl = getComboBoxEdit(*controls.resampleModeControlHwnd);
             EnableWindow(editControl, true);
             UpdateWindow(editControl);
         }
