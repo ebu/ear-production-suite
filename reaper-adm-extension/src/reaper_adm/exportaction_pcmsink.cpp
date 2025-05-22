@@ -105,7 +105,7 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     }
 
     auto profile = RenderDialogControl::getInstance().getProfile();
-    using Profile = RenderDialogState::Profile;
+    using Profile = RenderConfigDialog::Profile;
 
     auto const chna = admExportSources->getChnaChunk();
     std::shared_ptr<bw64::AxmlChunk> axml{};

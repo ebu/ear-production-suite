@@ -42,7 +42,7 @@ namespace {
     HWND ShowConfigIfMatch(const void *cfg, int cfg_l, HWND parent)
     {
         if (configMatchesSink(cfg, cfg_l)) {
-            return RenderDialogControl::getInstance().ShowConfig(cfg, cfg_l, parent);
+            return RenderDialogControl::ShowConfig(cfg, cfg_l, parent);
         }
         return nullptr;
     }

@@ -71,6 +71,7 @@ set(EXTENSION_SOURCES
 	progress/importdialog.cpp
 	progress/importlistener.cpp
 	progress/importprogress.cpp
+	export_dialog/render_dialog_modifier.cpp
 	)
 	
 set(EXTENSION_HEADERS
