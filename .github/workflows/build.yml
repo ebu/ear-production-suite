@@ -76,8 +76,8 @@ jobs:
             cmake_preset: "macos-arm64-packaging-release"
             vcpkg_triplet: arm64-osx-11_0
             test: false
-          - name: "Ubuntu 20.04"
-            os: ubuntu-20.04
+          - name: "Ubuntu 22.04"
+            os: ubuntu-22.04
             package: true
             cmake_preset: "linux-packaging-release"
             vcpkg_triplet: x64-linux
