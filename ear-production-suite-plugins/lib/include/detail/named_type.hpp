@@ -22,9 +22,9 @@ class NamedType {
   NamedType() : value_() {}
   explicit NamedType(T const& value) : value_(value) {}
   explicit NamedType(T&& value) : value_(value) {}
-  NamedType<T, Tag>(const NamedType<T, Tag>&) = default;
+  NamedType(const NamedType<T, Tag>&) = default;
   NamedType<T, Tag>& operator=(const NamedType<T, Tag>&) = default;
-  NamedType<T, Tag>(NamedType<T, Tag>&&) = default;
+  NamedType(NamedType<T, Tag>&&) = default;
   NamedType<T, Tag>& operator=(NamedType<T, Tag>&&) = default;
   NamedType<T, Tag>& operator=(const T& value) {
     value_ = value;
