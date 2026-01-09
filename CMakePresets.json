@@ -188,7 +188,7 @@
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": {
                     "type": "STRING",
-                    "value": "x64-osx-10_13"
+                    "value": "x64-osx-10-13"
                 },
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
             }
@@ -203,7 +203,7 @@
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": {
                     "type": "STRING",
-                    "value": "arm64-osx-11_0"
+                    "value": "arm64-osx-11-0"
                 },
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg_triplets"
             }
