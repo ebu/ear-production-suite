@@ -124,7 +124,7 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
       - name: 'Restore vcpkg and its artifacts.'
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
@@ -214,6 +214,12 @@ jobs:
 
       - name: 'Git Status'
         run: git status
+
+      - name: 'Save vcpkg cache'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
 
       - name: 'Prune the vcpkg cache'
         run: cmake -P "${{ github.workspace }}/.github/workflows/expire_vcpkg_cache.cmake"
