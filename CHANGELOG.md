@@ -1,3 +1,9 @@
+Version 1.2.1
+Maintenance update, no user-facing changes.
+
+* Update vckpg and dependencies
+* Change NamedType constructor declarations to support newer GCC versions in C++20 mode
+
 Version 1.2
 
  _Note: This release bumps the minimum required REAPER version from v6.11 to v6.37. This release also removes support for 3rd-party plugin suites (FB360/VISR) since this feature is rarely used and maintaining the code to support them adds significant development overhead._
