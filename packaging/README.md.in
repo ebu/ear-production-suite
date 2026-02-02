@@ -1,4 +1,4 @@
-# EAR Production Suite (v1.2.1 release)
+# EAR Production Suite (v1.2.2 release)
 
 The latest builds of the EAR Production Suite are available under [GitHub Releases](https://github.com/ebu/ear-production-suite/releases) or from the [EAR Production Suite website.](https://ear-production-suite.ebu.io/)
 Please download the files from there. The EAR Production Suite (EPS) download package comprises of multiple components:
@@ -12,11 +12,16 @@ Please download the files from there. The EAR Production Suite (EPS) download pa
 
 ## Release notes
 
-v1.2.1 is a general bug fix release and includes minor changes to support newer versions of REAPER.
+v1.2.2 is a general bug fix release and includes minor changes to support newer versions of REAPER.
 
 Note that some fixes in this release have required bumping the minimum required REAPER version from v6.11 to v6.37. This release also removes support for 3rd-party plugin suites (FB360/VISR) since this feature is rarely used and maintaining the code to support them adds significant development overhead.
 
 ### Known issues
+
+On Windows, plugin scanning can sometimes fail on the first attempt after an install. Performing a manual rescan resolves the problem.
+
+During project close/shutdown, the scene plugin can occasionally cause a hang on exit.
+
 The EPS exports ADM using egocentric, polar coordinates and conforming to the [EBU Broadcast Production Profile](https://tech.ebu.ch/publications/tech3392).
 It is very tolerant in the ADM it will import meaning it can import files that conform to other profiles.
 ADM authored using the [Dolby Atmos ADM](https://professionalsupport.dolby.com/s/article/Dolby-Atmos-ADM-Profile-specification?language=en_US) profile can be imported, but coordinates and directspeakers pack formats are converted on import and exported files will instead conform to the Production Profile.
