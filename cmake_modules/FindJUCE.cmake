@@ -54,6 +54,27 @@ find_package_handle_standard_args(JUCE
       find_library(OBJC objc)
       find_library(COREAUDIOKIT CoreAudioKit)
 
+      # AGL is legacy and may be absent from modern SDKs; only link it if present in the active SDK.
+      unset(AGL CACHE)
+      set(_JUCE_MACOSX_SDK_ROOT "${CMAKE_OSX_SYSROOT}")
+      if(NOT _JUCE_MACOSX_SDK_ROOT)
+        execute_process(
+          COMMAND xcrun --sdk macosx --show-sdk-path
+          OUTPUT_VARIABLE _JUCE_MACOSX_SDK_ROOT
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          ERROR_QUIET)
+      endif()
+      if(_JUCE_MACOSX_SDK_ROOT AND EXISTS "${_JUCE_MACOSX_SDK_ROOT}/System/Library/Frameworks/AGL.framework")
+        find_library(AGL AGL
+          PATHS "${_JUCE_MACOSX_SDK_ROOT}/System/Library/Frameworks"
+          NO_DEFAULT_PATH)
+      endif()
+
+      set(JUCE_OPTIONAL_APPLE_FRAMEWORKS "")
+      if(AGL)
+        list(APPEND JUCE_OPTIONAL_APPLE_FRAMEWORKS ${AGL})
+      endif()
+
       target_link_libraries(Juce::core INTERFACE
           ${OPENGL_gl_LIBRARY}
           ${AUDIOUNIT}
@@ -68,6 +89,7 @@ find_package_handle_standard_args(JUCE
           ${COREMIDI}
           ${QUARTZCORE}
           ${IOKIT}
+          ${JUCE_OPTIONAL_APPLE_FRAMEWORKS}
           ${ACCELERATE}
           ${WEBKIT}
           ${OBJC}
