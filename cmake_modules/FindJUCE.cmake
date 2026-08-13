@@ -49,7 +49,6 @@ find_package_handle_standard_args(JUCE
       find_library(COREMIDI CoreMidi)
       find_library(QUARTZCORE QuartzCore)
       find_library(IOKIT IOKit)
-      find_library(AGL AGL)
       find_library(ACCELERATE Accelerate)
       find_library(WEBKIT WebKit)
       find_library(OBJC objc)
@@ -69,7 +68,6 @@ find_package_handle_standard_args(JUCE
           ${COREMIDI}
           ${QUARTZCORE}
           ${IOKIT}
-          ${AGL}
           ${ACCELERATE}
           ${WEBKIT}
           ${OBJC}
