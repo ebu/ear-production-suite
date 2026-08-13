@@ -68,6 +68,10 @@
                     "type": "STRING",
                     "value": "x86_64"
                 },
+                "CMAKE_OSX_ARCHITECTURES": {
+                    "type": "STRING",
+                    "value": "x86_64"
+                },
                 "CMAKE_SYSTEM_NAME": {
                     "type": "STRING",
                     "value": "Darwin"
