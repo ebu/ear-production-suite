@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           
@@ -33,7 +33,7 @@ jobs:
           build_html: false
           
       - name: Upload PDFs
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v7
         with:
           name: pdfs
           path: packaging/pdfs
@@ -97,13 +97,13 @@ jobs:
         run: Get-PSDrive
 
       - name: 'Checkout repo recursively.'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0
           
       - name: Download generated PDFs
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v7
         with:
           name: 'pdfs'
           path: packaging
@@ -124,7 +124,7 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
       - name: 'Restore vcpkg and its artifacts.'
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
@@ -161,7 +161,7 @@ jobs:
           sudo apt-get install -y ccache libx11-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libglu1-mesa-dev libfreetype6-dev
 
       - name: 'Cache ccache files.'
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.config.name }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
@@ -216,7 +216,7 @@ jobs:
         run: git status
 
       - name: 'Save vcpkg cache'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ matrix.config.name }}-vcpkg-${{ steps.cache_timestamp.outputs.timestamp }}
@@ -254,14 +254,14 @@ jobs:
                   
       - name: 'unix: Upload Tar as build artifact.'
         if: ${{ matrix.config.package && !startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_dir }}.tar 
           
       - name: 'Windows: Upload output dir as build artifact.'
         if: ${{ matrix.config.package && matrix.config.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.cmake_install_prefix.outputs.install_dir }}
           path: ${{ steps.cmake_install_prefix.outputs.install_prefix_setup }}
@@ -281,12 +281,12 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v7
         with:
           name: 'macOS_Latest_Clang_x64'
           path: 'macOS_Latest_Clang_x64'
 
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v7
         with:
           name: 'macOS_Latest_Clang_arm64'
           path: 'macOS_Latest_Clang_arm64'
@@ -358,7 +358,7 @@ jobs:
       - name: 'tar ub'
         run: tar -cvf macOS_Latest_Clang_universal.tar -C macOS_Latest_Clang_universal .
 
-      - uses: actions/upload-artifact@v4.4.3
+      - uses: actions/upload-artifact@v7
         with:
           name: 'macOS_Latest_Clang_universal'
           path: 'macOS_Latest_Clang_universal.tar'
