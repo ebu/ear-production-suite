@@ -110,9 +110,6 @@ jobs:
       - name: Display structure of downloaded files
         run: ls packaging
         
-      - name: 'Install ninja-build tool.'
-        uses: seanmiddleditch/gha-setup-ninja@v3
-
       - name: 'Create vcpkg cache dir.'
         run: cmake -E make_directory ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
