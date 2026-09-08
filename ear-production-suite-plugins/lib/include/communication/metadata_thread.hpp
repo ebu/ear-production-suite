@@ -32,6 +32,17 @@ public:
         }
     }
 
+    void stop() {
+        std::lock_guard<std::mutex> stopLock(stopMutex_);
+        if (!run_.exchange(false)) {
+            return;
+        }
+        condition_.notify_one();
+        if (thread_->joinable()) {
+            thread_->join();
+        }
+    }
+
 
 private:
     MessageQueue getMessages() {
@@ -57,13 +68,8 @@ private:
         }
     }
 
-    void stop() {
-        run_.store(false);
-        condition_.notify_one();
-        thread_->join();
-    }
-
     std::mutex mutex_;
+    std::mutex stopMutex_;
     std::condition_variable condition_;
     std::atomic_bool run_{true};
     std::unique_ptr<std::thread> thread_;
