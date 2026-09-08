@@ -62,7 +62,6 @@ class MonitoringControlConnection {
   void handleConnectionDetailsResponse(std::error_code ec, nng::Message message,
                                        std::uint64_t generation);
   bool retryHandshake(std::uint64_t completedGeneration);
-  void disconnect();
   std::mutex negotiationMutex_;
   nng::ReqSocket socket_;
   std::shared_ptr<spdlog::logger> logger_;

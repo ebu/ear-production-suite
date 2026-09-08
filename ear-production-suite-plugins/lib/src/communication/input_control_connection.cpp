@@ -22,7 +22,6 @@ InputControlConnection::InputControlConnection(
 
 InputControlConnection::~InputControlConnection() {
   stop();
-  disconnect();
 }
 
 void InputControlConnection::logger(std::shared_ptr<spdlog::logger> logger) {
