@@ -23,7 +23,7 @@ class NNGSink : public spdlog::sinks::base_sink<Mutex> {
                  nng::Flags::nonblock);
 #endif
   }
-  virtual ~NNGSink() {}
+  virtual ~NNGSink() { socket_.asyncStop(); }
 
  protected:
   void sink_it_(const spdlog::details::log_msg& msg) override {
