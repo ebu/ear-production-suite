@@ -3,6 +3,9 @@
 #include "log.hpp"
 #include "communication/common_types.hpp"
 #include <functional>
+#include <cstdint>
+#include <mutex>
+#include <system_error>
 
 namespace ear {
 namespace plugin {
@@ -42,24 +45,34 @@ class MonitoringControlConnection {
   EAR_PLUGIN_BASE_EXPORT ~MonitoringControlConnection();
 
   void start(const std::string& endpoint);
+  void stop();
   void logger(std::shared_ptr<spdlog::logger> logger);
 
   void onConnectionEstablished(ConnectionEstablishedHandler callback);
   void onConnectionLost(ConnectionLostHandler callback);
 
-  bool isConnected() { return connected_; }
+  bool isConnected() const;
 
  private:
   void connected();
   void disconnected();
-  void handshake();
+  void handshake(std::uint64_t generation);
+  void handleNewConnectionResponse(std::error_code ec, nng::Message message,
+                                   std::uint64_t generation);
+  void handleConnectionDetailsResponse(std::error_code ec, nng::Message message,
+                                       std::uint64_t generation);
+  bool retryHandshake(std::uint64_t completedGeneration);
   void disconnect();
+  std::mutex negotiationMutex_;
   nng::ReqSocket socket_;
   std::shared_ptr<spdlog::logger> logger_;
   ConnectionId connectionId_;
   bool connected_;
   ConnectionEstablishedHandler connectedCallback_;
   ConnectionLostHandler disconnectedCallback_;
+  mutable std::mutex stateMutex_;
+  bool pipeConnected_{false};
+  std::uint64_t negotiationGeneration_{0};
 };
 }  // namespace communication
 }  // namespace plugin

@@ -34,13 +34,8 @@ HoaBackend::HoaBackend(ui::HoaFrontendBackendConnector* connector)
 }
 
 HoaBackend::~HoaBackend() {
-  // remove connection signal handlers
-  // this is required so the controlConnection_ does not try to invoke the
-  // registered member function which might easily use already destructed
-  // members. Another option might be to introduce a `stop()` method on the
-  // InputControlConnection class, but probably
-  // the expected behaviour of this would be to call any "disconnect" handlers
-  // on `stop()` as well, so this wouldn't help here?
+  controlConnection_.stop();
+  // Suppress the graceful-disconnect callback during member destruction.
   controlConnection_.onConnectionLost(nullptr);
   controlConnection_.onConnectionEstablished(nullptr);
 }

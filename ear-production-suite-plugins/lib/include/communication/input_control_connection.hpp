@@ -5,7 +5,9 @@
 #include "communication/input_control_socket.hpp"
 #include "ui/item_colour.hpp"
 #include <functional>
+#include <cstdint>
 #include <mutex>
+#include <system_error>
 
 namespace ear {
 namespace plugin {
@@ -37,7 +39,8 @@ class InputControlConnection {
       std::function<void(ConnectionId, std::string)>;
   using ConnectionLostHandler = std::function<void()>;
 
-  EAR_PLUGIN_BASE_EXPORT explicit InputControlConnection(std::shared_ptr<spdlog::logger> logger);
+  EAR_PLUGIN_BASE_EXPORT explicit InputControlConnection(
+      std::shared_ptr<spdlog::logger> logger);
   InputControlConnection(const InputControlConnection&) = delete;
   InputControlConnection& operator=(const InputControlConnection&) = delete;
   InputControlConnection(InputControlConnection&&) = delete;
@@ -46,6 +49,7 @@ class InputControlConnection {
   EAR_PLUGIN_BASE_EXPORT ~InputControlConnection();
 
   void start(const std::string& endpoint);
+  void stop();
 
   // Note: this will disconnect if connected and manually restarting will be
   // necessary
@@ -64,13 +68,22 @@ class InputControlConnection {
   };
   void connected();
   void disconnected();
-  void handshake(ConnectionId const& id);
-  void disconnect();
+  void handshake(std::uint64_t generation);
+  void handleNewConnectionResponse(std::error_code ec, nng::Message message,
+                                   std::uint64_t generation);
+  void handleObjectDetailsResponse(std::error_code ec, nng::Message message,
+                                   std::uint64_t generation);
+  bool retryHandshake(std::uint64_t completedGeneration);
+  void disconnect(ConnectionId connectionId = {});
+  std::mutex negotiationMutex_;
   mutable std::mutex stateMutex_;
   std::shared_ptr<spdlog::logger> logger_;
   InputControlSocket socket_;
   ConnectionId connectionId_;
   bool connected_;
+  bool pipeConnected_{false};
+  bool reconfiguring_{false};
+  std::uint64_t negotiationGeneration_{0};
   CachedItemProperties cachedItemProperties_;
   ConnectionEstablishedHandler connectedCallback_;
   ConnectionLostHandler disconnectedCallback_;

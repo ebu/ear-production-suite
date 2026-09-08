@@ -125,6 +125,27 @@ TEST_CASE("async rep-req") {
     auto reply = requestSocket.read();
     REQUIRE(as_string(reply) == msg);
   }
+
+  SECTION("request transaction") {
+    std::string msg = "Hello, World!";
+    bool callbackTriggered = false;
+    std::string response;
+
+    REQUIRE(requestSocket.asyncRequest(
+        msg, [&callbackTriggered, &response](std::error_code ec,
+                                             nng::Message message) {
+          REQUIRE(!ec);
+          callbackTriggered = true;
+          response = as_string(message);
+        }));
+
+    auto request = replySocket.read();
+    replySocket.send(request);
+    requestSocket.asyncWait();
+
+    REQUIRE(callbackTriggered);
+    REQUIRE(response == msg);
+  }
 }
 
 TEST_CASE("async sleep") {

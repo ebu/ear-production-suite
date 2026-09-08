@@ -2,6 +2,13 @@
 #include "error_handling.hpp"
 #include "ear-plugin-base/config.h"
 #include <nng/nng.h>
+#include <condition_variable>
+#include <deque>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <utility>
 
 namespace nng {
 /**
@@ -55,6 +62,115 @@ using pipe_event_t = int;
 #endif
 inline void pipe_notify_dispatch(nng_pipe pipe, pipe_event_t ev, void*);
 
+class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
+ public:
+  PipeEventState() = default;
+  ~PipeEventState() { stop(); }
+
+  PipeEventState(const PipeEventState&) = delete;
+  PipeEventState& operator=(const PipeEventState&) = delete;
+
+  void setHandler(PipeEvent event,
+                  std::function<void(Pipe, PipeEvent)> handler) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    handlerFor(event) = std::move(handler);
+    if (event != PipeEvent::preAdd && !worker_.joinable()) {
+      auto self = shared_from_this();
+      worker_ = std::thread([self] { self->run(); });
+    }
+  }
+
+  void dispatchPreAdd(Pipe pipe) {
+    std::function<void(Pipe, PipeEvent)> handler;
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (stopping_) {
+        return;
+      }
+      handler = pipeAddPreHandler_;
+    }
+    if (handler) {
+      handler(pipe, PipeEvent::preAdd);
+    }
+  }
+
+  void post(Pipe pipe, PipeEvent event) {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (stopping_) {
+        return;
+      }
+      events_.emplace_back(pipe, event);
+    }
+    condition_.notify_one();
+  }
+
+  void stop() {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (!stopping_) {
+        stopping_ = true;
+        events_.clear();
+        pipeAddPreHandler_ = nullptr;
+        pipeAddPostHandler_ = nullptr;
+        pipeRemPostHandler_ = nullptr;
+      }
+    }
+    condition_.notify_one();
+    std::lock_guard<std::mutex> joinLock(joinMutex_);
+    if (worker_.joinable()) {
+      if (worker_.get_id() == std::this_thread::get_id()) {
+        worker_.detach();
+      } else {
+        worker_.join();
+      }
+    }
+  }
+
+ private:
+  std::function<void(Pipe, PipeEvent)>& handlerFor(PipeEvent event) {
+    switch (event) {
+      case PipeEvent::preAdd:
+        return pipeAddPreHandler_;
+      case PipeEvent::postAdd:
+        return pipeAddPostHandler_;
+      case PipeEvent::postRemove:
+        return pipeRemPostHandler_;
+    }
+    return pipeRemPostHandler_;
+  }
+
+  void run() {
+    while (true) {
+      std::function<void(Pipe, PipeEvent)> handler;
+      std::pair<Pipe, PipeEvent> event;
+      {
+        std::unique_lock<std::mutex> lock(mutex_);
+        condition_.wait(lock, [this] { return stopping_ || !events_.empty(); });
+        if (stopping_) {
+          return;
+        }
+        event = events_.front();
+        events_.pop_front();
+        handler = handlerFor(event.second);
+      }
+      if (handler) {
+        handler(event.first, event.second);
+      }
+    }
+  }
+
+  std::mutex mutex_;
+  std::mutex joinMutex_;
+  std::condition_variable condition_;
+  std::deque<std::pair<Pipe, PipeEvent>> events_;
+  std::function<void(Pipe, PipeEvent)> pipeAddPreHandler_;
+  std::function<void(Pipe, PipeEvent)> pipeAddPostHandler_;
+  std::function<void(Pipe, PipeEvent)> pipeRemPostHandler_;
+  bool stopping_{false};
+  std::thread worker_;
+};
+
 /**
  * Internal utility class to implement pipe notification callbacks for sockets.
  */
@@ -64,122 +180,95 @@ class PipeEventDispatcher {
   PipeEventDispatcher(const PipeEventDispatcher&) = delete;
   PipeEventDispatcher& operator=(const PipeEventDispatcher&) = delete;
   ~PipeEventDispatcher() {
-    if (nng_socket_id(socket_) != 0) {
-      if (pipeAddPreHandler_) {
-        nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_PRE, NULL, NULL);
-        pipeAddPreHandler_ = nullptr;
-      }
-      if (pipeAddPostHandler_) {
-        nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_POST, NULL, NULL);
-        pipeAddPostHandler_ = nullptr;
-      }
-      if (pipeRemPostHandler_) {
-        nng_pipe_notify(socket_, NNG_PIPE_EV_REM_POST, NULL, NULL);
-        pipeRemPostHandler_ = nullptr;
-      }
+    if (state_) {
+      state_->stop();
     }
-  }
-  PipeEventDispatcher(PipeEventDispatcher&& other) {
-    socket_ = other.socket_;
-    if (nng_socket_id(socket_) != -1) {
-      onPipeEvent(PipeEvent::preAdd, other.pipeAddPreHandler_);
-      onPipeEvent(PipeEvent::postAdd, other.pipeAddPostHandler_);
-      onPipeEvent(PipeEvent::postRemove, other.pipeRemPostHandler_);
-    }
-    other.socket_ = NNG_SOCKET_INITIALIZER;
-    other.pipeAddPreHandler_ = nullptr;
-    other.pipeAddPostHandler_ = nullptr;
-    other.pipeRemPostHandler_ = nullptr;
   }
 
-  PipeEventDispatcher& operator=(PipeEventDispatcher&& other) {
-    socket_ = other.socket_;
-    if (nng_socket_id(socket_) != -1) {
-      onPipeEvent(PipeEvent::preAdd, other.pipeAddPreHandler_);
-      onPipeEvent(PipeEvent::postAdd, other.pipeAddPostHandler_);
-      onPipeEvent(PipeEvent::postRemove, other.pipeRemPostHandler_);
-    }
+  PipeEventDispatcher(PipeEventDispatcher&& other) noexcept
+      : state_(std::move(other.state_)), socket_(other.socket_) {
     other.socket_ = NNG_SOCKET_INITIALIZER;
-    other.pipeAddPreHandler_ = nullptr;
-    other.pipeAddPostHandler_ = nullptr;
-    other.pipeRemPostHandler_ = nullptr;
+  }
+
+  PipeEventDispatcher& operator=(PipeEventDispatcher&& other) noexcept {
+    if (this != &other) {
+      if (state_) {
+        state_->stop();
+      }
+      state_ = std::move(other.state_);
+      socket_ = other.socket_;
+      other.socket_ = NNG_SOCKET_INITIALIZER;
+    }
     return *this;
   }
+
   template <typename EventHandler>
   void onPipeEvent(PipeEvent event, EventHandler handler) {
-    bool eventAlreadyRegistered = false;
+    if (!state_) {
+      throw std::runtime_error("Event dispatcher is not attached to a socket");
+    }
+    state_->setHandler(event, std::move(handler));
     switch (event) {
       case PipeEvent::preAdd:
-        if (pipeAddPreHandler_) {
-          eventAlreadyRegistered = true;
-        }
-        pipeAddPreHandler_ = handler;
-        if (!eventAlreadyRegistered) {
-          nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_PRE, pipe_notify_dispatch,
-                          this);
-        }
+        handleError(nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_PRE,
+                                    pipe_notify_dispatch, state_.get()));
         break;
       case PipeEvent::postAdd:
-        if (pipeAddPostHandler_) {
-          eventAlreadyRegistered = true;
-        }
-        pipeAddPostHandler_ = handler;
-        if (!eventAlreadyRegistered) {
-          nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_POST, pipe_notify_dispatch,
-                          this);
-        }
+        handleError(nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_POST,
+                                    pipe_notify_dispatch, state_.get()));
         break;
       case PipeEvent::postRemove:
-        if (pipeRemPostHandler_) {
-          eventAlreadyRegistered = true;
-        }
-        pipeRemPostHandler_ = handler;
-        if (!eventAlreadyRegistered) {
-          nng_pipe_notify(socket_, NNG_PIPE_EV_REM_POST, pipe_notify_dispatch,
-                          this);
-        }
+        handleError(nng_pipe_notify(socket_, NNG_PIPE_EV_REM_POST,
+                                    pipe_notify_dispatch, state_.get()));
         break;
     }
   }
 
   void attach(nng_socket socket) {
-    if (nng_socket_id(socket_) != -1) {
+    if (state_) {
       throw std::runtime_error("Event dispatcher already attached to a socket");
     }
     socket_ = socket;
+    state_ = std::make_shared<PipeEventState>();
+  }
+
+  void quiesce() {
+    if (!state_) {
+      return;
+    }
+    if (nng_socket_id(socket_) > 0) {
+      nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_PRE, NULL, NULL);
+      nng_pipe_notify(socket_, NNG_PIPE_EV_ADD_POST, NULL, NULL);
+      nng_pipe_notify(socket_, NNG_PIPE_EV_REM_POST, NULL, NULL);
+    }
+    state_->stop();
+  }
+
+  void reset() {
+    state_.reset();
+    socket_ = NNG_SOCKET_INITIALIZER;
   }
 
  private:
-  friend void pipe_notify_dispatch(nng_pipe pipe, pipe_event_t ev, void* arg);
-  void dispatch(nng_pipe pipe, pipe_event_t event) {
-    switch (event) {
-      case NNG_PIPE_EV_ADD_PRE:
-        if (pipeAddPreHandler_) {
-          pipeAddPreHandler_(Pipe(pipe), PipeEvent::preAdd);
-        }
-        break;
-      case NNG_PIPE_EV_ADD_POST:
-        if (pipeAddPostHandler_) {
-          pipeAddPostHandler_(Pipe(pipe), PipeEvent::postAdd);
-        }
-        break;
-      case NNG_PIPE_EV_REM_POST:
-        if (pipeRemPostHandler_) {
-          pipeRemPostHandler_(Pipe(pipe), PipeEvent::postRemove);
-        }
-        break;
-      case NNG_PIPE_EV_NUM:
-        break;
-    }
-  }
-  std::function<void(Pipe, PipeEvent event)> pipeAddPreHandler_;
-  std::function<void(Pipe, PipeEvent event)> pipeAddPostHandler_;
-  std::function<void(Pipe, PipeEvent event)> pipeRemPostHandler_;
+  std::shared_ptr<PipeEventState> state_;
   nng_socket socket_;
 };
 
-void pipe_notify_dispatch(nng_pipe pipe, pipe_event_t ev, void* arg) {
-  static_cast<PipeEventDispatcher*>(arg)->dispatch(pipe, ev);
+void pipe_notify_dispatch(nng_pipe pipe, pipe_event_t event, void* arg) {
+  auto state = static_cast<PipeEventState*>(arg);
+  switch (event) {
+    case NNG_PIPE_EV_ADD_PRE:
+      state->dispatchPreAdd(Pipe(pipe));
+      break;
+    case NNG_PIPE_EV_ADD_POST:
+      state->post(Pipe(pipe), PipeEvent::postAdd);
+      break;
+    case NNG_PIPE_EV_REM_POST:
+      state->post(Pipe(pipe), PipeEvent::postRemove);
+      break;
+    case NNG_PIPE_EV_NUM:
+      break;
+  }
 }
 }  // namespace detail
 
