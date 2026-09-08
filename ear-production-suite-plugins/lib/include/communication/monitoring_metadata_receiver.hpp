@@ -27,23 +27,6 @@ class MonitoringMetadataReceiver {
 
   void start(const std::string& endpoint, const RequestHandler& handler);
 
-  /**
-   * Stop receiving metadata and shutdown the receiver.
-   *
-   * This will effectively cancel pending async receiving operations,
-   * which will in turn cause `handleReceive` to shutdown the stream receiver.
-   *
-   * Once the stream receiver has been shut down, it cannot be restarted.
-   *
-   * @note
-   * This is not the best design choice, but it's the easiest way to work
-   * with the fact that we cannot re-open an nng socket after closing.
-   * Another option would be to replace the socket during start or
-   * don't close the socket at all, but implent access to the nng dialer
-   * and stop this to cancel automatic reconnection.
-   */
-  void shutdown();
-
  private:
   void waitForMetadata();
   void handleReceive(std::error_code ec, nng::Message message);

@@ -74,7 +74,6 @@ void MonitoringStreamReceiver::handleReceive(std::error_code ec,
     waitForMetadata();
   } else if (ec.value() == NNG_ECANCELED) {
     EAR_LOGGER_INFO(logger_, "Operation cancelled, stopping stream receiver");
-    socket_.close();
   } else {
     EAR_LOGGER_ERROR(logger_, "Failed to receive scene metadata: {}",
                      ec.message());

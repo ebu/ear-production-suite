@@ -36,17 +36,6 @@ void MonitoringMetadataReceiver::waitForMetadata() {
                               nng::placeholders::Message));
 }
 
-void MonitoringMetadataReceiver::shutdown() {
-  // we can only use the non-blocking cancel here
-  // as this function might be called from within another
-  // nng callback handler, which would result in a deadlock.
-  // Thus, we just cancel the operation and shut the socket down
-  // from wtihin the handler
-  // Although tempting, don't try to use asyncWait() or asyncStop()
-  // here, as this will block forever as well.
-  socket_.asyncCancel();
-}
-
 void MonitoringMetadataReceiver::handleReceive(std::error_code ec,
                                                nng::Message message) {
   if (!ec) {
@@ -76,7 +65,6 @@ void MonitoringMetadataReceiver::handleReceive(std::error_code ec,
     waitForMetadata();
   } else if (ec.value() == NNG_ECANCELED) {
     EAR_LOGGER_INFO(logger_, "Operation cancelled, stopping stream receiver");
-    socket_.close();
   } else {
     EAR_LOGGER_ERROR(logger_, "Failed to receive scene metadata: {}",
                      ec.message());

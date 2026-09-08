@@ -32,6 +32,7 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/test_data" DESTINATION ${PROJECT_BINARY_D
 add_ear_test("protobuf_tests")
 add_ear_test("message_coding_tests")
 add_ear_test("connection_manager_tests")
+add_ear_test("control_connection_tests")
 add_ear_test("connection_id_tests")
 add_ear_test("nng_tests")
 add_ear_test("scene_tests")

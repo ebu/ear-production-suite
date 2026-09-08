@@ -59,25 +59,39 @@ class SocketBase {
     Traits::open(&socket_);
     eventDispatcher_.attach(socket_);
   }
-  ~SocketBase() { nng_close(socket_); }
+  ~SocketBase() { close(); }
 
   SocketBase(const SocketBase&) = delete;
   SocketBase& operator=(const SocketBase&) = delete;
-  SocketBase(SocketBase&& rhs) {
-    socket_ = rhs.socket_;
+  SocketBase(SocketBase&& rhs) noexcept
+      : aio_(std::move(rhs.aio_)),
+        eventDispatcher_(std::move(rhs.eventDispatcher_)),
+        socket_(rhs.socket_) {
     rhs.socket_ = NNG_SOCKET_INITIALIZER;
-    aio_ = std::move(rhs.aio_);
-    eventDispatcher_ = std::move(eventDispatcher_);
   }
   SocketBase& operator=(SocketBase&& rhs) {
-    socket_ = rhs.socket_;
-    rhs.socket_ = NNG_SOCKET_INITIALIZER;
-    aio_ = std::move(rhs.aio_);
-    eventDispatcher_ = std::move(eventDispatcher_);
+    if (this != &rhs) {
+      close();
+      socket_ = rhs.socket_;
+      rhs.socket_ = NNG_SOCKET_INITIALIZER;
+      aio_ = std::move(rhs.aio_);
+      eventDispatcher_ = std::move(rhs.eventDispatcher_);
+    }
     return *this;
   }
 
-  void close() { nng_close(socket_); }
+  void close() {
+    if (nng_socket_id(socket_) <= 0) {
+      return;
+    }
+    aio_->stop();
+    eventDispatcher_.quiesce();
+    nng_close(socket_);
+    eventDispatcher_.reset();
+    socket_ = NNG_SOCKET_INITIALIZER;
+  }
+
+  void stopPipeEvents() { eventDispatcher_.quiesce(); }
 
   void dial(const char* endpoint, Flags flags = Flags::none) {
     auto ret = nng_dial(socket_, endpoint, NULL, static_cast<int>(flags));
@@ -217,8 +231,8 @@ class SocketBase {
   void asyncStop() { aio_->stop(); }
 
   /**
-   * Cancels an async operation and waits for it to complete or to be completely
-   * aborted.
+   * Requests cancellation of an async operation without waiting for its
+   * completion handler.
    *
    * If an operation is currently in progress and aborted by this function, the
    * operation is cancelled and the callback will receive an error
@@ -236,6 +250,10 @@ class SocketBase {
    *
    * A different handler can be registered for each type.
    * Any previously registered handler for this event type will be discarded.
+   *
+   * Post-add and post-remove handlers are serialized on a worker thread so
+   * they may safely access the socket. Pre-add handlers run synchronously and
+   * must only inspect or close the supplied pipe.
    *
    * The same event handler can be registered for multiple events as well.
    *
