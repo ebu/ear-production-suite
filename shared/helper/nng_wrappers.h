@@ -65,33 +65,6 @@ struct PluginToAdmMap{
     int32_t routing = -1;
 };
 
-class NngSelfRegister {
-public:
-    NngSelfRegister() : nngFinaliser{getNngFinaliser()} {}
-    ~NngSelfRegister() {}
-
-private:
-    class NngFinaliser {
-    public:
-        NngFinaliser() {}
-        ~NngFinaliser() { nng_fini(); }
-    };
-
-    std::shared_ptr<NngFinaliser> nngFinaliser;
-
-    inline static std::weak_ptr<NngFinaliser> nngFinaliserStatic;
-
-    static std::shared_ptr<NngFinaliser> getNngFinaliser() {
-        if (std::shared_ptr<NngFinaliser> fini = nngFinaliserStatic.lock()) {
-            return fini;
-        } else {
-            fini = std::make_shared<NngFinaliser>();
-            nngFinaliserStatic = fini;
-            return fini;
-        }
-    }
-};
-
 #define NNGMSG_DATACOUNT_STALE -1
 #define NNGMSG_RESULT_UNKNOWN -1
 
@@ -665,4 +638,3 @@ private:
         return res;
     }
 };
-
