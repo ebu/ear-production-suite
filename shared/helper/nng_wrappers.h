@@ -90,10 +90,19 @@ public:
     void allocateBuffer(size_t bufSz) {
         buf = malloc(bufSz);
         sz = bufSz;
+        nngAllocated = false;
         dataCount = NNGMSG_DATACOUNT_STALE;  // Force recalc next request
     }
 
-    void freeBuffer() { free(buf); }
+    void freeBuffer() {
+        if (nngAllocated) {
+            nng_free(buf, sz);
+        } else {
+            free(buf);
+        }
+    }
+
+    void markNngAllocated() { nngAllocated = true; }
 
     void* getBufferPointer() { return buf; }
 
@@ -118,6 +127,7 @@ protected:
     int dataCount{NNGMSG_DATACOUNT_STALE};
     size_t dataSize{1};
     int res{NNGMSG_RESULT_UNKNOWN};
+    bool nngAllocated{false};
 
     void calcDataCount() {
         assert(sz % dataSize == 0);
@@ -601,9 +611,14 @@ public:
 
     std::shared_ptr<TypedNngMsg<float>> receiveBlock() {
         auto msg = std::make_shared<TypedNngMsg<float>>();
-        msg->setResult(
-            nng_recv(socket, msg->getBufferPointerPointer(), msg->getSizePointer(),
-                     NNG_FLAG_ALLOC));  // NNG_FLAG_NONBLOCK | NNG_FLAG_ALLOC));
+        auto result =
+            nng_recv(socket, msg->getBufferPointerPointer(),
+                     msg->getSizePointer(),
+                     NNG_FLAG_ALLOC);  // NNG_FLAG_NONBLOCK | NNG_FLAG_ALLOC
+        msg->setResult(result);
+        if (result == 0) {
+            msg->markNngAllocated();
+        }
         return std::move(msg);
     }
 
