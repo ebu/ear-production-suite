@@ -24,7 +24,6 @@ MonitoringControlConnection::MonitoringControlConnection() : connected_(false) {
 
 MonitoringControlConnection::~MonitoringControlConnection() {
   stop();
-  disconnect();
 }
 
 void MonitoringControlConnection::logger(
@@ -212,32 +211,6 @@ void MonitoringControlConnection::disconnected() {
   EAR_LOGGER_WARN(logger_, "Lost connection to scene master");
   if (callback) {
     callback();
-  }
-}
-
-void MonitoringControlConnection::disconnect() {
-  ConnectionId connectionId;
-  {
-    std::lock_guard<std::mutex> lock(stateMutex_);
-    if (!connected_) {
-      return;
-    }
-    connected_ = false;
-    connectionId = connectionId_;
-  }
-
-  if (connectionId.isValid()) {
-    EAR_LOGGER_DEBUG(logger_, "Disconnecting from scene master");
-    CloseConnectionMessage request{connectionId};
-    auto sendBuffer = serialize(request);
-    socket_.send(sendBuffer);
-    auto buffer = socket_.read();
-    auto resp = parseResponse(buffer);
-    if (!resp.success()) {
-      EAR_LOGGER_ERROR(logger_, "Failed to start close control connection: {}",
-                       resp.errorDescription());
-      return;
-    }
   }
 }
 
