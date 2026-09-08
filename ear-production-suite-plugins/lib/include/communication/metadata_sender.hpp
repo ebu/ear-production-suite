@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <atomic>
 #include <functional>
@@ -25,18 +26,21 @@ class MetadataSender {
   void triggerSend(bool force = false);
   void logger(std::shared_ptr<spdlog::logger> logger);
  private:
-  void startTimer();
+  void startTimerLocked();
+  void stopTimerLocked();
   void handleTimeout(std::error_code ec);
   DataWrapper& data_;
   std::shared_ptr<spdlog::logger> logger_;
   nng::PushSocket socket_;
-  nng::AsyncIO timer_;
+  std::unique_ptr<nng::AsyncIO> timer_;
   nng::Dialer dialer_;
+  std::mutex lifecycleMutex_;
   std::mutex timeoutMutex_;
-  std::mutex sendMutex_;
   ConnectionId connectionId_;
   std::chrono::system_clock::time_point lastSendTimestamp_;
   std::chrono::milliseconds maxSendInterval_;
   std::atomic<bool> timerRunning{false};
+  std::atomic<bool> sendInProgress_{false};
+  bool shuttingDown_{false};
 };
 }
