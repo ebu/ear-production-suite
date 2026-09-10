@@ -1,19 +1,9 @@
 #pragma once
-#include "nng-cpp/nng.hpp"
-#include "log.hpp"
-#include "communication/common_types.hpp"
-#include <functional>
-#include <cstdint>
-#include <mutex>
-#include <system_error>
+#include "communication/control_connection_core.hpp"
 
 namespace ear {
 namespace plugin {
 namespace communication {
-
-enum class ErrorCode;
-class Response;
-class Request;
 
 /**
  * @brief Connect an monitoring plugin to a scene master
@@ -31,8 +21,8 @@ class Request;
 class MonitoringControlConnection {
  public:
   using ConnectionEstablishedHandler =
-      std::function<void(communication::ConnectionId, std::string)>;
-  using ConnectionLostHandler = std::function<void()>;
+      ControlConnectionCore::ConnectionEstablishedHandler;
+  using ConnectionLostHandler = ControlConnectionCore::ConnectionLostHandler;
 
   EAR_PLUGIN_BASE_EXPORT MonitoringControlConnection();
   MonitoringControlConnection(const MonitoringControlConnection&) = delete;
@@ -54,24 +44,8 @@ class MonitoringControlConnection {
   bool isConnected() const;
 
  private:
-  void connected();
-  void disconnected();
-  void handshake(std::uint64_t generation);
-  void handleNewConnectionResponse(std::error_code ec, nng::Message message,
-                                   std::uint64_t generation);
-  void handleConnectionDetailsResponse(std::error_code ec, nng::Message message,
-                                       std::uint64_t generation);
-  bool retryHandshake(std::uint64_t completedGeneration);
-  std::mutex negotiationMutex_;
   nng::ReqSocket socket_;
-  std::shared_ptr<spdlog::logger> logger_;
-  ConnectionId connectionId_;
-  bool connected_;
-  ConnectionEstablishedHandler connectedCallback_;
-  ConnectionLostHandler disconnectedCallback_;
-  mutable std::mutex stateMutex_;
-  bool pipeConnected_{false};
-  std::uint64_t negotiationGeneration_{0};
+  ControlConnectionCore core_;
 };
 }  // namespace communication
 }  // namespace plugin

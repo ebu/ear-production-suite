@@ -1,21 +1,11 @@
 #pragma once
-#include "nng-cpp/nng.hpp"
-#include "log.hpp"
+#include "communication/control_connection_core.hpp"
 #include "communication/common_types.hpp"
 #include "communication/input_control_socket.hpp"
-#include "ui/item_colour.hpp"
-#include <functional>
-#include <cstdint>
-#include <mutex>
-#include <system_error>
 
 namespace ear {
 namespace plugin {
 namespace communication {
-
-enum class ErrorCode;
-class Response;
-class Request;
 
 /**
  * @brief Connect an input plugin to a scene master (stub)
@@ -36,8 +26,8 @@ class Request;
 class InputControlConnection {
  public:
   using ConnectionEstablishedHandler =
-      std::function<void(ConnectionId, std::string)>;
-  using ConnectionLostHandler = std::function<void()>;
+      ControlConnectionCore::ConnectionEstablishedHandler;
+  using ConnectionLostHandler = ControlConnectionCore::ConnectionLostHandler;
 
   EAR_PLUGIN_BASE_EXPORT explicit InputControlConnection(
       std::shared_ptr<spdlog::logger> logger);
@@ -62,31 +52,10 @@ class InputControlConnection {
   void onConnectionLost(ConnectionLostHandler callback);
 
  private:
-  struct CachedItemProperties {
-    std::string name;
-    ui::ItemColour colour;
-  };
-  void connected();
-  void disconnected();
-  void handshake(std::uint64_t generation);
-  void handleNewConnectionResponse(std::error_code ec, nng::Message message,
-                                   std::uint64_t generation);
-  void handleObjectDetailsResponse(std::error_code ec, nng::Message message,
-                                   std::uint64_t generation);
-  bool retryHandshake(std::uint64_t completedGeneration);
-  void disconnect(ConnectionId connectionId = {});
-  std::mutex negotiationMutex_;
-  mutable std::mutex stateMutex_;
-  std::shared_ptr<spdlog::logger> logger_;
+  bool closeConnection(ConnectionId connectionId);
+
   InputControlSocket socket_;
-  ConnectionId connectionId_;
-  bool connected_;
-  bool pipeConnected_{false};
-  bool reconfiguring_{false};
-  std::uint64_t negotiationGeneration_{0};
-  CachedItemProperties cachedItemProperties_;
-  ConnectionEstablishedHandler connectedCallback_;
-  ConnectionLostHandler disconnectedCallback_;
+  ControlConnectionCore core_;
 };
 }  // namespace communication
 }  // namespace plugin

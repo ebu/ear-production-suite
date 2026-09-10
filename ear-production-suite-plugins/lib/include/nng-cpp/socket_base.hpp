@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <chrono>
+#include <functional>
 #include <memory>
 
 namespace nng {
@@ -92,6 +93,11 @@ class SocketBase {
   }
 
   void stopPipeEvents() { eventDispatcher_.quiesce(); }
+
+  // Run a callback on the pipe-event worker, outside NNG AIO callbacks.
+  bool post(std::function<void()> callback) {
+    return eventDispatcher_.post(std::move(callback));
+  }
 
   void dial(const char* endpoint, Flags flags = Flags::none) {
     auto ret = nng_dial(socket_, endpoint, NULL, static_cast<int>(flags));

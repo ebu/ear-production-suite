@@ -71,6 +71,17 @@ bool InputControlSocket::asyncRequestObjectDetails(
   return asyncRequest(ObjectDetailsMessage{id}, std::move(handler));
 }
 
+bool InputControlSocket::asyncRequest(const MessageBuffer& buffer,
+                                      AsyncResponseHandler handler) {
+  return socket_.asyncRequest(buffer, std::move(handler));
+}
+
+bool InputControlSocket::post(std::function<void()> callback) {
+  return socket_.post(std::move(callback));
+}
+
+void InputControlSocket::asyncWait() { socket_.asyncWait(); }
+
 void InputControlSocket::asyncCancel() { socket_.asyncCancel(); }
 
 void InputControlSocket::asyncStop() { socket_.asyncStop(); }

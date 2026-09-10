@@ -29,6 +29,9 @@ EAR_PLUGIN_BASE_EXPORT class InputControlSocket {
                                  AsyncResponseHandler handler);
   bool asyncRequestObjectDetails(const ConnectionId& id,
                                  AsyncResponseHandler handler);
+  bool asyncRequest(const MessageBuffer& buffer, AsyncResponseHandler handler);
+  bool post(std::function<void()> callback);
+  void asyncWait();
   void asyncCancel();
   void asyncStop();
   void stopPipeEvents();

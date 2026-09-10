@@ -12,6 +12,7 @@ protobuf_generate_cpp(EAR_PROTO_SRC EAR_PROTO_HDR ${EAR_PROTO_INPUT})
 
 set(EAR_BASE_SOURCES
   src/communication/commands.cpp
+  src/communication/control_connection_core.cpp
   src/communication/metadata_sender.cpp
   src/communication/direct_speakers_metadata_sender.cpp
   src/communication/hoa_metadata_sender.cpp
@@ -61,6 +62,7 @@ set(EAR_BASE_HEADERS
 	include/binaural_monitoring_audio_processor.hpp
 	include/binaural_monitoring_backend.hpp
 	include/communication/commands.hpp
+	include/communication/control_connection_core.hpp
 	include/communication/common_types.hpp
 	include/communication/data_wrapper.hpp
 	include/communication/metadata_sender.hpp
