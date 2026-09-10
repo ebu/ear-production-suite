@@ -74,9 +74,12 @@ class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
                   std::function<void(Pipe, PipeEvent)> handler) {
     std::lock_guard<std::mutex> lock(mutex_);
     handlerFor(event) = std::move(handler);
-    if (event != PipeEvent::preAdd && !worker_.joinable()) {
-      auto self = shared_from_this();
-      worker_ = std::thread([self] { self->run(); });
+    if (event != PipeEvent::preAdd) {
+      std::lock_guard<std::mutex> joinLock(joinMutex_);
+      if (!worker_.joinable()) {
+        auto self = shared_from_this();
+        worker_ = std::thread([self] { self->run(); });
+      }
     }
   }
 
@@ -105,6 +108,26 @@ class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
     condition_.notify_one();
   }
 
+  bool post(std::function<void()> callback) {
+    if (!callback) {
+      return false;
+    }
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (stopping_) {
+        return false;
+      }
+      std::lock_guard<std::mutex> joinLock(joinMutex_);
+      if (!worker_.joinable()) {
+        auto self = shared_from_this();
+        worker_ = std::thread([self] { self->run(); });
+      }
+      events_.emplace_back(std::move(callback));
+    }
+    condition_.notify_one();
+    return true;
+  }
+
   void stop() {
     {
       std::lock_guard<std::mutex> lock(mutex_);
@@ -128,6 +151,17 @@ class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
   }
 
  private:
+  struct Event {
+    Event() = default;
+    Event(Pipe pipe, PipeEvent event) : pipe(pipe), event(event) {}
+    explicit Event(std::function<void()> callback)
+        : callback(std::move(callback)) {}
+
+    Pipe pipe;
+    PipeEvent event{PipeEvent::postAdd};
+    std::function<void()> callback;
+  };
+
   std::function<void(Pipe, PipeEvent)>& handlerFor(PipeEvent event) {
     switch (event) {
       case PipeEvent::preAdd:
@@ -143,19 +177,25 @@ class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
   void run() {
     while (true) {
       std::function<void(Pipe, PipeEvent)> handler;
-      std::pair<Pipe, PipeEvent> event;
+      std::function<void()> callback;
+      Event event;
       {
         std::unique_lock<std::mutex> lock(mutex_);
         condition_.wait(lock, [this] { return stopping_ || !events_.empty(); });
         if (stopping_) {
           return;
         }
-        event = events_.front();
+        event = std::move(events_.front());
         events_.pop_front();
-        handler = handlerFor(event.second);
+        callback = std::move(event.callback);
+        if (!callback) {
+          handler = handlerFor(event.event);
+        }
       }
-      if (handler) {
-        handler(event.first, event.second);
+      if (callback) {
+        callback();
+      } else if (handler) {
+        handler(event.pipe, event.event);
       }
     }
   }
@@ -163,7 +203,7 @@ class PipeEventState : public std::enable_shared_from_this<PipeEventState> {
   std::mutex mutex_;
   std::mutex joinMutex_;
   std::condition_variable condition_;
-  std::deque<std::pair<Pipe, PipeEvent>> events_;
+  std::deque<Event> events_;
   std::function<void(Pipe, PipeEvent)> pipeAddPreHandler_;
   std::function<void(Pipe, PipeEvent)> pipeAddPostHandler_;
   std::function<void(Pipe, PipeEvent)> pipeRemPostHandler_;
@@ -242,6 +282,10 @@ class PipeEventDispatcher {
       nng_pipe_notify(socket_, NNG_PIPE_EV_REM_POST, NULL, NULL);
     }
     state_->stop();
+  }
+
+  bool post(std::function<void()> callback) {
+    return state_ && state_->post(std::move(callback));
   }
 
   void reset() {

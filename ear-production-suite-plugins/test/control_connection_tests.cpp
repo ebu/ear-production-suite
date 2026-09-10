@@ -45,8 +45,7 @@ class EventLatch {
 
   bool waitFor(std::chrono::milliseconds timeout) {
     std::unique_lock<std::mutex> lock(mutex_);
-    return condition_.wait_for(lock, timeout,
-                               [this] { return signaled_; });
+    return condition_.wait_for(lock, timeout, [this] { return signaled_; });
   }
 
   void reset() {
@@ -62,9 +61,8 @@ class EventLatch {
 
 class FakeSceneMaster {
  public:
-  using RequestHandler =
-      std::function<void(FakeSceneMaster&, nng::RepSocket&,
-                         const RequestVariant&, std::size_t)>;
+  using RequestHandler = std::function<void(
+      FakeSceneMaster&, nng::RepSocket&, const RequestVariant&, std::size_t)>;
 
   FakeSceneMaster(std::string endpoint, RequestHandler handler)
       : endpoint_(std::move(endpoint)), handler_(std::move(handler)) {
@@ -93,8 +91,7 @@ class FakeSceneMaster {
 
   bool waitUntilReady(std::chrono::milliseconds timeout) {
     std::unique_lock<std::mutex> lock(mutex_);
-    return condition_.wait_for(lock, timeout,
-                               [this] { return ready_; });
+    return condition_.wait_for(lock, timeout, [this] { return ready_; });
   }
 
   bool waitForRequestCount(std::size_t count,
@@ -136,9 +133,8 @@ class FakeSceneMaster {
 
   bool waitForRecycle(std::chrono::milliseconds timeout) {
     std::unique_lock<std::mutex> lock(mutex_);
-    return condition_.wait_for(lock, timeout, [this] {
-      return recycled_ || serverError_;
-    });
+    return condition_.wait_for(lock, timeout,
+                               [this] { return recycled_ || serverError_; });
   }
 
   bool hasServerError() const {
@@ -242,8 +238,8 @@ void sendManagerResponse(nng::RepSocket& socket,
                          SceneConnectionManager& manager,
                          const RequestVariant& request) {
   try {
-    auto response = manager.handle(
-        ear::plugin::communication::Request{request});
+    auto response =
+        manager.handle(ear::plugin::communication::Request{request});
     auto buffer = ear::plugin::communication::serialize(response);
     socket.send(buffer);
   } catch (const std::system_error&) {
@@ -253,7 +249,9 @@ void sendManagerResponse(nng::RepSocket& socket,
   }
 }
 
-TEST_CASE("input control keeps pipe callbacks non-blocking across reconnect") {
+TEST_CASE(
+    "input control transport keeps pipe callbacks non-blocking across "
+    "reconnect") {
   SceneConnectionManager manager;
   EventLatch established;
   EventLatch lost;
@@ -296,20 +294,15 @@ TEST_CASE("input control keeps pipe callbacks non-blocking across reconnect") {
   REQUIRE(lost.waitFor(1s));
 }
 
-TEST_CASE(
-    "monitoring control keeps pipe callbacks non-blocking across reconnect") {
+TEST_CASE("monitoring control uses the monitoring connection protocol") {
   SceneConnectionManager manager;
   EventLatch established;
   EventLatch lost;
   ear::plugin::communication::MonitoringControlConnection connection;
+  REQUIRE_FALSE(connection.isConnected());
   FakeSceneMaster master(
-      makeEndpoint(),
-      [&manager](FakeSceneMaster& master, nng::RepSocket& socket,
-                 const RequestVariant& request, std::size_t requestCount) {
-        if (requestCount == 1) {
-          master.waitForFirstRequestRelease(2s);
-          return;
-        }
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
         sendManagerResponse(socket, manager, request);
       });
   REQUIRE(master.waitUntilReady(1s));
@@ -323,14 +316,253 @@ TEST_CASE(
   connection.onConnectionLost([&lost] { lost.signal(); });
   connection.start(master.endpoint());
 
-  REQUIRE(master.waitForRequestCount(1, 1s));
-  master.recycleConnection();
-  REQUIRE(master.waitForRecycle(1s));
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(established.waitFor(1s));
+  REQUIRE(connection.isConnected());
+  REQUIRE(establishedCount == 1);
+  REQUIRE(boost::get<ear::plugin::communication::NewConnectionMessage>(
+              master.requestAt(0))
+              .type() ==
+          ear::plugin::communication::ConnectionType::MONITORING);
+  REQUIRE(boost::get<
+              ear::plugin::communication::MonitoringConnectionDetailsMessage>(
+              master.requestAt(1))
+              .connectionId()
+              .isValid());
+  REQUIRE_FALSE(master.hasServerError());
 
-  REQUIRE(lost.waitFor(750ms));
+  master.stop();
+  REQUIRE(lost.waitFor(1s));
+}
+
+TEST_CASE("input control reconfigures an established connection") {
+  SceneConnectionManager manager;
+  const auto requestedId = ConnectionId::generate();
+  EventLatch established;
+  EventLatch lost;
+  std::atomic<int> establishedCount{0};
+  ConnectionId initialConnectionId;
+  std::mutex establishedMutex;
+  ear::plugin::communication::InputControlConnection connection(nullptr);
+  FakeSceneMaster master(
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection.onConnectionEstablished(
+      [&established, &establishedCount, &establishedMutex,
+       &initialConnectionId](ConnectionId id, std::string) {
+        {
+          std::lock_guard<std::mutex> lock(establishedMutex);
+          if (establishedCount == 0) {
+            initialConnectionId = id;
+          }
+        }
+        ++establishedCount;
+        established.signal();
+      });
+  connection.onConnectionLost([&lost] { lost.signal(); });
+  connection.start(master.endpoint());
+
   REQUIRE(master.waitForRequestCount(2, 2s));
   REQUIRE(established.waitFor(2s));
-  REQUIRE(establishedCount == 1);
+  established.reset();
+
+  ConnectionId oldConnectionId;
+  {
+    std::lock_guard<std::mutex> lock(establishedMutex);
+    oldConnectionId = initialConnectionId;
+  }
+  connection.setConnectionId(requestedId);
+
+  REQUIRE(lost.waitFor(1s));
+  REQUIRE(master.waitForRequestCount(5, 2s));
+  REQUIRE(established.waitFor(2s));
+  REQUIRE(establishedCount == 2);
+  REQUIRE(connection.getConnectionId() == requestedId);
+
+  auto closeRequest = master.requestAt(2);
+  REQUIRE(boost::get<ear::plugin::communication::CloseConnectionMessage>(
+              closeRequest)
+              .connectionId() == oldConnectionId);
+  auto newConnectionRequest = master.requestAt(3);
+  REQUIRE(boost::get<ear::plugin::communication::NewConnectionMessage>(
+              newConnectionRequest)
+              .connectionId() == requestedId);
+  REQUIRE_FALSE(master.hasServerError());
+
+  lost.reset();
+  master.stop();
+  REQUIRE(lost.waitFor(1s));
+}
+
+TEST_CASE("input control can change its ID from the established callback") {
+  SceneConnectionManager manager;
+  const auto requestedId = ConnectionId::generate();
+  EventLatch firstEstablished;
+  EventLatch secondEstablished;
+  EventLatch lost;
+  std::atomic<int> establishedCount{0};
+  ear::plugin::communication::InputControlConnection connection(nullptr);
+  FakeSceneMaster master(
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection.onConnectionEstablished([&connection, &firstEstablished,
+                                      &secondEstablished, &establishedCount,
+                                      requestedId](ConnectionId, std::string) {
+    if (establishedCount.fetch_add(1) == 0) {
+      connection.setConnectionId(requestedId);
+      firstEstablished.signal();
+    } else {
+      secondEstablished.signal();
+    }
+  });
+  connection.onConnectionLost([&lost] { lost.signal(); });
+  connection.start(master.endpoint());
+
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(firstEstablished.waitFor(2s));
+  REQUIRE(lost.waitFor(2s));
+  REQUIRE(master.waitForRequestCount(5, 2s));
+  REQUIRE(secondEstablished.waitFor(2s));
+  REQUIRE(establishedCount == 2);
+  REQUIRE(connection.getConnectionId() == requestedId);
+  REQUIRE_FALSE(master.hasServerError());
+
+  lost.reset();
+  master.stop();
+  REQUIRE(lost.waitFor(1s));
+}
+
+TEST_CASE("monitoring control can stop from the established callback") {
+  SceneConnectionManager manager;
+  EventLatch established;
+  ear::plugin::communication::MonitoringControlConnection connection;
+  FakeSceneMaster master(
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection.onConnectionEstablished(
+      [&connection, &established](ConnectionId, std::string) {
+        connection.stop();
+        established.signal();
+      });
+  connection.start(master.endpoint());
+
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(established.waitFor(2s));
+  REQUIRE_FALSE(connection.isConnected());
+  REQUIRE_FALSE(master.hasServerError());
+  master.stop();
+}
+
+TEST_CASE("monitoring control can stop from the lost callback") {
+  SceneConnectionManager manager;
+  EventLatch established;
+  EventLatch lost;
+  ear::plugin::communication::MonitoringControlConnection connection;
+  FakeSceneMaster master(
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection.onConnectionEstablished(
+      [&established](ConnectionId, std::string) { established.signal(); });
+  connection.onConnectionLost([&connection, &lost] {
+    connection.stop();
+    lost.signal();
+  });
+  connection.start(master.endpoint());
+
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(established.waitFor(2s));
+  master.stop();
+  REQUIRE(lost.waitFor(2s));
+  REQUIRE_FALSE(connection.isConnected());
+  REQUIRE_FALSE(master.hasServerError());
+}
+
+TEST_CASE("input control can be destroyed from the established callback") {
+  SceneConnectionManager manager;
+  EventLatch established;
+  auto connection =
+      std::make_unique<ear::plugin::communication::InputControlConnection>(
+          nullptr);
+  FakeSceneMaster master(
+      makeEndpoint(), [&manager](FakeSceneMaster&, nng::RepSocket& socket,
+                                 const RequestVariant& request, std::size_t) {
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection->onConnectionEstablished(
+      [&connection, &established](ConnectionId, std::string) {
+        connection.reset();
+        established.signal();
+      });
+  connection->start(master.endpoint());
+
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(established.waitFor(2s));
+  REQUIRE_FALSE(connection);
+  REQUIRE_FALSE(master.hasServerError());
+  master.stop();
+}
+
+TEST_CASE(
+    "input control reconnects when the pipe disappears during "
+    "reconfiguration") {
+  SceneConnectionManager manager;
+  const auto requestedId = ConnectionId::generate();
+  EventLatch established;
+  EventLatch lost;
+  std::atomic<int> establishedCount{0};
+  ear::plugin::communication::InputControlConnection connection(nullptr);
+  FakeSceneMaster master(
+      makeEndpoint(),
+      [&manager](FakeSceneMaster& master, nng::RepSocket& socket,
+                 const RequestVariant& request, std::size_t requestCount) {
+        if (requestCount == 3) {
+          // Drop the pipe after the close request has arrived but before a
+          // synchronous response can be consumed by the client.
+          master.recycleConnection();
+          return;
+        }
+        sendManagerResponse(socket, manager, request);
+      });
+  REQUIRE(master.waitUntilReady(1s));
+
+  connection.onConnectionEstablished(
+      [&established, &establishedCount](ConnectionId, std::string) {
+        ++establishedCount;
+        established.signal();
+      });
+  connection.onConnectionLost([&lost] { lost.signal(); });
+  connection.start(master.endpoint());
+
+  REQUIRE(master.waitForRequestCount(2, 2s));
+  REQUIRE(established.waitFor(2s));
+  established.reset();
+
+  REQUIRE_NOTHROW(connection.setConnectionId(requestedId));
+
+  REQUIRE(master.waitForRecycle(1s));
+  REQUIRE(lost.waitFor(1s));
+  REQUIRE(master.waitForRequestCount(5, 2s));
+  REQUIRE(established.waitFor(2s));
+  REQUIRE(establishedCount == 2);
+  REQUIRE(connection.getConnectionId() == requestedId);
   REQUIRE_FALSE(master.hasServerError());
 
   lost.reset();
@@ -359,8 +591,8 @@ TEST_CASE("input control restarts negotiation after an ID change") {
   REQUIRE(master.waitUntilReady(1s));
 
   connection.onConnectionEstablished(
-      [&established, &establishedId, &establishedMutex,
-       &establishedCount](ConnectionId id, std::string) {
+      [&established, &establishedId, &establishedMutex, &establishedCount](
+          ConnectionId id, std::string) {
         {
           std::lock_guard<std::mutex> lock(establishedMutex);
           establishedId = id;
