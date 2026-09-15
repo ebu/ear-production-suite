@@ -143,94 +143,110 @@ void ControlConnectionCore::setConnectionId(
     throw std::invalid_argument("close connection handler is required");
   }
 
-  std::unique_lock<std::mutex> negotiationLock(negotiationMutex_);
-  bool wasConnected;
-  bool pipeConnected;
-  ConnectionId previousConnectionId;
-  std::uint64_t generation;
+  auto change = prepareConnectionIdChange(id);
+  if (!change.wasConnected) {
+    return;
+  }
+
+  try {
+    closeConnectionDuringReconfiguration(change, closeConnection);
+    finishConnectionIdChange();
+  } catch (...) {
+    abortConnectionIdChange();
+    throw;
+  }
+}
+
+ControlConnectionCore::ConnectionIdChange
+ControlConnectionCore::prepareConnectionIdChange(ConnectionId id) {
+  ConnectionIdChange change;
+  std::lock_guard<std::mutex> negotiationLock(negotiationMutex_);
   {
     std::lock_guard<std::mutex> lock(stateMutex_);
-    wasConnected = connected_;
-    pipeConnected = pipeConnected_;
-    previousConnectionId = connectionId_;
+    change.wasConnected = connected_;
+    change.pipeConnected = pipeConnected_;
+    change.previousConnectionId = connectionId_;
     connectionId_ = id;
-    generation = ++negotiationGeneration_;
-    if (wasConnected) {
+    change.generation = ++negotiationGeneration_;
+    if (change.wasConnected) {
       reconfiguring_ = true;
       connected_ = false;
     }
   }
 
-  bool reconfigurationActive = wasConnected;
+  if (!change.wasConnected) {
+    if (change.pipeConnected) {
+      handshake(change.generation);
+    }
+    return change;
+  }
+
   try {
-    if (wasConnected) {
-      operations_.cancel();
-    }
-
-    if (!wasConnected) {
-      if (pipeConnected) {
-        handshake(generation);
-      }
-      return;
-    }
-
-    // The pipe callback must be able to update the state while the
-    // synchronous close request is in flight.
-    negotiationLock.unlock();
-
-    bool shouldCloseConnection = false;
-    {
-      std::lock_guard<std::mutex> lock(stateMutex_);
-      shouldCloseConnection = pipeConnected_ && !stopped_;
-    }
-
-    bool disconnectedSuccessfully = false;
-    if (shouldCloseConnection) {
-      try {
-        disconnectedSuccessfully = closeConnection(previousConnectionId);
-      } catch (const std::system_error& error) {
-        if (!isExpectedCloseError(error)) {
-          throw;
-        }
-        auto logger = loggerSnapshot();
-        EAR_LOGGER_WARN(
-            logger,
-            "Close control connection interrupted by NNG state change: {}",
-            error.code().message());
-      }
-    }
-
-    if (disconnectedSuccessfully) {
-      auto logger = loggerSnapshot();
-      EAR_LOGGER_TRACE(logger, "Disconnect successfully completed");
-      notifyConnectionLost(previousConnectionId);
-    }
-
-    negotiationLock.lock();
-
-    bool shouldHandshake = false;
-    {
-      std::lock_guard<std::mutex> lock(stateMutex_);
-      reconfiguring_ = false;
-      reconfigurationActive = false;
-      shouldHandshake = pipeConnected_ && !stopped_;
-      generation = negotiationGeneration_;
-    }
-    if (shouldHandshake) {
-      handshake(generation);
-    }
+    operations_.cancel();
   } catch (...) {
-    // A close handler may perform synchronous NNG operations. Do not leave
-    // future handshakes blocked if one of those operations fails.
-    if (reconfigurationActive) {
-      if (!negotiationLock.owns_lock()) {
-        negotiationLock.lock();
-      }
+    {
       std::lock_guard<std::mutex> lock(stateMutex_);
       reconfiguring_ = false;
     }
     throw;
   }
+
+  return change;
+}
+
+void ControlConnectionCore::closeConnectionDuringReconfiguration(
+    const ConnectionIdChange& change,
+    const CloseConnectionHandler& closeConnection) {
+  // Keep the negotiation mutex available: the synchronous close operation can
+  // trigger a pipe callback that needs to update the connection state.
+  bool shouldCloseConnection = false;
+  {
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    shouldCloseConnection = pipeConnected_ && !stopped_;
+  }
+  if (!shouldCloseConnection) {
+    return;
+  }
+
+  bool disconnectedSuccessfully = false;
+  try {
+    disconnectedSuccessfully = closeConnection(change.previousConnectionId);
+  } catch (const std::system_error& error) {
+    if (!isExpectedCloseError(error)) {
+      throw;
+    }
+    auto logger = loggerSnapshot();
+    EAR_LOGGER_WARN(
+        logger, "Close control connection interrupted by NNG state change: {}",
+        error.code().message());
+  }
+
+  if (disconnectedSuccessfully) {
+    auto logger = loggerSnapshot();
+    EAR_LOGGER_TRACE(logger, "Disconnect successfully completed");
+    notifyConnectionLost(change.previousConnectionId);
+  }
+}
+
+void ControlConnectionCore::finishConnectionIdChange() {
+  std::lock_guard<std::mutex> negotiationLock(negotiationMutex_);
+  bool shouldHandshake = false;
+  std::uint64_t generation;
+  {
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    reconfiguring_ = false;
+    shouldHandshake = pipeConnected_ && !stopped_;
+    generation = negotiationGeneration_;
+  }
+  if (shouldHandshake) {
+    handshake(generation);
+  }
+}
+
+void ControlConnectionCore::abortConnectionIdChange() {
+  std::lock_guard<std::mutex> negotiationLock(negotiationMutex_);
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  reconfiguring_ = false;
 }
 
 ConnectionId ControlConnectionCore::getConnectionId() const {
@@ -284,7 +300,7 @@ void ControlConnectionCore::handleNewConnectionResponse(
     std::error_code ec, nng::Message message, std::uint64_t generation) {
   auto logger = loggerSnapshot();
   if (ec) {
-    if (retryHandshake(generation) || ec.value() == NNG_ECANCELED) {
+    if (shouldRetryOrIgnore(ec, generation)) {
       return;
     }
     EAR_LOGGER_ERROR(logger, "Failed to request connection ID: {}",
@@ -294,52 +310,74 @@ void ControlConnectionCore::handleNewConnectionResponse(
 
   try {
     auto response = parseResponse(message);
-    if (!response.success()) {
-      if (retryHandshake(generation)) {
-        return;
-      }
-      EAR_LOGGER_ERROR(logger, "Failed to start new control connection: {}",
-                       response.errorDescription());
+    ConnectionId connectionId;
+    if (!processNewConnectionResponse(response, generation, logger,
+                                      connectionId)) {
       return;
     }
-    auto payload = response.payloadAs<NewConnectionResponse>();
-    if (!payload.connectionId().isValid()) {
-      if (retryHandshake(generation)) {
-        return;
-      }
-      EAR_LOGGER_ERROR(
-          logger,
-          "Failed to start new control connection: invalid connection id "
-          "received");
-      return;
-    }
-
-    ConnectionId connectionId = payload.connectionId();
-    bool staleResponse = false;
-    {
-      std::lock_guard<std::mutex> lock(stateMutex_);
-      if (!pipeConnected_ || reconfiguring_ ||
-          generation != negotiationGeneration_) {
-        staleResponse = true;
-      } else {
-        connectionId_ = connectionId;
-      }
-    }
-    if (staleResponse) {
-      retryHandshake(generation);
-      return;
-    }
-
-    EAR_LOGGER_DEBUG(logger, "Got connection ID {}", connectionId.string());
-    EAR_LOGGER_TRACE(logger, "Sending {} connection details", detailsType_);
-    auto sendBuffer = detailsRequestFactory_(connectionId);
-    operations_.request(sendBuffer, [this, generation](std::error_code ec,
-                                                       nng::Message message) {
-      handleDetailsResponse(ec, std::move(message), generation);
-    });
+    requestConnectionDetails(connectionId, generation, logger);
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger, "Exception during handshake: {}", e.what());
   }
+}
+
+bool ControlConnectionCore::shouldRetryOrIgnore(std::error_code ec,
+                                                std::uint64_t generation) {
+  return retryHandshake(generation) || ec.value() == NNG_ECANCELED;
+}
+
+bool ControlConnectionCore::processNewConnectionResponse(
+    const Response& response, std::uint64_t generation,
+    const std::shared_ptr<spdlog::logger>& logger, ConnectionId& connectionId) {
+  if (!response.success()) {
+    if (retryHandshake(generation)) {
+      return false;
+    }
+    EAR_LOGGER_ERROR(logger, "Failed to start new control connection: {}",
+                     response.errorDescription());
+    return false;
+  }
+
+  connectionId = response.payloadAs<NewConnectionResponse>().connectionId();
+  if (!connectionId.isValid()) {
+    if (retryHandshake(generation)) {
+      return false;
+    }
+    EAR_LOGGER_ERROR(
+        logger,
+        "Failed to start new control connection: invalid connection id "
+        "received");
+    return false;
+  }
+
+  if (!storeConnectionIdIfCurrent(connectionId, generation)) {
+    retryHandshake(generation);
+    return false;
+  }
+  return true;
+}
+
+bool ControlConnectionCore::storeConnectionIdIfCurrent(
+    ConnectionId connectionId, std::uint64_t generation) {
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  if (!pipeConnected_ || reconfiguring_ ||
+      generation != negotiationGeneration_) {
+    return false;
+  }
+  connectionId_ = connectionId;
+  return true;
+}
+
+void ControlConnectionCore::requestConnectionDetails(
+    ConnectionId connectionId, std::uint64_t generation,
+    const std::shared_ptr<spdlog::logger>& logger) {
+  EAR_LOGGER_DEBUG(logger, "Got connection ID {}", connectionId.string());
+  EAR_LOGGER_TRACE(logger, "Sending {} connection details", detailsType_);
+  auto sendBuffer = detailsRequestFactory_(connectionId);
+  operations_.request(
+      sendBuffer, [this, generation](std::error_code ec, nng::Message message) {
+        handleDetailsResponse(ec, std::move(message), generation);
+      });
 }
 
 void ControlConnectionCore::handleDetailsResponse(std::error_code ec,
@@ -347,7 +385,7 @@ void ControlConnectionCore::handleDetailsResponse(std::error_code ec,
                                                   std::uint64_t generation) {
   auto logger = loggerSnapshot();
   if (ec) {
-    if (retryHandshake(generation) || ec.value() == NNG_ECANCELED) {
+    if (shouldRetryOrIgnore(ec, generation)) {
       return;
     }
     EAR_LOGGER_ERROR(logger, "Failed to request {} connection details: {}",
@@ -357,55 +395,77 @@ void ControlConnectionCore::handleDetailsResponse(std::error_code ec,
 
   try {
     auto response = parseResponse(message);
-    if (!response.success()) {
-      if (retryHandshake(generation)) {
-        return;
-      }
-      EAR_LOGGER_ERROR(logger, "Failed to start new control connection: {}",
-                       response.errorDescription());
-      return;
-    }
-
-    auto streamEndpoint = detailsResponseParser_(response);
+    std::string streamEndpoint;
     ConnectionId connectionId;
     ConnectionEstablishedHandler callback;
-    bool staleResponse = false;
-    {
-      std::lock_guard<std::mutex> lock(stateMutex_);
-      if (!pipeConnected_ || reconfiguring_ ||
-          generation != negotiationGeneration_) {
-        staleResponse = true;
-      } else {
-        connected_ = true;
-        connectionId = connectionId_;
-        callback = connectedCallback_;
-      }
-    }
-    if (staleResponse) {
-      retryHandshake(generation);
+    if (!processDetailsResponse(response, generation, logger, streamEndpoint,
+                                connectionId, callback)) {
       return;
     }
 
     EAR_LOGGER_DEBUG(logger, "Received {} as {} metadata endpoint",
                      streamEndpoint, detailsType_);
-    if (callback) {
-      dispatchCallback([callback = std::move(callback), connectionId,
-                        streamEndpoint = std::move(streamEndpoint),
-                        logger]() mutable {
-        try {
-          callback(connectionId, std::move(streamEndpoint));
-        } catch (const std::runtime_error& error) {
-          EAR_LOGGER_ERROR(
-              logger, "Exception during connection established callback: {}",
-              error.what());
-        }
-      });
-    } else if (loggingOptions_.warnWhenNoConnectionEstablishedCallback) {
-      EAR_LOGGER_WARN(logger, "Connected with {} but no callback provided",
-                      connectionId.string());
-    }
+    notifyConnectionEstablished(connectionId, std::move(streamEndpoint),
+                                std::move(callback), logger);
   } catch (const std::runtime_error& e) {
     EAR_LOGGER_ERROR(logger, "Exception during handshake: {}", e.what());
+  }
+}
+
+bool ControlConnectionCore::processDetailsResponse(
+    const Response& response, std::uint64_t generation,
+    const std::shared_ptr<spdlog::logger>& logger, std::string& streamEndpoint,
+    ConnectionId& connectionId, ConnectionEstablishedHandler& callback) {
+  if (!response.success()) {
+    if (retryHandshake(generation)) {
+      return false;
+    }
+    EAR_LOGGER_ERROR(logger, "Failed to start new control connection: {}",
+                     response.errorDescription());
+    return false;
+  }
+
+  streamEndpoint = detailsResponseParser_(response);
+  if (!establishConnectionIfCurrent(generation, connectionId, callback)) {
+    retryHandshake(generation);
+    return false;
+  }
+  return true;
+}
+
+bool ControlConnectionCore::establishConnectionIfCurrent(
+    std::uint64_t generation, ConnectionId& connectionId,
+    ConnectionEstablishedHandler& callback) {
+  std::lock_guard<std::mutex> lock(stateMutex_);
+  if (!pipeConnected_ || reconfiguring_ ||
+      generation != negotiationGeneration_) {
+    return false;
+  }
+  connected_ = true;
+  connectionId = connectionId_;
+  callback = connectedCallback_;
+  return true;
+}
+
+void ControlConnectionCore::notifyConnectionEstablished(
+    ConnectionId connectionId, std::string streamEndpoint,
+    ConnectionEstablishedHandler callback,
+    std::shared_ptr<spdlog::logger> logger) {
+  if (callback) {
+    dispatchCallback([callback = std::move(callback), connectionId,
+                      streamEndpoint = std::move(streamEndpoint),
+                      logger = std::move(logger)]() mutable {
+      try {
+        callback(connectionId, std::move(streamEndpoint));
+      } catch (const std::runtime_error& error) {
+        EAR_LOGGER_ERROR(logger,
+                         "Exception during connection established callback: {}",
+                         error.what());
+      }
+    });
+  } else if (loggingOptions_.warnWhenNoConnectionEstablishedCallback) {
+    EAR_LOGGER_WARN(logger, "Connected with {} but no callback provided",
+                    connectionId.string());
   }
 }
 

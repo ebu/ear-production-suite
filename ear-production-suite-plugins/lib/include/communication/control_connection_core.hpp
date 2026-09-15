@@ -76,11 +76,48 @@ class EAR_PLUGIN_BASE_EXPORT ControlConnectionCore {
   void onConnectionLost(ConnectionLostHandler callback);
 
  private:
+  struct ConnectionIdChange {
+    bool wasConnected{false};
+    bool pipeConnected{false};
+    ConnectionId previousConnectionId;
+    std::uint64_t generation{0};
+  };
+
+  ConnectionIdChange prepareConnectionIdChange(ConnectionId id);
+  void closeConnectionDuringReconfiguration(
+      const ConnectionIdChange& change,
+      const CloseConnectionHandler& closeConnection);
+  void finishConnectionIdChange();
+  void abortConnectionIdChange();
+
   void handshake(std::uint64_t generation);
   void handleNewConnectionResponse(std::error_code ec, nng::Message message,
                                    std::uint64_t generation);
   void handleDetailsResponse(std::error_code ec, nng::Message message,
                              std::uint64_t generation);
+  bool shouldRetryOrIgnore(std::error_code ec, std::uint64_t generation);
+  bool processNewConnectionResponse(
+      const Response& response, std::uint64_t generation,
+      const std::shared_ptr<spdlog::logger>& logger,
+      ConnectionId& connectionId);
+  bool storeConnectionIdIfCurrent(ConnectionId connectionId,
+                                  std::uint64_t generation);
+  void requestConnectionDetails(ConnectionId connectionId,
+                                std::uint64_t generation,
+                                const std::shared_ptr<spdlog::logger>& logger);
+  bool processDetailsResponse(const Response& response,
+                              std::uint64_t generation,
+                              const std::shared_ptr<spdlog::logger>& logger,
+                              std::string& streamEndpoint,
+                              ConnectionId& connectionId,
+                              ConnectionEstablishedHandler& callback);
+  bool establishConnectionIfCurrent(std::uint64_t generation,
+                                    ConnectionId& connectionId,
+                                    ConnectionEstablishedHandler& callback);
+  void notifyConnectionEstablished(ConnectionId connectionId,
+                                   std::string streamEndpoint,
+                                   ConnectionEstablishedHandler callback,
+                                   std::shared_ptr<spdlog::logger> logger);
   bool retryHandshake(std::uint64_t completedGeneration);
   void notifyConnectionLost(ConnectionId connectionId);
   void dispatchCallback(std::function<void()> callback);
