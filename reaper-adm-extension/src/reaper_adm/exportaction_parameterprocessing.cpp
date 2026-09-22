@@ -204,6 +204,12 @@ std::vector<AdmAuthoringError> CumulatedPointData::useConstantValueForParameter(
         errors.push_back(AdmAuthoringError("Attempting to assign a constant value to an ADM parameter which already has parameter data."));
         return errors;
     }
+    // If a parameter is constant and set to it's default, it doesn't need to be explicitly written, so just return
+    if (auto defaultValue = getAdmParameterDefault(admParameter);
+        defaultValue && valueWithinTolerance(value, *defaultValue)) {
+        return errors;
+    }
+    // Non-default, constant value parameter, so add a point
     // No need to convert/scale here - it's not from an envelope
     newPointData(0.0, admParameter, value);
     return errors;
