@@ -340,6 +340,16 @@
                 "vcpkg-linux-x64",
                 "debug-base"
             ]
+        },
+        {
+            "name": "macos-arm64-debug",
+            "displayName": "macOS arm64 debug build",
+            "description": "debug build for macOS arm64 using Ninja and vcpkg",
+            "inherits": [
+                "ninja-base",
+                "vcpkg-macos-arm64",
+                "debug-base"
+            ]
         }
     ],
     "buildPresets": [
@@ -408,6 +418,11 @@
         {
             "name": "macos-arm64-packaging-release",
             "configurePreset": "macos-arm64-packaging-release",
+            "inherits": "macos"
+        },
+        {
+            "name": "macos-arm64-debug",
+            "configurePreset": "macos-arm64-debug",
             "inherits": "macos"
         },
         {
