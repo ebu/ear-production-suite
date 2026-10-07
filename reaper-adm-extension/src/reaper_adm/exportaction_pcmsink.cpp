@@ -5,6 +5,10 @@
 #include "adm/utilities/id_assignment.hpp"
 
 #include <exportaction_dialogcontrol.h>
+#include <limits>
+#include <algorithm>
+
+#define NOMINMAX
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -15,14 +19,6 @@
 #ifdef _MSC_VER
 // Keep compiler happy using safe string func alternatives
 #define strncpy(dst, src, dstlen) strncpy_s(dst, dstlen, src, dstlen-1)
-#endif
-
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
 using namespace admplug;
@@ -230,7 +226,7 @@ int PCM_sink_adm::processNextFrames(uint64_t toMaxFrame){
     int frameWriteLimit = (int)aggregatedBlockBufferSize;
 
     if (toMaxFrame > 0) {
-        frameWriteLimit = (int)min(frameWriteLimit, toMaxFrame - actualFramesWritten); // Shouldn't ever be negative, but the loop below would catch that anyway.
+        frameWriteLimit = std::min<int>(frameWriteLimit, toMaxFrame - actualFramesWritten); // Shouldn't ever be negative, but the loop below would catch that anyway.
     }
 
     while (framesWrittenToBlockBuffer < frameWriteLimit && nextFrameReady()) {
