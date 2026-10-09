@@ -10,6 +10,8 @@
 #include "ui_event_dispatcher.hpp"
 #include "communication/metadata_thread.hpp"
 #include "auto_mode_controller.hpp"
+#include "programme_store_adm_serializer.hpp"
+
 #include <daw_channel_count.h>
 
 namespace ear {
@@ -69,7 +71,7 @@ class SceneAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
 
  private:
   void doSampleRateChecks();
-  void sendAdmMetadata();
+  void sendAdmMetadata(ear::plugin::ProgrammeStoreAdmSerializer::Profile profile);
   void recvAdmMetadata(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps);
   void startExport();
   void stopExport();

@@ -252,7 +252,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Single Programme, Single object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores());
+    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
     auto const& doc = *result.first;
     auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
@@ -273,7 +273,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Two Programmes, Shared object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores());
+    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
     auto const& doc = *result.first;
     auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
@@ -305,7 +305,7 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
   metadata.setStore(programmeStore);
 
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(metadata.stores());
+  auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
   auto const& doc = *result.first;
   auto pluginMap = result.second;
 
@@ -366,7 +366,7 @@ TEST_CASE("Toggle group with three members") {
   metadata.setStore(programmeStore);
 
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(metadata.stores());
+  auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
   auto const& doc = *result.first;
   auto pluginMap = result.second;
 
@@ -440,7 +440,7 @@ TEST_CASE("On_Off interactive") {
 
   SECTION("With single object") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores());
+    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
     auto const& doc = *result.first;
     REQUIRE(doc.getElements<AudioObject>().size() == 1);
     auto const& obj = *doc.getElements<AudioObject>().front();
@@ -457,7 +457,7 @@ TEST_CASE("On_Off interactive") {
         programmeStore.withProgramme(programme);
     metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores());
+    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
     auto const& doc = *result.first;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 1);
@@ -481,7 +481,7 @@ TEST_CASE("On_Off interactive") {
                                          .withObject(connectionId));
     metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores());
+    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
     auto const& doc = *result.first;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 2);

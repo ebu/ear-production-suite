@@ -280,7 +280,7 @@ protected:
 
 class CommandCommon {
 public:
-    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings, GetAdmAndMappingsResp, SetAdmAndMappings, SetAdmAndMappingsResp };
+    enum Command { GetConfig, StartRender, StopRender, GetAdmAndMappings_Tech_3392, GetAdmAndMappings_Tech_3393, GetAdmAndMappingsResp, SetAdmAndMappings, SetAdmAndMappingsResp };
 
     nng_msg* encodeAdmAndMappingsMessage(Command cmd, std::string& admStr, std::vector<PluginToAdmMap>& pluginToAdmMaps) {
         nng_msg* msg;

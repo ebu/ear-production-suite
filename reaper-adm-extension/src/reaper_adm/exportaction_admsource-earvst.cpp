@@ -733,7 +733,7 @@ void EarVstCommunicator::infoExchange()
 
 void EarVstCommunicator::admAndMappingExchange()
 {
-    auto resp = commandSocket.doCommand(commandSocket.Command::GetAdmAndMappings);
+    auto resp = commandSocket.doCommand(commandSocket.Command::GetAdmAndMappings_Tech_3392);
     assert(resp->success());
 
     std::string admStrRecv;

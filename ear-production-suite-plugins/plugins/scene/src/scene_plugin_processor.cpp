@@ -214,10 +214,10 @@ void SceneAudioProcessor::doSampleRateChecks() {
   }
 }
 
-void SceneAudioProcessor::sendAdmMetadata() {
+void SceneAudioProcessor::sendAdmMetadata(ear::plugin::ProgrammeStoreAdmSerializer::Profile profile) {
   ear::plugin::ProgrammeStoreAdmSerializer serializer{};
   auto [adm, pluginMaps] =
-      serializer.serialize(metadata_.stores());
+      serializer.serialize(metadata_.stores(), profile);
 
   std::stringstream ss;
   adm::writeXml(ss, adm);
@@ -245,6 +245,7 @@ void SceneAudioProcessor::recvAdmMetadata(std::string admStr,  std::vector<Plugi
 }
 
 void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
+  using enum ear::plugin::ProgrammeStoreAdmSerializer::Profile;
   uint8_t cmd;
   memcpy(&cmd, msg->getBufferPointer(), sizeof(uint8_t));
 
@@ -256,9 +257,15 @@ void SceneAudioProcessor::incomingMessage(std::shared_ptr<NngMsg> msg) {
     stopExport();
     commandSocket->sendResp(cmd);
 
-  } else if (cmd == commandSocket->Command::GetAdmAndMappings) {
+  } else if (cmd == commandSocket->Command::GetAdmAndMappings_Tech_3392) {
     auto future =
-        std::async(std::launch::async, [this]() { sendAdmMetadata(); });
+        std::async(std::launch::async, [this]() { sendAdmMetadata(Tech3392); });
+    future.get();
+
+  } else if (cmd == commandSocket->Command::GetAdmAndMappings_Tech_3393) {
+    auto future =
+
+        std::async(std::launch::async, [this]() { sendAdmMetadata(Tech3392); });
     future.get();
 
   } else if (cmd == commandSocket->Command::GetConfig) {
