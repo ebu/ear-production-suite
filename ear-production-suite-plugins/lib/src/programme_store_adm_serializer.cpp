@@ -274,6 +274,7 @@ void ProgrammeStoreAdmSerializer::createAndLinkContentWith(
   std::shared_ptr<adm::AudioObject> const& object) {
   auto name = *object->get<adm::AudioObjectName>();
   auto audioContent = adm::AudioContent::create(adm::AudioContentName{name});
+  audioContent->set(adm::MixedContent::UNDEFINED);
   objectToReferencingContentMap.insert({object, audioContent});
   programme->addReference(audioContent);
   audioContent->addReference(object);
