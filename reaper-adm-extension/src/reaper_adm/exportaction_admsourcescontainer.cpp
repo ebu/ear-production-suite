@@ -7,7 +7,7 @@
 void AdmExportHandler::repopulate(ReaperAPI const & api)
 {
     // Resets and reconstructs admExportVstSources and earSceneMasterVstSources
-    admExportVstSources = std::make_shared<AdmVstExportSources>(api);
+    admExportVstSources = std::make_shared<AdmVstExportSources>(api, profile);
     earSceneMasterVstSources = std::make_shared<EarVstExportSources>(api, profile);
 }
 

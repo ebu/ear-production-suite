@@ -54,8 +54,11 @@ private:
 class AdmVstExporter
 {
 public:
-    AdmVstExporter(std::shared_ptr<AdmVst> admExportVst, std::shared_ptr<adm::AudioContent> parentContent, std::shared_ptr<adm::AudioObject> audioObject, ReaperAPI const& api);
-    ~AdmVstExporter();
+  AdmVstExporter(std::shared_ptr<AdmVst> admExportVst,
+                 std::shared_ptr<adm::AudioContent> parentContent,
+                 std::shared_ptr<adm::AudioObject> audioObject,
+                 ReaperAPI const &api, admplug::ExportProfile profile);
+  ~AdmVstExporter();
 
     std::shared_ptr<AdmVst> getPlugin() {
         return admExportVst;
@@ -75,10 +78,13 @@ public:
     int blockCount{ 0 };
 
 private:
-    void assignAdmMetadata(ReaperAPI const& api);
-    std::shared_ptr<AdmSubgraphElements> newAdmSubgraph(ReaperAPI const& api);
+    void assignAdmMetadata(ReaperAPI const &api, ExportProfile profile);
+    std::shared_ptr<AdmSubgraphElements> newAdmSubgraph(ReaperAPI const &api,
+                                                        ExportProfile profile);
     void newAdmPresetDefinitionReference(ReaperAPI const& api);
-    void createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api);
+    void createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor,
+                                 std::shared_ptr<AdmSubgraphElements> subgraph,
+                                 ReaperAPI const &api, ExportProfile profile);
     template<typename AudioBlockFormatType>
     void addBlockFormatsToChannelFormat(std::optional<std::vector<std::shared_ptr<AudioBlockFormatType>>> blocks, std::shared_ptr<AdmSubgraphElements> subgraph);
 
@@ -103,7 +109,7 @@ class AdmVstExportSources : public IExportSources
     A container for handling ADM sources provided by ADM Export Source VSTs
     */
 public:
-    AdmVstExportSources(ReaperAPI const&api);
+    AdmVstExportSources(ReaperAPI const &api, admplug::ExportProfile profile);
     ~AdmVstExportSources() {}
 
     bool documentRequiresProgrammeTitles() override { return true; }

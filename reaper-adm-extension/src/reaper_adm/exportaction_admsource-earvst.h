@@ -170,7 +170,7 @@ public:
 	}
 
 private:
-	void generateAdmAndChna(ReaperAPI const& api);
+	void generateAdmAndChna(ReaperAPI const &api, ExportProfile profile);
 
 	struct AdmElements {
 		adm::TypeDescriptor typeDescriptor;

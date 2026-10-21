@@ -1,9 +1,11 @@
 #include "exportaction_parameterprocessing.h"
 #include "envelopecreator.h"
+#include "export_profiles.hpp"
 
 #include <assert.h>
-#include <sstream>
 #include <cmath>
+#include <sstream>
+
 
 #define CURVE_APPROXIMATION_STEP_MS 100
 #define CURVE_APPROXIMATION_DEVIATION_THRESHOLD 0.05
@@ -454,7 +456,7 @@ bool CumulatedPointData::multipleValuesForSingleParameterAtTime(double time)
     return false;
 }
 
-std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> CumulatedPointData::generateAudioBlockFormatObjects(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, ReaperAPI const & api)
+std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> CumulatedPointData::generateAudioBlockFormatObjects(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, ReaperAPI const & api, admplug::ExportProfile profile)
 {
     // Use spherical if no plug-in suite/instance provided, or determine from plug-in suite
     bool useSph = !pluginSuite || !pluginInst || pluginSuite->pluginUsesSphericalCoordinates(pluginInst); // Use spherical if no plug-in suite provided, or determine from plug-in suite
@@ -570,6 +572,20 @@ std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> Cumula
             if(processBack || !multipleValuesForSingleParameterAtTime(*timeIt)) break;
             processBack = true; // Create an additional block for this time
 
+        }
+    }
+    // static values represented as a 0 duration initial block plus full duration block
+    if (blocks.size() == 2 && profile == admplug::ExportProfile::EBU_PRODUCTION_3393) {
+        using namespace std::chrono_literals;
+        auto const& first = blocks.front();
+        auto const& second = blocks[1];
+        auto bothAtStart {first->has<adm::Rtime>() &&
+            (first->get<adm::Rtime>() == adm::Time{0ns}) &&
+                second->has<adm::Rtime>() && second->get<adm::Rtime>() == adm::Time{0ns}};
+        if (bothAtStart) {
+            blocks.front()->unset<adm::Rtime>();
+            blocks.front()->unset<adm::Duration>();
+            blocks.pop_back();
         }
     }
 

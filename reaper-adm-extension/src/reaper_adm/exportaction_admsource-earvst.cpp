@@ -38,7 +38,7 @@ EarVstExportSources::EarVstExportSources(ReaperAPI const & api, ExportProfile pr
                 if(EarSceneMasterVst::isCandidateForExport(earSceneMasterVst)) {
                     if(!chosenCandidateForExport) {
                         chosenCandidateForExport = earSceneMasterVst;
-                        generateAdmAndChna(api);
+                        generateAdmAndChna(api, profile);
                     }
                     candidatesForExport.push_back(earSceneMasterVst);
                 }
@@ -101,7 +101,7 @@ bool EarVstExportSources::writeNextFrameTo(float * bufferWritePointer, bool skip
     return true;
 }
 
-void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
+void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api, admplug::ExportProfile profile)
 {
     using namespace adm;
 
@@ -265,7 +265,7 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
                         }
                     }
 
-                    auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst.get(), api);
+                    auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst.get(), api, profile);
                     for (auto& block : *blocks) admElements->audioChannelFormat->add(*block);
 
                 }
