@@ -24,7 +24,11 @@ class ProgrammeStoreAdmSerializer {
   std::pair<std::shared_ptr<adm::Document>, std::vector<PluginMap>> serialize(
     std::pair<proto::ProgrammeStore, ItemMap> stores,
     admplug::ExportProfile profile);
- private:
+   void createAndLinkContentWith(
+       std::shared_ptr<adm::AudioProgramme> const& programme,
+       std::shared_ptr<adm::AudioObject> const& object);
+
+  private:
   void serializeToggle(std::shared_ptr<adm::AudioProgramme> programme,
                        const proto::Toggle& toggle);
   std::shared_ptr<adm::AudioObject> getToggleDefaultAudioObject(
@@ -33,20 +37,25 @@ class ProgrammeStoreAdmSerializer {
   std::shared_ptr<adm::AudioObject> serializeToggleElement(std::shared_ptr<adm::AudioProgramme> programme,
                                                       const proto::Toggle& toggle,
                                                       int elementIndex);
-  void serializeProgramme(adm::Document& doc,
-                          proto::Programme const& programme);
-  void serializeElement(adm::AudioContent& content,
-                        proto::Object const& object);
-  void createTopLevelObject(adm::AudioContent& content,
-                            proto::InputItemMetadata const& metadata,
-                            proto::Object const& object);
+  void serializeProgramme(proto::Programme const& storedProgramme);
+  void serializeElement(
+      std::shared_ptr<adm::AudioProgramme> const& audioProgramme,
+      std::shared_ptr<adm::AudioContent> const& defaultContent,
+      proto::Object const& object);
+  void createTopLevelObject(
+      std::shared_ptr<adm::AudioProgramme> audioProgramme,
+      std::shared_ptr<adm::AudioContent> const& defaultContent,
+      proto::InputItemMetadata const& metadata, proto::Object const& object);
+  void createTopLevelObject3393(const proto::InputItemMetadata& metadata);
   bool isAlreadySerialized(proto::Object const& object) const;
 
   proto::ProgrammeStore programmes_;
   std::map<communication::ConnectionId, proto::InputItemMetadata> items_;
   std::shared_ptr<adm::Document> doc;
+  admplug::ExportProfile profile_{admplug::ExportProfile::EBU_PRODUCTION_3392};
   std::vector<PluginMap> pluginMap;
   std::map<std::string, std::shared_ptr<adm::AudioObject>> serializedObjects;
+  std::unordered_map<std::shared_ptr<adm::AudioObject>, std::shared_ptr<adm::AudioContent>> objectToReferencingContentMap;
   void setInteractivity(adm::AudioObject& object, const proto::Object& object1);
   void setImportance(adm::AudioObject& object, const proto::Object& object1);
   bool isSerializedWithDifferentObjectSettings(const proto::Object& object);

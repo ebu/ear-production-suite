@@ -1,16 +1,12 @@
 #include "programme_store_adm_serializer.hpp"
-#include <speaker_setups.hpp>
-#include <numeric>
 #include <adm/adm.hpp>
+#include <adm/document.hpp>
 #include <adm/utilities/object_creation.hpp>
 #include <adm/common_definitions.hpp>
 #include <adm/utilities/id_assignment.hpp>
 #include <helper/adm_preset_definitions_helper.h>
 #include <utility>
-#include <iomanip>
 #include <optional>
-#include <iostream>
-#include <sstream>
 
 using namespace ear::plugin;
 
@@ -231,14 +227,56 @@ ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap>
   programmes_ = std::move(stores.first);
   items_ = std::move(stores.second);
   doc = adm::Document::create();
-  doc->set(adm::Version("ITU-R_BS.2076-2"));
+  profile_ = profile;
+  if (profile == admplug::ExportProfile::EBU_PRODUCTION_3393) {
+    doc->set(adm::Version("ITU-R_BS.2076-3"));
+  } else {
+    doc->set(adm::Version("ITU-R_BS.2076-2"));
+  }
   addCommonDefinitionsTo(doc);
   pluginMap.clear();
   for (auto& programme : programmes_.programme()) {
-    serializeProgramme(*doc, programme);
+    serializeProgramme(programme);
   }
   adm::reassignIds(doc); // ADM elms in pluginMap are shared_ptr so will also have the updated ID's
+  if (profile == admplug::ExportProfile::EBU_PRODUCTION_3393) {
+    auto profileList = adm::ProfileList{};
+    profileList.add(
+      adm::Profile{adm::ProfileValue{"EBU Tech 3393"},
+                   adm::ProfileName{"EBU Production Profile"},
+                   adm::ProfileVersion{"1.0"}, adm::ProfileLevel{"1"}
+      }
+    );
+    doc->set(profileList);
+
+    auto tagList = adm::TagList{};
+    auto tag = adm::Tag{adm::TagValue{"1"}, adm::TagClass{"urn:profile:production:Layer"}};
+    auto tagGroup = adm::TagGroup{};
+    tagGroup.add(tag);
+
+    for (auto const& prog : doc->getElements<adm::AudioProgramme>()) {
+      tagGroup.addReference(prog);
+    }
+    for (auto const& content : doc->getElements<adm::AudioContent>()) {
+      tagGroup.addReference(content);
+    }
+    for (auto const& object : doc->getElements<adm::AudioObject>()) {
+      tagGroup.addReference(object);
+    }
+    tagList.add(tagGroup);
+    doc->set(tagList);
+  }
   return {doc, pluginMap};
+}
+
+void ProgrammeStoreAdmSerializer::createAndLinkContentWith(
+  std::shared_ptr<adm::AudioProgramme> const& programme,
+  std::shared_ptr<adm::AudioObject> const& object) {
+  auto name = *object->get<adm::AudioObjectName>();
+  auto audioContent = adm::AudioContent::create(adm::AudioContentName{name});
+  objectToReferencingContentMap.insert({object, audioContent});
+  programme->addReference(audioContent);
+  audioContent->addReference(object);
 }
 
 void ProgrammeStoreAdmSerializer::serializeToggle(
@@ -280,8 +318,9 @@ ProgrammeStoreAdmSerializer::serializeToggleElement(
     if (object.has_connection_id()) {
       auto content = adm::AudioContent::create(adm::AudioContentName{""});
       programme->addReference(content);
-      serializeElement(*content, object);
+      serializeElement(programme, content, object);
       auto admObject = serializedObjects[object.connection_id()];
+      objectToReferencingContentMap.insert({admObject, content});
       content->set(
           adm::AudioContentName{admObject->get<adm::AudioObjectName>().get()});
       return admObject;
@@ -290,59 +329,89 @@ ProgrammeStoreAdmSerializer::serializeToggleElement(
   return nullptr;
 }
 
+namespace {
+  constexpr std::size_t NAME_LENGTH {128ULL};
+}
+
 void ProgrammeStoreAdmSerializer::serializeProgramme(
-    adm::Document& doc, const proto::Programme& programme) {
-  auto prog = adm::AudioProgramme::create(
-      adm::AudioProgrammeName{programme.name()});
-  if(programme.has_language() && !programme.language().empty()) {
-    prog->set(adm::AudioProgrammeLanguage{ programme.language() });
+    const proto::Programme& storedProgramme) {
+
+  auto name = storedProgramme.name();
+  if (name.length() > NAME_LENGTH) {
+    name = name.substr(0ULL, NAME_LENGTH);
   }
-  auto defaultContent =
-      adm::AudioContent::create(adm::AudioContentName{programme.name()});
-  doc.add(prog);
-  prog->addReference(defaultContent);
-  for (auto const& element : programme.element()) {
+
+  auto audioProgramme = adm::AudioProgramme::create(
+      adm::AudioProgrammeName{name});
+
+  if(storedProgramme.has_language() && !storedProgramme.language().empty()) {
+    audioProgramme ->set(adm::AudioProgrammeLanguage{ storedProgramme.language() });
+  }
+
+  std::shared_ptr<adm::AudioContent> defaultContent;
+  if (profile_ != admplug::ExportProfile::EBU_PRODUCTION_3393) {
+    defaultContent =
+        adm::AudioContent::create(adm::AudioContentName{storedProgramme.name()});
+    audioProgramme->addReference(defaultContent);
+  }
+
+  doc->add(audioProgramme);
+
+  for (auto const& element : storedProgramme.element()) {
     if (element.has_toggle()) {
-      serializeToggle(prog, element.toggle());
+      serializeToggle(audioProgramme , element.toggle());
     }
     if (element.has_group()) {
       // TODO group handling
     }
     if (element.has_object()) {
-      serializeElement(*defaultContent, element.object());
+        serializeElement(audioProgramme, defaultContent, element.object());
     }
   }
 }
 
 void ProgrammeStoreAdmSerializer::serializeElement(
-    adm::AudioContent& content, const proto::Object& object) {
+  std::shared_ptr<adm::AudioProgramme> const& audioProgramme,
+std::shared_ptr<adm::AudioContent> const& defaultContent,
+const proto::Object& object) {
   auto metaDataIt = items_.find(object.connection_id());
   if (metaDataIt != items_.end()) {
     if (metaDataIt->second.has_obj_metadata() ||
         metaDataIt->second.has_ds_metadata() ||
         metaDataIt->second.has_hoa_metadata()) {
-      createTopLevelObject(content, metaDataIt->second, object);
+      createTopLevelObject(audioProgramme, defaultContent, metaDataIt->second, object);
     }
   }
 }
 
 void ProgrammeStoreAdmSerializer::createTopLevelObject(
-    adm::AudioContent& content, const proto::InputItemMetadata& metadata,
+  std::shared_ptr<adm::AudioProgramme> audioProgramme,
+    std::shared_ptr<adm::AudioContent> const& defaultContent, const proto::InputItemMetadata& metadata,
     const proto::Object& object) {
   assert(metadata.has_obj_metadata() || metadata.has_ds_metadata() ||
          metadata.has_hoa_metadata());
   const auto& connectionId = metadata.connection_id();
 
   if (isAlreadySerialized(object)) {
-    // Already have serialized this object (in a different programme?)
-    content.addReference(serializedObjects[connectionId]);
+    auto audioObject = serializedObjects[connectionId];
+    if (profile_ != admplug::ExportProfile::EBU_PRODUCTION_3393) {
+      // Already have serialized this object (in a different programme?)
+      defaultContent->addReference(audioObject);
+    } else {
+      auto audioContent = objectToReferencingContentMap[audioObject];
+      audioProgramme->addReference(audioContent);
+    }
   } else if (isSerializedWithDifferentObjectSettings(object)) {
     // Have serialized this input but have different object level settings
     auto otherAdmObject =
         serializedObjects.find(object.connection_id())->second;
     auto admObject =
         adm::AudioObject::create(adm::AudioObjectName(metadata.name()));
-    content.addReference(admObject);
+    if (profile_ != admplug::ExportProfile::EBU_PRODUCTION_3393) {
+      defaultContent->addReference(admObject);
+    } else {
+      createAndLinkContentWith(audioProgramme, admObject);
+    }
     for (auto& atuid : otherAdmObject->getReferences<adm::AudioTrackUid>()) {
       admObject->addReference(atuid);
     }
@@ -366,12 +435,15 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
       auto objectHolder = add2076v2SimpleObjectTo(doc, metadata.name());
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
-      content.addReference(objectHolder.audioObject);
+      if (profile_ != admplug::ExportProfile::EBU_PRODUCTION_3393) {
+        defaultContent->addReference(objectHolder.audioObject);
+      } else {
+        createAndLinkContentWith(audioProgramme, objectHolder.audioObject);
+      }
       assert(metadata.routing() <= std::numeric_limits<int16_t>::max());
       serializedObjects[connectionId] = objectHolder.audioObject;
       pluginMap.push_back({ metadata.input_instance_id(), metadata.routing(), objectHolder.audioObject, objectHolder.audioTrackUid });
-
-    } 
+    }
     else if (metadata.has_hoa_metadata() || metadata.has_ds_metadata()) {
 
       adm::AudioPackFormatId audioPackFormatID;
@@ -394,8 +466,12 @@ void ProgrammeStoreAdmSerializer::createTopLevelObject(
             doc, metadata.name(), audioPackFormatID);
       setInteractivity(*objectHolder.audioObject, object);
       setImportance(*objectHolder.audioObject, object);
-      content.addReference(objectHolder.audioObject);
-      for (int i(0); i < objectHolder.channels.size(); ++i) {
+      if (profile_ != admplug::ExportProfile::EBU_PRODUCTION_3393) {
+        defaultContent->addReference(objectHolder.audioObject);
+    } else {
+      createAndLinkContentWith(audioProgramme, objectHolder.audioObject);
+    }
+    for (int i(0); i < objectHolder.channels.size(); ++i) {
         pluginMap.push_back({metadata.input_instance_id(),
                              metadata.routing() + i, objectHolder.audioObject,
                              objectHolder.channels[i].audioTrackUid});
