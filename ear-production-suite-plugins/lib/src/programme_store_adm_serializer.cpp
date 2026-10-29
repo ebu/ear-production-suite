@@ -520,7 +520,11 @@ void ear::plugin::ProgrammeStoreAdmSerializer::setImportance(adm::AudioObject & 
   if(importance.has_value()) {
     admObject.set(adm::Importance(importance.value()));
   } else {
-    admObject.unset<adm::Importance>();
+    if (profile_ == admplug::ExportProfile::EBU_PRODUCTION_3393 && !admObject.has<adm::Importance>()) {
+      admObject.set(adm::Importance(5));
+    } else {
+      admObject.unset<adm::Importance>();
+    }
   }
 }
 
