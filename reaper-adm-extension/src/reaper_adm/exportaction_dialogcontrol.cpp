@@ -157,10 +157,10 @@ LRESULT RenderDialogState::selectInComboBox(HWND hwnd, std::string text) {
         if(itmtxt == text){
             SWELL_CB_SetCurSel(hwnd, 0, i);
             // Make sure applications control change callbacks are fired
-            auto nID = GetWindowLongPtr(hwnd, -12); // get GWL_ID
+            auto nID = GetWindowLongPtr(hwnd, GWL_ID); // get GWL_ID
             int send_cbn_selchange = MakeWParam(nID, CBN_SELCHANGE);
             // Send the WM_COMMAND to the parent, not the control itself
-            return SendMessage(GetParent(hwnd), 0x111, send_cbn_selchange, (LPARAM)hwnd);
+            return SendMessage(GetParent(hwnd), WM_COMMAND, send_cbn_selchange, (LPARAM)hwnd);
         }
     }
     return CB_ERR;
