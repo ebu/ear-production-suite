@@ -1,8 +1,10 @@
 #include "exportaction_pcmsink.h"
 
+#include <adm/write.hpp>
 #include "adm/adm.hpp"
 #include "adm/utilities/id_assignment.hpp"
-#include "adm/write.hpp"
+
+#include <exportaction_dialogcontrol.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -102,8 +104,18 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
         }
     }
 
+    auto profile = RenderDialogControl::getInstance().getProfile();
+    using Profile = RenderDialogState::Profile;
+
+    auto const chna = admExportSources->getChnaChunk();
+    std::shared_ptr<bw64::AxmlChunk> axml{};
+    switch (profile) {
+    case Profile::EBU_PRODUCTION_3392: {
+        axml = admExportSources->getAxmlChunk();
+      break;
+    }
+    }
     // Start writing
-    auto [axml, chna] = getAdmChunks(*admExportSources);
     try {
         writer = bw64::writeFile(admFilename, totalChannels, sRate, bitDepth, chna, axml);
     } catch (std::runtime_error const& e) {
@@ -112,11 +124,6 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
     
     // Start Renders
     admExportSources->setRenderInProgress(true);
-}
-
-std::pair<std::shared_ptr<bw64::AxmlChunk>, std::shared_ptr<bw64::ChnaChunk>>
-PCM_sink_adm::getAdmChunks(IExportSources& export_sources) {
-    return {export_sources.getAxmlChunk(), export_sources.getChnaChunk()};
 }
 
 PCM_sink_adm::~PCM_sink_adm()
@@ -188,23 +195,28 @@ void PCM_sink_adm::GetOutputInfoString(char *buf, int buflen)
 }
 
 
-void PCM_sink_adm::WriteDoubles(double **samples, int len, int nch, int offset, int spacing)
-{
-    if (!writer) return;
+void PCM_sink_adm::WriteDoubles(double **samples, int len, int nch, int offset,
+                                int spacing) {
+  if (!writer)
+    return;
 
-    // First call sets up aggregatedBlockBuffer (because we need to know the default block size, which should be len)
-    if (aggregatedBlockBufferStart == nullptr){
-        aggregatedBlockBufferFrameCount = len;
-        aggregatedBlockBufferSize = aggregatedBlockBufferFrameCount * totalChannels;
-        assert(aggregatedBlockBufferSize > 0);
-        aggregatedBlockBuffer = std::vector<float>(aggregatedBlockBufferSize, 0.0);
-        aggregatedBlockBufferStart = &aggregatedBlockBuffer.front();
-    }
+  // First call sets up aggregatedBlockBuffer (because we need to know the
+  // default block size, which should be len)
+  if (aggregatedBlockBufferStart == nullptr) {
+    aggregatedBlockBufferFrameCount = len;
+    aggregatedBlockBufferSize = aggregatedBlockBufferFrameCount * totalChannels;
+    assert(aggregatedBlockBufferSize > 0);
+    aggregatedBlockBuffer = std::vector<float>(aggregatedBlockBufferSize, 0.0);
+    aggregatedBlockBufferStart = &aggregatedBlockBuffer.front();
+  }
 
-    expectedFramesWritten += len;
+  expectedFramesWritten += len;
 
-    //while(processNextFrames(expectedFrames) == 0) continue; // Ensures we do at least one, but this is slower overall as we're always waiting on the message queue whenever this is called.
-    while(processNextFrames(expectedFramesWritten) > 0) continue; // Whilst we have stuff to process, keep processing them.
+  // while(processNextFrames(expectedFrames) == 0) continue; // Ensures we do at
+  // least one, but this is slower overall as we're always waiting on the
+  // message queue whenever this is called.
+  while (processNextFrames(expectedFramesWritten) > 0)
+    continue; // Whilst we have stuff to process, keep processing them.
 }
 
 int PCM_sink_adm::processNextFrames(uint64_t toMaxFrame){

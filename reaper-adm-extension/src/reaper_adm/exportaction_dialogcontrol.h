@@ -21,6 +21,11 @@ public:
 
     HWND ShowConfig(const void *cfg, int cfg_l, HWND parent);
 
+    enum class Profile {
+        EBU_PRODUCTION_3392
+    };
+
+
 private:
     friend class RenderDialogControl;
 
@@ -74,9 +79,14 @@ private:
     BOOL CALLBACK prepareRenderControl_pass1(HWND hwnd, LPARAM lParam);
     BOOL CALLBACK prepareRenderControl_pass2(HWND hwnd, LPARAM lParam);
     std::string getAdmExportVstsInfoString();
+    int loadConfig(void **loadedData, char const *description);
+    void saveState(HWND hwnd, void *data);
+    void saveConfig(HWND hwnd);
+    INT_PTR initDialog(HWND hwnd, void *cfgData, int cfgLength);
     WDL_DLGRET wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     bool startedPrepareDialogControls{ false };
+    Profile selectedProfile{Profile::EBU_PRODUCTION_3392};
 
     std::string EXPECTED_RENDER_DIALOG_WINDOW_TITLE{ "Render to File" };
     std::string EXPECTED_FIRST_SAMPLE_RATE_COMBO_OPTION{ "8000" };
@@ -94,7 +104,6 @@ private:
     std::string REQUIRED_CHANNEL_COUNT_COMBO_OPTION{ "Mono" };
     std::string EXPECTED_FIRST_RESAMPLE_MODE_COMBO_OPTION{ "Point Sampling (lowest quality, retro)" };
     const int EXPECTED_RESAMPLE_MODE_COMBO_ID{ 1000 };
-
 };
 
 class RenderDialogControl {
@@ -119,6 +128,10 @@ public:
 
     static BOOL CALLBACK callback_PrepareRenderControl_pass2(HWND hwnd, LPARAM lParam) {
         return getInstance().state.prepareRenderControl_pass2(hwnd, lParam);
+    }
+
+    RenderDialogState::Profile getProfile() {
+        return state.selectedProfile;
     }
 
 private:

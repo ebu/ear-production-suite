@@ -1,11 +1,14 @@
 #include "exportaction_dialogcontrol.h"
 
 #include <WDL/swell/swell.h>
+#include <WDL/filewrite.h>
 
-#include "resource.h"
-#include "exportaction_issues.h"
 #include "exportaction.h"
+#include "exportaction_issues.h"
+#include "resource.h"
+
 #include <helper/char_encoding.hpp>
+#include <reaper_plugin_functions.h>
 
 #define TIMER_ID 1
 
@@ -129,7 +132,7 @@ std::string RenderDialogState::getWindowText(HWND hwnd)
 
 HWND RenderDialogState::ShowConfig(const void *cfg, int cfg_l, HWND parent)
 {
-        const void *x[2] = { cfg,(void *)&cfg_l };
+        const void *x[2] = { cfg,(void *)cfg_l };
         return CreateDialogParam(reaperInst, MAKEINTRESOURCE(IDD_EXPORT), parent,
             RenderDialogControl::wavecfgDlgProc,
             (LPARAM)x);
@@ -441,16 +444,91 @@ std::string RenderDialogState::getAdmExportVstsInfoString() {
     return op;
 }
 
+namespace {
+  static int ADM_EXPORT_FOURCC = REAPER_FOURCC('a', 'd', 'm', ' ');
+}
+
+int RenderDialogState::loadConfig(void **loadedData, char const *description) {
+  static WDL_HeapBuf CONFIG_BUFFER;
+  const char *fileName = get_ini_file();
+  auto configLength =
+      GetPrivateProfileInt(description, "default_size", 0, fileName);
+  if (configLength < 1) {
+    return 0;
+  }
+  if (GetPrivateProfileStruct(description, "default",
+                              CONFIG_BUFFER.Resize(configLength), configLength,
+                              fileName)) {
+    *loadedData = CONFIG_BUFFER.Get();
+    return configLength;
+  }
+  return 0;
+}
+
+namespace {
+   constexpr int configSize() {
+       return 8;
+   }
+   const char* INI_CONFIG_DESCRIPTION = "ADM export defaults";
+}
+
+// serialize the state to data
+void RenderDialogState::saveState(HWND hwnd, void* data) {
+    auto profile = static_cast<int>(selectedProfile);
+    auto dataStream = reinterpret_cast<char*>(data);
+    auto fourccOutput = reinterpret_cast<int*>(dataStream);
+    *fourccOutput = ADM_EXPORT_FOURCC;
+    auto profileOutput = reinterpret_cast<int*>(dataStream + 4);
+    *profileOutput = REAPER_MAKELEINT(profile);
+}
+
+// write out state to reaper ini file
+void RenderDialogState::saveConfig(HWND hwnd) {
+    char data[configSize()];
+    saveState(hwnd, &data);
+    char length_buffer[64];
+    sprintf(length_buffer, "%d", configSize());
+    const char* fileName = get_ini_file();
+    WritePrivateProfileString(INI_CONFIG_DESCRIPTION, "default_size", length_buffer, fileName);
+    WritePrivateProfileStruct(INI_CONFIG_DESCRIPTION, "default", data, configSize(), fileName);
+}
+
+WDL_DLGRET RenderDialogState::initDialog(HWND hwnd, void* cfgData, int cfgLength) {
+    // we've not been given a saved config
+    if (cfgLength < 8) {
+        cfgLength = loadConfig(&cfgData, INI_CONFIG_DESCRIPTION);
+    }
+    // the load was successful
+    if (cfgLength >= 8) {
+        selectedProfile = [cfgData]() {
+            // skip FOURCC
+            auto data = reinterpret_cast<char*>(cfgData) + 4;
+            int profile = REAPER_MAKELEINT(*reinterpret_cast<int*>(data));
+            return static_cast<Profile>(profile);
+        }();
+    }
+    // If the load failed (first run or corrupted file), we'll just continue
+    // with values initialized from the constructor then save whatever was selected
+    // as the defaults for next time when the dialog is closed
+
+    auto profileComboBox = GetDlgItem(hwnd, IDC_COMBO2);
+    SendMessage(profileComboBox, CB_ADDSTRING, 0, reinterpret_cast<INT_PTR>(static_cast<LPCSTR>("EBU Production Profile")));
+    SendMessage(profileComboBox, CB_SETCURSEL, static_cast<WPARAM>(selectedProfile), static_cast<LPARAM>(0));
+    // this is called when the dialog is initialized
+    startedPrepareDialogControls = false;
+    return 0;
+
+}
+
 WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
-
     case WM_INITDIALOG:
     {
-        // this is called when the dialog is initialized
-        startedPrepareDialogControls = false;
-        return 0;
+        void *cfgData = ((void **)lParam)[0];
+        int cfgDataLength=reinterpret_cast<INT_PTR>(((void**)lParam)[1]);
+        initDialog(hwndDlg, cfgData, cfgDataLength);
     }
 
     case WM_PAINT:
@@ -516,32 +594,38 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
         return 0;
     }
 
+    // called on user interaction
     case WM_COMMAND:
     {
-        // this gets called in case something changed
-
-        // Unsigned shorts
         auto controlId = LOWORD(wParam);
         auto notificationType = HIWORD(wParam);
 
-        if (notificationType == BN_CLICKED && controlId == IDC_BUTTON_REFRESH) {
+        if (controlId == IDC_COMBO2 && notificationType == CBN_SELCHANGE) {
+          int itemIndex =
+              SendMessage(reinterpret_cast<HWND>(lParam), CB_GETCURSEL, 0, 0);
+          if (itemIndex != CB_ERR) {
+              selectedProfile = static_cast<Profile>(itemIndex);
+          }
+        }
+
+        if (controlId == IDC_BUTTON_REFRESH && notificationType == BN_CLICKED) {
             // Repopulate ADM info
             startPreparingRenderControls(hwndDlg);
         }
+
         return 0;
     }
 
+    // gets called with just wParam to retrieve size
+    // then gets called with lParam to get state
     case WM_USER + 1024:
     {
         // this gets called to retrieve the settings!
 
-        if (wParam) *((int *)wParam) = 32;
+        if (wParam) *((int *)wParam) = configSize();
         if (lParam)
         {
-            ((int *)lParam)[0] = ExportManager::ExportInfo.SINK_FOURCC;
-            ((int *)(((unsigned char *)lParam) + 4))[0] = REAPER_MAKELEINT(0);
-            ((float *)(((unsigned char *)lParam) + 4))[1] = 0.f;
-
+            saveState(hwndDlg, reinterpret_cast<void*>(lParam));
         }
         return 0;
     }
@@ -605,7 +689,7 @@ WDL_DLGRET RenderDialogState::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
             EnableWindow(editControl, true);
             UpdateWindow(editControl);
         }
-
+        saveConfig(hwndDlg);
         return 0;
     }
 
