@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <map>
-#include <optional>
 
 #include <WDL/wdltypes.h>
 
@@ -19,9 +18,6 @@ class RenderDialogControl;
 // admCfgDialogProc() is the message handler.
 class RenderConfigDialog {
 public:
-    enum class Profile {
-        EBU_PRODUCTION_3392
-    };
 
     RenderConfigDialog(std::shared_ptr<ReaperAPI> api, REAPER_PLUGIN_HINSTANCE *inst);
     ~RenderConfigDialog();
@@ -46,7 +42,7 @@ private:
     WDL_DLGRET wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     bool startedPrepareDialogControls{ false };
-    Profile selectedProfile{Profile::EBU_PRODUCTION_3392};
+    ExportProfile selectedProfile{ExportProfile::EBU_PRODUCTION_3392};
 };
 
 class RenderDialogControl {
@@ -62,7 +58,7 @@ public:
         return dialog().ShowConfig(cfg, cfg_l,parent);
     }
 
-    RenderConfigDialog::Profile getProfile() {
+    ExportProfile getProfile() {
         return dialog().selectedProfile;
     }
 

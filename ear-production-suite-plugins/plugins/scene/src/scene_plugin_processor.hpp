@@ -71,7 +71,7 @@ class SceneAudioProcessor : public AudioProcessor, public VST3ClientExtensions {
 
  private:
   void doSampleRateChecks();
-  void sendAdmMetadata(ear::plugin::ProgrammeStoreAdmSerializer::Profile profile);
+  void sendAdmMetadata(admplug::ExportProfile profile);
   void recvAdmMetadata(std::string admStr, std::vector<PluginToAdmMap> pluginToAdmMaps);
   void startExport();
   void stopExport();

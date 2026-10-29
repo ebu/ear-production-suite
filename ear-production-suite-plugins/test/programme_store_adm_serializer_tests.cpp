@@ -239,6 +239,7 @@ InputItemMetadata simpleDsItem(ConnectionId const& id,
 }
 
 TEST_CASE("Programme parser tests") {
+  using enum admplug::ExportProfile;
   Metadata metadata{std::make_unique<EventDispatcher>(), std::make_unique<EventDispatcher>()};
   auto connectionId = ConnectionId::generate();
   auto item = simpleObjectItem(connectionId, "test", 0);
@@ -252,7 +253,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Single Programme, Single object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+    auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
     auto const& doc = *result.first;
     auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 1);
@@ -273,7 +274,7 @@ TEST_CASE("Programme parser tests") {
 
   SECTION("Two Programmes, Shared object serialized correctly") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+    auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
     auto const& doc = *result.first;
     auto const pluginMap = result.second;
     REQUIRE(numberOf<adm::AudioProgramme>(doc) == 2);
@@ -304,8 +305,10 @@ TEST_CASE("Stereo DirectSpeaker input serialized correctly") {
 
   metadata.setStore(programmeStore);
 
+  using enum admplug::ExportProfile;
+
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+  auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
   auto const& doc = *result.first;
   auto pluginMap = result.second;
 
@@ -365,8 +368,10 @@ TEST_CASE("Toggle group with three members") {
 
   metadata.setStore(programmeStore);
 
+  using enum admplug::ExportProfile;
+
   ProgrammeStoreAdmSerializer serializer;
-  auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+  auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
   auto const& doc = *result.first;
   auto pluginMap = result.second;
 
@@ -438,9 +443,11 @@ TEST_CASE("On_Off interactive") {
   auto programmeStore = StoreBuilder{}.withProgramme(programme);
   metadata.setStore(programmeStore);
 
+  using enum admplug::ExportProfile;
+
   SECTION("With single object") {
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+    auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
     auto const& doc = *result.first;
     REQUIRE(doc.getElements<AudioObject>().size() == 1);
     auto const& obj = *doc.getElements<AudioObject>().front();
@@ -457,7 +464,7 @@ TEST_CASE("On_Off interactive") {
         programmeStore.withProgramme(programme);
     metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+    auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
     auto const& doc = *result.first;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 1);
@@ -481,7 +488,7 @@ TEST_CASE("On_Off interactive") {
                                          .withObject(connectionId));
     metadata.setStore(programmeStore);
     ProgrammeStoreAdmSerializer serializer;
-    auto result = serializer.serialize(metadata.stores(), ProgrammeStoreAdmSerializer::Tech3392);
+    auto result = serializer.serialize(metadata.stores(), EBU_PRODUCTION_3392);
     auto const& doc = *result.first;
     auto const& objects = doc.getElements<AudioObject>();
     REQUIRE(objects.size() == 2);

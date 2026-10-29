@@ -14,10 +14,11 @@
 #include <sstream>
 
 #include <daw_channel_count.h>
+#include "export_profiles.hpp"
 
 using namespace admplug;
 
-EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources(api)
+EarVstExportSources::EarVstExportSources(ReaperAPI const & api, ExportProfile profile) : IExportSources(api)
 {
     MediaTrack *trk;
     int numTracks = api.CountTracks(nullptr);
@@ -31,7 +32,7 @@ EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources
             for(int fxPos : fxPosVec) {
                 auto earSceneMasterVst = std::make_shared<EarSceneMasterVst>(trk, fxPos, api);
                 auto comms = earSceneMasterVst->getCommunicator(true);
-                if(comms) comms->updateInfo();
+                if(comms) comms->updateInfo(profile);
 
                 allEarSceneMasterVsts.push_back(earSceneMasterVst);
                 if(EarSceneMasterVst::isCandidateForExport(earSceneMasterVst)) {
@@ -670,10 +671,10 @@ EarVstCommunicator::EarVstCommunicator(int samplesPort, int commandPort) : Commu
 {
 }
 
-void EarVstCommunicator::updateInfo()
+void EarVstCommunicator::updateInfo(ExportProfile profile)
 {
     infoExchange();
-    admAndMappingExchange();
+    admAndMappingExchange(profile);
 }
 
 bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck)
@@ -731,9 +732,21 @@ void EarVstCommunicator::infoExchange()
     memcpy(&sampleRate, (char*)resp->getBufferPointer() + 1, 4);
 }
 
-void EarVstCommunicator::admAndMappingExchange()
+void EarVstCommunicator::admAndMappingExchange(ExportProfile profile)
 {
-    auto resp = commandSocket.doCommand(commandSocket.Command::GetAdmAndMappings_Tech_3392);
+    using enum ExportProfile;
+    CommandCommon::Command command = commandSocket.Command::GetAdmAndMappings_Tech_3392;
+    switch (profile) {
+    case EBU_PRODUCTION_3392: {
+      command = CommandSender::GetAdmAndMappings_Tech_3392;
+      break;
+    }
+    case EBU_PRODUCTION_3393: {
+      command = CommandSender::GetAdmAndMappings_Tech_3393;
+      break;
+    }
+    }
+    auto resp = commandSocket.doCommand(command);
     assert(resp->success());
 
     std::string admStrRecv;

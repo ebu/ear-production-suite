@@ -7,6 +7,7 @@
 #include <bw64/bw64.hpp>
 #include <vector>
 #include <map>
+#include "export_profiles.hpp"
 
 namespace ear {
 namespace plugin {
@@ -20,15 +21,9 @@ class ProgrammeStoreAdmSerializer {
      std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
    };
 
-  enum Profile {
-    Tech3392,
-    Tech3393
-  };
-
-
   std::pair<std::shared_ptr<adm::Document>, std::vector<PluginMap>> serialize(
     std::pair<proto::ProgrammeStore, ItemMap> stores,
-    Profile profile);
+    admplug::ExportProfile profile);
  private:
   void serializeToggle(std::shared_ptr<adm::AudioProgramme> programme,
                        const proto::Toggle& toggle);

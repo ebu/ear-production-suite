@@ -24,7 +24,7 @@ public:
     AdmVstCommunicator(int samplesPort, int commandPort);
     ~AdmVstCommunicator() {}
 
-    void updateInfo() override;
+    void updateInfo(ExportProfile profile) override;
     // Existing is fine - bool nextFrameAvailable();
     // Existing is fine - bool copyNextFrame(float* buf, bool bypassAvailabilityCheck = false);
 

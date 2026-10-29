@@ -27,11 +27,10 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
 {
     admFilenameStr = std::string(fn);
 
-    // Need to figure out if we're exporting just a time range
-    double st = this->GetStartTime(); // TODO: is this used for bounds?
+    auto profile = RenderDialogControl::getInstance().getProfile();
 
     // (re)Scan VSTs and states
-    admExportHandler = std::make_shared<AdmExportHandler>();
+    admExportHandler = std::make_shared<AdmExportHandler>(profile);
     admExportHandler->repopulate(*api);
 
     auto admExportSources = admExportHandler->getAdmExportSources();
@@ -100,13 +99,14 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
         }
     }
 
-    auto profile = RenderDialogControl::getInstance().getProfile();
-    using Profile = RenderConfigDialog::Profile;
+    using enum ExportProfile;
 
     auto const chna = admExportSources->getChnaChunk();
     std::shared_ptr<bw64::AxmlChunk> axml{};
     switch (profile) {
-    case Profile::EBU_PRODUCTION_3392: {
+    case EBU_PRODUCTION_3392:
+    case EBU_PRODUCTION_3393:
+    {
         axml = admExportSources->getAxmlChunk();
       break;
     }

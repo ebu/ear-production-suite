@@ -441,10 +441,10 @@ void AdmVstExporter::setRenderInProgressState(bool state) {
 
 AdmVstCommunicator::AdmVstCommunicator(int samplesPort, int commandPort) : CommunicatorBase(samplesPort, commandPort)
 {
-	updateInfo();
+	updateInfo(ExportProfile::EBU_PRODUCTION_3392);
 }
 
-void AdmVstCommunicator::updateInfo()
+void AdmVstCommunicator::updateInfo(ExportProfile profile)
 {
 	infoExchange();
 }

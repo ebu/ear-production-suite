@@ -135,7 +135,7 @@ WDL_DLGRET RenderConfigDialog::initDialog(HWND hwnd, void* cfgData, int cfgLengt
             // skip FOURCC
             auto data = reinterpret_cast<char*>(cfgData) + 4;
             int profile = REAPER_MAKELEINT(*reinterpret_cast<int*>(data));
-            return static_cast<Profile>(profile);
+            return static_cast<ExportProfile>(profile);
         }();
     }
     // If the load failed (first run or corrupted file), we'll just continue
@@ -143,7 +143,8 @@ WDL_DLGRET RenderConfigDialog::initDialog(HWND hwnd, void* cfgData, int cfgLengt
     // as the defaults for next time when the dialog is closed
 
     auto profileComboBox = GetDlgItem(hwnd, IDC_COMBO2);
-    SendMessage(profileComboBox, CB_ADDSTRING, 0, reinterpret_cast<INT_PTR>(static_cast<LPCSTR>("EBU Production Profile")));
+    SendMessage(profileComboBox, CB_ADDSTRING, 0, reinterpret_cast<INT_PTR>(static_cast<LPCSTR>("EBU Production Profile Tech 3392")));
+    SendMessage(profileComboBox, CB_ADDSTRING, 0, reinterpret_cast<INT_PTR>(static_cast<LPCSTR>("EBU Production Profile Tech 3393")));
     SendMessage(profileComboBox, CB_SETCURSEL, static_cast<WPARAM>(selectedProfile), static_cast<LPARAM>(0));
     // this is called when the dialog is initialized
     startedPrepareDialogControls = false;
@@ -176,7 +177,7 @@ WDL_DLGRET RenderConfigDialog::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
     case WM_TIMER:
     {
         KillTimer(hwndDlg, TIMER_ID);
-        admExportHandler = std::make_shared<AdmExportHandler>();
+        admExportHandler = std::make_shared<AdmExportHandler>(static_cast<ExportProfile>(selectedProfile));
         admExportHandler->repopulate(*reaperApi);
         auto warnings = dialogModifier.takeOverRenderControls(hwndDlg, admExportHandler);
         auto infoPaneText = warnings + getAdmExportVstsInfoString();
@@ -197,7 +198,7 @@ WDL_DLGRET RenderConfigDialog::wavecfgDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
             int itemIndex =
                 SendMessage(reinterpret_cast<HWND>(lParam), CB_GETCURSEL, 0, 0);
             if (itemIndex != CB_ERR) {
-                selectedProfile = static_cast<Profile>(itemIndex);
+                selectedProfile = static_cast<ExportProfile>(itemIndex);
             }
         }
 

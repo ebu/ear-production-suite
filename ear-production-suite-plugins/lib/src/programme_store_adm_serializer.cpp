@@ -227,7 +227,7 @@ bool ProgrammeStoreAdmSerializer::isAlreadySerialized(
 }
 
 std::pair<std::shared_ptr<adm::Document>, std::vector<ProgrammeStoreAdmSerializer::PluginMap>>
-ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap> stores, Profile profile) {
+ProgrammeStoreAdmSerializer::serialize(std::pair<proto::ProgrammeStore, ItemMap> stores, admplug::ExportProfile profile) {
   programmes_ = std::move(stores.first);
   items_ = std::move(stores.second);
   doc = adm::Document::create();
