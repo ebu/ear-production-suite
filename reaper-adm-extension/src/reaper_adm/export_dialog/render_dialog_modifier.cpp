@@ -88,11 +88,11 @@ RenderDialogModifier::getControlType(HWND hwnd) {
   char szClassName[9];
   GetClassName(hwnd, szClassName, 9);
   if (strcmp(szClassName, "Edit") == 0)
-    return TEXT;
+    return Control::TEXT;
   if (strcmp(szClassName, "Static") == 0)
-    return TEXT;
+    return Control::TEXT;
   if (strcmp(szClassName, "Button") == 0)
-    return BUTTON;
+    return Control::BUTTON;
 
   if (strcmp(szClassName, "ComboBox") == 0) {
     COMBOBOXINFO info = {sizeof(COMBOBOXINFO)};
@@ -100,7 +100,7 @@ RenderDialogModifier::getControlType(HWND hwnd) {
     auto editBoxText = getWindowText(info.hwndItem);
     bool editable = SetWindowText(info.hwndItem, "TEST");
     SetWindowText(info.hwndItem, editBoxText.c_str());
-    return editable ? EDITABLECOMBO : COMBOBOX;
+    return editable ? Control::EDITABLECOMBO : Control::COMBOBOX;
   }
 #else
   if (SWELL_IsButton(hwnd))
@@ -148,7 +148,7 @@ std::string RenderDialogModifier::getComboBoxItemText(HWND hwnd, int idx) {
       return std::string();
     char itmtxt[100];
 #ifdef WIN32
-    SendMessage(hwnd, CB_GETLBTEXT, itemIndex, (LPARAM)itmtxt);
+    SendMessage(hwnd, CB_GETLBTEXT, idx, (LPARAM)itmtxt);
 #else
     SWELL_CB_GetItemText(hwnd, 0, idx, itmtxt, 100);
 #endif

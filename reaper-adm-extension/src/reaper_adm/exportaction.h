@@ -4,7 +4,6 @@
 #include "reaper_plugin.h"
 #include <memory>
 #include "exportaction_dialogcontrol.h"
-#include "helper/nng_wrappers.h"
 
 namespace admplug {
 

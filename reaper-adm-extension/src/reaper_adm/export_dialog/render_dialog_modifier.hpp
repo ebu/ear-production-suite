@@ -1,6 +1,10 @@
 #ifndef RENDER_DIALOG_MODIFIER_HPP
 #define RENDER_DIALOG_MODIFIER_HPP
+#ifndef _WIN32
 #include <WDL/swell/swell-types.h>
+#else
+#include <windows.h>
+#endif
 #include <exportaction_admsourcescontainer.h>
 #include <optional>
 #include <string>
