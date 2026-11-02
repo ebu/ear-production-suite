@@ -1,12 +1,13 @@
 #pragma once
 
-#include "reaperapi.h"
-#include "exportaction_admsourcescontainer.h"
 #include "communicators.h"
-#include "parameter.h"
+#include "export_profiles.hpp"
+#include "exportaction_admsourcescontainer.h"
 #include "exportaction_issues.h"
 #include "exportaction_parameterprocessing.h"
 #include "helper/nng_wrappers.h"
+#include "parameter.h"
+#include "reaperapi.h"
 
 #include <daw_channel_count.h>
 
@@ -21,7 +22,7 @@ public:
 	EarVstCommunicator(int samplesPort, int commandPort);
 	~EarVstCommunicator() {}
 
-	void updateInfo() override;
+	void updateInfo(ExportProfile profile) override;
 
 	// Existing is fine - bool nextFrameAvailable();
 	bool copyNextFrame(float* buf, bool bypassAvailabilityCheck = false) override;
@@ -41,7 +42,7 @@ public:
 
 private:
 	void infoExchange();
-	void admAndMappingExchange();
+	void admAndMappingExchange(ExportProfile profile);
 
 	std::string admStr;
 	std::vector<ChannelMapping> channelMappings;
@@ -113,7 +114,6 @@ public:
 	EarVstCommunicator* getCommunicator(bool mustExist = false);
 	int getSamplesSocketPort();
 	int getCommandSocketPort();
-
 	// Statics
 	static const std::string* getVstNameStr();
 	static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
@@ -141,7 +141,7 @@ class EarVstExportSources : public IExportSources
 	A container for handling ADM sources provided by EAR SceneMaster VSTs
 	*/
 public:
-	EarVstExportSources(ReaperAPI const& api);
+	EarVstExportSources(ReaperAPI const& api, ExportProfile profile);
 	~EarVstExportSources() {};
 
 	bool documentRequiresProgrammeTitles() override { return false; }
@@ -170,7 +170,7 @@ public:
 	}
 
 private:
-	void generateAdmAndChna(ReaperAPI const& api);
+	void generateAdmAndChna(ReaperAPI const &api, ExportProfile profile);
 
 	struct AdmElements {
 		adm::TypeDescriptor typeDescriptor;

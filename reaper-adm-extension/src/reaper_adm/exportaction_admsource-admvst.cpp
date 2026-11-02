@@ -22,7 +22,7 @@ std::vector<adm::TypeDescriptor> getAdmTypeDefinitionsExcluding(adm::TypeDescrip
 }
 }
 
-AdmVstExportSources::AdmVstExportSources(ReaperAPI const& api) : IExportSources(api)
+AdmVstExportSources::AdmVstExportSources(ReaperAPI const& api, admplug::ExportProfile profile) : IExportSources(api)
 {
 	admDocument = adm::Document::create();
 	admDocument->set(adm::Version("ITU-R_BS.2076-2"));
@@ -64,7 +64,7 @@ AdmVstExportSources::AdmVstExportSources(ReaperAPI const& api) : IExportSources(
 
 					admContent->addReference(audioObject);
 					// Construction generates ADM
-					auto candidate = std::make_shared<AdmVstExporter>(admExportVst, admContent, audioObject, api);
+					auto candidate = std::make_shared<AdmVstExporter>(admExportVst, admContent, audioObject, api, profile);
 					candidatesForExport.push_back(candidate);
 				}
 			}
@@ -271,10 +271,16 @@ std::shared_ptr<bw64::ChnaChunk> AdmVstExportSources::getChnaChunk()
 
 
 
-AdmVstExporter::AdmVstExporter(std::shared_ptr<AdmVst> admExportVst, std::shared_ptr<adm::AudioContent> parentContent, std::shared_ptr<adm::AudioObject> audioObject, ReaperAPI const& api) : admExportVst{ admExportVst }, audioObject{ audioObject }, parentContent{ parentContent }, parentDocument{ parentContent->getParent().lock() }
+AdmVstExporter::AdmVstExporter(
+	std::shared_ptr<AdmVst> admExportVst,
+	std::shared_ptr<adm::AudioContent> parentContent,
+	std::shared_ptr<adm::AudioObject> audioObject,
+	ReaperAPI const& api,
+	admplug::ExportProfile profile
+	) : admExportVst{ admExportVst }, audioObject{ audioObject }, parentContent{ parentContent }, parentDocument{ parentContent->getParent().lock() }
 {
 	assert(parentDocument);
-	assignAdmMetadata(api);
+	assignAdmMetadata(api, profile);
 }
 
 AdmVstExporter::~AdmVstExporter()
@@ -289,7 +295,7 @@ bool AdmVstExporter::isCandidateForExport()
 	return AdmVst::isCandidateForExport(admExportVst);
 }
 
-void AdmVstExporter::assignAdmMetadata(ReaperAPI const& api)
+void AdmVstExporter::assignAdmMetadata(ReaperAPI const& api, admplug::ExportProfile profile)
 {
 	admAuthoringErrors.clear();
 
@@ -311,11 +317,11 @@ void AdmVstExporter::assignAdmMetadata(ReaperAPI const& api)
 	else {
 		// Probably Obj
 		// We can still generate ADM - just no blocks - default initial block will be created
-		newAdmSubgraph(api);
+		newAdmSubgraph(api, profile);
 	}
 }
 
-std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI const& api)
+std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI const& api, admplug::ExportProfile profile)
 {
 	auto suffix = std::to_string(admSubgraphs.size());
 	suffix.insert(0, "_");
@@ -340,7 +346,7 @@ std::shared_ptr<AdmSubgraphElements> AdmVstExporter::newAdmSubgraph(ReaperAPI co
 	subgraph->audioTrackUid->setReference(subgraph->audioChannelFormat);
 	subgraph->audioTrackUid->setReference(audioPackFormat);
 
-	createAndAddAudioBlocks(objectType, subgraph, api);
+	createAndAddAudioBlocks(objectType, subgraph, api, profile);
 
 	return subgraph;
 }
@@ -376,7 +382,7 @@ void AdmVstExporter::newAdmPresetDefinitionReference(ReaperAPI const& api)
 	}
 }
 
-void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api)
+void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor, std::shared_ptr<AdmSubgraphElements> subgraph, ReaperAPI const& api, admplug::ExportProfile profile)
 {
 		// Only needs doing for Object type - other types use presets (common defs)
 		if (typeDescriptor != adm::TypeDefinition::OBJECTS) return;
@@ -394,7 +400,8 @@ void AdmVstExporter::createAndAddAudioBlocks(adm::TypeDescriptor typeDescriptor,
 
     auto cumulatedPointData = CumulatedPointData(start, start + duration);
 		// Without a plugin instance, we'll just generate default block
-    addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(nullptr, nullptr, api), subgraph);
+    addBlockFormatsToChannelFormat(cumulatedPointData.generateAudioBlockFormatObjects(nullptr, nullptr,
+                                                           api, profile), subgraph);
 
 }
 
@@ -441,10 +448,10 @@ void AdmVstExporter::setRenderInProgressState(bool state) {
 
 AdmVstCommunicator::AdmVstCommunicator(int samplesPort, int commandPort) : CommunicatorBase(samplesPort, commandPort)
 {
-	updateInfo();
+	updateInfo(ExportProfile::EBU_PRODUCTION_3392);
 }
 
-void AdmVstCommunicator::updateInfo()
+void AdmVstCommunicator::updateInfo(ExportProfile profile)
 {
 	infoExchange();
 }

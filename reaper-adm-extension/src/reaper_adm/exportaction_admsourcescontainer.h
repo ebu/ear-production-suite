@@ -8,6 +8,7 @@
 #include "exportaction_issues.h"
 #include <bw64/bw64.hpp>
 #include <adm/adm.hpp>
+#include "export_profiles.hpp"
 
 // Helper function for converting ints to hex-strings used in ADM ID's
 template< typename T >
@@ -32,7 +33,7 @@ class IExportSources
     Formerly handled by; AdmExportContainer
     */
 public:
-    IExportSources(ReaperAPI const&api) {} // Instances should populate on instantiation (equivelent of old AdmExportContainer::repopulate() method)
+    IExportSources(ReaperAPI const& api) {} // Instances should populate on instantiation (equivelent of old AdmExportContainer::repopulate() method)
     ~IExportSources() {}
 
     virtual bool documentRequiresProgrammeTitles() = 0; // Does this source collection still require programme titles? (some sources (i.e EAR) provide this already)
@@ -69,7 +70,7 @@ class AdmExportHandler
     Formerly partially handled by; AdmExportContainer
     */
 public:
-    AdmExportHandler() {}
+    AdmExportHandler(ExportProfile profile) : profile{profile} {}
     ~AdmExportHandler() {}
 
     void repopulate(ReaperAPI const&api);
@@ -83,5 +84,6 @@ public:
 private:
     std::shared_ptr<AdmVstExportSources> admExportVstSources;
     std::shared_ptr<EarVstExportSources> earSceneMasterVstSources;
+    ExportProfile profile;
 
 };

@@ -1,8 +1,14 @@
 #include "exportaction_pcmsink.h"
 
+#include <adm/write.hpp>
 #include "adm/adm.hpp"
 #include "adm/utilities/id_assignment.hpp"
-#include "adm/write.hpp"
+
+#include <exportaction_dialogcontrol.h>
+#include <limits>
+#include <algorithm>
+
+#define NOMINMAX
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -15,25 +21,16 @@
 #define strncpy(dst, src, dstlen) strncpy_s(dst, dstlen, src, dstlen-1)
 #endif
 
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
-
 using namespace admplug;
 
 PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void *cfgdata, int cfgdata_l, int nch, int srate, bool buildpeaks) : api{ api }, admFilename { fn }, sRate{ srate }
 {
     admFilenameStr = std::string(fn);
 
-    // Need to figure out if we're exporting just a time range
-    double st = this->GetStartTime(); // TODO: is this used for bounds?
+    auto profile = RenderDialogControl::getInstance().getProfile();
 
     // (re)Scan VSTs and states
-    admExportHandler = std::make_shared<AdmExportHandler>();
+    admExportHandler = std::make_shared<AdmExportHandler>(profile);
     admExportHandler->repopulate(*api);
 
     auto admExportSources = admExportHandler->getAdmExportSources();
@@ -102,15 +99,25 @@ PCM_sink_adm::PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void 
         }
     }
 
+    using enum ExportProfile;
+
+    auto const chna = admExportSources->getChnaChunk();
+    std::shared_ptr<bw64::AxmlChunk> axml{};
+    switch (profile) {
+    case EBU_PRODUCTION_3392:
+    case EBU_PRODUCTION_3393:
+    {
+        axml = admExportSources->getAxmlChunk();
+      break;
+    }
+    }
     // Start writing
-    auto chna = admExportSources->getChnaChunk();
-    auto axml = admExportSources->getAxmlChunk();
     try {
-        writer = bw64::writeFile(admFilename, totalChannels, sRate, 24, chna, axml);
+        writer = bw64::writeFile(admFilename, totalChannels, sRate, bitDepth, chna, axml);
     } catch (std::runtime_error const& e) {
         errors.push_back(std::string("Error: Unable to open output file for writing: ") + e.what());
     }
-
+    
     // Start Renders
     admExportSources->setRenderInProgress(true);
 }
@@ -184,23 +191,28 @@ void PCM_sink_adm::GetOutputInfoString(char *buf, int buflen)
 }
 
 
-void PCM_sink_adm::WriteDoubles(double **samples, int len, int nch, int offset, int spacing)
-{
-    if (!writer) return;
+void PCM_sink_adm::WriteDoubles(double **samples, int len, int nch, int offset,
+                                int spacing) {
+  if (!writer)
+    return;
 
-    // First call sets up aggregatedBlockBuffer (because we need to know the default block size, which should be len)
-    if (aggregatedBlockBufferStart == nullptr){
-        aggregatedBlockBufferFrameCount = len;
-        aggregatedBlockBufferSize = aggregatedBlockBufferFrameCount * totalChannels;
-        assert(aggregatedBlockBufferSize > 0);
-        aggregatedBlockBuffer = std::vector<float>(aggregatedBlockBufferSize, 0.0);
-        aggregatedBlockBufferStart = &aggregatedBlockBuffer.front();
-    }
+  // First call sets up aggregatedBlockBuffer (because we need to know the
+  // default block size, which should be len)
+  if (aggregatedBlockBufferStart == nullptr) {
+    aggregatedBlockBufferFrameCount = len;
+    aggregatedBlockBufferSize = aggregatedBlockBufferFrameCount * totalChannels;
+    assert(aggregatedBlockBufferSize > 0);
+    aggregatedBlockBuffer = std::vector<float>(aggregatedBlockBufferSize, 0.0);
+    aggregatedBlockBufferStart = &aggregatedBlockBuffer.front();
+  }
 
-    expectedFramesWritten += len;
+  expectedFramesWritten += len;
 
-    //while(processNextFrames(expectedFrames) == 0) continue; // Ensures we do at least one, but this is slower overall as we're always waiting on the message queue whenever this is called.
-    while(processNextFrames(expectedFramesWritten) > 0) continue; // Whilst we have stuff to process, keep processing them.
+  // while(processNextFrames(expectedFrames) == 0) continue; // Ensures we do at
+  // least one, but this is slower overall as we're always waiting on the
+  // message queue whenever this is called.
+  while (processNextFrames(expectedFramesWritten) > 0)
+    continue; // Whilst we have stuff to process, keep processing them.
 }
 
 int PCM_sink_adm::processNextFrames(uint64_t toMaxFrame){
@@ -214,7 +226,7 @@ int PCM_sink_adm::processNextFrames(uint64_t toMaxFrame){
     int frameWriteLimit = (int)aggregatedBlockBufferSize;
 
     if (toMaxFrame > 0) {
-        frameWriteLimit = (int)min(frameWriteLimit, toMaxFrame - actualFramesWritten); // Shouldn't ever be negative, but the loop below would catch that anyway.
+        frameWriteLimit = std::min<int>(frameWriteLimit, toMaxFrame - actualFramesWritten); // Shouldn't ever be negative, but the loop below would catch that anyway.
     }
 
     while (framesWrittenToBlockBuffer < frameWriteLimit && nextFrameReady()) {
