@@ -9,6 +9,7 @@
 #define IDD_EXPORT                      102
 #define IDC_INFOPANE                    1001
 #define IDC_BUTTON_REFRESH              1002
+#define IDC_COMBO2                      1003
 
 // Next default values for new objects
 // 

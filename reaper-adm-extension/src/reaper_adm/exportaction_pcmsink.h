@@ -11,7 +11,9 @@ using namespace admplug;
 class PCM_sink_adm : public PCM_sink
 {
 public:
-    PCM_sink_adm(std::shared_ptr<ReaperAPI> api, const char *fn, void *cfgdata, int cfgdata_l, int nch, int srate, bool buildpeaks);
+    using Metadata = std::pair<std::shared_ptr<bw64::AxmlChunk>, std::shared_ptr<bw64::ChnaChunk>>;
+    PCM_sink_adm(std::shared_ptr<ReaperAPI> api,
+        const char *fn, void *cfgdata, int cfgdata_l, int nch, int srate, bool buildpeaks);
     ~PCM_sink_adm();
     void GetOutputInfoString(char *buf, int buflen);
     const char* GetFileName() { return admFilename; }
@@ -21,10 +23,18 @@ public:
     void WriteMIDI(MIDI_eventlist *events, int len, double samplerate) {} // N/A
     void WriteDoubles(double **samples, int len, int nch, int offset, int spacing);
 
+    static constexpr unsigned int fourCC {  REAPER_FOURCC('a', 'd', 'm', ' ') };
+    static constexpr auto FILE_FORMAT_DESCRIPTION = "ADM BW64 File";
+    static constexpr auto FILE_FORMAT_EXTENSION = "wav";
+
     // MAYBE USEFUL OVERRIDES AT A LATER DATE
     //int GetLastSecondPeaks(int sz, ReaSample *buf);
     //void GetPeakInfo(PCM_source_peaktransfer_t *block);
     //virtual int Extended(int call, void *parm1, void *parm2, void *parm3) override;
+
+protected:
+    int sRate;
+    int bitDepth {24};
 
 private:
     std::shared_ptr<ReaperAPI> api;
@@ -32,7 +42,6 @@ private:
     const char* admFilename;
     std::string admFilenameStr;
     std::unique_ptr<bw64::Bw64Writer> writer;
-    int sRate;
     int totalChannels;
 
     std::shared_ptr<AdmExportHandler> admExportHandler;

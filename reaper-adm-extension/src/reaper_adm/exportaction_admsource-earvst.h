@@ -1,12 +1,13 @@
 #pragma once
 
-#include "reaperapi.h"
-#include "exportaction_admsourcescontainer.h"
 #include "communicators.h"
-#include "parameter.h"
+#include "export_profiles.hpp"
+#include "exportaction_admsourcescontainer.h"
 #include "exportaction_issues.h"
 #include "exportaction_parameterprocessing.h"
 #include "helper/nng_wrappers.h"
+#include "parameter.h"
+#include "reaperapi.h"
 
 #include <daw_channel_count.h>
 
@@ -21,11 +22,12 @@ public:
 	EarVstCommunicator(int samplesPort, int commandPort);
 	~EarVstCommunicator() {}
 
-	void updateInfo() override;
+	void updateInfo(ExportProfile profile) override;
 
 	// Existing is fine - bool nextFrameAvailable();
 	bool copyNextFrame(float* buf, bool bypassAvailabilityCheck = false) override;
 
+	// Careful, this is fine now for max 128 channels in reaper, but if it ever goes to 256 we need to make sure we don't overflow when going to 1-based chna indexing
 	struct ChannelMapping {
         uint8_t originalChannelNumber;
         uint8_t writtenChannelNumber;
@@ -34,14 +36,14 @@ public:
 
 	int getReportedSampleRate() override { return sampleRate; }
 	int getReportedChannelCount() override { return channelMappings.size(); }
-	std::string getAdmTemplateStr() { return admStr; }
+	std::string getAdmTemplateStr() const { return admStr; }
 	std::vector<ChannelMapping> getChannelMappings() { return channelMappings; }
 
 	void sendAdm(std::string originalAdmStr, std::vector<PluginToAdmMap> pluginToAdmMaps);
 
 private:
 	void infoExchange();
-	void admAndMappingExchange();
+	void admAndMappingExchange(ExportProfile profile);
 
 	std::string admStr;
 	std::vector<ChannelMapping> channelMappings;
@@ -113,7 +115,6 @@ public:
 	EarVstCommunicator* getCommunicator(bool mustExist = false);
 	int getSamplesSocketPort();
 	int getCommandSocketPort();
-
 	// Statics
 	static const std::string* getVstNameStr();
 	static bool isAvailable(ReaperAPI const& api, bool doRescan = true);
@@ -122,7 +123,7 @@ public:
 
 private:
 	std::shared_ptr<EarVstCommunicator> communicator;
-	bool isCommunicatorPresent();
+	bool isCommunicatorPresent() const;
 	bool obtainCommunicator();
 	void releaseCommunicator();
 
@@ -141,7 +142,7 @@ class EarVstExportSources : public IExportSources
 	A container for handling ADM sources provided by EAR SceneMaster VSTs
 	*/
 public:
-	EarVstExportSources(ReaperAPI const& api);
+	EarVstExportSources(ReaperAPI const& api, ExportProfile profile);
 	~EarVstExportSources() {};
 
 	bool documentRequiresProgrammeTitles() override { return false; }
@@ -170,17 +171,7 @@ public:
 	}
 
 private:
-	void generateAdmAndChna(ReaperAPI const& api);
-
-	struct AdmElements {
-		adm::TypeDescriptor typeDescriptor;
-		std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
-		std::shared_ptr<adm::AudioTrackFormat> audioTrackFormat;
-		std::shared_ptr<adm::AudioPackFormat> audioPackFormat;
-		std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
-		std::shared_ptr<adm::AudioObject> audioObject;
-	};
-	std::optional<AdmElements> getAdmElementsFor(const PluginToAdmMap& plugin);
+	void generateAdmAndChna(ReaperAPI const &api, ExportProfile profile);
 
 	std::shared_ptr<adm::Document> admDocument;
 	std::shared_ptr<bw64::ChnaChunk> chnaChunk;
@@ -191,10 +182,4 @@ private:
 	std::vector<std::string> infoStrings;
 	std::vector<std::string> errorStrings;
 	std::vector<std::string> warningStrings;
-
-	// New methods that might need a seperate handler
-	std::vector<std::shared_ptr<PluginInstance>> getEarInputPluginsWithInputInstanceId(uint32_t inputInstanceId, ReaperAPI const& api);
-	TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api);
-	std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const& api);
-	bool getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api);
 };

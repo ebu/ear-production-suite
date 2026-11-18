@@ -1,6 +1,5 @@
 #include "actionmanager.h"
 #include "reaperapi.h"
-#include <WDL/swell/swell.h>
 #include "reaper_plugin.h"
 #include "reaperhost.h"
 #include <stdexcept>

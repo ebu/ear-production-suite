@@ -1,11 +1,13 @@
 #pragma once
 
-#include <map>
-#include <vector>
-#include <optional>
-#include <adm/adm.hpp>
-#include "pluginsuite.h"
+#include "export_profiles.hpp"
+
 #include "plugin.h"
+#include "pluginsuite.h"
+#include <adm/adm.hpp>
+#include <map>
+#include <optional>
+#include <vector>
 
 #include "exportaction_issues.h"
 #include "parameter.h"
@@ -44,7 +46,10 @@ public:
     bool haveDataFor(AdmParameter admParameter);
     bool multipleValuesForSingleParameterAtTime(double time);
 
-    std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> generateAudioBlockFormatObjects(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, ReaperAPI const& api);
+    std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatObjects>>> generateAudioBlockFormatObjects(std::shared_ptr<PluginSuite> pluginSuite,
+                                    PluginInstance *pluginInst,
+                                    ReaperAPI const &api,
+                                    ExportProfile profile);
     std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatDirectSpeakers>>> generateAudioBlockFormatDirectSpeakers(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, ReaperAPI const& api);
     std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatBinaural>>> generateAudioBlockFormatBinaural(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, ReaperAPI const& api);
     std::optional<std::vector<std::shared_ptr<adm::AudioBlockFormatMatrix>>> generateAudioBlockFormatMatrix(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, ReaperAPI const& api);

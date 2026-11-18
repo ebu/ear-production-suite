@@ -1,4 +1,5 @@
 #pragma once
+#include "export_profiles.hpp"
 #include "helper/nng_wrappers.h"
 
 class CommunicatorBase
@@ -7,7 +8,7 @@ public:
     CommunicatorBase(int samplesPort, int commandPort);
     ~CommunicatorBase();
 
-    virtual void updateInfo() {};
+    virtual void updateInfo(admplug::ExportProfile profile) {};
 
     void setRenderingState(bool state);
     bool getRenderingState() { return renderingState; }

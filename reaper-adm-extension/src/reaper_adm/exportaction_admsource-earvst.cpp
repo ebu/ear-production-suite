@@ -13,11 +13,12 @@
 #include <algorithm>
 #include <sstream>
 
+#include "export_profiles.hpp"
 #include <daw_channel_count.h>
 
 using namespace admplug;
 
-EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources(api)
+EarVstExportSources::EarVstExportSources(ReaperAPI const & api, ExportProfile profile) : IExportSources(api)
 {
     MediaTrack *trk;
     int numTracks = api.CountTracks(nullptr);
@@ -31,13 +32,13 @@ EarVstExportSources::EarVstExportSources(ReaperAPI const & api) : IExportSources
             for(int fxPos : fxPosVec) {
                 auto earSceneMasterVst = std::make_shared<EarSceneMasterVst>(trk, fxPos, api);
                 auto comms = earSceneMasterVst->getCommunicator(true);
-                if(comms) comms->updateInfo();
+                if(comms) comms->updateInfo(profile);
 
                 allEarSceneMasterVsts.push_back(earSceneMasterVst);
                 if(EarSceneMasterVst::isCandidateForExport(earSceneMasterVst)) {
                     if(!chosenCandidateForExport) {
                         chosenCandidateForExport = earSceneMasterVst;
-                        generateAdmAndChna(api);
+                        generateAdmAndChna(api, profile);
                     }
                     candidatesForExport.push_back(earSceneMasterVst);
                 }
@@ -100,214 +101,86 @@ bool EarVstExportSources::writeNextFrameTo(float * bufferWritePointer, bool skip
     return true;
 }
 
-void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api)
-{
-    using namespace adm;
-
-    // Get ADM template in to admDocument
-    std::istringstream sstr(chosenCandidateForExport->getAdmTemplateStr());
+namespace {
+std::shared_ptr<adm::Document> getTemplateAdmFromScene(EarSceneMasterVst& sceneMaster, std::vector<std::string>& errorStrings) {
+    std::shared_ptr<adm::Document> document = nullptr;
     try {
-        admDocument = adm::parseXml(sstr, adm::xml::ParserOptions::recursive_node_search); // Shouldn't need recursive here, but doesn't harm to do it anyway
+        std::istringstream sstr(sceneMaster.getAdmTemplateStr());
+        document = adm::parseXml(sstr, adm::xml::ParserOptions::recursive_node_search); // Shouldn't need recursive here, but doesn't harm to do it anyway
     } catch(std::exception &e) {
         std::string str = "Failed to parse ADM template: \"";
         str += e.what();
-        str += "\"";
+        str += '\"';
         errorStrings.push_back(str);
-        return;
+    }
+    return document;
+}
+
+void removeUnmappedUids(adm::Document& admDocument, EarSceneMasterVst& sceneMaster) {
+    // collect all the UIDs present in channel mappings
+    std::vector<std::uint32_t> mappedUids;
+    for(auto const& channelMapping : sceneMaster.getChannelMappings()) {
+        for(auto const& plugin : channelMapping.plugins) {
+            mappedUids.push_back(plugin.audioTrackUidVal);
+        }
     }
 
-    // Any track UID that won't be written should be removed
-    std::vector<uint32_t> audioTrackUidIdsInChannelMappings;
-    for(auto const& channelMapping : chosenCandidateForExport->getChannelMappings()) {
-        for(auto const& plugin : channelMapping.plugins) {
-            audioTrackUidIdsInChannelMappings.push_back(plugin.audioTrackUidVal);
+    // add any uids that are in the document but not in the mappings to 'missing'
+    auto uids = admDocument.getElements<adm::AudioTrackUid>();
+    std::vector<std::shared_ptr<adm::AudioTrackUid>> missing;
+    for(auto const& id : uids) {
+        auto idValue = id->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get();
+        if(std::find(mappedUids.begin(), mappedUids.end(), idValue) == mappedUids.end()) {
+            missing.push_back(id);
         }
     }
-    auto docAudioTrackUids = admDocument->getElements<adm::AudioTrackUid>();
-    std::vector<std::shared_ptr<adm::AudioTrackUid>> missingList;
-    for(auto docAudioTrackUid : docAudioTrackUids) {
-        uint32_t idValue = docAudioTrackUid->get<adm::AudioTrackUidId>().get<adm::AudioTrackUidIdValue>().get();
-        if(std::find(audioTrackUidIdsInChannelMappings.begin(), audioTrackUidIdsInChannelMappings.end(), idValue) == audioTrackUidIdsInChannelMappings.end()) {
-            missingList.push_back(docAudioTrackUid);
-        }
-    }
-    for(auto uid : missingList) {
-        auto tf = uid->getReference<adm::AudioTrackFormat>();
+
+    // remove the missing uids and any referenced stream formats / track formats from the document
+    for(auto const& id : missing) {
+        auto tf = id->getReference<adm::AudioTrackFormat>();
         if(tf) {
             auto sf = tf->getReference<adm::AudioStreamFormat>();
             if(sf) {
-                admDocument->remove(sf);
+                admDocument.remove(sf);
             }
-            admDocument->remove(tf);
+            admDocument.remove(tf);
         }
-        admDocument->remove(uid);
+        admDocument.remove(id);
     }
-
-    // Create CHNA chunk
-    std::vector<bw64::AudioId> audioIds;
-
-    for(auto const& channelMapping : chosenCandidateForExport->getChannelMappings()) {
-        for(auto const& plugin : channelMapping.plugins) {
-            auto admElements = getAdmElementsFor(plugin);
-            assert(admElements.has_value());
-
-            if(admElements->audioTrackFormat) {
-                // BS.2076-1 style structure (ATUID->ATF->ASF->ACF)
-                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
-                                                 formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
-                                                 formatId((*admElements).audioTrackFormat->get<AudioTrackFormatId>()),
-                                                 formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
-                ));
-            } else {
-                // BS.2076-2 style structure (ATUID->ACF)
-                std::string cfId = formatId(admElements->audioChannelFormat->get<AudioChannelFormatId>());
-                cfId += "_00";
-                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1, //1-Indexed in CHNA!!!!!!!!!!!!!!!
-                                                 formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
-                                                 cfId,
-                                                 formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
-                ));
-            }
-        }
-    }
-
-    chnaChunk = std::make_shared<bw64::ChnaChunk>(bw64::ChnaChunk(audioIds));
-
-    //Populate rest of ADM template (admDocument) here with AudioBlockFormats
-
-    std::shared_ptr<admplug::PluginSuite> pluginSuite = std::make_shared<EARPluginSuite>();
-
-    auto channelMappings = chosenCandidateForExport->getChannelMappings();
-    for(auto const& channelMapping : channelMappings) {
-        for(auto const& plugin : channelMapping.plugins) {
-
-            auto admElements = getAdmElementsFor(plugin);
-            assert(admElements.has_value());
-
-            // Find the associated plugin
-
-            auto feedingPlugins = getEarInputPluginsWithInputInstanceId(plugin.inputInstanceId, api);
-            if(feedingPlugins.size() == 0) {
-                std::string msg("Unable to find Input plugin with instance ID ");
-                msg += std::to_string(plugin.inputInstanceId);
-                errorStrings.push_back(msg);
-                continue;
-            } else if(feedingPlugins.size() > 1) {
-                std::string msg("Multiple Input plugins found with instance ID ");
-                msg += std::to_string(plugin.inputInstanceId);
-                errorStrings.push_back(msg);
-                continue;
-            }
-            auto pluginInst = feedingPlugins[0];
-
-            // Set audioobject start/duration
-
-            auto start = std::chrono::nanoseconds::zero();
-            auto duration = toNs(api.GetProjectLength(nullptr));
-
-            if(std::stof(api.GetAppVersion()) >= 6.01f)
-            {
-                // Check if Tail option in rendering dialog is activated and add length to duration if so
-                bool tailFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_TAILFLAG", 0., false)) & 0x2;
-                bool boundsFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_BOUNDSFLAG", 0., false)) == 1;
-                if(tailFlag && boundsFlag) {
-                    const double tailLengthMs = api.GetSetProjectInfo(nullptr, "RENDER_TAILMS", 0., false);
-                    duration += toNs(tailLengthMs / 1000.);
-                }
-            }
-
-            auto mediaTrack = pluginInst->getTrackInstance().get();
-            auto bounds = api.getTrackAudioBounds(mediaTrack, true); // True = ignore before zero - we don't do sub-zero bounds
-            if(bounds.has_value()) {
-                start = toNs(bounds->first);
-                duration = toNs(bounds->second - bounds->first);
-                admElements->audioObject->set(adm::Start{ start });
-                admElements->audioObject->set(adm::Duration{ duration });
-            }
-
-            const bool isPresetDef = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(admElements->audioPackFormat) != nullptr;
-            const bool isObjectType = admElements->typeDescriptor == adm::TypeDefinition::OBJECTS;
-
-            if (!isPresetDef) {
-                if (isObjectType) {
-                    // Need to generate BFs
-                    auto cumulatedPointData = CumulatedPointData(start, start + duration);
-
-                    // Get all values for all parameters, whether automated or not.
-                    for (int admParameterIndex = 0; admParameterIndex != (int)AdmParameter::NONE; admParameterIndex++) {
-                        auto admParameter = (AdmParameter)admParameterIndex;
-                        auto param = pluginSuite->getParameterFor(admParameter);
-                        auto env = getEnvelopeFor(pluginSuite, pluginInst.get(), admParameter, api);
-
-                        if (getEnvelopeBypassed(env, api)) {
-                            // We have an envelope, but it is bypassed
-                            auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api);
-                            auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-                            for (auto& newError : newErrors) {
-                                warningStrings.push_back(newError.what());
-                            }
-
-                        } else if (param && env) {
-                            // We have an envelope for this ADM parameter
-                            auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
-                            for (auto& newError : newErrors) {
-                                warningStrings.push_back(newError.what());
-                            }
-
-                        } else if (auto val = getValueFor(pluginSuite, pluginInst.get(), admParameter, api)) {
-                            // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
-                            // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
-                            auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
-                            for (auto& newError : newErrors) {
-                                warningStrings.push_back(newError.what());
-                            }
-                        }
-                    }
-
-                    auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInst.get(), api);
-                    for (auto& block : *blocks) admElements->audioChannelFormat->add(*block);
-
-                }
-                else {
-                    warningStrings.push_back("Currently only supporting Preset Definitions for non-Objects types");
-                }
-            }
-        }
-    }
-
-    // Create AXML Chunk
-    std::stringstream xmlStream;
-    adm::writeXml(xmlStream, admDocument);
-    xmlStream << "<!-- Produced using the EAR Production Suite (version ";
-    xmlStream << (eps::versionInfoAvailable()? eps::currentVersion() : "unknown");
-    xmlStream << "), from the EAR Scene plugin -->\n";
-    auto xmlStr = xmlStream.str();
-    axmlChunk = std::make_shared<bw64::AxmlChunk>(bw64::AxmlChunk(xmlStr));
-
 }
 
-std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmElementsFor(const PluginToAdmMap& plugin)
+struct AdmElements {
+    adm::TypeDescriptor typeDescriptor;
+    std::shared_ptr<adm::AudioTrackUid> audioTrackUid;
+    std::shared_ptr<adm::AudioTrackFormat> audioTrackFormat;
+    std::shared_ptr<adm::AudioPackFormat> audioPackFormat;
+    std::shared_ptr<adm::AudioChannelFormat> audioChannelFormat;
+    std::shared_ptr<adm::AudioObject> audioObject;
+};
+
+
+std::optional<AdmElements> getAdmElementsFor(adm::Document& admDocument, const PluginToAdmMap& plugin, std::vector<std::string>& warningStrings)
 {
     auto audioObjectId = adm::AudioObjectId(adm::AudioObjectIdValue(plugin.audioObjectIdVal));
-    auto audioObject = admDocument->lookup(audioObjectId);
+    auto audioObject = admDocument.lookup(audioObjectId);
     if(!audioObject) {
         auto msg = std::string("Audio Object with ID ");
         msg += adm::formatId(audioObjectId);
         msg += " not found for Input Instance ID ";
         msg += std::to_string(plugin.inputInstanceId);
         warningStrings.push_back(msg);
-        return std::optional<AdmElements>();
+        return {};
     }
 
     auto audioTrackUidId = adm::AudioTrackUidId(adm::AudioTrackUidIdValue(plugin.audioTrackUidVal));
-    auto audioTrackUid = admDocument->lookup(audioTrackUidId);
+    auto audioTrackUid = admDocument.lookup(audioTrackUidId);
     if(!audioTrackUid) {
         auto msg = std::string("Audio Track UID with ID ");
         msg += adm::formatId(audioTrackUidId);
         msg += " not found for Input Instance ID ";
         msg += std::to_string(plugin.inputInstanceId);
         warningStrings.push_back(msg);
-        return std::optional<AdmElements>();
+        return {};
     }
 
     // We make a lot of assumptions about the ADM structure here, but since we know what the EAR plugins will send us, this is probably safe
@@ -316,7 +189,7 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     assert(audioPackFormat);
     if(!audioPackFormat) {
         warningStrings.push_back(std::string("No Pack Format referenced from ") + adm::formatId(audioTrackUidId));
-        return std::optional<AdmElements>();
+        return {};
     }
 
     auto audioTrackFormat = audioTrackUid->getReference<adm::AudioTrackFormat>();
@@ -324,7 +197,7 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     assert(audioTrackFormat || audioChannelFormat);
     if(!audioTrackFormat && !audioChannelFormat) {
         warningStrings.push_back(std::string("No Track Format or Channel Format referenced from ") + adm::formatId(audioTrackUidId));
-        return std::optional<AdmElements>();
+        return {};
     }
 
     if(audioTrackFormat) {
@@ -332,14 +205,14 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
         assert(audioStreamFormat);
         if(!audioStreamFormat) {
             warningStrings.push_back(std::string("No Stream Format referenced recursively from ") + adm::formatId(audioTrackUidId));
-            return std::optional<AdmElements>();
+            return {};
         }
 
         audioChannelFormat = audioStreamFormat->getReference<adm::AudioChannelFormat>();
         assert(audioChannelFormat);
         if(!audioChannelFormat) {
             warningStrings.push_back(std::string("No Channel Format referenced recursively from ") + adm::formatId(audioTrackUidId));
-            return std::optional<AdmElements>();
+            return {};
         }
     }
 
@@ -347,17 +220,112 @@ std::optional<EarVstExportSources::AdmElements> EarVstExportSources::getAdmEleme
     adm::TypeDescriptor typeDescriptor = audioChannelFormat->get<adm::TypeDescriptor>();
 
     return AdmElements{
-        typeDescriptor,
-        audioTrackUid,
-        audioTrackFormat,
-        audioPackFormat,
-        audioChannelFormat,
-        audioObject
+            typeDescriptor,
+            audioTrackUid,
+            audioTrackFormat,
+            audioPackFormat,
+            audioChannelFormat,
+            audioObject
     };
-
 }
 
-TrackEnvelope* EarVstExportSources::getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, AdmParameter admParameter, ReaperAPI const & api)
+std::shared_ptr<bw64::ChnaChunk> createChna(adm::Document& admDocument, EarSceneMasterVst& sceneMaster, std::vector<std::string>& warnings) {
+    using namespace adm;
+    std::vector<bw64::AudioId> audioIds;
+    for(auto const& channelMapping : sceneMaster.getChannelMappings()) {
+        for(auto const& plugin : channelMapping.plugins) {
+            auto admElements = getAdmElementsFor(admDocument, plugin, warnings);
+            assert(admElements.has_value());
+
+            if(admElements->audioTrackFormat) {
+                // BS.2076-1 style structure (ATUID->ATF->ASF->ACF)
+                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1U, //1-Indexed in CHNA!!!!!!!!!!!!!!!
+                                                 formatId(admElements->audioTrackUid->get<AudioTrackUidId>()),
+                                                 formatId(admElements->audioTrackFormat->get<AudioTrackFormatId>()),
+                                                 formatId(admElements->audioPackFormat->get<AudioPackFormatId>())
+                ));
+            } else {
+                // BS.2076-2 style structure (ATUID->ACF)
+                std::string cfId = formatId(admElements->audioChannelFormat->get<AudioChannelFormatId>());
+                cfId += "_00";
+                audioIds.push_back(bw64::AudioId(channelMapping.writtenChannelNumber + 1U, //1-Indexed in CHNA!!!!!!!!!!!!!!!
+                                                 formatId((*admElements).audioTrackUid->get<AudioTrackUidId>()),
+                                                 cfId,
+                                                 formatId((*admElements).audioPackFormat->get<AudioPackFormatId>())
+                ));
+            }
+        }
+    }
+
+    return std::make_shared<bw64::ChnaChunk>(bw64::ChnaChunk(audioIds));
+}
+
+std::vector<std::shared_ptr<PluginInstance>> getEarInputPluginsWithInputInstanceId(uint32_t inputInstanceId, ReaperAPI const& api)
+{
+    std::vector<std::shared_ptr<PluginInstance>> instances;
+
+    for(int trackNum = 0; trackNum < api.CountTracks(0); trackNum++) {
+        auto trk = api.GetTrack(0, trackNum);
+        for(int vstPos = 0; vstPos < api.TrackFX_GetCount(trk); vstPos++) {
+            if(EarInputVst::isInputPlugin(api, trk, vstPos)) {
+                auto pluginInst = std::make_shared<EarInputVst>(trk, vstPos, api);
+
+                if(pluginInst->getInputInstanceId() == inputInstanceId) {
+                    instances.push_back(std::make_shared<PluginInstance>(trk, vstPos, api));
+                }
+            }
+        }
+    }
+    return instances;
+}
+
+std::chrono::nanoseconds getRenderTailDuration(ReaperAPI const& api) {
+    std::chrono::nanoseconds duration{0};
+    if(std::stof(api.GetAppVersion()) >= 6.01f)
+    {
+        // Check if Tail option in rendering dialog is activated and add length to duration if so
+        bool tailFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_TAILFLAG", 0., false)) & 0x2;
+        bool boundsFlag = static_cast<size_t>(api.GetSetProjectInfo(nullptr, "RENDER_BOUNDSFLAG", 0., false)) == 1;
+        if(tailFlag && boundsFlag) {
+            const double tailLengthMs = api.GetSetProjectInfo(nullptr, "RENDER_TAILMS", 0., false);
+            duration += toNs(tailLengthMs / 1000.);
+        }
+    }
+    return duration;
+}
+
+struct TimeBound {
+    std::chrono::nanoseconds start;
+    std::chrono::nanoseconds duration;
+};
+
+TimeBound getProjectRenderBounds(ReaperAPI const& api) {
+    auto start = std::chrono::nanoseconds::zero();
+    auto duration = toNs(api.GetProjectLength(nullptr));
+    duration += getRenderTailDuration(api);
+    return {start, duration};
+}
+
+std::shared_ptr<PluginInstance> getUniquePluginFromId(uint32_t pluginInstanceId, std::vector<std::string>& errorStrings, ReaperAPI const& api) {
+    auto feedingPlugins = getEarInputPluginsWithInputInstanceId(pluginInstanceId, api);
+    std::shared_ptr<PluginInstance> plugin;
+    if (feedingPlugins.size() == 1U) {
+        plugin = feedingPlugins.front();
+    }
+    if(feedingPlugins.empty()) {
+        std::string msg("Unable to find Input plugin with instance ID ");
+        msg += std::to_string(pluginInstanceId);
+        errorStrings.push_back(msg);
+    }
+    if(feedingPlugins.size() > 1U) {
+        std::string msg("Multiple Input plugins found with instance ID ");
+        msg += std::to_string(pluginInstanceId);
+        errorStrings.push_back(msg);
+    }
+    return plugin;
+}
+
+TrackEnvelope* getEnvelopeFor(std::shared_ptr<admplug::PluginSuite> const& pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter, ReaperAPI const & api)
 {
     MediaTrack* track = pluginInst->getTrackInstance().get();
 
@@ -369,19 +337,7 @@ TrackEnvelope* EarVstExportSources::getEnvelopeFor(std::shared_ptr<admplug::Plug
     return nullptr;
 }
 
-std::optional<double> EarVstExportSources::getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance * pluginInst, AdmParameter admParameter, ReaperAPI const & api)
-{
-    MediaTrack* track = pluginInst->getTrackInstance().get();
-
-    // Plugin Parameters
-    if(auto param = pluginSuite->getPluginParameterFor(admParameter)) {
-        return pluginInst->getParameterWithConvert(*param);
-    }
-
-    return std::optional<double>();
-}
-
-bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI const& api)
+bool envelopeIsBypassed(TrackEnvelope* env, ReaperAPI const& api)
 {
     bool envBypassed = false;
     if(env) {
@@ -402,23 +358,149 @@ bool EarVstExportSources::getEnvelopeBypassed(TrackEnvelope* env, ReaperAPI cons
     return envBypassed;
 }
 
-std::vector<std::shared_ptr<PluginInstance>> EarVstExportSources::getEarInputPluginsWithInputInstanceId(uint32_t inputInstanceId, ReaperAPI const& api)
+std::optional<double> getValueFor(std::shared_ptr<admplug::PluginSuite> pluginSuite, PluginInstance* pluginInst, AdmParameter admParameter)
 {
-    std::vector<std::shared_ptr<PluginInstance>> insts;
+    // Plugin Parameters
+    if(auto param = pluginSuite->getPluginParameterFor(admParameter)) {
+        return pluginInst->getParameterWithConvert(*param);
+    }
 
-    for(int trackNum = 0; trackNum < api.CountTracks(0); trackNum++) {
-        auto trk = api.GetTrack(0, trackNum);
-        for(int vstPos = 0; vstPos < api.TrackFX_GetCount(trk); vstPos++) {
-            if(EarInputVst::isInputPlugin(api, trk, vstPos)) {
-                auto pluginInst = std::make_shared<EarInputVst>(trk, vstPos, api);
+    return {};
+}
 
-                if(pluginInst->getInputInstanceId() == inputInstanceId) {
-                    insts.push_back(std::make_shared<PluginInstance>(trk, vstPos, api));
+CumulatedPointData getParameterData(
+    std::shared_ptr<PluginInstance> const& pluginInstance,
+    std::shared_ptr<PluginSuite> const& pluginSuite,
+    TimeBound const renderBounds,
+    std::vector<std::string>& warningStrings,
+    ReaperAPI const& api) {
+    auto cumulatedPointData = CumulatedPointData(renderBounds.start, renderBounds.start + renderBounds.duration);
+
+    // Get all values for all parameters, whether automated or not.
+    for (int admParameterIndex = 0; admParameterIndex != static_cast<int>(AdmParameter::NONE); admParameterIndex++) {
+        auto admParameter = static_cast<AdmParameter>(admParameterIndex);
+        auto param = pluginSuite->getParameterFor(admParameter);
+        auto env = getEnvelopeFor(pluginSuite, pluginInstance.get(), admParameter, api);
+
+        if (param && env && !envelopeIsBypassed(env, api)) {
+            // We have an envelope for this ADM parameter
+            auto newErrors = cumulatedPointData.useEnvelopeDataForParameter(*env, *param, admParameter, api);
+            for (auto& newError : newErrors) {
+                warningStrings.push_back(newError.what());
+            }
+        } else {
+            if (auto val = getValueFor(pluginSuite, pluginInstance.get(), admParameter)) {
+            // We do not have an envelope for this ADM parameter but the plugin suite CAN provide a fixed value for it
+            // NOTE that this will include parameters NOT relevant to the current audioObject type, but these are ignored during block creation.
+                auto newErrors = cumulatedPointData.useConstantValueForParameter(admParameter, *val);
+                for (auto& newError : newErrors) {
+                    warningStrings.push_back(newError.what());
                 }
             }
         }
     }
-    return insts;
+    return cumulatedPointData;
+}
+
+struct ChannelFormatSource {
+    uint32_t inputInstanceId;
+    TimeBound objectBounds;
+};
+
+bool operator==(ChannelFormatSource const& lhs, ChannelFormatSource const& rhs) {
+    return lhs.inputInstanceId == rhs.inputInstanceId && lhs.objectBounds.duration == rhs.objectBounds.duration && lhs.objectBounds.start == rhs.objectBounds.start;
+}
+
+
+
+}
+
+void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api, admplug::ExportProfile profile)
+{
+    using namespace adm;
+    {
+        auto parsedTemplate = getTemplateAdmFromScene(*chosenCandidateForExport, errorStrings);
+        if (parsedTemplate == nullptr) {
+            return;
+        }
+        admDocument = parsedTemplate;
+    }
+
+    // Any track UID that won't be written should be removed
+    removeUnmappedUids(*admDocument, *chosenCandidateForExport);
+
+    // Create CHNA chunk
+    chnaChunk = createChna(*admDocument, *chosenCandidateForExport, warningStrings);
+
+    //Populate rest of ADM template (admDocument) here with AudioBlockFormats
+    std::shared_ptr<admplug::PluginSuite> pluginSuite = std::make_shared<EARPluginSuite>();
+    std::unordered_map<std::shared_ptr<AudioChannelFormat>, ChannelFormatSource> writtenChannels;
+
+    auto channelMappings = chosenCandidateForExport->getChannelMappings();
+    for(auto const& channelMapping : channelMappings) {
+        for(auto const& plugin : channelMapping.plugins) {
+
+            auto admElements = getAdmElementsFor(*admDocument, plugin, warningStrings);
+            assert(admElements.has_value());
+
+            // Find the associated plugin
+            auto pluginInstance = getUniquePluginFromId(plugin.inputInstanceId, errorStrings, api);
+            if (pluginInstance == nullptr) {
+                continue;
+            }
+
+            // Set audioobject start/duration
+            auto renderBounds = getProjectRenderBounds(api);
+
+            auto mediaTrack = pluginInstance->getTrackInstance().get();
+            auto trackBounds = api.getTrackAudioBounds(mediaTrack, true); // True = ignore before zero - we don't do sub-zero bounds
+            if(trackBounds.has_value()) {
+                renderBounds = {toNs(trackBounds->first), toNs(trackBounds->second - trackBounds->first)};
+                admElements->audioObject->set(adm::Start{ renderBounds.start });
+                admElements->audioObject->set(adm::Duration{ renderBounds.duration });
+            }
+
+            const bool isPresetDef = AdmPresetDefinitionsHelper::getSingleton().getPackFormatData(admElements->audioPackFormat) != nullptr;
+            const bool isObjectType = admElements->typeDescriptor == adm::TypeDefinition::OBJECTS;
+
+            // for object type plugins, grab automation and/or parameter data
+            // use it to generate audioBlockFormats and add them to audioChannelFormat
+            if (!isPresetDef) {
+                if (isObjectType) {
+                    auto currentSource = ChannelFormatSource{.inputInstanceId = plugin.inputInstanceId, .objectBounds = renderBounds};
+                    auto writtenSource = writtenChannels.find(admElements->audioChannelFormat);
+                    if (writtenSource == writtenChannels.end()) {
+                        // if we've not encountered this channel format before, write it's blocks
+                        auto cumulatedPointData = getParameterData(pluginInstance, pluginSuite, renderBounds, warningStrings, api);
+                        auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInstance.get(), api, profile);
+                        for (auto& block : *blocks) {
+                            admElements->audioChannelFormat->add(*block);
+                        }
+                        writtenChannels[admElements->audioChannelFormat] = currentSource;
+
+                    } else {
+                        // if we have encountered this channel format before, sanity check that it has come from the same plugin and has the same time bounds
+                        if (currentSource != writtenSource->second) {
+                            errorStrings.push_back("Encountered audioChannelFormat multiple times with different instance id or time range");
+                        }
+                    }
+                }
+                else {
+                    warningStrings.push_back("Currently only supporting Preset Definitions for non-Objects types");
+                }
+            }
+        }
+    }
+
+    // Create AXML Chunk
+    std::stringstream xmlStream;
+    adm::writeXml(xmlStream, admDocument);
+    xmlStream << "<!-- Produced using the EAR Production Suite (version ";
+    xmlStream << (eps::versionInfoAvailable()? eps::currentVersion() : "unknown");
+    xmlStream << "), from the EAR Scene plugin -->\n";
+    auto xmlStr = xmlStream.str();
+    axmlChunk = std::make_shared<bw64::AxmlChunk>(bw64::AxmlChunk(xmlStr));
+
 }
 
 //EarInputVst
@@ -558,7 +640,7 @@ std::vector<int> EarSceneMasterVst::trackEarSceneMasterVstIndexes(ReaperAPI cons
     return vstPos;
 }
 
-bool EarSceneMasterVst::isCommunicatorPresent()
+bool EarSceneMasterVst::isCommunicatorPresent() const
 {
     return (bool)communicator;
 }
@@ -670,10 +752,10 @@ EarVstCommunicator::EarVstCommunicator(int samplesPort, int commandPort) : Commu
 {
 }
 
-void EarVstCommunicator::updateInfo()
+void EarVstCommunicator::updateInfo(ExportProfile profile)
 {
     infoExchange();
-    admAndMappingExchange();
+    admAndMappingExchange(profile);
 }
 
 bool EarVstCommunicator::copyNextFrame(float * buf, bool bypassAvailabilityCheck)
@@ -731,9 +813,21 @@ void EarVstCommunicator::infoExchange()
     memcpy(&sampleRate, (char*)resp->getBufferPointer() + 1, 4);
 }
 
-void EarVstCommunicator::admAndMappingExchange()
+void EarVstCommunicator::admAndMappingExchange(ExportProfile profile)
 {
-    auto resp = commandSocket.doCommand(commandSocket.Command::GetAdmAndMappings);
+    using enum ExportProfile;
+    CommandCommon::Command command = commandSocket.Command::GetAdmAndMappings_Tech_3392;
+    switch (profile) {
+    case EBU_PRODUCTION_3392: {
+      command = CommandSender::GetAdmAndMappings_Tech_3392;
+      break;
+    }
+    case EBU_PRODUCTION_3393: {
+      command = CommandSender::GetAdmAndMappings_Tech_3393;
+      break;
+    }
+    }
+    auto resp = commandSocket.doCommand(command);
     assert(resp->success());
 
     std::string admStrRecv;
