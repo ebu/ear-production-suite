@@ -402,6 +402,16 @@ CumulatedPointData getParameterData(
     return cumulatedPointData;
 }
 
+struct ChannelFormatSource {
+    uint32_t inputInstanceId;
+    TimeBound objectBounds;
+};
+
+bool operator==(ChannelFormatSource const& lhs, ChannelFormatSource const& rhs) {
+    return lhs.inputInstanceId == rhs.inputInstanceId && lhs.objectBounds.duration == rhs.objectBounds.duration && lhs.objectBounds.start == rhs.objectBounds.start;
+}
+
+
 
 }
 
@@ -423,8 +433,8 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api, admplug::Expo
     chnaChunk = createChna(*admDocument, *chosenCandidateForExport, warningStrings);
 
     //Populate rest of ADM template (admDocument) here with AudioBlockFormats
-
     std::shared_ptr<admplug::PluginSuite> pluginSuite = std::make_shared<EARPluginSuite>();
+    std::unordered_map<std::shared_ptr<AudioChannelFormat>, ChannelFormatSource> writtenChannels;
 
     auto channelMappings = chosenCandidateForExport->getChannelMappings();
     for(auto const& channelMapping : channelMappings) {
@@ -457,11 +467,22 @@ void EarVstExportSources::generateAdmAndChna(ReaperAPI const& api, admplug::Expo
             // use it to generate audioBlockFormats and add them to audioChannelFormat
             if (!isPresetDef) {
                 if (isObjectType) {
-                    // Need to generate BFs
-                    auto cumulatedPointData = getParameterData(pluginInstance, pluginSuite, renderBounds, warningStrings, api);
-                    auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInstance.get(), api, profile);
-                    for (auto& block : *blocks) {
-                        admElements->audioChannelFormat->add(*block);
+                    auto currentSource = ChannelFormatSource{.inputInstanceId = plugin.inputInstanceId, .objectBounds = renderBounds};
+                    auto writtenSource = writtenChannels.find(admElements->audioChannelFormat);
+                    if (writtenSource == writtenChannels.end()) {
+                        // if we've not encountered this channel format before, write it's blocks
+                        auto cumulatedPointData = getParameterData(pluginInstance, pluginSuite, renderBounds, warningStrings, api);
+                        auto blocks = cumulatedPointData.generateAudioBlockFormatObjects(pluginSuite, pluginInstance.get(), api, profile);
+                        for (auto& block : *blocks) {
+                            admElements->audioChannelFormat->add(*block);
+                        }
+                        writtenChannels[admElements->audioChannelFormat] = currentSource;
+
+                    } else {
+                        // if we have encountered this channel format before, sanity check that it has come from the same plugin and has the same time bounds
+                        if (currentSource != writtenSource->second) {
+                            errorStrings.push_back("Encountered audioChannelFormat multiple times with different instance id or time range");
+                        }
                     }
                 }
                 else {
